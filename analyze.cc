@@ -26,8 +26,9 @@ int main(int argc, char* argv[]) {
     sample = argv[1];
 
   std::string fname = "root_files/"+sample+".root";
+  fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/ZZ2L2Q.root"; // for testing
 
-  auto fin = new TFile(fname.c_str(), "READ");
+  auto fin = TFile::Open(fname.c_str());
   auto ntuple = (TTree*)fin->Get("etau_tree");
   auto counts = (TH1F*)fin->Get("nevents");
   auto gen_number = counts->GetBinContent(2);
@@ -43,6 +44,7 @@ int main(int argc, char* argv[]) {
 
   // need to get root files for pileup reweighting
   // auto lumi_weights = new reweight::LumiReWeighting("", "", "", "");
+
 
   // stolen directly from Cecile's code
   // will probably find somewhere to hide all of this for readability
