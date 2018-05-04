@@ -25,11 +25,16 @@ int main(int argc, char* argv[]) {
   if (argc > 1)
     sample = argv[1];
 
-  auto fname = "root_files/"+sample+".root";
-  auto ext = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/"; // for testing
-  fname = ("root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/"+sample+".root").c_str();
+  std::string fname;
+  bool isData = sample.find("Data") != std::string::npos;
+  if (isData)
+    fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_22feb_SV/"+sample+".root";
+  else
+    fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/"+sample+".root";
 
+  std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());
+  std::cout << "Loading Ntuple..." << std::endl;
   auto ntuple = (TTree*)fin->Get("etau_tree");
   auto counts = (TH1F*)fin->Get("nevents");
   auto gen_number = counts->GetBinContent(2);
@@ -38,7 +43,7 @@ int main(int argc, char* argv[]) {
   auto fout = new TFile((prefix+sample+suffix).c_str(), "RECREATE");
 
   double evtwt;
-  if (sample.find("Data") != std::string::npos)
+  if (isData)
     evtwt = 1.0;
   else
     evtwt = luminosity * cross_sections[sample] / gen_number;
