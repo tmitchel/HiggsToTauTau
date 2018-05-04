@@ -82,6 +82,24 @@ int main(int argc, char* argv[]) {
   TH2F *h1_WSS=new TH2F ("h1_WSS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1);h1_WSS->Sumw2();
   TH2F *h2_WSS=new TH2F ("h2_WSS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2);h2_WSS->Sumw2();
 
+  TH1F* hel_pt = new TH1F("hel_pt", "Electron p_{T};p_{T} [GeV];;", 100, 0., 500);
+  TH1F* hel_eta = new TH1F("hel_eta", "Electron #eta;#eta [GeV];;", 80, -4., 4.);
+
+  TH1F* htau_pt = new TH1F("htau_pt", "Tau p_{T};p_{T} [GeV];;", 100, 0., 500);
+  TH1F* htau_eta = new TH1F("htau_eta", "Tau #eta;#eta [GeV];;", 80, -4., 4.);
+
+  TH1F* hmet = new TH1F("met", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
+  TH1F* hmetphi = new TH1F("metphi", "Missing E_{T} #phi;Missing E_{T} [GeV];;", 60, -3.14, 3.14);
+  TH1F* hmet_x = new TH1F("met_x", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
+  TH1F* hmet_y = new TH1F("met_y", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
+  TH1F* hmet_pt = new TH1F("met_pt", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
+
+  TH1F* hmt = new TH1F("mt", "MT", 50, 0, 100);
+  TH1F* hnjets = new TH1F("njets", "N(jets)", 10, -0.5, 9.5);
+  TH1F* hmjj = new TH1F("mjj", "Dijet Mass; Mass [GeV];;", 100, 0, 200);
+  TH1F* hmsv = new TH1F("msv", "SV Fit Mass; Mass [GeV];;", 50, 0, 100);
+
+
   // construct factories
   trigger          trigs(ntuple);
   event_info       events(ntuple);
@@ -142,14 +160,28 @@ int main(int argc, char* argv[]) {
     double mt = calculate_mt(&electron, met_x, met_y, met_pt);
     int evt_charge = tau.getCharge() + electron.getCharge();
 
+    // fill histograms
+    hel_pt->Fill(electron.getPt(), evtwt);
+    hel_eta->Fill(electron.getEta(), evtwt);
+    htau_pt->Fill(tau.getPt(), evtwt);
+    htau_eta->Fill(tau.getEta(), evtwt);
+    hmet->Fill(met.getMet(), evtwt);
+    hmet_x->Fill(met_x, evtwt);
+    hmet_y->Fill(met_y, evtwt);
+    hmet_pt->Fill(met_pt, evtwt);
+    hmt->Fill(mt, evtwt);
+    hnjets->Fill(jets.getNjets(), evtwt);
+    hmjj->Fill(jets.getDijetMass(), evtwt);
+    hmsv->Fill(events.getMSV(), evtwt);
+
     if (mt < 50 && tau.getPt() > 30) {
       if (jets.getNjets() == 0) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0)
-            h0_OS->Fill(tau.getPt(), events.getMSV());
+            h0_OS->Fill(tau.getPt(), events.getMSV(), evtwt);
           else
-            h0_SS->Fill(tau.getPt(), events.getMSV());
+            h0_SS->Fill(tau.getPt(), events.getMSV(), evtwt);
         } // close if signal block
 
       } // close njets == 0
@@ -157,9 +189,9 @@ int main(int argc, char* argv[]) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0)
-            h1_OS->Fill(tau.getPt(), events.getMSV());
+            h1_OS->Fill(tau.getPt(), events.getMSV(), evtwt);
           else
-            h1_SS->Fill(tau.getPt(), events.getMSV());
+            h1_SS->Fill(tau.getPt(), events.getMSV(), evtwt);
         } // close if signal block
 
       } // close njets == 1 (or low dijet mass njets == 2)
@@ -167,16 +199,13 @@ int main(int argc, char* argv[]) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0)
-            h2_OS->Fill(tau.getPt(), events.getMSV());
+            h2_OS->Fill(tau.getPt(), events.getMSV(), evtwt);
           else
-            h2_SS->Fill(tau.getPt(), events.getMSV());
+            h2_SS->Fill(tau.getPt(), events.getMSV(), evtwt);
         } // close if signal block
 
       } // close njets == 2
     } // close mt, tau selection
-
-
-
 
   } // close event loop
 
