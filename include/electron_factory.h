@@ -27,12 +27,12 @@ public:
   float getEta()      { return eta; };
   float getPhi()      { return phi; };
   float getMass()     { return mass; };
-  float getCharge()   { return charge; };
-  float getPx()       {return px; };
-  float getPy()       {return py; };
+  float getPx()       { return px; };
+  float getPy()       { return py; };
   float getPz()       { return pz; };
   float getIso()      { return iso; };
   int getGenMatch()   { return gen_match; };
+  int getCharge()     { return charge; };
 
   // setters
   void setPt(float Pt)             { pt = Pt; };
