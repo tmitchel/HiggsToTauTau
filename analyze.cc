@@ -32,9 +32,15 @@ int main(int argc, char* argv[]) {
   auto counts = (TH1F*)fin->Get("nevents");
   auto gen_number = counts->GetBinContent(2);
   auto suffix = "_output.root";
-  auto fout = new TFile((sample+suffix).c_str(), "RECREATE");
+  auto prefix = "output/";
+  auto fout = new TFile((prefix+sample+suffix).c_str(), "RECREATE");
 
-  double evtwt(luminosity * cross_sections[sample] / gen_number);
+  double evtwt;
+  if (sample.find("Data") != std::string::npos)
+    evtwt = 1.0;
+  else
+    evtwt = luminosity * cross_sections[sample] / gen_number;
+
   // need to get root files for pileup reweighting
   // auto lumi_weights = new reweight::LumiReWeighting("", "", "", "");
 
