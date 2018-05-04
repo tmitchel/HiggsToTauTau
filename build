@@ -1,0 +1,3 @@
+
+echo "Compiling analysis code with name:" $1
+g++ -O3 analyze.cc `root-config --cflags --glibs` -o $1
