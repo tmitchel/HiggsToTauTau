@@ -25,8 +25,9 @@ int main(int argc, char* argv[]) {
   if (argc > 1)
     sample = argv[1];
 
-  std::string fname = "root_files/"+sample+".root";
-  fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/ZZ2L2Q.root"; // for testing
+  auto fname = "root_files/"+sample+".root";
+  auto ext = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/"; // for testing
+  fname = ("root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/"+sample+".root").c_str();
 
   auto fin = TFile::Open(fname.c_str());
   auto ntuple = (TTree*)fin->Get("etau_tree");
