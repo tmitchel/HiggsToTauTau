@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
   TH1F* hmt = new TH1F("mt", "MT", 50, 0, 100);
   TH1F* hnjets = new TH1F("njets", "N(jets)", 10, -0.5, 9.5);
   TH1F* hmjj = new TH1F("mjj", "Dijet Mass; Mass [GeV];;", 100, 0, 200);
-  TH1F* hmsv = new TH1F("msv", "SV Fit Mass; Mass [GeV];;", 50, 0, 100);
+  TH1F* hmsv = new TH1F("msv", "SV Fit Mass; Mass [GeV];;", 100, 0, 300);
 
 
   // construct factories

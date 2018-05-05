@@ -20,7 +20,6 @@ if options.isData:
 else:
     path = "/store/user/tmitchel/smhet_20march/"
 
-fileList = [ifile for ifile in filter(None, popen('xrdfsls root://cmseos.fnal.gov/ ls '+path).read().split('\n'))]
+fileList = [ifile for ifile in filter(None, popen('xrdfs root://cmseos.fnal.gov/ ls '+path).read().split('\n'))]
 for ifile in fileList:
-    print ifile
     call('./'+options.exe+' '+ifile, shell=True)
