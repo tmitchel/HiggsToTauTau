@@ -61,7 +61,7 @@ static std::map<std::string, double> cross_sections {
   {"WplusH110", 1.335*0.0791},
   {"WplusH120", 0.9558*0.0698},
   {"WplusH125", 0.840*0.0627},
-  {"WplusH130", 0.7414*0.0541}
+  {"WplusH130", 0.7414*0.0541},
   {"WplusH140", 0.6308*0.0360},
   {"ZZ2L2Q", 3.22},
   {"ZZ4L", 1.212},
