@@ -22,4 +22,4 @@ else:
 
 fileList = [ifile for ifile in filter(None, popen('xrdfs root://cmseos.fnal.gov/ ls '+path).read().split('\n'))]
 for ifile in fileList:
-    call('./'+options.exe+' '+ifile, shell=True)
+    call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0], shell=True)
