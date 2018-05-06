@@ -56,6 +56,9 @@ int main(int argc, char* argv[]) {
   TFile *f_Trk=new TFile("inputs/ratios.root");
   TGraph *h_Trk=(TGraph*) f_Trk->Get("ratio_eta");
 
+  auto trig_SF = new ScaleFactor("Electron_Ele25eta2p1WPTight_eff.root");
+  auto id_SF = new ScaleFactor("Electron_IdIso0p10_eff.root");
+
   // stolen directly from Cecile's code
   // will probably find somewhere to hide all of this for readability
   float bins0[] = {0,60,65,70,75,80,85,90,95,100,105,110,115,400};
@@ -169,11 +172,13 @@ int main(int argc, char* argv[]) {
     if (!tau.getDecayModeFinding() || tau.getEta() > 2.3)
       continue;
 
+    double sf_trig(1.), sf_id(1.);
 
     // apply lots of SF's that I don't have
-    if (sample != "data") {
-      // apply trigger SF
-      // apply id SF
+    if (!isData) {
+      sf_trg = trig_SF->getDataEfficiency(electron.getPt(), electron.getEta());
+      sf_id = id_SF->GetSF(electron.getPt(), electron.getEta());
+      evtwt *= (sf_trg * sf_id * h_Trk->Eval(electron.getEta()) * lumi_weights->weight(events.getNPU()));
     }
 
     // Tau energy scale corrections
