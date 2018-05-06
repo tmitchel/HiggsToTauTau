@@ -19,6 +19,7 @@
 #include "include/gen_factory.h"
 #include "include/util.h"
 #include "include/LumiReweightingStandAlone.h"
+#include "include/SF_factory.h"
 
 int main(int argc, char* argv[]) {
 
