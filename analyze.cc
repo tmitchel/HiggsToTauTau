@@ -56,8 +56,8 @@ int main(int argc, char* argv[]) {
   TFile *f_Trk=new TFile("inputs/ratios.root");
   TGraph *h_Trk=(TGraph*) f_Trk->Get("ratio_eta");
 
-  auto trig_SF = new SF_factory("Electron_Ele25eta2p1WPTight_eff.root");
-  auto id_SF = new SF_factory("Electron_IdIso0p10_eff.root");
+  auto trig_SF = new SF_factory("inputs/Electron_Ele25eta2p1WPTight_eff.root");
+  auto id_SF = new SF_factory("inputs/Electron_IdIso0p10_eff.root");
 
   // stolen directly from Cecile's code
   // will probably find somewhere to hide all of this for readability
