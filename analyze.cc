@@ -75,7 +75,6 @@ int main(int argc, char* argv[]) {
   int  binnum_pth = sizeof(bins_pth)/sizeof(Float_t) - 1;
   int  binnum_taupt = sizeof(bins_taupt)/sizeof(Float_t) - 1;
   int  binnum_mjj = sizeof(bins_mjj)/sizeof(Float_t) - 1;
-  fout->cd();
 
   TH1F *n70=new TH1F ("n70", "n70", 6,0,6);
 
@@ -178,10 +177,9 @@ int main(int argc, char* argv[]) {
     // apply lots of SF's that I don't have
     if (!isData) {
       sf_trg = trig_SF->getDataEfficiency(electron.getPt(), electron.getEta());
-      sf_id = id_SF->getSF(electron.getPt(), electron.getEta());
-      evtwt *= (sf_trg * sf_id * h_Trk->Eval(electron.getEta()) * lumi_weights->weight(events.getNPU()));
+      // sf_id = id_SF->getSF(electron.getPt(), electron.getEta());
+      // evtwt *= (sf_trg * sf_id * h_Trk->Eval(electron.getEta()) * lumi_weights->weight(events.getNPU()));
     }
-    fout->cd();
 
     // Tau energy scale corrections
     // ...
