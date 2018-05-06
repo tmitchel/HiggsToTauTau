@@ -260,13 +260,13 @@ namespace reweight {
 
 	  weights_->Divide( den );  // so now the average weight should be 1.0
 
-	  std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
+	  //std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
 
 	  int NBins = weights_->GetNbinsX();
 
-	  for(int ibin = 1; ibin<NBins+1; ++ibin){
-	    std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
-	  }
+	  //for(int ibin = 1; ibin<NBins+1; ++ibin){
+	  //  std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
+	  //}
 
 	  weightOOT_init();
 
@@ -319,11 +319,11 @@ namespace reweight {
 
 	weights_->Divide( den );  // so now the average weight should be 1.0    
 
-	std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
+	//std::cout << " Lumi/Pileup Reweighting: Computed Weights per In-Time Nint " << std::endl;
 
-	for(int ibin = 1; ibin<NBins+1; ++ibin){
-	  std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
-	}
+	//for(int ibin = 1; ibin<NBins+1; ++ibin){
+	//  std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
+	//}
 
 	weightOOT_init();
 
@@ -342,9 +342,9 @@ namespace reweight {
 
 	using std::min;
 
-	if( MC_distr_->GetEntries() == 0 ) {
-	  std::cout << " MC and Data distributions are not initialized! You must call the LumiReWeighting constructor. " << std::endl;
-	}
+	//if( MC_distr_->GetEntries() == 0 ) {
+	//  std::cout << " MC and Data distributions are not initialized! You must call the LumiReWeighting constructor. " << std::endl;
+	//}
 
 	// arrays for storing number of interactions
 
@@ -527,7 +527,7 @@ namespace reweight {
 	  }
 	}
 
-	std::cout << " 3D Weight Matrix initialized! " << std::endl;
+	//std::cout << " 3D Weight Matrix initialized! " << std::endl;
 
 	return;
 
