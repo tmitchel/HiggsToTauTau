@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
     if (!tau.getDecayModeFinding() || tau.getEta() > 2.3)
       continue;
 
-    double sf_trig(1.), sf_id(1.);
+    double sf_trg(1.), sf_id(1.);
 
     // apply lots of SF's that I don't have
     if (!isData) {
