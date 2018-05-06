@@ -67,6 +67,9 @@ sitemp.SetFillColor(0)
 ottemp = htemplate.Clone()
 ottemp.SetLineColor(r.kRed)
 ottemp.SetFillColor(r.kRed)
+qcdtemp = htemplate.Clone()
+qcdtemp.SetLineColor(r.kOrange+1)
+qcdtemp.SetFillColor(r.kOrange+1)
 datahist = htemplate.Clone()
 datahist.SetMarkerStyle(20)
 datahist.SetLineColor(r.kBlack)
@@ -91,6 +94,9 @@ for ifile in infiles:
     elif 'wjets' in ifile:
         samples.setdefault('wjets', wjtemp)
         samples['wjets'].Add(ihist)
+    elif 'QCD' in ifile:
+        samples.setdefault('QCD', qcdtemp)
+        samples['QCD'].Add(ihist)
     elif 'SMH_VBF125' in ifile or 'SMH_ggH125' in ifile:
         sitemp.Add(ihist)
         continue
@@ -112,7 +118,6 @@ stack = r.THStack()
 for sample in samples:
     if not 'sig' in sample[0]:
         stack.Add(sample[1])
-
 
 stat.SetMarkerStyle(0)
 stat.SetLineWidth(2)
@@ -177,10 +182,9 @@ leg.AddEntry(tttemp, 't#bar{t}', 'f')
 leg.AddEntry(wjtemp, 'Wjets', 'f')
 leg.AddEntry(sttemp, 'Single Top', 'f')
 leg.AddEntry(ottemp, 'Other', 'f')
+leg.AddEntry(qcdtemp, 'QCD', 'f')
 leg.AddEntry(stat, 'Background Stat. Uncertainty', 'f')
 leg.AddEntry(sitemp, 'Signal', 'l')
-
-
 
 stack.SetMaximum(stack.GetMaximum()*100)
 stack.SetMinimum(1)
