@@ -3,6 +3,7 @@
 from os import popen
 from subprocess import call
 from optparse import OptionParser
+import time
 
 parser = OptionParser()
 parser.add_option('--data', '-d', action='store_true',
@@ -20,6 +21,9 @@ if options.isData:
 else:
     path = "/store/user/tmitchel/smhet_20march/"
 
+start = time.time()
 fileList = [ifile for ifile in filter(None, popen('xrdfs root://cmseos.fnal.gov/ ls '+path).read().split('\n'))]
 for ifile in fileList:
     call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0], shell=True)
+end = time.time()
+print 'Processing completed in', end-start, 'seconds.'
