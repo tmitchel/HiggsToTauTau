@@ -7,6 +7,7 @@
 #include "TH2F.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TGraphAsymmErrors.h"
 
 // user includes
 #include "include/trigger.h"
@@ -49,8 +50,10 @@ int main(int argc, char* argv[]) {
     evtwt = luminosity * cross_sections[sample] / gen_number;
 
   // need to get root files for pileup reweighting
-  // auto lumi_weights = new reweight::LumiReWeighting("", "", "", "");
+  auto lumi_weights = new reweight::LumiReWeighting("inputs/MC_Moriond17_PU25ns_V1.root", "inputs/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
 
+  TFile *f_Trk=new TFile("inputs/ratios.root");
+  TGraph *h_Trk=(TGraph*) f_Trk->Get("ratio_eta");
 
   // stolen directly from Cecile's code
   // will probably find somewhere to hide all of this for readability
