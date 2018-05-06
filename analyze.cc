@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
     // apply lots of SF's that I don't have
     if (!isData) {
       sf_trg = trig_SF->getDataEfficiency(electron.getPt(), electron.getEta());
-      sf_id = id_SF->GetSF(electron.getPt(), electron.getEta());
+      sf_id = id_SF->getSF(electron.getPt(), electron.getEta());
       evtwt *= (sf_trg * sf_id * h_Trk->Eval(electron.getEta()) * lumi_weights->weight(events.getNPU()));
     }
 
