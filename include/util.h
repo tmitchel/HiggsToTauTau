@@ -9,7 +9,7 @@ static std::map<std::string, double> cross_sections {
   {"DY2_missingfiles", 387.3},
   {"DY2_noFakeTauCorr", 387.3},
   {"DY3", 118.4},
-  {"DY3_noFakeTauCorr", 118.4,
+  {"DY3_noFakeTauCorr", 118.4},
   {"DY4", 63.7},
   {"DY4_missingfiles", 63.7},
   {"DY4_noFakeTauCorr", 63.7},
@@ -65,8 +65,7 @@ static std::map<std::string, double> cross_sections {
   {"WplusH140", 0.6308*0.0360},
   {"ZZ2L2Q", 3.22},
   {"ZZ4L", 1.212},
-
-  {"data", 1.0},
+  {"data", 1.0}
 
 
 
