@@ -188,6 +188,15 @@ int main(int argc, char* argv[]) {
           else
             h0_SS->Fill(tau.getPt(), events.getMSV(), evtwt);
         } // close if signal block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
+          h0_QCD->Fill(tau.getPt(), events.getMSV(), evtwt);
+        } // close if qcd block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
+          if (evt_charge == 0)
+            h0_WOS->Fill(tau.getPt(), events.getMSV(), evtwt);
+          else
+            h0_WSS->Fill(tau.getPt(), events.getMSV(), evtwt);
+        } // close if W block
 
       } // close njets == 0
       else if (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300)) {
@@ -198,6 +207,16 @@ int main(int argc, char* argv[]) {
           else
             h1_SS->Fill(tau.getPt(), events.getMSV(), evtwt);
         } // close if signal block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
+          h1_QCD->Fill(tau.getPt(), events.getMSV(), evtwt);
+        } // close if qcd block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
+          if (evt_charge == 0)
+            h1_WOS->Fill(tau.getPt(), events.getMSV(), evtwt);
+          else
+            h1_WSS->Fill(tau.getPt(), events.getMSV(), evtwt);
+        } // close if W block
+
 
       } // close njets == 1 (or low dijet mass njets == 2)
       else if (jets.getNjets() == 2 && jets.getDijetMass() > 300) {
@@ -208,6 +227,15 @@ int main(int argc, char* argv[]) {
           else
             h2_SS->Fill(tau.getPt(), events.getMSV(), evtwt);
         } // close if signal block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
+          h2_QCD->Fill(tau.getPt(), events.getMSV(), evtwt);
+        } // close if qcd block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
+          if (evt_charge == 0)
+            h2_WOS->Fill(tau.getPt(), events.getMSV(), evtwt);
+          else
+            h2_WSS->Fill(tau.getPt(), events.getMSV(), evtwt);
+        } // close if W block
 
       } // close njets == 2
     } // close mt, tau selection
