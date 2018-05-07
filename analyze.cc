@@ -44,11 +44,11 @@ int main(int argc, char* argv[]) {
   auto prefix = "output/";
   auto fout = new TFile((prefix+sample+suffix).c_str(), "RECREATE");
 
-  double evtwt;
+  double norm;
   if (isData)
-    evtwt = 1.0;
+    norm = 1.0;
   else
-    evtwt = luminosity * cross_sections[sample] / gen_number;
+    norm = luminosity * cross_sections[sample] / gen_number;
 
   // need to get root files for pileup reweighting
   auto lumi_weights = new reweight::LumiReWeighting("inputs/MC_Moriond17_PU25ns_V1.root", "inputs/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
@@ -173,7 +173,7 @@ int main(int argc, char* argv[]) {
     if (!tau.getDecayModeFinding() || tau.getEta() > 2.3)
       continue;
 
-    double sf_trg(1.), sf_id(1.);
+    double evtwt(norm), sf_trg(1.), sf_id(1.);
 
     // apply lots of SF's that I don't have
     if (!isData) {
