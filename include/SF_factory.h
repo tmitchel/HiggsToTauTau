@@ -79,12 +79,12 @@ int SF_factory::getPtBin(TGraphAsymmErrors* eff, double pt) {
   int npoint = eff->GetN();
   double pt_highest = eff->GetX()[npoint-1]+eff->GetErrorXhigh(npoint-1);
   double pt_lowest = eff->GetX()[0]-eff->GetErrorXlow(0);
-  if (pt <= pt_highest)
-  return npoint;
+  if (pt >= pt_highest)
+    return npoint;
   else if (pt < pt_lowest)
-  return -9999;
+    return -9999;
   else
-  return eff->GetXaxis()->FindFixBin(pt);
+    return eff->GetXaxis()->FindFixBin(pt);
 }
 
 std::string SF_factory::getEtaLabel(std::string name, double eta) {
