@@ -59,6 +59,8 @@ int main(int argc, char* argv[]) {
   auto trig_SF = new SF_factory("inputs/Electron_Ele25eta2p1WPTight_eff.root");
   auto id_SF = new SF_factory("inputs/Electron_IdIso0p10_eff.root");
 
+  fout->cd();
+
   // stolen directly from Cecile's code
   // will probably find somewhere to hide all of this for readability
   float bins0[] = {0,60,65,70,75,80,85,90,95,100,105,110,115,400};
@@ -175,11 +177,12 @@ int main(int argc, char* argv[]) {
     double sf_trg(1.), sf_id(1.);
 
     // apply lots of SF's that I don't have
-    if (!isData) {
-      sf_trg = trig_SF->getDataEfficiency(electron.getPt(), electron.getEta());
+    // if (!isData) {
+      // sf_trg = trig_SF->getDataEfficiency(electron.getPt(), electron.getEta());
       // sf_id = id_SF->getSF(electron.getPt(), electron.getEta());
       // evtwt *= (sf_trg * sf_id * h_Trk->Eval(electron.getEta()) * lumi_weights->weight(events.getNPU()));
-    }
+    // }
+    fout->cd();
 
     // Tau energy scale corrections
     // ...
