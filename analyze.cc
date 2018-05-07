@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
 
     // corrections based on decay mode
     if (tau.getGenMatch() == 5 && events.getDecayMode() == 0)
-      evtwt =* 0.97;
+      evtwt *= 0.97;
     else if (tau.getGenMatch() == 5 && events.getDecayMode() == 1)
       evtwt *= 0.92;
     else if (tau.getGenMatch() == 5 && events.getDecayMode() < 2)
