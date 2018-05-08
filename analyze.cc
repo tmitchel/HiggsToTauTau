@@ -113,11 +113,11 @@ int main(int argc, char* argv[]) {
   TH1F* hel_pt_WOS = new TH1F("el_pt_WOS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
   TH1F* hel_pt_WSS = new TH1F("el_pt_WSS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
 
-  TH1F* hmsv_QCD = new TH1F("msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 500.);
-  TH1F* hmsv_SS = new TH1F("msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 500.);
-  TH1F* hmsv_OS = new TH1F("msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 500.);
-  TH1F* hmsv_WOS = new TH1F("msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 500.);
-  TH1F* hmsv_WSS = new TH1F("msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 500.);
+  TH1F* hmsv_QCD = new TH1F("msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1F* hmsv_SS = new TH1F("msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1F* hmsv_OS = new TH1F("msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1F* hmsv_WOS = new TH1F("msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1F* hmsv_WSS = new TH1F("msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
 
   // TH1F* h0_tau_pt_QCD = new TH1F("h0_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
   // TH1F* h1_tau_pt_QCD = new TH1F("h1_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
@@ -174,7 +174,7 @@ int main(int argc, char* argv[]) {
   Int_t nevts = ntuple->GetEntries();
   for (Int_t i = 0; i < nevts; i++) {
     ntuple->GetEntry(i);
-    if (i % 10000 == 0)
+    if (i % 50000 == 0)
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
 
     // electron pT > 27 GeV

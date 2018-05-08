@@ -13,43 +13,44 @@ public:
   trigger (TTree*);
   virtual ~trigger () {};
 
+  // getters
   // electron
-  float getMatchEle25eta2p1Tight()  { return matchEle25eta2p1Tight_1; };
-  float getMatchEle27eta2p1Loose()  { return matchEle27eta2p1Loose_1; };
-  float getMatchEle45L1TauJet()     { return matchEle45L1TauJet_1; };
-  float getMatchEle115()            { return matchEle115_1; };
-  float getMatchEle24Tau20sL1_1()   { return matchEle24Tau20sL1_1; };
-  float getMatchEle24Tau20_1()      { return matchEle24Tau20_1; };
-  float getMatchEle24Tau30_1()      { return matchEle24Tau30_1; };
+  float getMatchEle25eta2p1Tight()  { return matchEle25eta2p1Tight_1;   };
+  float getMatchEle27eta2p1Loose()  { return matchEle27eta2p1Loose_1;   };
+  float getMatchEle45L1TauJet()     { return matchEle45L1TauJet_1;      };
+  float getMatchEle115()            { return matchEle115_1;             };
+  float getMatchEle24Tau20sL1_1()   { return matchEle24Tau20sL1_1;      };
+  float getMatchEle24Tau20_1()      { return matchEle24Tau20_1;         };
+  float getMatchEle24Tau30_1()      { return matchEle24Tau30_1;         };
 
-  float getFilterEle25eta2p1Tight() { return filterEle25eta2p1Tight_1; };
-  float getFilterEle27eta2p1Loose() { return filterEle27eta2p1Loose_1; };
-  float getFilterEle45L1TauJet()    { return filterEle45L1TauJet_1; };
-  float getFilterEle115()           { return filterEle115_1; };
-  float getFilterEle24Tau20sL1_1()  { return filterEle24Tau20sL1_1; };
-  float getFilterEle24Tau20_1()     { return filterEle24Tau20_1; };
-  float getFilterEle24Tau30_1()     { return filterEle24Tau30_1; };
+  float getFilterEle25eta2p1Tight() { return filterEle25eta2p1Tight_1;  };
+  float getFilterEle27eta2p1Loose() { return filterEle27eta2p1Loose_1;  };
+  float getFilterEle45L1TauJet()    { return filterEle45L1TauJet_1;     };
+  float getFilterEle115()           { return filterEle115_1;            };
+  float getFilterEle24Tau20sL1_1()  { return filterEle24Tau20sL1_1;     };
+  float getFilterEle24Tau20_1()     { return filterEle24Tau20_1;        };
+  float getFilterEle24Tau30_1()     { return filterEle24Tau30_1;        };
 
   // taus
-  float getPassEle25eta2p1Tight()   { return passEle25eta2p1Tight; };
-  float getPassEle27eta2p1Loose()   { return passEle27eta2p1Loose; };
-  float getPassEle45L1TauJet()      { return passEle45L1TauJet; };
-  float getPassEle115()             { return passEle115; };
-  float getPassEle24Tau20sL1()      { return passEle24Tau20sL1; };
-  float getPassEle24Tau20()         { return passEle24Tau20; };
-  float getPassEle24Tau30()         { return passEle24Tau30; };
+  float getPassEle25eta2p1Tight()   { return passEle25eta2p1Tight;      };
+  float getPassEle27eta2p1Loose()   { return passEle27eta2p1Loose;      };
+  float getPassEle45L1TauJet()      { return passEle45L1TauJet;         };
+  float getPassEle115()             { return passEle115;                };
+  float getPassEle24Tau20sL1()      { return passEle24Tau20sL1;         };
+  float getPassEle24Tau20()         { return passEle24Tau20;            };
+  float getPassEle24Tau30()         { return passEle24Tau30;            };
 
-  float getMatchEle24Tau20sL1_2()   { return matchEle24Tau20sL1_2; };
-  float getMatchEle24Tau20_2()      { return matchEle24Tau20_2; };
-  float getMatchEle24Tau30_2()      { return matchEle24Tau30_2; };
+  float getMatchEle24Tau20sL1_2()   { return matchEle24Tau20sL1_2;      };
+  float getMatchEle24Tau20_2()      { return matchEle24Tau20_2;         };
+  float getMatchEle24Tau30_2()      { return matchEle24Tau30_2;         };
 
-  float getFilterEle24Tau20sL1_2()  { return filterEle24Tau20sL1_2; };
-  float getFilterEle24Tau20_2()     { return filterEle24Tau20_2; };
-  float getFilterEle24Tau30_2()     { return filterEle24Tau30_2; };
+  float getFilterEle24Tau20sL1_2()  { return filterEle24Tau20sL1_2;     };
+  float getFilterEle24Tau20_2()     { return filterEle24Tau20_2;        };
+  float getFilterEle24Tau30_2()     { return filterEle24Tau30_2;        };
 
 };
 
-
+// read data from tree into member variables
 trigger::trigger(TTree* input) {
   input -> SetBranchAddress( "matchEle25eta2p1Tight_1",  &matchEle25eta2p1Tight_1  );
   input -> SetBranchAddress( "matchEle25eta2p1Tight_1",  &matchEle25eta2p1Tight_1  );

@@ -13,26 +13,24 @@ public:
   std::string name = "electron";
   float pt, eta, phi, mass, charge, px, py, pz, iso;
   int gen_match;
-
   TLorentzVector p4;
 
   electron(float, float, float, float, float);
   ~electron() {};
 
   // getters
-  std::string getName()  { return name; };
-  TLorentzVector getP4() { return p4; };
-
-  float getPt()       { return pt; };
-  float getEta()      { return eta; };
-  float getPhi()      { return phi; };
-  float getMass()     { return mass; };
-  float getPx()       { return px; };
-  float getPy()       { return py; };
-  float getPz()       { return pz; };
-  float getIso()      { return iso; };
-  int getGenMatch()   { return gen_match; };
-  int getCharge()     { return charge; };
+  std::string getName()   { return name;      };
+  TLorentzVector getP4()  { return p4;        };
+  float getPt()           { return pt;        };
+  float getEta()          { return eta;       };
+  float getPhi()          { return phi;       };
+  float getMass()         { return mass;      };
+  float getPx()           { return px;        };
+  float getPy()           { return py;        };
+  float getPz()           { return pz;        };
+  float getIso()          { return iso;       };
+  int getGenMatch()       { return gen_match; };
+  int getCharge()         { return charge;    };
 
   // setters
   void setPt(float Pt)             { pt = Pt; };
@@ -47,6 +45,7 @@ public:
   void setGenMatch(int GenMatch)   { gen_match = GenMatch; };
 };
 
+// initialize member data and set TLorentzVector
 electron::electron(float Pt, float Eta, float Phi, float M, float Charge) :
   pt(Pt),
   eta(Eta),
@@ -69,10 +68,10 @@ private:
 public:
   electron_factory (TTree*);
   virtual ~electron_factory () {};
-
   electron run_factory();
 };
 
+// read data from tree into member variables
 electron_factory::electron_factory(TTree* input) {
   input -> SetBranchAddress( "px_1",        &px_1        );
   input -> SetBranchAddress( "py_1",        &py_1        );
@@ -86,6 +85,7 @@ electron_factory::electron_factory(TTree* input) {
   input -> SetBranchAddress( "gen_match_1", &gen_match_1 );
 }
 
+// create electron object and set member data
 electron electron_factory::run_factory() {
   electron el(pt_1, eta_1, phi_1, m_1, q_1);
   el.setPx(px_1);

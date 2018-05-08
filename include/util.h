@@ -81,6 +81,7 @@ static std::map<std::string, double> cross_sections {
   // {"WW", 118.7}
 };
 
+// do the mt calculation
 static float calculate_mt(electron* const el, float met_x, float met_y, float met_pt) {
   return sqrt(pow(el->getPt() + met_pt, 2) - pow(el->getPx() + met_x, 2) - pow(el->getPy() + met_y, 2));
 }

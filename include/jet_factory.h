@@ -8,13 +8,14 @@ public:
   jet (float,float,float,float,float);
   virtual ~jet() {};
 
-  float getPt()     { return pt; };
-  float getEta()    { return eta; };
-  float getPhi()    { return phi; };
-  float getCSV()    { return csv; };
-  float getFlavor() { return flavor; };
+  float getPt()     { return pt;      };
+  float getEta()    { return eta;     };
+  float getPhi()    { return phi;     };
+  float getCSV()    { return csv;     };
+  float getFlavor() { return flavor;  };
 };
 
+// initialize member data and set TLorentzVector
 jet::jet(float Pt, float Eta, float Phi, float Csv, float Flavor=-9999) :
   pt(Pt),
   eta(Eta),
@@ -37,17 +38,18 @@ private:
 public:
   jet_factory (TTree*);
   virtual ~jet_factory () {};
-
   void run_factory();
-  int getNbtag()       { return nbtag; };
-  int getNjets()       { return njets; };
-  int getNjetPt20()    { return njetspt20; };
-  float getDijetMass() { return mjj; };
 
-  std::vector<jet> getJets() { return plain_jets; };
-  std::vector<jet> getBtagJets() { return btag_jets; };
+  // getters
+  int getNbtag()                  { return nbtag;      };
+  int getNjets()                  { return njets;      };
+  int getNjetPt20()               { return njetspt20;  };
+  float getDijetMass()            { return mjj;        };
+  std::vector<jet> getJets()      { return plain_jets; };
+  std::vector<jet> getBtagJets()  { return btag_jets;  };
 };
 
+// read data from tree into member variables
 jet_factory::jet_factory(TTree* input) {
   input -> SetBranchAddress ( "mjj",       &mjj       );
   input -> SetBranchAddress ( "nbtag",     &nbtag     );
@@ -73,6 +75,7 @@ jet_factory::jet_factory(TTree* input) {
   input -> SetBranchAddress ( "bflavor_2", &bflavor_2 );
 }
 
+// initialize member data and set TLorentzVector
 void jet_factory::run_factory() {
   plain_jets.clear();
   btag_jets.clear();

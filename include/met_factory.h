@@ -10,19 +10,19 @@ public:
   virtual ~met_factory () {};
 
   // getters
-  float getMet()          { return met; };
-  float getMetSig()       { return metSig; };
-  float getMetCov00()     { return metcov00; };
-  float getMetCov10()     { return metcov10; };
-  float getMetCov11()     { return metcov11; };
-  float getMetCov01()     { return metcov01; };
+  float getMet()          { return met;         };
+  float getMetSig()       { return metSig;      };
+  float getMetCov00()     { return metcov00;    };
+  float getMetCov10()     { return metcov10;    };
+  float getMetCov11()     { return metcov11;    };
+  float getMetCov01()     { return metcov01;    };
   float getMetCov00_v2()  { return metcov00_v2; };
   float getMetCov10_v2()  { return metcov10_v2; };
   float getMetCov11_v2()  { return metcov11_v2; };
   float getMetCov01_v2()  { return metcov01_v2; };
-  float getMetPhi()       { return metphi; };
-  float getMetPx()        { return met_px; };
-  float getMetPy()        { return met_py; };
+  float getMetPhi()       { return metphi;      };
+  float getMetPx()        { return met_px;      };
+  float getMetPy()        { return met_py;      };
 
   // setters
   void setMet(float Met)                  { met = Met;                  };
@@ -40,6 +40,7 @@ public:
   void setMetPy(float MetPy)              { met_py = MetPy;             };
 };
 
+// initialize member data and set TLorentzVector
 met_factory::met_factory(TTree* input) {
   input -> SetBranchAddress( "met",         &met          );
   input -> SetBranchAddress( "metSig",      &metSig       );

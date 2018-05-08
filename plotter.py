@@ -29,7 +29,7 @@ def formatCanvas(can):
     pad1.SetPad(0, .3, 1, 1)
     pad1.SetTopMargin(.1)
     pad1.SetBottomMargin(0.02)
-    pad1.SetLogy()
+    # pad1.SetLogy()
     pad1.SetTickx(1)
     pad1.SetTicky(1)
 
@@ -78,6 +78,7 @@ datahist.SetFillColor(0)
 samples = {}
 stat = htemplate.Clone()
 for ifile in infiles:
+    print ifile
     fin = r.TFile(ifile, 'read')
     fout.cd()
     ihist = fin.Get(options.var).Clone()
@@ -186,7 +187,7 @@ leg.AddEntry(qcdtemp, 'QCD', 'f')
 leg.AddEntry(stat, 'Background Stat. Uncertainty', 'f')
 leg.AddEntry(sitemp, 'Signal', 'l')
 
-stack.SetMaximum(stack.GetMaximum()*5000000)
+stack.SetMaximum(stack.GetMaximum()*1.2)
 stack.SetMinimum(1)
 sitemp.Draw('hist same')
 datahist.Draw('same lep')

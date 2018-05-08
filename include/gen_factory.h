@@ -30,6 +30,7 @@ public:
 
 };
 
+// read data from tree into member variables
 gen_factory::gen_factory(TTree* input) {
   input -> SetBranchAddress( "genpX",           &genpX          );
   input -> SetBranchAddress( "genpY",           &genpY          );
