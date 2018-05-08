@@ -206,41 +206,43 @@ int main(int argc, char* argv[]) {
 
 
     // electron/tau visible mass
-    if (sample == "W" || sample == "W1" || sample == "W2" || sample == "W3" || sample == "W4") {
-      if (gen.getNumGenJets() == 5)
-        evtwt *= 12.43;
-      if (gen.getNumGenJets() == 6)
-        evtwt *= 4.019;
-      if (gen.getNumGenJets() == 7)
-        evtwt *= 2.222;
-      if (gen.getNumGenJets() == 8)
-        evtwt *= 1.077;
-      if (gen.getNumGenJets() == 9)
-        evtwt *= 1.176;
-    }
+    if (!isData) {
+      if (sample == "W" || sample == "W1" || sample == "W2" || sample == "W3" || sample == "W4") {
+        if (gen.getNumGenJets() == 5)
+          evtwt *= 12.43;
+        if (gen.getNumGenJets() == 6)
+          evtwt *= 4.019;
+        if (gen.getNumGenJets() == 7)
+          evtwt *= 2.222;
+        if (gen.getNumGenJets() == 8)
+          evtwt *= 1.077;
+        if (gen.getNumGenJets() == 9)
+          evtwt *= 1.176;
+      }
 
-    if (sample == "ZTT" || sample == "ZLL" || sample == "ZL" || sample == "ZJ") {
-      if (gen.getNumGenJets() == 5)
-        evtwt *= 1.281;
-      if (gen.getNumGenJets() == 6)
-        evtwt *= 0.2825;
-      if (gen.getNumGenJets() == 7)
-        evtwt *= 0.3021;
-      if (gen.getNumGenJets() == 8)
-        evtwt *= 0.3127;
-      if (gen.getNumGenJets() == 9)
-        evtwt *= 0.2511;
-    }
+      if (sample == "ZTT" || sample == "ZLL" || sample == "ZL" || sample == "ZJ") {
+        if (gen.getNumGenJets() == 5)
+          evtwt *= 1.281;
+        if (gen.getNumGenJets() == 6)
+          evtwt *= 0.2825;
+        if (gen.getNumGenJets() == 7)
+          evtwt *= 0.3021;
+        if (gen.getNumGenJets() == 8)
+          evtwt *= 0.3127;
+        if (gen.getNumGenJets() == 9)
+          evtwt *= 0.2511;
+      }
 
-    // corrections based on decay mode
-    if (tau.getGenMatch() == 5 && events.getDecayMode() == 0)
-      evtwt *= 0.97;
-    else if (tau.getGenMatch() == 5 && events.getDecayMode() == 1)
-      evtwt *= 0.92;
-    else if (tau.getGenMatch() == 5 && events.getDecayMode() < 2)
-      evtwt *= 0.94;
-    else if (tau.getGenMatch() == 5 && events.getDecayMode() == 10)
-      evtwt *= 0.80;
+      // corrections based on decay mode
+      if (tau.getGenMatch() == 5 && events.getDecayMode() == 0)
+        evtwt *= 0.97;
+      else if (tau.getGenMatch() == 5 && events.getDecayMode() == 1)
+        evtwt *= 0.92;
+      else if (tau.getGenMatch() == 5 && events.getDecayMode() < 2)
+        evtwt *= 0.94;
+      else if (tau.getGenMatch() == 5 && events.getDecayMode() == 10)
+        evtwt *= 0.80;
+    }
 
     double met_x = met.getMet() * cos(met.getMetPhi());
     double met_y = met.getMet() * sin(met.getMetPhi());
