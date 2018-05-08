@@ -77,8 +77,6 @@ int main(int argc, char* argv[]) {
   int  binnum_taupt = sizeof(bins_taupt)/sizeof(Float_t) - 1;
   int  binnum_mjj = sizeof(bins_mjj)/sizeof(Float_t) - 1;
 
-  TH1F *n70=new TH1F ("n70", "n70", 6,0,6);
-
   // TH2F *h0_OS=new TH2F ("h0_OS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0);h0_OS->Sumw2();
   // TH2F *h1_OS=new TH2F ("h1_OS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1);h1_OS->Sumw2();
   // TH2F *h2_OS=new TH2F ("h2_OS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2);h2_OS->Sumw2();
@@ -94,30 +92,6 @@ int main(int argc, char* argv[]) {
   // TH2F *h0_WSS=new TH2F ("h0_WSS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0);h0_WSS->Sumw2();
   // TH2F *h1_WSS=new TH2F ("h1_WSS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1);h1_WSS->Sumw2();
   // TH2F *h2_WSS=new TH2F ("h2_WSS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2);h2_WSS->Sumw2();
-
-  TH1F* hel_pt = new TH1F("el_pt", "Electron p_{T};p_{T} [GeV];;", 20, 0., 100);
-  TH1F* hel_eta = new TH1F("el_eta", "Electron #eta;#eta [GeV];;", 80, -4., 4.);
-
-  TH1F* htau_pt = new TH1F("tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200);
-  TH1F* htau_eta = new TH1F("tau_eta", "Tau #eta;#eta [GeV];;", 80, -4., 4.);
-
-  TH1F* htau_pt_QCD = new TH1F("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1F* htau_pt_SS = new TH1F("tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1F* htau_pt_OS = new TH1F("tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1F* htau_pt_WOS = new TH1F("tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1F* htau_pt_WSS = new TH1F("tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-
-  TH1F* hel_pt_QCD = new TH1F("el_pt_QCD", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1F* hel_pt_SS = new TH1F("el_pt_SS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1F* hel_pt_OS = new TH1F("el_pt_OS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1F* hel_pt_WOS = new TH1F("el_pt_WOS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1F* hel_pt_WSS = new TH1F("el_pt_WSS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-
-  TH1F* hmsv_QCD = new TH1F("msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1F* hmsv_SS = new TH1F("msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1F* hmsv_OS = new TH1F("msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1F* hmsv_WOS = new TH1F("msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1F* hmsv_WSS = new TH1F("msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
 
   // TH1F* h0_tau_pt_QCD = new TH1F("h0_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
   // TH1F* h1_tau_pt_QCD = new TH1F("h1_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
@@ -150,6 +124,32 @@ int main(int argc, char* argv[]) {
   // TH1F* h0_msv_WOS = new TH1F("h0_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
   // TH1F* h1_msv_WOS = new TH1F("h1_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
   // TH1F* h2_msv_WOS = new TH1F("h2_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+
+  TH1F *n70=new TH1F ("n70", "n70", 6,0,6);
+
+  TH1F* hel_pt = new TH1F("el_pt", "Electron p_{T};p_{T} [GeV];;", 20, 0., 100);
+  TH1F* hel_eta = new TH1F("el_eta", "Electron #eta;#eta [GeV];;", 80, -4., 4.);
+
+  TH1F* htau_pt = new TH1F("tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200);
+  TH1F* htau_eta = new TH1F("tau_eta", "Tau #eta;#eta [GeV];;", 80, -4., 4.);
+
+  TH1F* htau_pt_QCD = new TH1F("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1F* htau_pt_SS = new TH1F("tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1F* htau_pt_OS = new TH1F("tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1F* htau_pt_WOS = new TH1F("tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1F* htau_pt_WSS = new TH1F("tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+
+  TH1F* hel_pt_QCD = new TH1F("el_pt_QCD", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1F* hel_pt_SS = new TH1F("el_pt_SS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1F* hel_pt_OS = new TH1F("el_pt_OS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1F* hel_pt_WOS = new TH1F("el_pt_WOS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1F* hel_pt_WSS = new TH1F("el_pt_WSS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+
+  TH1F* hmsv_QCD = new TH1F("msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1F* hmsv_SS = new TH1F("msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1F* hmsv_OS = new TH1F("msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1F* hmsv_WOS = new TH1F("msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1F* hmsv_WSS = new TH1F("msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
 
   TH1F* hmet = new TH1F("met", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
   TH1F* hmetphi = new TH1F("metphi", "Missing E_{T} #phi;Missing E_{T} [GeV];;", 60, -3.14, 3.14);
@@ -204,7 +204,6 @@ int main(int argc, char* argv[]) {
     // Tau energy scale corrections
     // ...
 
-
     // electron/tau visible mass
     if (!isData) {
       if (sample == "W" || sample == "W1" || sample == "W2" || sample == "W3" || sample == "W4") {
@@ -251,27 +250,26 @@ int main(int argc, char* argv[]) {
     double mt = calculate_mt(&electron, met_x, met_y, met_pt);
     int evt_charge = tau.getCharge() + electron.getCharge();
 
-
     if (mt < 50 && tau.getPt() > 30) {
 
       // inclusive selection
       if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
 
-        // fill histograms
-        hel_pt->Fill(electron.getPt(), evtwt);
-        hel_eta->Fill(electron.getEta(), evtwt);
-        htau_pt->Fill(tau.getPt(), evtwt);
-        htau_eta->Fill(tau.getEta(), evtwt);
-        hmet->Fill(met.getMet(), evtwt);
-        hmet_x->Fill(met_x, evtwt);
-        hmet_y->Fill(met_y, evtwt);
-        hmet_pt->Fill(met_pt, evtwt);
-        hmt->Fill(mt, evtwt);
-        hnjets->Fill(jets.getNjets(), evtwt);
-        hmjj->Fill(jets.getDijetMass(), evtwt);
-        hmsv->Fill(events.getMSV(), evtwt);
 
         if (evt_charge == 0) {
+          // fill histograms
+          hel_pt->Fill(electron.getPt(), evtwt);
+          hel_eta->Fill(electron.getEta(), evtwt);
+          htau_pt->Fill(tau.getPt(), evtwt);
+          htau_eta->Fill(tau.getEta(), evtwt);
+          hmet->Fill(met.getMet(), evtwt);
+          hmet_x->Fill(met_x, evtwt);
+          hmet_y->Fill(met_y, evtwt);
+          hmet_pt->Fill(met_pt, evtwt);
+          hmt->Fill(mt, evtwt);
+          hnjets->Fill(jets.getNjets(), evtwt);
+          hmjj->Fill(jets.getDijetMass(), evtwt);
+          hmsv->Fill(events.getMSV(), evtwt);
           htau_pt_OS->Fill(tau.getPt(), evtwt);
           hel_pt_OS->Fill(electron.getPt(), evtwt);
           hmsv_OS->Fill(events.getMSV(), evtwt);
