@@ -95,23 +95,23 @@ int main(int argc, char* argv[]) {
   // TH2F *h1_WSS=new TH2F ("h1_WSS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1);h1_WSS->Sumw2();
   // TH2F *h2_WSS=new TH2F ("h2_WSS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2);h2_WSS->Sumw2();
 
-  TH1F* hel_pt = new TH1F("el_pt", "Electron p_{T};p_{T} [GeV];;", 100, 0., 500);
+  TH1F* hel_pt = new TH1F("el_pt", "Electron p_{T};p_{T} [GeV];;", 20, 0., 100);
   TH1F* hel_eta = new TH1F("el_eta", "Electron #eta;#eta [GeV];;", 80, -4., 4.);
 
-  TH1F* htau_pt = new TH1F("tau_pt", "Tau p_{T};p_{T} [GeV];;", 100, 0., 500);
+  TH1F* htau_pt = new TH1F("tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200);
   TH1F* htau_eta = new TH1F("tau_eta", "Tau #eta;#eta [GeV];;", 80, -4., 4.);
 
-  TH1F* htau_pt_QCD = new TH1F("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  TH1F* htau_pt_SS = new TH1F("tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  TH1F* htau_pt_OS = new TH1F("tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  TH1F* htau_pt_WOS = new TH1F("tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  TH1F* htau_pt_WSS = new TH1F("tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  TH1F* htau_pt_QCD = new TH1F("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1F* htau_pt_SS = new TH1F("tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1F* htau_pt_OS = new TH1F("tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1F* htau_pt_WOS = new TH1F("tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1F* htau_pt_WSS = new TH1F("tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
 
-  TH1F* hel_pt_QCD = new TH1F("el_pt_QCD", "Electron p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  TH1F* hel_pt_SS = new TH1F("el_pt_SS", "Electron p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  TH1F* hel_pt_OS = new TH1F("el_pt_OS", "Electron p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  TH1F* hel_pt_WOS = new TH1F("el_pt_WOS", "Electron p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  TH1F* hel_pt_WSS = new TH1F("el_pt_WSS", "Electron p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  TH1F* hel_pt_QCD = new TH1F("el_pt_QCD", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1F* hel_pt_SS = new TH1F("el_pt_SS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1F* hel_pt_OS = new TH1F("el_pt_OS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1F* hel_pt_WOS = new TH1F("el_pt_WOS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1F* hel_pt_WSS = new TH1F("el_pt_WSS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
 
   TH1F* hmsv_QCD = new TH1F("msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 500.);
   TH1F* hmsv_SS = new TH1F("msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 500.);
