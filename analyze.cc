@@ -174,7 +174,7 @@ int main(int argc, char* argv[]) {
   Int_t nevts = ntuple->GetEntries();
   for (Int_t i = 0; i < nevts; i++) {
     ntuple->GetEntry(i);
-    if (i % 50000 == 0)
+    if (i % 100000 == 0)
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
 
     // electron pT > 27 GeV
@@ -188,7 +188,7 @@ int main(int argc, char* argv[]) {
 
     // tau passes decay mode finding and |eta| < 2.3
     auto tau = taus.run_factory();
-    if (!tau.getDecayModeFinding() || tau.getEta() > 2.3)
+    if (!tau.getDecayModeFinding() || abs(tau.getEta()) > 2.3)
       continue;
 
     double evtwt(norm), sf_trg(1.), sf_id(1.);
