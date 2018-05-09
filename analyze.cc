@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
   else
     fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/"+sample+".root";
 
-  std::cout << "Opening file... " << sample << std::endl;
+  std::cout << "Opening file... " << sample << " with name " << name << std::endl;
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
   auto ntuple = (TTree*)fin->Get("etau_tree");
