@@ -3,7 +3,7 @@
 #include <cmath>
 
 // ROOT includes
-#include "TH1F.h"
+#include "TH1D.h"
 #include "TH2F.h"
 #include "TTree.h"
 #include "TFile.h"
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
   auto ntuple = (TTree*)fin->Get("etau_tree");
-  auto counts = (TH1F*)fin->Get("nevents");
+  auto counts = (TH1D*)fin->Get("nevents");
   auto gen_number = counts->GetBinContent(2);
   auto suffix = "_output.root";
   auto prefix = "output/";
@@ -102,74 +102,74 @@ int main(int argc, char* argv[]) {
   // TH2F *h1_WSS=new TH2F ("h1_WSS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1);h1_WSS->Sumw2();
   // TH2F *h2_WSS=new TH2F ("h2_WSS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2);h2_WSS->Sumw2();
 
-  // TH1F* h0_tau_pt_QCD = new TH1F("h0_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h1_tau_pt_QCD = new TH1F("h1_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h2_tau_pt_QCD = new TH1F("h2_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h0_tau_pt_SS = new TH1F("h0_tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h1_tau_pt_SS = new TH1F("h1_tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h2_tau_pt_SS = new TH1F("h2_tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h0_tau_pt_OS = new TH1F("h0_tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h1_tau_pt_OS = new TH1F("h1_tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h2_tau_pt_OS = new TH1F("h2_tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h0_tau_pt_WSS = new TH1F("h0_tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h1_tau_pt_WSS = new TH1F("h1_tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h2_tau_pt_WSS = new TH1F("h2_tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h0_tau_pt_WOS = new TH1F("h0_tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h1_tau_pt_WOS = new TH1F("h1_tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1F* h2_tau_pt_WOS = new TH1F("h2_tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h0_tau_pt_QCD = new TH1D("h0_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h1_tau_pt_QCD = new TH1D("h1_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h2_tau_pt_QCD = new TH1D("h2_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h0_tau_pt_SS = new TH1D("h0_tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h1_tau_pt_SS = new TH1D("h1_tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h2_tau_pt_SS = new TH1D("h2_tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h0_tau_pt_OS = new TH1D("h0_tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h1_tau_pt_OS = new TH1D("h1_tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h2_tau_pt_OS = new TH1D("h2_tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h0_tau_pt_WSS = new TH1D("h0_tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h1_tau_pt_WSS = new TH1D("h1_tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h2_tau_pt_WSS = new TH1D("h2_tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h0_tau_pt_WOS = new TH1D("h0_tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h1_tau_pt_WOS = new TH1D("h1_tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
+  // TH1D* h2_tau_pt_WOS = new TH1D("h2_tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
   //
-  // TH1F* h0_msv_QCD = new TH1F("h0_msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h1_msv_QCD = new TH1F("h1_msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h2_msv_QCD = new TH1F("h2_msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h0_msv_SS = new TH1F("h0_msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h1_msv_SS = new TH1F("h1_msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h2_msv_SS = new TH1F("h2_msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h0_msv_OS = new TH1F("h0_msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h1_msv_OS = new TH1F("h1_msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h2_msv_OS = new TH1F("h2_msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h0_msv_WSS = new TH1F("h0_msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h1_msv_WSS = new TH1F("h1_msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h2_msv_WSS = new TH1F("h2_msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h0_msv_WOS = new TH1F("h0_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h1_msv_WOS = new TH1F("h1_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1F* h2_msv_WOS = new TH1F("h2_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h0_msv_QCD = new TH1D("h0_msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h1_msv_QCD = new TH1D("h1_msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h2_msv_QCD = new TH1D("h2_msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h0_msv_SS = new TH1D("h0_msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h1_msv_SS = new TH1D("h1_msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h2_msv_SS = new TH1D("h2_msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h0_msv_OS = new TH1D("h0_msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h1_msv_OS = new TH1D("h1_msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h2_msv_OS = new TH1D("h2_msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h0_msv_WSS = new TH1D("h0_msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h1_msv_WSS = new TH1D("h1_msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h2_msv_WSS = new TH1D("h2_msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h0_msv_WOS = new TH1D("h0_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h1_msv_WOS = new TH1D("h1_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  // TH1D* h2_msv_WOS = new TH1D("h2_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
 
-  TH1F *n70=new TH1F ("n70", "n70", 6,0,6);
+  TH1D *n70=new TH1D ("n70", "n70", 6,0,6);
 
-  TH1F* hel_pt = new TH1F("el_pt", "Electron p_{T};p_{T} [GeV];;", 20, 0., 100);
-  TH1F* hel_eta = new TH1F("el_eta", "Electron #eta;#eta [GeV];;", 80, -4., 4.);
+  TH1D* hel_pt = new TH1D("el_pt", "Electron p_{T};p_{T} [GeV];;", 20, 0., 100);
+  TH1D* hel_eta = new TH1D("el_eta", "Electron #eta;#eta [GeV];;", 80, -4., 4.);
 
-  TH1F* htau_pt = new TH1F("tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200);
-  TH1F* htau_eta = new TH1F("tau_eta", "Tau #eta;#eta [GeV];;", 80, -4., 4.);
+  TH1D* htau_pt = new TH1D("tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200);
+  TH1D* htau_eta = new TH1D("tau_eta", "Tau #eta;#eta [GeV];;", 80, -4., 4.);
 
-  TH1F* htau_pt_QCD = new TH1F("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1F* htau_pt_SS = new TH1F("tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1F* htau_pt_OS = new TH1F("tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1F* htau_pt_WOS = new TH1F("tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1F* htau_pt_WSS = new TH1F("tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1D* htau_pt_QCD = new TH1D("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1D* htau_pt_SS = new TH1D("tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1D* htau_pt_OS = new TH1D("tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1D* htau_pt_WOS = new TH1D("tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
+  TH1D* htau_pt_WSS = new TH1D("tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
 
-  TH1F* hel_pt_QCD = new TH1F("el_pt_QCD", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1F* hel_pt_SS = new TH1F("el_pt_SS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1F* hel_pt_OS = new TH1F("el_pt_OS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1F* hel_pt_WOS = new TH1F("el_pt_WOS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1F* hel_pt_WSS = new TH1F("el_pt_WSS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1D* hel_pt_QCD = new TH1D("el_pt_QCD", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1D* hel_pt_SS = new TH1D("el_pt_SS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1D* hel_pt_OS = new TH1D("el_pt_OS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1D* hel_pt_WOS = new TH1D("el_pt_WOS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
+  TH1D* hel_pt_WSS = new TH1D("el_pt_WSS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
 
-  TH1F* hmsv_QCD = new TH1F("msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1F* hmsv_SS = new TH1F("msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1F* hmsv_OS = new TH1F("msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1F* hmsv_WOS = new TH1F("msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1F* hmsv_WSS = new TH1F("msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1D* hmsv_QCD = new TH1D("msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1D* hmsv_SS = new TH1D("msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1D* hmsv_OS = new TH1D("msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1D* hmsv_WOS = new TH1D("msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
+  TH1D* hmsv_WSS = new TH1D("msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
 
-  TH1F* hmet = new TH1F("met", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
-  TH1F* hmetphi = new TH1F("metphi", "Missing E_{T} #phi;Missing E_{T} [GeV];;", 60, -3.14, 3.14);
-  TH1F* hmet_x = new TH1F("met_x", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
-  TH1F* hmet_y = new TH1F("met_y", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
-  TH1F* hmet_pt = new TH1F("met_pt", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
+  TH1D* hmet = new TH1D("met", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
+  TH1D* hmetphi = new TH1D("metphi", "Missing E_{T} #phi;Missing E_{T} [GeV];;", 60, -3.14, 3.14);
+  TH1D* hmet_x = new TH1D("met_x", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
+  TH1D* hmet_y = new TH1D("met_y", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
+  TH1D* hmet_pt = new TH1D("met_pt", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
 
-  TH1F* hmt = new TH1F("mt", "MT", 50, 0, 100);
-  TH1F* hnjets = new TH1F("njets", "N(jets)", 10, -0.5, 9.5);
-  TH1F* hmjj = new TH1F("mjj", "Dijet Mass; Mass [GeV];;", 100, 0, 200);
-  TH1F* hmsv = new TH1F("msv", "SV Fit Mass; Mass [GeV];;", 100, 0, 300);
+  TH1D* hmt = new TH1D("mt", "MT", 50, 0, 100);
+  TH1D* hnjets = new TH1D("njets", "N(jets)", 10, -0.5, 9.5);
+  TH1D* hmjj = new TH1D("mjj", "Dijet Mass; Mass [GeV];;", 100, 0, 200);
+  TH1D* hmsv = new TH1D("msv", "SV Fit Mass; Mass [GeV];;", 100, 0, 300);
 
   // construct factories
   trigger          trigs(ntuple);
