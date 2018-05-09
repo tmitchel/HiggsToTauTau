@@ -5,8 +5,8 @@ private:
   Float_t matchEle25eta2p1Tight_1, matchEle27eta2p1Loose_1, matchEle45L1TauJet_1, matchEle115_1, matchEle24Tau20sL1_1;
   Float_t matchEle24Tau20_1, matchEle24Tau30_1, filterEle25eta2p1Tight_1, filterEle27eta2p1Loose_1, filterEle45L1TauJet_1;
   Float_t filterEle115_1, filterEle24Tau20sL1_1, filterEle24Tau20_1, filterEle24Tau30_1;
-  Float_t passEle25eta2p1Tight, passEle27eta2p1Loose, passEle45L1TauJet, passEle115, passEle24Tau20sL1, passEle24Tau20;
-  Float_t passEle24Tau30, matchEle24Tau20sL1_2, matchEle24Tau20_2, matchEle24Tau30_2, filterEle24Tau20sL1_2, filterEle24Tau20_2;
+  bool passEle25eta2p1Tight, passEle27eta2p1Loose, passEle45L1TauJet, passEle115, passEle24Tau20sL1, passEle24Tau20, passEle24Tau30;
+  Float_t matchEle24Tau20sL1_2, matchEle24Tau20_2, matchEle24Tau30_2, filterEle24Tau20sL1_2, filterEle24Tau20_2;
   Float_t filterEle24Tau30_2;
 
 public:
@@ -32,13 +32,13 @@ public:
   float getFilterEle24Tau30_1()     { return filterEle24Tau30_1;        };
 
   // taus
-  float getPassEle25eta2p1Tight()   { return passEle25eta2p1Tight;      };
-  float getPassEle27eta2p1Loose()   { return passEle27eta2p1Loose;      };
-  float getPassEle45L1TauJet()      { return passEle45L1TauJet;         };
-  float getPassEle115()             { return passEle115;                };
-  float getPassEle24Tau20sL1()      { return passEle24Tau20sL1;         };
-  float getPassEle24Tau20()         { return passEle24Tau20;            };
-  float getPassEle24Tau30()         { return passEle24Tau30;            };
+  bool getPassEle25eta2p1Tight()    { return passEle25eta2p1Tight;      };
+  bool getPassEle27eta2p1Loose()    { return passEle27eta2p1Loose;      };
+  bool getPassEle45L1TauJet()       { return passEle45L1TauJet;         };
+  bool getPassEle115()              { return passEle115;                };
+  bool getPassEle24Tau20sL1()       { return passEle24Tau20sL1;         };
+  bool getPassEle24Tau20()          { return passEle24Tau20;            };
+  bool getPassEle24Tau30()          { return passEle24Tau30;            };
 
   float getMatchEle24Tau20sL1_2()   { return matchEle24Tau20sL1_2;      };
   float getMatchEle24Tau20_2()      { return matchEle24Tau20_2;         };

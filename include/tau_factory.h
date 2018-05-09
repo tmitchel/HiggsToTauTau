@@ -11,8 +11,8 @@ class tau {
 private:
 public:
   std::string name = "tau";
-  float pt, eta, phi, mass, charge, px, py, pz, dmf;
-  float tightIsoMVA, AgainstTightElectron, AgainstLooseMuon, MediumIsoMVA;
+  float pt, eta, phi, mass, charge, px, py, pz;
+  bool dmf, tightIsoMVA, AgainstTightElectron, AgainstLooseMuon, MediumIsoMVA;
   int gen_match;
   TLorentzVector p4;
 
@@ -29,11 +29,11 @@ public:
   float getPx()                     { return px;                    };
   float getPy()                     { return py;                    };
   float getPz()                     { return pz;                    };
-  float getDecayModeFinding()       { return dmf;                   };
-  float getTightIsoMVA()            { return tightIsoMVA;           };
-  float getAgainstTightElectron ()  { return AgainstTightElectron;  };
-  float getAgainstLooseMuon ()      { return AgainstLooseMuon;      };
-  float getMediumIsoMVA()           { return MediumIsoMVA;          };
+  bool getDecayModeFinding()        { return dmf;                   };
+  bool getTightIsoMVA()             { return tightIsoMVA;           };
+  bool getAgainstTightElectron ()   { return AgainstTightElectron;  };
+  bool getAgainstLooseMuon ()       { return AgainstLooseMuon;      };
+  bool getMediumIsoMVA()            { return MediumIsoMVA;          };
   int getGenMatch()                 { return gen_match;             };
   int getCharge()                   { return charge;                };
 
@@ -46,12 +46,12 @@ public:
   void setPx(float Px)                            { px = Px;                            };
   void setPy(float Py)                            { py = Py;                            };
   void setPz(float Pz)                            { pz = Pz;                            };
-  void setDecayModeFinding(float DMF)             { dmf = DMF;                          };
+  void setDecayModeFinding(bool DMF)              { dmf = DMF;                          };
+  void setTightIsoMVA(bool newIsoTight)           { tightIsoMVA = newIsoTight;          };
+  void setAgainstTightElectron(bool newAElTight)  { AgainstTightElectron = newAElTight; };
+  void setAgainstLooseMuon(bool newAMuLoose)      { AgainstLooseMuon = newAMuLoose;     };
+  void setMediumIsoMVA(bool newIsoMed)            { MediumIsoMVA = newIsoMed;           };
   void setGenMatch(int GenMatch)                  { gen_match = GenMatch;               };
-  void setTightIsoMVA(float newIsoTight)          { tightIsoMVA = newIsoTight;          };
-  void setAgainstTightElectron(float newAElTight) { AgainstTightElectron = newAElTight; };
-  void setAgainstLooseMuon(float newAMuLoose)     { AgainstLooseMuon = newAMuLoose;     };
-  void setMediumIsoMVA(float newIsoMed)           { MediumIsoMVA = newIsoMed;           };
 };
 
 // initialize member data and set TLorentzVector
