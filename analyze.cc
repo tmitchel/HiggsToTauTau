@@ -237,29 +237,31 @@ int main(int argc, char* argv[]) {
     // electron/tau visible mass
     if (!isData) {
       if (name == "W") {
-        if (gen.getNumGenJets() == 5)
-          evtwt *= 12.43;
-        if (gen.getNumGenJets() == 6)
-          evtwt *= 4.019;
-        if (gen.getNumGenJets() == 7)
-          evtwt *= 2.222;
-        if (gen.getNumGenJets() == 8)
-          evtwt *= 1.077;
-        if (gen.getNumGenJets() == 9)
-          evtwt *= 1.176;
+        if (gen.getNumGenJets() == 1)
+          evtwt *= 6.8176;
+        else if (gen.getNumGenJets() == 2)
+          evtwt *= 2.1038;
+        else if (gen.getNumGenJets() == 3)
+          evtwt *= 0.6889;
+        else if (gen.getNumGenJets() == 4)
+          evtwt *= 0.6900;
+        else
+          evtwt *= 25.446;
+
       }
 
       if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
-        if (gen.getNumGenJets() == 5)
-          evtwt *= 1.281;
-        if (gen.getNumGenJets() == 6)
-          evtwt *= 0.2825;
-        if (gen.getNumGenJets() == 7)
-          evtwt *= 0.3021;
-        if (gen.getNumGenJets() == 8)
-          evtwt *= 0.3127;
-        if (gen.getNumGenJets() == 9)
-          evtwt *= 0.2511;
+        if (gen.getNumGenJets() == 1)
+          evtwt *= 0.45729;
+        else if (gen.getNumGenJets() == 2)
+          evtwt *= 0.4668;
+        else if (gen.getNumGenJets() == 3)
+          evtwt *= 0.47995;
+        else if (gen.getNumGenJets() == 4)
+          evtwt *= 0.39349;
+        else
+          evtwt *= 1.4184;
+
       }
 
       // corrections based on decay mode
