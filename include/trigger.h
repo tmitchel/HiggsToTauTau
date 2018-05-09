@@ -5,7 +5,7 @@ private:
   Float_t matchEle25eta2p1Tight_1, matchEle27eta2p1Loose_1, matchEle45L1TauJet_1, matchEle115_1, matchEle24Tau20sL1_1;
   Float_t matchEle24Tau20_1, matchEle24Tau30_1, filterEle25eta2p1Tight_1, filterEle27eta2p1Loose_1, filterEle45L1TauJet_1;
   Float_t filterEle115_1, filterEle24Tau20sL1_1, filterEle24Tau20_1, filterEle24Tau30_1;
-  bool passEle25eta2p1Tight, passEle27eta2p1Loose, passEle45L1TauJet, passEle115, passEle24Tau20sL1, passEle24Tau20, passEle24Tau30;
+  Float_t passEle25eta2p1Tight, passEle27eta2p1Loose, passEle45L1TauJet, passEle115, passEle24Tau20sL1, passEle24Tau20, passEle24Tau30;
   Float_t matchEle24Tau20sL1_2, matchEle24Tau20_2, matchEle24Tau30_2, filterEle24Tau20sL1_2, filterEle24Tau20_2;
   Float_t filterEle24Tau30_2;
 
