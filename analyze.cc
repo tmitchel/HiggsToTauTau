@@ -135,6 +135,7 @@ int main(int argc, char* argv[]) {
   // TH1D* h2_msv_WOS = new TH1D("h2_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
 
   TH1D *n70=new TH1D ("n70", "n70", 6,0,6);
+  TH1D* cutflow = new TH1D("cutflow", "Cutflow", 11, -0.5, 10.5);
 
   TH1D* hel_pt = new TH1D("el_pt", "Electron p_{T};p_{T} [GeV];;", 20, 0., 100);
   TH1D* hel_eta = new TH1D("el_eta", "Electron #eta;#eta [GeV];;", 80, -4., 4.);
@@ -186,21 +187,24 @@ int main(int argc, char* argv[]) {
     if (i % 100000 == 0)
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
 
+    double evtwt(norm), sf_trg(1.), sf_id(1.);
+    cutflow->Fill(0., evtwt);
+
     // electron pT > 27 GeV
     auto electron = electrons.run_factory();
-    if (electron.getPt() < 27)
-      continue;
+    if (electron.getPt() > 27)  cutflow->Fill(1., evtwt);
+    else continue;
 
     // electron passes Ele25eta2p1Tight
-    if (isData && !trigs.getPassEle25eta2p1Tight())
-      continue;
+    if (trigs.getPassEle25eta2p1Tight()) cutflow->Fill(2., evtwt);
+    else continue;
 
     // tau passes decay mode finding and |eta| < 2.3
     auto tau = taus.run_factory();
-    if (!tau.getDecayModeFinding() || abs(tau.getEta()) > 2.3)
-      continue;
-
-      double evtwt(norm), sf_trg(1.), sf_id(1.);
+    if (tau.getDecayModeFinding()) cutflow->Fill(3., evtwt);
+    else continue;
+    if (abs(tau.getEta()) < 2.3) cutflow->Fill(4., evtwt);
+    else continue;
 
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4)
@@ -217,6 +221,7 @@ int main(int argc, char* argv[]) {
         else if (tau.getEta() > 1.558)
           evtwt *= 1.30;
     }
+    cutflow->Fill(5., evtwt);
 
     // apply lots of SF's that I don't have
     if (!isData) {
@@ -277,12 +282,14 @@ int main(int argc, char* argv[]) {
 
     if (mt < 50 && tau.getPt() > 30) {
 
+      cutflow->Fill(6., evtwt);
       // inclusive selection
       if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
-
+        cutflow->Fill(7., evtwt);
 
         if (evt_charge == 0) {
           // fill histograms
+          cutflow->Fill(8., evtwt);
           hel_pt->Fill(electron.getPt(), evtwt);
           hel_eta->Fill(electron.getEta(), evtwt);
           htau_pt->Fill(tau.getPt(), evtwt);
