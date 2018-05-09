@@ -49,67 +49,69 @@ temp = r.TFile(infiles[0], 'read')
 fout = r.TFile('hist_output.root', 'recreate')
 htemplate = temp.Get(options.var).Clone()
 htemplate.Reset()
-dytemp = htemplate.Clone()
-dytemp.SetLineColor(90)
-dytemp.SetFillColor(90)
-tttemp = htemplate.Clone()
-tttemp.SetLineColor(8)
-tttemp.SetFillColor(8)
-sttemp = htemplate.Clone()
-sttemp.SetLineColor(r.kBlue)
-sttemp.SetFillColor(r.kBlue)
-wjtemp = htemplate.Clone()
-wjtemp.SetLineColor(r.kMagenta+1)
-wjtemp.SetFillColor(r.kMagenta+1)
-sitemp = htemplate.Clone()
-sitemp.SetLineColor(r.kCyan)
-sitemp.SetFillColor(0)
-ottemp = htemplate.Clone()
-ottemp.SetLineColor(r.kRed)
-ottemp.SetFillColor(r.kRed)
-qcdtemp = htemplate.Clone()
-qcdtemp.SetLineColor(r.kOrange+1)
-qcdtemp.SetFillColor(r.kOrange+1)
-datahist = htemplate.Clone()
-datahist.SetMarkerStyle(20)
-datahist.SetLineColor(r.kBlack)
-datahist.SetFillColor(0)
+
+ztt_hist = htemplate.Clone()
+ztt_hist.SetLineColor(r.TColor.GetColor(r.kBlack))
+ztt_hist.SetFillColor(r.TColor.GetColor("#ffcc66"))
+
+zl_hist = htemplate.Clone()
+zl_hist.SetLineColor(r.TColor.GetColor(r.kBlack))
+zl_hist.SetFillColor(r.TColor.GetColor("#4496c8"))
+
+tt_hist = htemplate.Clone()
+tt_hist.SetLineColor(r.kBlack)
+tt_hist.SetFillColor(r.TColor.GetColor("#9999cc"))
+
+sig_hist = htemplate.Clone()
+sig_hist.SetLineColor(r.kCyan)
+sig_hist.SetFillColor(0)
+
+wjets_hist = htemplate.Clone()
+wjets_hist.SetLineColor(r.kBlack)
+wjets_hist.SetFillColor(r.TColor.GetColor("#de5a6a"))
+
+qcd_temp = htemplate.Clone()
+qcd_temp.SetLineColor(r.kBlack)
+qcd_temp.SetFillColor(r.TColor.GetColor("#ffccff"))
+
+data_hist = htemplate.Clone()
+data_hist.SetMarkerStyle(20)
+data_hist.SetLineColor(r.kBlack)
+data_hist.SetFillColor(0)
 
 samples = {}
 stat = htemplate.Clone()
 for ifile in infiles:
-    print ifile
     fin = r.TFile(ifile, 'read')
     fout.cd()
     ihist = fin.Get(options.var).Clone()
     temp = htemplate.Clone()
-    if 'drellYan' in ifile:
-        samples.setdefault('drellYan', dytemp)
-        samples['drellYan'].Add(ihist)
+    if 'ZTT' in ifile:
+        samples.setdefault('ztt', ztt_hist)
+        samples['ztt'].Add(ihist)
+        stat.Add(ihist)
+    elif 'ZL' in ifile:
+        samples.setdefault('zl', zl_hist)
+        samples['zl'].Add(ihist)
+        stat.Add(ihist)
     elif 'ttbar' in ifile:
-        samples.setdefault('ttbar', tttemp)
+        samples.setdefault('ttbar', tt_hist)
         samples['ttbar'].Add(ihist)
-    elif 'singleTop' in ifile:
-        samples.setdefault('singleTop', sttemp)
-        samples['singleTop'].Add(ihist)
-    elif 'wjets' in ifile:
-        samples.setdefault('wjets', wjtemp)
+        stat.Add(ihist)
+    elif 'W_unscaled' in ifile:
+        samples.setdefault('wjets', wjets_hist)
         samples['wjets'].Add(ihist)
+        stat.Add(ihist)
     elif 'QCD' in ifile:
-        samples.setdefault('QCD', qcdtemp)
+        samples.setdefault('QCD', qcd_temp)
         samples['QCD'].Add(ihist)
-    elif 'SMH_VBF125' in ifile or 'SMH_ggH125' in ifile:
-        sitemp.Add(ihist)
+        stat.Add(ihist)
+    elif 'HWW' in ifile:
+        sig_hist.Add(ihist)
         continue
     elif 'data' in ifile:
-        datahist.Add(ihist)
+        data_hist.Add(ihist)
         continue
-    else:
-        temp.SetLineColor(r.kRed)
-        temp.SetFillColor(r.kRed)
-        samples.setdefault('other', ottemp)
-        samples['other'].Add(ihist)
-    stat.Add(ihist)
 
 samples = sorted(samples.iteritems(), key=lambda (n,hist) : hist.Integral())
 
@@ -133,15 +135,15 @@ stack.GetYaxis().SetTitleFont(42)
 stack.GetYaxis().SetTitleSize(.05)
 stack.GetYaxis().SetTitleOffset(.72)
 
-pull = datahist.Clone()
+pull = data_hist.Clone()
 pull.Add(stat, -1)
 for ibin in range(pull.GetNbinsX()):
     pullContent = pull.GetBinContent(ibin)
-    uncertainty = math.sqrt(pow(pull.GetBinErrorUp(ibin), 2)+pow(datahist.GetBinErrorUp(ibin), 2))
+    uncertainty = math.sqrt(pow(pull.GetBinErrorUp(ibin), 2)+pow(data_hist.GetBinErrorUp(ibin), 2))
     if uncertainty > 0:
         pull.SetBinContent(ibin, pullContent/uncertainty)
     else:
-        pull.SetBinContent(ibin, 1000)
+        pull.SetBinContent(ibin, 0)
 
 pull.SetTitle('')
 pull.SetMaximum(2.8)
@@ -161,13 +163,13 @@ pull.GetYaxis().SetTitleOffset(.32)
 pull.GetYaxis().SetLabelSize(.17)
 pull.GetYaxis().SetNdivisions(505)
 
-line1 = r.TLine(0, 2., 500, 2.)
+line1 = r.TLine(0, 2., 200, 2.)
 line1.SetLineWidth(1)
 line1.SetLineStyle(7)
 line1.SetLineColor(r.kBlack)
 # line1.Draw()
 
-line2 = r.TLine(0, -2., 500, -2.)
+line2 = r.TLine(0, -2., 200, -2.)
 line2.SetLineWidth(1)
 line2.SetLineStyle(7)
 line2.SetLineColor(r.kBlack)
@@ -177,20 +179,20 @@ leg = r.TLegend(0.5,0.42,0.88,0.88)
 leg.SetTextSize(0.045)
 leg.SetLineColor(0)
 leg.SetFillColor(0)
-leg.AddEntry(datahist, "35.9 fb^{-1} Data", 'lep')
-leg.AddEntry(dytemp, "Drell-Yan", "f")
-leg.AddEntry(tttemp, 't#bar{t}', 'f')
-leg.AddEntry(wjtemp, 'Wjets', 'f')
-leg.AddEntry(sttemp, 'Single Top', 'f')
-leg.AddEntry(ottemp, 'Other', 'f')
-leg.AddEntry(qcdtemp, 'QCD', 'f')
+leg.AddEntry(data_hist, "35.9 fb^{-1} Data", 'lep')
+leg.AddEntry(ztt_hist, "Z #rightarrow #tau#tau", "f")
+leg.AddEntry(zl_hist, "Z #rightarrow e+e-", "f")
+leg.AddEntry(tt_hist, 't#bar{t}', 'f')
+leg.AddEntry(wjets_hist, 'Electroweak', 'f')
+leg.AddEntry(qcd_temp, 'QCD', 'f')
 leg.AddEntry(stat, 'Background Stat. Uncertainty', 'f')
-leg.AddEntry(sitemp, 'Signal', 'l')
+leg.AddEntry(sig_hist, 'Signal', 'l')
 
 stack.SetMaximum(stack.GetMaximum()*1.2)
 stack.SetMinimum(1)
-sitemp.Draw('hist same')
-datahist.Draw('same lep')
+sig_hist.Scale(10)
+sig_hist.Draw('hist same')
+data_hist.Draw('same lep')
 stat.Draw('same e2')
 leg.Draw()
 

@@ -33,8 +33,8 @@ for ifile in fileList:
     elif 'TT' in ifile:
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' TTT', shell=True)
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' TTJ', shell=True)
-    elif 'W_' in ifile or 'W1' in ifile or 'W2' in ifile or 'W3' in ifile or 'W4' in ifile:
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' W', shell=True)        
+    elif 'W.root' in ifile or 'W1' in ifile or 'W2' in ifile or 'W3' in ifile or 'W4' in ifile:
+        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' W', shell=True)
     else:
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0], shell=True)
 end = time.time()

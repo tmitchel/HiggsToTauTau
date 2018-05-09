@@ -32,7 +32,7 @@ static std::map<std::string, double> cross_sections {
   // {"DYlow", 5765.4},
   {"EWKminus", 20.25},
   {"EWKplus", 25.62},
-  {"EWKZLL", 5765.4},
+  {"EWKZLL", 3.987},
   {"EWKZNuNu", 10.01},
   {"HWW_gg125", 48.58*0.2137*0.3258},
   {"HWW_vbf125", 3.782*0.2137*0.3258},
