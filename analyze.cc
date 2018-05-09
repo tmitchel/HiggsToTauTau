@@ -27,6 +27,10 @@ int main(int argc, char* argv[]) {
   if (argc > 1)
     sample = argv[1];
 
+  std::string name = sample;
+  if (argc > 2)
+    name = argv[2];
+
   std::string fname;
   bool isData = sample.find("Data") != std::string::npos;
   if (isData)
@@ -42,7 +46,7 @@ int main(int argc, char* argv[]) {
   auto gen_number = counts->GetBinContent(2);
   auto suffix = "_output.root";
   auto prefix = "output/";
-  auto fout = new TFile((prefix+sample+suffix).c_str(), "RECREATE");
+  auto fout = new TFile((prefix+name+suffix).c_str(), "RECREATE");
 
   double norm;
   if (isData)
@@ -183,7 +187,7 @@ int main(int argc, char* argv[]) {
       continue;
 
     // electron passes Ele25eta2p1Tight
-    if (!trigs.getPassEle25eta2p1Tight())
+    if (isData && !trigs.getPassEle25eta2p1Tight())
       continue;
 
     // tau passes decay mode finding and |eta| < 2.3
@@ -191,7 +195,23 @@ int main(int argc, char* argv[]) {
     if (!tau.getDecayModeFinding() || abs(tau.getEta()) > 2.3)
       continue;
 
-    double evtwt(norm), sf_trg(1.), sf_id(1.);
+      double evtwt(norm), sf_trg(1.), sf_id(1.);
+
+    // Separate Drell-Yan
+    if (name == "ZL" && tau.getGenMatch() > 4)
+      continue;
+    if (name == "ZTT" && tau.getGenMatch() != 5)
+      continue;
+    if (name == "ZLL" && tau.getGenMatch() == 5)
+      continue;
+    if (name == "ZJ" && tau.getGenMatch() != 6)
+      continue;
+    if (name == "ZL" || (name == "ZLL" && tau.getGenMatch() < 5)) {
+        if (tau.getEta() < 1.460)
+          evtwt *= 1.80;
+        else if (tau.getEta() > 1.558)
+          evtwt *= 1.30;
+    }
 
     // apply lots of SF's that I don't have
     if (!isData) {
@@ -206,7 +226,7 @@ int main(int argc, char* argv[]) {
 
     // electron/tau visible mass
     if (!isData) {
-      if (sample == "W" || sample == "W1" || sample == "W2" || sample == "W3" || sample == "W4") {
+      if (name == "W") {
         if (gen.getNumGenJets() == 5)
           evtwt *= 12.43;
         if (gen.getNumGenJets() == 6)
@@ -219,7 +239,7 @@ int main(int argc, char* argv[]) {
           evtwt *= 1.176;
       }
 
-      if (sample == "ZTT" || sample == "ZLL" || sample == "ZL" || sample == "ZJ") {
+      if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
         if (gen.getNumGenJets() == 5)
           evtwt *= 1.281;
         if (gen.getNumGenJets() == 6)
