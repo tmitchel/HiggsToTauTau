@@ -46,7 +46,12 @@ int main(int argc, char* argv[]) {
   auto gen_number = counts->GetBinContent(2);
   auto suffix = "_output.root";
   auto prefix = "output/";
-  auto fout = new TFile((prefix+name+suffix).c_str(), "RECREATE");
+  std::string filename;
+  if (name == sample)
+    filename = prefix + name + suffix;
+  else
+    filename = prefix + sample + std::string("_") + name + suffix;
+  auto fout = new TFile(filename.c_str(), "RECREATE");
 
   double norm;
   if (isData)
