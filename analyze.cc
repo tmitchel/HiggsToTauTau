@@ -23,6 +23,7 @@
 
 int main(int argc, char* argv[]) {
 
+  // parse user options
   std::string sample = "ZZ4L";
   if (argc > 1)
     sample = argv[1];
@@ -35,6 +36,7 @@ int main(int argc, char* argv[]) {
   if (argc > 3)
     local = argv[3];
 
+  // path to find input root files
   std::string fname;
   bool isData = sample.find("Data") != std::string::npos;
   if (local) {
@@ -47,13 +49,17 @@ int main(int argc, char* argv[]) {
       fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/"+sample+".root";
   }
 
-  std::cout << fname << std::endl;
+  // open input file
   std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
   auto ntuple = (TTree*)fin->Get("etau_tree");
+
+  // get number of generated events
   auto counts = (TH1D*)fin->Get("nevents");
   auto gen_number = counts->GetBinContent(2);
+
+  // create output file
   auto suffix = "_output.root";
   auto prefix = "output/";
   std::string filename;
@@ -63,22 +69,26 @@ int main(int argc, char* argv[]) {
     filename = prefix + sample + std::string("_") + name + suffix;
   auto fout = new TFile(filename.c_str(), "RECREATE");
 
+  // get normalization
   double norm;
   if (isData)
     norm = 1.0;
   else
     norm = luminosity * cross_sections[sample] / gen_number;
 
-  // need to get root files for pileup reweighting
+  // read inputs for lumi reweighting
   auto lumi_weights = new reweight::LumiReWeighting("inputs/MC_Moriond17_PU25ns_V1.root", "inputs/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
 
+  // tracking corrections
   TFile *f_Trk=new TFile("inputs/ratios.root");
   TGraph *h_Trk=(TGraph*) f_Trk->Get("ratio_eta");
 
+  // trigger and ID scale factors
   auto trig_SF = new SF_factory("inputs/Electron_Ele25eta2p1WPTight_eff.root");
   auto id_SF = new SF_factory("inputs/Electron_IdIso0p10_eff.root");
   fout->cd();
 
+  // declare histograms (maybe find a nicer place to put these)
   TH1D *n70=new TH1D ("n70", "n70", 6,0,6);
   TH1D* cutflow = new TH1D("cutflow", "Cutflow", 11, -0.5, 10.5);
 
@@ -126,6 +136,7 @@ int main(int argc, char* argv[]) {
   met_factory      met(ntuple);
   gen_factory      gen(ntuple);
 
+  // begin the event loop
   Int_t nevts = ntuple->GetEntries();
   for (Int_t i = 0; i < nevts; i++) {
     ntuple->GetEntry(i);
@@ -145,11 +156,12 @@ int main(int argc, char* argv[]) {
     if (trigs.getPassEle25eta2p1Tight()) cutflow->Fill(2., evtwt);
     else continue;
 
-    // tau passes decay mode finding and |eta| < 2.3
+    // tau passes decay mode finding
     auto tau = taus.run_factory();
     if (tau.getDecayModeFinding()) cutflow->Fill(3., evtwt);
     else continue;
 
+    // tau |eta| < 2.3
     if (fabs(tau.getEta()) < 2.3) cutflow->Fill(4., evtwt);
     else continue;
     // end event selection
@@ -157,21 +169,24 @@ int main(int argc, char* argv[]) {
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4)
       continue;
-    if (name == "ZTT" && tau.getGenMatch() != 5)
+    else if (name == "ZTT" && tau.getGenMatch() != 5)
       continue;
-    if (name == "ZLL" && tau.getGenMatch() == 5)
+    else if (name == "ZLL" && tau.getGenMatch() == 5)
       continue;
-    if (name == "ZJ" && tau.getGenMatch() != 6)
+    else if (name == "ZJ" && tau.getGenMatch() != 6)
       continue;
+
+    cutflow->Fill(5., evtwt);
+
+    // apply some weights
     if (name == "ZL" || (name == "ZLL" && tau.getGenMatch() < 5)) {
         if (tau.getEta() < 1.460)
           evtwt *= 1.80;
         else if (tau.getEta() > 1.558)
           evtwt *= 1.30;
     }
-    cutflow->Fill(5., evtwt);
 
-    // apply lots of SF's
+    // apply trigger and ID scale factors
     if (!isData) {
       sf_trg = trig_SF->getDataEfficiency(electron.getPt(), electron.getEta());
       sf_id = id_SF->getSF(electron.getPt(), electron.getEta());
@@ -182,7 +197,7 @@ int main(int argc, char* argv[]) {
     // Tau energy scale corrections
     // ...
 
-    // electron/tau visible mass
+    // electron/tau visible mass (I'm not actually sure what these weights are at the moment)
     if (!isData) {
       if (name == "W") {
         if (gen.getNumGenJets() == 1)
@@ -221,6 +236,7 @@ int main(int argc, char* argv[]) {
         evtwt *= 0.80;
     }
 
+    // calculate mt
     double met_x = met.getMet() * cos(met.getMetPhi());
     double met_y = met.getMet() * sin(met.getMetPhi());
     // more tau energy scale corrections to met_x and met_y
@@ -238,21 +254,24 @@ int main(int argc, char* argv[]) {
         if (evt_charge == 0) {
           // fill histograms
           cutflow->Fill(8., evtwt);
-          hel_pt->Fill(electron.getPt(), evtwt);
-          hel_eta->Fill(electron.getEta(), evtwt);
-          htau_pt->Fill(tau.getPt(), evtwt);
-          htau_eta->Fill(tau.getEta(), evtwt);
-          hmet->Fill(met.getMet(), evtwt);
-          hmet_x->Fill(met_x, evtwt);
-          hmet_y->Fill(met_y, evtwt);
-          hmet_pt->Fill(met_pt, evtwt);
-          hmt->Fill(mt, evtwt);
-          hnjets->Fill(jets.getNjets(), evtwt);
-          hmjj->Fill(jets.getDijetMass(), evtwt);
-          hmsv->Fill(events.getMSV(), evtwt);
-          htau_pt_OS->Fill(tau.getPt(), evtwt);
-          hel_pt_OS->Fill(electron.getPt(), evtwt);
-          hmsv_OS->Fill(events.getMSV(), evtwt);
+          if (deltaR(electron.getEta(), electron.getPhi(), tau.getEta(), tau.getPhi()) < 0.5) {
+            cutflow->Fill(9., evtwt);
+            hel_pt->Fill(electron.getPt(), evtwt);
+            hel_eta->Fill(electron.getEta(), evtwt);
+            htau_pt->Fill(tau.getPt(), evtwt);
+            htau_eta->Fill(tau.getEta(), evtwt);
+            hmet->Fill(met.getMet(), evtwt);
+            hmet_x->Fill(met_x, evtwt);
+            hmet_y->Fill(met_y, evtwt);
+            hmet_pt->Fill(met_pt, evtwt);
+            hmt->Fill(mt, evtwt);
+            hnjets->Fill(jets.getNjets(), evtwt);
+            hmjj->Fill(jets.getDijetMass(), evtwt);
+            hmsv->Fill(events.getMSV(), evtwt);
+            htau_pt_OS->Fill(tau.getPt(), evtwt);
+            hel_pt_OS->Fill(electron.getPt(), evtwt);
+            hmsv_OS->Fill(events.getMSV(), evtwt);
+          }
         }
         else {
           htau_pt_SS->Fill(tau.getPt(), evtwt);

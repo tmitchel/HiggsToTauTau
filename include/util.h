@@ -49,7 +49,7 @@ static std::map<std::string, double> cross_sections {
   {"SMH_gg140", 36.0*0.0360},
   {"ST_tW_antitop", 35.6},
   {"ST_tW_top", 35.6},
-  {"ST_t_antitop", 80.95},
+  {"ST_t_antitop", 26.23},
   {"ST_t_top", 44.07},
   {"TT", 831.76},
   {"TT_missingfiles", 831.76},
@@ -98,4 +98,8 @@ static std::map<std::string, double> cross_sections {
 // do the mt calculation
 static float calculate_mt(electron* const el, float met_x, float met_y, float met_pt) {
   return sqrt(pow(el->getPt() + met_pt, 2) - pow(el->getPx() + met_x, 2) - pow(el->getPy() + met_y, 2));
+}
+
+static float deltaR(float eta1, float phi1, float eta2, float phi2) {
+  return sqrt(pow(eta1-eta2, 2) + pow(phi1-phi2, 2));
 }
