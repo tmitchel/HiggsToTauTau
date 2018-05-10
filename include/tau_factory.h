@@ -31,7 +31,7 @@ public:
   float getPz()                     { return pz;                    };
   float getDecayModeFinding()       { return dmf;                   };
   bool getTightIsoMVA()             { return tightIsoMVA;           };
-  bool getAgainstTightElectron ()   { return AgainstTightElectron;  };
+  bool getAgainstTightElectron()    { return AgainstTightElectron;  };
   bool getAgainstLooseMuon ()       { return AgainstLooseMuon;      };
   bool getMediumIsoMVA()            { return MediumIsoMVA;          };
   int getGenMatch()                 { return gen_match;             };

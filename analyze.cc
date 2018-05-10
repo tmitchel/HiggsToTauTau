@@ -143,7 +143,33 @@ int main(int argc, char* argv[]) {
     if (i % 100000 == 0)
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
 
-    double evtwt(norm), sf_trg(1.), sf_id(1.);
+    double evtwt(norm), corrections(1.), sf_trg(1.), sf_id(1.);
+    if (name == "W") {
+      if (gen.getNumGenJets() == 1)
+        evtwt = 6.8176;
+      else if (gen.getNumGenJets() == 2)
+        evtwt = 2.1038;
+      else if (gen.getNumGenJets() == 3)
+        evtwt = 0.6889;
+      else if (gen.getNumGenJets() == 4)
+        evtwt = 0.6900;
+      else
+        evtwt = 25.446;
+    }
+
+    if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
+      if (gen.getNumGenJets() == 1)
+        evtwt = 0.45729;
+      else if (gen.getNumGenJets() == 2)
+        evtwt = 0.4668;
+      else if (gen.getNumGenJets() == 3)
+        evtwt = 0.47995;
+      else if (gen.getNumGenJets() == 4)
+        evtwt = 0.39349;
+      else
+        evtwt = 1.4184;
+    }
+
     cutflow->Fill(0., evtwt);
 
     // begin event selection
@@ -153,7 +179,7 @@ int main(int argc, char* argv[]) {
     else continue;
 
     // electron passes Ele25eta2p1Tight
-    if (trigs.getPassEle25eta2p1Tight()) cutflow->Fill(2., evtwt);
+    if (!isData || trigs.getPassEle25eta2p1Tight()) cutflow->Fill(2., evtwt);
     else continue;
 
     // tau passes decay mode finding
@@ -178,63 +204,36 @@ int main(int argc, char* argv[]) {
 
     cutflow->Fill(5., evtwt);
 
-    // apply some weights
-    if (name == "ZL" || (name == "ZLL" && tau.getGenMatch() < 5)) {
-        if (tau.getEta() < 1.460)
-          evtwt *= 1.80;
-        else if (tau.getEta() > 1.558)
-          evtwt *= 1.30;
-    }
-
     // apply trigger and ID scale factors
     if (!isData) {
       sf_trg = trig_SF->getDataEfficiency(electron.getPt(), electron.getEta());
       sf_id = id_SF->getSF(electron.getPt(), electron.getEta());
       evtwt *= (sf_trg * sf_id * h_Trk->Eval(electron.getEta()) * lumi_weights->weight(events.getNPU()));
+
+      // corrections based on decay mode
+      if (tau.getGenMatch() == 5)
+        evtwt *= 0.95;
+
+      if (tau.getGenMatch() == 5 || tau.getGenMatch() == 4) {
+        if (fabs(tau.getEta())<0.4) evtwt *= 1.263;
+        else if (fabs(tau.getEta())<0.8) evtwt *= 1.364;
+        else if (fabs(tau.getEta())<1.2) evtwt *= 0.854;
+        else if (fabs(tau.getEta())<1.7) evtwt *= 1.712;
+        else if (fabs(tau.getEta())<2.3) evtwt *= 2.324;
+        if (name == "ZL" && events.getDecayMode() == 0) evtwt *= 0.74; //ZL corrections Laura
+        else if (name == "ZL" && events.getDecayMode() == 1) evtwt *= 1.0;
+        }
+
+      if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3){//Yiwen
+         if (fabs(tau.getEta())<1.460) evtwt *= 1.213;
+         else if (fabs(tau.getEta())>1.558) evtwt *= 1.375;
+      }
+
     }
     fout->cd();
 
     // Tau energy scale corrections
     // ...
-
-    // electron/tau visible mass (I'm not actually sure what these weights are at the moment)
-    if (!isData) {
-      if (name == "W") {
-        if (gen.getNumGenJets() == 1)
-          evtwt *= 6.8176;
-        else if (gen.getNumGenJets() == 2)
-          evtwt *= 2.1038;
-        else if (gen.getNumGenJets() == 3)
-          evtwt *= 0.6889;
-        else if (gen.getNumGenJets() == 4)
-          evtwt *= 0.6900;
-        else
-          evtwt *= 25.446;
-      }
-
-      if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
-        if (gen.getNumGenJets() == 1)
-          evtwt *= 0.45729;
-        else if (gen.getNumGenJets() == 2)
-          evtwt *= 0.4668;
-        else if (gen.getNumGenJets() == 3)
-          evtwt *= 0.47995;
-        else if (gen.getNumGenJets() == 4)
-          evtwt *= 0.39349;
-        else
-          evtwt *= 1.4184;
-      }
-
-      // corrections based on decay mode
-      if (tau.getGenMatch() == 5 && events.getDecayMode() == 0)
-        evtwt *= 0.97;
-      else if (tau.getGenMatch() == 5 && events.getDecayMode() == 1)
-        evtwt *= 0.92;
-      else if (tau.getGenMatch() == 5 && events.getDecayMode() < 2)
-        evtwt *= 0.94;
-      else if (tau.getGenMatch() == 5 && events.getDecayMode() == 10)
-        evtwt *= 0.80;
-    }
 
     // calculate mt
     double met_x = met.getMet() * cos(met.getMetPhi());
@@ -254,7 +253,7 @@ int main(int argc, char* argv[]) {
         if (evt_charge == 0) {
           // fill histograms
           cutflow->Fill(8., evtwt);
-          if (deltaR(electron.getEta(), electron.getPhi(), tau.getEta(), tau.getPhi()) < 0.5) {
+          if (deltaR(electron.getEta(), electron.getPhi(), tau.getEta(), tau.getPhi()) > 0.5) {
             cutflow->Fill(9., evtwt);
             hel_pt->Fill(electron.getPt(), evtwt);
             hel_eta->Fill(electron.getEta(), evtwt);

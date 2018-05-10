@@ -90,19 +90,20 @@ for ifile in infiles:
     fout.cd()
     ihist = fin.Get(options.var).Clone()
     temp = htemplate.Clone()
-    if 'ZTT' in ifile:
+    print ifile
+    if ifile == 'output/ZTT.root':
         samples.setdefault('ztt', ztt_hist)
         samples['ztt'].Add(ihist)
         stat.Add(ihist)
-    elif 'ZL' in ifile:
+    elif ifile == 'output/ZL.root':
         samples.setdefault('zl', zl_hist)
         samples['zl'].Add(ihist)
         stat.Add(ihist)
-    elif 'ttbar' in ifile:
+    elif ifile == 'output/ttbar.root':
         samples.setdefault('ttbar', tt_hist)
         samples['ttbar'].Add(ihist)
         stat.Add(ihist)
-    elif 'W_unscaled' in ifile:
+    elif ifile == 'output/W_unscaled.root':
         samples.setdefault('wjets', wjets_hist)
         samples['wjets'].Add(ihist)
         stat.Add(ihist)
@@ -110,13 +111,13 @@ for ifile in infiles:
         samples.setdefault('QCD', qcd_temp)
         samples['QCD'].Add(ihist)
         stat.Add(ihist)
-    elif 'VV' in ifile:
+    elif ifile == 'output/VV.root':
         samples.setdefault('VV', vv_hist)
         samples['VV'].Add(ihist)
         stat.Add(ihist)
     elif 'HWW' in ifile:
         sig_hist.Add(ihist)
-    elif 'data' in ifile:
+    elif ifile == 'output/data.root':
         data_hist.Add(ihist)
 
 samples = sorted(samples.iteritems(), key=lambda (n,hist) : hist.Integral())
@@ -169,13 +170,13 @@ pull.GetYaxis().SetTitleOffset(.32)
 pull.GetYaxis().SetLabelSize(.17)
 pull.GetYaxis().SetNdivisions(505)
 
-line1 = r.TLine(0, 2., 200, 2.)
+line1 = r.TLine(0, 2., 100, 2.)
 line1.SetLineWidth(1)
 line1.SetLineStyle(7)
 line1.SetLineColor(r.kBlack)
 # line1.Draw()
 
-line2 = r.TLine(0, -2., 200, -2.)
+line2 = r.TLine(0, -2., 100, -2.)
 line2.SetLineWidth(1)
 line2.SetLineStyle(7)
 line2.SetLineColor(r.kBlack)
