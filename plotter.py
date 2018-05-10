@@ -58,6 +58,10 @@ zl_hist = htemplate.Clone()
 zl_hist.SetLineColor(r.TColor.GetColor(r.kBlack))
 zl_hist.SetFillColor(r.TColor.GetColor("#4496c8"))
 
+vv_hist = htemplate.Clone()
+vv_hist.SetLineColor(r.kBlack)
+vv_hist.SetFillColor(r.TColor.GetColor("#12cadd"))
+
 tt_hist = htemplate.Clone()
 tt_hist.SetLineColor(r.kBlack)
 tt_hist.SetFillColor(r.TColor.GetColor("#9999cc"))
@@ -106,12 +110,14 @@ for ifile in infiles:
         samples.setdefault('QCD', qcd_temp)
         samples['QCD'].Add(ihist)
         stat.Add(ihist)
+    elif 'VV' in ifile:
+        samples.setdefault('VV', vv_hist)
+        samples['VV'].Add(ihist)
+        stat.Add(ihist)
     elif 'HWW' in ifile:
         sig_hist.Add(ihist)
-        continue
     elif 'data' in ifile:
         data_hist.Add(ihist)
-        continue
 
 samples = sorted(samples.iteritems(), key=lambda (n,hist) : hist.Integral())
 
@@ -175,7 +181,7 @@ line2.SetLineStyle(7)
 line2.SetLineColor(r.kBlack)
 # line2.Draw()
 
-leg = r.TLegend(0.5,0.42,0.88,0.88)
+leg = r.TLegend(0.6,0.42,0.88,0.88)
 leg.SetTextSize(0.045)
 leg.SetLineColor(0)
 leg.SetFillColor(0)
@@ -185,7 +191,8 @@ leg.AddEntry(zl_hist, "Z #rightarrow e+e-", "f")
 leg.AddEntry(tt_hist, 't#bar{t}', 'f')
 leg.AddEntry(wjets_hist, 'Electroweak', 'f')
 leg.AddEntry(qcd_temp, 'QCD', 'f')
-leg.AddEntry(stat, 'Background Stat. Uncertainty', 'f')
+leg.AddEntry(vv_hist, 'Diboson', 'f')
+leg.AddEntry(stat, 'Background Stat. Unc.', 'f')
 leg.AddEntry(sig_hist, 'Signal', 'l')
 
 stack.SetMaximum(stack.GetMaximum()*1.2)

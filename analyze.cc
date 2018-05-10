@@ -31,13 +31,23 @@ int main(int argc, char* argv[]) {
   if (argc > 2)
     name = argv[2];
 
+  bool local = false;
+  if (argc > 3)
+    local = argv[3];
+
   std::string fname;
   bool isData = sample.find("Data") != std::string::npos;
-  if (isData)
-    fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_22feb_SV/"+sample+".root";
-  else
-    fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/"+sample+".root";
+  if (local) {
+    fname = "root_files/"+sample+".root";
+  }
+  else {
+    if (isData)
+      fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_22feb_SV/"+sample+".root";
+    else
+      fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/"+sample+".root";
+  }
 
+  std::cout << fname << std::endl;
   std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
@@ -68,71 +78,6 @@ int main(int argc, char* argv[]) {
   auto trig_SF = new SF_factory("inputs/Electron_Ele25eta2p1WPTight_eff.root");
   auto id_SF = new SF_factory("inputs/Electron_IdIso0p10_eff.root");
   fout->cd();
-
-  // stolen directly from Cecile's code
-  // will probably find somewhere to hide all of this for readability
-  float bins0[] = {0,60,65,70,75,80,85,90,95,100,105,110,115,400};
-  float bins1[] = {0,70,80,90,100,110,120,130,140,150,180,300};
-  float bins2[] = {0,90,105,120,135,150,400};
-
-  float bins_pth[] = {0,60,100,140,180,220,500};
-  float bins_mjj[] = {300,600,900,1200,1700,3000};
-  float bins_taupt[] = {30,35,40,45,50,55,300};
-
-  int  binnum1 = sizeof(bins1)/sizeof(Float_t) - 1;
-  int  binnum2 = sizeof(bins2)/sizeof(Float_t) - 1;
-  int  binnum0 = sizeof(bins0)/sizeof(Float_t) - 1;
-  int  binnum_pth = sizeof(bins_pth)/sizeof(Float_t) - 1;
-  int  binnum_taupt = sizeof(bins_taupt)/sizeof(Float_t) - 1;
-  int  binnum_mjj = sizeof(bins_mjj)/sizeof(Float_t) - 1;
-
-  // TH2F *h0_OS=new TH2F ("h0_OS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0);h0_OS->Sumw2();
-  // TH2F *h1_OS=new TH2F ("h1_OS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1);h1_OS->Sumw2();
-  // TH2F *h2_OS=new TH2F ("h2_OS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2);h2_OS->Sumw2();
-  // TH2F *h0_SS=new TH2F ("h0_SS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0);h0_SS->Sumw2();
-  // TH2F *h1_SS=new TH2F ("h1_SS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1);h1_SS->Sumw2();
-  // TH2F *h2_SS=new TH2F ("h2_SS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2);h2_SS->Sumw2();
-  // TH2F *h0_QCD=new TH2F ("h0_QCD","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0);h0_QCD->Sumw2();
-  // TH2F *h1_QCD=new TH2F ("h1_QCD","Invariant mass",binnum_pth,bins_pth,binnum1,bins1);h1_QCD->Sumw2();
-  // TH2F *h2_QCD=new TH2F ("h2_QCD","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2);h2_QCD->Sumw2();
-  // TH2F *h0_WOS=new TH2F ("h0_WOS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0);h0_WOS->Sumw2();
-  // TH2F *h1_WOS=new TH2F ("h1_WOS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1);h1_WOS->Sumw2();
-  // TH2F *h2_WOS=new TH2F ("h2_WOS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2);h2_WOS->Sumw2();
-  // TH2F *h0_WSS=new TH2F ("h0_WSS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0);h0_WSS->Sumw2();
-  // TH2F *h1_WSS=new TH2F ("h1_WSS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1);h1_WSS->Sumw2();
-  // TH2F *h2_WSS=new TH2F ("h2_WSS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2);h2_WSS->Sumw2();
-
-  // TH1D* h0_tau_pt_QCD = new TH1D("h0_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h1_tau_pt_QCD = new TH1D("h1_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h2_tau_pt_QCD = new TH1D("h2_tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h0_tau_pt_SS = new TH1D("h0_tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h1_tau_pt_SS = new TH1D("h1_tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h2_tau_pt_SS = new TH1D("h2_tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h0_tau_pt_OS = new TH1D("h0_tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h1_tau_pt_OS = new TH1D("h1_tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h2_tau_pt_OS = new TH1D("h2_tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h0_tau_pt_WSS = new TH1D("h0_tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h1_tau_pt_WSS = new TH1D("h1_tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h2_tau_pt_WSS = new TH1D("h2_tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h0_tau_pt_WOS = new TH1D("h0_tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h1_tau_pt_WOS = new TH1D("h1_tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  // TH1D* h2_tau_pt_WOS = new TH1D("h2_tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 100, 0., 500.);
-  //
-  // TH1D* h0_msv_QCD = new TH1D("h0_msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h1_msv_QCD = new TH1D("h1_msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h2_msv_QCD = new TH1D("h2_msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h0_msv_SS = new TH1D("h0_msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h1_msv_SS = new TH1D("h1_msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h2_msv_SS = new TH1D("h2_msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h0_msv_OS = new TH1D("h0_msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h1_msv_OS = new TH1D("h1_msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h2_msv_OS = new TH1D("h2_msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h0_msv_WSS = new TH1D("h0_msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h1_msv_WSS = new TH1D("h1_msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h2_msv_WSS = new TH1D("h2_msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h0_msv_WOS = new TH1D("h0_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h1_msv_WOS = new TH1D("h1_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  // TH1D* h2_msv_WOS = new TH1D("h2_msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
 
   TH1D *n70=new TH1D ("n70", "n70", 6,0,6);
   TH1D* cutflow = new TH1D("cutflow", "Cutflow", 11, -0.5, 10.5);
@@ -190,6 +135,7 @@ int main(int argc, char* argv[]) {
     double evtwt(norm), sf_trg(1.), sf_id(1.);
     cutflow->Fill(0., evtwt);
 
+    // begin event selection
     // electron pT > 27 GeV
     auto electron = electrons.run_factory();
     if (electron.getPt() > 27)  cutflow->Fill(1., evtwt);
@@ -203,8 +149,10 @@ int main(int argc, char* argv[]) {
     auto tau = taus.run_factory();
     if (tau.getDecayModeFinding()) cutflow->Fill(3., evtwt);
     else continue;
-    if (abs(tau.getEta()) < 2.3) cutflow->Fill(4., evtwt);
+
+    if (fabs(tau.getEta()) < 2.3) cutflow->Fill(4., evtwt);
     else continue;
+    // end event selection
 
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4)
@@ -223,7 +171,7 @@ int main(int argc, char* argv[]) {
     }
     cutflow->Fill(5., evtwt);
 
-    // apply lots of SF's that I don't have
+    // apply lots of SF's
     if (!isData) {
       sf_trg = trig_SF->getDataEfficiency(electron.getPt(), electron.getEta());
       sf_id = id_SF->getSF(electron.getPt(), electron.getEta());
@@ -247,7 +195,6 @@ int main(int argc, char* argv[]) {
           evtwt *= 0.6900;
         else
           evtwt *= 25.446;
-
       }
 
       if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
@@ -261,7 +208,6 @@ int main(int argc, char* argv[]) {
           evtwt *= 0.39349;
         else
           evtwt *= 1.4184;
-
       }
 
       // corrections based on decay mode
@@ -313,12 +259,12 @@ int main(int argc, char* argv[]) {
           hel_pt_SS->Fill(electron.getPt(), evtwt);
           hmsv_SS->Fill(events.getMSV(), evtwt);
         }
-      }
+      } // close signal
       else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
         htau_pt_QCD->Fill(tau.getPt(), evtwt);
         hel_pt_QCD->Fill(electron.getPt(), evtwt);
         hmsv_QCD->Fill(events.getMSV(), evtwt);
-      }
+      } // close qcd
       else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()){
         if (evt_charge == 0) {
           htau_pt_WOS->Fill(tau.getPt(), evtwt);
@@ -329,8 +275,8 @@ int main(int argc, char* argv[]) {
           htau_pt_WSS->Fill(tau.getPt(), evtwt);
           hel_pt_WSS->Fill(electron.getPt(), evtwt);
           hmsv_WSS->Fill(events.getMSV(), evtwt);
-        }
-      }
+        } // close Wjets
+      } // close general
 
       // if (jets.getNjets() == 0) {
       //

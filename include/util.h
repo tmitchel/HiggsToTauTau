@@ -50,7 +50,7 @@ static std::map<std::string, double> cross_sections {
   {"ST_tW_antitop", 35.6},
   {"ST_tW_top", 35.6},
   {"ST_t_antitop", 80.95},
-  {"ST_t_top", 136.02},
+  {"ST_t_top", 44.07},
   {"TT", 831.76},
   {"TT_missingfiles", 831.76},
   {"VV2L2Nu", 11.95},

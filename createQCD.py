@@ -51,7 +51,7 @@ hbkg_msv_QCD.Reset()
 # hbkg_2jet_SS.Reset()
 
 for ifile in filelist:
-    if 'data' in ifile or 'SMH' in ifile or 'ZH' in ifile or 'vbf' in ifile or 'gg' in ifile:
+    if 'data' in ifile or 'ZH' in ifile or 'vbf' in ifile.lower() or 'gg' in ifile.lower() or 'Wplus' in ifile or 'Wminus' in ifile:
         continue
     ftemp = TFile(ifile, 'read')
     print ftemp.GetName()
