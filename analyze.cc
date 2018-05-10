@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
     else continue;
 
     // electron passes Ele25eta2p1Tight
-    if (trigs.getPassEle25eta2p1Tight()) cutflow->Fill(2., evtwt);
+    if (!isData || trigs.getPassEle25eta2p1Tight()) cutflow->Fill(2., evtwt);
     else continue;
 
     // tau passes decay mode finding
