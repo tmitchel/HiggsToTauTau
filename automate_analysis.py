@@ -28,12 +28,15 @@ else:
 
 start = time.time()
 if options.local:
-    fileList = [ifile for ifile in glob('root_files/*') if '.root' in ifile]
+    if options.isData:
+    	fileList = [ifile for ifile in glob('root_files/smhet_22feb_SV/*') if '.root' in ifile and 'Data' in ifile]
+    else:
+	    fileList = [ifile for ifile in glob('root_files/smhet_20march/*') if '.root' in ifile and not 'Data' in ifile]
     suffix = ' -l'
 else:
     fileList = [ifile for ifile in filter(None, popen('xrdfs root://cmseos.fnal.gov/ ls '+path).read().split('\n'))]
     suffix = ''
-
+print options.local, options.isData
 for ifile in fileList:
     if not 'root' in ifile:
         continue
