@@ -45,7 +45,8 @@ for ifile in fileList:
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' ZL'+suffix, shell=True)
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' ZJ'+suffix, shell=True)
     elif 'TT' in ifile:
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' TT'+suffix, shell=True)
+        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' TTT'+suffix, shell=True)
+        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' TTJ'+suffix, shell=True)
     elif 'W.root' in ifile or 'W1' in ifile or 'W2' in ifile or 'W3' in ifile or 'W4' in ifile:
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' W'+suffix, shell=True)
     else:

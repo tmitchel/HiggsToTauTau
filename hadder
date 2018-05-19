@@ -1,5 +1,6 @@
 mv output/Data_output.root output/data.root
-mv output/TT_output.root output/ttbar.root
+#mv output/TT_output.root output/ttbar.root
+hadd output/ttbar.root output/TT_TTT_output.root output/TT_TTJ_output.root
 hadd output/ZJ.root output/DY*ZJ*
 hadd output/ZL.root output/DY*ZL*
 hadd output/ZTT.root output/DY*ZTT* output/EWKZ*

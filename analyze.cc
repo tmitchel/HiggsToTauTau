@@ -98,11 +98,11 @@ int main(int argc, char* argv[]) {
 
   TH1D* hel_pt = new TH1D("el_pt", "Electron p_{T};p_{T} [GeV];;", 20, 0., 100);
   TH1D* hel_eta = new TH1D("el_eta", "Electron #eta;#eta [GeV];;", 80, -4., 4.);
-  TH1D* hel_phi = new TH1D("el_phi", "Electron #phi;#phi [GeV];;", 50, -5., 5.);
+  TH1D* hel_phi = new TH1D("el_phi", "Electron #phi;#phi [GeV];;", 15, -3.14, 3.14);
 
   TH1D* htau_pt = new TH1D("tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200);
   TH1D* htau_eta = new TH1D("tau_eta", "Tau #eta;#eta [GeV];;", 80, -4., 4.);
-  TH1D* htau_phi = new TH1D("tau_phi", "Tau #phi;#phi [GeV];;", 50, -5., 5.);
+  TH1D* htau_phi = new TH1D("tau_phi", "Tau #phi;#phi [GeV];;", 15, -3.14, 3.14);
 
   TH1D* htau_pt_QCD = new TH1D("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
   TH1D* htau_pt_SS = new TH1D("tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
@@ -183,7 +183,7 @@ int main(int argc, char* argv[]) {
     // begin event selection
     // electron pT > 27 GeV
     auto electron = electrons.run_factory();
-    if (electron.getPt() > 27)  cutflow->Fill(1., evtwt);
+    if (electron.getPt() > 26 && fabs(electron.getEta()) < 2.1)  cutflow->Fill(1., evtwt);
     else continue;
 
     // electron passes Ele25eta2p1Tight
@@ -203,9 +203,9 @@ int main(int argc, char* argv[]) {
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4)
       continue;
-    else if (name == "ZTT" && tau.getGenMatch() != 5)
+    else if ((name == "ZTT" || name == "TTT") && tau.getGenMatch() != 5)
       continue;
-    else if (name == "ZLL" && tau.getGenMatch() == 5)
+    else if ((name == "ZLL" || name == "TTJ") && tau.getGenMatch() == 5)
       continue;
     else if (name == "ZJ" && tau.getGenMatch() != 6)
       continue;
@@ -222,6 +222,7 @@ int main(int argc, char* argv[]) {
       // corrections based on decay mode
       if (tau.getGenMatch() == 5)
         evtwt *= 0.95;
+
       weightflow->Fill(2., evtwt);
 
       if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {

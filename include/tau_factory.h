@@ -11,8 +11,8 @@ class tau {
 private:
 public:
   std::string name = "tau";
-  float pt, eta, phi, mass, charge, px, py, pz, dmf;
-  bool tightIsoMVA, AgainstTightElectron, AgainstLooseMuon, MediumIsoMVA;
+  float pt, eta, phi, mass, charge, px, py, pz, dmf, tightIsoMVA;
+  bool AgainstTightElectron, AgainstLooseMuon, MediumIsoMVA;
   int gen_match;
   TLorentzVector p4;
 
@@ -30,7 +30,7 @@ public:
   float getPy()                     { return py;                    };
   float getPz()                     { return pz;                    };
   float getDecayModeFinding()       { return dmf;                   };
-  bool getTightIsoMVA()             { return tightIsoMVA;           };
+  float getTightIsoMVA()            { return tightIsoMVA;           };
   bool getAgainstTightElectron()    { return AgainstTightElectron;  };
   bool getAgainstLooseMuon ()       { return AgainstLooseMuon;      };
   bool getMediumIsoMVA()            { return MediumIsoMVA;          };
@@ -47,7 +47,7 @@ public:
   void setPy(float Py)                            { py = Py;                            };
   void setPz(float Pz)                            { pz = Pz;                            };
   void setDecayModeFinding(float DMF)             { dmf = DMF;                          };
-  void setTightIsoMVA(bool newIsoTight)           { tightIsoMVA = newIsoTight;          };
+  void setTightIsoMVA(float newIsoTight)          { tightIsoMVA = newIsoTight;          };
   void setAgainstTightElectron(bool newAElTight)  { AgainstTightElectron = newAElTight; };
   void setAgainstLooseMuon(bool newAMuLoose)      { AgainstLooseMuon = newAMuLoose;     };
   void setMediumIsoMVA(bool newIsoMed)            { MediumIsoMVA = newIsoMed;           };
