@@ -31,6 +31,7 @@ private:
   float jpt_2, jeta_2, jphi_2, jcsv_2;
   float bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1;
   float bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2;
+  float pt_top1, pt_top2;
   int nbtag, njets, njetspt20;
   std::vector<jet> plain_jets;
   std::vector<jet> btag_jets;
@@ -45,6 +46,8 @@ public:
   int getNjets()                  { return njets;      };
   int getNjetPt20()               { return njetspt20;  };
   float getDijetMass()            { return mjj;        };
+  float getTopPt1()               { return pt_top1;    };
+  float getTopPt2()               { return pt_top2;    };
   std::vector<jet> getJets()      { return plain_jets; };
   std::vector<jet> getBtagJets()  { return btag_jets;  };
 };
@@ -73,6 +76,8 @@ jet_factory::jet_factory(TTree* input) {
   input -> SetBranchAddress ( "bphi_2",    &bphi_2    );
   input -> SetBranchAddress ( "bcsv_2",    &bcsv_2    );
   input -> SetBranchAddress ( "bflavor_2", &bflavor_2 );
+  input -> SetBranchAddress ( "pt_top1",   &pt_top1   );
+  input -> SetBranchAddress ( "pt_top2",   &pt_top2   );
 }
 
 // initialize member data and set TLorentzVector

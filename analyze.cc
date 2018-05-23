@@ -1,6 +1,8 @@
 // system includes
 #include <iostream>
 #include <cmath>
+#include <algorithm>
+#include <unordered_map>
 
 // ROOT includes
 #include "TH1D.h"
@@ -8,18 +10,23 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TGraphAsymmErrors.h"
+#include "RooWorkspace.h"
+#include "RooRealVar.h"
+#include "RooFunctor.h"
+#include "RooMsgService.h"
 
 // user includes
 #include "include/trigger.h"
 #include "include/event_info.h"
-#include "include/electron_factory.h"
 #include "include/tau_factory.h"
+#include "include/electron_factory.h"
 #include "include/jet_factory.h"
 #include "include/met_factory.h"
 #include "include/gen_factory.h"
-#include "include/util.h"
-#include "include/LumiReweightingStandAlone.h"
 #include "include/SF_factory.h"
+#include "include/util.h"
+#include "include/btagSF.h"
+#include "include/LumiReweightingStandAlone.h"
 
 int main(int argc, char* argv[]) {
 
@@ -83,57 +90,29 @@ int main(int argc, char* argv[]) {
   auto lumi_weights = new reweight::LumiReWeighting("inputs/MC_Moriond17_PU25ns_V1.root", "inputs/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
 
   // tracking corrections
-  TFile *f_Trk=new TFile("inputs/ratios.root");
-  TGraph *h_Trk=(TGraph*) f_Trk->Get("ratio_eta");
+  TFile *f_Trk = new TFile("inputs/Tracking_EfficienciesAndSF_BCDEFGH.root");
+  TGraph *h_Trk = (TGraph*) f_Trk->Get("ratio_eff_eta3_dr030e030_corr");
+
+  // Z-pT reweighting
+  TFile *zpt_file=new TFile("inputs/zpt_weights_2016_BtoH.root");
+  auto zpt_hist=(TH2F*) zpt_file->Get("zptmass_histo");
+
+  //H->tau tau scale factors
+  TFile htt_sf_file("inputs/htt_scalefactors_sm_moriond_v1.root");
+  RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
+  htt_sf_file.Close();
+  fout->cd();
 
   // trigger and ID scale factors
   auto trig_SF = new SF_factory("inputs/Electron_Ele25eta2p1WPTight_eff.root");
   auto id_SF = new SF_factory("inputs/Electron_IdIso0p10_eff.root");
   fout->cd();
 
-  // declare histograms (maybe find a nicer place to put these)
-  TH1D *n70=new TH1D ("n70", "n70", 6,0,6);
-  TH1D* cutflow = new TH1D("cutflow", "Cutflow", 11, -0.5, 10.5);
-  TH1D* weightflow = new TH1D("weightflow", "Cutflow", 11, -0.5, 10.5);
-
-  TH1D* hel_pt = new TH1D("el_pt", "Electron p_{T};p_{T} [GeV];;", 20, 0., 100);
-  TH1D* hel_eta = new TH1D("el_eta", "Electron #eta;#eta [GeV];;", 80, -4., 4.);
-  TH1D* hel_phi = new TH1D("el_phi", "Electron #phi;#phi [GeV];;", 15, -3.14, 3.14);
-
-  TH1D* htau_pt = new TH1D("tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200);
-  TH1D* htau_eta = new TH1D("tau_eta", "Tau #eta;#eta [GeV];;", 80, -4., 4.);
-  TH1D* htau_phi = new TH1D("tau_phi", "Tau #phi;#phi [GeV];;", 15, -3.14, 3.14);
-
-  TH1D* htau_pt_QCD = new TH1D("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1D* htau_pt_SS = new TH1D("tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1D* htau_pt_OS = new TH1D("tau_pt_OS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1D* htau_pt_WOS = new TH1D("tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-  TH1D* htau_pt_WSS = new TH1D("tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.);
-
-  TH1D* hel_pt_QCD = new TH1D("el_pt_QCD", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1D* hel_pt_SS = new TH1D("el_pt_SS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1D* hel_pt_OS = new TH1D("el_pt_OS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1D* hel_pt_WOS = new TH1D("el_pt_WOS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-  TH1D* hel_pt_WSS = new TH1D("el_pt_WSS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.);
-
-  TH1D* hmsv_QCD = new TH1D("msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1D* hmsv_SS = new TH1D("msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1D* hmsv_OS = new TH1D("msv_OS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1D* hmsv_WOS = new TH1D("msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-  TH1D* hmsv_WSS = new TH1D("msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.);
-
-  TH1D* hmet = new TH1D("met", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
-  TH1D* hmetphi = new TH1D("metphi", "Missing E_{T} #phi;Missing E_{T} [GeV];;", 60, -3.14, 3.14);
-  TH1D* hmet_x = new TH1D("met_x", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
-  TH1D* hmet_y = new TH1D("met_y", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
-  TH1D* hmet_pt = new TH1D("met_pt", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500);
-
-  TH1D* hmt = new TH1D("mt", "MT", 50, 0, 100);
-  TH1D* hnjets = new TH1D("njets", "N(jets)", 10, -0.5, 9.5);
-  TH1D* hmjj = new TH1D("mjj", "Dijet Mass; Mass [GeV];;", 100, 0, 200);
-  TH1D* hmsv = new TH1D("msv", "SV Fit Mass; Mass [GeV];;", 100, 0, 300);
-
-  TH1D* hNGenJets = new TH1D("NGenJets", "Number of Gen Jets", 12, -0.5, 11.5);
+  // declare histograms
+  auto histos = new std::unordered_map<std::string, TH1D*>;
+  auto histos_2d = new std::unordered_map<std::string, TH2F*>;
+  initHistos_1D(histos);
+  initHistos_2D(histos_2d);
 
   // construct factories
   trigger          trigs(ntuple);
@@ -143,6 +122,7 @@ int main(int argc, char* argv[]) {
   jet_factory      jets(ntuple);
   met_factory      met(ntuple);
   gen_factory      gen(ntuple);
+  double n70_count;
 
   // begin the event loop
   Int_t nevts = ntuple->GetEntries();
@@ -151,6 +131,7 @@ int main(int argc, char* argv[]) {
     if (i % 100000 == 0)
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
 
+    // find the event weight (not lumi*xs if looking at W or Drell-Yan)
     double evtwt(norm), corrections(1.), sf_trg(1.), sf_id(1.);
     if (name == "W") {
       if (gen.getNumGenJets() == 1)
@@ -178,25 +159,25 @@ int main(int argc, char* argv[]) {
         evtwt = 1.4184;
     }
 
-    cutflow->Fill(0., evtwt);
+    histos->at("cutflow")->Fill(0., evtwt);
 
     // begin event selection
     // electron pT > 27 GeV
     auto electron = electrons.run_factory();
-    if (electron.getPt() > 26 && fabs(electron.getEta()) < 2.1)  cutflow->Fill(1., evtwt);
+    if (electron.getPt() > 26 && fabs(electron.getEta()) < 2.1)  histos->at("cutflow") -> Fill(1., evtwt);
     else continue;
 
     // electron passes Ele25eta2p1Tight
-    if (!isData || trigs.getPassEle25eta2p1Tight()) cutflow->Fill(2., evtwt);
+    if (!isData || trigs.getPassEle25eta2p1Tight()) histos->at("cutflow") -> Fill(2., evtwt);
     else continue;
 
     // tau passes decay mode finding
     auto tau = taus.run_factory();
-    if (tau.getDecayModeFinding()) cutflow->Fill(3., evtwt);
+    if (tau.getDecayModeFinding()) histos->at("cutflow") -> Fill(3., evtwt);
     else continue;
 
     // tau |eta| < 2.3
-    if (fabs(tau.getEta()) < 2.3) cutflow->Fill(4., evtwt);
+    if (fabs(tau.getEta()) < 2.3) histos->at("cutflow") -> Fill(4., evtwt);
     else continue;
     // end event selection
 
@@ -210,21 +191,22 @@ int main(int argc, char* argv[]) {
     else if (name == "ZJ" && tau.getGenMatch() != 6)
       continue;
 
-    cutflow->Fill(5., evtwt);
+    histos->at("cutflow") -> Fill(5., evtwt);
 
-    // apply trigger and ID scale factors
+    // apply all scale factors/corrections/etc.
     if (!isData) {
+
+      // apply trigger and id SF's
       sf_trg = trig_SF->getDataEfficiency(electron.getPt(), electron.getEta());
       sf_id = id_SF->getSF(electron.getPt(), electron.getEta());
-
       evtwt *= (sf_trg * sf_id * h_Trk->Eval(electron.getEta()) * lumi_weights->weight(events.getNPU()));
-      weightflow->Fill(1., evtwt);
-      // corrections based on decay mode
+      // evtwt *= (sf_trg * sf_id * h_Trk->GetBinContent(h_Trk->FindBin(electron.getEta())) * lumi_weights->weight(events.getNPU()));
+
+      // tau ID efficiency SF
       if (tau.getGenMatch() == 5)
         evtwt *= 0.95;
 
-      weightflow->Fill(2., evtwt);
-
+      // anti-lepton discriminator SFs
       if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
         if (fabs(tau.getEta())<0.4) evtwt *= 1.263;
         else if (fabs(tau.getEta())<0.8) evtwt *= 1.364;
@@ -234,186 +216,196 @@ int main(int argc, char* argv[]) {
         if (name == "ZL" && events.getDecayMode() == 0) evtwt *= 0.74; //ZL corrections Laura
         else if (name == "ZL" && events.getDecayMode() == 1) evtwt *= 1.0;
       }
-      weightflow->Fill(3., evtwt);
 
       if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3){//Yiwen
          if (fabs(tau.getEta())<1.460) evtwt *= 1.213;
          else if (fabs(tau.getEta())>1.558) evtwt *= 1.375;
        }
-       weightflow->Fill(4., evtwt);
+
+       // Z-pT Reweighting
+       if (name=="EWKZLL" || name=="EWKZNuNu" || name=="ZTT" || name=="ZLL" || name=="ZL" || name=="ZJ")
+        evtwt *= zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(gen.getGenM()),zpt_hist->GetYaxis()->FindBin(gen.getGenPt()));
+
+      // top-pT Reweighting
+      if (name == "TTT" || name == "TT" || name == "TTJ") {
+        float pt_top1 = std::min(float(400.), jets.getTopPt1());
+        float pt_top2 = std::min(float(400.), jets.getTopPt2());
+        evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
+      }
+
+      // b-tagging SF (only used in scaling W, I believe)
+      // int nbtagged = std::min(2, jets.getNbtag());
+      // auto bjets = jets.getBtagJets();
+      // float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt() ,bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
+      // if (nbtagged>2) weight_btag=0;
+
+      // recoil correction
+      htt_sf->var("t_pt")->setVal(tau.getPt());
+      htt_sf->var("t_eta")->setVal(tau.getEta());
+      htt_sf->var("t_dm")->setVal(events.getDecayMode());
+      evtwt *= htt_sf->function("t_genuine_TightIso_mt_ratio")->getVal();
+
     }
     fout->cd();
-
-    // Tau energy scale corrections
-    // ...
 
     // calculate mt
     double met_x = met.getMet() * cos(met.getMetPhi());
     double met_y = met.getMet() * sin(met.getMetPhi());
-    // more tau energy scale corrections to met_x and met_y
     double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
     double mt = calculate_mt(&electron, met_x, met_y, met_pt);
     int evt_charge = tau.getCharge() + electron.getCharge();
 
+    if (mt > 80 && evt_charge == 0 && tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon())
+      n70_count += evtwt;
+
     if (mt < 50 && tau.getPt() > 30) {
 
-      cutflow->Fill(6., evtwt);
+      histos->at("cutflow") -> Fill(6., evtwt);
       // inclusive selection
       if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
-        cutflow->Fill(7., evtwt);
+        histos->at("cutflow") -> Fill(7., evtwt);
 
         if (evt_charge == 0) {
           // fill histograms
-          cutflow->Fill(8., evtwt);
+          histos->at("cutflow") -> Fill(8., evtwt);
           if (deltaR(electron.getEta(), electron.getPhi(), tau.getEta(), tau.getPhi()) > 0.5) {
-            cutflow->Fill(9., evtwt);
-            hel_pt->Fill(electron.getPt(), evtwt);
-            hel_eta->Fill(electron.getEta(), evtwt);
-            hel_phi->Fill(electron.getPhi(), evtwt);
-            htau_pt->Fill(tau.getPt(), evtwt);
-            htau_eta->Fill(tau.getEta(), evtwt);
-            htau_phi->Fill(tau.getPhi(), evtwt);
-            hmet->Fill(met.getMet(), evtwt);
-            hmet_x->Fill(met_x, evtwt);
-            hmet_y->Fill(met_y, evtwt);
-            hmet_pt->Fill(met_pt, evtwt);
-            hmt->Fill(mt, evtwt);
-            hnjets->Fill(jets.getNjets(), evtwt);
-            hmjj->Fill(jets.getDijetMass(), evtwt);
-            hmsv->Fill(events.getMSV(), evtwt);
-            htau_pt_OS->Fill(tau.getPt(), evtwt);
-            hel_pt_OS->Fill(electron.getPt(), evtwt);
-            hmsv_OS->Fill(events.getMSV(), evtwt);
-            hNGenJets->Fill(gen.getNumGenJets(), evtwt);
+            histos->at("cutflow")     -> Fill(9.                  , evtwt);
+            histos->at("hel_pt")      -> Fill(electron.getPt()    , evtwt);
+            histos->at("hel_eta")     -> Fill(electron.getEta()   , evtwt);
+            histos->at("hel_phi")     -> Fill(electron.getPhi()   , evtwt);
+            histos->at("htau_pt")     -> Fill(tau.getPt()         , evtwt);
+            histos->at("htau_eta")    -> Fill(tau.getEta()        , evtwt);
+            histos->at("htau_phi")    -> Fill(tau.getPhi()        , evtwt);
+            histos->at("hmet")        -> Fill(met.getMet()        , evtwt);
+            histos->at("hmet_x")      -> Fill(met_x               , evtwt);
+            histos->at("hmet_y")      -> Fill(met_y               , evtwt);
+            histos->at("hmet_pt")     -> Fill(met_pt              , evtwt);
+            histos->at("hmt")         -> Fill(mt                  , evtwt);
+            histos->at("hnjets")      -> Fill(jets.getNjets()     , evtwt);
+            histos->at("hmjj")        -> Fill(jets.getDijetMass() , evtwt);
+            histos->at("hmsv")        -> Fill(events.getMSV()     , evtwt);
+            histos->at("hNGenJets")   -> Fill(gen.getNumGenJets() , evtwt);
           }
         }
         else {
-          htau_pt_SS->Fill(tau.getPt(), evtwt);
-          hel_pt_SS->Fill(electron.getPt(), evtwt);
-          hmsv_SS->Fill(events.getMSV(), evtwt);
+          histos->at("htau_pt_SS")  -> Fill(tau.getPt()        , evtwt);
+          histos->at("hel_pt_SS")   -> Fill(electron.getPt()   , evtwt);
+          histos->at("htau_phi_SS") -> Fill(tau.getPhi()       , evtwt);
+          histos->at("hel_phi_SS")  -> Fill(electron.getPhi()  , evtwt);
+          histos->at("hmsv_SS")     -> Fill(events.getMSV()    , evtwt);
+          histos->at("hmet_SS")     -> Fill(met.getMet()       , evtwt);
+          histos->at("hmt_SS")      -> Fill(events.getMSV()    , evtwt);
+          histos->at("hmjj_SS")     -> Fill(jets.getDijetMass(), evtwt);
         }
       } // close signal
       else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
-        htau_pt_QCD->Fill(tau.getPt(), evtwt);
-        hel_pt_QCD->Fill(electron.getPt(), evtwt);
-        hmsv_QCD->Fill(events.getMSV(), evtwt);
+        histos->at("htau_pt_QCD")  -> Fill(tau.getPt()       , evtwt);
+        histos->at("hel_pt_QCD")   -> Fill(electron.getPt()  , evtwt);
+        histos->at("htau_phi_QCD") -> Fill(tau.getPhi()      , evtwt);
+        histos->at("hel_phi_QCD")  -> Fill(electron.getPhi() , evtwt);
+        histos->at("hmsv_QCD")     -> Fill(events.getMSV()   , evtwt);
+        histos->at("hmet_QCD")     -> Fill(met.getMet()       , evtwt);
+        histos->at("hmt_QCD")      -> Fill(events.getMSV()    , evtwt);
+        histos->at("hmjj_QCD")     -> Fill(jets.getDijetMass(), evtwt);
       } // close qcd
       else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()){
         if (evt_charge == 0) {
-          htau_pt_WOS->Fill(tau.getPt(), evtwt);
-          hel_pt_WOS->Fill(electron.getPt(), evtwt);
-          hmsv_WOS->Fill(events.getMSV(), evtwt);
+          histos->at("htau_pt_WOS")  -> Fill(tau.getPt()       , evtwt);
+          histos->at("hel_pt_WOS")   -> Fill(electron.getPt()  , evtwt);
+          histos->at("htau_phi_WOS") -> Fill(tau.getPhi()      , evtwt);
+          histos->at("hel_phi_WOS")  -> Fill(electron.getPhi() , evtwt);
+          histos->at("hmsv_WOS")     -> Fill(events.getMSV()   , evtwt);
+          histos->at("hmet_WOS")     -> Fill(met.getMet()       , evtwt);
+          histos->at("hmt_WOS")      -> Fill(events.getMSV()    , evtwt);
+          histos->at("hmjj_WOS")     -> Fill(jets.getDijetMass(), evtwt);
         }
         else {
-          htau_pt_WSS->Fill(tau.getPt(), evtwt);
-          hel_pt_WSS->Fill(electron.getPt(), evtwt);
-          hmsv_WSS->Fill(events.getMSV(), evtwt);
+          histos->at("htau_pt_WSS")  -> Fill(tau.getPt()       , evtwt);
+          histos->at("hel_pt_WSS")   -> Fill(electron.getPt()  , evtwt);
+          histos->at("htau_phi_WSS") -> Fill(tau.getPhi()      , evtwt);
+          histos->at("hel_phi_WSS")  -> Fill(electron.getPhi() , evtwt);
+          histos->at("hmsv_WSS")     -> Fill(events.getMSV()   , evtwt);
+          histos->at("hmet_WSS")     -> Fill(met.getMet()       , evtwt);
+          histos->at("hmt_WSS")      -> Fill(events.getMSV()    , evtwt);
+          histos->at("hmjj_WSS")     -> Fill(jets.getDijetMass(), evtwt);
         } // close Wjets
       } // close general
 
-      // if (jets.getNjets() == 0) {
-      //
-      //   if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
-      //     if (evt_charge == 0) {
-      //       h0_OS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h0_tau_pt_OS->Fill(tau.getPt(), evtwt);
-      //       h0_msv_OS->Fill(events.getMSV(), evtwt);
-      //     }
-      //     else {
-      //       h0_SS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h0_tau_pt_SS->Fill(tau.getPt(), evtwt);
-      //       h0_msv_SS->Fill(events.getMSV(), evtwt);
-      //     }
-      //   } // close if signal block
-      //   else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
-      //     h0_QCD->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //     h0_tau_pt_QCD->Fill(tau.getPt(), evtwt);
-      //     h0_msv_QCD->Fill(events.getMSV(), evtwt);
-      //   } // close if qcd block
-      //   else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
-      //     if (evt_charge == 0) {
-      //       h0_WOS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h0_tau_pt_WOS->Fill(tau.getPt(), evtwt);
-      //       h0_msv_WOS->Fill(events.getMSV(), evtwt);
-      //     }
-      //     else {
-      //       h0_WSS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h0_tau_pt_WSS->Fill(tau.getPt(), evtwt);
-      //       h0_msv_WSS->Fill(events.getMSV(), evtwt);
-      //     }
-      //   } // close if W block
-      //
-      // } // close njets == 0
-      // else if (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300)) {
-      //
-      //   if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
-      //     if (evt_charge == 0) {
-      //       h1_OS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h1_tau_pt_OS->Fill(tau.getPt(), evtwt);
-      //       h1_msv_OS->Fill(events.getMSV(), evtwt);
-      //     }
-      //     else {
-      //       h1_SS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h1_tau_pt_SS->Fill(tau.getPt(), evtwt);
-      //       h1_msv_SS->Fill(events.getMSV(), evtwt);
-      //     }
-      //   } // close if signal block
-      //   else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
-      //     h1_QCD->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //     h1_tau_pt_QCD->Fill(tau.getPt(), evtwt);
-      //     h1_msv_QCD->Fill(events.getMSV(), evtwt);
-      //   } // close if qcd block
-      //   else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
-      //     if (evt_charge == 0) {
-      //       h1_WOS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h1_tau_pt_WOS->Fill(tau.getPt(), evtwt);
-      //       h1_msv_WOS->Fill(events.getMSV(), evtwt);
-      //     }
-      //     else {
-      //       h1_WSS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h1_tau_pt_WSS->Fill(tau.getPt(), evtwt);
-      //       h1_msv_WSS->Fill(events.getMSV(), evtwt);
-      //     }
-      //   } // close if W block
-      //
-      // } // close njets == 1 (or low dijet mass njets == 2)
-      // else if (jets.getNjets() == 2 && jets.getDijetMass() > 300) {
-      //
-      //   if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
-      //     if (evt_charge == 0) {
-      //       h2_OS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h2_tau_pt_OS->Fill(tau.getPt(), evtwt);
-      //       h2_msv_OS->Fill(events.getMSV(), evtwt);
-      //     }
-      //     else {
-      //       h2_SS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h2_tau_pt_SS->Fill(tau.getPt(), evtwt);
-      //       h2_msv_SS->Fill(events.getMSV(), evtwt);
-      //     }
-      //   } // close if signal block
-      //   else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
-      //     h2_QCD->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //     h2_tau_pt_QCD->Fill(tau.getPt(), evtwt);
-      //     h2_msv_QCD->Fill(events.getMSV(), evtwt);
-      //   } // close if qcd block
-      //   else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
-      //     if (evt_charge == 0) {
-      //       h2_WOS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h2_tau_pt_WOS->Fill(tau.getPt(), evtwt);
-      //       h2_msv_WOS->Fill(events.getMSV(), evtwt);
-      //     }
-      //     else {
-      //       h2_WSS->Fill(tau.getPt(), events.getMSV(), evtwt);
-      //       h2_tau_pt_WSS->Fill(tau.getPt(), evtwt);
-      //       h2_msv_WSS->Fill(events.getMSV(), evtwt);
-      //     }
-      //   } // close if W block
-      //
-      // } // close njets == 2
+      if (jets.getNjets() == 0) {
+
+        if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
+          if (evt_charge == 0) {
+            histos_2d->at("h0_OS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+          else {
+            histos_2d->at("h0_SS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+        } // close if signal block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
+          histos_2d->at("h0_QCD") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+        } // close if qcd block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
+          if (evt_charge == 0) {
+            histos_2d->at("h0_WOS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+          else {
+            histos_2d->at("h0_WSS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+        } // close if W block
+
+      } // close njets == 0
+      else if (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300)) {
+
+        if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
+          if (evt_charge == 0) {
+            histos_2d->at("h1_OS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+          else {
+            histos_2d->at("h1_SS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+        } // close if signal block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
+          histos_2d->at("h1_QCD") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+        } // close if qcd block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
+          if (evt_charge == 0) {
+            histos_2d->at("h1_WOS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+          else {
+            histos_2d->at("h1_WSS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+        } // close if W block
+
+      } // close njets == 1 (or low dijet mass njets == 2)
+      else if (jets.getNjets() == 2 && jets.getDijetMass() > 300) {
+
+        if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
+          if (evt_charge == 0) {
+            histos_2d->at("h2_OS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+          else {
+            histos_2d->at("h2_SS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+        } // close if signal block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
+          histos_2d->at("h2_QCD") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+        } // close if qcd block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
+          if (evt_charge == 0) {
+            histos_2d->at("h2_WOS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+          else {
+            histos_2d->at("h2_WSS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+        } // close if W block
+
+      } // close njets == 2
 
     } // close mt, tau selection
 
   } // close event loop
+  histos->at("n70")->Fill(1, n70_count);
+  histos->at("n70")->Write();
 
   fin->Close();
   fout->cd();

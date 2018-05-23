@@ -15,6 +15,10 @@ parser.add_option('--var', '-v', action='store',
                   dest='var', default='msv',
                   help='variable to plot'
                   )
+parser.add_option('--scaleTop', '-s', action='store',
+                  dest='scaleTop', default=1, type=float,
+                  help='scale the histogram'
+                  )
 (options, args) = parser.parse_args()
 
 r.gStyle.SetOptStat(0)
@@ -87,6 +91,7 @@ data_hist.SetFillColor(0)
 
 samples = {}
 stat = htemplate.Clone()
+stat.Reset()
 for ifile in infiles:
     fin = r.TFile(ifile, 'read')
     fout.cd()
@@ -122,14 +127,19 @@ for ifile in infiles:
     elif ifile == 'output/data.root':
         data_hist.Add(ihist)
 
-samples = sorted(samples.iteritems(), key=lambda (n,hist) : hist.Integral())
+# samples = sorted(samples.iteritems(), key=lambda (n,hist) : hist.Integral())
 
 can = r.TCanvas('can', 'can', 800, 600)
 formatCanvas(can)
 stack = r.THStack()
-for sample in samples:
-    if not 'sig' in sample[0]:
-        stack.Add(sample[1])
+# for sample in samples:
+    # if not 'sig' in sample[0]:
+        # stack.Add(sample[1])
+stack.Add(samples['ttbar'])
+stack.Add(samples['QCD'])
+stack.Add(samples['wjets'])
+stack.Add(samples['zl'])
+stack.Add(samples['ztt'])
 
 stat.SetMarkerStyle(0)
 stat.SetLineWidth(2)
@@ -142,7 +152,7 @@ stack.GetXaxis().SetLabelSize(0)
 stack.GetYaxis().SetTitle('Events / Bin')
 stack.GetYaxis().SetTitleFont(42)
 stack.GetYaxis().SetTitleSize(.05)
-stack.GetYaxis().SetTitleOffset(.72)
+stack.GetYaxis().SetTitleOffset(.92)
 
 # pull = data_hist.Clone()
 # pull.Add(stat, -1)
@@ -193,30 +203,33 @@ pull.GetXaxis().SetLabelFont(42)
 pull.GetXaxis().SetLabelSize(.1)
 
 pull.GetYaxis().SetTitle('#frac{Data}{Bkg.}')
-pull.GetYaxis().SetTitleSize(0.12)
+pull.GetYaxis().SetTitleSize(0.14)
 pull.GetYaxis().SetTitleFont(42)
-pull.GetYaxis().SetTitleOffset(.32)
+pull.GetYaxis().SetTitleOffset(.31)
 pull.GetYaxis().SetLabelSize(.1)
 pull.GetYaxis().SetNdivisions(505)
 
-line1 = r.TLine(-3.14, 1.4, 3.14, 1.4)
+line_low = pull.GetBinLowEdge(1)
+line_high = pull.GetBinLowEdge(pull.GetNbinsX())+pull.GetBinWidth(pull.GetNbinsX())
+
+line1 = r.TLine(line_low, 1.4, line_high, 1.4)
 line1.SetLineWidth(1)
 line1.SetLineStyle(7)
 line1.SetLineColor(r.kBlack)
 # line1.Draw()
 
-line2 = r.TLine(-3.14, 0.6, 3.14, 0.6)
+line2 = r.TLine(line_low, 0.6, line_high, 0.6)
 line2.SetLineWidth(1)
 line2.SetLineStyle(7)
 line2.SetLineColor(r.kBlack)
 # line2.Draw()
 
-line3 = r.TLine(-3.14, 1, 3.14, 1)
+line3 = r.TLine(line_low, 1, line_high, 1)
 line3.SetLineWidth(1)
 line3.SetLineStyle(7)
 line3.SetLineColor(r.kBlack)
 
-leg = r.TLegend(0.6,0.42,0.88,0.88)
+leg = r.TLegend(0.6,0.55,0.88,0.88)
 leg.SetTextSize(0.045)
 leg.SetLineColor(0)
 leg.SetFillColor(0)
@@ -227,10 +240,10 @@ leg.AddEntry(tt_hist, 't#bar{t}', 'f')
 leg.AddEntry(wjets_hist, 'Electroweak', 'f')
 leg.AddEntry(qcd_temp, 'QCD', 'f')
 leg.AddEntry(vv_hist, 'Diboson', 'f')
-leg.AddEntry(stat, 'Background Stat. Unc.', 'f')
-leg.AddEntry(sig_hist, '10X Signal', 'l')
+# leg.AddEntry(stat, 'Background Stat. Unc.', 'f')
+# leg.AddEntry(sig_hist, '10X Signal', 'l')
 
-stack.SetMaximum(stack.GetMaximum()*2.5)
+stack.SetMaximum(stack.GetMaximum()*options.scaleTop)
 stack.SetMinimum(1)
 sig_hist.Scale(100)
 sig_hist.Draw('hist same')

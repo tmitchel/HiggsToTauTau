@@ -103,3 +103,98 @@ static float calculate_mt(electron* const el, float met_x, float met_y, float me
 static float deltaR(float eta1, float phi1, float eta2, float phi2) {
   return sqrt(pow(eta1-eta2, 2) + pow(phi1-phi2, 2));
 }
+
+void initHistos_1D(std::unordered_map<std::string, TH1D*>* histos) {
+  histos->insert({"n70", new TH1D("n70", "n70", 6,0,6)});
+  histos->insert({"cutflow", new TH1D("cutflow", "Cutflow", 11, -0.5, 10.5)});
+
+  histos->insert({"htau_pt", new TH1D("tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200)});
+  histos->insert({"htau_pt_QCD", new TH1D("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.)});
+  histos->insert({"htau_pt_SS", new TH1D("tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.)});
+  histos->insert({"htau_pt_WOS", new TH1D("tau_pt_WOS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.)});
+  histos->insert({"htau_pt_WSS", new TH1D("tau_pt_WSS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.)});
+  histos->insert({"htau_eta", new TH1D("tau_eta", "Tau #eta;#eta [GeV];;", 80, -4., 4.)});
+  histos->insert({"htau_phi", new TH1D("tau_phi", "Tau #phi;#phi [GeV];;", 15, -3.14, 3.14)});
+  histos->insert({"htau_phi_QCD", new TH1D("tau_phi_QCD", "Tau p_{T}; p_{T} [GeV]", 15, -3.14, 3.14)});
+  histos->insert({"htau_phi_SS", new TH1D("tau_phi_SS", "Tau p_{T}; p_{T} [GeV]", 15, -3.14, 3.14)});
+  histos->insert({"htau_phi_WOS", new TH1D("tau_phi_WOS", "Tau p_{T}; p_{T} [GeV]", 15, -3.14, 3.14)});
+  histos->insert({"htau_phi_WSS", new TH1D("tau_phi_WSS", "Tau p_{T}; p_{T} [GeV]", 15, -3.14, 3.14)});
+
+  histos->insert({"hel_pt", new TH1D("el_pt", "Electron p_{T};p_{T} [GeV];;", 20, 0., 100)});
+  histos->insert({"hel_pt_QCD", new TH1D("el_pt_QCD", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.)});
+  histos->insert({"hel_pt_SS", new TH1D("el_pt_SS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.)});
+  histos->insert({"hel_pt_WOS", new TH1D("el_pt_WOS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.)});
+  histos->insert({"hel_pt_WSS", new TH1D("el_pt_WSS", "Electron p_{T}; p_{T} [GeV]", 20, 0., 100.)});
+  histos->insert({"hel_eta", new TH1D("el_eta", "Electron #eta;#eta [GeV];;", 80, -4., 4.)});
+  histos->insert({"hel_phi", new TH1D("el_phi", "Electron #phi;#phi [GeV];;", 15, -3.14, 3.14)});
+  histos->insert({"hel_phi_QCD", new TH1D("el_phi_QCD", "el p_{T}; p_{T} [GeV]", 15, -3.14, 3.14)});
+  histos->insert({"hel_phi_SS", new TH1D("el_phi_SS", "el p_{T}; p_{T} [GeV]", 15, -3.14, 3.14)});
+  histos->insert({"hel_phi_WOS", new TH1D("el_phi_WOS", "el p_{T}; p_{T} [GeV]", 15, -3.14, 3.14)});
+  histos->insert({"hel_phi_WSS", new TH1D("el_phi_WSS", "el p_{T}; p_{T} [GeV]", 15, -3.14, 3.14)});
+
+  histos->insert({"hmsv", new TH1D("msv", "SV Fit Mass; Mass [GeV];;", 100, 0, 300)});
+  histos->insert({"hmsv_QCD", new TH1D("msv_QCD", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.)});
+  histos->insert({"hmsv_SS", new TH1D("msv_SS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.)});
+  histos->insert({"hmsv_WOS", new TH1D("msv_WOS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.)});
+  histos->insert({"hmsv_WSS", new TH1D("msv_WSS", "SV Fit Mass; Mass [GeV];;", 100, 0., 300.)});
+
+  histos->insert({"hmet", new TH1D("met", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500)});
+  histos->insert({"hmet_QCD", new TH1D("met_QCD", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500)});
+  histos->insert({"hmet_SS", new TH1D("met_SS", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500)});
+  histos->insert({"hmet_WOS", new TH1D("met_WOS", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500)});
+  histos->insert({"hmet_WSS", new TH1D("met_WSS", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500)});
+
+  histos->insert({"hmt", new TH1D("mt", "MT", 50, 0, 100)});
+  histos->insert({"hmt_QCD", new TH1D("mt_QCD", "MT", 50, 0, 100)});
+  histos->insert({"hmt_SS", new TH1D("mt_SS", "MT", 50, 0, 100)});
+  histos->insert({"hmt_WOS", new TH1D("mt_WOS", "MT", 50, 0, 100)});
+  histos->insert({"hmt_WSS", new TH1D("mt_WSS", "MT", 50, 0, 100)});
+
+  histos->insert({"hmjj", new TH1D("mjj", "Dijet Mass; Mass [GeV];;", 100, 0, 200)});
+  histos->insert({"hmjj_QCD", new TH1D("mjj_QCD", "Dijet Mass; Mass [GeV];;", 100, 0, 200)});
+  histos->insert({"hmjj_SS", new TH1D("mjj_SS", "Dijet Mass; Mass [GeV];;", 100, 0, 200)});
+  histos->insert({"hmjj_WOS", new TH1D("mjj_WOS", "Dijet Mass; Mass [GeV];;", 100, 0, 200)});
+  histos->insert({"hmjj_WSS", new TH1D("mjj_WSS", "Dijet Mass; Mass [GeV];;", 100, 0, 200)});
+
+  histos->insert({"hmetphi", new TH1D("metphi", "Missing E_{T} #phi;Missing E_{T} [GeV];;", 60, -3.14, 3.14)});
+  histos->insert({"hmet_x", new TH1D("met_x", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500)});
+  histos->insert({"hmet_y", new TH1D("met_y", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500)});
+  histos->insert({"hmet_pt", new TH1D("met_pt", "Missing E_{T};Missing E_{T} [GeV];;", 100, 0., 500)});
+
+  histos->insert({"hnjets", new TH1D("njets", "N(jets)", 10, -0.5, 9.5)});
+  histos->insert({"hNGenJets", new TH1D("NGenJets", "Number of Gen Jets", 12, -0.5, 11.5)});
+}
+
+void initHistos_2D(std::unordered_map<std::string, TH2F*>* histos) {
+
+  float bins0[] = {0,60,65,70,75,80,85,90,95,100,105,110,115,400};
+  float bins1[] = {0,70,80,90,100,110,120,130,140,150,180,300};
+  float bins2[] = {0,90,105,120,135,150,400};
+
+  float bins_pth[] = {0,60,100,140,180,220,500};
+  float bins_mjj[] = {300,600,900,1200,1700,3000};
+  float bins_taupt[] = {30,35,40,45,50,55,300};
+
+  int  binnum1 = sizeof(bins1)/sizeof(Float_t) - 1;
+  int  binnum2 = sizeof(bins2)/sizeof(Float_t) - 1;
+  int  binnum0 = sizeof(bins0)/sizeof(Float_t) - 1;
+  int  binnum_pth = sizeof(bins_pth)/sizeof(Float_t) - 1;
+  int  binnum_taupt = sizeof(bins_taupt)/sizeof(Float_t) - 1;
+  int  binnum_mjj = sizeof(bins_mjj)/sizeof(Float_t) - 1;
+
+  histos->insert({"h0_OS", new TH2F("h0_OS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
+  histos->insert({"h1_OS", new TH2F("h1_OS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
+  histos->insert({"h2_OS", new TH2F("h2_OS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h0_SS", new TH2F("h0_SS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
+  histos->insert({"h1_SS", new TH2F("h1_SS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
+  histos->insert({"h2_SS", new TH2F("h2_SS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h0_QCD", new TH2F("h0_QCD","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
+  histos->insert({"h1_QCD", new TH2F("h1_QCD","Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
+  histos->insert({"h2_QCD", new TH2F("h2_QCD","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h0_WOS", new TH2F("h0_WOS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
+  histos->insert({"h1_WOS", new TH2F("h1_WOS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
+  histos->insert({"h2_WOS", new TH2F("h2_WOS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h0_WSS", new TH2F("h0_WSS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
+  histos->insert({"h1_WSS", new TH2F("h1_WSS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
+  histos->insert({"h2_WSS", new TH2F("h2_WSS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+}
