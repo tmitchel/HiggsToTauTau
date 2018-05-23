@@ -19,6 +19,7 @@ hists = [
         ('h0_OS'  , fdata.Get('h0_SS')     .Clone(), fdata.Get('h0_QCD')     .Clone()),
         ('h1_OS'  , fdata.Get('h1_SS')     .Clone(), fdata.Get('h1_QCD')     .Clone()),
         ('h2_OS'  , fdata.Get('h2_SS')     .Clone(), fdata.Get('h2_QCD')     .Clone()),
+        ('hvbf_OS', fdata.Get('hvbf_SS')   .Clone(), fdata.Get('hvbf_QCD')   .Clone()),
         ]
 
 for ifile in bkg_files:

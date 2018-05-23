@@ -185,16 +185,21 @@ void initHistos_2D(std::unordered_map<std::string, TH2F*>* histos) {
   histos->insert({"h0_OS", new TH2F("h0_OS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
   histos->insert({"h1_OS", new TH2F("h1_OS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
   histos->insert({"h2_OS", new TH2F("h2_OS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"hvbf_OS", new TH2F("hvbf_OS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
   histos->insert({"h0_SS", new TH2F("h0_SS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
   histos->insert({"h1_SS", new TH2F("h1_SS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
   histos->insert({"h2_SS", new TH2F("h2_SS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"hvbf_SS", new TH2F("hvbf_SS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
   histos->insert({"h0_QCD", new TH2F("h0_QCD","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
   histos->insert({"h1_QCD", new TH2F("h1_QCD","Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
   histos->insert({"h2_QCD", new TH2F("h2_QCD","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"hvbf_QCD", new TH2F("hvbf_QCD","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
   histos->insert({"h0_WOS", new TH2F("h0_WOS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
   histos->insert({"h1_WOS", new TH2F("h1_WOS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
   histos->insert({"h2_WOS", new TH2F("h2_WOS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"hvbf_WOS", new TH2F("hvbf_WOS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
   histos->insert({"h0_WSS", new TH2F("h0_WSS","Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
   histos->insert({"h1_WSS", new TH2F("h1_WSS","Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
   histos->insert({"h2_WSS", new TH2F("h2_WSS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"hvbf_WSS", new TH2F("hvbf_WSS","Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
 }

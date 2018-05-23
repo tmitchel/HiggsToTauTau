@@ -19,6 +19,10 @@ parser.add_option('--scaleTop', '-s', action='store',
                   dest='scaleTop', default=1, type=float,
                   help='scale the histogram'
                   )
+parser.add_option('--dim', '-D', action='store',
+                  dest='dim', default=0, type=int,
+                  help='dimension to pick'
+                  )
 (options, args) = parser.parse_args()
 
 r.gStyle.SetOptStat(0)
@@ -51,7 +55,12 @@ infiles = [ifile for ifile in glob(options.in_dir+'/*')]
 
 temp = r.TFile(infiles[0], 'read')
 fout = r.TFile('hist_output.root', 'recreate')
-htemplate = temp.Get(options.var).Clone()
+if options.dim == 0:
+    htemplate = temp.Get(options.var).Clone()
+elif options.dim == 1:
+    htemplate = temp.Get(options.var).ProjectionX()
+elif options.dim == 2:
+    htemplate = temp.Get(options.var).ProjectionY()
 htemplate.Reset()
 
 ztt_hist = htemplate.Clone()
@@ -96,8 +105,15 @@ for ifile in infiles:
     fin = r.TFile(ifile, 'read')
     fout.cd()
     ihist = fin.Get(options.var).Clone()
+
+    if options.dim == 1:
+        temp = ihist.ProjectionX()
+        ihist = temp
+    elif options.dim == 2:
+        ihist = ihist.ProjectionY()
+
     temp = htemplate.Clone()
-    print ifile
+    # print ifile
     if ifile == 'output/ZTT.root':
         samples.setdefault('ztt', ztt_hist)
         samples['ztt'].Add(ihist)
@@ -153,6 +169,7 @@ stack.GetYaxis().SetTitle('Events / Bin')
 stack.GetYaxis().SetTitleFont(42)
 stack.GetYaxis().SetTitleSize(.05)
 stack.GetYaxis().SetTitleOffset(.92)
+stack.SetTitle('Missing E_{T} [GeV]')
 
 # pull = data_hist.Clone()
 # pull.Add(stat, -1)
@@ -196,7 +213,7 @@ pull.SetMaximum(1.4)
 pull.SetMinimum(0.6)
 pull.SetFillColor(0)
 pull.SetLineColor(r.kBlack)
-pull.GetXaxis().SetTitle('P_{T} [GeV]')
+pull.GetXaxis().SetTitle('Missing E_{T} [GeV]')
 pull.GetXaxis().SetTitleSize(0.15)
 pull.GetXaxis().SetTitleOffset(0.8)
 pull.GetXaxis().SetLabelFont(42)
@@ -277,4 +294,5 @@ line1.Draw('same')
 line2.Draw('same')
 line3.Draw('same')
 
+can.SaveAs(options.var+'.png')
 can.SaveAs(options.var+'.pdf')

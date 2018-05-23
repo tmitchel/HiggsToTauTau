@@ -255,6 +255,8 @@ int main(int argc, char* argv[]) {
     double mt = calculate_mt(&electron, met_x, met_y, met_pt);
     int evt_charge = tau.getCharge() + electron.getCharge();
 
+    TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
+
     if (mt > 80 && evt_charge == 0 && tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon())
       n70_count += evtwt;
 
@@ -331,6 +333,7 @@ int main(int argc, char* argv[]) {
         } // close Wjets
       } // close general
 
+      // event categorizaation
       if (jets.getNjets() == 0) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
@@ -354,7 +357,7 @@ int main(int argc, char* argv[]) {
         } // close if W block
 
       } // close njets == 0
-      else if (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300)) {
+      else if (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() < 100)) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
@@ -377,7 +380,7 @@ int main(int argc, char* argv[]) {
         } // close if W block
 
       } // close njets == 1 (or low dijet mass njets == 2)
-      else if (jets.getNjets() == 2 && jets.getDijetMass() > 300) {
+      else if (jets.getNjets() == 2 && Higgs.Pt() > 100 && jets.getDijetMass() > 300) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
@@ -399,7 +402,30 @@ int main(int argc, char* argv[]) {
           }
         } // close if W block
 
-      } // close njets == 2
+      } // close VBF
+      else if (jets.getNjets() == 2 && jets.getDijetMass() < 300) {
+
+        if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
+          if (evt_charge == 0) {
+            histos_2d->at("hvbf_OS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+          else {
+            histos_2d->at("hvbf_SS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+        } // close if signal block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
+          histos_2d->at("hvbf_QCD") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+        } // close if qcd block
+        else if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
+          if (evt_charge == 0) {
+            histos_2d->at("hvbf_WOS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+          else {
+            histos_2d->at("hvbf_WSS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          }
+        } // close if W block
+
+      } // close VH
 
     } // close mt, tau selection
 

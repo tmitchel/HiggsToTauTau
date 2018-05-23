@@ -4,6 +4,7 @@ class met_factory {
 private:
   float met, metSig, metcov00, metcov10, metcov11, metcov01, metcov00_v2, metcov10_v2;
   float metcov11_v2, metcov01_v2, metphi, met_py, met_px;
+  TLorentzVector p4;
 
 public:
   met_factory (TTree*);
@@ -23,6 +24,7 @@ public:
   float getMetPhi()       { return metphi;      };
   float getMetPx()        { return met_px;      };
   float getMetPy()        { return met_py;      };
+  TLorentzVector getP4();
 
   // setters
   void setMet(float Met)                  { met = Met;                  };
@@ -55,4 +57,9 @@ met_factory::met_factory(TTree* input) {
   input -> SetBranchAddress( "metphi",      &metphi       );
   input -> SetBranchAddress( "met_px",      &met_px       );
   input -> SetBranchAddress( "met_py",      &met_py       );
+}
+
+TLorentzVector met_factory::getP4() {
+  p4.SetPtEtaPhiM(met, 0, metphi, 0);
+  return p4;
 }
