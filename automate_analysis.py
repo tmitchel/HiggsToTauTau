@@ -47,9 +47,19 @@ for ifile in fileList:
     elif 'TT' in ifile:
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' TTT'+suffix, shell=True)
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' TTJ'+suffix, shell=True)
-    elif 'W.root' in ifile or 'W1' in ifile or 'W2' in ifile or 'W3' in ifile or 'W4' in ifile:
+    elif 'W.root' in ifile or 'W1_' in ifile or 'W2_' in ifile or 'W3_' in ifile or 'W4_' in ifile or 'EWKW' in ifile:
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' W'+suffix, shell=True)
+    elif 'EWKZ' in ifile:
+        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' EWKZ'+suffix, shell=True)
+    elif 'HWW_gg' in ifile:
+        name = ifile.split('/')[-1].split('.root')[0]
+        call('./'+options.exe+' '+name+' ggH_hww'+name.split('HWW_gg')[-1]+suffix, shell=True)
+    elif 'HWW_vbf' in ifile:
+        name = ifile.split('/')[-1].split('.root')[0]
+        call('./'+options.exe+' '+name+' qqH_hww'+name.split('HWW_gg')[-1]+suffix, shell=True)
+    elif 'Data' in ifile:
+        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' Data'+suffix, shell=True)
     else:
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' '+ifile.split('/')[-1].split('.root')[0]+suffix, shell=True)
+        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' VV'+suffix, shell=True)
 end = time.time()
 print 'Processing completed in', end-start, 'seconds.'

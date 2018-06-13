@@ -4,5 +4,7 @@ hadd output/ttbar.root output/TT_TTT_output.root output/TT_TTJ_output.root
 hadd output/ZJ.root output/DY*ZJ*
 hadd output/ZL.root output/DY*ZL*
 hadd output/ZTT.root output/DY*ZTT* output/EWKZ*
-hadd output/W_unscaled.root output/W1* output/W2* output/W3* output/W4* output/W_output.root output/EWKW*
+hadd output/W_unscaled.root output/W1_* output/W2_* output/W3_* output/W4_* output/W_output.root output/EWKW*
 hadd output/VV.root output/ST_* output/VV* output/WW* output/ZZ* output/WZ*
+mkdir output/originals
+mv output/*output*.root output/originals
