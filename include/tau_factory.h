@@ -32,7 +32,7 @@ public:
   float getDecayModeFinding()       { return dmf;                   };
   float getTightIsoMVA()            { return tightIsoMVA;           };
   bool getAgainstTightElectron()    { return AgainstTightElectron;  };
-  bool getAgainstLooseMuon ()       { return AgainstLooseMuon;      };
+  bool getAgainstLooseMuon()        { return AgainstLooseMuon;      };
   bool getMediumIsoMVA()            { return MediumIsoMVA;          };
   int getGenMatch()                 { return gen_match;             };
   int getCharge()                   { return charge;                };

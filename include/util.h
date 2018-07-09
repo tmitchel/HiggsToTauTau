@@ -106,7 +106,7 @@ static float deltaR(float eta1, float phi1, float eta2, float phi2) {
 
 void initHistos_1D(std::unordered_map<std::string, TH1D*>* histos) {
   histos->insert({"n70", new TH1D("n70", "n70", 6,0,6)});
-  histos->insert({"cutflow", new TH1D("cutflow", "Cutflow", 11, -0.5, 10.5)});
+  histos->insert({"cutflow", new TH1D("cutflow", "Cutflow", 12, -0.5, 11.5)});
 
   histos->insert({"htau_pt", new TH1D("tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200)});
   histos->insert({"htau_pt_QCD", new TH1D("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.)});
