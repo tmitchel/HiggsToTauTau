@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
-  auto ntuple = (TTree*)fin->Get("etau_tree");
+  auto ntuple = (TTree*)fin->Get("et_tree");
 
   // get number of generated events
   auto counts = (TH1D*)fin->Get("nevents");
@@ -85,12 +85,6 @@ int main(int argc, char* argv[]) {
     filename = prefix + sample + std::string("_") + name + suffix;
   auto fout = new TFile(filename.c_str(), "RECREATE");
   fout->mkdir("grabbag");
-
-    TH1F* againstel = new TH1F("againstel", "againstel", 10, 0., 10);
-    TH1F* againstmu = new TH1F("againstmu", "againstmu", 10, 0., 10);
-
-
-
 
   // get normalization (lumi & xs are in util.h)
   double norm;
@@ -228,9 +222,6 @@ int main(int argc, char* argv[]) {
     // tau |eta| < 2.3
     if (fabs(tau.getEta()) < 2.3) histos->at("cutflow") -> Fill(4., 1);
     else continue;
-
-    againstel->Fill(tau.getAgainstTightElectron(), 1.);
-    againstmu->Fill(tau.getAgainstLooseMuon(), 1.);
 
     // check against mu/el
     if (tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) histos->at("cutflow") -> Fill(5., 1);

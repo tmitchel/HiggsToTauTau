@@ -5,7 +5,8 @@
 class event_info {
 private:
   float npv, npu, rho, m_sv, pt_sv, m_vis, pt_tt, l2_decayMode;
-  int run, lumi, evt;
+  int run, lumi;
+  ULong64_t evt;
 
 public:
   event_info (TTree*);
