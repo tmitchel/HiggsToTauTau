@@ -17,7 +17,6 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "include/trigger.h"
 #include "include/event_info.h"
 #include "include/tau_factory.h"
 #include "include/electron_factory.h"
@@ -150,7 +149,6 @@ int main(int argc, char* argv[]) {
   initHistos_2D(histos_2d, fout, name);
 
   // construct factories
-  trigger          trigs(ntuple);
   event_info       event(ntuple);
   electron_factory electrons(ntuple);
   tau_factory      taus(ntuple);
@@ -209,7 +207,7 @@ int main(int argc, char* argv[]) {
     else continue;
 
     // electron passes Ele25eta2p1Tight
-    if ((trigs.getPassEle25eta2p1Tight() && trigs.getMatchEle25eta2p1Tight() && trigs.getFilterEle25eta2p1Tight())) histos->at("cutflow") -> Fill(2., 1);
+    if ((event.getPassEle25eta2p1Tight() && event.getMatchEle25eta2p1Tight() && event.getFilterEle25eta2p1Tight())) histos->at("cutflow") -> Fill(2., 1);
     else continue;
 
     // tau passes decay mode finding
@@ -271,8 +269,8 @@ int main(int argc, char* argv[]) {
       if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3){//Yiwen
          if (fabs(tau.getEta())<1.460) evtwt *= 1.402;
          else if (fabs(tau.getEta())>1.558) evtwt *= 1.900;
-         if (name == "ZL" && event.getDecayMode() == 0) evtwt *= 0.98;
-         else if (sample == "ZL" && event.getDecayMode() == 1) evtwt *= 1.20;
+         if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
+         else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
        }
         else if (tau.getGenMatch() == 2 or tau.getGenMatch() == 4){
             if (fabs(tau.getEta())<0.4) evtwt *= 1.012;
@@ -399,7 +397,7 @@ int main(int argc, char* argv[]) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("h0_OS") -> Fill(event.getDecayMode(), (electron.getP4()+tau.getP4()).M(), evtwt);
+            histos_2d->at("h0_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4()+tau.getP4()).M(), evtwt);
           }
           else {
             histos_2d->at("h0_SS") -> Fill(tau.getPt(), event.getVisM(), evtwt);

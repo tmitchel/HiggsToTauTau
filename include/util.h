@@ -16,20 +16,6 @@ static std::map<std::string, double> cross_sections {
   {"DY_missingfiles", 5765.4},
   {"DY_noFakeTauCorr", 5765.4},
   {"DYlow", 5765.4},
-  // {"DY1", 1178.3},
-  // {"DY1_missingfiles", 1178.3},
-  // {"DY2", 387.3},
-  // {"DY1_noFakeTauCorr", 1178.3},
-  // {"DY2_missingfiles", 387.3},
-  // {"DY2_noFakeTauCorr", 387.3},
-  // {"DY3", 118.4},
-  // {"DY3_noFakeTauCorr", 118.4},
-  // {"DY4", 63.7},
-  // {"DY4_missingfiles", 63.7},
-  // {"DY4_noFakeTauCorr", 63.7},
-  // {"DY_missingfiles", 5765.4},
-  // {"DY_noFakeTauCorr", 5765.4},
-  // {"DYlow", 5765.4},
   {"EWKminus", 20.25},
   {"EWKplus", 25.62},
   {"EWKZLL", 3.987},
@@ -80,19 +66,6 @@ static std::map<std::string, double> cross_sections {
   {"ZZ2L2Q", 3.22},
   {"ZZ4L", 1.212},
   {"data", 1.0}
-
-
-
-  // {"ZL", 5765.4},
-  // {"ZTT", 5765.4},
-  // {"ZJ", 5765.4},
-  // {"QCD", 720648000*0.00042},
-  // {"WZJets", 5.26},
-  // {"ggh", 44.14*0.0627},
-  // {"VBF", 3.782*0.0627},
-  // {"ZZ", 16.523},
-  // {"WZ", 47.13},
-  // {"WW", 118.7}
 };
 
 // do the mt calculation
