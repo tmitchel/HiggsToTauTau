@@ -2,8 +2,8 @@
 
 class met_factory {
 private:
-  float met, metSig, metcov00, metcov10, metcov11, metcov01;
-  float metphi, met_py, met_px;
+  Float_t met, metSig, metcov00, metcov10, metcov11, metcov01;
+  Float_t metphi, met_py, met_px;
   TLorentzVector p4;
 
 public:
@@ -11,27 +11,27 @@ public:
   virtual ~met_factory () {};
 
   // getters
-  float getMet()          { return met;         };
-  float getMetSig()       { return metSig;      };
-  float getMetCov00()     { return metcov00;    };
-  float getMetCov10()     { return metcov10;    };
-  float getMetCov11()     { return metcov11;    };
-  float getMetCov01()     { return metcov01;    };
-  float getMetPhi()       { return metphi;      };
-  float getMetPx()        { return met_px;      };
-  float getMetPy()        { return met_py;      };
+  Float_t getMet()          { return met;         };
+  Float_t getMetSig()       { return metSig;      };
+  Float_t getMetCov00()     { return metcov00;    };
+  Float_t getMetCov10()     { return metcov10;    };
+  Float_t getMetCov11()     { return metcov11;    };
+  Float_t getMetCov01()     { return metcov01;    };
+  Float_t getMetPhi()       { return metphi;      };
+  Float_t getMetPx()        { return met_px;      };
+  Float_t getMetPy()        { return met_py;      };
   TLorentzVector getP4();
 
   // setters
-  void setMet(float Met)                  { met = Met;            };
-  void setMetSig(float MetSig)            { metSig = MetSig;      };
-  void setMetCov00(float MetCov00)        { metcov00 = MetCov00;  };
-  void setMetCov10(float MetCov10)        { metcov10 = MetCov10;  };
-  void setMetCov11(float MetCov11)        { metcov11 = MetCov11;  };
-  void setMetCov01(float MetCov01)        { metcov01 = MetCov01;  };
-  void setMetPhi(float MetPhi)            { metphi = MetPhi;      };
-  void setMetPx(float MetPx)              { met_px = MetPx;       };
-  void setMetPy(float MetPy)              { met_py = MetPy;       };
+  void setMet(Float_t Met)                  { met = Met;            };
+  void setMetSig(Float_t MetSig)            { metSig = MetSig;      };
+  void setMetCov00(Float_t MetCov00)        { metcov00 = MetCov00;  };
+  void setMetCov10(Float_t MetCov10)        { metcov10 = MetCov10;  };
+  void setMetCov11(Float_t MetCov11)        { metcov11 = MetCov11;  };
+  void setMetCov01(Float_t MetCov01)        { metcov01 = MetCov01;  };
+  void setMetPhi(Float_t MetPhi)            { metphi = MetPhi;      };
+  void setMetPx(Float_t MetPx)              { met_px = MetPx;       };
+  void setMetPy(Float_t MetPy)              { met_py = MetPy;       };
 };
 
 // initialize member data and set TLorentzVector

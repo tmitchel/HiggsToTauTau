@@ -69,11 +69,11 @@ static std::map<std::string, double> cross_sections {
 };
 
 // do the mt calculation
-static float calculate_mt(electron* const el, float met_x, float met_y, float met_pt) {
+static Float_t calculate_mt(electron* const el, Float_t met_x, Float_t met_y, Float_t met_pt) {
   return sqrt(pow(el->getPt() + met_pt, 2) - pow(el->getPx() + met_x, 2) - pow(el->getPy() + met_y, 2));
 }
 
-static float deltaR(float eta1, float phi1, float eta2, float phi2) {
+static Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) {
   return sqrt(pow(eta1-eta2, 2) + pow(phi1-phi2, 2));
 }
 
@@ -146,20 +146,20 @@ void initHistos_1D(std::unordered_map<std::string, TH1D*>* histos) {
 
 void initHistos_2D(std::unordered_map<std::string, TH2F*>* histos, TFile* fout, std::string name) {
 
-  float bins0[] = {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400};
-  float bins1[] = {0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300};
-  float bins2[] = {0, 95, 115, 135, 155, 400};
+  Float_t bins0[] = {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400};
+  Float_t bins1[] = {0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300};
+  Float_t bins2[] = {0, 95, 115, 135, 155, 400};
 
-  float bins_pth[] = {0, 100, 150, 200, 250, 300, 5000};
-  float bins_mjj[] = {300, 700, 1100, 1500, 10000};
-  float bins_taupt[] = {0, 1, 10, 11};
+  Float_t bins_pth[] = {0, 100, 150, 200, 250, 300, 5000};
+  Float_t bins_mjj[] = {300, 700, 1100, 1500, 10000};
+  Float_t bins_taupt[] = {0, 1, 10, 11};
 
-  int  binnum1 = sizeof(bins1)/sizeof(Float_t) - 1;
-  int  binnum2 = sizeof(bins2)/sizeof(Float_t) - 1;
-  int  binnum0 = sizeof(bins0)/sizeof(Float_t) - 1;
-  int  binnum_pth = sizeof(bins_pth)/sizeof(Float_t) - 1;
-  int  binnum_taupt = sizeof(bins_taupt)/sizeof(Float_t) - 1;
-  int  binnum_mjj = sizeof(bins_mjj)/sizeof(Float_t) - 1;
+  Int_t  binnum1 = sizeof(bins1)/sizeof(Float_t) - 1;
+  Int_t  binnum2 = sizeof(bins2)/sizeof(Float_t) - 1;
+  Int_t  binnum0 = sizeof(bins0)/sizeof(Float_t) - 1;
+  Int_t  binnum_pth = sizeof(bins_pth)/sizeof(Float_t) - 1;
+  Int_t  binnum_taupt = sizeof(bins_taupt)/sizeof(Float_t) - 1;
+  Int_t  binnum_mjj = sizeof(bins_mjj)/sizeof(Float_t) - 1;
 
   fout->mkdir("et_0jet");
   fout->mkdir("et_boosted");
