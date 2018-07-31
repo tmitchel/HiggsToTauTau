@@ -11,8 +11,7 @@ class electron {
 private:
 public:
   std::string name = "electron";
-  Float_t pt, eta, phi, mass, charge, px, py, pz, iso;
-  Int_t gen_match;
+  Float_t pt, eta, phi, mass, charge, px, py, pz, iso, gen_match;
   TLorentzVector p4;
 
   electron(Float_t, Float_t, Float_t, Float_t, Float_t);
@@ -29,7 +28,7 @@ public:
   Float_t getPy()           { return py;        };
   Float_t getPz()           { return pz;        };
   Float_t getIso()          { return iso;       };
-  Int_t getGenMatch()       { return gen_match; };
+  Float_t getGenMatch()     { return gen_match; };
   Int_t getCharge()         { return charge;    };
 
   // setters
@@ -42,7 +41,7 @@ public:
   void setPy(Float_t Py)             { py = Py; };
   void setPz(Float_t Pz)             { pz = Pz; };
   void setIso(Float_t Iso)           { iso = Iso; };
-  void setGenMatch(Int_t GenMatch)   { gen_match = GenMatch; };
+  void setGenMatch(Float_t GenMatch) { gen_match = GenMatch; };
 };
 
 // initialize member data and set TLorentzVector
@@ -62,8 +61,7 @@ electron::electron(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Char
 /////////////////////////////////////////////////
 class electron_factory {
 private:
-  Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1;
-  Int_t gen_match_1;
+  Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, gen_match_1;
 
 public:
   electron_factory (TTree*);
