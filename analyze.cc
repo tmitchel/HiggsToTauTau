@@ -23,7 +23,6 @@
 #include "include/electron_factory.h"
 #include "include/jet_factory.h"
 #include "include/met_factory.h"
-#include "include/gen_factory.h"
 #include "include/SF_factory.h"
 #include "include/util.h"
 #include "include/btagSF.h"
@@ -152,12 +151,11 @@ int main(int argc, char* argv[]) {
 
   // construct factories
   trigger          trigs(ntuple);
-  event_info       events(ntuple);
+  event_info       event(ntuple);
   electron_factory electrons(ntuple);
   tau_factory      taus(ntuple);
   jet_factory      jets(ntuple);
   met_factory      met(ntuple);
-  gen_factory      gen(ntuple);
   double n70_count;
 
   // begin the event loop
@@ -170,26 +168,26 @@ int main(int argc, char* argv[]) {
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
     double evtwt(norm), corrections(1.), sf_trig(1.), sf_trig_anti(1.), sf_id(1.), sf_id_anti(1.);
     if (name == "W") {
-      if (gen.getNumGenJets() == 1)
+      if (event.getNumGenJets() == 1)
         evtwt = 6.82;
-      else if (gen.getNumGenJets() == 2)
+      else if (event.getNumGenJets() == 2)
         evtwt = 2.099;
-      else if (gen.getNumGenJets() == 3)
+      else if (event.getNumGenJets() == 3)
         evtwt = 0.689;
-      else if (gen.getNumGenJets() == 4)
+      else if (event.getNumGenJets() == 4)
         evtwt = 0.690;
       else
         evtwt = 25.44;
     }
 
     if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
-      if (gen.getNumGenJets() == 1)
+      if (event.getNumGenJets() == 1)
         evtwt = 0.457;
-      else if (gen.getNumGenJets() == 2)
+      else if (event.getNumGenJets() == 2)
         evtwt = 0.467;
-      else if (gen.getNumGenJets() == 3)
+      else if (event.getNumGenJets() == 3)
         evtwt = 0.480;
-      else if (gen.getNumGenJets() == 4)
+      else if (event.getNumGenJets() == 4)
         evtwt = 0.393;
       else
         evtwt = 1.418;
@@ -259,7 +257,7 @@ int main(int argc, char* argv[]) {
       sf_id = myScaleFactor_id->getSF(electron.getPt(), electron.getEta());
       sf_id_anti = myScaleFactor_idAnti->getSF(electron.getPt(), electron.getEta());
       
-      evtwt *= (sf_trig * sf_id * lumi_weights->weight(events.getNPU()) * gen.getGenWeight());
+      evtwt *= (sf_trig * sf_id * lumi_weights->weight(event.getNPU()) * event.getGenWeight());
 
       // tau ID efficiency SF
       if (tau.getGenMatch() == 5)
@@ -273,8 +271,8 @@ int main(int argc, char* argv[]) {
       if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3){//Yiwen
          if (fabs(tau.getEta())<1.460) evtwt *= 1.402;
          else if (fabs(tau.getEta())>1.558) evtwt *= 1.900;
-         if (name == "ZL" && events.getDecayMode() == 0) evtwt *= 0.98;
-         else if (sample == "ZL" && events.getDecayMode() == 1) evtwt *= 1.20;
+         if (name == "ZL" && event.getDecayMode() == 0) evtwt *= 0.98;
+         else if (sample == "ZL" && event.getDecayMode() == 1) evtwt *= 1.20;
        }
         else if (tau.getGenMatch() == 2 or tau.getGenMatch() == 4){
             if (fabs(tau.getEta())<0.4) evtwt *= 1.012;
@@ -286,7 +284,7 @@ int main(int argc, char* argv[]) {
 
        // Z-pT Reweighting
        if (name=="EWKZLL" || name=="EWKZNuNu" || name=="ZTT" || name=="ZLL" || name=="ZL" || name=="ZJ")
-        evtwt *= zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(gen.getGenM()),zpt_hist->GetYaxis()->FindBin(gen.getGenPt()));
+        evtwt *= zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()),zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
 
       // // top-pT Reweighting (only for some systematic)
       // if (name == "TTT" || name == "TT" || name == "TTJ") {
@@ -315,7 +313,7 @@ int main(int argc, char* argv[]) {
 
     if (mt > 80 && mt < 200 && evt_charge == 0 && tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
       histos->at("n70") -> Fill(0.1, evtwt);
-      if (jets.getNjets() == 0 && events.getMSV() < 400)
+      if (jets.getNjets() == 0 && event.getMSV() < 400)
         histos->at("n70") -> Fill(1.1, evtwt);
       else if (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() < 100))
         histos->at("n70") -> Fill(2.1, evtwt);
@@ -348,8 +346,8 @@ int main(int argc, char* argv[]) {
             histos->at("hmt")         -> Fill(mt                  , evtwt);
             histos->at("hnjets")      -> Fill(jets.getNjets()     , evtwt);
             histos->at("hmjj")        -> Fill(jets.getDijetMass() , evtwt);
-            histos->at("hmsv")        -> Fill(events.getVisM()    , evtwt);
-            histos->at("hNGenJets")   -> Fill(gen.getNumGenJets() , evtwt);
+            histos->at("hmsv")        -> Fill(event.getVisM()    , evtwt);
+            histos->at("hNGenJets")   -> Fill(event.getNumGenJets() , evtwt);
           }
         }
         else {
@@ -357,7 +355,7 @@ int main(int argc, char* argv[]) {
           histos->at("hel_pt_SS")   -> Fill(electron.getPt()   , evtwt);
           histos->at("htau_phi_SS") -> Fill(tau.getPhi()       , evtwt);
           histos->at("hel_phi_SS")  -> Fill(electron.getPhi()  , evtwt);
-          histos->at("hmsv_SS")     -> Fill(events.getVisM()   , evtwt);
+          histos->at("hmsv_SS")     -> Fill(event.getVisM()   , evtwt);
           histos->at("hmet_SS")     -> Fill(met.getMet()       , evtwt);
           histos->at("hmt_SS")      -> Fill(mt                 , evtwt);
           histos->at("hmjj_SS")     -> Fill(jets.getDijetMass(), evtwt);
@@ -368,7 +366,7 @@ int main(int argc, char* argv[]) {
         histos->at("hel_pt_QCD")   -> Fill(electron.getPt()   , evtwt);
         histos->at("htau_phi_QCD") -> Fill(tau.getPhi()       , evtwt);
         histos->at("hel_phi_QCD")  -> Fill(electron.getPhi()  , evtwt);
-        histos->at("hmsv_QCD")     -> Fill(events.getVisM()   , evtwt);
+        histos->at("hmsv_QCD")     -> Fill(event.getVisM()   , evtwt);
         histos->at("hmet_QCD")     -> Fill(met.getMet()       , evtwt);
         histos->at("hmt_QCD")      -> Fill(mt                 , evtwt);
         histos->at("hmjj_QCD")     -> Fill(jets.getDijetMass(), evtwt);
@@ -379,7 +377,7 @@ int main(int argc, char* argv[]) {
           histos->at("hel_pt_WOS")   -> Fill(electron.getPt()   , evtwt);
           histos->at("htau_phi_WOS") -> Fill(tau.getPhi()       , evtwt);
           histos->at("hel_phi_WOS")  -> Fill(electron.getPhi()  , evtwt);
-          histos->at("hmsv_WOS")     -> Fill(events.getVisM()   , evtwt);
+          histos->at("hmsv_WOS")     -> Fill(event.getVisM()   , evtwt);
           histos->at("hmet_WOS")     -> Fill(met.getMet()       , evtwt);
           histos->at("hmt_WOS")      -> Fill(mt                 , evtwt);
           histos->at("hmjj_WOS")     -> Fill(jets.getDijetMass(), evtwt);
@@ -389,7 +387,7 @@ int main(int argc, char* argv[]) {
           histos->at("hel_pt_WSS")   -> Fill(electron.getPt()   , evtwt);
           histos->at("htau_phi_WSS") -> Fill(tau.getPhi()       , evtwt);
           histos->at("hel_phi_WSS")  -> Fill(electron.getPhi()  , evtwt);
-          histos->at("hmsv_WSS")     -> Fill(events.getVisM()   , evtwt);
+          histos->at("hmsv_WSS")     -> Fill(event.getVisM()   , evtwt);
           histos->at("hmet_WSS")     -> Fill(met.getMet()       , evtwt);
           histos->at("hmt_WSS")      -> Fill(mt                 , evtwt);
           histos->at("hmjj_WSS")     -> Fill(jets.getDijetMass(), evtwt);
@@ -401,21 +399,21 @@ int main(int argc, char* argv[]) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("h0_OS") -> Fill(events.getDecayMode(), (electron.getP4()+tau.getP4()).M(), evtwt);
+            histos_2d->at("h0_OS") -> Fill(event.getDecayMode(), (electron.getP4()+tau.getP4()).M(), evtwt);
           }
           else {
-            histos_2d->at("h0_SS") -> Fill(tau.getPt(), events.getVisM(), evtwt);
+            histos_2d->at("h0_SS") -> Fill(tau.getPt(), event.getVisM(), evtwt);
           }
         } // close if signal block
         if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
-          histos_2d->at("h0_QCD") -> Fill(tau.getPt(), events.getVisM(), evtwt);
+          histos_2d->at("h0_QCD") -> Fill(tau.getPt(), event.getVisM(), evtwt);
         } // close if qcd block
         if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("h0_WOS") -> Fill(tau.getPt(), events.getVisM(), evtwt);
+            histos_2d->at("h0_WOS") -> Fill(tau.getPt(), event.getVisM(), evtwt);
           }
           else {
-            histos_2d->at("h0_WSS") -> Fill(tau.getPt(), events.getVisM(), evtwt);
+            histos_2d->at("h0_WSS") -> Fill(tau.getPt(), event.getVisM(), evtwt);
           }
         } // close if W block
 
@@ -424,21 +422,21 @@ int main(int argc, char* argv[]) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("h1_OS") -> Fill(Higgs.Pt(), events.getMSV(), evtwt);
+            histos_2d->at("h1_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
           }
           else {
-            histos_2d->at("h1_SS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("h1_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
         } // close if signal block
         if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
-          histos_2d->at("h1_QCD") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          histos_2d->at("h1_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
         } // close if qcd block
         if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("h1_WOS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("h1_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
           else {
-            histos_2d->at("h1_WSS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("h1_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
         } // close if W block
 
@@ -446,21 +444,21 @@ int main(int argc, char* argv[]) {
       else if (jets.getNjets() > 1 && Higgs.Pt() > 50 && jets.getDijetMass() > 300) {
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("h2_OS") -> Fill(jets.getDijetMass(), events.getMSV(), evtwt);
+            histos_2d->at("h2_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
           }
           else {
-            histos_2d->at("h2_SS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("h2_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
         } // close if signal block
         if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
-          histos_2d->at("h2_QCD") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          histos_2d->at("h2_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
         } // close if qcd block
         if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("h2_WOS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("h2_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
           else {
-            histos_2d->at("h2_WSS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("h2_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
         } // close if W block
 
@@ -469,21 +467,21 @@ int main(int argc, char* argv[]) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("h3_OS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("h3_OS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
           else {
-            histos_2d->at("hvbf_SS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("hvbf_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
         } // close if signal block
         if (tau.getMediumIsoMVA() && electron.getIso() < 0.30 && tau.getAgainstTightElectron()) {
-          histos_2d->at("hvbf_QCD") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+          histos_2d->at("hvbf_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
         } // close if qcd block
         if (tau.getMediumIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("hvbf_WOS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("hvbf_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
           else {
-            histos_2d->at("hvbf_WSS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("hvbf_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
         } // close if W block
 

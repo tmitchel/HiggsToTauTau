@@ -2,7 +2,10 @@
 
 class gen_factory {
 private:
-  float genpX, genpY, genM, genpT, numGenJets, genweight, gen_Higgs_pt, gen_Higgs_mass;
+  Float_t genpX, genpY, genM, genpT, numGenJets, genweight, gen_Higgs_pt, gen_Higgs_mass;
+  Float_t npv, npu, rho, m_sv, pt_sv, m_vis, pt_tt, l2_decayMode;
+  Int_t run, lumi;
+  ULong64_t evt;
 
 public:
   gen_factory (TTree*);
