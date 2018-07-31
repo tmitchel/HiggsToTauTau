@@ -173,13 +173,13 @@ void initHistos_1D(std::unordered_map<std::string, TH1D*>* histos) {
 
 void initHistos_2D(std::unordered_map<std::string, TH2F*>* histos, TFile* fout, std::string name) {
 
-  float bins0[] = {0,60,65,70,75,80,85,90,95,100,105,110,115,400};
-  float bins1[] = {0,70,80,90,100,110,120,130,140,150,180,300};
-  float bins2[] = {0,90,105,120,135,150,400};
+  float bins0[] = {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400};
+  float bins1[] = {0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300};
+  float bins2[] = {0, 95, 115, 135, 155, 400};
 
-  float bins_pth[] = {0,60,100,140,180,220,500};
-  float bins_mjj[] = {300,600,900,1200,1700,3000};
-  float bins_taupt[] = {30,35,40,45,50,55,300};
+  float bins_pth[] = {0, 100, 150, 200, 250, 300, 5000};
+  float bins_mjj[] = {300, 700, 1100, 1500, 10000};
+  float bins_taupt[] = {0, 1, 10, 11};
 
   int  binnum1 = sizeof(bins1)/sizeof(Float_t) - 1;
   int  binnum2 = sizeof(bins2)/sizeof(Float_t) - 1;

@@ -401,7 +401,7 @@ int main(int argc, char* argv[]) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("h0_OS") -> Fill(tau.getPt(), events.getVisM(), evtwt);
+            histos_2d->at("h0_OS") -> Fill(events.getDecayMode(), (electron.getP4()+tau.getP4()).M(), evtwt);
           }
           else {
             histos_2d->at("h0_SS") -> Fill(tau.getPt(), events.getVisM(), evtwt);
@@ -424,7 +424,7 @@ int main(int argc, char* argv[]) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("h1_OS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("h1_OS") -> Fill(Higgs.Pt(), events.getMSV(), evtwt);
           }
           else {
             histos_2d->at("h1_SS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
@@ -446,7 +446,7 @@ int main(int argc, char* argv[]) {
       else if (jets.getNjets() > 1 && Higgs.Pt() > 50 && jets.getDijetMass() > 300) {
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("h2_OS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("h2_OS") -> Fill(jets.getDijetMass(), events.getMSV(), evtwt);
           }
           else {
             histos_2d->at("h2_SS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
