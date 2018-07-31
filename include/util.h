@@ -1,5 +1,5 @@
 
-static double luminosity(35900.);
+static double luminosity(35870.);
 static std::map<std::string, double> cross_sections {
   {"DY", 5765.4},
   {"DY1", 5765.4},
@@ -196,10 +196,10 @@ void initHistos_2D(std::unordered_map<std::string, TH2F*>* histos, TFile* fout, 
   histos->insert({"h0_OS", new TH2F(name.c_str(),"Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
   fout->cd("et_boosted");
   histos->insert({"h1_OS", new TH2F(name.c_str(),"Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
-  fout->cd("et_ZH");
-  histos->insert({"h2_OS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
   fout->cd("et_vbf");
-  histos->insert({"hvbf_OS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h2_OS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  fout->cd("et_ZH");
+  histos->insert({"h3_OS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
 
   fout->mkdir("et_antiiso_0jet_cr");
   fout->mkdir("et_antiiso_boosted_cr");

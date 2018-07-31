@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
-  auto ntuple = (TTree*)fin->Get("et_tree");
+  auto ntuple = (TTree*)fin->Get("etau_tree");
 
   // get number of generated events
   auto counts = (TH1D*)fin->Get("nevents");
@@ -420,7 +420,7 @@ int main(int argc, char* argv[]) {
         } // close if W block
 
       } // close njets == 0
-      else if (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300 && Higgs.Pt() < 50)) {
+      else if (jets.getNjets() == 1 || (jets.getNjets() > 1 && (jets.getDijetMass() <= 300 || Higgs.Pt() <= 50 || tau.getPt() <= 30))) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
@@ -444,7 +444,6 @@ int main(int argc, char* argv[]) {
 
       } // close njets == 1 (or low dijet mass njets == 2)
       else if (jets.getNjets() > 1 && Higgs.Pt() > 50 && jets.getDijetMass() > 300) {
-
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
             histos_2d->at("h2_OS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
@@ -470,7 +469,7 @@ int main(int argc, char* argv[]) {
 
         if (tau.getTightIsoMVA() && electron.getIso() < 0.10 && tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) {
           if (evt_charge == 0) {
-            histos_2d->at("hvbf_OS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
+            histos_2d->at("h3_OS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
           }
           else {
             histos_2d->at("hvbf_SS") -> Fill(tau.getPt(), events.getMSV(), evtwt);
