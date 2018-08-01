@@ -25,6 +25,7 @@ static std::map<std::string, double> cross_sections {
   {"SMH_VBF110", 4.434*0.0791},
   {"SMH_VBF120", 3.935*0.0698},
   {"SMH_VBF125", 3.782*0.0627},
+  {"VBFHtoTauTau125", 3.782*0.0627},
   {"SMH_VBF130", 3.637*0.0541},
   {"SMH_VBF130_missingfiles", 3.637*0.0541},
   {"SMH_VBF140", 3.492*0.0360},

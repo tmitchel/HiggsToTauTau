@@ -11,9 +11,8 @@ class tau {
 private:
 public:
   std::string name = "tau";
-  Float_t pt, eta, phi, mass, charge, px, py, pz, dmf, tightIsoMVA, l2_decayMode;
+  Float_t pt, eta, phi, mass, charge, px, py, pz, dmf, tightIsoMVA, l2_decayMode, gen_match;
   Bool_t AgainstTightElectron, AgainstLooseMuon, MediumIsoMVA;
-  Int_t gen_match;
   TLorentzVector p4;
 
   tau(Float_t, Float_t, Float_t, Float_t, Float_t);
@@ -32,10 +31,10 @@ public:
   Float_t getDecayModeFinding()       { return dmf;                   };
   Float_t getTightIsoMVA()            { return tightIsoMVA;           };
   Float_t getL2DecayMode()            { return l2_decayMode;          };
+  Float_t getGenMatch()               { return gen_match;             };
   Bool_t getAgainstTightElectron()    { return AgainstTightElectron;  };
   Bool_t getAgainstLooseMuon()        { return AgainstLooseMuon;      };
   Bool_t getMediumIsoMVA()            { return MediumIsoMVA;          };
-  Int_t getGenMatch()                 { return gen_match;             };
   Int_t getCharge()                   { return charge;                };
 
   // setters
@@ -50,10 +49,10 @@ public:
   void setDecayModeFinding(Float_t DMF)             { dmf = DMF;                          };
   void setTightIsoMVA(Float_t newIsoTight)          { tightIsoMVA = newIsoTight;          };
   void setL2DecayMode(Float_t L2_decayMode)         { l2_decayMode = L2_decayMode;        };
+  void setGenMatch(Float_t GenMatch)                { gen_match = GenMatch;               };
   void setAgainstTightElectron(Bool_t newAElTight)  { AgainstTightElectron = newAElTight; };
   void setAgainstLooseMuon(Bool_t newAMuLoose)      { AgainstLooseMuon = newAMuLoose;     };
   void setMediumIsoMVA(Bool_t newIsoMed)            { MediumIsoMVA = newIsoMed;           };
-  void setGenMatch(Int_t GenMatch)                  { gen_match = GenMatch;               };
 };
 
 // initialize member data and set TLorentzVector
@@ -75,8 +74,7 @@ class tau_factory {
 private:
   Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, decayModeFinding_2;
   Float_t byTightIsolationMVArun2v1DBoldDMwLT_2, againstElectronTightMVA6_2, againstMuonLoose3_2;
-  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, l2_decayMode;
-  Int_t gen_match_2;
+  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, l2_decayMode, gen_match_2;
 
 public:
   tau_factory (TTree*);
