@@ -322,6 +322,8 @@ std::cout << gen_number << " " << cross_sections[sample] << std::endl;
 
     histos->at("pre_mt") -> Fill(mt, 1.);
     histos->at("pre_tau_pt") -> Fill(tau.getPt(), 1.);
+    histos->at("pre_tau_iso") -> Fill(tau.getTightIsoMVA(), 1.);
+    histos->at("pre_el_iso") -> Fill(electron.getIso(), 1.);
 
     if (mt < 50 && tau.getPt() > 30) {
 
