@@ -2,6 +2,7 @@
 static double luminosity(35870.);
 static std::map<std::string, double> cross_sections {
   {"DY", 5765.4},
+  {"DYJets", 5765.4},
   {"DY1", 5765.4},
   {"DY1_missingfiles", 5765.4},
   {"DY2", 5765.4},

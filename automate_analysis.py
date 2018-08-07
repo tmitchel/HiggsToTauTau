@@ -12,7 +12,7 @@ parser.add_option('--data', '-d', action='store_true',
                   help='run on data or MC'
                   )
 parser.add_option('--exe', '-e', action='store',
-                  default='analyzer', dest='exe',
+                  default='Analyze', dest='exe',
                   help='name of executable'
                   )
 parser.add_option('--local', '-l', action='store_true',
@@ -54,9 +54,9 @@ for ifile in fileList:
     elif 'HWW_gg' in ifile:
         name = ifile.split('/')[-1].split('.root')[0]
         call('./'+options.exe+' '+name+' ggH_hww'+name.split('HWW_gg')[-1]+suffix, shell=True)
-    elif 'HWW_vbf' in ifile:
+    elif 'HWW_vbf' in ifile or 'VBFHtoTauTau' in ifile:
         name = ifile.split('/')[-1].split('.root')[0]
-        call('./'+options.exe+' '+name+' qqH_hww'+name.split('HWW_gg')[-1]+suffix, shell=True)
+        call('./'+options.exe+' '+name+' qqH_hww'+name.split('VBFHtoTauTau')[-1]+suffix, shell=True)
     elif 'Data' in ifile:
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' Data'+suffix, shell=True)
     else:
