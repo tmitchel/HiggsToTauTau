@@ -320,6 +320,9 @@ std::cout << gen_number << " " << cross_sections[sample] << std::endl;
         histos->at("n70") -> Fill(3.1, evtwt);
     }
 
+    histos->at("pre_mt") -> Fill(mt, 1.);
+    histos->at("pre_tau_pt") -> Fill(tau.getPt(), 1.);
+
     if (mt < 50 && tau.getPt() > 30) {
 
       histos->at("cutflow") -> Fill(7., 1.);

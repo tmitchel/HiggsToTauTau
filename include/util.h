@@ -83,6 +83,9 @@ void initHistos_1D(std::unordered_map<std::string, TH1D*>* histos) {
   histos->insert({"n70", new TH1D("n70", "n70", 6,0,6)});
   histos->insert({"cutflow", new TH1D("cutflow", "Cutflow", 12, -0.5, 11.5)});
 
+  histos->insert({"pre_tau_pt", new TH1D("pre_tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200)});
+  histos->insert({"pre_mt", new TH1D("pre_mt", "mt", 50, 0., 100.)});
+
   histos->insert({"htau_pt", new TH1D("tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200)});
   histos->insert({"htau_pt_QCD", new TH1D("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.)});
   histos->insert({"htau_pt_SS", new TH1D("tau_pt_SS", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.)});
