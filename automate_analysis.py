@@ -31,7 +31,7 @@ if options.local:
     if options.isData:
     	fileList = [ifile for ifile in glob('root_files/smhet_22feb_SV/*') if '.root' in ifile and 'Data' in ifile]
     else:
-	    fileList = [ifile for ifile in glob('root_files/smhet_20march/*') if '.root' in ifile and not 'Data' in ifile]
+	    fileList = [ifile for ifile in glob('root_files/newfiles/*') if '.root' in ifile and not 'Data' in ifile]
     suffix = ' -l'
 else:
     fileList = [ifile for ifile in filter(None, popen('xrdfs root://cmseos.fnal.gov/ ls '+path).read().split('\n'))]
@@ -40,18 +40,18 @@ print options.local, options.isData
 for ifile in fileList:
     if not 'root' in ifile:
         continue
-    if 'DY' in ifile:
+    if 'DYJets' in ifile:
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' ZTT'+suffix, shell=True)
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' ZL'+suffix, shell=True)
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' ZJ'+suffix, shell=True)
     elif 'TT' in ifile:
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' TTT'+suffix, shell=True)
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' TTJ'+suffix, shell=True)
-    elif 'W.root' in ifile or 'W1_' in ifile or 'W2_' in ifile or 'W3_' in ifile or 'W4_' in ifile or 'EWKW' in ifile:
+    elif 'WJets' in ifile or 'EWKW' in ifile:
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' W'+suffix, shell=True)
     elif 'EWKZ' in ifile:
         call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' EWKZ'+suffix, shell=True)
-    elif 'HWW_gg' in ifile:
+    elif 'HWW_gg' in ifile or 'ggHtoTauTau' in ifile:
         name = ifile.split('/')[-1].split('.root')[0]
         call('./'+options.exe+' '+name+' ggH_hww'+name.split('HWW_gg')[-1]+suffix, shell=True)
     elif 'HWW_vbf' in ifile or 'VBFHtoTauTau' in ifile:

@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     if (isData)
       fname = "root_files/smhet_22feb_SV/"+sample+".root";
     else
-      fname = "root_files/smhet_20march/"+sample+".root";
+      fname = "root_files/newfiles/"+sample+".root";
   }
   else {
     if (isData)
