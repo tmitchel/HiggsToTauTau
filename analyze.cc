@@ -240,7 +240,7 @@ std::cout << gen_number << " " << cross_sections[sample] << std::endl;
       continue;
     else if ((name == "ZTT" || name == "TTT") && tau.getGenMatch() != 5)
       continue;
-    else if ((name == "ZLL" || name == "TTJ") && tau.getGenMatch() == 5)
+    else if ((name == "ZLL" || name == "TTJ" || name == "ZL") && tau.getGenMatch() == 5)
       continue;
     else if (name == "ZJ" && tau.getGenMatch() != 6)
       continue;
