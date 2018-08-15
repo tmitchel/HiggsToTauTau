@@ -29,7 +29,7 @@ else:
 start = time.time()
 if options.local:
     if options.isData:
-    	fileList = [ifile for ifile in glob('root_files/smhet_22feb_SV/*') if '.root' in ifile and 'Data' in ifile]
+    	fileList = [ifile for ifile in glob('root_files/newfiles_data/*') if '.root' in ifile and 'Data' in ifile]
     else:
 	    fileList = [ifile for ifile in glob('root_files/newfiles/*') if '.root' in ifile and not 'Data' in ifile]
     suffix = ' -l'

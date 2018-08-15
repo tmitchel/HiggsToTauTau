@@ -32,7 +32,7 @@ private:
   Float_t bpt_1, beta_1, bphi_1, bcsv_1;
   Float_t bpt_2, beta_2, bphi_2, bcsv_2;
   Float_t pt_top1, pt_top2;
-  Float_t nbtag, njets, njetspt20;
+  Float_t nbtag, njetspt20, njets;
   std::vector<jet> plain_jets, btag_jets;
 
 public:

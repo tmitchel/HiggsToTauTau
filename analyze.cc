@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
   bool isData = sample.find("Data") != std::string::npos;
   if (local) {
     if (isData)
-      fname = "root_files/smhet_22feb_SV/"+sample+".root";
+      fname = "root_files/newfiles_data/"+sample+".root";
     else
       fname = "root_files/newfiles/"+sample+".root";
   }
