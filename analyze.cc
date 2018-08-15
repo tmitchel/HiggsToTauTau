@@ -228,6 +228,9 @@ std::cout << gen_number << " " << cross_sections[sample] << std::endl;
     // get jet data for the event
     jets.run_factory();
 
+    // build Higgs
+    TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
+
     // create categories
 	bool signalRegion = (tau.getTightIsoMVA()  && electron.getIso() < 0.10);
 	bool qcdRegion    = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
@@ -281,9 +284,11 @@ std::cout << gen_number << " " << cross_sections[sample] << std::endl;
             else evtwt *= 2.281;
         }
 
-       // Z-pT Reweighting
-       if (name=="EWKZLL" || name=="EWKZNuNu" || name=="ZTT" || name=="ZLL" || name=="ZL" || name=="ZJ")
+      // Z-pT and Zmm Reweighting
+      if (name=="EWKZLL" || name=="EWKZNuNu" || name=="ZTT" || name=="ZLL" || name=="ZL" || name=="ZJ") {
         evtwt *= zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()),zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
+        evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
+      } 
 
       // // top-pT Reweighting (only for some systematic)
       // if (name == "TTT" || name == "TT" || name == "TTJ") {
@@ -307,8 +312,6 @@ std::cout << gen_number << " " << cross_sections[sample] << std::endl;
     double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
     double mt = calculate_mt(&electron, met_x, met_y, met_pt);
     int evt_charge = tau.getCharge() + electron.getCharge();
-
-    TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
 
     if (mt > 80 && mt < 200 && evt_charge == 0 && tau.getTightIsoMVA() && electron.getIso() < 0.10) {
       histos->at("n70") -> Fill(0.1, evtwt);
