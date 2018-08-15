@@ -1,0 +1,9 @@
+.DS_Store
+.vscode
+.wscode*
+Analyze
+LeptonEfficiencies
+syncdir
+temp.py
+varcomp.py
+old.root
