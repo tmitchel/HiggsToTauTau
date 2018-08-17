@@ -26,6 +26,7 @@
 #include "include/util.h"
 #include "include/btagSF.h"
 #include "include/LumiReweightingStandAlone.h"
+#include "include/CLParser.h"
 
 int main(int argc, char* argv[]) {
 
@@ -34,33 +35,20 @@ int main(int argc, char* argv[]) {
   // Get file names, normalization, paths, etc. //
   ////////////////////////////////////////////////
 
-  // parse user options
-  std::string sample = "ZZ4L";
-  if (argc > 1)
-    sample = argv[1];
-
-  std::string name = sample;
-  if (argc > 2)
-    name = argv[2];
-
-  bool local = false;
-  if (argc > 3)
-    local = argv[3];
-
-  // path to find input root files
-  std::string fname;
+  CLParser parser(argc, argv);
+  bool local = parser.Flag("-l");
+  bool svFit = parser.Flag("-S");
+  std::string sample = parser.Option("-s");
+  std::string name = parser.Option("-n");
+  std::string path = parser.Option("-p");
+  std::string fname = path + sample;
   bool isData = sample.find("Data") != std::string::npos;
-  if (local) {
-    if (isData)
-      fname = "root_files/data_svFitted/"+sample+"_svFit.root";
-    else
-      fname = "root_files/svFitted/"+sample+"_svFit.root";
-  }
-  else {
-    if (isData)
-      fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_22feb_SV/"+sample+".root";
-    else
-      fname = "root://cmsxrootd.fnal.gov//store/user/tmitchel/smhet_20march/"+sample+".root";
+  // bool isData = parser.Flag("-d");
+
+  if (svFit) {
+    fname += "_svFit.root";
+  } else {
+    fname += ".root";
   }
 
   // open input file
@@ -77,10 +65,11 @@ int main(int argc, char* argv[]) {
   auto suffix = "_output.root";
   auto prefix = "output/";
   std::string filename;
-  if (name == sample)
+  if (name == sample) {
     filename = prefix + name + suffix;
-  else
+  } else {
     filename = prefix + sample + std::string("_") + name + suffix;
+  }
   auto fout = new TFile(filename.c_str(), "RECREATE");
   fout->mkdir("grabbag");
 
@@ -112,7 +101,7 @@ int main(int argc, char* argv[]) {
   RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
   htt_sf_file.Close();
 
-  // not sure what these are exactly, yet
+  // not sure what these are exactly, yetı
   TFile *fEleRec = new TFile("inputs/EGammaRec.root");
   TH2F *histEleRec = (TH2F*)fEleRec->Get("EGamma_SF2D");
 
@@ -124,10 +113,8 @@ int main(int argc, char* argv[]) {
 
   // trigger and ID scale factors
   auto myScaleFactor_trgEle25 = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_eff.root");
-  auto myScaleFactor_trgEle24Leg = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele24_eff.root");
   auto myScaleFactor_id = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_IsoLt0p1_eff.root");
   auto myScaleFactor_trgEle25Anti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_antiisolated_Iso0p1to0p3_eff_rb.root");
-  auto myScaleFactor_trgEle24LegAnti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele24_antiisolated_Iso0p1to0p3_eff_rb.root");
   auto myScaleFactor_idAnti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_antiisolated_Iso0p1to0p3_eff.root");
 
   TFile * f_NNLOPS = new TFile("inputs/NNLOPS_reweight.root");
@@ -246,10 +233,10 @@ int main(int argc, char* argv[]) {
     if (!isData) {
 
       // apply trigger and id SF's
-      sf_trig = myScaleFactor_trgEle25->getSF(electron.getPt(), electron.getEta());
+      sf_trig      = myScaleFactor_trgEle25->getSF(electron.getPt(), electron.getEta());
       sf_trig_anti = myScaleFactor_trgEle25Anti->getSF(electron.getPt(), electron.getEta());
-      sf_id = myScaleFactor_id->getSF(electron.getPt(), electron.getEta());
-      sf_id_anti = myScaleFactor_idAnti->getSF(electron.getPt(), electron.getEta());
+      sf_id        = myScaleFactor_id->getSF(electron.getPt(), electron.getEta());
+      sf_id_anti   = myScaleFactor_idAnti->getSF(electron.getPt(), electron.getEta());
       
       evtwt *= (sf_trig * sf_id * lumi_weights->weight(event.getNPU()) * event.getGenWeight());
 
@@ -319,7 +306,7 @@ int main(int argc, char* argv[]) {
     bool signalRegion = (tau.getTightIsoMVA()  && electron.getIso() < 0.10);
     bool qcdRegion    = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
     bool wRegion      = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
-    bool qcdCR        = (tau.getTightIsoMVA()  && electron.getIso() < 0.30 && electron.getIso() > 0.10);
+    bool qcdCR        = (tau.getTightIsoMVA()  && electron.getIso() > 0.10 && electron.getIso() < 0.30);
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
