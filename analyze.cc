@@ -52,9 +52,9 @@ int main(int argc, char* argv[]) {
   bool isData = sample.find("Data") != std::string::npos;
   if (local) {
     if (isData)
-      fname = "root_files/newfiles_data/"+sample+".root";
+      fname = "root_files/data_svFitted/"+sample+"_svFit.root";
     else
-      fname = "root_files/newfiles/"+sample+".root";
+      fname = "root_files/svFitted/"+sample+"_svFit.root";
   }
   else {
     if (isData)
@@ -90,7 +90,6 @@ int main(int argc, char* argv[]) {
     norm = 1.0;
   else
     norm = luminosity * cross_sections[sample] / gen_number;
-std::cout << gen_number << " " << cross_sections[sample] << std::endl;
 
   ///////////////////////////////////////////////
   // Scale Factors:                            //
