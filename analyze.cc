@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
   initHistos_2D(histos_2d, fout, name);
 
   // construct factories
-  event_info       event(ntuple);
+  event_info       event(ntuple, "blarg");
   electron_factory electrons(ntuple);
   tau_factory      taus(ntuple);
   jet_factory      jets(ntuple);
