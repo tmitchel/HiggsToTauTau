@@ -7,8 +7,6 @@ private:
   Float_t genpX, genpY, genM, genpT, numGenJets, genweight, gen_Higgs_pt, gen_Higgs_mass; // gen
   Float_t npv, npu, rho, m_sv, pt_sv, m_vis, pt_tt;  // event
   Float_t matchEle25, filterEle25, passEle25; // trigger
-  Float_t m_sv_UESUp, m_sv_UESDown, pt_sv_UESUp, pt_sv_UESDown; // unclustered energy systematics
-  Float_t m_sv_JESUp, m_sv_JESDown, pt_sv_JESUp, pt_sv_JESDown; // jet energy systematics
   Int_t run, lumi;
   ULong64_t evt;
 
@@ -53,10 +51,8 @@ event_info::event_info(TTree* input, std::string syst) {
     pt_sv_name = syst.c_str();
   }
 
-  input -> SetBranchAddress( m_sv_name          , &m_sv           );
-  input -> SetBranchAddress( pt_sv_name         , &pt_sv          );
-
-
+  input -> SetBranchAddress( m_sv_name       , &m_sv           );
+  input -> SetBranchAddress( pt_sv_name      , &pt_sv          );
   input -> SetBranchAddress( "run"           , &run            );
   input -> SetBranchAddress( "lumi"          , &lumi           );
   input -> SetBranchAddress( "evt"           , &evt            );
@@ -75,14 +71,4 @@ event_info::event_info(TTree* input, std::string syst) {
   input -> SetBranchAddress( "matchEle25"    , &matchEle25     );
   input -> SetBranchAddress( "filterEle25"   , &filterEle25    );
   input -> SetBranchAddress( "passEle25"     , &passEle25      );
-
-  // sytematic realted
-  input->SetBranchAddress("m_sv_UESUp",    &m_sv_UESUp   );
-  input->SetBranchAddress("m_sv_UESDown",  &m_sv_UESDown );
-  input->SetBranchAddress("m_sv_JESUp",    &m_sv_JESUp   );
-  input->SetBranchAddress("m_sv_JESDown",  &m_sv_JESDown );
-  input->SetBranchAddress("pt_sv_UESUp",   &pt_sv_UESUp  );
-  input->SetBranchAddress("pt_sv_UESDown", &pt_sv_UESDown);
-  input->SetBranchAddress("pt_sv_JESUp",   &pt_sv_JESUp  );
-  input->SetBranchAddress("pt_sv_JESDown", &pt_sv_JESDown);
 }

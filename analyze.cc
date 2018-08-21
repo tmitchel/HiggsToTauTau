@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
   std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
+  std::string syst = parser.Option("-u");
   std::string fname = path + sample;
   bool isData = sample.find("Data") != std::string::npos;
   // bool isData = parser.Flag("-d");
@@ -136,11 +137,11 @@ int main(int argc, char* argv[]) {
   initHistos_2D(histos_2d, fout, name);
 
   // construct factories
-  event_info       event(ntuple, "blarg");
+  event_info       event(ntuple, syst);
   electron_factory electrons(ntuple);
   tau_factory      taus(ntuple);
-  jet_factory      jets(ntuple);
-  met_factory      met(ntuple);
+  jet_factory      jets(ntuple, syst);
+  met_factory      met(ntuple, syst);
   double n70_count;
 
   // begin the event loop
