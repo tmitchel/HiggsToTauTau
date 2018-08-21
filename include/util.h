@@ -1,112 +1,78 @@
 
 static double luminosity(35870.);
 static std::map<std::string, double> cross_sections {
-  {"DY", 5765.4},
-  {"DY1", 5765.4},
-  {"DY1_missingfiles", 5765.4},
-  {"DY2", 5765.4},
-  {"DY1_noFakeTauCorr", 5765.4},
-  {"DY2_missingfiles", 5765.4},
-  {"DY2_noFakeTauCorr", 5765.4},
-  {"DY3", 5765.4},
-  {"DY3_noFakeTauCorr", 5765.4},
-  {"DY4", 5765.4},
-  {"DY4_missingfiles", 5765.4},
-  {"DY4_noFakeTauCorr", 5765.4},
-  {"DY_missingfiles", 5765.4},
-  {"DY_noFakeTauCorr", 5765.4},
-  {"DYlow", 5765.4},
-  // {"DY1", 1178.3},
-  // {"DY1_missingfiles", 1178.3},
-  // {"DY2", 387.3},
-  // {"DY1_noFakeTauCorr", 1178.3},
-  // {"DY2_missingfiles", 387.3},
-  // {"DY2_noFakeTauCorr", 387.3},
-  // {"DY3", 118.4},
-  // {"DY3_noFakeTauCorr", 118.4},
-  // {"DY4", 63.7},
-  // {"DY4_missingfiles", 63.7},
-  // {"DY4_noFakeTauCorr", 63.7},
-  // {"DY_missingfiles", 5765.4},
-  // {"DY_noFakeTauCorr", 5765.4},
-  // {"DYlow", 5765.4},
-  {"EWKminus", 20.25},
-  {"EWKplus", 25.62},
-  {"EWKZLL", 3.987},
-  {"EWKZNuNu", 10.01},
+  {"DYJets", 5765.4},
+  {"DYJets1", 5765.4},
+  {"DYJets2", 5765.4},
+  {"DYJets3", 5765.4},
+  {"DYJets4", 5765.4},
+  {"EWKMinus", 20.25},
+  {"EWKPlus", 25.62},
+  {"EWKZ2l", 3.987},
+  {"EWKZ2nu", 10.01},
   {"HWW_gg125", 48.58*0.2137*0.3258},
   {"HWW_vbf125", 3.782*0.2137*0.3258},
   {"SMH_VBF110", 4.434*0.0791},
   {"SMH_VBF120", 3.935*0.0698},
   {"SMH_VBF125", 3.782*0.0627},
+  {"VBFHtoTauTau125", 3.782*0.0627},
   {"SMH_VBF130", 3.637*0.0541},
-  {"SMH_VBF130_missingfiles", 3.637*0.0541},
   {"SMH_VBF140", 3.492*0.0360},
   {"SMH_gg110", 57.90*0.0791},
   {"SMH_ggH120", 47.38*0.0698},
   {"SMH_ggH125", 44.14*0.0627},
+  {"ggHtoTauTau125", 44.14*0.0627},
   {"SMH_ggH130", 41.23*0.0541},
   {"SMH_gg140", 36.0*0.0360},
   {"ST_tW_antitop", 35.6},
   {"ST_tW_top", 35.6},
   {"ST_t_antitop", 26.23},
   {"ST_t_top", 44.07},
+  {"Tbar-tW", 35.6},
+  {"T-tW", 35.6},
+  {"Tbar-tchan", 26.23},
+  {"T-tchan", 44.07},
   {"TT", 831.76},
-  {"TT_missingfiles", 831.76},
-  {"VV2L2Nu", 11.95},
-  {"W", 61526.7},
-  {"W1", 61526.7},
-  {"W2", 61526.7},
-  {"W3", 61526.7},
-  {"W4", 61526.7},
-  {"WGToLNuG", 489.0},
-  {"WGstarLNuEE", 3.526},
-  {"WGstarLNuMuMu", 2.793},
-  {"WW1L1Nu2Q", 49.997},
-  {"WZ1L1Nu2Q", 10.71},
-  {"WZ1L3Nu", 3.05},
-  {"WZ2L2Q", 5.595},
-  {"WZLLLNu", 4.708},
-  {"WminusH110", 0.8587*0.0791},
-  {"WminusH120", 0.6092*0.0698},
-  {"WminusH125", 0.5328*0.0627},
-  {"WminusH130", 0.4676*0.0541},
-  {"WminusH140", 0.394*0.0360},
-  {"WplusH110", 1.335*0.0791},
-  {"WplusH120", 0.9558*0.0698},
-  {"WplusH125", 0.840*0.0627},
-  {"WplusH130", 0.7414*0.0541},
-  {"WplusH140", 0.6308*0.0360},
-  {"ZZ2L2Q", 3.22},
-  {"ZZ4L", 1.212},
-  {"data", 1.0}
-
-
-
-  // {"ZL", 5765.4},
-  // {"ZTT", 5765.4},
-  // {"ZJ", 5765.4},
-  // {"QCD", 720648000*0.00042},
-  // {"WZJets", 5.26},
-  // {"ggh", 44.14*0.0627},
-  // {"VBF", 3.782*0.0627},
-  // {"ZZ", 16.523},
-  // {"WZ", 47.13},
-  // {"WW", 118.7}
+  {"VV2l2nu", 11.95},
+  {"WJets", 61526.7},
+  {"WJets1", 61526.7},
+  {"WJets2", 61526.7},
+  {"WJets3", 61526.7},
+  {"WJets4", 61526.7},
+  {"WGLNu", 489.0},
+  {"WGstarEE", 3.526},
+  {"WGstarMuMu", 2.793},
+  {"WW1l1nu2q", 49.997},
+  {"WZ1l1nu2q", 10.71},
+  {"WZ1l3nu", 3.05},
+  {"WZ2l2Q", 5.595},
+  {"WZ3l1nu", 4.708},
+  {"WMinusHTauTau125", 0.5328*0.0627},
+  {"WPlusHTauTau125", 0.840*0.0627},
+  {"ZZ2l2q", 3.22},
+  {"ZZ4l", 1.212},
+  {"ZHTauTau125", 0.8839*0.062},
+  {"data", 1.0},
+  {"Data", 1.0}
 };
 
 // do the mt calculation
-static float calculate_mt(electron* const el, float met_x, float met_y, float met_pt) {
+static Float_t calculate_mt(electron* const el, Float_t met_x, Float_t met_y, Float_t met_pt) {
   return sqrt(pow(el->getPt() + met_pt, 2) - pow(el->getPx() + met_x, 2) - pow(el->getPy() + met_y, 2));
 }
 
-static float deltaR(float eta1, float phi1, float eta2, float phi2) {
+static Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) {
   return sqrt(pow(eta1-eta2, 2) + pow(phi1-phi2, 2));
 }
 
 void initHistos_1D(std::unordered_map<std::string, TH1D*>* histos) {
   histos->insert({"n70", new TH1D("n70", "n70", 6,0,6)});
   histos->insert({"cutflow", new TH1D("cutflow", "Cutflow", 12, -0.5, 11.5)});
+
+  histos->insert({"pre_tau_pt", new TH1D("pre_tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200)});
+  histos->insert({"pre_mt", new TH1D("pre_mt", "mt", 50, 0., 100.)});
+  histos->insert({"pre_tau_iso", new TH1D("pre_tau_iso","" ,50, 0, .3)});
+  histos->insert({"pre_el_iso", new TH1D("pre_el_iso","", 50, 0, .3)});
 
   histos->insert({"htau_pt", new TH1D("tau_pt", "Tau p_{T};p_{T} [GeV];;", 40, 0., 200)});
   histos->insert({"htau_pt_QCD", new TH1D("tau_pt_QCD", "Tau p_{T}; p_{T} [GeV]", 40, 0., 200.)});
@@ -173,20 +139,20 @@ void initHistos_1D(std::unordered_map<std::string, TH1D*>* histos) {
 
 void initHistos_2D(std::unordered_map<std::string, TH2F*>* histos, TFile* fout, std::string name) {
 
-  float bins0[] = {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400};
-  float bins1[] = {0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300};
-  float bins2[] = {0, 95, 115, 135, 155, 400};
+  Float_t bins0[] = {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400};
+  Float_t bins1[] = {0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300};
+  Float_t bins2[] = {0, 95, 115, 135, 155, 400};
 
-  float bins_pth[] = {0, 100, 150, 200, 250, 300, 5000};
-  float bins_mjj[] = {300, 700, 1100, 1500, 10000};
-  float bins_taupt[] = {0, 1, 10, 11};
+  Float_t bins_pth[] = {0, 100, 150, 200, 250, 300, 5000};
+  Float_t bins_mjj[] = {300, 700, 1100, 1500, 10000};
+  Float_t bins_taupt[] = {0, 1, 10, 11};
 
-  int  binnum1 = sizeof(bins1)/sizeof(Float_t) - 1;
-  int  binnum2 = sizeof(bins2)/sizeof(Float_t) - 1;
-  int  binnum0 = sizeof(bins0)/sizeof(Float_t) - 1;
-  int  binnum_pth = sizeof(bins_pth)/sizeof(Float_t) - 1;
-  int  binnum_taupt = sizeof(bins_taupt)/sizeof(Float_t) - 1;
-  int  binnum_mjj = sizeof(bins_mjj)/sizeof(Float_t) - 1;
+  Int_t  binnum1 = sizeof(bins1)/sizeof(Float_t) - 1;
+  Int_t  binnum2 = sizeof(bins2)/sizeof(Float_t) - 1;
+  Int_t  binnum0 = sizeof(bins0)/sizeof(Float_t) - 1;
+  Int_t  binnum_pth = sizeof(bins_pth)/sizeof(Float_t) - 1;
+  Int_t  binnum_taupt = sizeof(bins_taupt)/sizeof(Float_t) - 1;
+  Int_t  binnum_mjj = sizeof(bins_mjj)/sizeof(Float_t) - 1;
 
   fout->mkdir("et_0jet");
   fout->mkdir("et_boosted");
@@ -252,4 +218,37 @@ void initHistos_2D(std::unordered_map<std::string, TH2F*>* histos, TFile* fout, 
   histos->insert({"h2_WSS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
   fout->cd("et_wjets_vbf_crSS");
   histos->insert({"hvbf_WSS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+}
+
+double GetZmmSF(float jets, float mj, float pthi, float taupt, float syst) {
+  double aweight = 1.0;
+  if (syst == 0)
+  {
+    if (jets >= 2 && mj > 300 && taupt > 40 && pthi > 50)
+    { //VBF
+      if (mj >= 300 && mj < 700)
+        aweight = 1.070;
+      if (mj >= 700 && mj < 1100)
+        aweight = 1.090;
+      if (mj >= 1100 && mj < 1500)
+        aweight = 1.055;
+      if (mj >= 1500)
+        aweight = 1.015;
+    }
+  }
+  if (syst == 1)
+  {
+    if (jets >= 2 && mj > 300 && taupt > 40 && pthi > 50)
+    { //VBF
+      if (mj >= 300 && mj < 700)
+        aweight = 1.14;
+      if (mj >= 700 && mj < 1100)
+        aweight = 1.18;
+      if (mj >= 1100 && mj < 1500)
+        aweight = 1.11;
+      if (mj >= 1500)
+        aweight = 1.030;
+    }
+  }
+  return aweight;
 }

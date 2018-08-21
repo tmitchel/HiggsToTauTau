@@ -12,12 +12,16 @@ parser.add_option('--data', '-d', action='store_true',
                   help='run on data or MC'
                   )
 parser.add_option('--exe', '-e', action='store',
-                  default='analyzer', dest='exe',
+                  default='Analyze', dest='exe',
                   help='name of executable'
                   )
 parser.add_option('--local', '-l', action='store_true',
                   default=False, dest='local',
                   help='running locally or not'
+                  )
+parser.add_option('--svfit', '-s', action='store_true',
+                  default=False, dest='svfit',
+                  help='are these svfitted files?'
                   )
 (options, args) = parser.parse_args()
 
@@ -29,37 +33,50 @@ else:
 start = time.time()
 if options.local:
     if options.isData:
-    	fileList = [ifile for ifile in glob('root_files/smhet_22feb_SV/*') if '.root' in ifile and 'Data' in ifile]
+    	fileList = [ifile for ifile in glob('root_files/data_svFitted/*') if '.root' in ifile and 'Data' in ifile]
     else:
-	    fileList = [ifile for ifile in glob('root_files/smhet_20march/*') if '.root' in ifile and not 'Data' in ifile]
+	    fileList = [ifile for ifile in glob('root_files/svFitted/*') if '.root' in ifile and not 'Data' in ifile]
     suffix = ' -l'
 else:
     fileList = [ifile for ifile in filter(None, popen('xrdfs root://cmseos.fnal.gov/ ls '+path).read().split('\n'))]
     suffix = ''
-print options.local, options.isData
+
 for ifile in fileList:
     if not 'root' in ifile:
         continue
-    if 'DY' in ifile:
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' ZTT'+suffix, shell=True)
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' ZL'+suffix, shell=True)
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' ZJ'+suffix, shell=True)
+        
+    postfix = '.root'
+    if options.svfit:
+        postfix = '_svFit.root'
+    sample = ifile.split('/')[-1].split(postfix)[0]
+    tosample = ifile.rstrip(sample+postfix)
+
+    if 'DYJets' in ifile:
+        names = ['ZTT', 'ZL', 'ZJ']
     elif 'TT' in ifile:
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' TTT'+suffix, shell=True)
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' TTJ'+suffix, shell=True)
-    elif 'W.root' in ifile or 'W1_' in ifile or 'W2_' in ifile or 'W3_' in ifile or 'W4_' in ifile or 'EWKW' in ifile:
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' W'+suffix, shell=True)
+        names = ['TTT', 'TTJ']
+    elif 'Wjets' in ifile or 'EWKW' in ifile:
+        names = ['W']
     elif 'EWKZ' in ifile:
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' EWKZ'+suffix, shell=True)
-    elif 'HWW_gg' in ifile:
-        name = ifile.split('/')[-1].split('.root')[0]
-        call('./'+options.exe+' '+name+' ggH_hww'+name.split('HWW_gg')[-1]+suffix, shell=True)
-    elif 'HWW_vbf' in ifile:
-        name = ifile.split('/')[-1].split('.root')[0]
-        call('./'+options.exe+' '+name+' qqH_hww'+name.split('HWW_gg')[-1]+suffix, shell=True)
+        names = ['EWKZ']
     elif 'Data' in ifile:
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' Data'+suffix, shell=True)
-    else:
-        call('./'+options.exe+' '+ifile.split('/')[-1].split('.root')[0]+' VV'+suffix, shell=True)
+        names = ['Data']
+    elif 'ggHtoTauTau' in ifile:
+        mass = sample.split('ggHtoTauTau')[-1]
+        names = ['ggH'+mass]
+    elif 'VBFHtoTauTau' in ifile:
+        mass = sample.split('VBFHtoTauTau')[-1]
+        names = ['VBF'+mass]
+    else: 
+        names = ['VV']
+
+    callstring = './%s -p %s -s %s' % (options.exe, tosample, sample)
+    if options.svfit:
+        callstring += ' -S'
+
+    for name in names:
+        tocall = callstring + ' -n %s' % name 
+        call(tocall, shell=True)
+
 end = time.time()
 print 'Processing completed in', end-start, 'seconds.'
