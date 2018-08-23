@@ -439,6 +439,16 @@ int main(int argc, char* argv[]) {
             histos->at("hmjj")->Fill(jets.getDijetMass(), evtwt);
             histos->at("hmsv")->Fill(event.getVisM(), evtwt);
             histos->at("hNGenJets")->Fill(event.getNumGenJets(), evtwt);
+            histos->at("pt_sv")->Fill(event.getPtSV() ,evtwt);
+            histos->at("m_sv")->Fill(event.getMSV(), evtwt);
+            histos->at("Dbkg_VBF")->Fill(event.getDbkg_VBF(), evtwt);
+            histos->at("Phi")->Fill(event.getPhi(), evtwt);
+            histos->at("Phi1")->Fill(event.getPhi1(), evtwt);
+            histos->at("Q2V1")->Fill(event.getQ2V1(), evtwt);
+            histos->at("Q2V2")->Fill(event.getQ2V2(), evtwt);
+            histos->at("costheta1")->Fill(event.getCosTheta1(), evtwt);
+            histos->at("costheta2")->Fill(event.getCosTheta2(), evtwt);
+            histos->at("costhetastar")->Fill(event.getCosThetaStar(), evtwt);
           }
         } else {
           histos->at("htau_pt_SS")->Fill(tau.getPt(), evtwt);
