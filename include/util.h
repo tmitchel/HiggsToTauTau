@@ -1,3 +1,5 @@
+#include <map>
+
 static double luminosity(35870.);
 static std::map<std::string, double> cross_sections {
   {"DYJets", 5765.4},

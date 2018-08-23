@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
   // bool isData = parser.Flag("-d");
 
   if (svFit) {
-    fname += "_svFit.root";
+    fname += "_svFit_mela.root";
   } else {
     fname += ".root";
   }
@@ -330,19 +330,19 @@ int main(int argc, char* argv[]) {
           if (evt_charge == 0) {
             histos_2d->at("h0_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4()+tau.getP4()).M(), evtwt);
           } else {
-            histos_2d->at("h0_SS") -> Fill(tau.getPt(), event.getVisM(), evtwt);
+            histos_2d->at("h0_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
           }
         } // close if signal block
 
         if (qcdRegion) {
-          histos_2d->at("h0_QCD") -> Fill(tau.getPt(), event.getVisM(), evtwt);
+          histos_2d->at("h0_QCD") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
         } // close if qcd block
 
         if (wRegion) {
           if (evt_charge == 0) {
-            histos_2d->at("h0_WOS") -> Fill(tau.getPt(), event.getVisM(), evtwt);
+            histos_2d->at("h0_WOS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
           } else {
-            histos_2d->at("h0_WSS") -> Fill(tau.getPt(), event.getVisM(), evtwt);
+            histos_2d->at("h0_WSS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
           }
         } // close if W block
 
@@ -352,19 +352,19 @@ int main(int argc, char* argv[]) {
           if (evt_charge == 0) {
             histos_2d->at("h1_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("h1_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h1_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
           }
         } // close if signal block
 
         if (qcdRegion) {
-          histos_2d->at("h1_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+          histos_2d->at("h1_QCD") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
         } // close if qcd block
 
         if (wRegion) {
           if (evt_charge == 0) {
-            histos_2d->at("h1_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h1_WOS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("h1_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h1_WSS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
           }
         } // close if W block
 
@@ -374,19 +374,19 @@ int main(int argc, char* argv[]) {
           if (evt_charge == 0) {
             histos_2d->at("h2_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("h2_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h2_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
           }
         } // close if signal block
 
         if (qcdRegion) {
-          histos_2d->at("h2_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+          histos_2d->at("h2_QCD") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
         } // close if qcd block
 
         if (wRegion) {
           if (evt_charge == 0) {
-            histos_2d->at("h2_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h2_WOS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("h2_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h2_WSS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
           }
         } // close if W block
 
