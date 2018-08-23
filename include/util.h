@@ -1,4 +1,3 @@
-
 static double luminosity(35870.);
 static std::map<std::string, double> cross_sections {
   {"DYJets", 5765.4},
@@ -141,8 +140,8 @@ void initHistos_1D(std::unordered_map<std::string, TH1D*>* histos) {
   histos->insert({"Dbkg_VBF", new TH1D("Dbkg_VBF", "Dbkg_VBF", 50, 0., 1.)});
   histos->insert({"Phi", new TH1D("Phi", "Phi", 50, -3.14, 3.14)});
   histos->insert({"Phi1", new TH1D("Phi1", "Phi1", 50, -3.14, 3.14)});
-  histos->insert({"Q2V1", new TH1D("Q2V1", "Q2V1", 1000, 0., 100000000.)});
-  histos->insert({"Q2V2", new TH1D("Q2V2", "Q2V2", 1000, 0., 100000000.)});
+  histos->insert({"Q2V1", new TH1D("Q2V1", "Q2V1", 1000, 0., 1000000.)});
+  histos->insert({"Q2V2", new TH1D("Q2V2", "Q2V2", 1000, 0., 1000000.)});
   histos->insert({"costheta1", new TH1D("costheta1", "costheta1", 50, -1., 1.)});
   histos->insert({"costheta2", new TH1D("costheta2", "costheta2", 50, -1., 1.)});
   histos->insert({"costhetastar", new TH1D("costhetastar", "costhetastar", 50, -1., 1.)});
