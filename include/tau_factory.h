@@ -102,6 +102,7 @@ tau tau_factory::run_factory() {
   t.AgainstLooseMuon = againstMuonLoose3_2;
   t.dmf = decayModeFinding_2;
   t.l2_decayMode = l2_decayMode;
+  t.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_2;
 
   return t;
 }
