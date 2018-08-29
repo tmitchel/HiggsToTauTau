@@ -37,20 +37,14 @@ int main(int argc, char* argv[]) {
 
   CLParser parser(argc, argv);
   bool local = parser.Flag("-l");
-  bool svFit = parser.Flag("-S");
   std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
   std::string syst = parser.Option("-u");
-  std::string fname = path + sample;
+  std::string suffix = parser.Option("-P");
+  std::string fname = path + sample + suffix;
   bool isData = sample.find("Data") != std::string::npos;
   // bool isData = parser.Flag("-d");
-
-  if (svFit) {
-    fname += "_svFit_mela.root";
-  } else {
-    fname += ".root";
-  }
 
   // open input file
   std::cout << "Opening file... " << sample << std::endl;
