@@ -33,9 +33,9 @@ else:
 start = time.time()
 if options.local:
     if options.isData:
-    	fileList = [ifile for ifile in glob('root_files/data_svFitted/*') if '.root' in ifile and 'Data' in ifile]
+    	fileList = [ifile for ifile in glob('root_files/mela_svfit_full/*') if '.root' in ifile and 'Data' in ifile]
     else:
-	    fileList = [ifile for ifile in glob('root_files/svFitted/*') if '.root' in ifile and not 'Data' in ifile]
+	    fileList = [ifile for ifile in glob('root_files/mela_svfit_full/*') if '.root' in ifile and not 'Data' in ifile]
     suffix = ' -l'
 else:
     fileList = [ifile for ifile in filter(None, popen('xrdfs root://cmseos.fnal.gov/ ls '+path).read().split('\n'))]
@@ -44,12 +44,13 @@ else:
 for ifile in fileList:
     if not 'root' in ifile:
         continue
-        
+
     postfix = '.root'
     if options.svfit:
-        postfix = '_svFit.root'
+        postfix = '_svFit_mela.root'
     sample = ifile.split('/')[-1].split(postfix)[0]
     tosample = ifile.rstrip(sample+postfix)
+    print sample
 
     if 'DYJets' in ifile:
         names = ['ZTT', 'ZL', 'ZJ']
@@ -60,13 +61,19 @@ for ifile in fileList:
     elif 'EWKZ' in ifile:
         names = ['EWKZ']
     elif 'Data' in ifile:
-        names = ['Data']
+        names = ['data_obs']
     elif 'ggHtoTauTau' in ifile:
         mass = sample.split('ggHtoTauTau')[-1]
         names = ['ggH'+mass]
     elif 'VBFHtoTauTau' in ifile:
         mass = sample.split('VBFHtoTauTau')[-1]
         names = ['VBF'+mass]
+    elif 'WPlusH' in ifile or 'WMinusH' in ifile:
+        mass = sample.split('HTauTau')[-1]
+        names = ['WH'+mass]
+    elif 'ZH' in ifile:
+        mass = sample.split('ZHTauTau')[-1]
+        names = ['ZH'+mass]
     else: 
         names = ['VV']
 
