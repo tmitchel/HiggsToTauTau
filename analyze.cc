@@ -396,19 +396,19 @@ int main(int argc, char* argv[]) {
           if (evt_charge == 0) {
             histos_2d->at("h3_OS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("hvbf_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h3_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
         } // close if signal block
 
         if (qcdRegion) {
-          histos_2d->at("hvbf_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+          histos_2d->at("h3_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
         } // close if qcd block
 
         if (wRegion) {
           if (evt_charge == 0) {
-            histos_2d->at("hvbf_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h3_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("hvbf_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h3_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
         } // close if W block
 
