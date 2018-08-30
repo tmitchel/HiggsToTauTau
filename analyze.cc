@@ -41,10 +41,14 @@ int main(int argc, char* argv[]) {
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
   std::string syst = parser.Option("-u");
-  std::string suffix = parser.Option("-P");
-  std::string fname = path + sample + suffix;
+  std::string postfix = parser.Option("-P");
+  std::string fname = path + sample + postfix;
   bool isData = sample.find("Data") != std::string::npos;
   // bool isData = parser.Flag("-d");
+  std::string systname = "";
+  if (!syst.empty()) {
+    systname = "_" + syst;
+  }
 
   // open input file
   std::cout << "Opening file... " << sample << std::endl;
@@ -61,9 +65,9 @@ int main(int argc, char* argv[]) {
   auto prefix = "output/";
   std::string filename;
   if (name == sample) {
-    filename = prefix + name + suffix;
+    filename = prefix + name + systname + suffix;
   } else {
-    filename = prefix + sample + std::string("_") + name + suffix;
+    filename = prefix + sample + std::string("_") + name + systname + suffix;
   }
   auto fout = new TFile(filename.c_str(), "RECREATE");
   fout->mkdir("grabbag");
@@ -122,13 +126,22 @@ int main(int argc, char* argv[]) {
   // Final setup:                     //
   // Declare histograms and factories //
   //////////////////////////////////////
-
+  std::map<std::string, std::string> hist_suffix = {
+    {"met_UESDown","_CMS_scale_met_unclustered_13TeVDown"},
+    {"met_UESUp","_CMS_scale_met_unclustered_13TeVUp"},
+    {"met_JESDown","_CMS_scale_met_clustered_13TeVDown"},
+    {"met_JESUp","_CMS_scale_met_clustered_13TeVUp"},
+    {"metphi_UESDown","_CMS_scale_metphi_unclustered_13TeVDown"},
+    {"metphi_UESUp","_CMS_scale_metphi_unclustered_13TeVUp"},
+    {"metphi_JESDown","_CMS_scale_metphi_clustered_13TeVDown"},
+    {"metphi_JESUp","_CMS_scale_metphi_clustered_13TeVUp"}
+  };
   // declare histograms (histogram initializer functions in util.h)
   auto histos = new std::unordered_map<std::string, TH1D*>;
   auto histos_2d = new std::unordered_map<std::string, TH2F*>;
   fout->cd("grabbag");
   initHistos_1D(histos);
-  initHistos_2D(histos_2d, fout, name);
+  initHistos_2D(histos_2d, fout, name, hist_suffix[syst]);
 
   // construct factories
   event_info       event(ntuple, syst);

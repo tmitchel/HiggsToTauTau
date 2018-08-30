@@ -149,7 +149,7 @@ void initHistos_1D(std::unordered_map<std::string, TH1D*>* histos) {
   histos->insert({"costhetastar", new TH1D("costhetastar", "costhetastar", 50, -1., 1.)});
 }
 
-void initHistos_2D(std::unordered_map<std::string, TH2F*>* histos, TFile* fout, std::string name) {
+void initHistos_2D(std::unordered_map<std::string, TH2F*>* histos, TFile* fout, std::string name, std::string suffix) {
 
   Float_t bins0[] = {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400};
   Float_t bins1[] = {0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300};
@@ -171,65 +171,65 @@ void initHistos_2D(std::unordered_map<std::string, TH2F*>* histos, TFile* fout, 
   fout->mkdir("et_ZH");
   fout->mkdir("et_vbf");
   fout->cd("et_0jet");
-  histos->insert({"h0_OS", new TH2F(name.c_str(),"Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
+  histos->insert({"h0_OS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
   fout->cd("et_boosted");
-  histos->insert({"h1_OS", new TH2F(name.c_str(),"Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
+  histos->insert({"h1_OS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
   fout->cd("et_vbf");
-  histos->insert({"h2_OS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h2_OS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
   fout->cd("et_ZH");
-  histos->insert({"h3_OS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h3_OS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
 
   fout->mkdir("et_antiiso_0jet_cr");
   fout->mkdir("et_antiiso_boosted_cr");
   fout->mkdir("et_antiiso_vbf_cr");
   fout->mkdir("et_antiiso_ZH_cr");
   fout->cd("et_antiiso_0jet_cr");
-  histos->insert({"h0_QCD", new TH2F(name.c_str(),"Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
+  histos->insert({"h0_QCD", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
   fout->cd("et_antiiso_boosted_cr");
-  histos->insert({"h1_QCD", new TH2F(name.c_str(),"Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
+  histos->insert({"h1_QCD", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
   fout->cd("et_antiiso_vbf_cr");
-  histos->insert({"h2_QCD", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h2_QCD", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
   fout->cd("et_antiiso_ZH_cr");
-  histos->insert({"h3_QCD", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h3_QCD", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
 
   fout->mkdir("et_wjets_0jet_cr");
   fout->mkdir("et_wjets_boosted_cr");
   fout->mkdir("et_wjets_vbf_cr");
   fout->mkdir("et_wjets_ZH_cr");
   fout->cd("et_wjets_0jet_cr");
-  histos->insert({"h0_WOS", new TH2F(name.c_str(),"Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
+  histos->insert({"h0_WOS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
   fout->cd("et_wjets_boosted_cr");
-  histos->insert({"h1_WOS", new TH2F(name.c_str(),"Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
+  histos->insert({"h1_WOS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
   fout->cd("et_wjets_vbf_cr");
-  histos->insert({"h2_WOS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h2_WOS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
   fout->cd("et_wjets_ZH_cr");
-  histos->insert({"h3_WOS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h3_WOS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
 
   fout->mkdir("et_antiiso_0jet_crSS");
   fout->mkdir("et_antiiso_boosted_crSS");
   fout->mkdir("et_antiiso_vbf_crSS");
   fout->mkdir("et_antiiso_ZH_crSS");
   fout->cd("et_antiiso_0jet_crSS");
-  histos->insert({"h0_SS", new TH2F(name.c_str(),"Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
+  histos->insert({"h0_SS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
   fout->cd("et_antiiso_boosted_crSS");
-  histos->insert({"h1_SS", new TH2F(name.c_str(),"Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
+  histos->insert({"h1_SS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
   fout->cd("et_antiiso_vbf_crSS");
-  histos->insert({"h2_SS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h2_SS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
   fout->cd("et_antiiso_ZH_crSS");
-  histos->insert({"h3_SS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h3_SS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
 
   fout->mkdir("et_wjets_0jet_crSS");
   fout->mkdir("et_wjets_boosted_crSS");
   fout->mkdir("et_wjets_vbf_crSS");
   fout->mkdir("et_wjets_ZH_crSS");
   fout->cd("et_wjets_0jet_crSS");
-  histos->insert({"h0_WSS", new TH2F(name.c_str(),"Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
+  histos->insert({"h0_WSS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_taupt,bins_taupt,binnum0,bins0)});
   fout->cd("et_wjets_boosted_crSS");
-  histos->insert({"h1_WSS", new TH2F(name.c_str(),"Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
+  histos->insert({"h1_WSS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_pth,bins_pth,binnum1,bins1)});
   fout->cd("et_wjets_vbf_crSS");
-  histos->insert({"h2_WSS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h2_WSS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
   fout->cd("et_wjets_ZH_crSS");
-  histos->insert({"h3_WSS", new TH2F(name.c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
+  histos->insert({"h3_WSS", new TH2F((name+suffix).c_str(),"Invariant mass",binnum_mjj,bins_mjj,binnum2,bins2)});
 }
 
 double GetZmmSF(float jets, float mj, float pthi, float taupt, float syst) {
