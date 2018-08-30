@@ -60,7 +60,7 @@ for ifile in fileList:
         names = ['ZTT', 'ZL', 'ZJ']
     elif 'TT' in ifile:
         names = ['TTT', 'TTJ']
-    elif 'Wjets' in ifile or 'EWKW' in ifile:
+    elif 'WJets' in ifile or 'EWKW' in ifile:
         names = ['W']
     elif 'EWKZ' in ifile:
         names = ['EWKZ']
