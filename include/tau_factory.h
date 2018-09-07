@@ -14,7 +14,7 @@ class tau {
 private:
   std::string name = "tau";
   Float_t pt, eta, phi, mass, charge, px, py, pz, dmf, tightIsoMVA, l2_decayMode, gen_match;
-  Bool_t AgainstTightElectron, AgainstLooseMuon, MediumIsoMVA;
+  Bool_t AgainstTightElectron, AgainstVLooseElectron, AgainstTightMuon, AgainstLooseMuon, MediumIsoMVA;
   TLorentzVector p4;
 public:
 
@@ -36,6 +36,8 @@ public:
   Float_t getL2DecayMode()            { return l2_decayMode;          };
   Float_t getGenMatch()               { return gen_match;             };
   Bool_t getAgainstTightElectron()    { return AgainstTightElectron;  };
+  Bool_t getAgainstVLooseElectron()   { return AgainstVLooseElectron; };
+  Bool_t getAgainstTightMuon()        { return AgainstTightMuon;      };
   Bool_t getAgainstLooseMuon()        { return AgainstLooseMuon;      };
   Bool_t getMediumIsoMVA()            { return MediumIsoMVA;          };
   Int_t getCharge()                   { return charge;                };
@@ -59,7 +61,7 @@ tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) :
 class tau_factory {
 private:
   Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, decayModeFinding_2;
-  Float_t byTightIsolationMVArun2v1DBoldDMwLT_2, againstElectronTightMVA6_2, againstMuonLoose3_2;
+  Float_t byTightIsolationMVArun2v1DBoldDMwLT_2, againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2;
   Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, l2_decayMode, gen_match_2;
 
 public:
@@ -85,6 +87,8 @@ tau_factory::tau_factory(TTree* input) {
   input -> SetBranchAddress( "decayModeFinding_2",                      &decayModeFinding_2                     );
   input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_2",   &byTightIsolationMVArun2v1DBoldDMwLT_2  );
   input -> SetBranchAddress( "againstElectronTightMVA6_2",              &againstElectronTightMVA6_2             );
+  input -> SetBranchAddress( "againstElectronVLooseMVA6_2",             &againstElectronVLooseMVA6_2            );
+  input -> SetBranchAddress( "againstMuonTight3_2",                     &againstMuonTight3_2                    );
   input -> SetBranchAddress( "againstMuonLoose3_2",                     &againstMuonLoose3_2                    );
   input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_2",  &byMediumIsolationMVArun2v1DBoldDMwLT_2 );
   input -> SetBranchAddress( "l2_decayMode",                            &l2_decayMode                           );
