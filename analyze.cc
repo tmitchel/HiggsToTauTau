@@ -37,18 +37,17 @@ int main(int argc, char* argv[]) {
 
   CLParser parser(argc, argv);
   bool local = parser.Flag("-l");
-  bool svFit = parser.Flag("-S");
   std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
-  std::string fname = path + sample;
+  std::string syst = parser.Option("-u");
+  std::string postfix = parser.Option("-P");
+  std::string fname = path + sample + postfix;
   bool isData = sample.find("Data") != std::string::npos;
   // bool isData = parser.Flag("-d");
-
-  if (svFit) {
-    fname += "_svFit.root";
-  } else {
-    fname += ".root";
+  std::string systname = "";
+  if (!syst.empty()) {
+    systname = "_" + syst;
   }
 
   // open input file
@@ -66,9 +65,9 @@ int main(int argc, char* argv[]) {
   auto prefix = "output/";
   std::string filename;
   if (name == sample) {
-    filename = prefix + name + suffix;
+    filename = prefix + name + systname + suffix;
   } else {
-    filename = prefix + sample + std::string("_") + name + suffix;
+    filename = prefix + sample + std::string("_") + name + systname + suffix;
   }
   auto fout = new TFile(filename.c_str(), "RECREATE");
   fout->mkdir("grabbag");
@@ -127,20 +126,29 @@ int main(int argc, char* argv[]) {
   // Final setup:                     //
   // Declare histograms and factories //
   //////////////////////////////////////
-
+  std::map<std::string, std::string> hist_suffix = {
+    {"met_UESDown","_CMS_scale_met_unclustered_13TeVDown"},
+    {"met_UESUp","_CMS_scale_met_unclustered_13TeVUp"},
+    {"met_JESDown","_CMS_scale_met_clustered_13TeVDown"},
+    {"met_JESUp","_CMS_scale_met_clustered_13TeVUp"},
+    {"metphi_UESDown","_CMS_scale_metphi_unclustered_13TeVDown"},
+    {"metphi_UESUp","_CMS_scale_metphi_unclustered_13TeVUp"},
+    {"metphi_JESDown","_CMS_scale_metphi_clustered_13TeVDown"},
+    {"metphi_JESUp","_CMS_scale_metphi_clustered_13TeVUp"}
+  };
   // declare histograms (histogram initializer functions in util.h)
   auto histos = new std::unordered_map<std::string, TH1D*>;
   auto histos_2d = new std::unordered_map<std::string, TH2F*>;
   fout->cd("grabbag");
   initHistos_1D(histos);
-  initHistos_2D(histos_2d, fout, name);
+  initHistos_2D(histos_2d, fout, name, hist_suffix[syst]);
 
   // construct factories
-  event_info       event(ntuple);
+  event_info       event(ntuple, syst);
   electron_factory electrons(ntuple);
   tau_factory      taus(ntuple);
-  jet_factory      jets(ntuple);
-  met_factory      met(ntuple);
+  jet_factory      jets(ntuple, syst);
+  met_factory      met(ntuple, syst);
   double n70_count;
 
   // begin the event loop
@@ -329,19 +337,19 @@ int main(int argc, char* argv[]) {
           if (evt_charge == 0) {
             histos_2d->at("h0_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4()+tau.getP4()).M(), evtwt);
           } else {
-            histos_2d->at("h0_SS") -> Fill(tau.getPt(), event.getVisM(), evtwt);
+            histos_2d->at("h0_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
           }
         } // close if signal block
 
         if (qcdRegion) {
-          histos_2d->at("h0_QCD") -> Fill(tau.getPt(), event.getVisM(), evtwt);
+          histos_2d->at("h0_QCD") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
         } // close if qcd block
 
         if (wRegion) {
           if (evt_charge == 0) {
-            histos_2d->at("h0_WOS") -> Fill(tau.getPt(), event.getVisM(), evtwt);
+            histos_2d->at("h0_WOS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
           } else {
-            histos_2d->at("h0_WSS") -> Fill(tau.getPt(), event.getVisM(), evtwt);
+            histos_2d->at("h0_WSS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
           }
         } // close if W block
 
@@ -351,19 +359,19 @@ int main(int argc, char* argv[]) {
           if (evt_charge == 0) {
             histos_2d->at("h1_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("h1_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h1_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
           }
         } // close if signal block
 
         if (qcdRegion) {
-          histos_2d->at("h1_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+          histos_2d->at("h1_QCD") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
         } // close if qcd block
 
         if (wRegion) {
           if (evt_charge == 0) {
-            histos_2d->at("h1_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h1_WOS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("h1_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h1_WSS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
           }
         } // close if W block
 
@@ -373,19 +381,19 @@ int main(int argc, char* argv[]) {
           if (evt_charge == 0) {
             histos_2d->at("h2_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("h2_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h2_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
           }
         } // close if signal block
 
         if (qcdRegion) {
-          histos_2d->at("h2_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+          histos_2d->at("h2_QCD") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
         } // close if qcd block
 
         if (wRegion) {
           if (evt_charge == 0) {
-            histos_2d->at("h2_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h2_WOS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("h2_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h2_WSS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
           }
         } // close if W block
 
@@ -395,19 +403,19 @@ int main(int argc, char* argv[]) {
           if (evt_charge == 0) {
             histos_2d->at("h3_OS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("hvbf_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h3_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
         } // close if signal block
 
         if (qcdRegion) {
-          histos_2d->at("hvbf_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+          histos_2d->at("h3_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
         } // close if qcd block
 
         if (wRegion) {
           if (evt_charge == 0) {
-            histos_2d->at("hvbf_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h3_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           } else {
-            histos_2d->at("hvbf_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+            histos_2d->at("h3_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
           }
         } // close if W block
 
@@ -438,6 +446,16 @@ int main(int argc, char* argv[]) {
             histos->at("hmjj")->Fill(jets.getDijetMass(), evtwt);
             histos->at("hmsv")->Fill(event.getVisM(), evtwt);
             histos->at("hNGenJets")->Fill(event.getNumGenJets(), evtwt);
+            histos->at("pt_sv")->Fill(event.getPtSV() ,evtwt);
+            histos->at("m_sv")->Fill(event.getMSV(), evtwt);
+            histos->at("Dbkg_VBF")->Fill(event.getDbkg_VBF(), evtwt);
+            histos->at("Phi")->Fill(event.getPhi(), evtwt);
+            histos->at("Phi1")->Fill(event.getPhi1(), evtwt);
+            histos->at("Q2V1")->Fill(event.getQ2V1(), evtwt);
+            histos->at("Q2V2")->Fill(event.getQ2V2(), evtwt);
+            histos->at("costheta1")->Fill(event.getCosTheta1(), evtwt);
+            histos->at("costheta2")->Fill(event.getCosTheta2(), evtwt);
+            histos->at("costhetastar")->Fill(event.getCosThetaStar(), evtwt);
           }
         } else {
           histos->at("htau_pt_SS")->Fill(tau.getPt(), evtwt);

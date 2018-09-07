@@ -19,10 +19,14 @@ parser.add_option('--local', '-l', action='store_true',
                   default=False, dest='local',
                   help='running locally or not'
                   )
-parser.add_option('--svfit', '-s', action='store_true',
-                  default=False, dest='svfit',
-                  help='are these svfitted files?'
+parser.add_option('--syst', '-s', action='store_true',
+                  default=False, dest='syst',
+                  help='run systematics as well'
                   )
+parser.add_option('--suffix', '-p', action='store',
+                default='_svFit_mela.root', dest='suffix',
+                help='suffix to strip off root files'
+                )
 (options, args) = parser.parse_args()
 
 if options.isData:
@@ -33,50 +37,61 @@ else:
 start = time.time()
 if options.local:
     if options.isData:
-    	fileList = [ifile for ifile in glob('root_files/data_svFitted/*') if '.root' in ifile and 'Data' in ifile]
+    	fileList = [ifile for ifile in glob('root_files/mela_svfit_full/*') if '.root' in ifile and 'Data' in ifile]
     else:
-	    fileList = [ifile for ifile in glob('root_files/svFitted/*') if '.root' in ifile and not 'Data' in ifile]
+	    fileList = [ifile for ifile in glob('root_files/mela_svfit_full/*') if '.root' in ifile and not 'Data' in ifile]
     suffix = ' -l'
 else:
     fileList = [ifile for ifile in filter(None, popen('xrdfs root://cmseos.fnal.gov/ ls '+path).read().split('\n'))]
     suffix = ''
 
+systs = ['', 'met_UESUp', 'met_UESDown', 'met_JESUp', 'met_JESDown', 'metphi_UESUp', 'metphi_UESDown', 'metphi_JESUp', 'metphi_JESDown', 'mjj_JESUp', 'mjj_JESDown']
+
 for ifile in fileList:
     if not 'root' in ifile:
         continue
-        
-    postfix = '.root'
-    if options.svfit:
-        postfix = '_svFit.root'
+
+    postfix = options.suffix
     sample = ifile.split('/')[-1].split(postfix)[0]
     tosample = ifile.rstrip(sample+postfix)
+    print sample
 
     if 'DYJets' in ifile:
         names = ['ZTT', 'ZL', 'ZJ']
     elif 'TT' in ifile:
         names = ['TTT', 'TTJ']
-    elif 'Wjets' in ifile or 'EWKW' in ifile:
+    elif 'WJets' in ifile or 'EWKW' in ifile:
         names = ['W']
     elif 'EWKZ' in ifile:
         names = ['EWKZ']
     elif 'Data' in ifile:
-        names = ['Data']
+        names = ['data_obs']
     elif 'ggHtoTauTau' in ifile:
         mass = sample.split('ggHtoTauTau')[-1]
         names = ['ggH'+mass]
     elif 'VBFHtoTauTau' in ifile:
         mass = sample.split('VBFHtoTauTau')[-1]
         names = ['VBF'+mass]
+    elif 'WPlusH' in ifile or 'WMinusH' in ifile:
+        mass = sample.split('HTauTau')[-1]
+        names = ['WH'+mass]
+    elif 'ZH' in ifile:
+        mass = sample.split('ZHTauTau')[-1]
+        names = ['ZH'+mass]
     else: 
         names = ['VV']
 
-    callstring = './%s -p %s -s %s' % (options.exe, tosample, sample)
-    if options.svfit:
-        callstring += ' -S'
+    callstring = './%s -p %s -s %s -P %s' % (options.exe, tosample, sample, postfix)
 
-    for name in names:
-        tocall = callstring + ' -n %s' % name 
-        call(tocall, shell=True)
+    if options.syst:
+        for isyst in systs:
+            for name in names:
+                tocall = callstring + ' -n %s -u %s' % (name, isyst)
+                call(tocall, shell=True)
+    else:
+        for name in names:
+            tocall = callstring + ' -n %s' % name 
+            call(tocall, shell=True)
 
 end = time.time()
 print 'Processing completed in', end-start, 'seconds.'

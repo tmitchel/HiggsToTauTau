@@ -4,22 +4,25 @@
 #include "TTree.h"
 #include "TLorentzVector.h"
 
+class electron_factory; // forward declare so it can befriend electrons
+
 //////////////////////////////////////////////////
 // Purpose: To hold a single composite electron //
 //////////////////////////////////////////////////
 class electron {
+  friend electron_factory;
 private:
-public:
   std::string name = "electron";
   Float_t pt, eta, phi, mass, charge, px, py, pz, iso, gen_match;
   TLorentzVector p4;
+public:
 
   electron(Float_t, Float_t, Float_t, Float_t, Float_t);
   ~electron() {};
 
   // getters
-  std::string getName()   { return name;      };
-  TLorentzVector getP4()  { return p4;        };
+  std::string getName()     { return name;      };
+  TLorentzVector getP4()    { return p4;        };
   Float_t getPt()           { return pt;        };
   Float_t getEta()          { return eta;       };
   Float_t getPhi()          { return phi;       };
@@ -30,18 +33,6 @@ public:
   Float_t getIso()          { return iso;       };
   Float_t getGenMatch()     { return gen_match; };
   Int_t getCharge()         { return charge;    };
-
-  // setters
-  void setPt(Float_t Pt)             { pt = Pt; };
-  void setEta(Float_t Eta)           { eta = Eta; };
-  void setPhi(Float_t Phi)           { phi = Phi; };
-  void setMass(Float_t M)            { mass = M; };
-  void setCharge(Float_t Charge)     { charge = Charge; };
-  void setPx(Float_t Px)             { px = Px; };
-  void setPy(Float_t Py)             { py = Py; };
-  void setPz(Float_t Pz)             { pz = Pz; };
-  void setIso(Float_t Iso)           { iso = Iso; };
-  void setGenMatch(Float_t GenMatch) { gen_match = GenMatch; };
 };
 
 // initialize member data and set TLorentzVector
@@ -86,11 +77,11 @@ electron_factory::electron_factory(TTree* input) {
 // create electron object and set member data
 electron electron_factory::run_factory() {
   electron el(pt_1, eta_1, phi_1, m_1, q_1);
-  el.setPx(px_1);
-  el.setPy(py_1);
-  el.setPz(pz_1);
-  el.setIso(iso_1);
-  el.setGenMatch(gen_match_1);
+  el.px = px_1;
+  el.py = py_1;
+  el.pz = pz_1;
+  el.iso = iso_1;
+  el.gen_match = gen_match_1;
 
   return el;
 }

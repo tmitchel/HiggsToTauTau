@@ -4,16 +4,19 @@
 #include "TTree.h"
 #include "TLorentzVector.h"
 
+class tau_factory;
+
 ////////////////////////////////////////////////////
 // Purpose: To hold a single composite tau lepton //
 ////////////////////////////////////////////////////
 class tau {
+  friend tau_factory;
 private:
-public:
   std::string name = "tau";
   Float_t pt, eta, phi, mass, charge, px, py, pz, dmf, tightIsoMVA, l2_decayMode, gen_match;
   Bool_t AgainstTightElectron, AgainstLooseMuon, MediumIsoMVA;
   TLorentzVector p4;
+public:
 
   tau(Float_t, Float_t, Float_t, Float_t, Float_t);
   ~tau() {};
@@ -36,23 +39,6 @@ public:
   Bool_t getAgainstLooseMuon()        { return AgainstLooseMuon;      };
   Bool_t getMediumIsoMVA()            { return MediumIsoMVA;          };
   Int_t getCharge()                   { return charge;                };
-
-  // setters
-  void setPt(Float_t Pt)                            { pt = Pt;                            };
-  void setEta(Float_t Eta)                          { eta = Eta;                          };
-  void setPhi(Float_t Phi)                          { phi = Phi;                          };
-  void setMass(Float_t M)                           { mass = M;                           };
-  void setCharge(Float_t Charge)                    { charge = Charge;                    };
-  void setPx(Float_t Px)                            { px = Px;                            };
-  void setPy(Float_t Py)                            { py = Py;                            };
-  void setPz(Float_t Pz)                            { pz = Pz;                            };
-  void setDecayModeFinding(Float_t DMF)             { dmf = DMF;                          };
-  void setTightIsoMVA(Float_t newIsoTight)          { tightIsoMVA = newIsoTight;          };
-  void setL2DecayMode(Float_t L2_decayMode)         { l2_decayMode = L2_decayMode;        };
-  void setGenMatch(Float_t GenMatch)                { gen_match = GenMatch;               };
-  void setAgainstTightElectron(Bool_t newAElTight)  { AgainstTightElectron = newAElTight; };
-  void setAgainstLooseMuon(Bool_t newAMuLoose)      { AgainstLooseMuon = newAMuLoose;     };
-  void setMediumIsoMVA(Bool_t newIsoMed)            { MediumIsoMVA = newIsoMed;           };
 };
 
 // initialize member data and set TLorentzVector
@@ -107,16 +93,16 @@ tau_factory::tau_factory(TTree* input) {
 // create electron object and set member data
 tau tau_factory::run_factory() {
   tau t(pt_2, eta_2, phi_2, m_2, q_2);
-  t.setPx(px_2);
-  t.setPy(py_2);
-  t.setPz(pz_2);
-  t.setGenMatch(gen_match_2);
-  t.setTightIsoMVA(byTightIsolationMVArun2v1DBoldDMwLT_2);
-  t.setAgainstTightElectron(againstElectronTightMVA6_2);
-  t.setAgainstLooseMuon(againstMuonLoose3_2);
-  t.setMediumIsoMVA(byMediumIsolationMVArun2v1DBoldDMwLT_2);
-  t.setDecayModeFinding(decayModeFinding_2);
-  t.setL2DecayMode(l2_decayMode);
+  t.px = px_2;
+  t.py = py_2;
+  t.pz = pz_2;
+  t.gen_match = gen_match_2;
+  t.tightIsoMVA = byTightIsolationMVArun2v1DBoldDMwLT_2;
+  t.AgainstTightElectron = againstElectronTightMVA6_2;
+  t.AgainstLooseMuon = againstMuonLoose3_2;
+  t.dmf = decayModeFinding_2;
+  t.l2_decayMode = l2_decayMode;
+  t.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_2;
 
   return t;
 }
