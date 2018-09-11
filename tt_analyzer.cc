@@ -17,6 +17,7 @@
 #include "RooMsgService.h"
 
 // user includes
+#include "include/util.h"
 #include "include/event_info.h"
 #include "include/ditau_factory.h"
 #include "include/electron_factory.h"
@@ -25,7 +26,6 @@
 #include "include/SF_factory.h"
 #include "include/tauSF.h"
 #include "include/btagSF.h"
-#include "include/util.h"
 #include "include/LumiReweightingStandAlone.h"
 #include "include/CLParser.h"
 
@@ -73,12 +73,15 @@ int main(int argc, char* argv[]) {
   auto fout = new TFile(filename.c_str(), "RECREATE");
   fout->mkdir("grabbag");
 
+  // initialize Helper class
+  Helper helper(fout, name, syst);
+
   // get normalization (lumi & xs are in util.h)
   double norm;
   if (isData)
     norm = 1.0;
   else
-    norm = luminosity * cross_sections[sample] / gen_number;
+    norm = helper.getLuminosity() * helper.getCrossSection(sample) / gen_number;
 
   ///////////////////////////////////////////////
   // Scale Factors:                            //
@@ -124,14 +127,12 @@ int main(int argc, char* argv[]) {
     {"metphi_JESUp","_CMS_scale_metphi_clustered_13TeVUp"}
   };
   // declare histograms (histogram initializer functions in util.h)
-  auto histos = new std::unordered_map<std::string, TH1D*>;
-  auto histos_2d = new std::unordered_map<std::string, TH2F*>;
+  auto histos = helper.getHistos1D();
+  auto histos_2d = helper.getHistos2D();
   fout->cd("grabbag");
-  initHistos_1D(histos);
-  initHistos_2D(histos_2d, fout, name, hist_suffix[syst]);
 
   // construct factories
-  event_info       event(ntuple, syst);
+  event_info       event(ntuple, syst, "tt");
   ditau_factory    ditaus(ntuple);
   jet_factory      jets(ntuple, syst);
   met_factory      met(ntuple, syst);
