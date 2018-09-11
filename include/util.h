@@ -162,7 +162,17 @@ Helper::Helper(TFile *fout, std::string name, std::string syst) : luminosity(358
     {"costheta2", new TH1F("costheta2", "costheta2", 50, -1., 1.)},
     {"costhetastar", new TH1F("costhetastar", "costhetastar", 50, -1., 1.)},
 
-    // systematics
+  };
+
+  systematics = {
+    {"met_UESDown", "_CMS_scale_met_unclustered_13TeVDown"},
+    {"met_UESUp", "_CMS_scale_met_unclustered_13TeVUp"},
+    {"met_JESDown", "_CMS_scale_met_clustered_13TeVDown"},
+    {"met_JESUp", "_CMS_scale_met_clustered_13TeVUp"},
+    {"metphi_UESDown", "_CMS_scale_metphi_unclustered_13TeVDown"},
+    {"metphi_UESUp", "_CMS_scale_metphi_unclustered_13TeVUp"},
+    {"metphi_JESDown", "_CMS_scale_metphi_clustered_13TeVDown"},
+    {"metphi_JESUp", "_CMS_scale_metphi_clustered_13TeVUp"}
   };
 
   Float_t bins0[] = {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400};
@@ -250,17 +260,6 @@ Helper::Helper(TFile *fout, std::string name, std::string syst) : luminosity(358
   histos_2d.insert({"h2_WSS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
   fout->cd("et_wjets_ZH_crSS");
   histos_2d.insert({"h3_WSS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
-
-  systematics = {
-    {"met_UESDown", "_CMS_scale_met_unclustered_13TeVDown"},
-    {"met_UESUp", "_CMS_scale_met_unclustered_13TeVUp"},
-    {"met_JESDown", "_CMS_scale_met_clustered_13TeVDown"},
-    {"met_JESUp", "_CMS_scale_met_clustered_13TeVUp"},
-    {"metphi_UESDown", "_CMS_scale_metphi_unclustered_13TeVDown"},
-    {"metphi_UESUp", "_CMS_scale_metphi_unclustered_13TeVUp"},
-    {"metphi_JESDown", "_CMS_scale_metphi_clustered_13TeVDown"},
-    {"metphi_JESUp", "_CMS_scale_metphi_clustered_13TeVUp"}
-  };
 }
 
 double GetZmmSF(float jets, float mj, float pthi, float taupt, float syst) {

@@ -131,9 +131,9 @@ int main(int argc, char* argv[]) {
   //////////////////////////////////////
 
   // declare histograms (histogram initializer functions in util.h)
+  fout->cd("grabbag");
   auto histos = helper.getHistos1D();
   auto histos_2d = helper.getHistos2D();
-  fout->cd("grabbag");
 
   // construct factories
   event_info       event(ntuple, syst, "et");
