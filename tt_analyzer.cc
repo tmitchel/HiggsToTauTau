@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
   }
   auto fout = new TFile(filename.c_str(), "RECREATE");
   fout->mkdir("grabbag");
+  fout->cd("grabbag");
 
   // initialize Helper class
   Helper helper(fout, name, syst);
