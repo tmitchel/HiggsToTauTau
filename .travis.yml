@@ -1,0 +1,3 @@
+language: cpp
+sudo: enabled
+script: ./build et_analyzer.cc test_et
