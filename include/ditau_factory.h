@@ -15,7 +15,7 @@ class tau {
 private:
   std::string name = "tau";
   Float_t pt, eta, phi, mass, charge, px, py, pz, dmf, tightIsoMVA, l2_decayMode, gen_match;
-  Bool_t AgainstTightElectron, AgainstLooseMuon, MediumIsoMVA, LooseIsoMVA;
+  Bool_t AgainstTightElectron, AgainstLooseMuon, MediumIsoMVA, LooseIsoMVA, VLooseIsoMVA;
   TLorentzVector p4;
 public:
 
@@ -39,8 +39,9 @@ public:
   Bool_t getAgainstTightElectron()    { return AgainstTightElectron;  };
   Bool_t getAgainstLooseMuon()        { return AgainstLooseMuon;      };
   Bool_t getMediumIsoMVA()            { return MediumIsoMVA;          };
-  Bool_t getLooseIso()                { return LooseIsoMVA;           };
-  Int_t getCharge()                   { return charge;                };
+  Bool_t getLooseIsoMVA()             { return LooseIsoMVA;           };
+  Bool_t getVLooseIsoMVA()            { return VLooseIsoMVA;          };
+  Int_t getCharge() { return charge; };
 };
 
 // initialize member data and set TLorentzVector
@@ -62,10 +63,10 @@ class ditau_factory {
 private:
   Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, iso_1, q_1, mt_1, decayModeFinding_1;
   Float_t byTightIsolationMVArun2v1DBoldDMwLT_1, againstElectronTightMVA6_1, againstMuonLoose3_1;
-  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_1, l2_decayMode_1, gen_match_1, byLooseIsolationMVArun2v1DBoldDMwLT_1;
+  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_1, l2_decayMode_1, gen_match_1, byLooseIsolationMVArun2v1DBoldDMwLT_1, byVLooseIsolationMVArun2v1DBoldDMwLT_1;
   Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, decayModeFinding_2;
   Float_t byTightIsolationMVArun2v1DBoldDMwLT_2, againstElectronTightMVA6_2, againstMuonLoose3_2;
-  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, l2_decayMode_2, gen_match_2, byLooseIsolationMVArun2v1DBoldDMwLT_2;
+  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, l2_decayMode_2, gen_match_2, byLooseIsolationMVArun2v1DBoldDMwLT_2, byVLooseIsolationMVArun2v1DBoldDMwLT_2;
 
 public:
   ditau_factory (TTree*);
@@ -90,7 +91,8 @@ ditau_factory::ditau_factory(TTree* input) {
   input -> SetBranchAddress( "decayModeFinding_1",                      &decayModeFinding_1                     );
   input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_1",   &byTightIsolationMVArun2v1DBoldDMwLT_1  );
   input -> SetBranchAddress( "byLooseIsolationMVArun2v1DBoldDMwLT_1",   &byLooseIsolationMVArun2v1DBoldDMwLT_1  );
-  input -> SetBranchAddress( "againstElectronTightMVA6_1",              &againstElectronTightMVA6_1);
+  input -> SetBranchAddress( "byVLooseIsolationMVArun2v1DBoldDMwLT_1",  &byVLooseIsolationMVArun2v1DBoldDMwLT_1 );
+  input -> SetBranchAddress( "againstElectronTightMVA6_1",              &againstElectronTightMVA6_1             );
   input -> SetBranchAddress( "againstMuonLoose3_1",                     &againstMuonLoose3_1                    );
   input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_1",  &byMediumIsolationMVArun2v1DBoldDMwLT_1 );
   input -> SetBranchAddress( "l2_decayMode_1",                          &l2_decayMode_1                         );
@@ -108,6 +110,7 @@ ditau_factory::ditau_factory(TTree* input) {
   input -> SetBranchAddress( "decayModeFinding_2",                      &decayModeFinding_2                     );
   input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_2",   &byTightIsolationMVArun2v1DBoldDMwLT_2  );
   input -> SetBranchAddress( "byLooseIsolationMVArun2v1DBoldDMwLT_2",   &byLooseIsolationMVArun2v1DBoldDMwLT_2  );
+  input -> SetBranchAddress( "byVLooseIsolationMVArun2v1DBoldDMwLT_2",  &byVLooseIsolationMVArun2v1DBoldDMwLT_2 );
   input -> SetBranchAddress( "againstElectronTightMVA6_2",              &againstElectronTightMVA6_2             );
   input -> SetBranchAddress( "againstMuonLoose3_2",                     &againstMuonLoose3_2                    );
   input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_2",  &byMediumIsolationMVArun2v1DBoldDMwLT_2 );

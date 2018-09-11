@@ -193,7 +193,7 @@ int main(int argc, char* argv[]) {
 
     // tau against electron/muon selection
     if (tau1.getAgainstTightElectron() || tau2.getAgainstTightElectron() || tau1.getAgainstLooseMuon() || tau2.getAgainstLooseMuon()) 
-      histos->at("cutflow")->Fill(4, 1.);
+      histos->at("cutflow")->Fill(3, 1.);
     else continue;
 
     // |eta| < 2.1
@@ -202,10 +202,6 @@ int main(int argc, char* argv[]) {
 
     // dR(t1, t2) selection
     if (tau1.getP4().DeltaR(tau2.getP4())) histos->at("cutflow")->Fill(5, 1.);
-    else continue;
-
-    // tau isolation selection
-    if (tau1.getLooseIso() || tau2.getLooseIso()) histos->at("cutflow")->Fill(6, 1.);
     else continue;
 
     // finally, apply vetos
@@ -299,8 +295,9 @@ int main(int argc, char* argv[]) {
 
     // create regions
     bool signalRegion  = (tau1.getTightIsoMVA()  &&  tau2.getTightIsoMVA());
-    bool antiIsoRegion = (tau1.getMediumIsoMVA() && !tau2.getTightIsoMVA() && tau2.getLooseIso()) 
-                      || (tau2.getMediumIsoMVA() && !tau1.getTightIsoMVA() && tau1.getLooseIso());
+    bool antiIsoRegion = (tau1.getMediumIsoMVA() && !tau2.getTightIsoMVA() && tau2.getLooseIsoMVA()) 
+                      || (tau2.getMediumIsoMVA() && !tau1.getTightIsoMVA() && tau1.getLooseIsoMVA());
+    bool qcdRegion = (tau1.getDecayModeFinding() == 1 && tau2.getDecayModeFinding() == 1 && tau1.getVLooseIsoMVA() && tau2.getVLooseIsoMVA());
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
