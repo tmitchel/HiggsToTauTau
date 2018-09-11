@@ -58,11 +58,11 @@ static std::map<std::string, double> cross_sections {
 };
 
 // do the mt calculation
-static Float_t calculate_mt(electron* const el, Float_t met_x, Float_t met_y, Float_t met_pt) {
+Float_t calculate_mt(electron* const el, Float_t met_x, Float_t met_y, Float_t met_pt) {
   return sqrt(pow(el->getPt() + met_pt, 2) - pow(el->getPx() + met_x, 2) - pow(el->getPy() + met_y, 2));
 }
 
-static Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) {
+Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) {
   return sqrt(pow(eta1-eta2, 2) + pow(phi1-phi2, 2));
 }
 
