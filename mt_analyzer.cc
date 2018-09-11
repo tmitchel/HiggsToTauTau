@@ -17,13 +17,14 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "include/event_info_mt.h"
+#include "include/util.h"
+#include "include/event_info.h"
 #include "include/tau_factory.h"
 #include "include/muon_factory.h"
 #include "include/jet_factory.h"
 #include "include/met_factory.h"
 #include "include/SF_factory.h"
-#include "include/util_mt.h"
+// #include "include/util_mt.h"
 #include "include/btagSF.h"
 #include "include/LumiReweightingStandAlone.h"
 #include "include/CLParser.h"
@@ -71,13 +72,17 @@ int main(int argc, char* argv[]) {
   }
   auto fout = new TFile(filename.c_str(), "RECREATE");
   fout->mkdir("grabbag");
+  fout->cd("grabbag");
+
+  // initialize Helper class
+  Helper helper(fout, name, syst);
 
   // get normalization (lumi & xs are in util.h)
   double norm;
   if (isData)
     norm = 1.0;
   else
-    norm = luminosity * cross_sections[sample] / gen_number;
+    norm = helper.getLuminosity() * helper.getCrossSection(sample) / gen_number;
 
   ///////////////////////////////////////////////
   // Scale Factors:                            //
@@ -120,25 +125,14 @@ int main(int argc, char* argv[]) {
   // Final setup:                     //
   // Declare histograms and factories //
   //////////////////////////////////////
-  std::map<std::string, std::string> hist_suffix = {
-    {"met_UESDown","_CMS_scale_met_unclustered_13TeVDown"},
-    {"met_UESUp","_CMS_scale_met_unclustered_13TeVUp"},
-    {"met_JESDown","_CMS_scale_met_clustered_13TeVDown"},
-    {"met_JESUp","_CMS_scale_met_clustered_13TeVUp"},
-    {"metphi_UESDown","_CMS_scale_metphi_unclustered_13TeVDown"},
-    {"metphi_UESUp","_CMS_scale_metphi_unclustered_13TeVUp"},
-    {"metphi_JESDown","_CMS_scale_metphi_clustered_13TeVDown"},
-    {"metphi_JESUp","_CMS_scale_metphi_clustered_13TeVUp"}
-  };
+
   // declare histograms (histogram initializer functions in util.h)
-  auto histos = new std::unordered_map<std::string, TH1D*>;
-  auto histos_2d = new std::unordered_map<std::string, TH2F*>;
   fout->cd("grabbag");
-  initHistos_1D(histos);
-  initHistos_2D(histos_2d, fout, name, hist_suffix[syst]);
+  auto histos = helper.getHistos1D();
+  auto histos_2d = helper.getHistos2D();
 
   // construct factories
-  event_info       event(ntuple, syst);
+  event_info       event(ntuple, syst, "mt");
   muon_factory     muons(ntuple);
   tau_factory      taus(ntuple);
   jet_factory      jets(ntuple, syst);
@@ -200,15 +194,11 @@ int main(int argc, char* argv[]) {
     else continue;
 
     // low energy muon passes IsoMu19Tau20
-    if (muon.getPt()<=23 && (event.getPassIsoMu19Tau20() && event.getMatchIsoMu19Tau20_1() && event.getFilterIsoMu19Tau20_1() &&event.getMatchIsoMu19Tau20_2() && event.getFilterIsoMu19Tau20_2()))
+    if (muon.getPt()<=23 && (event.getPassCrossTrigger()))
 	histos->at("cutflow") -> Fill(2., 1);
     // high energy muon passes IsoMu22 || IsoTkMu22 || IsoMu22eta2p1 || IsoTkMu22eta2p1
-    else if(muon.getPt()>23 && 
-	    (event.getPassIsoMu22() && event.getMatchIsoMu22() && event.getFilterIsoMu22()) &&
-	    (event.getPassIsoTkMu22() && event.getMatchIsoTkMu22() && event.getFilterIsoTkMu22()) &&
-	    (event.getPassIsoMu22eta2p1() && event.getMatchIsoMu22eta2p1() && event.getFilterIsoMu22eta2p1()) &&
-	    (event.getPassIsoTkMu22eta2p1() && event.getMatchIsoTkMu22eta2p1() && event.getFilterIsoTkMu22eta2p1())
-	    )	histos->at("cutflow") -> Fill(2., 1);
+    else if(muon.getPt()>23 && event.getPassIsoMu22() && event.getPassIsoTkMu22() && event.getPassIsoMu22eta2p1() && event.getPassIsoTkMu22eta2p1())
+    	histos->at("cutflow") -> Fill(2., 1);
     else continue;
 
     // tau pT > 30 and |eta| < 2.3
@@ -310,11 +300,11 @@ int main(int argc, char* argv[]) {
 
     histos->at("cutflow") -> Fill(11, 1.);
 
-    // calculate mt (calculate_mt in util.h)
+    // calculate mt
     double met_x = met.getMet() * cos(met.getMetPhi());
     double met_y = met.getMet() * sin(met.getMetPhi());
     double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-    double mt = calculate_mt(&muon, met_x, met_y, met_pt);
+    double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getPx() + met_x, 2) - pow(muon.getPy() + met_y, 2));
     int evt_charge = tau.getCharge() + muon.getCharge();
 
     // DK
@@ -448,7 +438,7 @@ int main(int argc, char* argv[]) {
         if (evt_charge == 0) {
           // fill histograms
           histos->at("cutflow")->Fill(9., 1.);
-          if (deltaR(muon.getEta(), muon.getPhi(), tau.getEta(), tau.getPhi()) > 0.5) {
+          if (helper.deltaR(muon.getEta(), muon.getPhi(), tau.getEta(), tau.getPhi()) > 0.5) {
             histos->at("cutflow")->Fill(10., 1.);
             histos->at("hmu_pt")->Fill(muon.getPt(), evtwt);
             histos->at("hmu_eta")->Fill(muon.getEta(), evtwt);
@@ -463,7 +453,6 @@ int main(int argc, char* argv[]) {
             histos->at("hmt")->Fill(mt, evtwt);
             histos->at("hnjets")->Fill(jets.getNjets(), evtwt);
             histos->at("hmjj")->Fill(jets.getDijetMass(), evtwt);
-            histos->at("hmsv")->Fill(event.getVisM(), evtwt);
             histos->at("hNGenJets")->Fill(event.getNumGenJets(), evtwt);
             histos->at("pt_sv")->Fill(event.getPtSV() ,evtwt);
             histos->at("m_sv")->Fill(event.getMSV(), evtwt);
@@ -481,7 +470,6 @@ int main(int argc, char* argv[]) {
           histos->at("hmu_pt_SS")->Fill(muon.getPt(), evtwt);
           histos->at("htau_phi_SS")->Fill(tau.getPhi(), evtwt);
           histos->at("hmu_phi_SS")->Fill(muon.getPhi(), evtwt);
-          histos->at("hmsv_SS")->Fill(event.getVisM(), evtwt);
           histos->at("hmet_SS")->Fill(met.getMet(), evtwt);
           histos->at("hmt_SS")->Fill(mt, evtwt);
           histos->at("hmjj_SS")->Fill(jets.getDijetMass(), evtwt);
@@ -492,7 +480,6 @@ int main(int argc, char* argv[]) {
         histos->at("hmu_pt_QCD")->Fill(muon.getPt(), evtwt);
         histos->at("htau_phi_QCD")->Fill(tau.getPhi(), evtwt);
         histos->at("hmu_phi_QCD")->Fill(muon.getPhi(), evtwt);
-        histos->at("hmsv_QCD")->Fill(event.getVisM(), evtwt);
         histos->at("hmet_QCD")->Fill(met.getMet(), evtwt);
         histos->at("hmt_QCD")->Fill(mt, evtwt);
         histos->at("hmjj_QCD")->Fill(jets.getDijetMass(), evtwt);
@@ -503,7 +490,6 @@ int main(int argc, char* argv[]) {
           histos->at("hmu_pt_WOS")->Fill(muon.getPt(), evtwt);
           histos->at("htau_phi_WOS")->Fill(tau.getPhi(), evtwt);
           histos->at("hmu_phi_WOS")->Fill(muon.getPhi(), evtwt);
-          histos->at("hmsv_WOS")->Fill(event.getVisM(), evtwt);
           histos->at("hmet_WOS")->Fill(met.getMet(), evtwt);
           histos->at("hmt_WOS")->Fill(mt, evtwt);
           histos->at("hmjj_WOS")->Fill(jets.getDijetMass(), evtwt);
@@ -512,7 +498,6 @@ int main(int argc, char* argv[]) {
           histos->at("hmu_pt_WSS")->Fill(muon.getPt(), evtwt);
           histos->at("htau_phi_WSS")->Fill(tau.getPhi(), evtwt);
           histos->at("hmu_phi_WSS")->Fill(muon.getPhi(), evtwt);
-          histos->at("hmsv_WSS")->Fill(event.getVisM(), evtwt);
           histos->at("hmet_WSS")->Fill(met.getMet(), evtwt);
           histos->at("hmt_WSS")->Fill(mt, evtwt);
           histos->at("hmjj_WSS")->Fill(jets.getDijetMass(), evtwt);

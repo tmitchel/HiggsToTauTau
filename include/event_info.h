@@ -7,21 +7,32 @@ private:
   Float_t genpX, genpY, genM, genpT, numGenJets, genweight, gen_Higgs_pt, gen_Higgs_mass; // gen
   Float_t npv, npu, rho, extramuon_veto, extraelec_veto;  // event
   Float_t matchEle25, filterEle25, passEle25; // etau trigger
-  Float_t passDoubleTauCmbIso35, matchDoubleTauCmbIso35_1, filterDoubleTauCmbIso35_1, matchDoubleTauCmbIso35_2, filterDoubleTauCmbIso35_2;
-  Float_t passDoubleTau35, matchDoubleTau35_1, filterDoubleTau35_1, matchDoubleTau35_2, filterDoubleTau35_2;
+  Float_t passDoubleTauCmbIso35, matchDoubleTauCmbIso35_1, filterDoubleTauCmbIso35_1, matchDoubleTauCmbIso35_2, filterDoubleTauCmbIso35_2; // tt trigger
+  Float_t passDoubleTau35, matchDoubleTau35_1, filterDoubleTau35_1, matchDoubleTau35_2, filterDoubleTau35_2;                               // tt trigger
+  Float_t matchIsoMu19Tau20_1, matchIsoMu19Tau20_2, filterIsoMu19Tau20_1, filterIsoMu19Tau20_2, passIsoMu19Tau20; // cross trigger
+  Float_t matchIsoMu22_1, filterIsoMu22_1, passIsoMu22;                         // single muon trigger
+  Float_t matchIsoTkMu22_1, filterIsoTkMu22_1, passIsoTkMu22;                   // single muon trigger
+  Float_t matchIsoMu22eta2p1_1, filterIsoMu22eta2p1_1, passIsoMu22eta2p1;       // single muon trigger
+  Float_t matchIsoTkMu22eta2p1_1, filterIsoTkMu22eta2p1_1, passIsoTkMu22eta2p1; // single muon trigger
   Float_t m_sv, pt_sv; // SVFit
-  Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2; // MELA
-  Float_t ME_sm_VBF, ME_bkg; // More MELA
+  Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
+  Float_t ME_sm_VBF, ME_bkg;                                                                                // MELA
   Int_t run, lumi;
   ULong64_t evt;
 
 public:
-  event_info (TTree*, std::string);
+  event_info (TTree*, std::string, std::string);
   virtual ~event_info () {};
 
   // tautau Trigger Info
+  Bool_t getPassEle25();
   Bool_t getPassDoubleTauCmbIso35();
   Bool_t getPassDoubleTau35();
+  Bool_t getPassCrossTrigger();
+  Bool_t getPassIsoMu22();
+  Bool_t getPassIsoTkMu22();
+  Bool_t getPassIsoMu22eta2p1();
+  Bool_t getPassIsoTkMu22eta2p1();
 
   // Event Info
   Float_t getNPV()          { return npv;             };
@@ -42,11 +53,6 @@ public:
   Float_t getGenWeight()    { return genweight;       };
   Float_t getGenHiggsPt()   { return gen_Higgs_pt;    };
   Float_t getGenHiggsMass() { return gen_Higgs_mass;  };
-
-  // etau Trigger Info
-  Float_t getMatchEle25()   { return matchEle25;      };
-  Float_t getFilterEle25()  { return filterEle25;     };
-  Float_t getPassEle25()    { return passEle25;       };
 
   // SVFit Info
   Float_t getMSV()          { return m_sv;            };
@@ -69,7 +75,7 @@ public:
 };
 
 // read data from trees into member variables
-event_info::event_info(TTree* input, std::string syst) {
+event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   auto m_sv_name("m_sv"), pt_sv_name("pt_sv");
   if (syst.find(m_sv_name) != std::string::npos) {
     m_sv_name = syst.c_str();
@@ -94,9 +100,6 @@ event_info::event_info(TTree* input, std::string syst) {
   input -> SetBranchAddress( "genweight"     , &genweight      );
   input -> SetBranchAddress( "gen_Higgs_pt"  , &gen_Higgs_pt   );
   input -> SetBranchAddress( "gen_Higgs_mass", &gen_Higgs_mass );
-  input -> SetBranchAddress( "matchEle25"    , &matchEle25     );
-  input -> SetBranchAddress( "filterEle25"   , &filterEle25    );
-  input -> SetBranchAddress( "passEle25"     , &passEle25      );
   input -> SetBranchAddress( "Dbkg_VBF"      , &Dbkg_VBF       );
   input -> SetBranchAddress( "Dbkg_ggH"      , &Dbkg_ggH       );
   input -> SetBranchAddress( "Dbkg_ZH"       , &Dbkg_ZH        );
@@ -111,16 +114,53 @@ event_info::event_info(TTree* input, std::string syst) {
   input -> SetBranchAddress( "ME_sm_VBF"     , &ME_sm_VBF      );
   input -> SetBranchAddress( "ME_bkg"        , &ME_bkg         );
 
-  input -> SetBranchAddress( "passDoubleTauCmbIso35"    , &passDoubleTauCmbIso35      );
-  input -> SetBranchAddress( "matchDoubleTauCmbIso35_1" , &matchDoubleTauCmbIso35_1   );
-  input -> SetBranchAddress( "filterDoubleTauCmbIso35_1", &filterDoubleTauCmbIso35_1  );
-  input -> SetBranchAddress( "matchDoubleTauCmbIso35_2" , &matchDoubleTauCmbIso35_2   );
-  input -> SetBranchAddress( "filterDoubleTauCmbIso35_2", &filterDoubleTauCmbIso35_2  );
-  input -> SetBranchAddress( "passDoubleTau35"          , &passDoubleTau35            );
-  input -> SetBranchAddress( "matchDoubleTau35_1"       , &matchDoubleTau35_1         );
-  input -> SetBranchAddress( "filterDoubleTau35_1"      , &filterDoubleTau35_1        );
-  input -> SetBranchAddress( "matchDoubleTau35_2"       , &matchDoubleTau35_2         );
-  input -> SetBranchAddress( "filterDoubleTau35_2"      , &filterDoubleTau35_2        );
+
+  if (analyzer == "et") {
+    input -> SetBranchAddress( "matchEle25" , &matchEle25  );
+    input -> SetBranchAddress( "filterEle25", &filterEle25 );
+    input -> SetBranchAddress( "passEle25"  , &passEle25   );
+  } else if (analyzer == "mt") {
+    input -> SetBranchAddress( "matchIsoMu19Tau20_1"     , &matchIsoMu19Tau20_1     );
+    input -> SetBranchAddress( "matchIsoMu19Tau20_2"     , &matchIsoMu19Tau20_2     );
+    input -> SetBranchAddress( "filterIsoMu19Tau20_1"    , &filterIsoMu19Tau20_1    );
+    input -> SetBranchAddress( "filterIsoMu19Tau20_2"    , &filterIsoMu19Tau20_2    );
+    input -> SetBranchAddress( "passIsoMu19Tau20"        , &passIsoMu19Tau20        );
+    input -> SetBranchAddress( "matchIsoMu22_1"          , &matchIsoMu22_1          );
+    input -> SetBranchAddress( "filterIsoMu22_1"         , &filterIsoMu22_1         );
+    input -> SetBranchAddress( "passIsoMu22"             , &passIsoMu22             );
+    input -> SetBranchAddress( "matchIsoTkMu22_1"        , &matchIsoTkMu22_1        );
+    input -> SetBranchAddress( "filterIsoTkMu22_1"       , &filterIsoTkMu22_1       );
+    input -> SetBranchAddress( "passIsoTkMu22"           , &passIsoTkMu22           );
+    input -> SetBranchAddress( "matchIsoMu22eta2p1_1"    , &matchIsoMu22eta2p1_1    );
+    input -> SetBranchAddress( "filterIsoMu22eta2p1_1"   , &filterIsoMu22eta2p1_1   );
+    input -> SetBranchAddress( "passIsoMu22eta2p1"       , &passIsoMu22eta2p1       );
+    input -> SetBranchAddress( "matchIsoTkMu22eta2p1_1"  , &matchIsoTkMu22eta2p1_1  );
+    input -> SetBranchAddress( "filterIsoTkMu22eta2p1_1" , &filterIsoTkMu22eta2p1_1 );
+    input -> SetBranchAddress( "passIsoTkMu22eta2p1"     , &passIsoTkMu22eta2p1     );
+  } else if (analyzer == "tt") {
+    input -> SetBranchAddress( "passDoubleTauCmbIso35"    , &passDoubleTauCmbIso35      );
+    input -> SetBranchAddress( "matchDoubleTauCmbIso35_1" , &matchDoubleTauCmbIso35_1   );
+    input -> SetBranchAddress( "filterDoubleTauCmbIso35_1", &filterDoubleTauCmbIso35_1  );
+    input -> SetBranchAddress( "matchDoubleTauCmbIso35_2" , &matchDoubleTauCmbIso35_2   );
+    input -> SetBranchAddress( "filterDoubleTauCmbIso35_2", &filterDoubleTauCmbIso35_2  );
+    input -> SetBranchAddress( "passDoubleTau35"          , &passDoubleTau35            );
+    input -> SetBranchAddress( "matchDoubleTau35_1"       , &matchDoubleTau35_1         );
+    input -> SetBranchAddress( "filterDoubleTau35_1"      , &filterDoubleTau35_1        );
+    input -> SetBranchAddress( "matchDoubleTau35_2"       , &matchDoubleTau35_2         );
+    input -> SetBranchAddress( "filterDoubleTau35_2"      , &filterDoubleTau35_2        );
+  } else if (analyzer == "emu") {
+
+  } else {
+    std::cerr << "HEY! THAT'S NOT AN ANALYZER. WAT U DOIN." << std::endl;
+  }
+
+}
+
+Bool_t event_info::getPassEle25() {
+  if (matchEle25 && filterEle25 && passEle25) {
+    return true;
+  } 
+  return false;
 }
 
 Bool_t event_info::getPassDoubleTauCmbIso35() {
@@ -137,3 +177,37 @@ Bool_t event_info::getPassDoubleTau35() {
   return false;
 }
 
+Bool_t event_info::getPassCrossTrigger() {
+  if (passIsoMu19Tau20 && (matchIsoMu19Tau20_1 || matchIsoMu19Tau20_2) && (filterIsoMu19Tau20_1 || filterIsoMu19Tau20_2)) {
+    return true;
+  }
+  return false;
+}
+
+Bool_t event_info::getPassIsoMu22() {
+  if (passIsoMu22 && matchIsoMu22_1 && filterIsoMu22_1) {
+    return true;
+  }
+  return false;
+}
+
+Bool_t event_info::getPassIsoTkMu22() {
+  if (passIsoTkMu22 && matchIsoTkMu22_1 && filterIsoTkMu22_1) {
+    return true;
+  }
+  return false;
+}
+
+Bool_t event_info::getPassIsoMu22eta2p1() {
+  if (passIsoMu22eta2p1 && matchIsoMu22eta2p1_1 && filterIsoMu22eta2p1_1) {
+    return true;
+  }
+  return false;
+}
+
+Bool_t event_info::getPassIsoTkMu22eta2p1() {
+  if (passIsoTkMu22eta2p1 && matchIsoTkMu22eta2p1_1 && filterIsoTkMu22eta2p1_1) {
+    return true;
+  }
+  return false;
+}
