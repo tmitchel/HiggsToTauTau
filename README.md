@@ -17,13 +17,13 @@ All analyzers will take a ROOT file containing a skimmed TTree as input and outp
 ### Automatic Mode
 
 The script `automate_analysis.py` is used to automate the process of running an analyzer on all input files in a given directory. Provided a set of flags, the script will run a given analyzer with the correct flags on all ROOT files in the provided directory. An example is shown below, assuming the existence of the binary Analyze_et compiled from the electron-tau analyzer. 
-```python
+```
 python automate_analysis.py --exe Analyze_et --data --local --syst met_JESUp --suffix _asuffix.root
 ```
 
 This example will run the Analyze_et binary on all files in the local data directory. The analyzer will be told it is running on data to prevent MC corrections from being applied. The analyzer will run using the `met_JESUp` shift instead of nominal met. The `--suffix` option tells the script to remove the provided suffix from all input files so that the analyzer can read them correctly. An output file for each input will be stored in the `output` directory with the same name as the stripped input file plus the suffix `_output.root`. For more information about options, use
 
-```python
+```
 python automate_analysis.py --help
 ```
 
