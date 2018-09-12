@@ -415,78 +415,78 @@ int main(int argc, char* argv[]) {
       } // close VH
 
       histos->at("cutflow")->Fill(7., 1.);
-      // inclusive selection
-      if (signalRegion) {
-        histos->at("cutflow")->Fill(8., 1.);
+      // // inclusive selection
+      // if (signalRegion) {
+      //   histos->at("cutflow")->Fill(8., 1.);
 
-        if (evt_charge == 0) {
-          // fill histograms
-          histos->at("cutflow")->Fill(9., 1.);
-          if (helper.deltaR(electron.getEta(), electron.getPhi(), tau.getEta(), tau.getPhi()) > 0.5) {
-            histos->at("cutflow")->Fill(10., 1.);
-            histos->at("hel_pt")->Fill(electron.getPt(), evtwt);
-            histos->at("hel_eta")->Fill(electron.getEta(), evtwt);
-            histos->at("hel_phi")->Fill(electron.getPhi(), evtwt);
-            histos->at("htau_pt")->Fill(tau.getPt(), evtwt);
-            histos->at("htau_eta")->Fill(tau.getEta(), evtwt);
-            histos->at("htau_phi")->Fill(tau.getPhi(), evtwt);
-            histos->at("hmet")->Fill(met.getMet(), evtwt);
-            histos->at("hmet_x")->Fill(met_x, evtwt);
-            histos->at("hmet_y")->Fill(met_y, evtwt);
-            histos->at("hmet_pt")->Fill(met_pt, evtwt);
-            histos->at("hmt")->Fill(mt, evtwt);
-            histos->at("hnjets")->Fill(jets.getNjets(), evtwt);
-            histos->at("hmjj")->Fill(jets.getDijetMass(), evtwt);
-            histos->at("hNGenJets")->Fill(event.getNumGenJets(), evtwt);
-            histos->at("pt_sv")->Fill(event.getPtSV() ,evtwt);
-            histos->at("m_sv")->Fill(event.getMSV(), evtwt);
-            histos->at("Dbkg_VBF")->Fill(event.getDbkg_VBF(), evtwt);
-            histos->at("Phi")->Fill(event.getPhi(), evtwt);
-            histos->at("Phi1")->Fill(event.getPhi1(), evtwt);
-            histos->at("Q2V1")->Fill(event.getQ2V1(), evtwt);
-            histos->at("Q2V2")->Fill(event.getQ2V2(), evtwt);
-            histos->at("costheta1")->Fill(event.getCosTheta1(), evtwt);
-            histos->at("costheta2")->Fill(event.getCosTheta2(), evtwt);
-            histos->at("costhetastar")->Fill(event.getCosThetaStar(), evtwt);
-          }
-        } else {
-          histos->at("htau_pt_SS")->Fill(tau.getPt(), evtwt);
-          histos->at("hel_pt_SS")->Fill(electron.getPt(), evtwt);
-          histos->at("htau_phi_SS")->Fill(tau.getPhi(), evtwt);
-          histos->at("hel_phi_SS")->Fill(electron.getPhi(), evtwt);
-          histos->at("hmet_SS")->Fill(met.getMet(), evtwt);
-          histos->at("hmt_SS")->Fill(mt, evtwt);
-          histos->at("hmjj_SS")->Fill(jets.getDijetMass(), evtwt);
-        }
-      } // close signal
-      if (qcdRegion) {
-        histos->at("htau_pt_QCD")->Fill(tau.getPt(), evtwt);
-        histos->at("hel_pt_QCD")->Fill(electron.getPt(), evtwt);
-        histos->at("htau_phi_QCD")->Fill(tau.getPhi(), evtwt);
-        histos->at("hel_phi_QCD")->Fill(electron.getPhi(), evtwt);
-        histos->at("hmet_QCD")->Fill(met.getMet(), evtwt);
-        histos->at("hmt_QCD")->Fill(mt, evtwt);
-        histos->at("hmjj_QCD")->Fill(jets.getDijetMass(), evtwt);
-      } // close qcd
-      if (wRegion) {
-        if (evt_charge == 0) {
-          histos->at("htau_pt_WOS")->Fill(tau.getPt(), evtwt);
-          histos->at("hel_pt_WOS")->Fill(electron.getPt(), evtwt);
-          histos->at("htau_phi_WOS")->Fill(tau.getPhi(), evtwt);
-          histos->at("hel_phi_WOS")->Fill(electron.getPhi(), evtwt);
-          histos->at("hmet_WOS")->Fill(met.getMet(), evtwt);
-          histos->at("hmt_WOS")->Fill(mt, evtwt);
-          histos->at("hmjj_WOS")->Fill(jets.getDijetMass(), evtwt);
-        } else {
-          histos->at("htau_pt_WSS")->Fill(tau.getPt(), evtwt);
-          histos->at("hel_pt_WSS")->Fill(electron.getPt(), evtwt);
-          histos->at("htau_phi_WSS")->Fill(tau.getPhi(), evtwt);
-          histos->at("hel_phi_WSS")->Fill(electron.getPhi(), evtwt);
-          histos->at("hmet_WSS")->Fill(met.getMet(), evtwt);
-          histos->at("hmt_WSS")->Fill(mt, evtwt);
-          histos->at("hmjj_WSS")->Fill(jets.getDijetMass(), evtwt);
-        } // close Wjets
-      }   // close general
+      //   if (evt_charge == 0) {
+      //     // fill histograms
+      //     histos->at("cutflow")->Fill(9., 1.);
+      //     if (helper.deltaR(electron.getEta(), electron.getPhi(), tau.getEta(), tau.getPhi()) > 0.5) {
+      //       histos->at("cutflow")->Fill(10., 1.);
+      //       histos->at("hel_pt")->Fill(electron.getPt(), evtwt);
+      //       histos->at("hel_eta")->Fill(electron.getEta(), evtwt);
+      //       histos->at("hel_phi")->Fill(electron.getPhi(), evtwt);
+      //       histos->at("htau_pt")->Fill(tau.getPt(), evtwt);
+      //       histos->at("htau_eta")->Fill(tau.getEta(), evtwt);
+      //       histos->at("htau_phi")->Fill(tau.getPhi(), evtwt);
+      //       histos->at("hmet")->Fill(met.getMet(), evtwt);
+      //       histos->at("hmet_x")->Fill(met_x, evtwt);
+      //       histos->at("hmet_y")->Fill(met_y, evtwt);
+      //       histos->at("hmet_pt")->Fill(met_pt, evtwt);
+      //       histos->at("hmt")->Fill(mt, evtwt);
+      //       histos->at("hnjets")->Fill(jets.getNjets(), evtwt);
+      //       histos->at("hmjj")->Fill(jets.getDijetMass(), evtwt);
+      //       histos->at("hNGenJets")->Fill(event.getNumGenJets(), evtwt);
+      //       histos->at("pt_sv")->Fill(event.getPtSV() ,evtwt);
+      //       histos->at("m_sv")->Fill(event.getMSV(), evtwt);
+      //       histos->at("Dbkg_VBF")->Fill(event.getDbkg_VBF(), evtwt);
+      //       histos->at("Phi")->Fill(event.getPhi(), evtwt);
+      //       histos->at("Phi1")->Fill(event.getPhi1(), evtwt);
+      //       histos->at("Q2V1")->Fill(event.getQ2V1(), evtwt);
+      //       histos->at("Q2V2")->Fill(event.getQ2V2(), evtwt);
+      //       histos->at("costheta1")->Fill(event.getCosTheta1(), evtwt);
+      //       histos->at("costheta2")->Fill(event.getCosTheta2(), evtwt);
+      //       histos->at("costhetastar")->Fill(event.getCosThetaStar(), evtwt);
+      //     }
+      //   } else {
+      //     histos->at("htau_pt_SS")->Fill(tau.getPt(), evtwt);
+      //     histos->at("hel_pt_SS")->Fill(electron.getPt(), evtwt);
+      //     histos->at("htau_phi_SS")->Fill(tau.getPhi(), evtwt);
+      //     histos->at("hel_phi_SS")->Fill(electron.getPhi(), evtwt);
+      //     histos->at("hmet_SS")->Fill(met.getMet(), evtwt);
+      //     histos->at("hmt_SS")->Fill(mt, evtwt);
+      //     histos->at("hmjj_SS")->Fill(jets.getDijetMass(), evtwt);
+      //   }
+      // } // close signal
+      // if (qcdRegion) {
+      //   histos->at("htau_pt_QCD")->Fill(tau.getPt(), evtwt);
+      //   histos->at("hel_pt_QCD")->Fill(electron.getPt(), evtwt);
+      //   histos->at("htau_phi_QCD")->Fill(tau.getPhi(), evtwt);
+      //   histos->at("hel_phi_QCD")->Fill(electron.getPhi(), evtwt);
+      //   histos->at("hmet_QCD")->Fill(met.getMet(), evtwt);
+      //   histos->at("hmt_QCD")->Fill(mt, evtwt);
+      //   histos->at("hmjj_QCD")->Fill(jets.getDijetMass(), evtwt);
+      // } // close qcd
+      // if (wRegion) {
+      //   if (evt_charge == 0) {
+      //     histos->at("htau_pt_WOS")->Fill(tau.getPt(), evtwt);
+      //     histos->at("hel_pt_WOS")->Fill(electron.getPt(), evtwt);
+      //     histos->at("htau_phi_WOS")->Fill(tau.getPhi(), evtwt);
+      //     histos->at("hel_phi_WOS")->Fill(electron.getPhi(), evtwt);
+      //     histos->at("hmet_WOS")->Fill(met.getMet(), evtwt);
+      //     histos->at("hmt_WOS")->Fill(mt, evtwt);
+      //     histos->at("hmjj_WOS")->Fill(jets.getDijetMass(), evtwt);
+      //   } else {
+      //     histos->at("htau_pt_WSS")->Fill(tau.getPt(), evtwt);
+      //     histos->at("hel_pt_WSS")->Fill(electron.getPt(), evtwt);
+      //     histos->at("htau_phi_WSS")->Fill(tau.getPhi(), evtwt);
+      //     histos->at("hel_phi_WSS")->Fill(electron.getPhi(), evtwt);
+      //     histos->at("hmet_WSS")->Fill(met.getMet(), evtwt);
+      //     histos->at("hmt_WSS")->Fill(mt, evtwt);
+      //     histos->at("hmjj_WSS")->Fill(jets.getDijetMass(), evtwt);
+      //   } // close Wjets
+      // }   // close general
 
     } // close mt, tau selection
 
