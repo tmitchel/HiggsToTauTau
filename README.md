@@ -52,7 +52,6 @@ This command will run the Analyze_et binary on the file `root_files/mela_svfit_f
 
 ## To-Do List
  - Check the naming of all branches for all channels
- - Update `event_info` class to avoid reading non-existent branches depending on the analyzer
  - Modify helper scripts to work for more channels than just etau
  - Merge the tt code into the master branch once it is ready
    - Add histograms for control regions
