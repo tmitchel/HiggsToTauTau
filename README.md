@@ -1,4 +1,6 @@
-# 2016 Higgs to Tau-Tau Analysis Code
+# 2016 Higgs to Tau-Tau Analysis Code 
+
+[![Build Status](https://travis-ci.com/tmitchel/HTT2016_analyzer.svg?branch=master)](https://travis-ci.com/tmitchel/HTT2016_analyzer)
 
 This code is used for the study of a Higgs boson decaying to a pair of tau leptons. The repository includes four analyzers, corresponding to the four final states being studied: electron-tau (et), muon-tau (mt), tau-tau (tt), and electron-muon (emu).
 
