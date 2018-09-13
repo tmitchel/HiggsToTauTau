@@ -36,7 +36,6 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////
 
   CLParser parser(argc, argv);
-  bool local = parser.Flag("-l");
   std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
@@ -179,44 +178,20 @@ int main(int argc, char* argv[]) {
         evtwt = 1.418;
     }
 
-    // fout->cd("grabbag");
-    histos->at("cutflow")->Fill(0., 1.);
+    histos->at("cutflow")->Fill(1., 1.);
 
     //////////////////////////////////////////////////////////
-    // Event Selection:                                     //
+    // Event Selection in skimmer:                          //
     //   - Trigger: Ele25eta2p1Tight -> pass, match, filter //
     //   - Electron: pT > 26, |eta| < 2.1                   //
-    //   - Tau: decayModeFinding, |eta| < 2.3               //
+    //   - Tau: pt > 27 || 29.5, |eta| < 2.3, lepton vetos, //
+    //          VLoose Isolation, against leptons           //
+    //   - Event: dR(tau,el) > 0.5                          //
     //////////////////////////////////////////////////////////
 
-    // electron pT > 26 GeV
     auto electron = electrons.run_factory();
-    if (electron.getPt() > 26 && fabs(electron.getEta()) < 2.1)  histos->at("cutflow") -> Fill(1., 1);
-    else continue;
-
-    // electron passes Ele25eta2p1Tight
-    if (event.getPassEle25()) histos->at("cutflow") -> Fill(2., 1);
-    else continue;
-
-    // tau passes decay mode finding
     auto tau = taus.run_factory();
-    if (tau.getDecayModeFinding()) histos->at("cutflow") -> Fill(3., 1);
-    else continue;
-
-    // tau |eta| < 2.3
-    if (fabs(tau.getEta()) < 2.3) histos->at("cutflow") -> Fill(4., 1);
-    else continue;
-
-    // check against mu/el
-    if (tau.getAgainstTightElectron() && tau.getAgainstLooseMuon()) histos->at("cutflow") -> Fill(5., 1);
-    else continue;
-    // end event selection
-
-    // get jet data for the event
     jets.run_factory();
-
-    // build Higgs
-    TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
 
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4)
@@ -228,7 +203,10 @@ int main(int argc, char* argv[]) {
     else if (name == "ZJ" && tau.getGenMatch() != 6)
       continue;
 
-    histos->at("cutflow") -> Fill(6., 1.);
+    histos->at("cutflow") -> Fill(2., 1.);
+
+    // build Higgs
+    TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
 
     // apply all scale factors/corrections/etc.
     if (!isData) {
@@ -283,8 +261,6 @@ int main(int argc, char* argv[]) {
       if (nbtagged>2) weight_btag=0;
     }
     fout->cd();
-
-    histos->at("cutflow") -> Fill(11, 1.);
 
     // calculate mt
     double met_x = met.getMet() * cos(met.getMetPhi());
@@ -414,7 +390,7 @@ int main(int argc, char* argv[]) {
 
       } // close VH
 
-      histos->at("cutflow")->Fill(7., 1.);
+      histos->at("cutflow")->Fill(3., 1.);
       // // inclusive selection
       // if (signalRegion) {
       //   histos->at("cutflow")->Fill(8., 1.);
