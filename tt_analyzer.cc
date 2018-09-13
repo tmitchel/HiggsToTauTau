@@ -117,16 +117,7 @@ int main(int argc, char* argv[]) {
   // Final setup:                     //
   // Declare histograms and factories //
   //////////////////////////////////////
-  std::map<std::string, std::string> hist_suffix = {
-    {"met_UESDown","_CMS_scale_met_unclustered_13TeVDown"},
-    {"met_UESUp","_CMS_scale_met_unclustered_13TeVUp"},
-    {"met_JESDown","_CMS_scale_met_clustered_13TeVDown"},
-    {"met_JESUp","_CMS_scale_met_clustered_13TeVUp"},
-    {"metphi_UESDown","_CMS_scale_metphi_unclustered_13TeVDown"},
-    {"metphi_UESUp","_CMS_scale_metphi_unclustered_13TeVUp"},
-    {"metphi_JESDown","_CMS_scale_metphi_clustered_13TeVDown"},
-    {"metphi_JESUp","_CMS_scale_metphi_clustered_13TeVUp"}
-  };
+
   // declare histograms (histogram initializer functions in util.h)
   fout->cd("grabbag");
   auto histos = helper.getHistos1D();
@@ -194,7 +185,7 @@ int main(int argc, char* argv[]) {
     else continue;
 
     // tau against electron/muon selection
-    if (tau1.getAgainstTightElectron() || tau2.getAgainstTightElectron() || tau1.getAgainstLooseMuon() || tau2.getAgainstLooseMuon()) 
+    if (tau1.getAgainstVLooseElectron() || tau2.getAgainstVLooseElectron() || tau1.getAgainstLooseMuon() || tau2.getAgainstLooseMuon())
       histos->at("cutflow")->Fill(3, 1.);
     else continue;
 
