@@ -15,45 +15,38 @@ parser.add_option('--exe', '-e', action='store',
                   default='Analyze', dest='exe',
                   help='name of executable'
                   )
-parser.add_option('--local', '-l', action='store_true',
-                  default=False, dest='local',
-                  help='running locally or not'
-                  )
-parser.add_option('--syst', '-s', action='store_true',
+parser.add_option('--syst', action='store_true',
                   default=False, dest='syst',
                   help='run systematics as well'
                   )
-parser.add_option('--suffix', '-p', action='store',
-                default='_svFit_mela.root', dest='suffix',
-                help='suffix to strip off root files'
-                )
+parser.add_option('--suffix', '-s', action='store',
+                  default='.root', dest='suffix',
+                  help='suffix to strip off root files'
+                  )
+parser.add_option('--path', '-p', action='store',
+                  default='root_files/', dest='path',
+                  help='path to input file directory'
+                  )
+parser.add_option('--prefix', '-P', action='store',
+                  default=None, dest='prefix',
+                  help='prefix to strip'
+)
 (options, args) = parser.parse_args()
-
-if options.isData:
-    path = "/store/user/tmitchel/smhet_22feb_SV/"
-else:
-    path = "/store/user/tmitchel/smhet_20march/"
+suffix = options.suffix
+prefix = options.prefix
 
 start = time.time()
-if options.local:
-    if options.isData:
-    	fileList = [ifile for ifile in glob('root_files/mela_svfit_full/*') if '.root' in ifile and 'Data' in ifile]
-    else:
-	    fileList = [ifile for ifile in glob('root_files/mela_svfit_full/*') if '.root' in ifile and not 'Data' in ifile]
-    suffix = ' -l'
+if options.isData:
+    fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile and 'data' in ifile.lower()]
 else:
-    fileList = [ifile for ifile in filter(None, popen('xrdfs root://cmseos.fnal.gov/ ls '+path).read().split('\n'))]
-    suffix = ''
+    fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile and not 'data' in ifile.lower()]
 
 systs = ['', 'met_UESUp', 'met_UESDown', 'met_JESUp', 'met_JESDown', 'metphi_UESUp', 'metphi_UESDown', 'metphi_JESUp', 'metphi_JESDown', 'mjj_JESUp', 'mjj_JESDown']
 
 for ifile in fileList:
-    if not 'root' in ifile:
-        continue
-
-    postfix = options.suffix
-    sample = ifile.split('/')[-1].split(postfix)[0]
-    tosample = ifile.rstrip(sample+postfix)
+    sample = ifile.split('/')[-1].split(suffix)[0]
+    sample = sample.lstrip(prefix)
+    tosample = ifile.rstrip(sample+suffix)
     print sample
 
     if 'DYJets' in ifile:
@@ -81,7 +74,7 @@ for ifile in fileList:
     else: 
         names = ['VV']
 
-    callstring = './%s -p %s -s %s -P %s' % (options.exe, tosample, sample, postfix)
+    callstring = './%s -p %s -s %s -P %s' % (options.exe, tosample, sample, suffix)
 
     if options.syst:
         for isyst in systs:
