@@ -44,9 +44,11 @@ else:
 systs = ['', 'met_UESUp', 'met_UESDown', 'met_JESUp', 'met_JESDown', 'metphi_UESUp', 'metphi_UESDown', 'metphi_JESUp', 'metphi_JESDown', 'mjj_JESUp', 'mjj_JESDown']
 
 for ifile in fileList:
+    if not 'T-tW' in ifile:
+      continue
     sample = ifile.split('/')[-1].split(suffix)[0]
-    sample = sample.lstrip(prefix)
-    tosample = ifile.rstrip(sample+suffix)
+    sample = sample.replace(prefix, '')
+    tosample = ifile.replace(sample+suffix,'')
     print sample
 
     if 'DYJets' in ifile:
@@ -85,6 +87,8 @@ for ifile in fileList:
         for name in names:
             tocall = callstring + ' -n %s' % name 
             call(tocall, shell=True)
+
+    print tocall
 
 end = time.time()
 print 'Processing completed in', end-start, 'seconds.'
