@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+############################################################
+## Script to automate running an analyzer on all files in ##
+## a directory.                                           ##
+############################################################
+
 from os import popen
 from subprocess import call
 from optparse import OptionParser

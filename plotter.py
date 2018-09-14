@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+##############################################
+## DEPRECATED!                              ##
+## Script for plotting a given distribution ##
+##############################################
+
 import ROOT as r
 from glob import glob
 from pprint import pprint

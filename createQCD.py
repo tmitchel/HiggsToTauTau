@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 
+################################################################
+## This script is used to create the QCD shape. We use a      ##
+## loosened signal region selection to create a QCD region.   ##
+## This region allows us to get a smoother shape than the low ##
+## statistics signal region. We create an opposite-sign       ##
+## sub-region and a same-sign sub-region in our QCD region.   ##
+## The ratio of SS/OS is used to normalize the OS region. The ##
+## shape is formed by subtracting all other backgrounds from  ##
+## data, leaving the contribution from QCD.                   ##
+################################################################
+
 from ROOT import TFile
 
 fout = TFile('output/QCD_output.root', 'recreate')
