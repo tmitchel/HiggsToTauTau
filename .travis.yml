@@ -1,3 +1,10 @@
+####################################################
+## Script for testing with travis-CI. In order to ##
+## do the testing with ROOT, we need to create a  ##
+## docker container with ROOT installed. Then, we ##
+## can run our tests inside the container.        ##
+#################################################### 
+
 # All build envs are for C++
 language: cpp
 
