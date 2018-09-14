@@ -20,21 +20,14 @@ All analyzers will take a ROOT file containing a skimmed TTree as input and outp
 
 The script `automate_analysis.py` is used to automate the process of running an analyzer on all input files in a given directory. Provided a set of flags, the script will run a given analyzer with the correct flags on all ROOT files in the provided directory. An example is shown below, assuming the existence of the binary Analyze_et compiled from the electron-tau analyzer. 
 ```
-python automate_analysis.py --exe Analyze_et --data --local --syst --suffix _asuffix.root
+python automate_analysis.py --exe Analyze_et --data --syst --suffix _aSuffix.root --prefix aPrefix --path root_files/
 ```
 
-This example will run the Analyze_et binary on all files in the local data directory. The analyzer will be told it is running on data to prevent MC corrections from being applied. The analyzer will be run once for each file/systematic permutation. The `--suffix` option tells the script to remove the provided suffix from all input files so that the analyzer can read them correctly. An output file for each input will be stored in the `output` directory with the same name as the stripped input file plus the suffix `_output.root`. For more information about options, use
+This example will run the Analyze_et binary on all files in the directory `root_files/`. The analyzer will be told it is running on data to prevent MC corrections from being applied. The analyzer will be run once for each file/systematic permutation. The `--suffix` option tells the script to remove the provided suffix from all input files so that the analyzer can read them correctly. Similarly, `--prefix` will strip the given prefix off the input names. An output file for each input will be stored in the `output` directory with the same name as the stripped input file plus the suffix `_output.root`. For more information about options, use
 
 ```
 python automate_analysis.py --help
 ```
-
-Input directories may be changed by changing lines like:
-```python
-fileList = [ifile for ifile in glob('root_files/mela_svfit_full/*') if '.root' in ifile and 'Data' in ifile]
-```
-
-This needs to be updated to make it more user-friendly.
 
 ### Manual Mode
 
