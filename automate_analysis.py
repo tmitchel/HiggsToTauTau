@@ -58,7 +58,7 @@ for ifile in fileList:
         names = ['W']
     elif 'EWKZ' in ifile:
         names = ['EWKZ']
-    elif 'Data' in ifile:
+    elif 'data' in ifile.lower():
         names = ['data_obs']
     elif 'ggHtoTauTau' in ifile:
         mass = sample.split('ggHtoTauTau')[-1]
