@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
-  auto ntuple = (TTree*)fin->Get("etau_tree");
+  auto ntuple = (TTree*)fin->Get("tt_tree");
 
   // get number of generated events
   auto counts = (TH1D*)fin->Get("nevents");

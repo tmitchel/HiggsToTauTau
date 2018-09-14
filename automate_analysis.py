@@ -44,10 +44,9 @@ else:
 systs = ['', 'met_UESUp', 'met_UESDown', 'met_JESUp', 'met_JESDown', 'metphi_UESUp', 'metphi_UESDown', 'metphi_JESUp', 'metphi_JESDown', 'mjj_JESUp', 'mjj_JESDown']
 
 for ifile in fileList:
-    if not 'T-tW' in ifile:
-      continue
     sample = ifile.split('/')[-1].split(suffix)[0]
-    sample = sample.replace(prefix, '')
+    if prefix:
+      sample = sample.replace(prefix, '')
     tosample = ifile.replace(sample+suffix,'')
     print sample
 
