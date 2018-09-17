@@ -14,7 +14,7 @@ class tau {
   friend ditau_factory;
 private:
   std::string name = "tau";
-  Float_t pt, eta, phi, mass, charge, px, py, pz, dmf, tightIsoMVA, l2_decayMode, gen_match;
+  Float_t pt, eta, phi, mass, charge, px, py, pz, tightIsoMVA, decayMode, gen_match;
   Bool_t AgainstTightElectron, AgainstVLooseElectron, AgainstLooseMuon, MediumIsoMVA, LooseIsoMVA, VLooseIsoMVA;
   TLorentzVector p4;
 public:
@@ -32,9 +32,8 @@ public:
   Float_t getPx()                     { return px;                    };
   Float_t getPy()                     { return py;                    };
   Float_t getPz()                     { return pz;                    };
-  Float_t getDecayModeFinding()       { return dmf;                   };
   Float_t getTightIsoMVA()            { return tightIsoMVA;           };
-  Float_t getL2DecayMode()            { return l2_decayMode;          };
+  Float_t getDecayMode()              { return decayMode;             };
   Float_t getGenMatch()               { return gen_match;             };
   Bool_t getAgainstTightElectron()    { return AgainstTightElectron;  };
   Bool_t getAgainstVLooseElectron()   { return AgainstVLooseElectron; };
@@ -62,12 +61,12 @@ tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) :
 /////////////////////////////////////////////////
 class ditau_factory {
 private:
-  Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, iso_1, q_1, mt_1, decayModeFinding_1;
+  Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, iso_1, q_1, mt_1;
   Float_t byTightIsolationMVArun2v1DBoldDMwLT_1, againstElectronTightMVA6_1, againstElectronVLooseMVA6_1, againstMuonLoose3_1;
-  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_1, l2_decayMode_1, gen_match_1, byLooseIsolationMVArun2v1DBoldDMwLT_1, byVLooseIsolationMVArun2v1DBoldDMwLT_1;
-  Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, decayModeFinding_2;
+  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_1, t1_decayMode, gen_match_1, byLooseIsolationMVArun2v1DBoldDMwLT_1, byVLooseIsolationMVArun2v1DBoldDMwLT_1;
+  Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2;
   Float_t byTightIsolationMVArun2v1DBoldDMwLT_2, againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonLoose3_2;
-  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, l2_decayMode_2, gen_match_2, byLooseIsolationMVArun2v1DBoldDMwLT_2, byVLooseIsolationMVArun2v1DBoldDMwLT_2;
+  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, t2_decayMode, gen_match_2, byLooseIsolationMVArun2v1DBoldDMwLT_2, byVLooseIsolationMVArun2v1DBoldDMwLT_2;
 
 public:
   ditau_factory (TTree*);
@@ -89,7 +88,6 @@ ditau_factory::ditau_factory(TTree* input) {
   input -> SetBranchAddress( "iso_1",                                   &iso_1                                  );
   input -> SetBranchAddress( "q_1",                                     &q_1                                    );
   input -> SetBranchAddress( "gen_match_1",                             &gen_match_1                            );
-  input -> SetBranchAddress( "decayModeFinding_1",                      &decayModeFinding_1                     );
   input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_1",   &byTightIsolationMVArun2v1DBoldDMwLT_1  );
   input -> SetBranchAddress( "byLooseIsolationMVArun2v1DBoldDMwLT_1",   &byLooseIsolationMVArun2v1DBoldDMwLT_1  );
   input -> SetBranchAddress( "byVLooseIsolationMVArun2v1DBoldDMwLT_1",  &byVLooseIsolationMVArun2v1DBoldDMwLT_1 );
@@ -97,7 +95,7 @@ ditau_factory::ditau_factory(TTree* input) {
   input -> SetBranchAddress( "againstElectronVLooseMVA6_1",             &againstElectronVLooseMVA6_1            );
   input -> SetBranchAddress( "againstMuonLoose3_1",                     &againstMuonLoose3_1                    );
   input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_1",  &byMediumIsolationMVArun2v1DBoldDMwLT_1 );
-  input -> SetBranchAddress( "l2_decayMode_1",                          &l2_decayMode_1                         );
+  input -> SetBranchAddress( "t1_decayMode",                            &t1_decayMode                           );
   input -> SetBranchAddress( "px_2",                                    &px_2                                   );
   input -> SetBranchAddress( "py_2",                                    &py_2                                   );
   input -> SetBranchAddress( "pz_2",                                    &pz_2                                   );
@@ -109,7 +107,6 @@ ditau_factory::ditau_factory(TTree* input) {
   input -> SetBranchAddress( "iso_2",                                   &iso_2                                  );
   input -> SetBranchAddress( "q_2",                                     &q_2                                    );
   input -> SetBranchAddress( "gen_match_2",                             &gen_match_2                            );
-  input -> SetBranchAddress( "decayModeFinding_2",                      &decayModeFinding_2                     );
   input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_2",   &byTightIsolationMVArun2v1DBoldDMwLT_2  );
   input -> SetBranchAddress( "byLooseIsolationMVArun2v1DBoldDMwLT_2",   &byLooseIsolationMVArun2v1DBoldDMwLT_2  );
   input -> SetBranchAddress( "byVLooseIsolationMVArun2v1DBoldDMwLT_2",  &byVLooseIsolationMVArun2v1DBoldDMwLT_2 );
@@ -117,7 +114,7 @@ ditau_factory::ditau_factory(TTree* input) {
   input -> SetBranchAddress( "againstElectronVLooseMVA6_1",             &againstElectronVLooseMVA6_1            );
   input -> SetBranchAddress( "againstMuonLoose3_2",                     &againstMuonLoose3_2                    );
   input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_2",  &byMediumIsolationMVArun2v1DBoldDMwLT_2 );
-  input -> SetBranchAddress( "l2_decayMode_2",                          &l2_decayMode_2                         );
+  input -> SetBranchAddress( "t2_decayMode",                            &t2_decayMode                           );
 }
 
 // create electron object and set member data
@@ -131,8 +128,7 @@ std::pair<tau, tau> ditau_factory::run_factory() {
   t1.AgainstTightElectron = againstElectronTightMVA6_1;
   t1.AgainstVLooseElectron = againstElectronVLooseMVA6_1;
   t1.AgainstLooseMuon = againstMuonLoose3_1;
-  t1.dmf = decayModeFinding_1;
-  t1.l2_decayMode = l2_decayMode_1;
+  t1.decayMode = t1_decayMode;
   t1.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_1;
   t1.LooseIsoMVA = byLooseIsolationMVArun2v1DBoldDMwLT_1;
 
@@ -145,8 +141,7 @@ std::pair<tau, tau> ditau_factory::run_factory() {
   t2.AgainstTightElectron = againstElectronTightMVA6_2;
   t2.AgainstVLooseElectron = againstElectronVLooseMVA6_1;
   t2.AgainstLooseMuon = againstMuonLoose3_2;
-  t2.dmf = decayModeFinding_2;
-  t2.l2_decayMode = l2_decayMode_2;
+  t2.decayMode = t2_decayMode;
   t2.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_2;
   t2.LooseIsoMVA = byLooseIsolationMVArun2v1DBoldDMwLT_2;
 

@@ -26,7 +26,7 @@ jet::jet(Float_t Pt, Float_t Eta, Float_t Phi, Float_t Csv, Float_t Flavor=-9999
 
 class jet_factory {
 private:
-  Float_t mjj, jdeta;
+  Float_t mjj;
   Float_t jpt_1, jeta_1, jphi_1, jcsv_1;
   Float_t jpt_2, jeta_2, jphi_2, jcsv_2;
   Float_t bpt_1, beta_1, bphi_1, bcsv_1;
@@ -45,7 +45,6 @@ public:
   Float_t getNjets()              { return njets;      };
   Float_t getNjetPt20()           { return njetspt20;  };
   Float_t getDijetMass()          { return mjj;        };
-  Float_t getJDEta()              { return jdeta;      };
   Float_t getTopPt1()             { return pt_top1;    };
   Float_t getTopPt2()             { return pt_top2;    };
   std::vector<jet> getJets()      { return plain_jets; };
@@ -54,18 +53,15 @@ public:
 
 // read data from tree into member variables
 jet_factory::jet_factory(TTree* input, std::string syst) {
-  auto mjj_name("mjj"), njets_name("njets"), jdeta_name("jdeta");
+  auto mjj_name("mjj"), njets_name("njets");
   if (syst.find(mjj_name) != std::string::npos) {
     mjj_name = syst.c_str();
   } else if (syst.find(njets_name) != std::string::npos) {
     njets_name = syst.c_str();
-  } else if (syst.find(jdeta_name) != std::string::npos) {
-    jdeta_name = syst.c_str();
   }
 
   input -> SetBranchAddress ( mjj_name,    &mjj       );
   input -> SetBranchAddress ( njets_name,  &njets     );
-  input -> SetBranchAddress ( jdeta_name,  &jdeta     );
   input -> SetBranchAddress ( "nbtag",     &nbtag     );
   input -> SetBranchAddress ( "njetspt20", &njetspt20 );
   input -> SetBranchAddress ( "jpt_1",     &jpt_1     );
@@ -101,5 +97,4 @@ void jet_factory::run_factory() {
   plain_jets.push_back(j2);
   btag_jets.push_back(b1);
   btag_jets.push_back(b2);
-
 }

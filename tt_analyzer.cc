@@ -224,8 +224,8 @@ int main(int argc, char* argv[]) {
     if (!isData) {
 
       // apply trigger and id SF's
-      sf_trig1 = tauSFs.compute_SF(tau1.getPt(), std::to_string(int(tau1.getL2DecayMode())));
-      sf_trig2 = tauSFs.compute_SF(tau1.getPt(), std::to_string(int(tau2.getL2DecayMode())));
+      sf_trig1 = tauSFs.compute_SF(tau1.getPt(), std::to_string(int(tau1.getDecayMode())));
+      sf_trig2 = tauSFs.compute_SF(tau1.getPt(), std::to_string(int(tau2.getDecayMode())));
       evtwt *= (sf_trig1 * sf_trig2 * lumi_weights->weight(event.getNPU()) * event.getGenWeight());
 
       // for trigger SF systematics

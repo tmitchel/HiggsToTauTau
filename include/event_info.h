@@ -4,7 +4,7 @@
 /////////////////////////////////////////
 class event_info {
 private:
-  Float_t genpX, genpY, genM, genpT, numGenJets, genweight, gen_Higgs_pt, gen_Higgs_mass; // gen
+  Float_t genpX, genpY, genM, genpT, numGenJets, genweight; // gen
   Float_t npv, npu, rho, extramuon_veto, extraelec_veto;  // event
   Float_t matchEle25, filterEle25, passEle25; // etau trigger
   Float_t passDoubleTauCmbIso35, matchDoubleTauCmbIso35_1, filterDoubleTauCmbIso35_1, matchDoubleTauCmbIso35_2, filterDoubleTauCmbIso35_2; // tt trigger
@@ -51,8 +51,6 @@ public:
   Float_t getGenPt()        { return genpT;           };
   Float_t getNumGenJets()   { return numGenJets;      };
   Float_t getGenWeight()    { return genweight;       };
-  Float_t getGenHiggsPt()   { return gen_Higgs_pt;    };
-  Float_t getGenHiggsMass() { return gen_Higgs_mass;  };
 
   // SVFit Info
   Float_t getMSV()          { return m_sv;            };
@@ -98,8 +96,6 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   input -> SetBranchAddress( "genpT"         , &genpT          );
   input -> SetBranchAddress( "numGenJets"    , &numGenJets     );
   input -> SetBranchAddress( "genweight"     , &genweight      );
-  input -> SetBranchAddress( "gen_Higgs_pt"  , &gen_Higgs_pt   );
-  input -> SetBranchAddress( "gen_Higgs_mass", &gen_Higgs_mass );
   input -> SetBranchAddress( "Dbkg_VBF"      , &Dbkg_VBF       );
   input -> SetBranchAddress( "Dbkg_ggH"      , &Dbkg_ggH       );
   input -> SetBranchAddress( "Dbkg_ZH"       , &Dbkg_ZH        );
