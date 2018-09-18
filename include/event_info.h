@@ -17,7 +17,7 @@ private:
   Float_t m_sv, pt_sv; // SVFit
   Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
   Float_t ME_sm_VBF, ME_bkg;                                                                                // MELA
-  Int_t run, lumi;
+  UInt_t run, lumi;
   ULong64_t evt;
 
 public:
@@ -40,8 +40,8 @@ public:
   Float_t getRho()          { return rho;             };
   Float_t getMuonVeto()     { return extramuon_veto;  };
   Float_t getElectronVeto() { return extraelec_veto;  };
-  Int_t getRun()            { return run;             };
-  Int_t getLumi()           { return lumi;            };
+  UInt_t getRun()            { return run;             };
+  UInt_t getLumi()           { return lumi;            };
   ULong64_t getEvt()        { return evt;             };
 
   // Generator Info
