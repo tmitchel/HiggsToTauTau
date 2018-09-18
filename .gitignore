@@ -1,7 +1,7 @@
 .DS_Store
 .vscode
 .wscode*
-Analyze
+Analyze*
 LeptonEfficiencies
 syncdir
 temp.py
