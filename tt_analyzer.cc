@@ -273,7 +273,7 @@ int main(int argc, char* argv[]) {
       }
 
       // b-tagging SF (only used in scaling W, I believe)
-      int nbtagged = std::min(static_cast<Float_t>(2), jets.getNbtag());
+      int nbtagged = std::min(2, jets.getNbtag());
       auto bjets = jets.getBtagJets();
       float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt() ,bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
       if (nbtagged>2) weight_btag=0;
