@@ -6,4 +6,4 @@ LeptonEfficiencies
 syncdir
 temp.py
 varcomp.py
-old.root
+*.root
