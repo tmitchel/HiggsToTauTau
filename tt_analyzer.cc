@@ -290,7 +290,7 @@ int main(int argc, char* argv[]) {
     bool signalRegion  = (tau1.getTightIsoMVA()  &&  tau2.getTightIsoMVA());
     bool antiIsoRegion = (tau1.getMediumIsoMVA() && !tau2.getTightIsoMVA() && tau2.getLooseIsoMVA()) 
                       || (tau2.getMediumIsoMVA() && !tau1.getTightIsoMVA() && tau1.getLooseIsoMVA());
-    bool qcdRegion = (tau1.getDecayModeFinding() == 1 && tau2.getDecayModeFinding() == 1 && tau1.getVLooseIsoMVA() && tau2.getVLooseIsoMVA());
+    bool qcdRegion = (tau1.getVLooseIsoMVA() && tau2.getVLooseIsoMVA());
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
