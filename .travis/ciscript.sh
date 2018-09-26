@@ -9,8 +9,8 @@ set -ex
 SELFDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECTDIR="$(dirname "${SELFDIR}")"
 
-sudo chmod 777 /home/travis/build/tmitchel/HTT2016_analyzer/
-cd /home/travis/build/tmitchel/HTT2016_analyzer/
+sudo chmod 777 /home/travis/build/KState-HEP-HTT/SMHTT_Analyzers/
+cd /home/travis/build/KState-HEP-HTT/SMHTT_Analyzers/
 
 bash build et_analyzer.cc test_et
 bash build mt_analyzer.cc test_mt
