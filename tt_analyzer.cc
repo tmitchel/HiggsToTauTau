@@ -198,6 +198,8 @@ int main(int argc, char* argv[]) {
 
     if (isEmbed) {
       event.setEmbed(); // change triggers to work for embedded samples
+      tau1.scalePt(1.02);
+      tau2.scalePt(1.02);
     }
 
     // trigger selection

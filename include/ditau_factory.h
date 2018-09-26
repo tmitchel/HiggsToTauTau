@@ -23,6 +23,11 @@ public:
   tau(Float_t, Float_t, Float_t, Float_t, Float_t);
   ~tau() {};
 
+  void scalePt(Float_t scalePt) {
+    pt *= scalePt;
+    p4.SetPtEtaPhiM(pt, eta, phi, mass);
+  }
+
   // getters
   std::string getName()               { return name;                  };
   TLorentzVector getP4()              { return p4;                    };
