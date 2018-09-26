@@ -31,7 +31,7 @@ public:
         j2_pt, j2_eta, j2_phi,
         b1_pt, b1_eta, b1_phi,
         b2_pt, b2_eta, b2_phi,
-        met, metphi,
+        met, metphi, mjj,
         pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
         higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj;
@@ -72,9 +72,7 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
 
     otree->Branch("met",           &met,           "met/F"            );
     otree->Branch("metphi",        &metphi,        "metphi/F"         );
-
-        //     pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
-        // Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
+    otree->Branch("mjj",           &mjj,           "mjj/F"            );
 
     otree->Branch("pt_sv",         &pt_sv,         "pt_sv/F"          );
     otree->Branch("m_sv",          &m_sv,          "m_sv/F"           );
