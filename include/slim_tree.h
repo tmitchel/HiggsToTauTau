@@ -15,9 +15,9 @@ public:
 
     // member functions
     // fill the tree for this event
-    void fillTree(std::string, electron*, tau*, jet_factory*, met_factory*, event_info*, float);
-    void fillTree(std::string, muon*    , tau*, jet_factory*, met_factory*, event_info*, float);
-    void fillTree(std::string, tau*     , tau*, jet_factory*, met_factory*, event_info*, float);
+    void fillTree(std::string, electron*, tau*, jet_factory*, met_factory*, event_info*, Float_t);
+    void fillTree(std::string, muon*    , tau*, jet_factory*, met_factory*, event_info*, Float_t);
+    void fillTree(std::string, tau*     , tau*, jet_factory*, met_factory*, event_info*, Float_t);
 
     // member data
     TTree* otree;
@@ -48,7 +48,7 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree("tree_name", "tre
     otree->Branch("cat_inclusive", &cat_inclusive, "cat_inclusive/I"  );
 }
 
-void slim_tree::fillTree(std::string cat, electron* el, tau* t, jet_factory* fjets, met_factory* met, event_info* evt, float weight) {
+void slim_tree::fillTree(std::string cat, electron* el, tau* t, jet_factory* fjets, met_factory* met, event_info* evt, Float_t weight) {
     // create things needed for later
     auto jets( fjets->getJets() );
     TLorentzVector higgs( el->getP4() + t->getP4() + met->getP4() );

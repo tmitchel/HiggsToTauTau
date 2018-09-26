@@ -85,6 +85,8 @@ int main(int argc, char* argv[]) {
     helper = new Helper(fout, name, syst);
   }
 
+  // cd to root of output file and create tree
+  fout->cd();
   slim_tree* st = new slim_tree("test_tree");
 
   // get normalization (lumi & xs are in util.h)
@@ -175,7 +177,7 @@ int main(int argc, char* argv[]) {
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
 
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
-    double evtwt(norm), corrections(1.), sf_trig(1.), sf_trig_anti(1.), sf_id(1.), sf_id_anti(1.);
+    Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_trig_anti(1.), sf_id(1.), sf_id_anti(1.);
     if (name == "W") {
       if (event.getNumGenJets() == 1) {
         evtwt = 6.82;
@@ -371,6 +373,7 @@ int main(int argc, char* argv[]) {
     histos->at("pre_el_iso") -> Fill(electron.getIso(), 1.);
 
     if (mt < 50 && tau.getPt() > 30) {
+      st->fillTree(std::string("et_inclusive"), &electron, &tau, &jets, &met, &event, evtwt);
 
       // event categorizaation
       if (zeroJet) {
