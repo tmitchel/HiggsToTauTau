@@ -27,6 +27,7 @@
 #include "include/btagSF.h"
 #include "include/LumiReweightingStandAlone.h"
 #include "include/CLParser.h"
+#include "include/EmbedWeight.h"
 
 int main(int argc, char* argv[]) {
 
@@ -43,6 +44,7 @@ int main(int argc, char* argv[]) {
   std::string postfix = parser.Option("-P");
   std::string fname = path + sample + postfix;
   bool isData = sample.find("data") != std::string::npos;
+  bool isEmbed = sample.find("embed") != std::string::npos;
   // bool isData = parser.Flag("-d");
   std::string systname = "";
   if (!syst.empty()) {
@@ -73,14 +75,26 @@ int main(int argc, char* argv[]) {
   fout->cd("grabbag");
 
   // initialize Helper class
-  Helper helper(fout, name, syst);
+  Helper *helper;
+  if (isEmbed) {
+    helper = new Helper(fout, "ZTT", syst);
+  } else {
+    helper = new Helper(fout, name, syst);
+  }
 
   // get normalization (lumi & xs are in util.h)
   double norm;
-  if (isData)
+  if (isData) {
     norm = 1.0;
-  else 
-    norm = helper.getLuminosity() * helper.getCrossSection(sample) / gen_number;
+  } else if (isEmbed) {
+    if (sample.find("embed-H") != std::string::npos) {
+      norm = 1 / .59;
+    } else {
+      norm = 1 / .99;
+    }
+  } else {
+    norm = helper->getLuminosity() * helper->getCrossSection(sample) / gen_number;
+  }
 
   ///////////////////////////////////////////////
   // Scale Factors:                            //
@@ -102,6 +116,11 @@ int main(int argc, char* argv[]) {
   TFile htt_sf_file("inputs/htt_scalefactors_v16_3.root");
   RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
   htt_sf_file.Close();
+
+  // embedded sample weights
+  TFile embed_file("inputs/htt_scalefactors_v16_9_embedded.root", "READ");
+  RooWorkspace *wEmbed = (RooWorkspace *)embed_file.Get("w");
+  embed_file.Close();
 
   // not sure what these are exactly, yetı
   TFile *fEleRec = new TFile("inputs/EGammaRec.root");
@@ -132,8 +151,8 @@ int main(int argc, char* argv[]) {
 
   // declare histograms (histogram initializer functions in util.h)
   fout->cd("grabbag");
-  auto histos = helper.getHistos1D();
-  auto histos_2d = helper.getHistos2D();
+  auto histos = helper->getHistos1D();
+  auto histos_2d = helper->getHistos2D();
 
   // construct factories
   event_info       event(ntuple, syst, "et");
@@ -153,29 +172,31 @@ int main(int argc, char* argv[]) {
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
     double evtwt(norm), corrections(1.), sf_trig(1.), sf_trig_anti(1.), sf_id(1.), sf_id_anti(1.);
     if (name == "W") {
-      if (event.getNumGenJets() == 1)
+      if (event.getNumGenJets() == 1) {
         evtwt = 6.82;
-      else if (event.getNumGenJets() == 2)
+      } else if (event.getNumGenJets() == 2) {
         evtwt = 2.099;
-      else if (event.getNumGenJets() == 3)
+      } else if (event.getNumGenJets() == 3) {
         evtwt = 0.689;
-      else if (event.getNumGenJets() == 4)
+      } else if (event.getNumGenJets() == 4) {
         evtwt = 0.690;
-      else
+      } else {
         evtwt = 25.44;
+      }
     }
 
     if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
-      if (event.getNumGenJets() == 1)
+      if (event.getNumGenJets() == 1) {
         evtwt = 0.457;
-      else if (event.getNumGenJets() == 2)
+      } else if (event.getNumGenJets() == 2) {
         evtwt = 0.467;
-      else if (event.getNumGenJets() == 3)
+      } else if (event.getNumGenJets() == 3) {
         evtwt = 0.480;
-      else if (event.getNumGenJets() == 4)
+      } else if (event.getNumGenJets() == 4) {
         evtwt = 0.393;
-      else
+      } else {
         evtwt = 1.418;
+      }
     }
 
     histos->at("cutflow")->Fill(1., 1.);
@@ -194,14 +215,15 @@ int main(int argc, char* argv[]) {
     jets.run_factory();
 
     // Separate Drell-Yan
-    if (name == "ZL" && tau.getGenMatch() > 4)
+    if (name == "ZL" && tau.getGenMatch() > 4) {
       continue;
-    else if ((name == "ZTT" || name == "TTT") && tau.getGenMatch() != 5)
+    } else if ((name == "ZTT" || name == "TTT") && tau.getGenMatch() != 5) {
       continue;
-    else if ((name == "ZLL" || name == "TTJ") && tau.getGenMatch() == 5)
+    } else if ((name == "ZLL" || name == "TTJ") && tau.getGenMatch() == 5) {
       continue;
-    else if (name == "ZJ" && tau.getGenMatch() != 6)
+    } else if (name == "ZJ" && tau.getGenMatch() != 6) {
       continue;
+    }
 
     histos->at("cutflow") -> Fill(2., 1.);
 
@@ -209,7 +231,7 @@ int main(int argc, char* argv[]) {
     TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
 
     // apply all scale factors/corrections/etc.
-    if (!isData) {
+    if (!isData && !isEmbed) {
 
       // apply trigger and id SF's
       sf_trig      = myScaleFactor_trgEle25->getSF(electron.getPt(), electron.getEta());
@@ -220,8 +242,9 @@ int main(int argc, char* argv[]) {
       evtwt *= (sf_trig * sf_id * lumi_weights->weight(event.getNPU()) * event.getGenWeight());
 
       // tau ID efficiency SF
-      if (tau.getGenMatch() == 5)
+      if (tau.getGenMatch() == 5) {
         evtwt *= 0.95;
+      }
 
       htt_sf->var("e_pt")->setVal(electron.getPt());
       htt_sf->var("e_eta")->setVal(electron.getEta());
@@ -259,6 +282,51 @@ int main(int argc, char* argv[]) {
       auto bjets = jets.getBtagJets();
       float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt() ,bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
       if (nbtagged>2) weight_btag=0;
+    } else if (!isData && isEmbed) {
+      double Stitching_Weight(1.);
+      // get the stitching weight
+      if (event.getRun() >= 272007 && event.getRun() < 275657) {
+        Stitching_Weight = (1.0 / 0.902);
+      } else if (event.getRun() < 276315) {
+        Stitching_Weight = (1.0 / 0.910);
+      } else if (event.getRun() < 276831) {
+        Stitching_Weight = (1.0 / 0.945);
+      } else if (event.getRun() < 277772) {
+        Stitching_Weight = (1.0 / 0.945);
+      } else if (event.getRun() < 278820) {
+        Stitching_Weight = (1.0 / 0.915);
+      } else if (event.getRun() < 280919) {
+        Stitching_Weight = (1.0 / 0.903);
+      } else if (event.getRun() < 284045) {
+        Stitching_Weight = (1.0 / 0.933);
+      }
+      histos->at("Stitching")->Fill(Stitching_Weight, 1.);
+      // get correction factor
+      std::vector<double> corrFactor = EmdWeight_Electron(wEmbed, electron.getPt(), electron.getEta(), electron.getIso());
+      double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]); // id SF, iso SF, trg eff. SF
+      histos->at("totEmbed")->Fill(totEmbedWeight, 1.);
+      histos->at("corr2")->Fill(corrFactor[2], 1.);
+      histos->at("corr5")->Fill(corrFactor[5], 1.);
+      histos->at("corr6")->Fill(corrFactor[6], 1.);
+      // data to mc trigger ratio
+      double trg_ratio(m_sel_trg_ratio(wEmbed, electron.getPt(), electron.getEta(), tau.getPt(), tau.getEta()));
+      histos->at("trg")->Fill(trg_ratio, 1.);
+
+      auto genweight(event.getGenWeight());
+      if (genweight > 1 || genweight < 0) {
+        genweight = 0;
+      }
+      evtwt *= (Stitching_Weight * totEmbedWeight * trg_ratio * genweight);
+      histos->at("gen")->Fill(genweight, 1.);
+      // temporary SF for failed embed jobs
+      if (fname.find("embed-H") != std::string::npos) {
+        evtwt *= (1. / .59);
+      } else if (fname.find("embed") != std::string::npos) {
+        evtwt *= (1. / .99);
+      }
+      // scale-up tau pT
+      tau.scalePt(1.02);
+      histos->at("evtwt")->Fill(evtwt, 1.);
     }
     fout->cd();
 
