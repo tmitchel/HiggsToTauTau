@@ -21,6 +21,12 @@ public:
   tau(Float_t, Float_t, Float_t, Float_t, Float_t);
   ~tau() {};
 
+  // scale tau pT for embedded samples
+  void scalePt(Float_t newPt) {
+    pt *= newPt;
+    p4.SetPtEtaPhiM(pt, eta, phi, mass);
+  }
+
   // getters
   std::string getName()               { return name;                  };
   TLorentzVector getP4()              { return p4;                    };
