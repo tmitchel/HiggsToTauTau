@@ -61,7 +61,7 @@ infiles = [ifile for ifile in glob(options.in_dir+'/*')]
 temp = r.TFile(infiles[0], 'read')
 fout = r.TFile('hist_output.root', 'recreate')
 if options.dim == 0:
-    htemplate = temp.Get(options.var).Clone()
+    htemplate = temp.Get('grabbag/'+options.var).Clone()
 elif options.dim == 1:
     htemplate = temp.Get(options.var).ProjectionX()
 elif options.dim == 2:
@@ -109,7 +109,7 @@ stat.Reset()
 for ifile in infiles:
     fin = r.TFile(ifile, 'read')
     fout.cd()
-    ihist = fin.Get(options.var).Clone()
+    ihist = fin.Get('grabbag/'+options.var).Clone()
 
     if options.dim == 1:
         temp = ihist.ProjectionX()
@@ -122,30 +122,27 @@ for ifile in infiles:
     if ifile == 'output/ZTT.root':
         samples.setdefault('ztt', ztt_hist)
         samples['ztt'].Add(ihist)
-        stat.Add(ihist)
     elif ifile == 'output/ZL.root':
         samples.setdefault('zl', zl_hist)
         samples['zl'].Add(ihist)
-        stat.Add(ihist)
-    elif ifile == 'output/ttbar.root':
-        samples.setdefault('ttbar', tt_hist)
-        samples['ttbar'].Add(ihist)
-        stat.Add(ihist)
+    elif ifile == 'output/TTT.root':
+        samples.setdefault('TTT', tt_hist)
+        samples['TTT'].Add(ihist)
+    elif ifile == 'output/TTJ.root':
+        samples.setdefault('TTJ', tt_hist)
+        samples['TTJ'].Add(ihist)
     elif ifile == 'output/W_unscaled.root':
         samples.setdefault('wjets', wjets_hist)
         samples['wjets'].Add(ihist)
-        stat.Add(ihist)
     elif 'QCD' in ifile:
         samples.setdefault('QCD', qcd_temp)
         samples['QCD'].Add(ihist)
-        stat.Add(ihist)
     elif ifile == 'output/VV.root':
         samples.setdefault('VV', vv_hist)
         samples['VV'].Add(ihist)
-        stat.Add(ihist)
     elif 'HWW' in ifile:
         sig_hist.Add(ihist)
-    elif ifile == 'output/data.root':
+    elif ifile == 'output/Data.root':
         data_hist.Add(ihist)
 
 # samples = sorted(samples.iteritems(), key=lambda (n,hist) : hist.Integral())
@@ -153,14 +150,20 @@ for ifile in infiles:
 can = r.TCanvas('can', 'can', 800, 600)
 formatCanvas(can)
 stack = r.THStack()
-# for sample in samples:
-    # if not 'sig' in sample[0]:
-        # stack.Add(sample[1])
-stack.Add(samples['ttbar'])
+
+stack.Add(samples['TTT'])
+stack.Add(samples['TTJ'])
 stack.Add(samples['QCD'])
 stack.Add(samples['wjets'])
 stack.Add(samples['zl'])
 stack.Add(samples['ztt'])
+
+stat.Add(samples['TTT'])
+stat.Add(samples['TTJ'])
+stat.Add(samples['QCD'])
+stat.Add(samples['wjets'])
+stat.Add(samples['zl'])
+stat.Add(samples['ztt'])
 
 stat.SetMarkerStyle(0)
 stat.SetLineWidth(2)
