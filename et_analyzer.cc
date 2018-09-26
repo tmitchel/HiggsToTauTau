@@ -21,6 +21,7 @@
 #include "include/event_info.h"
 #include "include/tau_factory.h"
 #include "include/electron_factory.h"
+#include "include/muon_factory.h"
 #include "include/jet_factory.h"
 #include "include/met_factory.h"
 #include "include/SF_factory.h"
@@ -28,6 +29,7 @@
 #include "include/LumiReweightingStandAlone.h"
 #include "include/CLParser.h"
 #include "include/EmbedWeight.h"
+#include "include/slim_tree.h"
 
 int main(int argc, char* argv[]) {
 
@@ -36,7 +38,7 @@ int main(int argc, char* argv[]) {
   // Get file names, normalization, paths, etc. //
   ////////////////////////////////////////////////
 
-  CLParser parser(argc, argv);
+  CLParser parser(argc, argv); 
   std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
@@ -46,6 +48,7 @@ int main(int argc, char* argv[]) {
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos;
   // bool isData = parser.Flag("-d");
+
   std::string systname = "";
   if (!syst.empty()) {
     systname = "_" + syst;
@@ -81,6 +84,8 @@ int main(int argc, char* argv[]) {
   } else {
     helper = new Helper(fout, name, syst);
   }
+
+  slim_tree* st = new slim_tree("test_tree");
 
   // get normalization (lumi & xs are in util.h)
   double norm;
