@@ -4,7 +4,7 @@
 /////////////////////////////////////////
 class event_info {
 private:
-  Float_t genpX, genpY, genM, genpT, numGenJets, genweight; // gen
+  Float_t genpX, genpY, genM, genpT, numGenJets, genweight, amcatNLO_weight; // gen
   Float_t npv, npu, rho, extramuon_veto, extraelec_veto;  // event
   Float_t matchEle25, filterEle25, passEle25; // etau trigger
   Float_t passDoubleTauCmbIso35, matchDoubleTauCmbIso35_1, filterDoubleTauCmbIso35_1, matchDoubleTauCmbIso35_2, filterDoubleTauCmbIso35_2; // tt trigger
@@ -81,35 +81,35 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
     pt_sv_name = syst.c_str();
   }
 
-  input -> SetBranchAddress( m_sv_name       , &m_sv           );
-  input -> SetBranchAddress( pt_sv_name      , &pt_sv          );
-  input -> SetBranchAddress( "run"           , &run            );
-  input -> SetBranchAddress( "lumi"          , &lumi           );
-  input -> SetBranchAddress( "evt"           , &evt            );
-  input -> SetBranchAddress( "npv"           , &npv            );
-  input -> SetBranchAddress( "npu"           , &npu            );
-  input -> SetBranchAddress( "extramuon_veto", &extramuon_veto );
-  input -> SetBranchAddress( "extraelec_veto", &extraelec_veto );
-  input -> SetBranchAddress( "genpX"         , &genpX          );
-  input -> SetBranchAddress( "genpY"         , &genpY          );
-  input -> SetBranchAddress( "genM"          , &genM           );
-  input -> SetBranchAddress( "genpT"         , &genpT          );
-  input -> SetBranchAddress( "numGenJets"    , &numGenJets     );
-  input -> SetBranchAddress( "genweight"     , &genweight      );
-  input -> SetBranchAddress( "Dbkg_VBF"      , &Dbkg_VBF       );
-  input -> SetBranchAddress( "Dbkg_ggH"      , &Dbkg_ggH       );
-  input -> SetBranchAddress( "Dbkg_ZH"       , &Dbkg_ZH        );
-  input -> SetBranchAddress( "Dbkg_WH"       , &Dbkg_WH        );
-  input -> SetBranchAddress( "Phi"           , &Phi            );
-  input -> SetBranchAddress( "Phi1"          , &Phi1           );
-  input -> SetBranchAddress( "costheta1"     , &costheta1      );
-  input -> SetBranchAddress( "costheta2"     , &costheta2      );
-  input -> SetBranchAddress( "costhetastar"  , &costhetastar   );
-  input -> SetBranchAddress( "Q2V1"          , &Q2V1           );
-  input -> SetBranchAddress( "Q2V2"          , &Q2V2           );
-  input -> SetBranchAddress( "ME_sm_VBF"     , &ME_sm_VBF      );
-  input -> SetBranchAddress( "ME_bkg"        , &ME_bkg         );
-
+  input -> SetBranchAddress( m_sv_name        , &m_sv            );
+  input -> SetBranchAddress( pt_sv_name       , &pt_sv           );
+  input -> SetBranchAddress( "run"            , &run             );
+  input -> SetBranchAddress( "lumi"           , &lumi            );
+  input -> SetBranchAddress( "evt"            , &evt             );
+  input -> SetBranchAddress( "npv"            , &npv             );
+  input -> SetBranchAddress( "npu"            , &npu             );
+  input -> SetBranchAddress( "extramuon_veto" , &extramuon_veto  );
+  input -> SetBranchAddress( "extraelec_veto" , &extraelec_veto  );
+  input -> SetBranchAddress( "genpX"          , &genpX           );
+  input -> SetBranchAddress( "genpY"          , &genpY           );
+  input -> SetBranchAddress( "genM"           , &genM            );
+  input -> SetBranchAddress( "genpT"          , &genpT           );
+  input -> SetBranchAddress( "numGenJets"     , &numGenJets      );
+  input -> SetBranchAddress( "genweight"      , &genweight       );
+  input -> SetBranchAddress( "Dbkg_VBF"       , &Dbkg_VBF        );
+  input -> SetBranchAddress( "Dbkg_ggH"       , &Dbkg_ggH        );
+  input -> SetBranchAddress( "Dbkg_ZH"        , &Dbkg_ZH         );
+  input -> SetBranchAddress( "Dbkg_WH"        , &Dbkg_WH         );
+  input -> SetBranchAddress( "Phi"            , &Phi             );
+  input -> SetBranchAddress( "Phi1"           , &Phi1            );
+  input -> SetBranchAddress( "costheta1"      , &costheta1       );
+  input -> SetBranchAddress( "costheta2"      , &costheta2       );
+  input -> SetBranchAddress( "costhetastar"   , &costhetastar    );
+  input -> SetBranchAddress( "Q2V1"           , &Q2V1            );
+  input -> SetBranchAddress( "Q2V2"           , &Q2V2            );
+  input -> SetBranchAddress( "ME_sm_VBF"      , &ME_sm_VBF       );
+  input -> SetBranchAddress( "ME_bkg"         , &ME_bkg          );
+  input -> SetBranchAddress( "amcatNLO_weight", &amcatNLO_weight );
 
   if (analyzer == "et") {
     input -> SetBranchAddress( "matchEle25" , &matchEle25  );
