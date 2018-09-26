@@ -13,7 +13,8 @@ class tau {
   friend tau_factory;
 private:
   std::string name = "tau";
-  Float_t pt, eta, phi, mass, charge, px, py, pz, dmf, tightIsoMVA, l2_decayMode, gen_match;
+  Int_t gen_match;
+  Float_t pt, eta, phi, mass, charge, px, py, pz, dmf, tightIsoMVA, l2_decayMode;
   Bool_t AgainstTightElectron, AgainstVLooseElectron, AgainstTightMuon, AgainstLooseMuon, MediumIsoMVA;
   TLorentzVector p4;
 public:
@@ -40,12 +41,12 @@ public:
   Float_t getDecayModeFinding()       { return dmf;                   };
   Float_t getTightIsoMVA()            { return tightIsoMVA;           };
   Float_t getL2DecayMode()            { return l2_decayMode;          };
-  Float_t getGenMatch()               { return gen_match;             };
   Bool_t getAgainstTightElectron()    { return AgainstTightElectron;  };
   Bool_t getAgainstVLooseElectron()   { return AgainstVLooseElectron; };
   Bool_t getAgainstTightMuon()        { return AgainstTightMuon;      };
   Bool_t getAgainstLooseMuon()        { return AgainstLooseMuon;      };
   Bool_t getMediumIsoMVA()            { return MediumIsoMVA;          };
+  Int_t getGenMatch()                 { return gen_match;             };
   Int_t getCharge()                   { return charge;                };
 };
 
@@ -66,9 +67,10 @@ tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) :
 /////////////////////////////////////////////////
 class tau_factory {
 private:
+  Int_t gen_match_2;
   Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, decayModeFinding_2;
   Float_t byTightIsolationMVArun2v1DBoldDMwLT_2, againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2;
-  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, l2_decayMode, gen_match_2;
+  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, l2_decayMode;
 
 public:
   tau_factory (TTree*);
