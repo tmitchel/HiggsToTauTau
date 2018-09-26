@@ -14,6 +14,7 @@ private:
   Float_t matchIsoTkMu22_1, filterIsoTkMu22_1, passIsoTkMu22;                   // single muon trigger
   Float_t matchIsoMu22eta2p1_1, filterIsoMu22eta2p1_1, passIsoMu22eta2p1;       // single muon trigger
   Float_t matchIsoTkMu22eta2p1_1, filterIsoTkMu22eta2p1_1, passIsoTkMu22eta2p1; // single muon trigger
+  Bool_t PassEle25, PassDoubleTauCmbIso35, PassDoubleTau35, PassIsoMu19Tau20, PassIsoMu22, PassIsoTkMu22, PassIsoMu22eta2p1, PassIsoTkMu22eta2p1;
   Float_t m_sv, pt_sv; // SVFit
   Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
   Float_t ME_sm_VBF, ME_bkg;                                                                                // MELA
@@ -23,6 +24,7 @@ private:
 public:
   event_info (TTree*, std::string, std::string);
   virtual ~event_info () {};
+  void setEmbed();
 
   // tautau Trigger Info
   Bool_t getPassEle25();
@@ -150,60 +152,55 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
     std::cerr << "HEY! THAT'S NOT AN ANALYZER. WAT U DOIN." << std::endl;
   }
 
+  PassEle25 = passEle25 && filterEle25 && matchEle25;
+  PassDoubleTauCmbIso35 = passDoubleTauCmbIso35 && (matchDoubleTauCmbIso35_1 || matchDoubleTauCmbIso35_2) && (filterDoubleTauCmbIso35_1 || filterDoubleTauCmbIso35_2);
+  PassDoubleTau35 = passDoubleTau35 && (matchDoubleTau35_1 || matchDoubleTau35_2) && (filterDoubleTau35_1 || filterDoubleTau35_2);
+  PassIsoMu19Tau20 = passIsoMu19Tau20 && (matchIsoMu19Tau20_1 || matchIsoMu19Tau20_2) && (filterIsoMu19Tau20_1 || filterIsoMu19Tau20_2);
+  PassIsoMu22 = passIsoMu22 && matchIsoMu22_1 && filterIsoMu22_1;
+  PassIsoTkMu22 = passIsoTkMu22 && matchIsoTkMu22_1 && filterIsoTkMu22_1;
+  PassIsoMu22eta2p1 = passIsoMu22eta2p1 && matchIsoMu22eta2p1_1 && filterIsoMu22eta2p1_1;
+  PassIsoTkMu22eta2p1 = passIsoTkMu22eta2p1 && matchIsoTkMu22eta2p1_1 && filterIsoTkMu22eta2p1_1;
 }
 
-Bool_t event_info::getPassEle25() {
-  if (matchEle25 && filterEle25 && passEle25) {
-    return true;
-  } 
-  return false;
+void event_info::setEmbed() {
+  PassEle25 = passEle25;
+  PassDoubleTauCmbIso35 = passDoubleTauCmbIso35;
+  PassDoubleTau35 = passDoubleTau35;
+  PassIsoMu19Tau20 = passIsoMu19Tau20;
+  PassIsoMu22 = passIsoMu22;
+  PassIsoTkMu22 = passIsoTkMu22;
+  PassIsoMu22eta2p1 = passIsoMu22eta2p1;
+  PassIsoTkMu22eta2p1 = passIsoTkMu22eta2p1;
+}
+
+Bool_t event_info::getPassEle25(){
+  return PassEle25;
 }
 
 Bool_t event_info::getPassDoubleTauCmbIso35() {
-  if (passDoubleTauCmbIso35 && (matchDoubleTauCmbIso35_1 || matchDoubleTauCmbIso35_2) && (filterDoubleTauCmbIso35_1 || filterDoubleTauCmbIso35_2)) {
-    return true;
-  }
-  return false;
+  return PassDoubleTauCmbIso35;
 }
 
 Bool_t event_info::getPassDoubleTau35() {
-  if (passDoubleTau35 && (matchDoubleTau35_1 || matchDoubleTau35_2) && (filterDoubleTau35_1 || filterDoubleTau35_2)) {
-    return true;
-  }
-  return false;
+  return PassDoubleTau35;
 }
 
 Bool_t event_info::getPassCrossTrigger() {
-  if (passIsoMu19Tau20 && (matchIsoMu19Tau20_1 || matchIsoMu19Tau20_2) && (filterIsoMu19Tau20_1 || filterIsoMu19Tau20_2)) {
-    return true;
-  }
-  return false;
+  return PassIsoMu19Tau20;
 }
 
 Bool_t event_info::getPassIsoMu22() {
-  if (passIsoMu22 && matchIsoMu22_1 && filterIsoMu22_1) {
-    return true;
-  }
-  return false;
+  return PassIsoMu22;
 }
 
 Bool_t event_info::getPassIsoTkMu22() {
-  if (passIsoTkMu22 && matchIsoTkMu22_1 && filterIsoTkMu22_1) {
-    return true;
-  }
-  return false;
+  return PassIsoTkMu22;
 }
 
 Bool_t event_info::getPassIsoMu22eta2p1() {
-  if (passIsoMu22eta2p1 && matchIsoMu22eta2p1_1 && filterIsoMu22eta2p1_1) {
-    return true;
-  }
-  return false;
+  return PassIsoMu22eta2p1;
 }
 
 Bool_t event_info::getPassIsoTkMu22eta2p1() {
-  if (passIsoTkMu22eta2p1 && matchIsoTkMu22eta2p1_1 && filterIsoTkMu22eta2p1_1) {
-    return true;
-  }
-  return false;
+  return PassIsoTkMu22eta2p1;
 }
