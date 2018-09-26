@@ -21,6 +21,7 @@
 #include "include/event_info.h"
 #include "include/tau_factory.h"
 #include "include/electron_factory.h"
+#include "include/muon_factory.h"
 #include "include/jet_factory.h"
 #include "include/met_factory.h"
 #include "include/SF_factory.h"
@@ -28,6 +29,7 @@
 #include "include/LumiReweightingStandAlone.h"
 #include "include/CLParser.h"
 #include "include/EmbedWeight.h"
+#include "include/slim_tree.h"
 
 int main(int argc, char* argv[]) {
 
@@ -36,7 +38,7 @@ int main(int argc, char* argv[]) {
   // Get file names, normalization, paths, etc. //
   ////////////////////////////////////////////////
 
-  CLParser parser(argc, argv);
+  CLParser parser(argc, argv); 
   std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
@@ -46,6 +48,7 @@ int main(int argc, char* argv[]) {
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos;
   // bool isData = parser.Flag("-d");
+
   std::string systname = "";
   if (!syst.empty()) {
     systname = "_" + syst;
@@ -81,6 +84,10 @@ int main(int argc, char* argv[]) {
   } else {
     helper = new Helper(fout, name, syst);
   }
+
+  // cd to root of output file and create tree
+  fout->cd();
+  slim_tree* st = new slim_tree("test_tree");
 
   // get normalization (lumi & xs are in util.h)
   double norm;
@@ -170,7 +177,7 @@ int main(int argc, char* argv[]) {
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
 
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
-    double evtwt(norm), corrections(1.), sf_trig(1.), sf_trig_anti(1.), sf_id(1.), sf_id_anti(1.);
+    Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_trig_anti(1.), sf_id(1.), sf_id_anti(1.);
     if (name == "W") {
       if (event.getNumGenJets() == 1) {
         evtwt = 6.82;
@@ -365,174 +372,189 @@ int main(int argc, char* argv[]) {
     histos->at("pre_tau_iso") -> Fill(tau.getTightIsoMVA(), 1.);
     histos->at("pre_el_iso") -> Fill(electron.getIso(), 1.);
 
-    if (mt < 50 && tau.getPt() > 30) {
+    // now do mt selection
+    if (mt > 50 || tau.getPt() < 30) {
+      continue;
+    }
 
-      // event categorizaation
+    std::string tree_cat( "none" );
+    if (signalRegion) {
       if (zeroJet) {
-
-        if (signalRegion) {
-          if (evt_charge == 0) {
-            histos_2d->at("h0_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4()+tau.getP4()).M(), evtwt);
-          } else {
-            histos_2d->at("h0_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-          }
-        } // close if signal block
-
-        if (qcdRegion) {
-          histos_2d->at("h0_QCD") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        } // close if qcd block
-
-        if (wRegion) {
-          if (evt_charge == 0) {
-            histos_2d->at("h0_WOS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-          } else {
-            histos_2d->at("h0_WSS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-          }
-        } // close if W block
-
+        tree_cat = "et_0jet";
       } else if (boosted) {
-
-        if (signalRegion) {
-          if (evt_charge == 0) {
-            histos_2d->at("h1_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-          } else {
-            histos_2d->at("h1_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-          }
-        } // close if signal block
-
-        if (qcdRegion) {
-          histos_2d->at("h1_QCD") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } // close if qcd block
-
-        if (wRegion) {
-          if (evt_charge == 0) {
-            histos_2d->at("h1_WOS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-          } else {
-            histos_2d->at("h1_WSS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-          }
-        } // close if W block
-
+        tree_cat = "et_boosted";
       } else if (vbfCat) {
+        tree_cat = "et_vbf";
+      } else {
+        tree_cat = "et_inclusive";
+      }
+    }     
+    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, evtwt);
 
-        if (signalRegion) {
-          if (evt_charge == 0) {
-            histos_2d->at("h2_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-          } else {
-            histos_2d->at("h2_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-          }
-        } // close if signal block
+    // event categorizaation
+    if (zeroJet) {
 
-        if (qcdRegion) {
-          histos_2d->at("h2_QCD") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } // close if qcd block
+      if (signalRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h0_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4()+tau.getP4()).M(), evtwt);
+        } else {
+          histos_2d->at("h0_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        }
+      } // close if signal block
 
-        if (wRegion) {
-          if (evt_charge == 0) {
-            histos_2d->at("h2_WOS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-          } else {
-            histos_2d->at("h2_WSS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-          }
-        } // close if W block
+      if (qcdRegion) {
+        histos_2d->at("h0_QCD") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+      } // close if qcd block
 
-      } else if (VHCat) {
+      if (wRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h0_WOS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        } else {
+          histos_2d->at("h0_WSS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        }
+      } // close if W block
 
-        if (signalRegion) {
-          if (evt_charge == 0) {
-            histos_2d->at("h3_OS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
-          } else {
-            histos_2d->at("h3_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
-          }
-        } // close if signal block
+    } else if (boosted) {
 
-        if (qcdRegion) {
-          histos_2d->at("h3_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
-        } // close if qcd block
+      if (signalRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h1_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h1_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        }
+      } // close if signal block
 
-        if (wRegion) {
-          if (evt_charge == 0) {
-            histos_2d->at("h3_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
-          } else {
-            histos_2d->at("h3_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
-          }
-        } // close if W block
+      if (qcdRegion) {
+        histos_2d->at("h1_QCD") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+      } // close if qcd block
 
-      } // close VH
+      if (wRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h1_WOS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h1_WSS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        }
+      } // close if W block
 
-      histos->at("cutflow")->Fill(3., 1.);
-      // // inclusive selection
-      // if (signalRegion) {
-      //   histos->at("cutflow")->Fill(8., 1.);
+    } else if (vbfCat) {
 
-      //   if (evt_charge == 0) {
-      //     // fill histograms
-      //     histos->at("cutflow")->Fill(9., 1.);
-      //     if (helper.deltaR(electron.getEta(), electron.getPhi(), tau.getEta(), tau.getPhi()) > 0.5) {
-      //       histos->at("cutflow")->Fill(10., 1.);
-      //       histos->at("hel_pt")->Fill(electron.getPt(), evtwt);
-      //       histos->at("hel_eta")->Fill(electron.getEta(), evtwt);
-      //       histos->at("hel_phi")->Fill(electron.getPhi(), evtwt);
-      //       histos->at("htau_pt")->Fill(tau.getPt(), evtwt);
-      //       histos->at("htau_eta")->Fill(tau.getEta(), evtwt);
-      //       histos->at("htau_phi")->Fill(tau.getPhi(), evtwt);
-      //       histos->at("hmet")->Fill(met.getMet(), evtwt);
-      //       histos->at("hmet_x")->Fill(met_x, evtwt);
-      //       histos->at("hmet_y")->Fill(met_y, evtwt);
-      //       histos->at("hmet_pt")->Fill(met_pt, evtwt);
-      //       histos->at("hmt")->Fill(mt, evtwt);
-      //       histos->at("hnjets")->Fill(jets.getNjets(), evtwt);
-      //       histos->at("hmjj")->Fill(jets.getDijetMass(), evtwt);
-      //       histos->at("hNGenJets")->Fill(event.getNumGenJets(), evtwt);
-      //       histos->at("pt_sv")->Fill(event.getPtSV() ,evtwt);
-      //       histos->at("m_sv")->Fill(event.getMSV(), evtwt);
-      //       histos->at("Dbkg_VBF")->Fill(event.getDbkg_VBF(), evtwt);
-      //       histos->at("Phi")->Fill(event.getPhi(), evtwt);
-      //       histos->at("Phi1")->Fill(event.getPhi1(), evtwt);
-      //       histos->at("Q2V1")->Fill(event.getQ2V1(), evtwt);
-      //       histos->at("Q2V2")->Fill(event.getQ2V2(), evtwt);
-      //       histos->at("costheta1")->Fill(event.getCosTheta1(), evtwt);
-      //       histos->at("costheta2")->Fill(event.getCosTheta2(), evtwt);
-      //       histos->at("costhetastar")->Fill(event.getCosThetaStar(), evtwt);
-      //     }
-      //   } else {
-      //     histos->at("htau_pt_SS")->Fill(tau.getPt(), evtwt);
-      //     histos->at("hel_pt_SS")->Fill(electron.getPt(), evtwt);
-      //     histos->at("htau_phi_SS")->Fill(tau.getPhi(), evtwt);
-      //     histos->at("hel_phi_SS")->Fill(electron.getPhi(), evtwt);
-      //     histos->at("hmet_SS")->Fill(met.getMet(), evtwt);
-      //     histos->at("hmt_SS")->Fill(mt, evtwt);
-      //     histos->at("hmjj_SS")->Fill(jets.getDijetMass(), evtwt);
-      //   }
-      // } // close signal
-      // if (qcdRegion) {
-      //   histos->at("htau_pt_QCD")->Fill(tau.getPt(), evtwt);
-      //   histos->at("hel_pt_QCD")->Fill(electron.getPt(), evtwt);
-      //   histos->at("htau_phi_QCD")->Fill(tau.getPhi(), evtwt);
-      //   histos->at("hel_phi_QCD")->Fill(electron.getPhi(), evtwt);
-      //   histos->at("hmet_QCD")->Fill(met.getMet(), evtwt);
-      //   histos->at("hmt_QCD")->Fill(mt, evtwt);
-      //   histos->at("hmjj_QCD")->Fill(jets.getDijetMass(), evtwt);
-      // } // close qcd
-      // if (wRegion) {
-      //   if (evt_charge == 0) {
-      //     histos->at("htau_pt_WOS")->Fill(tau.getPt(), evtwt);
-      //     histos->at("hel_pt_WOS")->Fill(electron.getPt(), evtwt);
-      //     histos->at("htau_phi_WOS")->Fill(tau.getPhi(), evtwt);
-      //     histos->at("hel_phi_WOS")->Fill(electron.getPhi(), evtwt);
-      //     histos->at("hmet_WOS")->Fill(met.getMet(), evtwt);
-      //     histos->at("hmt_WOS")->Fill(mt, evtwt);
-      //     histos->at("hmjj_WOS")->Fill(jets.getDijetMass(), evtwt);
-      //   } else {
-      //     histos->at("htau_pt_WSS")->Fill(tau.getPt(), evtwt);
-      //     histos->at("hel_pt_WSS")->Fill(electron.getPt(), evtwt);
-      //     histos->at("htau_phi_WSS")->Fill(tau.getPhi(), evtwt);
-      //     histos->at("hel_phi_WSS")->Fill(electron.getPhi(), evtwt);
-      //     histos->at("hmet_WSS")->Fill(met.getMet(), evtwt);
-      //     histos->at("hmt_WSS")->Fill(mt, evtwt);
-      //     histos->at("hmjj_WSS")->Fill(jets.getDijetMass(), evtwt);
-      //   } // close Wjets
-      // }   // close general
+      if (signalRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h2_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h2_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        }
+      } // close if signal block
 
-    } // close mt, tau selection
+      if (qcdRegion) {
+        histos_2d->at("h2_QCD") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+      } // close if qcd block
+
+      if (wRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h2_WOS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h2_WSS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        }
+      } // close if W block
+
+    } else if (VHCat) {
+
+      if (signalRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h3_OS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h3_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+        }
+      } // close if signal block
+
+      if (qcdRegion) {
+        histos_2d->at("h3_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+      } // close if qcd block
+
+      if (wRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h3_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h3_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
+        }
+      } // close if W block
+
+    } // close VH
+
+    histos->at("cutflow")->Fill(3., 1.);
+    // // inclusive selection
+    // if (signalRegion) {
+    //   histos->at("cutflow")->Fill(8., 1.);
+
+    //   if (evt_charge == 0) {
+    //     // fill histograms
+    //     histos->at("cutflow")->Fill(9., 1.);
+    //     if (helper.deltaR(electron.getEta(), electron.getPhi(), tau.getEta(), tau.getPhi()) > 0.5) {
+    //       histos->at("cutflow")->Fill(10., 1.);
+    //       histos->at("hel_pt")->Fill(electron.getPt(), evtwt);
+    //       histos->at("hel_eta")->Fill(electron.getEta(), evtwt);
+    //       histos->at("hel_phi")->Fill(electron.getPhi(), evtwt);
+    //       histos->at("htau_pt")->Fill(tau.getPt(), evtwt);
+    //       histos->at("htau_eta")->Fill(tau.getEta(), evtwt);
+    //       histos->at("htau_phi")->Fill(tau.getPhi(), evtwt);
+    //       histos->at("hmet")->Fill(met.getMet(), evtwt);
+    //       histos->at("hmet_x")->Fill(met_x, evtwt);
+    //       histos->at("hmet_y")->Fill(met_y, evtwt);
+    //       histos->at("hmet_pt")->Fill(met_pt, evtwt);
+    //       histos->at("hmt")->Fill(mt, evtwt);
+    //       histos->at("hnjets")->Fill(jets.getNjets(), evtwt);
+    //       histos->at("hmjj")->Fill(jets.getDijetMass(), evtwt);
+    //       histos->at("hNGenJets")->Fill(event.getNumGenJets(), evtwt);
+    //       histos->at("pt_sv")->Fill(event.getPtSV() ,evtwt);
+    //       histos->at("m_sv")->Fill(event.getMSV(), evtwt);
+    //       histos->at("Dbkg_VBF")->Fill(event.getDbkg_VBF(), evtwt);
+    //       histos->at("Phi")->Fill(event.getPhi(), evtwt);
+    //       histos->at("Phi1")->Fill(event.getPhi1(), evtwt);
+    //       histos->at("Q2V1")->Fill(event.getQ2V1(), evtwt);
+    //       histos->at("Q2V2")->Fill(event.getQ2V2(), evtwt);
+    //       histos->at("costheta1")->Fill(event.getCosTheta1(), evtwt);
+    //       histos->at("costheta2")->Fill(event.getCosTheta2(), evtwt);
+    //       histos->at("costhetastar")->Fill(event.getCosThetaStar(), evtwt);
+    //     }
+    //   } else {
+    //     histos->at("htau_pt_SS")->Fill(tau.getPt(), evtwt);
+    //     histos->at("hel_pt_SS")->Fill(electron.getPt(), evtwt);
+    //     histos->at("htau_phi_SS")->Fill(tau.getPhi(), evtwt);
+    //     histos->at("hel_phi_SS")->Fill(electron.getPhi(), evtwt);
+    //     histos->at("hmet_SS")->Fill(met.getMet(), evtwt);
+    //     histos->at("hmt_SS")->Fill(mt, evtwt);
+    //     histos->at("hmjj_SS")->Fill(jets.getDijetMass(), evtwt);
+    //   }
+    // } // close signal
+    // if (qcdRegion) {
+    //   histos->at("htau_pt_QCD")->Fill(tau.getPt(), evtwt);
+    //   histos->at("hel_pt_QCD")->Fill(electron.getPt(), evtwt);
+    //   histos->at("htau_phi_QCD")->Fill(tau.getPhi(), evtwt);
+    //   histos->at("hel_phi_QCD")->Fill(electron.getPhi(), evtwt);
+    //   histos->at("hmet_QCD")->Fill(met.getMet(), evtwt);
+    //   histos->at("hmt_QCD")->Fill(mt, evtwt);
+    //   histos->at("hmjj_QCD")->Fill(jets.getDijetMass(), evtwt);
+    // } // close qcd
+    // if (wRegion) {
+    //   if (evt_charge == 0) {
+    //     histos->at("htau_pt_WOS")->Fill(tau.getPt(), evtwt);
+    //     histos->at("hel_pt_WOS")->Fill(electron.getPt(), evtwt);
+    //     histos->at("htau_phi_WOS")->Fill(tau.getPhi(), evtwt);
+    //     histos->at("hel_phi_WOS")->Fill(electron.getPhi(), evtwt);
+    //     histos->at("hmet_WOS")->Fill(met.getMet(), evtwt);
+    //     histos->at("hmt_WOS")->Fill(mt, evtwt);
+    //     histos->at("hmjj_WOS")->Fill(jets.getDijetMass(), evtwt);
+    //   } else {
+    //     histos->at("htau_pt_WSS")->Fill(tau.getPt(), evtwt);
+    //     histos->at("hel_pt_WSS")->Fill(electron.getPt(), evtwt);
+    //     histos->at("htau_phi_WSS")->Fill(tau.getPhi(), evtwt);
+    //     histos->at("hel_phi_WSS")->Fill(electron.getPhi(), evtwt);
+    //     histos->at("hmet_WSS")->Fill(met.getMet(), evtwt);
+    //     histos->at("hmt_WSS")->Fill(mt, evtwt);
+    //     histos->at("hmjj_WSS")->Fill(jets.getDijetMass(), evtwt);
+    //   } // close Wjets
+    // }   // close general
 
   } // close event loop
   histos->at("n70")->Fill(1, n70_count);
