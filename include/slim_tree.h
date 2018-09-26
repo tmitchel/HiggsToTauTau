@@ -57,10 +57,17 @@ void slim_tree::fillTree(std::string cat, electron* el, tau* t, jet_factory* fje
     evtwt = weight;
     higgs_pT = higgs.Pt();
     higgs_m = higgs.M();
-    hjj_pT = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).Pt();
-    hjj_m = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).M();
-    dEtajj = fabs(jets.at(0).getEta() - jets.at(1).getEta());
-    dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi());
+    if (fjets->getNjets() > 1) {
+        hjj_pT = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).Pt();
+        hjj_m = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).M();
+        dEtajj = fabs(jets.at(0).getEta() - jets.at(1).getEta());
+        dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi());
+    } else {
+        hjj_pT = 0.;
+        hjj_m = 0.;
+        dEtajj = 0.;
+        dPhijj = 0.;
+    }
 
     // reset the categories
     cat_0jet      = 0;
