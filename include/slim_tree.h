@@ -136,11 +136,14 @@ void slim_tree::fillTree(std::string cat, electron* el, tau* t, jet_factory* fje
 
     // decide on which selections have been passed
     if (cat == "et_0jet") {
-        cat_0jet = 1;
+      cat_inclusive = 1;
+      cat_0jet = 1;
     } else if (cat == "et_boosted") {
-        cat_boosted = 1;
+      cat_inclusive = 1;
+      cat_boosted = 1;
     } else if (cat == "et_vbf") {
-        cat_vbf = 1;
+      cat_inclusive = 1;
+      cat_vbf = 1;
     } else if (cat == "et_inclusive") {
         cat_inclusive = 1;
     }
