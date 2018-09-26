@@ -7,3 +7,4 @@ syncdir
 temp.py
 varcomp.py
 *.root
+Prep*

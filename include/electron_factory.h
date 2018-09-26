@@ -13,7 +13,8 @@ class electron {
   friend electron_factory;
 private:
   std::string name = "electron";
-  Float_t pt, eta, phi, mass, charge, px, py, pz, iso, gen_match;
+  Int_t gen_match;
+  Float_t pt, eta, phi, mass, charge, px, py, pz, iso;
   TLorentzVector p4;
 public:
 
@@ -31,7 +32,7 @@ public:
   Float_t getPy()           { return py;        };
   Float_t getPz()           { return pz;        };
   Float_t getIso()          { return iso;       };
-  Float_t getGenMatch()     { return gen_match; };
+  Int_t getGenMatch()       { return gen_match; };
   Int_t getCharge()         { return charge;    };
 };
 
@@ -52,7 +53,8 @@ electron::electron(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Char
 /////////////////////////////////////////////////
 class electron_factory {
 private:
-  Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, gen_match_1;
+  Int_t gen_match_1;
+  Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1;
 
 public:
   electron_factory (TTree*);

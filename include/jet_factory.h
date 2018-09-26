@@ -3,16 +3,18 @@
 class jet {
 private:
   Float_t pt, eta, phi, csv, flavor;
+  TLorentzVector p4;
 
 public:
   jet (Float_t,Float_t,Float_t,Float_t,Float_t);
   virtual ~jet() {};
 
-  Float_t getPt()     { return pt;      };
-  Float_t getEta()    { return eta;     };
-  Float_t getPhi()    { return phi;     };
-  Float_t getCSV()    { return csv;     };
-  Float_t getFlavor() { return flavor;  };
+  Float_t getPt()        { return pt;      };
+  Float_t getEta()       { return eta;     };
+  Float_t getPhi()       { return phi;     };
+  Float_t getCSV()       { return csv;     };
+  Float_t getFlavor()    { return flavor;  };
+  TLorentzVector getP4() { return p4; };
 };
 
 // initialize member data and set TLorentzVector
@@ -22,7 +24,9 @@ jet::jet(Float_t Pt, Float_t Eta, Float_t Phi, Float_t Csv, Float_t Flavor=-9999
   phi(Phi),
   csv(Csv),
   flavor(Flavor)
-  {}
+  {
+    p4.SetPtEtaPhiM(Pt, Eta, Phi, 0.);
+  }
 
 class jet_factory {
 private:

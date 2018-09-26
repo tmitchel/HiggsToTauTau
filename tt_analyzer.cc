@@ -17,17 +17,18 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "include/util.h"
-#include "include/event_info.h"
+#include "include/CLParser.h"
+#include "include/EmbedWeight.h"
+#include "include/LumiReweightingStandAlone.h"
+#include "include/SF_factory.h"
+#include "include/btagSF.h"
 #include "include/ditau_factory.h"
 #include "include/electron_factory.h"
+#include "include/event_info.h"
 #include "include/jet_factory.h"
 #include "include/met_factory.h"
-#include "include/SF_factory.h"
 #include "include/tauSF.h"
-#include "include/btagSF.h"
-#include "include/LumiReweightingStandAlone.h"
-#include "include/CLParser.h"
+#include "include/util.h"
 
 int main(int argc, char* argv[]) {
 
@@ -45,6 +46,8 @@ int main(int argc, char* argv[]) {
   std::string postfix = parser.Option("-P");
   std::string fname = path + sample + postfix;
   bool isData = sample.find("Data") != std::string::npos;
+  bool isEmbed = sample.find("embed") != std::string::npos;
+
   // bool isData = parser.Flag("-d");
   std::string systname = "";
   if (!syst.empty()) {
@@ -75,14 +78,22 @@ int main(int argc, char* argv[]) {
   fout->cd("grabbag");
 
   // initialize Helper class
-  Helper helper(fout, name, syst);
-
+  Helper *helper;
+  if (isEmbed) {
+    helper = new Helper(fout, "ZTT", syst);
+  } else {
+    helper = new Helper(fout, name, syst);
+  }
+  
   // get normalization (lumi & xs are in util.h)
   double norm;
-  if (isData)
+  if (isData) {
     norm = 1.0;
-  else
-    norm = helper.getLuminosity() * helper.getCrossSection(sample) / gen_number;
+  } else if (isEmbed) {
+    norm = 1.0; // this can change based on passing jobs
+  } else {
+    norm = helper->getLuminosity() * helper->getCrossSection(sample) / gen_number;
+  }
 
   ///////////////////////////////////////////////
   // Scale Factors:                            //
@@ -104,6 +115,11 @@ int main(int argc, char* argv[]) {
   // RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
   // htt_sf_file.Close();
 
+  // embedded sample weights
+  TFile embed_file("inputs/htt_scalefactors_v16_9_embedded.root", "READ");
+  RooWorkspace *wEmbed = (RooWorkspace *)embed_file.Get("w");
+  embed_file.Close();
+
   // trigger and ID scale factors
   auto tauSFs = tauSF();
 
@@ -120,8 +136,8 @@ int main(int argc, char* argv[]) {
 
   // declare histograms (histogram initializer functions in util.h)
   fout->cd("grabbag");
-  auto histos = helper.getHistos1D();
-  auto histos_2d = helper.getHistos2D();
+  auto histos = helper->getHistos1D();
+  auto histos_2d = helper->getHistos2D();
 
   // construct factories
   event_info       event(ntuple, syst, "tt");
@@ -180,6 +196,12 @@ int main(int argc, char* argv[]) {
     auto tau1( taus.first ); 
     auto tau2( taus.second );
 
+    if (isEmbed) {
+      event.setEmbed(); // change triggers to work for embedded samples
+      tau1.scalePt(1.02);
+      tau2.scalePt(1.02);
+    }
+
     // trigger selection
     if (event.getPassDoubleTauCmbIso35() || event.getPassDoubleTau35()) histos->at("cutflow") -> Fill(2, 1.);
     else continue;
@@ -226,7 +248,7 @@ int main(int argc, char* argv[]) {
       // apply trigger and id SF's
       sf_trig1 = tauSFs.compute_SF(tau1.getPt(), std::to_string(int(tau1.getDecayMode())));
       sf_trig2 = tauSFs.compute_SF(tau1.getPt(), std::to_string(int(tau2.getDecayMode())));
-      evtwt *= (sf_trig1 * sf_trig2 * lumi_weights->weight(event.getNPU()) * event.getGenWeight());
+      evtwt *= (sf_trig1 * sf_trig2 * lumi_weights->weight(event.getNPU()) * event.getNLOWeight());
 
       // for trigger SF systematics
       if (tau1.getGenMatch() == 5) {
@@ -277,6 +299,30 @@ int main(int argc, char* argv[]) {
       auto bjets = jets.getBtagJets();
       float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt() ,bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
       if (nbtagged>2) weight_btag=0;
+    } else if (!isData && isEmbed) {
+      double Stitching_Weight(1.);
+      // get the stitching weight
+      if (event.getRun() >= 272007 && event.getRun() < 275657) {
+        Stitching_Weight = (1.0 / 0.897);
+      } else if (event.getRun() < 276315) {
+        Stitching_Weight = (1.0 / 0.908);
+      } else if (event.getRun() < 276831) {
+        Stitching_Weight = (1.0 / 0.950);
+      } else if (event.getRun() < 277772) {
+        Stitching_Weight = (1.0 / 0.861);
+      } else if (event.getRun() < 278820) {
+        Stitching_Weight = (1.0 / 0.941);
+      } else if (event.getRun() < 280919) {
+        Stitching_Weight = (1.0 / 0.908);
+      } else if (event.getRun() < 284045) {
+        Stitching_Weight = (1.0 / 0.949);
+      }
+      // get correction factor
+      // std::vector<double> corrFactor = EmdWeight_Tau(wEmbed, electron.getPt(), electron.getEta(), electron.getIso());
+      // double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]); // id SF, iso SF, trg eff. SF
+      // data to mc trigger ratio
+      double trg_ratio(m_sel_trg_ratio(wEmbed, tau1.getPt(), tau1.getEta(), tau2.getPt(), tau2.getEta()));
+      evtwt *= Stitching_Weight * trg_ratio * event.getNLOWeight();
     }
     fout->cd();
 
@@ -317,9 +363,9 @@ int main(int argc, char* argv[]) {
 
         if (signalRegion) {
           if (evt_charge == 0) {
-            histos_2d->at("h0_OS")->Fill(event.getMSV(), 1., evtwt);
+            histos_2d->at("h0_OS")->Fill(1., event.getMSV(), evtwt);
           } else {
-            histos_2d->at("h0_SS")->Fill(event.getMSV(), 1., evtwt);
+            histos_2d->at("h0_SS")->Fill(1., event.getMSV(), evtwt);
           }
         } // close if signal block
 
@@ -337,13 +383,60 @@ int main(int argc, char* argv[]) {
 
         if (signalRegion) {
           if (evt_charge == 0) {
-            histos_2d->at("h2_OS")->Fill(normMELA, 1., evtwt);
+            histos_2d->at("h2_OS")->Fill(1., normMELA, evtwt);
           } else {
-            histos_2d->at("h2_SS")->Fill(normMELA, 1., evtwt);
+            histos_2d->at("h2_SS")->Fill(1., normMELA, evtwt);
           }
         } // close if signal block
 
       } // close VBF
+
+      // inclusive selection
+      if (signalRegion) {
+        histos->at("cutflow")->Fill(8., 1.);
+        if (evt_charge == 0) {
+          // fill histograms
+          histos->at("cutflow")->Fill(9., 1.);
+          if (helper->deltaR(tau1.getEta(), tau1.getPhi(), tau2.getEta(), tau2.getPhi()) > 0.5) {
+            histos->at("cutflow")->Fill(10., 1.);
+            histos->at("hel_pt")->Fill(tau1.getPt(), evtwt);
+            histos->at("hel_eta")->Fill(tau1.getEta(), evtwt);
+            histos->at("hel_phi")->Fill(tau1.getPhi(), evtwt);
+            histos->at("htau_pt")->Fill(tau2.getPt(), evtwt);
+            histos->at("htau_eta")->Fill(tau2.getEta(), evtwt);
+            histos->at("htau_phi")->Fill(tau2.getPhi(), evtwt);
+            histos->at("hmet")->Fill(met.getMet(), evtwt);
+            histos->at("hnjets")->Fill(jets.getNjets(), evtwt);
+            histos->at("hmjj")->Fill(jets.getDijetMass(), evtwt);
+            histos->at("hNGenJets")->Fill(event.getNumGenJets(), evtwt);
+            histos->at("pt_sv")->Fill(event.getPtSV(), evtwt);
+            histos->at("m_sv")->Fill(event.getMSV(), evtwt);
+            histos->at("Dbkg_VBF")->Fill(event.getDbkg_VBF(), evtwt);
+            histos->at("Phi")->Fill(event.getPhi(), evtwt);
+            histos->at("Phi1")->Fill(event.getPhi1(), evtwt);
+            histos->at("Q2V1")->Fill(event.getQ2V1(), evtwt);
+            histos->at("Q2V2")->Fill(event.getQ2V2(), evtwt);
+            histos->at("costheta1")->Fill(event.getCosTheta1(), evtwt);
+            histos->at("costheta2")->Fill(event.getCosTheta2(), evtwt);
+            histos->at("costhetastar")->Fill(event.getCosThetaStar(), evtwt);
+          }
+        } else {
+          histos->at("htau_pt_SS")->Fill(tau2.getPt(), evtwt);
+          histos->at("hel_pt_SS")->Fill(tau1.getPt(), evtwt);
+          histos->at("htau_phi_SS")->Fill(tau2.getPhi(), evtwt);
+          histos->at("hel_phi_SS")->Fill(tau1.getPhi(), evtwt);
+          histos->at("hmet_SS")->Fill(met.getMet(), evtwt);
+          histos->at("hmjj_SS")->Fill(jets.getDijetMass(), evtwt);
+        }
+      } // close signal
+      if (qcdRegion) {
+        histos->at("htau_pt_QCD")->Fill(tau2.getPt(), evtwt);
+        histos->at("hel_pt_QCD")->Fill(tau1.getPt(), evtwt);
+        histos->at("htau_phi_QCD")->Fill(tau2.getPhi(), evtwt);
+        histos->at("hel_phi_QCD")->Fill(tau1.getPhi(), evtwt);
+        histos->at("hmet_QCD")->Fill(met.getMet(), evtwt);
+        histos->at("hmjj_QCD")->Fill(jets.getDijetMass(), evtwt);
+      } // close qcd
 
     } // close tau selection
     histos->at("cutflow")->Fill(7., 1.);

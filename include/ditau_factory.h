@@ -14,13 +14,19 @@ class tau {
   friend ditau_factory;
 private:
   std::string name = "tau";
-  Float_t pt, eta, phi, mass, charge, px, py, pz, tightIsoMVA, decayMode, gen_match;
+  Int_t gen_match;
+  Float_t pt, eta, phi, mass, charge, px, py, pz, tightIsoMVA, decayMode;
   Bool_t AgainstTightElectron, AgainstVLooseElectron, AgainstLooseMuon, MediumIsoMVA, LooseIsoMVA, VLooseIsoMVA;
   TLorentzVector p4;
 public:
 
   tau(Float_t, Float_t, Float_t, Float_t, Float_t);
   ~tau() {};
+
+  void scalePt(Float_t scalePt) {
+    pt *= scalePt;
+    p4.SetPtEtaPhiM(pt, eta, phi, mass);
+  }
 
   // getters
   std::string getName()               { return name;                  };
@@ -34,14 +40,14 @@ public:
   Float_t getPz()                     { return pz;                    };
   Float_t getTightIsoMVA()            { return tightIsoMVA;           };
   Float_t getDecayMode()              { return decayMode;             };
-  Float_t getGenMatch()               { return gen_match;             };
   Bool_t getAgainstTightElectron()    { return AgainstTightElectron;  };
   Bool_t getAgainstVLooseElectron()   { return AgainstVLooseElectron; };
   Bool_t getAgainstLooseMuon()        { return AgainstLooseMuon;      };
   Bool_t getMediumIsoMVA()            { return MediumIsoMVA;          };
   Bool_t getLooseIsoMVA()             { return LooseIsoMVA;           };
   Bool_t getVLooseIsoMVA()            { return VLooseIsoMVA;          };
-  Int_t getCharge() { return charge; };
+  Int_t getGenMatch()                 { return gen_match;             };
+  Int_t getCharge()                   { return charge;                };
 };
 
 // initialize member data and set TLorentzVector
@@ -61,12 +67,13 @@ tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) :
 /////////////////////////////////////////////////
 class ditau_factory {
 private:
+  Int_t gen_match_1, gen_match_2;
   Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, iso_1, q_1, mt_1;
   Float_t byTightIsolationMVArun2v1DBoldDMwLT_1, againstElectronTightMVA6_1, againstElectronVLooseMVA6_1, againstMuonLoose3_1;
-  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_1, t1_decayMode, gen_match_1, byLooseIsolationMVArun2v1DBoldDMwLT_1, byVLooseIsolationMVArun2v1DBoldDMwLT_1;
+  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_1, t1_decayMode, byLooseIsolationMVArun2v1DBoldDMwLT_1, byVLooseIsolationMVArun2v1DBoldDMwLT_1;
   Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2;
   Float_t byTightIsolationMVArun2v1DBoldDMwLT_2, againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonLoose3_2;
-  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, t2_decayMode, gen_match_2, byLooseIsolationMVArun2v1DBoldDMwLT_2, byVLooseIsolationMVArun2v1DBoldDMwLT_2;
+  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, t2_decayMode, byLooseIsolationMVArun2v1DBoldDMwLT_2, byVLooseIsolationMVArun2v1DBoldDMwLT_2;
 
 public:
   ditau_factory (TTree*);
