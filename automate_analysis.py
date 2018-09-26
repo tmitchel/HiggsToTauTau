@@ -55,27 +55,36 @@ for ifile in fileList:
     tosample = ifile.replace(sample+suffix,'')
     print sample
 
-    if 'DYJets' in ifile:
+    if 'DYJets' in sample:
         names = ['ZTT', 'ZL', 'ZJ']
-    elif 'TT' in ifile:
+    elif 'TT' in sample:
         names = ['TTT', 'TTJ']
-    elif 'WJets' in ifile or 'EWKW' in ifile:
+    elif 'WJets' in sample or 'EWKW' in sample:
         names = ['W']
-    elif 'EWKZ' in ifile:
+    elif 'EWKZ' in sample:
         names = ['EWKZ']
-    elif 'data' in ifile.lower():
+    elif 'data' in sample.lower():
         names = ['data_obs']
-    elif 'ggHtoTauTau' in ifile:
+    elif 'ggHtoTauTau' in sample:
         mass = sample.split('ggHtoTauTau')[-1]
         names = ['ggH'+mass]
-    elif 'VBFHtoTauTau' in ifile:
+    elif 'ggH' in sample:
+        mass = sample.split('ggH')[-1]
+        names = ['ggH'+mass]
+    elif 'VBFHtoTauTau' in sample:
         mass = sample.split('VBFHtoTauTau')[-1]
         names = ['VBF'+mass]
-    elif 'WPlusH' in ifile or 'WMinusH' in ifile:
+    elif 'VBF' in sample:
+        mass = sample.split('VBF')[-1]
+        names = ['VBF'+mass]
+    elif 'WPlusH' in sample or 'WMinusH' in sample:
         mass = sample.split('HTauTau')[-1]
         names = ['WH'+mass]
-    elif 'ZH' in ifile:
+    elif 'ZHTauTau' in sample:
         mass = sample.split('ZHTauTau')[-1]
+        names = ['ZH'+mass]
+    elif 'ZH' in sample:
+        mass = sample.split('ZH')[-1]
         names = ['ZH'+mass]
     else: 
         names = ['VV']
