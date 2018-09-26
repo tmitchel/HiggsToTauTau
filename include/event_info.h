@@ -53,6 +53,7 @@ public:
   Float_t getGenPt()        { return genpT;           };
   Float_t getNumGenJets()   { return numGenJets;      };
   Float_t getGenWeight()    { return genweight;       };
+  Float_t getNLOWeight()    { return amcatNLO_weight; };
 
   // SVFit Info
   Float_t getMSV()          { return m_sv;            };
