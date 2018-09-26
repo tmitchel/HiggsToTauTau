@@ -118,6 +118,18 @@ void slim_tree::fillTree(std::string cat, electron* el, tau* t, jet_factory* fje
     t1_mass = t->getMass();
     met = fmet->getMet();
     metphi = fmet->getMetPhi();
+    mjj = fjets->getDijetMass();
+    pt_sv = evt->getPtSV();
+    m_sv = evt->getMSV();
+    Dbkg_VBF = evt->getDbkg_VBF();
+    Dbkg_ggH = evt->getDbkg_ggH();
+    Phi = evt->getPhi();
+    Phi1 = evt->getPhi1();
+    costheta1 = evt->getCosTheta1();
+    costheta2 = evt->getCosTheta2();
+    costhetastar = evt->getCosThetaStar();
+    Q2V1 = evt->getQ2V1();
+    Q2V2 = evt->getQ2V2();
 
     // dijet info is only ok if you have 2 jets, imagine that
     hjj_pT = 0.;
