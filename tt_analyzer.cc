@@ -24,9 +24,11 @@
 #include "include/btagSF.h"
 #include "include/ditau_factory.h"
 #include "include/electron_factory.h"
+#include "include/muon_factory.h"
 #include "include/event_info.h"
 #include "include/jet_factory.h"
 #include "include/met_factory.h"
+#include "include/slim_tree.h"
 #include "include/tauSF.h"
 #include "include/util.h"
 
@@ -84,7 +86,11 @@ int main(int argc, char* argv[]) {
   } else {
     helper = new Helper(fout, name, syst);
   }
-  
+
+  // cd to root of output file and create tree
+  fout->cd();
+  slim_tree *st = new slim_tree("tt_tree");
+
   // get normalization (lumi & xs are in util.h)
   double norm;
   if (isData) {
@@ -355,6 +361,24 @@ int main(int argc, char* argv[]) {
         evtwt *= tauSFs.VBF_ZmmSF(jets.getDijetMass(), syst);
       }
     }
+
+    if (tau1.getPt() < 50 || tau2.getPt() < 40) {
+      continue;
+    }
+
+    std::string tree_cat("none");
+    if (signalRegion) {
+      if (zeroJet) {
+        tree_cat = "0jet";
+      } else if (boosted) {
+        tree_cat = "boosted";
+      } else if (vbfCat) {
+        tree_cat = "vbf";
+      } else {
+        tree_cat = "inclusive";
+      }
+    }
+    st->fillTree(tree_cat, &tau1, &tau2, &jets, &met, &event, evtwt);
 
     if (tau1.getPt() > 50 && tau2.getPt() > 40) {
 

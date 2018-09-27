@@ -374,13 +374,13 @@ int main(int argc, char* argv[]) {
     std::string tree_cat( "none" );
     if (signalRegion) {
       if (zeroJet) {
-        tree_cat = "et_0jet";
+        tree_cat = "0jet";
       } else if (boosted) {
-        tree_cat = "et_boosted";
+        tree_cat = "boosted";
       } else if (vbfCat) {
-        tree_cat = "et_vbf";
+        tree_cat = "vbf";
       } else {
-        tree_cat = "et_inclusive";
+        tree_cat = "inclusive";
       }
     }     
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, evtwt);
