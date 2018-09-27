@@ -86,6 +86,8 @@ for ifile in fileList:
     elif 'ZH' in sample:
         mass = sample.split('ZH')[-1]
         names = ['ZH'+mass]
+    elif 'embed' in sample:
+        names = ['embed']
     else: 
         names = ['VV']
 
