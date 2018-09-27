@@ -74,6 +74,7 @@ int main(int argc, char* argv[]) {
     filename = prefix + sample + std::string("_") + name + systname + suffix;
   }
   auto fout = new TFile(filename.c_str(), "RECREATE");
+  counts->Write();
   fout->mkdir("grabbag");
   fout->cd("grabbag");
 
