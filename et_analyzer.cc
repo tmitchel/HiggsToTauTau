@@ -46,9 +46,9 @@ int main(int argc, char* argv[]) {
   std::string postfix = parser.Option("-P");
   std::string fname = path + sample + postfix;
   bool isData = sample.find("data") != std::string::npos;
-  bool isEmbed = sample.find("embed") != std::string::npos;
+  bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
   // bool isData = parser.Flag("-d");
-
+  
   std::string systname = "";
   if (!syst.empty()) {
     systname = "_" + syst;
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 
   // cd to root of output file and create tree
   fout->cd();
-  slim_tree* st = new slim_tree("test_tree");
+  slim_tree* st = new slim_tree("etau_tree");
 
   // get normalization (lumi & xs are in util.h)
   double norm;
@@ -307,24 +307,19 @@ int main(int argc, char* argv[]) {
       } else if (event.getRun() < 284045) {
         Stitching_Weight = (1.0 / 0.933);
       }
-      histos->at("Stitching")->Fill(Stitching_Weight, 1.);
       // get correction factor
       std::vector<double> corrFactor = EmdWeight_Electron(wEmbed, electron.getPt(), electron.getEta(), electron.getIso());
       double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]); // id SF, iso SF, trg eff. SF
-      histos->at("totEmbed")->Fill(totEmbedWeight, 1.);
-      histos->at("corr2")->Fill(corrFactor[2], 1.);
-      histos->at("corr5")->Fill(corrFactor[5], 1.);
-      histos->at("corr6")->Fill(corrFactor[6], 1.);
+
       // data to mc trigger ratio
       double trg_ratio(m_sel_trg_ratio(wEmbed, electron.getPt(), electron.getEta(), tau.getPt(), tau.getEta()));
-      histos->at("trg")->Fill(trg_ratio, 1.);
 
       auto genweight(event.getGenWeight());
       if (genweight > 1 || genweight < 0) {
         genweight = 0;
       }
       evtwt *= (Stitching_Weight * totEmbedWeight * trg_ratio * genweight);
-      histos->at("gen")->Fill(genweight, 1.);
+      
       // temporary SF for failed embed jobs
       if (fname.find("embed-H") != std::string::npos) {
         evtwt *= (1. / .59);
@@ -333,7 +328,6 @@ int main(int argc, char* argv[]) {
       }
       // scale-up tau pT
       tau.scalePt(1.02);
-      histos->at("evtwt")->Fill(evtwt, 1.);
     }
     fout->cd();
 
