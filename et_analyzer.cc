@@ -46,9 +46,9 @@ int main(int argc, char* argv[]) {
   std::string postfix = parser.Option("-P");
   std::string fname = path + sample + postfix;
   bool isData = sample.find("data") != std::string::npos;
-  bool isEmbed = sample.find("embed") != std::string::npos;
+  bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
   // bool isData = parser.Flag("-d");
-
+  
   std::string systname = "";
   if (!syst.empty()) {
     systname = "_" + syst;
