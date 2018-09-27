@@ -31,7 +31,7 @@ public:
         j2_pt, j2_eta, j2_phi,
         b1_pt, b1_eta, b1_phi,
         b2_pt, b2_eta, b2_phi,
-        met, metphi, mjj,
+        met, metphi, mjj, njets, numGenJets,
         pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
         higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj;
@@ -73,6 +73,8 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("met",           &met,           "met/F"            );
     otree->Branch("metphi",        &metphi,        "metphi/F"         );
     otree->Branch("mjj",           &mjj,           "mjj/F"            );
+    otree->Branch("njets",         &njets,         "njets/F"          );
+    otree->Branch("numGenJets",    &numGenJets,    "numGenJets/F"     );
 
     otree->Branch("pt_sv",         &pt_sv,         "pt_sv/F"          );
     otree->Branch("m_sv",          &m_sv,          "m_sv/F"           );
@@ -130,6 +132,8 @@ void slim_tree::fillTree(std::string cat, electron* el, tau* t, jet_factory* fje
     costhetastar = evt->getCosThetaStar();
     Q2V1 = evt->getQ2V1();
     Q2V2 = evt->getQ2V2();
+    njets = fjets->getNjets();
+    numGenJets = fjets->getNumGenJets();
 
     // dijet info is only ok if you have 2 jets, imagine that
     hjj_pT = 0.;
@@ -141,11 +145,11 @@ void slim_tree::fillTree(std::string cat, electron* el, tau* t, jet_factory* fje
     b1_pt = 0; b1_eta = 0; b1_phi = 0;
     b2_pt = 0; b2_eta = 0; b2_phi = 0;
 
-    if (fjets->getNjets() > 0) {
+    if (njets > 0) {
         j1_pt = jets.at(0).getPt();
         j1_eta = jets.at(0).getEta();
         j1_phi = jets.at(0).getPhi();
-        if (fjets->getNjets() > 1) {
+        if (njets > 1) {
           j2_pt = jets.at(1).getPt();
           j2_eta = jets.at(1).getEta();
           j2_phi = jets.at(1).getPhi();
