@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 
   // cd to root of output file and create tree
   fout->cd();
-  slim_tree* st = new slim_tree("test_tree");
+  slim_tree* st = new slim_tree("etau_tree");
 
   // get normalization (lumi & xs are in util.h)
   double norm;
@@ -380,13 +380,13 @@ int main(int argc, char* argv[]) {
     std::string tree_cat( "none" );
     if (signalRegion) {
       if (zeroJet) {
-        tree_cat = "et_0jet";
+        tree_cat = "0jet";
       } else if (boosted) {
-        tree_cat = "et_boosted";
+        tree_cat = "boosted";
       } else if (vbfCat) {
-        tree_cat = "et_vbf";
+        tree_cat = "vbf";
       } else {
-        tree_cat = "et_inclusive";
+        tree_cat = "inclusive";
       }
     }     
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, evtwt);

@@ -18,6 +18,7 @@ public:
     void fillTree(std::string, electron*, tau*, jet_factory*, met_factory*, event_info*, Float_t);
     void fillTree(std::string, muon*    , tau*, jet_factory*, met_factory*, event_info*, Float_t);
     void fillTree(std::string, tau*     , tau*, jet_factory*, met_factory*, event_info*, Float_t);
+    void generalFill(std::string, jet_factory*, met_factory*, event_info*, Float_t, TLorentzVector);
 
     // member data
     TTree* otree;
@@ -101,23 +102,15 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("cat_inclusive", &cat_inclusive, "cat_inclusive/I"  );
 }
 
-void slim_tree::fillTree(std::string cat, electron* el, tau* t, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight) {
+void slim_tree::generalFill(std::string cat, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, TLorentzVector higgs) {
     // create things needed for later
-    auto jets( fjets->getJets() );
-    TLorentzVector higgs( el->getP4() + t->getP4() + fmet->getP4() );
+    auto jets(fjets->getJets());
 
     // start filling branches
     evtwt = weight;
     higgs_pT = higgs.Pt();
     higgs_m = higgs.M();
-    el_pt = el->getPt();
-    el_eta = el->getEta();
-    el_phi = el->getPhi();
-    el_mass = el->getMass();
-    t1_pt = t->getPt();
-    t1_eta = t->getEta();
-    t1_phi = t->getPhi();
-    t1_mass = t->getMass();
+
     met = fmet->getMet();
     metphi = fmet->getMetPhi();
     mjj = fjets->getDijetMass();
@@ -140,45 +133,102 @@ void slim_tree::fillTree(std::string cat, electron* el, tau* t, jet_factory* fje
     hjj_m = 0.;
     dEtajj = 0.;
     dPhijj = 0.;
-    j1_pt = 0; j1_eta = 0; j1_phi = 0;
-    j2_pt = 0; j2_eta = 0; j2_phi = 0;
-    b1_pt = 0; b1_eta = 0; b1_phi = 0;
-    b2_pt = 0; b2_eta = 0; b2_phi = 0;
+    j1_pt = 0;
+    j1_eta = 0;
+    j1_phi = 0;
+    j2_pt = 0;
+    j2_eta = 0;
+    j2_phi = 0;
+    b1_pt = 0;
+    b1_eta = 0;
+    b1_phi = 0;
+    b2_pt = 0;
+    b2_eta = 0;
+    b2_phi = 0;
 
     if (njets > 0) {
         j1_pt = jets.at(0).getPt();
         j1_eta = jets.at(0).getEta();
         j1_phi = jets.at(0).getPhi();
         if (njets > 1) {
-          j2_pt = jets.at(1).getPt();
-          j2_eta = jets.at(1).getEta();
-          j2_phi = jets.at(1).getPhi();
-          hjj_pT = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).Pt();
-          hjj_m = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).M();
-          dEtajj = fabs(jets.at(0).getEta() - jets.at(1).getEta());
-          dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi());
+        j2_pt = jets.at(1).getPt();
+        j2_eta = jets.at(1).getEta();
+        j2_phi = jets.at(1).getPhi();
+        hjj_pT = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).Pt();
+        hjj_m = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).M();
+        dEtajj = fabs(jets.at(0).getEta() - jets.at(1).getEta());
+        dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi());
         }
     }
 
     // reset the categories
-    cat_0jet      = 0;
-    cat_boosted   = 0;
-    cat_vbf       = 0;
+    cat_0jet = 0;
+    cat_boosted = 0;
+    cat_vbf = 0;
     cat_inclusive = 0;
 
     // decide on which selections have been passed
-    if (cat == "et_0jet") {
-      cat_inclusive = 1;
-      cat_0jet = 1;
-    } else if (cat == "et_boosted") {
-      cat_inclusive = 1;
-      cat_boosted = 1;
-    } else if (cat == "et_vbf") {
-      cat_inclusive = 1;
-      cat_vbf = 1;
-    } else if (cat == "et_inclusive") {
+    if (cat == "0jet") {
+        cat_inclusive = 1;
+        cat_0jet = 1;
+    } else if (cat == "boosted") {
+        cat_inclusive = 1;
+        cat_boosted = 1;
+    } else if (cat == "vbf") {
+        cat_inclusive = 1;
+        cat_vbf = 1;
+    } else if (cat == "inclusive") {
         cat_inclusive = 1;
     }
+}
+
+void slim_tree::fillTree(std::string cat, electron* el, tau* t, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight) {
+
+    TLorentzVector higgs(el->getP4() + t->getP4() + fmet->getP4());
+    generalFill(cat, fjets, fmet, evt, weight, higgs);
+
+    el_pt = el->getPt();
+    el_eta = el->getEta();
+    el_phi = el->getPhi();
+    el_mass = el->getMass();
+    t1_pt = t->getPt();
+    t1_eta = t->getEta();
+    t1_phi = t->getPhi();
+    t1_mass = t->getMass();
 
     otree->Fill();
+}
+
+void slim_tree::fillTree(std::string cat, tau *t1, tau *t2, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight) {
+
+    TLorentzVector higgs(t1->getP4() + t2->getP4() + fmet->getP4());
+    generalFill(cat, fjets, fmet, evt, weight, higgs);
+
+    t1_pt = t1->getPt();
+    t1_eta = t1->getEta();
+    t1_phi = t1->getPhi();
+    t1_mass = t1->getMass();
+    t2_pt = t2->getPt();
+    t2_eta = t2->getEta();
+    t2_phi = t2->getPhi();
+    t2_mass = t2->getMass();
+
+    otree->Fill();
+}
+
+void slim_tree::fillTree(std::string cat, muon *mu, tau *t1, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight) {
+
+  TLorentzVector higgs(mu->getP4() + t1->getP4() + fmet->getP4());
+  generalFill(cat, fjets, fmet, evt, weight, higgs);
+
+  mu_pt = mu->getPt();
+  mu_eta = mu->getEta();
+  mu_phi = mu->getPhi();
+  mu_mass = mu->getMass();
+  t1_pt = t1->getPt();
+  t1_eta = t1->getEta();
+  t1_phi = t1->getPhi();
+  t1_mass = t1->getMass();
+
+  otree->Fill();
 }
