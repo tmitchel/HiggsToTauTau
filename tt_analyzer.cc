@@ -160,7 +160,7 @@ int main(int argc, char* argv[]) {
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
 
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
-    double evtwt(norm), corrections(1.), sf_trig1(1.), sf_trig2(1.);
+    Float_t evtwt(norm), corrections(1.), sf_trig1(1.), sf_trig2(1.);
     double sf_trig_RR(1.), sf_trig_RF(1.), sf_trig_FR(1.), sf_trig_FF(1.);
 
     if (name == "W") {
