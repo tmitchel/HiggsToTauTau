@@ -307,6 +307,7 @@ int main(int argc, char* argv[]) {
       } else if (event.getRun() < 284045) {
         Stitching_Weight = (1.0 / 0.933);
       }
+
       // get correction factor
       std::vector<double> corrFactor = EmdWeight_Electron(wEmbed, electron.getPt(), electron.getEta(), electron.getIso());
       double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]); // id SF, iso SF, trg eff. SF
@@ -319,7 +320,7 @@ int main(int argc, char* argv[]) {
         genweight = 0;
       }
       evtwt *= (Stitching_Weight * totEmbedWeight * trg_ratio * genweight);
-      
+
       // temporary SF for failed embed jobs
       if (fname.find("embed-H") != std::string::npos) {
         evtwt *= (1. / .59);
