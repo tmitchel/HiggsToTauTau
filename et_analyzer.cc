@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
     norm = 1.0;
   } else if (isEmbed) {
     if (sample.find("embed-H") != std::string::npos) {
-      norm = 1 / .59;
+      norm = 1 / .85;
     } else {
       norm = 1 / .99;
     }
@@ -322,14 +322,10 @@ int main(int argc, char* argv[]) {
       }
       evtwt *= (Stitching_Weight * totEmbedWeight * trg_ratio * genweight);
 
-      // temporary SF for failed embed jobs
-      if (fname.find("embed-H") != std::string::npos) {
-        evtwt *= (1. / .59);
-      } else if (fname.find("embed") != std::string::npos) {
-        evtwt *= (1. / .99);
-      }
       // scale-up tau pT
-      tau.scalePt(1.02);
+      if (tau.getGenMatch() == 5) {
+        tau.scalePt(1.02);
+      }
     }
     fout->cd();
 
@@ -360,7 +356,7 @@ int main(int argc, char* argv[]) {
     bool zeroJet = (jets.getNjets() == 0);
     bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && 
                    (jets.getDijetMass() <= 300 || Higgs.Pt() <= 50 || tau.getPt() == 30)));
-    bool vbfCat  = (jets.getNjets() > 1 && Higgs.Pt() > 50 && jets.getDijetMass() > 300);
+    bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
     histos->at("pre_mt") -> Fill(mt, 1.);
@@ -383,6 +379,9 @@ int main(int argc, char* argv[]) {
         tree_cat = "vbf";
       } else {
         tree_cat = "inclusive";
+      }
+      if (vbfCat) {
+        tree_cat = "vbf";
       }
     }     
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, evtwt);
