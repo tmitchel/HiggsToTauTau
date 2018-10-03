@@ -209,6 +209,10 @@ int main(int argc, char* argv[]) {
 
     histos->at("cutflow")->Fill(1., 1.);
 
+    auto electron = electrons.run_factory();
+    auto tau = taus.run_factory();
+    jets.run_factory();
+
     //////////////////////////////////////////////////////////
     // Event Selection in skimmer:                          //
     //   - Trigger: Ele25eta2p1Tight -> pass, match, filter //
@@ -218,9 +222,17 @@ int main(int argc, char* argv[]) {
     //   - Event: dR(tau,el) > 0.5                          //
     //////////////////////////////////////////////////////////
 
-    auto electron = electrons.run_factory();
-    auto tau = taus.run_factory();
-    jets.run_factory();
+    if (electron.getPt() > 26.) histos->at("cutflow") -> Fill(2., 1.);
+    else continue;
+
+    if (fabs(electron.getEta()) < 2.1) histos->at("cutflow") -> Fill(3., 1.);
+    else continue;
+
+    if (tau.getPt() > 27.) histos->at("cutflow") -> Fill(4., 1.);
+    else continue;
+
+    if (fabs(tau.getEta()) < 2.3) histos->at("cutflow") -> Fill(5., 1.);
+    else continue;
 
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
@@ -233,7 +245,7 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
-    histos->at("cutflow") -> Fill(2., 1.);
+    histos->at("cutflow") -> Fill(6., 1.);
 
     // build Higgs
     TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
@@ -477,7 +489,7 @@ int main(int argc, char* argv[]) {
 
     } // close VH
 
-    histos->at("cutflow")->Fill(3., 1.);
+    histos->at("cutflow")->Fill(7., 1.);
     // // inclusive selection
     // if (signalRegion) {
     //   histos->at("cutflow")->Fill(8., 1.);
