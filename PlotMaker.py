@@ -10,11 +10,11 @@ parser.add_argument('--cat', '-c', action='store',
     help='name of category to pull from'
     )
 parser.add_argument('--bins', '-b', action='store', 
-    dest='bins', default=[50, 0, 100], nargs='+', 
+    dest='bins', default=[50, 0, 100], nargs='+', type=int,
     help='[N bins, low, high]'
     )
 args = parser.parse_args()
-
+print args.bins
 from ROOT import TFile, TLegend, TH1F, TCanvas, THStack, kBlack, TColor, TLatex, kTRUE, TMath, TLine, gStyle
 from glob import glob
 gStyle.SetOptStat(0)
@@ -27,11 +27,14 @@ def applyStyle(name, hist, leg):
     elif name == 'ZL':
         hist.SetFillColor(TColor.GetColor("#4496c8"))
         leg.AddEntry(hist, 'ZL', 'f')
+    elif name == 'ZJ':
+        hist.SetFillColor(TColor.GetColor("#33ff11"))
+        leg.AddEntry(hist, 'TTJ', 'f')
     elif name == 'TTT':
         hist.SetFillColor(TColor.GetColor("#9999cc"))
         leg.AddEntry(hist, 'TTT', 'f')
     elif name == 'TTJ':
-        hist.SetFillColor(TColor.GetColor("#33ff11"))
+        hist.SetFillColor(TColor.GetColor("#9999cc"))
         leg.AddEntry(hist, 'TTJ', 'f')
     elif name == 'VV':
         hist.SetFillColor(TColor.GetColor("#12cadd"))
@@ -61,20 +64,20 @@ def applyStyle(name, hist, leg):
         return None, -1
     return hist, overlay
 
-def fillHist(ifile, hist, leg):
+def fillHist(ifile, incat, hist, leg):
     tfile = TFile(ifile, 'read')
     tree = tfile.Get('etau_tree')
     name = ifile.split('/')[-1].split('.root')[0]
     from array import array
-    var = array('f', [0])
-    weights = array('f', [0])
+    var, weights, hpt = array('f', [0]), array('f', [0]), array('f', [0])
     cat = array('i', [0])
     tree.SetBranchAddress(args.var, var)
     tree.SetBranchAddress('evtwt', weights)
-    tree.SetBranchAddress('cat_'+args.cat, cat)
+    tree.SetBranchAddress(incat, cat)
+    tree.SetBranchAddress('higgs_pT', hpt)
     for i in range(tree.GetEntries()):
         tree.GetEntry(i)
-        if cat[0] > 0:
+        if cat[0] > 0 and hpt[0] > 50:
             hist.Fill(var[0], weights[0])
     hist, overlay = applyStyle(name, hist, leg)
     if overlay == 0 and hist != None:
@@ -176,10 +179,35 @@ def sigmaLines(data):
 
     return line1, line2
 
+def createQCD(data, stat):
+    qcd = data.Clone()
+    qcd.Add(stat, -1)
+    qcd.SetFillColor(TColor.GetColor("#ffccff"))
+    SS = qcd.Clone()
+    SS.Reset()
+    OS = SS.Clone()
+    for ifile in files:
+        name = ifile.split('/')[-1].split('.root')[0]
+        if not (name == 'embed' or name == 'ZL' or name == 'ZJ' or name == 'TTT' or name == 'TTJ' or name == 'W' or name == 'VV'):
+            continue
+        fin = TFile(ifile, 'read')
+        tree = fin.Get('etau_tree')
+        for event in tree:
+            if event.cat_qcd == 0 or event.cat_vbf == 0:
+                continue
+            if event.el_charge + event.t1_charge == 0:
+                OS.Fill(args.var, event.evtwt)
+            else:
+                SS.Fill(args.var, event.evtwt)
+    
+    print SS.Integral(), OS.Integral()
+    qcd.Scale(SS.Integral()/OS.Integral())
+    return qcd
+
 if __name__ == "__main__":
-    files = [ifile for ifile in glob('output/et_newtrees/*')]
-    files.insert(0, files.pop(files.index('output/et_newtrees/Data.root')))
-    files.insert(-1, files.pop(files.index('output/et_newtrees/VBF125.root')))
+    files = [ifile for ifile in glob('output/et_loose/*')]
+    files.insert(0, files.pop(files.index('output/et_loose/Data.root')))
+    files.insert(-1, files.pop(files.index('output/et_loose/VBF125.root')))
     data = TH1F('data', 'data', args.bins[0], args.bins[1], args.bins[2])
     sig = TH1F('signal', 'signal', args.bins[0], args.bins[1], args.bins[2])
     stat = TH1F('stat', 'stat', args.bins[0], args.bins[1], args.bins[2])
@@ -189,7 +217,7 @@ if __name__ == "__main__":
     for ifile in files:
         name = ifile.split('/')[-1].split('.root')[0]
         hist = TH1F(name, name, args.bins[0], args.bins[1], args.bins[2])
-        hist, leg, overlay = fillHist(ifile, hist, leg) 
+        hist, leg, overlay = fillHist(ifile, 'cat_'+args.cat, hist, leg)
         if overlay == 0:
             stack.Add(hist)
             stat.Add(hist)
@@ -200,6 +228,10 @@ if __name__ == "__main__":
 
     can = createCanvas()
     stat = formatStat(stat)
+    qcd = createQCD(data, stat)
+    leg.AddEntry(qcd, 'QCD', 'f')
+    stack.Add(qcd)
+    stat.Add(qcd)
     high = max(data.GetMaximum(), stat.GetMaximum()) * 1.2
 
     stack.SetMaximum(high)
@@ -249,4 +281,4 @@ if __name__ == "__main__":
     line1.Draw()
     line2.Draw()
 
-    can.SaveAs('hi.pdf')
+    can.SaveAs('hi_new.pdf')
