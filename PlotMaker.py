@@ -14,7 +14,7 @@ parser.add_argument('--bins', '-b', action='store',
     help='[N bins, low, high]'
     )
 args = parser.parse_args()
-print args.bins
+
 from ROOT import TFile, TLegend, TH1F, TCanvas, THStack, kBlack, TColor, TLatex, kTRUE, TMath, TLine, gStyle
 from glob import glob
 gStyle.SetOptStat(0)
@@ -57,33 +57,51 @@ def applyStyle(name, hist, leg):
         overlay = 2
         leg.AddEntry(hist, 'VBF M=125GeV', 'l')
     # elif name == 'ggH125':
-    #     hist.SetLineColor(TColor.GetColor("#00fd00"))
+    #     hist.SetFillColor(0)
+    #     hist.SetLineWidth(3)
+    #     hist.SetLineColor(TColor.GetColor('#000000'))
+    #     hist.SetLineStyle(7)
     #     overlay = 2
     #     leg.AddEntry(hist, 'ggH M=125GeV', 'l')
     else:
-        return None, -1
+        return None, -1 
     return hist, overlay
 
-def fillHist(ifile, incat, hist, leg):
+def fillHist(ifile, incat, leg, qcd_OS, qcd_SS):
+    name = ifile.split('/')[-1].split('.root')[0]
+    hist = TH1F(name, name, args.bins[0], args.bins[1], args.bins[2])
     tfile = TFile(ifile, 'read')
     tree = tfile.Get('etau_tree')
-    name = ifile.split('/')[-1].split('.root')[0]
     from array import array
-    var, weights, hpt = array('f', [0]), array('f', [0]), array('f', [0])
+    var, weights, hpt, tq, eq, QCD = array('f', [0]), array('f', [0]), array('f', [0]), array('f', [0]), array('f', [0]), array('f', [0])
     cat = array('i', [0])
     tree.SetBranchAddress(args.var, var)
     tree.SetBranchAddress('evtwt', weights)
     tree.SetBranchAddress(incat, cat)
     tree.SetBranchAddress('higgs_pT', hpt)
+    tree.SetBranchAddress('cat_qcd', QCD)
+    tree.SetBranchAddress('el_charge', eq)
+    tree.SetBranchAddress('t1_charge', tq)
     for i in range(tree.GetEntries()):
         tree.GetEntry(i)
         if cat[0] > 0 and hpt[0] > 50:
             hist.Fill(var[0], weights[0])
+        if QCD[0] > 0 and name == 'Data':
+            if eq[0] + tq[0] == 0:
+                qcd_OS.Fill(var[0], weights[0])
+            else:
+                qcd_SS.Fill(var[0], weights[0])
+        elif QCD[0] > 0 and (name == 'embed' or name == 'ZL' or name == 'ZJ' or name == 'TTT' or name == 'TTJ' or name == 'W' or name == 'VV'):
+            if eq[0] + tq[0] == 0:
+                qcd_OS.Fill(var[0], -weights[0])
+            else:
+                qcd_SS.Fill(var[0], -weights[0])
+
     hist, overlay = applyStyle(name, hist, leg)
     if overlay == 0 and hist != None:
         hist.SetName(name)
 
-    return hist, leg, overlay
+    return hist, leg, overlay, qcd_OS, qcd_SS
 
 def createCanvas():
     can = TCanvas()
@@ -120,6 +138,12 @@ titles = {
     'el_pt': 'Electron p_{T} [GeV]',
     't1_pt': 'Tau p_{T} [GeV]',
     'met': 'Missing E_{T} [GeV]',
+    'pt_sv': 'SVFit p_{T} [GeV]',
+    'm_sv': 'SVFit Mass [GeV]',
+    'mjj': 'Dijet Mass [GeV]',
+    'Dbkg_VBF': 'MELA VBF Disc',
+    'Dbkg_ggH': 'MELA ggH Disc',
+    'NN_disc': 'NN Disc.'
 }
 
 def formatStack(stack):
@@ -179,45 +203,27 @@ def sigmaLines(data):
 
     return line1, line2
 
-def createQCD(data, stat):
+def createQCD(data, stat, OS, SS):
     qcd = data.Clone()
     qcd.Add(stat, -1)
-    qcd.SetFillColor(TColor.GetColor("#ffccff"))
-    SS = qcd.Clone()
-    SS.Reset()
-    OS = SS.Clone()
-    for ifile in files:
-        name = ifile.split('/')[-1].split('.root')[0]
-        if not (name == 'embed' or name == 'ZL' or name == 'ZJ' or name == 'TTT' or name == 'TTJ' or name == 'W' or name == 'VV'):
-            continue
-        fin = TFile(ifile, 'read')
-        tree = fin.Get('etau_tree')
-        for event in tree:
-            if event.cat_qcd == 0 or event.cat_vbf == 0:
-                continue
-            if event.el_charge + event.t1_charge == 0:
-                OS.Fill(args.var, event.evtwt)
-            else:
-                SS.Fill(args.var, event.evtwt)
-    
-    print SS.Integral(), OS.Integral()
     qcd.Scale(SS.Integral()/OS.Integral())
+    qcd.SetFillColor(TColor.GetColor("#ffccff"))
     return qcd
 
 if __name__ == "__main__":
-    files = [ifile for ifile in glob('output/et_loose/*')]
-    files.insert(0, files.pop(files.index('output/et_loose/Data.root')))
-    files.insert(-1, files.pop(files.index('output/et_loose/VBF125.root')))
+    files = [ifile for ifile in glob('output/etau_notvbf_loose/*')]
+    files.insert(0, files.pop(files.index('output/etau_notvbf_loose/Data.root')))
+    files.insert(-1, files.pop(files.index('output/etau_notvbf_loose/VBF125.root')))
     data = TH1F('data', 'data', args.bins[0], args.bins[1], args.bins[2])
     sig = TH1F('signal', 'signal', args.bins[0], args.bins[1], args.bins[2])
     stat = TH1F('stat', 'stat', args.bins[0], args.bins[1], args.bins[2])
+    qcd_OS = TH1F('qcd_OS', 'qcd_OS', args.bins[0], args.bins[1], args.bins[2])
+    qcd_SS = TH1F('qcd_SS', 'qcd_SS', args.bins[0], args.bins[1], args.bins[2])
 
     leg = createLegend()
     stack = THStack()
     for ifile in files:
-        name = ifile.split('/')[-1].split('.root')[0]
-        hist = TH1F(name, name, args.bins[0], args.bins[1], args.bins[2])
-        hist, leg, overlay = fillHist(ifile, 'cat_'+args.cat, hist, leg)
+        hist, leg, overlay, qcd_OS, qcd_SS = fillHist(ifile, 'cat_'+args.cat, leg, qcd_OS, qcd_SS)
         if overlay == 0:
             stack.Add(hist)
             stat.Add(hist)
@@ -228,7 +234,7 @@ if __name__ == "__main__":
 
     can = createCanvas()
     stat = formatStat(stat)
-    qcd = createQCD(data, stat)
+    qcd = createQCD(data, stat, qcd_OS, qcd_SS)
     leg.AddEntry(qcd, 'QCD', 'f')
     stack.Add(qcd)
     stat.Add(qcd)
@@ -239,6 +245,7 @@ if __name__ == "__main__":
     formatStack(stack)
     data.Draw('same lep')
     stat.Draw('same e2')
+    sig.Scale(50)
     sig.Draw('same hist')
     leg.Draw()
 
@@ -281,4 +288,12 @@ if __name__ == "__main__":
     line1.Draw()
     line2.Draw()
 
-    can.SaveAs('hi_new.pdf')
+    can.SaveAs(args.var+'_'+args.cat+'.pdf')
+
+    fout = TFile('roc_'+args.var+'.root', 'recreate')
+    fout.cd()
+    qcd.SetName('hbkg_'+args.var)
+    sig.SetName('hsig_'+args.var)
+    qcd.Write()
+    sig.Write()
+    fout.Close()
