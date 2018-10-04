@@ -393,7 +393,7 @@ int main(int argc, char* argv[]) {
       if (vbfCat) {
         tree_cat = "vbf";
       }
-    } else if (qcdRegion) {
+    } else if (qcdCR) {
       tree_cat = "qcdRegion";
     }     
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, evtwt);
