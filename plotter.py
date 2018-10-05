@@ -119,30 +119,30 @@ for ifile in infiles:
 
     temp = htemplate.Clone()
     # print ifile
-    if ifile == 'output/ZTT.root':
+    if ifile == options.in_dir+'/ZTT.root':
         samples.setdefault('ztt', ztt_hist)
         samples['ztt'].Add(ihist)
-    elif ifile == 'output/ZL.root':
+    elif ifile == options.in_dir+'/ZL.root':
         samples.setdefault('zl', zl_hist)
         samples['zl'].Add(ihist)
-    elif ifile == 'output/TTT.root':
+    elif ifile == options.in_dir+'/TTT.root':
         samples.setdefault('TTT', tt_hist)
         samples['TTT'].Add(ihist)
-    elif ifile == 'output/TTJ.root':
+    elif ifile == options.in_dir+'/TTJ.root':
         samples.setdefault('TTJ', tt_hist)
         samples['TTJ'].Add(ihist)
-    elif ifile == 'output/W_unscaled.root':
+    elif ifile == options.in_dir+'/W.root':
         samples.setdefault('wjets', wjets_hist)
         samples['wjets'].Add(ihist)
     elif 'QCD' in ifile:
         samples.setdefault('QCD', qcd_temp)
         samples['QCD'].Add(ihist)
-    elif ifile == 'output/VV.root':
+    elif ifile == options.in_dir+'/VV.root':
         samples.setdefault('VV', vv_hist)
         samples['VV'].Add(ihist)
     elif 'HWW' in ifile:
         sig_hist.Add(ihist)
-    elif ifile == 'output/Data.root':
+    elif ifile == options.in_dir+'/Data.root':
         data_hist.Add(ihist)
 
 # samples = sorted(samples.iteritems(), key=lambda (n,hist) : hist.Integral())
@@ -153,14 +153,14 @@ stack = r.THStack()
 
 stack.Add(samples['TTT'])
 stack.Add(samples['TTJ'])
-stack.Add(samples['QCD'])
+# stack.Add(samples['QCD'])
 stack.Add(samples['wjets'])
 stack.Add(samples['zl'])
 stack.Add(samples['ztt'])
 
 stat.Add(samples['TTT'])
 stat.Add(samples['TTJ'])
-stat.Add(samples['QCD'])
+# stat.Add(samples['QCD'])
 stat.Add(samples['wjets'])
 stat.Add(samples['zl'])
 stat.Add(samples['ztt'])
@@ -234,25 +234,25 @@ pull.GetYaxis().SetTitleOffset(.31)
 pull.GetYaxis().SetLabelSize(.1)
 pull.GetYaxis().SetNdivisions(505)
 
-line_low = pull.GetBinLowEdge(1)
-line_high = pull.GetBinLowEdge(pull.GetNbinsX())+pull.GetBinWidth(pull.GetNbinsX())
+# line_low = pull.GetBinLowEdge(1)
+# line_high = pull.GetBinLowEdge(pull.GetNbinsX())+pull.GetBinWidth(pull.GetNbinsX())
 
-line1 = r.TLine(line_low, 1.4, line_high, 1.4)
-line1.SetLineWidth(1)
-line1.SetLineStyle(7)
-line1.SetLineColor(r.kBlack)
-# line1.Draw()
+# line1 = r.TLine(line_low, 1.4, line_high, 1.4)
+# line1.SetLineWidth(1)
+# line1.SetLineStyle(7)
+# line1.SetLineColor(r.kBlack)
+# # line1.Draw()
 
-line2 = r.TLine(line_low, 0.6, line_high, 0.6)
-line2.SetLineWidth(1)
-line2.SetLineStyle(7)
-line2.SetLineColor(r.kBlack)
-# line2.Draw()
+# line2 = r.TLine(line_low, 0.6, line_high, 0.6)
+# line2.SetLineWidth(1)
+# line2.SetLineStyle(7)
+# line2.SetLineColor(r.kBlack)
+# # line2.Draw()
 
-line3 = r.TLine(line_low, 1, line_high, 1)
-line3.SetLineWidth(1)
-line3.SetLineStyle(7)
-line3.SetLineColor(r.kBlack)
+# line3 = r.TLine(line_low, 1, line_high, 1)
+# line3.SetLineWidth(1)
+# line3.SetLineStyle(7)
+# line3.SetLineColor(r.kBlack)
 
 leg = r.TLegend(0.6,0.55,0.88,0.88)
 leg.SetTextSize(0.045)
@@ -269,38 +269,38 @@ leg.AddEntry(vv_hist, 'Diboson', 'f')
 # leg.AddEntry(sig_hist, '10X Signal', 'l')
 
 stack.SetMaximum(stack.GetMaximum()*options.scaleTop)
-stack.SetMinimum(1)
-sig_hist.Scale(100)
+# stack.SetMinimum(1)
+# sig_hist.Scale(100)
 sig_hist.Draw('hist same')
 data_hist.Draw('same lep')
 stat.Draw('same e2')
 leg.Draw()
 
-ll = r.TLatex()
-ll.SetNDC(r.kTRUE)
-ll.SetTextSize(0.06)
-ll.SetTextFont(42)
-ll.DrawLatex(0.69,0.92, "35.9 fb^{-1} (13 TeV)");
+# ll = r.TLatex()
+# ll.SetNDC(r.kTRUE)
+# ll.SetTextSize(0.06)
+# ll.SetTextFont(42)
+# ll.DrawLatex(0.69,0.92, "35.9 fb^{-1} (13 TeV)");
 
-cms = r.TLatex()
-cms.SetNDC(r.kTRUE)
-cms.SetTextFont(61)
-cms.SetTextSize(0.1)
-cms.DrawLatex(0.14, 0.75,"CMS")
+# cms = r.TLatex()
+# cms.SetNDC(r.kTRUE)
+# cms.SetTextFont(61)
+# cms.SetTextSize(0.1)
+# cms.DrawLatex(0.14, 0.75,"CMS")
 
-prel = r.TLatex()
-prel.SetNDC(r.kTRUE)
-prel.SetTextFont(52)
-prel.SetTextSize(0.1)
-prel.DrawLatex(0.25,0.75,"Preliminary")
+# prel = r.TLatex()
+# prel.SetNDC(r.kTRUE)
+# prel.SetTextFont(52)
+# prel.SetTextSize(0.1)
+# prel.DrawLatex(0.25,0.75,"Preliminary")
 
 can.cd(2)
 pull.Draw('lep2')
 den.Draw('e2same')
 pull.Draw('same lep2')
-line1.Draw('same')
-line2.Draw('same')
-line3.Draw('same')
+# line1.Draw('same')
+# line2.Draw('same')
+# line3.Draw('same')
 
 can.SaveAs(options.var+'.png')
 can.SaveAs(options.var+'.pdf')
