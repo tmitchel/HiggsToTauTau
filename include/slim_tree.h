@@ -22,12 +22,12 @@ public:
 
     // member data
     TTree* otree;
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_inclusive;
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_inclusive, cat_qcd;
     Float_t evtwt,
-        el_pt, el_eta, el_phi, el_mass,
-        mu_pt, mu_eta, mu_phi, mu_mass,
-        t1_pt, t1_eta, t1_phi, t1_mass, // t1 is used for et and mt, as well
-        t2_pt, t2_eta, t2_phi, t2_mass,
+        el_pt, el_eta, el_phi, el_mass, el_charge,
+        mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
+        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, // t1 is used for et and mt, as well
+        t2_pt, t2_eta, t2_phi, t2_mass, t2_charge,
         j1_pt, j1_eta, j1_phi,
         j2_pt, j2_eta, j2_phi,
         b1_pt, b1_eta, b1_phi,
@@ -45,18 +45,22 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("el_eta",        &el_eta,        "el_eta/F"         );
     otree->Branch("el_phi",        &el_phi,        "el_phi/F"         );
     otree->Branch("el_mass",       &el_mass,       "el_mass/F"        );
+    otree->Branch("el_charge",     &el_charge,     "el_charge/F"      );
     otree->Branch("mu_pt",         &mu_pt,         "mu_pt/F"          );
     otree->Branch("mu_eta",        &mu_eta,        "mu_eta/F"         );
     otree->Branch("mu_phi",        &mu_phi,        "mu_phi/F"         );
     otree->Branch("mu_mass",       &mu_mass,       "mu_mass/F"        );
+    otree->Branch("mu_charge",     &mu_charge,     "mu_charge/F"      );
     otree->Branch("t1_pt",         &t1_pt,         "t1_pt/F"          );
     otree->Branch("t1_eta",        &t1_eta,        "t1_eta/F"         );
     otree->Branch("t1_phi",        &t1_phi,        "t1_phi/F"         );
     otree->Branch("t1_mass",       &t1_mass,       "t1_mass/F"        );
+    otree->Branch("t1_charge",     &t1_charge,     "t1_charge/F"      );
     otree->Branch("t2_pt",         &t2_pt,         "t2_pt/F"          );
     otree->Branch("t2_eta",        &t2_eta,        "t2_eta/F"         );
     otree->Branch("t2_phi",        &t2_phi,        "t2_phi/F"         );
     otree->Branch("t2_mass",       &t2_mass,       "t2_mass/F"        );
+    otree->Branch("t2_charge",     &t2_charge,     "t2_charge/F"      );
 
     otree->Branch("j1_pt",         &j1_pt,         "j1_pt/F"          );
     otree->Branch("j1_eta",        &j1_eta,        "j1_eta/F"         );
@@ -100,6 +104,8 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("cat_boosted",   &cat_boosted,   "cat_boosted/I"    );
     otree->Branch("cat_vbf",       &cat_vbf,       "cat_vbf/I"        );
     otree->Branch("cat_inclusive", &cat_inclusive, "cat_inclusive/I"  );
+    otree->Branch("cat_qcd",       &cat_qcd,       "cat_qcd/I"        );
+
 }
 
 void slim_tree::generalFill(std::string cat, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, TLorentzVector higgs) {
@@ -179,6 +185,8 @@ void slim_tree::generalFill(std::string cat, jet_factory* fjets, met_factory* fm
         cat_vbf = 1;
     } else if (cat == "inclusive") {
         cat_inclusive = 1;
+    } else if (cat == "qcdRegion") {
+        cat_qcd = 1;
     }
 }
 
@@ -191,10 +199,12 @@ void slim_tree::fillTree(std::string cat, electron* el, tau* t, jet_factory* fje
     el_eta = el->getEta();
     el_phi = el->getPhi();
     el_mass = el->getMass();
+    el_charge = el->getCharge();
     t1_pt = t->getPt();
     t1_eta = t->getEta();
     t1_phi = t->getPhi();
     t1_mass = t->getMass();
+    t1_charge = t->getCharge();
 
     otree->Fill();
 }
@@ -208,10 +218,12 @@ void slim_tree::fillTree(std::string cat, tau *t1, tau *t2, jet_factory *fjets, 
     t1_eta = t1->getEta();
     t1_phi = t1->getPhi();
     t1_mass = t1->getMass();
+    t1_charge = t1->getCharge();
     t2_pt = t2->getPt();
     t2_eta = t2->getEta();
     t2_phi = t2->getPhi();
     t2_mass = t2->getMass();
+    t2_charge = t2->getCharge();
 
     otree->Fill();
 }
@@ -225,10 +237,12 @@ void slim_tree::fillTree(std::string cat, muon *mu, tau *t1, jet_factory *fjets,
   mu_eta = mu->getEta();
   mu_phi = mu->getPhi();
   mu_mass = mu->getMass();
+  mu_charge = mu->getCharge();
   t1_pt = t1->getPt();
   t1_eta = t1->getEta();
   t1_phi = t1->getPhi();
   t1_mass = t1->getMass();
+  t1_charge = t1->getCharge();
 
   otree->Fill();
 }

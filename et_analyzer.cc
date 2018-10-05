@@ -74,6 +74,7 @@ int main(int argc, char* argv[]) {
     filename = prefix + sample + std::string("_") + name + systname + suffix;
   }
   auto fout = new TFile(filename.c_str(), "RECREATE");
+  counts->Write();
   fout->mkdir("grabbag");
   fout->cd("grabbag");
 
@@ -95,7 +96,7 @@ int main(int argc, char* argv[]) {
     norm = 1.0;
   } else if (isEmbed) {
     if (sample.find("embed-H") != std::string::npos) {
-      norm = 1 / .59;
+      norm = 1 / .85;
     } else {
       norm = 1 / .99;
     }
@@ -208,6 +209,10 @@ int main(int argc, char* argv[]) {
 
     histos->at("cutflow")->Fill(1., 1.);
 
+    auto electron = electrons.run_factory();
+    auto tau = taus.run_factory();
+    jets.run_factory();
+
     //////////////////////////////////////////////////////////
     // Event Selection in skimmer:                          //
     //   - Trigger: Ele25eta2p1Tight -> pass, match, filter //
@@ -217,9 +222,20 @@ int main(int argc, char* argv[]) {
     //   - Event: dR(tau,el) > 0.5                          //
     //////////////////////////////////////////////////////////
 
-    auto electron = electrons.run_factory();
-    auto tau = taus.run_factory();
-    jets.run_factory();
+    if (electron.getPt() > 26.) histos->at("cutflow") -> Fill(2., 1.);
+    else continue;
+
+    if (fabs(electron.getEta()) < 2.1) histos->at("cutflow") -> Fill(3., 1.);
+    else continue;
+
+    if (tau.getPt() > 27.) histos->at("cutflow") -> Fill(4., 1.);
+    else continue;
+
+    if (fabs(tau.getEta()) < 2.3) histos->at("cutflow") -> Fill(5., 1.);
+    else continue;
+
+    if (tau.getAgainstLooseMuon() > 0.5 && tau.getAgainstTightElectron() > 0.5) histos->at("cutflow") -> Fill(6., 1.);
+    else continue;
 
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
@@ -232,7 +248,7 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
-    histos->at("cutflow") -> Fill(2., 1.);
+    histos->at("cutflow") -> Fill(7., 1.);
 
     // build Higgs
     TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
@@ -321,14 +337,10 @@ int main(int argc, char* argv[]) {
       }
       evtwt *= (Stitching_Weight * totEmbedWeight * trg_ratio * genweight);
 
-      // temporary SF for failed embed jobs
-      if (fname.find("embed-H") != std::string::npos) {
-        evtwt *= (1. / .59);
-      } else if (fname.find("embed") != std::string::npos) {
-        evtwt *= (1. / .99);
-      }
       // scale-up tau pT
-      tau.scalePt(1.02);
+      if (tau.getGenMatch() == 5) {
+        tau.scalePt(1.02);
+      }
     }
     fout->cd();
 
@@ -359,7 +371,7 @@ int main(int argc, char* argv[]) {
     bool zeroJet = (jets.getNjets() == 0);
     bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && 
                    (jets.getDijetMass() <= 300 || Higgs.Pt() <= 50 || tau.getPt() == 30)));
-    bool vbfCat  = (jets.getNjets() > 1 && Higgs.Pt() > 50 && jets.getDijetMass() > 300);
+    bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
     histos->at("pre_mt") -> Fill(mt, 1.);
@@ -374,15 +386,18 @@ int main(int argc, char* argv[]) {
 
     std::string tree_cat( "none" );
     if (signalRegion) {
+      tree_cat = "inclusive";
       if (zeroJet) {
         tree_cat = "0jet";
-      } else if (boosted) {
+      } 
+      if (boosted) {
         tree_cat = "boosted";
-      } else if (vbfCat) {
+      } 
+      if (vbfCat) {
         tree_cat = "vbf";
-      } else {
-        tree_cat = "inclusive";
       }
+    } else if (qcdCR) {
+      tree_cat = "qcdRegion";
     }     
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, evtwt);
 
@@ -477,7 +492,7 @@ int main(int argc, char* argv[]) {
 
     } // close VH
 
-    histos->at("cutflow")->Fill(3., 1.);
+    histos->at("cutflow")->Fill(8., 1.);
     // // inclusive selection
     // if (signalRegion) {
     //   histos->at("cutflow")->Fill(8., 1.);
