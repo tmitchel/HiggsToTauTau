@@ -234,6 +234,9 @@ int main(int argc, char* argv[]) {
     if (fabs(tau.getEta()) < 2.3) histos->at("cutflow") -> Fill(5., 1.);
     else continue;
 
+    if (tau.getAgainstLooseMuon() > 0.5 && tau.getAgainstTightElectron() > 0.5) histos->at("cutflow") -> Fill(6., 1.);
+    else continue;
+
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
       continue;
@@ -245,7 +248,7 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
-    histos->at("cutflow") -> Fill(6., 1.);
+    histos->at("cutflow") -> Fill(7., 1.);
 
     // build Higgs
     TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
@@ -489,7 +492,7 @@ int main(int argc, char* argv[]) {
 
     } // close VH
 
-    histos->at("cutflow")->Fill(7., 1.);
+    histos->at("cutflow")->Fill(8., 1.);
     // // inclusive selection
     // if (signalRegion) {
     //   histos->at("cutflow")->Fill(8., 1.);
