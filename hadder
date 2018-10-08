@@ -1,10 +1,15 @@
-mv output/Data_output.root output/data.root
-#mv output/TT_output.root output/ttbar.root
-hadd output/ttbar.root output/TT_TTT_output.root output/TT_TTJ_output.root
+hadd output/Data.root output/data*
+mv output/TT_TTT_output.root output/TTT.root
+mv output/TT_TTJ_output.root output/TTJ.root
 hadd output/ZJ.root output/DY*ZJ*
 hadd output/ZL.root output/DY*ZL*
-hadd output/ZTT.root output/DY*ZTT* output/EWKZ*
-hadd output/W_unscaled.root output/W1_* output/W2_* output/W3_* output/W4_* output/W_output.root output/EWKW*
-hadd output/VV.root output/ST_* output/VV* output/WW* output/ZZ* output/WZ*
+hadd output/ZTT.root output/DY*ZTT*
+hadd output/embed.root output/embed-*
+hadd output/W.root output/WJet*.root
+hadd output/VV.root output/T-* output/Tbar* output/VV* output/WZ* output/ZZ* output/WW*
+hadd output/EWKZ.root output/EWKZ2*
+hadd output/WH125.root output/WPlus* output/WMinus*
+mv output/VBFHtoTauTau125_VBF125_output.root output/VBF125.root
+mv output/ggHtoTauTau125_ggH125_output.root output/ggH125.root
 mkdir output/originals
 mv output/*output*.root output/originals
