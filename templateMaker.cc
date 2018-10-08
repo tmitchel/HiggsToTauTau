@@ -16,7 +16,7 @@
 // class to hold the histograms until I'm ready to write them
 class histHolder {
 public:
-  histHolder(std::vector<int>);
+  histHolder(std::vector<int>, std::string);
   void writeHistos();
   void initVectors(std::string);
 
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
   }
 
   // initialize histogram holder 
-  auto hists = new histHolder(bins);
+  auto hists = new histHolder(bins, tvar);
 
   // read all files from input directory
   std::vector<std::string> files;
@@ -66,16 +66,17 @@ int main(int argc, char *argv[]) {
     hists->initVectors(name);
 
     // I hate doing it like this, but when I move the SetBranchAddres I see unexpected behavior
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf, cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
+    Int_t cat_inclusive, cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf, cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
     Float_t eq, tq, hpt, var, weight;
     tree->SetBranchAddress("el_charge", &eq);
     tree->SetBranchAddress("t1_charge", &tq);
     tree->SetBranchAddress("higgs_pT", &hpt);
     tree->SetBranchAddress(tvar.c_str(), &var);
+    tree->SetBranchAddress("evtwt", &weight);
+    tree->SetBranchAddress("cat_inclusive", &cat_inclusive);
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
     tree->SetBranchAddress("cat_boosted", &cat_boosted);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
-    tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("cat_antiiso", &cat_antiiso);
     tree->SetBranchAddress("cat_antiiso_0jet", &cat_antiiso_0jet);
     tree->SetBranchAddress("cat_antiiso_boosted", &cat_antiiso_boosted);
@@ -168,13 +169,13 @@ void fillQCD(TH1F* hist, std::string name, double var, double weight) {
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
 // and the map from categories to vectors of TH1F*'s. Each TH1F* in the vector corresponds to 
 // one file that is being put into that categories directory in the output tempalte
-histHolder::histHolder(std::vector<int> Bins) :
+histHolder::histHolder(std::vector<int> Bins, std::string tvar) :
   hists {
     {"et_0jet", std::vector<TH1F *>()},
     {"et_boosted", std::vector<TH1F *>()},
     {"et_vbf", std::vector<TH1F *>()},
   }, 
-  fout( new TFile("ctemplate.root", "recreate") ),
+  fout( new TFile(("templates/template_"+tvar+".root").c_str(), "recreate") ),
   bins( Bins )
 {
   for (auto it = hists.begin(); it != hists.end(); it++) {

@@ -13,6 +13,14 @@ parser.add_argument('--bins', '-b', action='store',
     dest='bins', default=[50, 0, 100], nargs='+', type=int,
     help='[N bins, low, high]'
     )
+parser.add_argument('--template', '-t', action='store_true',
+    dest='template', default=False,
+    help='create template'
+    )
+parser.add_argument('--plotOff', '-p', action='store_true',
+    dest='plotOff', default=False,
+    help='turn off plotting'
+)
 args = parser.parse_args()
 
 from ROOT import TFile, TLegend, TH1F, TCanvas, THStack, kBlack, TColor, TLatex, kTRUE, TMath, TLine, gStyle
@@ -67,41 +75,59 @@ def applyStyle(name, hist, leg):
         return None, -1 
     return hist, overlay
 
-def fillHist(ifile, incat, leg, qcd_OS, qcd_SS):
+def fillQCD(hist, name, var, weight):
+    if name == 'Data':
+        hist.Fill(var, weight)
+    elif name == 'embed' or name == 'ZL' or name == 'ZJ' or name == 'TTT' or name == 'TTJ' or name == 'W' or name == 'VV':
+        hist.Fill(var, -1*weight)
+    return hist
+
+def fillHist(ifile, incat, leg, qcd_OS, qcd_SS, qcd_nom):
+    nomCatName = 'cat_' + incat
+    antiisoCatName = 'cat_antiiso_' + incat
+    qcdCatName = 'cat_qcd_' + incat
     name = ifile.split('/')[-1].split('.root')[0]
     hist = TH1F(name, name, args.bins[0], args.bins[1], args.bins[2])
     tfile = TFile(ifile, 'read')
     tree = tfile.Get('etau_tree')
     from array import array
-    var, weights, hpt, tq, eq, QCD = array('f', [0]), array('f', [0]), array('f', [0]), array('f', [0]), array('f', [0]), array('f', [0])
-    cat = array('i', [0])
+    var, weights, hpt, tq, eq = array('f', [0]), array('f', [0]), array('f', [0]), array('f', [0]), array('f', [0])
+    nom_cat, antiiso_cat, qcd_cat = array('i', [0]), array('i', [0]), array('i', [0])
+
     tree.SetBranchAddress(args.var, var)
+    tree.SetBranchAddress(nomCatName, nom_cat)
+    tree.SetBranchAddress(antiisoCatName, antiiso_cat)
+    tree.SetBranchAddress(qcdCatName, qcd_cat)
     tree.SetBranchAddress('evtwt', weights)
-    tree.SetBranchAddress(incat, cat)
     tree.SetBranchAddress('higgs_pT', hpt)
-    tree.SetBranchAddress('cat_qcd', QCD)
     tree.SetBranchAddress('el_charge', eq)
     tree.SetBranchAddress('t1_charge', tq)
+
     for i in range(tree.GetEntries()):
         tree.GetEntry(i)
-        if cat[0] > 0 and hpt[0] > 50:
-            hist.Fill(var[0], weights[0])
-        if QCD[0] > 0 and name == 'Data':
+
+        ## get OS/SS ratio
+        if antiiso_cat[0] > 0:
             if eq[0] + tq[0] == 0:
-                qcd_OS.Fill(var[0], weights[0])
+                qcd_OS = fillQCD(qcd_OS, name, var[0], weights[0])
             else:
-                qcd_SS.Fill(var[0], weights[0])
-        elif QCD[0] > 0 and (name == 'embed' or name == 'ZL' or name == 'ZJ' or name == 'TTT' or name == 'TTJ' or name == 'W' or name == 'VV'):
-            if eq[0] + tq[0] == 0:
-                qcd_OS.Fill(var[0], -weights[0])
-            else:
-                qcd_SS.Fill(var[0], -weights[0])
+                qcd_SS = fillQCD(qcd_SS, name, var[0], weights[0])
+
+
+        if eq[0] + tq[0] == 0:
+            if nomCatName == 'cat_vbf' and hpt[0] < 50:
+                continue
+            if nom_cat[0] > 0:
+                hist.Fill(var[0], weights[0])
+            if qcd_cat[0] > 0:
+                qcd_nom = fillQCD(qcd_nom, name, var[0], weights[0])
+
 
     hist, overlay = applyStyle(name, hist, leg)
     if overlay == 0 and hist != None:
         hist.SetName(name)
 
-    return hist, leg, overlay, qcd_OS, qcd_SS
+    return hist, leg, overlay, qcd_OS, qcd_SS, qcd_nom
 
 def createCanvas():
     can = TCanvas()
@@ -143,7 +169,14 @@ titles = {
     'mjj': 'Dijet Mass [GeV]',
     'Dbkg_VBF': 'MELA VBF Disc',
     'Dbkg_ggH': 'MELA ggH Disc',
-    'NN_disc': 'NN Disc.'
+    'NN_disc': 'NN Disc.',
+    'Q2V1': '',
+    'Q2V2': '',
+    'Phi': '',
+    'Phi1': '',
+    'costheta1': '',
+    'costheta2': '',
+    'costhetastar': '',
 }
 
 def formatStack(stack):
@@ -203,27 +236,30 @@ def sigmaLines(data):
 
     return line1, line2
 
-def createQCD(data, stat, OS, SS):
-    qcd = data.Clone()
-    qcd.Add(stat, -1)
-    qcd.Scale(SS.Integral()/OS.Integral())
+def createQCD(qcd, OS, SS):
+    qcd.Scale(1.06 * SS.Integral()/OS.Integral())
+    for ibin in range(qcd.GetNbinsX()):
+        if qcd.GetBinContent(ibin) < 0:
+            qcd.SetBinContent(ibin, 0)
     qcd.SetFillColor(TColor.GetColor("#ffccff"))
     return qcd
 
 if __name__ == "__main__":
-    files = [ifile for ifile in glob('output/etau_notvbf_loose/*')]
-    files.insert(0, files.pop(files.index('output/etau_notvbf_loose/Data.root')))
-    files.insert(-1, files.pop(files.index('output/etau_notvbf_loose/VBF125.root')))
+    files = [ifile for ifile in glob('output/*') if '.root' in ifile]
+    files.insert(0, files.pop(files.index('output/Data.root')))
+    files.insert(-1, files.pop(files.index('output/VBF125.root')))
     data = TH1F('data', 'data', args.bins[0], args.bins[1], args.bins[2])
     sig = TH1F('signal', 'signal', args.bins[0], args.bins[1], args.bins[2])
     stat = TH1F('stat', 'stat', args.bins[0], args.bins[1], args.bins[2])
     qcd_OS = TH1F('qcd_OS', 'qcd_OS', args.bins[0], args.bins[1], args.bins[2])
     qcd_SS = TH1F('qcd_SS', 'qcd_SS', args.bins[0], args.bins[1], args.bins[2])
+    qcd_nom = TH1F('qcd_nom', 'qcd_nom', args.bins[0], args.bins[1], args.bins[2])
 
     leg = createLegend()
     stack = THStack()
+    hists = []
     for ifile in files:
-        hist, leg, overlay, qcd_OS, qcd_SS = fillHist(ifile, 'cat_'+args.cat, leg, qcd_OS, qcd_SS)
+        hist, leg, overlay, qcd_OS, qcd_SS, qcd_nom = fillHist(ifile, args.cat, leg, qcd_OS, qcd_SS, qcd_nom)
         if overlay == 0:
             stack.Add(hist)
             stat.Add(hist)
@@ -231,69 +267,76 @@ if __name__ == "__main__":
             data = hist
         elif overlay == 2:
             sig = hist
+        
+        if hist != None:
+            hists.append(hist.Clone())
 
-    can = createCanvas()
-    stat = formatStat(stat)
-    qcd = createQCD(data, stat, qcd_OS, qcd_SS)
-    leg.AddEntry(qcd, 'QCD', 'f')
-    stack.Add(qcd)
-    stat.Add(qcd)
-    high = max(data.GetMaximum(), stat.GetMaximum()) * 1.2
+    qcd = createQCD(qcd_nom, qcd_OS, qcd_SS)
+    print qcd.Integral()
 
-    stack.SetMaximum(high)
-    stack.Draw('hist')
-    formatStack(stack)
-    data.Draw('same lep')
-    stat.Draw('same e2')
-    sig.Scale(50)
-    sig.Draw('same hist')
-    leg.Draw()
+    if args.template:
+        fout = TFile('templates/temp_'+args.var+'_'+args.cat+'.root', 'recreate')
+        for ihist in hists:
+            ihist.SetName(ihist.GetName()+'_'+args.var)
+            ihist.Write()
+        qcd.SetName('QCD_'+args.var)
+        qcd.Write()
+        fout.Close()
+    
+    if not args.plotOff:
+        can = createCanvas()
+        stat = formatStat(stat)
+        leg.AddEntry(qcd, 'QCD', 'f')
+        stack.Add(qcd)
+        stat.Add(qcd)
+        high = max(data.GetMaximum(), stat.GetMaximum()) * 1.2
 
-    ll = TLatex()
-    ll.SetNDC(kTRUE)
-    ll.SetTextSize(0.06)
-    ll.SetTextFont(42)
-    ll.DrawLatex(0.69, 0.92, "35.9 fb^{-1} (13 TeV)")
+        stack.SetMaximum(high)
+        stack.Draw('hist')
+        formatStack(stack)
+        data.Draw('same lep')
+        stat.Draw('same e2')
+        # sig.Scale(50)
+        sig.Draw('same hist')
+        leg.Draw()
 
-    cms = TLatex()
-    cms.SetNDC(kTRUE)
-    cms.SetTextFont(61)
-    cms.SetTextSize(0.09)
-    cms.DrawLatex(0.14, 0.8, "CMS")
+        ll = TLatex()
+        ll.SetNDC(kTRUE)
+        ll.SetTextSize(0.06)
+        ll.SetTextFont(42)
+        ll.DrawLatex(0.69, 0.92, "35.9 fb^{-1} (13 TeV)")
 
-    prel = TLatex()
-    prel.SetNDC(kTRUE)
-    prel.SetTextFont(52)
-    prel.SetTextSize(0.09)
-    prel.DrawLatex(0.23, 0.8, "Preliminary")
+        cms = TLatex()
+        cms.SetNDC(kTRUE)
+        cms.SetTextFont(61)
+        cms.SetTextSize(0.09)
+        cms.DrawLatex(0.14, 0.8, "CMS")
 
-    can.cd(2)
-    ###########################
-    ## create pull histogram ##
-    ###########################
-    pull = data.Clone()
-    pull.Add(stat, -1)
-    for ibin in range(pull.GetNbinsX()+1):
-        pullContent = pull.GetBinContent(ibin)
-        uncertainty = TMath.Sqrt(pow(stat.GetBinErrorUp(ibin), 2)+pow(data.GetBinErrorUp(ibin), 2))
-        if uncertainty > 0:
-            pull.SetBinContent(ibin, pullContent / uncertainty)
-        else:
-            pull.SetBinContent(ibin, 0)
+        prel = TLatex()
+        prel.SetNDC(kTRUE)
+        prel.SetTextFont(52)
+        prel.SetTextSize(0.09)
+        prel.DrawLatex(0.23, 0.8, "Preliminary")
 
-    pull = formatPull(pull)
-    pull.Draw('hist')
+        can.cd(2)
+        ###########################
+        ## create pull histogram ##
+        ###########################
+        pull = data.Clone()
+        pull.Add(stat, -1)
+        for ibin in range(pull.GetNbinsX()+1):
+            pullContent = pull.GetBinContent(ibin)
+            uncertainty = TMath.Sqrt(pow(stat.GetBinErrorUp(ibin), 2)+pow(data.GetBinErrorUp(ibin), 2))
+            if uncertainty > 0:
+                pull.SetBinContent(ibin, pullContent / uncertainty)
+            else:
+                pull.SetBinContent(ibin, 0)
 
-    line1, line2, = sigmaLines(data)
-    line1.Draw()
-    line2.Draw()
+        pull = formatPull(pull)
+        pull.Draw('hist')
 
-    can.SaveAs(args.var+'_'+args.cat+'.pdf')
+        line1, line2, = sigmaLines(data)
+        line1.Draw()
+        line2.Draw()
 
-    fout = TFile('roc_'+args.var+'.root', 'recreate')
-    fout.cd()
-    qcd.SetName('hbkg_'+args.var)
-    sig.SetName('hsig_'+args.var)
-    qcd.Write()
-    sig.Write()
-    fout.Close()
+        can.SaveAs(args.var+'_'+args.cat+'.pdf')
