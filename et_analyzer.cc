@@ -222,20 +222,20 @@ int main(int argc, char* argv[]) {
     //   - Event: dR(tau,el) > 0.5                          //
     //////////////////////////////////////////////////////////
 
-    if (electron.getPt() > 26.) histos->at("cutflow") -> Fill(2., 1.);
-    else continue;
+    // if (electron.getPt() > 26.) histos->at("cutflow") -> Fill(2., 1.);
+    // else continue;
 
-    if (fabs(electron.getEta()) < 2.1) histos->at("cutflow") -> Fill(3., 1.);
-    else continue;
+    // if (fabs(electron.getEta()) < 2.1) histos->at("cutflow") -> Fill(3., 1.);
+    // else continue;
 
-    if (tau.getPt() > 27.) histos->at("cutflow") -> Fill(4., 1.);
-    else continue;
+    // if (tau.getPt() > 27.) histos->at("cutflow") -> Fill(4., 1.);
+    // else continue;
 
-    if (fabs(tau.getEta()) < 2.3) histos->at("cutflow") -> Fill(5., 1.);
-    else continue;
+    // if (fabs(tau.getEta()) < 2.3) histos->at("cutflow") -> Fill(5., 1.);
+    // else continue;
 
-    if (tau.getAgainstLooseMuon() > 0.5 && tau.getAgainstTightElectron() > 0.5) histos->at("cutflow") -> Fill(6., 1.);
-    else continue;
+    // if (tau.getAgainstLooseMuon() > 0.5 && tau.getAgainstTightElectron() > 0.5) histos->at("cutflow") -> Fill(6., 1.);
+    // else continue;
 
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
@@ -396,8 +396,9 @@ int main(int argc, char* argv[]) {
       if (vbfCat) {
         tree_cat = "vbf";
       }
-    } else if (qcdRegion) {
-      tree_cat = "qcdRegion";
+    } 
+    if (qcdCR) {
+      tree_cat = "antiiso";
       if (zeroJet) {
         tree_cat = "antiiso_0jet";
       }
@@ -407,7 +408,19 @@ int main(int argc, char* argv[]) {
       if (vbfCat) {
         tree_cat = "antiiso_vbf";
       }
-    }     
+    } 
+    if (qcdRegion) {
+      tree_cat = "qcdRegion";
+      if (zeroJet) {
+        tree_cat = "qcd_0jet";
+      }
+      if (boosted) {
+        tree_cat = "qcd_boosted";
+      }
+      if (vbfCat) {
+        tree_cat = "qcd_vbf";
+      }
+    }
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, evtwt);
 
     // event categorizaation
