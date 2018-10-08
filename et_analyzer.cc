@@ -385,7 +385,6 @@ int main(int argc, char* argv[]) {
     }
 
     std::vector<std::string> tree_cat;
-    // std::string tree_cat( "none" );
     if (signalRegion) {
       tree_cat.push_back("inclusive");
       if (zeroJet) {
