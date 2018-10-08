@@ -22,7 +22,8 @@ public:
 
     // member data
     TTree* otree;
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_inclusive, cat_qcd, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf;
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_inclusive, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf, 
+        cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
     Float_t evtwt,
         el_pt, el_eta, el_phi, el_mass, el_charge,
         mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
@@ -104,10 +105,14 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("cat_boosted",         &cat_boosted,         "cat_boosted/I"        );
     otree->Branch("cat_vbf",             &cat_vbf,             "cat_vbf/I"            );
     otree->Branch("cat_inclusive",       &cat_inclusive,       "cat_inclusive/I"      );
-    otree->Branch("cat_qcd",             &cat_qcd,             "cat_qcd/I"            );
+    otree->Branch("cat_antiiso",         &cat_antiiso,         "cat_antiiso/I"        );
     otree->Branch("cat_antiiso_0jet",    &cat_antiiso_0jet,    "cat_antiiso_0jet/I"   );
     otree->Branch("cat_antiiso_boosted", &cat_antiiso_boosted, "cat_antiiso_boosted/I");
     otree->Branch("cat_antiiso_vbf",     &cat_antiiso_vbf,     "cat_antiiso_vbf/I"    );
+    otree->Branch("cat_qcd",             &cat_qcd,             "cat_qcd/I"            );
+    otree->Branch("cat_qcd_0jet",        &cat_qcd_0jet,        "cat_qcd_0jet/I"       );
+    otree->Branch("cat_qcd_boosted",     &cat_qcd_boosted,     "cat_qcd_boosted/I"    );
+    otree->Branch("cat_qcd_vbf",         &cat_qcd_vbf,         "cat_qcd_vbf/I"        );
 }
 
 void slim_tree::generalFill(std::string cat, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, TLorentzVector higgs) {
@@ -174,10 +179,14 @@ void slim_tree::generalFill(std::string cat, jet_factory* fjets, met_factory* fm
     cat_boosted = 0;
     cat_vbf = 0;
     cat_inclusive = 0;
-    cat_qcd = 0;
+    cat_antiiso = 0;
     cat_antiiso_0jet = 0;
     cat_antiiso_boosted = 0;
     cat_antiiso_vbf = 0;
+    cat_qcd = 0;
+    cat_qcd_0jet = 0;
+    cat_qcd_boosted = 0;
+    cat_qcd_vbf = 0;
 
     // decide on which selections have been passed
     if (cat == "0jet") {
@@ -192,14 +201,25 @@ void slim_tree::generalFill(std::string cat, jet_factory* fjets, met_factory* fm
     } else if (cat == "inclusive") {
         cat_inclusive = 1;
     } else if (cat == "antiiso_0jet") {
-        cat_qcd = 1;
+        cat_antiiso = 1;
         cat_antiiso_0jet = 1;
     } else if (cat == "antiiso_boosted") {
-        cat_qcd = 1;
+        cat_antiiso = 1;
         cat_antiiso_boosted = 1;
     } else if (cat == "antiiso_vbf") {
-        cat_qcd = 1;
+        cat_antiiso = 1;
         cat_antiiso_vbf = 1;
+    } else if (cat == "antiiso") {
+        cat_antiiso = 1;
+    } else if (cat == "qcd_0jet") {
+        cat_qcd = 1;
+        cat_qcd_0jet = 1;
+    } else if (cat == "qcd_boosted") {
+        cat_qcd = 1;
+        cat_qcd_boosted = 1;
+    } else if (cat == "qcd_vbf") {
+        cat_qcd = 1;
+        cat_qcd_vbf = 1;
     } else if (cat == "qcdRegion") {
         cat_qcd = 1;
     }
