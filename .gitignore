@@ -8,3 +8,5 @@ temp.py
 varcomp.py
 *.root
 Prep*
+*.pdf
+*.png

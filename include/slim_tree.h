@@ -22,7 +22,7 @@ public:
 
     // member data
     TTree* otree;
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_inclusive, cat_qcd;
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_inclusive, cat_qcd, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf;
     Float_t evtwt,
         el_pt, el_eta, el_phi, el_mass, el_charge,
         mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
@@ -39,73 +39,75 @@ public:
 };
 
 slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str(), tree_name.c_str()) ) {
-    otree->Branch("evtwt",         &evtwt,         "evtwt/F"          );
-
-    otree->Branch("el_pt",         &el_pt,         "el_pt/F"          );
-    otree->Branch("el_eta",        &el_eta,        "el_eta/F"         );
-    otree->Branch("el_phi",        &el_phi,        "el_phi/F"         );
-    otree->Branch("el_mass",       &el_mass,       "el_mass/F"        );
-    otree->Branch("el_charge",     &el_charge,     "el_charge/F"      );
-    otree->Branch("mu_pt",         &mu_pt,         "mu_pt/F"          );
-    otree->Branch("mu_eta",        &mu_eta,        "mu_eta/F"         );
-    otree->Branch("mu_phi",        &mu_phi,        "mu_phi/F"         );
-    otree->Branch("mu_mass",       &mu_mass,       "mu_mass/F"        );
-    otree->Branch("mu_charge",     &mu_charge,     "mu_charge/F"      );
-    otree->Branch("t1_pt",         &t1_pt,         "t1_pt/F"          );
-    otree->Branch("t1_eta",        &t1_eta,        "t1_eta/F"         );
-    otree->Branch("t1_phi",        &t1_phi,        "t1_phi/F"         );
-    otree->Branch("t1_mass",       &t1_mass,       "t1_mass/F"        );
-    otree->Branch("t1_charge",     &t1_charge,     "t1_charge/F"      );
-    otree->Branch("t2_pt",         &t2_pt,         "t2_pt/F"          );
-    otree->Branch("t2_eta",        &t2_eta,        "t2_eta/F"         );
-    otree->Branch("t2_phi",        &t2_phi,        "t2_phi/F"         );
-    otree->Branch("t2_mass",       &t2_mass,       "t2_mass/F"        );
-    otree->Branch("t2_charge",     &t2_charge,     "t2_charge/F"      );
-
-    otree->Branch("j1_pt",         &j1_pt,         "j1_pt/F"          );
-    otree->Branch("j1_eta",        &j1_eta,        "j1_eta/F"         );
-    otree->Branch("j1_phi",        &j1_phi,        "j1_phi/F"         );
-    otree->Branch("j2_pt",         &j2_pt,         "j2_pt/F"          );
-    otree->Branch("j2_eta",        &j2_eta,        "j2_eta/F"         );
-    otree->Branch("j2_phi",        &j2_phi,        "j2_phi/F"         );
-    otree->Branch("b1_pt",         &b1_pt,         "b1_pt/F"          );
-    otree->Branch("b1_eta",        &b1_eta,        "b1_eta/F"         );
-    otree->Branch("b1_phi",        &b1_phi,        "b1_phi/F"         );
-    otree->Branch("b2_pt",         &b2_pt,         "b2_pt/F"          );
-    otree->Branch("b2_eta",        &b2_eta,        "b2_eta/F"         );
-    otree->Branch("b2_phi",        &b2_phi,        "b2_phi/F"         );
-
-    otree->Branch("met",           &met,           "met/F"            );
-    otree->Branch("metphi",        &metphi,        "metphi/F"         );
-    otree->Branch("mjj",           &mjj,           "mjj/F"            );
-    otree->Branch("njets",         &njets,         "njets/F"          );
-    otree->Branch("numGenJets",    &numGenJets,    "numGenJets/F"     );
-
-    otree->Branch("pt_sv",         &pt_sv,         "pt_sv/F"          );
-    otree->Branch("m_sv",          &m_sv,          "m_sv/F"           );
-    otree->Branch("Dbkg_VBF",      &Dbkg_VBF,      "Dbkg_VBF/F"       );
-    otree->Branch("Dbkg_ggH",      &Dbkg_ggH,      "Dbkg_ggH/F"       );
-
-    otree->Branch("Phi"         , &Phi         , "Phi/F"              );
-    otree->Branch("Phi1"        , &Phi1        , "Phi1/F"             );
-    otree->Branch("costheta1"   , &costheta1   , "costheta1/F"        );
-    otree->Branch("costheta2"   , &costheta2   , "costheta2/F"        );
-    otree->Branch("costhetastar", &costhetastar, "costhetastar/F"     );
-    otree->Branch("Q2V1"        , &Q2V1        , "Q2V1/F"             );
-    otree->Branch("Q2V2"        , &Q2V2        , "Q2V2/F"             );
-
-    otree->Branch("higgs_pT",      &higgs_pT,      "higgs_pT/F"       );
-    otree->Branch("higgs_m",       &higgs_m,       "higgs_m/F"        );
-    otree->Branch("hjj_pT",        &hjj_pT,        "hjj_pT/F"         );
-    otree->Branch("hjj_m",         &hjj_m,         "hjj_m/F"          );
-    otree->Branch("dEtajj",        &dEtajj,        "dEtajj/F"         );
-    otree->Branch("dPhijj",        &dPhijj,        "dPhijj/F"         );
-    otree->Branch("cat_0jet",      &cat_0jet,      "cat_0jet/I"       );
-    otree->Branch("cat_boosted",   &cat_boosted,   "cat_boosted/I"    );
-    otree->Branch("cat_vbf",       &cat_vbf,       "cat_vbf/I"        );
-    otree->Branch("cat_inclusive", &cat_inclusive, "cat_inclusive/I"  );
-    otree->Branch("cat_qcd",       &cat_qcd,       "cat_qcd/I"        );
-
+    otree->Branch("evtwt",               &evtwt,               "evtwt/F"              );
+                
+    otree->Branch("el_pt",               &el_pt,               "el_pt/F"              );
+    otree->Branch("el_eta",              &el_eta,              "el_eta/F"             );
+    otree->Branch("el_phi",              &el_phi,              "el_phi/F"             );
+    otree->Branch("el_mass",             &el_mass,             "el_mass/F"            );
+    otree->Branch("el_charge",           &el_charge,           "el_charge/F"          );
+    otree->Branch("mu_pt",               &mu_pt,               "mu_pt/F"              );
+    otree->Branch("mu_eta",              &mu_eta,              "mu_eta/F"             );
+    otree->Branch("mu_phi",              &mu_phi,              "mu_phi/F"             );
+    otree->Branch("mu_mass",             &mu_mass,             "mu_mass/F"            );
+    otree->Branch("mu_charge",           &mu_charge,           "mu_charge/F"          );
+    otree->Branch("t1_pt",               &t1_pt,               "t1_pt/F"              );
+    otree->Branch("t1_eta",              &t1_eta,              "t1_eta/F"             );
+    otree->Branch("t1_phi",              &t1_phi,              "t1_phi/F"             );
+    otree->Branch("t1_mass",             &t1_mass,             "t1_mass/F"            );
+    otree->Branch("t1_charge",           &t1_charge,           "t1_charge/F"          );
+    otree->Branch("t2_pt",               &t2_pt,               "t2_pt/F"              );
+    otree->Branch("t2_eta",              &t2_eta,              "t2_eta/F"             );
+    otree->Branch("t2_phi",              &t2_phi,              "t2_phi/F"             );
+    otree->Branch("t2_mass",             &t2_mass,             "t2_mass/F"            );
+    otree->Branch("t2_charge",           &t2_charge,           "t2_charge/F"          );
+                
+    otree->Branch("j1_pt",               &j1_pt,               "j1_pt/F"              );
+    otree->Branch("j1_eta",              &j1_eta,              "j1_eta/F"             );
+    otree->Branch("j1_phi",              &j1_phi,              "j1_phi/F"             );
+    otree->Branch("j2_pt",               &j2_pt,               "j2_pt/F"              );
+    otree->Branch("j2_eta",              &j2_eta,              "j2_eta/F"             );
+    otree->Branch("j2_phi",              &j2_phi,              "j2_phi/F"             );
+    otree->Branch("b1_pt",               &b1_pt,               "b1_pt/F"              );
+    otree->Branch("b1_eta",              &b1_eta,              "b1_eta/F"             );
+    otree->Branch("b1_phi",              &b1_phi,              "b1_phi/F"             );
+    otree->Branch("b2_pt",               &b2_pt,               "b2_pt/F"              );
+    otree->Branch("b2_eta",              &b2_eta,              "b2_eta/F"             );
+    otree->Branch("b2_phi",              &b2_phi,              "b2_phi/F"             );
+                
+    otree->Branch("met",                 &met,                 "met/F"                );
+    otree->Branch("metphi",              &metphi,              "metphi/F"             );
+    otree->Branch("mjj",                 &mjj,                 "mjj/F"                );
+    otree->Branch("njets",               &njets,               "njets/F"              );
+    otree->Branch("numGenJets",          &numGenJets,          "numGenJets/F"         );
+                
+    otree->Branch("pt_sv",               &pt_sv,               "pt_sv/F"              );
+    otree->Branch("m_sv",                &m_sv,                "m_sv/F"               );
+    otree->Branch("Dbkg_VBF",            &Dbkg_VBF,            "Dbkg_VBF/F"           );
+    otree->Branch("Dbkg_ggH",            &Dbkg_ggH,            "Dbkg_ggH/F"           );
+            
+    otree->Branch("Phi"         ,        &Phi         ,        "Phi/F"                );
+    otree->Branch("Phi1"        ,        &Phi1        ,        "Phi1/F"               );
+    otree->Branch("costheta1"   ,        &costheta1   ,        "costheta1/F"          );
+    otree->Branch("costheta2"   ,        &costheta2   ,        "costheta2/F"          );
+    otree->Branch("costhetastar",        &costhetastar,        "costhetastar/F"       );
+    otree->Branch("Q2V1"        ,        &Q2V1        ,        "Q2V1/F"               );
+    otree->Branch("Q2V2"        ,        &Q2V2        ,        "Q2V2/F"               );
+            
+    otree->Branch("higgs_pT",            &higgs_pT,            "higgs_pT/F"           );
+    otree->Branch("higgs_m",             &higgs_m,             "higgs_m/F"            );
+    otree->Branch("hjj_pT",              &hjj_pT,              "hjj_pT/F"             );
+    otree->Branch("hjj_m",               &hjj_m,               "hjj_m/F"              );
+    otree->Branch("dEtajj",              &dEtajj,              "dEtajj/F"             );
+    otree->Branch("dPhijj",              &dPhijj,              "dPhijj/F"             );
+    otree->Branch("cat_0jet",            &cat_0jet,            "cat_0jet/I"           );
+    otree->Branch("cat_boosted",         &cat_boosted,         "cat_boosted/I"        );
+    otree->Branch("cat_vbf",             &cat_vbf,             "cat_vbf/I"            );
+    otree->Branch("cat_inclusive",       &cat_inclusive,       "cat_inclusive/I"      );
+    otree->Branch("cat_qcd",             &cat_qcd,             "cat_qcd/I"            );
+    otree->Branch("cat_antiiso_0jet",    &cat_antiiso_0jet,    "cat_antiiso_0jet/I"   );
+    otree->Branch("cat_antiiso_boosted", &cat_antiiso_boosted, "cat_antiiso_boosted/I");
+    otree->Branch("cat_antiiso_vbf",     &cat_antiiso_vbf,     "cat_antiiso_vbf/I"    );
 }
 
 void slim_tree::generalFill(std::string cat, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, TLorentzVector higgs) {
@@ -157,13 +159,13 @@ void slim_tree::generalFill(std::string cat, jet_factory* fjets, met_factory* fm
         j1_eta = jets.at(0).getEta();
         j1_phi = jets.at(0).getPhi();
         if (njets > 1) {
-        j2_pt = jets.at(1).getPt();
-        j2_eta = jets.at(1).getEta();
-        j2_phi = jets.at(1).getPhi();
-        hjj_pT = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).Pt();
-        hjj_m = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).M();
-        dEtajj = fabs(jets.at(0).getEta() - jets.at(1).getEta());
-        dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi());
+            j2_pt = jets.at(1).getPt();
+            j2_eta = jets.at(1).getEta();
+            j2_phi = jets.at(1).getPhi();
+            hjj_pT = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).Pt();
+            hjj_m = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).M();
+            dEtajj = fabs(jets.at(0).getEta() - jets.at(1).getEta());
+            dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi());
         }
     }
 
@@ -172,6 +174,10 @@ void slim_tree::generalFill(std::string cat, jet_factory* fjets, met_factory* fm
     cat_boosted = 0;
     cat_vbf = 0;
     cat_inclusive = 0;
+    cat_qcd = 0;
+    cat_antiiso_0jet = 0;
+    cat_antiiso_boosted = 0;
+    cat_antiiso_vbf = 0;
 
     // decide on which selections have been passed
     if (cat == "0jet") {
@@ -185,6 +191,15 @@ void slim_tree::generalFill(std::string cat, jet_factory* fjets, met_factory* fm
         cat_vbf = 1;
     } else if (cat == "inclusive") {
         cat_inclusive = 1;
+    } else if (cat == "antiiso_0jet") {
+        cat_qcd = 1;
+        cat_antiiso_0jet = 1;
+    } else if (cat == "antiiso_boosted") {
+        cat_qcd = 1;
+        cat_antiiso_boosted = 1;
+    } else if (cat == "antiiso_vbf") {
+        cat_qcd = 1;
+        cat_antiiso_vbf = 1;
     } else if (cat == "qcdRegion") {
         cat_qcd = 1;
     }
