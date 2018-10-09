@@ -3,11 +3,13 @@
 class CLParser {
     private:
     std::vector<std::string> tokens;
+    std::vector<std::string> opts;
     
     public:
     CLParser(int&, char**);
     bool Flag(const std::string&);
     std::string Option(const std::string&);
+    std::vector<std::string> MultiOption(const std::string&, int);
 };
 
 CLParser::CLParser(int &argc, char** argv) {
@@ -31,4 +33,16 @@ std::string CLParser::Option(const std::string &flag) {
     return empty;
 }
 
+std::vector<std::string> CLParser::MultiOption(const std::string &flag, int depth) {
+  if (depth == 0) {
+    return opts;
+  }
+  auto found = std::find(tokens.begin(), tokens.end(), flag);
+  if (found != tokens.end() && ++found != tokens.end()) {
+    --depth;
+    opts.push_back(*found);
+    MultiOption(*found, depth);
+  }
+  return opts;
+}
 

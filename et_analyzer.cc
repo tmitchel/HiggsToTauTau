@@ -222,20 +222,20 @@ int main(int argc, char* argv[]) {
     //   - Event: dR(tau,el) > 0.5                          //
     //////////////////////////////////////////////////////////
 
-    if (electron.getPt() > 26.) histos->at("cutflow") -> Fill(2., 1.);
-    else continue;
+    // if (electron.getPt() > 26.) histos->at("cutflow") -> Fill(2., 1.);
+    // else continue;
 
-    if (fabs(electron.getEta()) < 2.1) histos->at("cutflow") -> Fill(3., 1.);
-    else continue;
+    // if (fabs(electron.getEta()) < 2.1) histos->at("cutflow") -> Fill(3., 1.);
+    // else continue;
 
-    if (tau.getPt() > 27.) histos->at("cutflow") -> Fill(4., 1.);
-    else continue;
+    // if (tau.getPt() > 27.) histos->at("cutflow") -> Fill(4., 1.);
+    // else continue;
 
-    if (fabs(tau.getEta()) < 2.3) histos->at("cutflow") -> Fill(5., 1.);
-    else continue;
+    // if (fabs(tau.getEta()) < 2.3) histos->at("cutflow") -> Fill(5., 1.);
+    // else continue;
 
-    if (tau.getAgainstLooseMuon() > 0.5 && tau.getAgainstTightElectron() > 0.5) histos->at("cutflow") -> Fill(6., 1.);
-    else continue;
+    // if (tau.getAgainstLooseMuon() > 0.5 && tau.getAgainstTightElectron() > 0.5) histos->at("cutflow") -> Fill(6., 1.);
+    // else continue;
 
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
@@ -303,7 +303,7 @@ int main(int argc, char* argv[]) {
       // b-tagging SF (only used in scaling W, I believe)
       int nbtagged = std::min(2, jets.getNbtag());
       auto bjets = jets.getBtagJets();
-      float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt() ,bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
+      float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
       if (nbtagged>2) weight_btag=0;
     } else if (!isData && isEmbed) {
       double Stitching_Weight(1.);
@@ -384,21 +384,43 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
-    std::string tree_cat( "none" );
+    std::vector<std::string> tree_cat;
     if (signalRegion) {
-      tree_cat = "inclusive";
+      tree_cat.push_back("inclusive");
       if (zeroJet) {
-        tree_cat = "0jet";
+        tree_cat.push_back("0jet");
       } 
       if (boosted) {
-        tree_cat = "boosted";
+        tree_cat.push_back("boosted");
       } 
       if (vbfCat) {
-        tree_cat = "vbf";
+        tree_cat.push_back("vbf");
       }
-    } else if (qcdCR) {
-      tree_cat = "qcdRegion";
-    }     
+    } 
+    if (qcdCR) {
+      tree_cat.push_back("antiiso");
+      if (zeroJet) {
+        tree_cat.push_back("antiiso_0jet");
+      }
+      if (boosted) {
+        tree_cat.push_back("antiiso_boosted");
+      }
+      if (vbfCat) {
+        tree_cat.push_back("antiiso_vbf");
+      }
+    } 
+    if (qcdRegion) {
+      tree_cat.push_back("qcdRegion");
+      if (zeroJet) {
+        tree_cat.push_back("qcd_0jet");
+      }
+      if (boosted) {
+        tree_cat.push_back("qcd_boosted");
+      }
+      if (vbfCat) {
+        tree_cat.push_back("qcd_vbf");
+      }
+    }
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, evtwt);
 
     // event categorizaation

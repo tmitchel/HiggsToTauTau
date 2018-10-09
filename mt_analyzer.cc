@@ -394,16 +394,41 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
-    std::string tree_cat("none");
+    std::vector<std::string> tree_cat;
     if (signalRegion) {
+      tree_cat.push_back("inclusive");
       if (zeroJet) {
-        tree_cat = "0jet";
-      } else if (boosted) {
-        tree_cat = "boosted";
-      } else if (vbfCat) {
-        tree_cat = "vbf";
-      } else {
-        tree_cat = "inclusive";
+        tree_cat.push_back("0jet");
+      }
+      if (boosted) {
+        tree_cat.push_back("boosted");
+      }
+      if (vbfCat) {
+        tree_cat.push_back("vbf");
+      }
+    }
+    if (qcdCR) {
+      tree_cat.push_back("antiiso");
+      if (zeroJet) {
+        tree_cat.push_back("antiiso_0jet");
+      }
+      if (boosted) {
+        tree_cat.push_back("antiiso_boosted");
+      }
+      if (vbfCat) {
+        tree_cat.push_back("antiiso_vbf");
+      }
+    }
+    if (qcdRegion) {
+      tree_cat.push_back("qcdRegion");
+      if (zeroJet) {
+        tree_cat.push_back("qcd_0jet");
+      }
+      if (boosted) {
+        tree_cat.push_back("qcd_boosted");
+      }
+      if (vbfCat) {
+        tree_cat.push_back("qcd_vbf");
       }
     }
     st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, evtwt);
