@@ -36,6 +36,7 @@ public:
         met, metphi, mjj, njets, numGenJets,
         pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
+        ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2,
         higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj;
 };
 
@@ -92,8 +93,13 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("costheta1"   ,        &costheta1   ,        "costheta1/F"          );
     otree->Branch("costheta2"   ,        &costheta2   ,        "costheta2/F"          );
     otree->Branch("costhetastar",        &costhetastar,        "costhetastar/F"       );
-    otree->Branch("Q2V1"        ,        &Q2V1        ,        "Q2V1/F"               );
-    otree->Branch("Q2V2"        ,        &Q2V2        ,        "Q2V2/F"               );
+    otree->Branch("ME_sm_VBF"   ,        &ME_sm_VBF    ,        "ME_sm_/F"            );
+    otree->Branch("ME_sm_ggH"   ,        &ME_sm_ggH    ,        "ME_sm_/F"            );
+    otree->Branch("ME_sm_WH"    ,        &ME_sm_WH     ,        "ME_sm_WH/F"          );
+    otree->Branch("ME_sm_ZH"    ,        &ME_sm_ZH     ,        "ME_sm_ZH/F"          );
+    otree->Branch("ME_bkg"      ,        &ME_bkg       ,        "MEbkg_/F"            );
+    otree->Branch("ME_bkg1"     ,        &ME_bkg1      ,        "MEbkg1_/F"           );
+    otree->Branch("ME_bkg2"     ,        &ME_bkg2      ,        "MEbkg2_/F"           );
             
     otree->Branch("higgs_pT",            &higgs_pT,            "higgs_pT/F"           );
     otree->Branch("higgs_m",             &higgs_m,             "higgs_m/F"            );
@@ -139,6 +145,14 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     Q2V1 = evt->getQ2V1();
     Q2V2 = evt->getQ2V2();
     njets = fjets->getNjets();
+    ME_sm_VBF = evt->getME_sm_VBF();
+    ME_sm_ggH = evt->getME_sm_ggH();
+    ME_sm_WH = evt->getME_sm_WH();
+    ME_sm_ZH = evt->getME_sm_ZH();
+    ME_bkg = evt->getME_bkg();
+    ME_bkg1 = evt->getME_bkg1();
+    ME_bkg2 = evt->getME_bkg2();
+
     numGenJets = evt->getNumGenJets();
 
     // dijet info is only ok if you have 2 jets, imagine that

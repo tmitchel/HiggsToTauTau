@@ -17,7 +17,8 @@ private:
   Bool_t PassEle25, PassDoubleTauCmbIso35, PassDoubleTau35, PassIsoMu19Tau20, PassIsoMu22, PassIsoTkMu22, PassIsoMu22eta2p1, PassIsoTkMu22eta2p1;
   Float_t m_sv, pt_sv; // SVFit
   Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
-  Float_t ME_sm_VBF, ME_bkg;                                                                                // MELA
+  Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2;                               // MELA
+
   UInt_t run, lumi;
   ULong64_t evt;
 
@@ -71,8 +72,15 @@ public:
   Float_t getCosThetaStar() { return costhetastar;    };
   Float_t getQ2V1()         { return Q2V1;            };
   Float_t getQ2V2()         { return Q2V2;            };
-  Float_t getMELA_vbf()     { return ME_sm_VBF;       };
-  Float_t getMELA_bkg()     { return ME_bkg;          };
+  Float_t getME_sm_VBF()    { return ME_sm_VBF;       };
+  Float_t getME_sm_ggH()    { return ME_sm_ggH;       };
+  Float_t getME_sm_WH()     { return ME_sm_WH;        };
+  Float_t getME_sm_ZH()     { return ME_sm_ZH;        };
+  Float_t getME_bkg()       { return ME_bkg;          };
+  Float_t getME_bkg1()      { return ME_bkg1;         };
+  Float_t getME_bkg2()      { return ME_bkg2;         };
+
+
 };
 
 // read data from trees into member variables
@@ -111,6 +119,12 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   input -> SetBranchAddress( "Q2V1"           , &Q2V1            );
   input -> SetBranchAddress( "Q2V2"           , &Q2V2            );
   input -> SetBranchAddress( "ME_sm_VBF"      , &ME_sm_VBF       );
+  input -> SetBranchAddress( "ME_sm_ggH"      , &ME_sm_ggH       );
+  input -> SetBranchAddress( "ME_sm_WH"       , &ME_sm_WH        );
+  input -> SetBranchAddress( "ME_sm_ZH"       , &ME_sm_ZH        );
+  input -> SetBranchAddress( "ME_bkg"         , &ME_bkg          );
+  input -> SetBranchAddress( "ME_bkg1"        , &ME_bkg1         );
+  input -> SetBranchAddress( "ME_bkg2"        , &ME_bkg2         );
   input -> SetBranchAddress( "ME_bkg"         , &ME_bkg          );
   input -> SetBranchAddress( "amcatNLO_weight", &amcatNLO_weight );
 
