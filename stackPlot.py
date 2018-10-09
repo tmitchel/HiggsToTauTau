@@ -20,39 +20,29 @@ def applyStyle(name, hist, leg):
     overlay = 0
     if name == 'embed':
         hist.SetFillColor(TColor.GetColor("#ffcc66"))
-        leg.AddEntry(hist, 'ZTT', 'f')
+        hist.SetName("ZTT")
     elif name == 'ZL':
         hist.SetFillColor(TColor.GetColor("#4496c8"))
-        leg.AddEntry(hist, 'ZL', 'f')
-    elif name == 'ZJ':
-        hist.SetFillColor(TColor.GetColor("#33ff11"))
-        leg.AddEntry(hist, 'TTJ', 'f')
-    elif name == 'TTT':
-        hist.SetFillColor(TColor.GetColor("#9999cc"))
-        leg.AddEntry(hist, 'TTT', 'f')
-    elif name == 'TTJ':
-        hist.SetFillColor(TColor.GetColor("#7799cc"))
-        leg.AddEntry(hist, 'TTJ', 'f')
-    elif name == 'VV':
+        hist.SetName('ZL')
+    elif name == 'ZJ' or name == 'TTT' or name == 'TTJ' or name == 'VV':
         hist.SetFillColor(TColor.GetColor("#12cadd"))
-        leg.AddEntry(hist, 'Diboson', 'f')
+        overlay = 3
     elif name == 'W':
         hist.SetFillColor(TColor.GetColor("#de5a6a"))
-        leg.AddEntry(hist, 'W+jets', 'f')
+        hist.SetName('W+jets')
     elif name == 'QCD':
         hist.SetFillColor(TColor.GetColor("#ffccff"))
-        leg.AddEntry(hist, 'QCD', 'f')
+        hist.SetName('QCD')
     elif name == 'Data':
         hist.SetLineColor(kBlack)
         overlay = 1
-        leg.AddEntry(hist, 'Data', 'lep')
     elif name == 'VBF125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#000000'))
         hist.SetLineStyle(7)
         overlay = 2
-        leg.AddEntry(hist, 'VBF M=125GeV', 'l')
+        # leg.AddEntry(hist, 'VBF M=125GeV', 'l')
     # elif name == 'ggH125':
     #     hist.SetFillColor(0)
     #     hist.SetLineWidth(3)
@@ -117,7 +107,6 @@ titles = {
     'costhetastar': 'Cos(#theta*)',
 }
 
-
 def formatStack(stack):
     stack.GetXaxis().SetLabelSize(0)
     stack.GetYaxis().SetTitle('Events / Bin')
@@ -126,6 +115,23 @@ def formatStack(stack):
     stack.GetYaxis().SetTitleOffset(.92)
     stack.SetTitle('')
 
+def formatOther(other, holder):
+    other.SetFillColor(TColor.GetColor("#12cadd"))
+    other.SetName('Other')
+    holder.append(other.Clone())
+    return holder
+
+
+def fillStackAndLegend(data, sig, holder, leg):
+    stack = THStack()
+    leg.AddEntry(data, 'Data', 'lep')
+    holder = sorted(holder, key=lambda hist: hist.Integral())
+    for hist in holder:
+        stack.Add(hist)
+    for hist in reversed(holder):
+        leg.AddEntry(hist, hist.GetName(), 'f')
+    leg.AddEntry(sig, 'VBF M=125GeV', 'l')
+    return stack, leg
 
 def createLegend():
     leg = TLegend(0.65, 0.45, 0.85, 0.85)
@@ -187,21 +193,27 @@ def main():
     sig = data.Clone()
     sig.Reset()
     stat = sig.Clone()
-    stack = THStack()
+    other = stat.Clone()
+    inStack = []
     hists = [idir.Get(key.GetName()).Clone() for key in idir.GetListOfKeys()]
-    hists = sorted(hists, key=lambda hist: hist.Integral())
     for ihist in hists:
         hist, overlay, leg = applyStyle(ihist.GetName(), ihist, leg)
         if overlay == 0:
-            stack.Add(hist)
+            inStack.append(hist)
             stat.Add(hist)
         elif overlay == 1:
             data = hist
         elif overlay == 2:
             sig = hist
+        elif overlay == 3:
+            other.Add(hist)
+            stat.Add(hist)
 
     can = createCanvas()
+    inStack = formatOther(other, inStack)
+    stack, leg = fillStackAndLegend(data, sig, inStack, leg)
     stat = formatStat(stat)
+
     high = max(data.GetMaximum(), stat.GetMaximum()) * 1.2
     stack.SetMaximum(high)
     stack.Draw('hist')
