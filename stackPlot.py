@@ -108,13 +108,13 @@ titles = {
     'Dbkg_VBF': 'MELA VBF Disc',
     'Dbkg_ggH': 'MELA ggH Disc',
     'NN_disc': 'NN Disc.',
-    'Q2V1': '',
-    'Q2V2': '',
-    'Phi': '',
-    'Phi1': '',
-    'costheta1': '',
-    'costheta2': '',
-    'costhetastar': '',
+    'Q2V1': 'Q^2 V1',
+    'Q2V2': 'Q^2 V2',
+    'Phi': '#phi',
+    'Phi1': '#phi_1',
+    'costheta1': 'Cos(#theta_1)',
+    'costheta2': 'Cos(#theta_2)',
+    'costhetastar': 'Cos(#theta*)',
 }
 
 
@@ -180,7 +180,7 @@ def sigmaLines(data):
     return line1, line2
 
 def main():
-    fin = TFile('templates/template_'+args.var+'.root', 'read')
+    fin = TFile('Templates/template_'+args.var+'.root', 'read')
     idir = fin.Get(args.cat)
     leg = createLegend()
     data = idir.Get('Data').Clone()
@@ -192,10 +192,6 @@ def main():
     hists = sorted(hists, key=lambda hist: hist.Integral())
     for ihist in hists:
         hist, overlay, leg = applyStyle(ihist.GetName(), ihist, leg)
-
-    # for key in idir.GetListOfKeys():
-    #     hist = idir.Get(key.GetName()).Clone()
-    #     hist, overlay, leg = applyStyle(key.GetName(), hist, leg)
         if overlay == 0:
             stack.Add(hist)
             stat.Add(hist)
@@ -255,7 +251,7 @@ def main():
     line1.Draw()
     line2.Draw()
 
-    can.SaveAs('test.pdf')
+    can.SaveAs('Plots/'+args.var+'_'+args.cat+'.pdf')
 
 
 if __name__ == "__main__":

@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
   std::string sample = parser.Option("-s");
   std::string dir = parser.Option("-d");
   std::string tvar = parser.Option("-t");
-  std::vector<std::string> sbins = parser.MultiOption("-p", 3);
+  std::vector<std::string> sbins = parser.MultiOption("-b", 3);
 
   // get the provided histogram binning
   std::vector<int> bins;
@@ -175,7 +175,7 @@ histHolder::histHolder(std::vector<int> Bins, std::string tvar) :
     {"et_boosted", std::vector<TH1F *>()},
     {"et_vbf", std::vector<TH1F *>()},
   }, 
-  fout( new TFile(("templates/template_"+tvar+".root").c_str(), "recreate") ),
+  fout( new TFile(("Templates/template_"+tvar+".root").c_str(), "recreate") ),
   bins( Bins )
 {
   for (auto it = hists.begin(); it != hists.end(); it++) {

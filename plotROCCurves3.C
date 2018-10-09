@@ -45,22 +45,24 @@ void plotROCCurves3() {
   // gROOT->ProcessLine(".L ~/.root/CMSStyle.C");
   // CMSstyle();
 
-  TFile *file = TFile::Open("templates/roc.root");
+  TFile *file;
   TH1F* s;
   TH1F* b;
   TString names[12] = {
     "NN_disc",
-    "Dbkg_VBF"
+    "Dbkg_VBF",
+    "Dbkg_ggH"
   };
 
   TString labels[12] = {
     "NN Disc.",
-    "MELA VBF"
+    "MELA VBF",
+    "MELA ggH"
   };
   
   
   TH2F* frame = new TH2F("frame","",1000,0.,1,1000,0,1);
-  frame->GetXaxis()->SetTitle("eff ggH H#rightarrow#tau#tau");
+  frame->GetXaxis()->SetTitle("eff VBF H#rightarrow#tau#tau");
   frame->GetYaxis()->SetTitle("eff QCD+2jets");
   gStyle->SetOptStat(0);
   frame->Draw();
@@ -70,10 +72,11 @@ void plotROCCurves3() {
   TLegend* leg = new TLegend(0.21, 0.41, 0.41, 0.89);
   leg->SetBorderSize(0);
   
-  for(int iSample = 0; iSample != 2; ++iSample) {
+  for(int iSample = 0; iSample != 3; ++iSample) {
 
-    s = (TH1F*)file->Get("VBF125_" + names[iSample]);
-    b = (TH1F*)file->Get("embed_" + names[iSample]);
+    file = TFile::Open("Templates/template_"+names[iSample]+".root");
+    s = (TH1F*)file->Get("et_vbf/VBF125");
+    b = (TH1F*)file->Get("et_vbf/embed");
     s->SetLineColor(kRed);
     b->SetLineColor(kBlue);
     
