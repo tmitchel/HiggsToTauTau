@@ -89,54 +89,39 @@ int main(int argc, char *argv[]) {
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
 
-      // fill OS/SS histograms for each category to be used in OS/SS ratio
       if (eq + tq == 0) {
-        if (cat_antiiso_0jet > 0) {
-          fillQCD(hists->qcd_0jet_OS, name, var, weight);
+        // output histograms for the template
+        if (cat_0jet > 0) {
+          hists->hists.at("et_0jet").back()->Fill(var, weight);
         }
-        if (cat_antiiso_boosted > 0) {
-          fillQCD(hists->qcd_boosted_OS, name, var, weight);
+        if (cat_boosted > 0) {
+          hists->hists.at("et_boosted").back()->Fill(var, weight);
         }
-        if (cat_antiiso_vbf > 0 && hpt > 50) {
-          fillQCD(hists->qcd_vbf_OS, name, var, weight);
+        if (cat_vbf > 0 && hpt > 0) {
+          hists->hists.at("et_vbf").back()->Fill(var, weight);
         }
       } else {
-        if (cat_antiiso_0jet > 0) {
+        // get QCD shape from SS loose iso region
+        if (cat_qcd_0jet > 0) {
+          fillQCD(hists->qcd_0jet, name, var, weight);
+        }
+        if (cat_qcd_boosted > 0) {
+          fillQCD(hists->qcd_boosted, name, var, weight);
+        }
+        if (cat_qcd_vbf > 0 && hpt > 0) {
+          fillQCD(hists->qcd_vbf, name, var, weight);
+        }
+
+        // get SS in signal region for loose region normalization
+        if (cat_0jet > 0) {
           fillQCD(hists->qcd_0jet_SS, name, var, weight);
         }
-        if (cat_antiiso_boosted > 0) {
+        if (cat_boosted > 0) {
           fillQCD(hists->qcd_boosted_SS, name, var, weight);
         }
-        if (cat_antiiso_vbf > 0 && hpt > 50) {
+        if (cat_vbf > 0 && hpt > 0) {
           fillQCD(hists->qcd_vbf_SS, name, var, weight);
         }
-      }
-
-      // only OS events beyond this point
-      if (eq + tq != 0) {
-        continue;
-      }
-
-      // output histograms for the template
-      if (cat_0jet > 0) {
-        hists->hists.at("et_0jet").back()->Fill(var, weight);
-      }
-      if (cat_boosted > 0) {
-        hists->hists.at("et_boosted").back()->Fill(var, weight);
-      }
-      if (cat_vbf > 0 && hpt > 50) {
-        hists->hists.at("et_vbf").back()->Fill(var, weight);
-      }
-
-      // the QCD histograms (unscaled)
-      if (cat_0jet > 0) { 
-        fillQCD(hists->qcd_0jet, name, var, weight);
-      }
-      if (cat_qcd_boosted > 0) {
-        fillQCD(hists->qcd_boosted, name, var, weight);
-      }
-      if (cat_qcd_vbf > 0 && hpt > 50) {
-        fillQCD(hists->qcd_vbf, name, var, weight);
       }
     }
   }
@@ -214,7 +199,7 @@ void histHolder::writeHistos() {
 
   fout->cd("et_0jet");
   qcd_0jet->SetName("QCD");
-  qcd_0jet->Scale(1.07 * qcd_0jet_SS->Integral() / qcd_0jet_OS->Integral());
+  qcd_0jet->Scale(1.0 * qcd_0jet_SS->Integral() / qcd_0jet->Integral());
   for (auto i = 0; i < qcd_0jet->GetNbinsX(); i++) {
     if (qcd_0jet->GetBinContent(i) < 0) {
       qcd_0jet->SetBinContent(i, 0);
@@ -224,7 +209,7 @@ void histHolder::writeHistos() {
 
   fout->cd("et_boosted");
   qcd_boosted->SetName("QCD");
-  qcd_boosted->Scale(1.06 * qcd_boosted_SS->Integral() / qcd_boosted_OS->Integral());
+  qcd_boosted->Scale(1.28 * qcd_boosted_SS->Integral() / qcd_boosted->Integral());
   for (auto i = 0; i < qcd_boosted->GetNbinsX(); i++) {
     if (qcd_boosted->GetBinContent(i) < 0) {
       qcd_boosted->SetBinContent(i, 0);
@@ -234,7 +219,7 @@ void histHolder::writeHistos() {
 
   fout->cd("et_vbf");
   qcd_vbf->SetName("QCD");
-  qcd_vbf->Scale(qcd_vbf_SS->Integral() / qcd_vbf_OS->Integral());
+  qcd_vbf->Scale(1.0 * qcd_vbf_SS->Integral() / qcd_vbf->Integral());
   for (auto i = 0; i < qcd_vbf->GetNbinsX(); i++) {
     if (qcd_vbf->GetBinContent(i) < 0) {
       qcd_vbf->SetBinContent(i, 0);
