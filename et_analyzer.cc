@@ -305,6 +305,14 @@ int main(int argc, char* argv[]) {
       auto bjets = jets.getBtagJets();
       float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
       if (nbtagged>2) weight_btag=0;
+
+      // NNLOPS ggH reweighting
+      if (sample.find("ggHtoTauTau125") != std::string::npos) {
+        if (Rivet_nJets30 == 0) evtwt *= g_NNLOPS_0jet->Eval(min(Rivet_higgsPt, float(125.0)));
+        if (Rivet_nJets30 == 1) evtwt *= g_NNLOPS_1jet->Eval(min(Rivet_higgsPt, float(625.0)));
+        if (Rivet_nJets30 == 2) evtwt *= g_NNLOPS_2jet->Eval(min(Rivet_higgsPt, float(800.0)));
+        if (Rivet_nJets30 >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(Rivet_higgsPt, float(925.0)));
+      }
     } else if (!isData && isEmbed) {
       double Stitching_Weight(1.);
       // get the stitching weight
