@@ -93,6 +93,8 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("costheta1"   ,        &costheta1   ,        "costheta1/F"          );
     otree->Branch("costheta2"   ,        &costheta2   ,        "costheta2/F"          );
     otree->Branch("costhetastar",        &costhetastar,        "costhetastar/F"       );
+    otree->Branch("Q2V1"        ,        &Q2V1        ,        "Q2V1/F"               );
+    otree->Branch("Q2V2"        ,        &Q2V2        ,        "Q2V2/F"               );
     otree->Branch("ME_sm_VBF"   ,        &ME_sm_VBF    ,        "ME_sm_/F"            );
     otree->Branch("ME_sm_ggH"   ,        &ME_sm_ggH    ,        "ME_sm_/F"            );
     otree->Branch("ME_sm_WH"    ,        &ME_sm_WH     ,        "ME_sm_WH/F"          );
