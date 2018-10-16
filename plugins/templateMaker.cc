@@ -11,7 +11,7 @@
 #include "TTree.h"
 
 // user includes
-#include "include/CLParser.h"
+#include "../include/CLParser.h"
 
 // class to hold the histograms until I'm ready to write them
 class histHolder {
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
         if (cat_boosted > 0) {
           hists->hists.at("et_boosted").back()->Fill(var, weight);
         }
-        if (cat_vbf > 0 && hpt > 0) {
+        if (cat_vbf > 0 && hpt > 50) {
           hists->hists.at("et_vbf").back()->Fill(var, weight);
         }
       } else {
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
         if (cat_qcd_boosted > 0) {
           fillQCD(hists->qcd_boosted, name, var, weight);
         }
-        if (cat_qcd_vbf > 0 && hpt > 0) {
+        if (cat_qcd_vbf > 0 && hpt > 50) {
           fillQCD(hists->qcd_vbf, name, var, weight);
         }
 
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
         if (cat_boosted > 0) {
           fillQCD(hists->qcd_boosted_SS, name, var, weight);
         }
-        if (cat_vbf > 0 && hpt > 0) {
+        if (cat_vbf > 0 && hpt > 50) {
           fillQCD(hists->qcd_vbf_SS, name, var, weight);
         }
       }
@@ -160,7 +160,7 @@ histHolder::histHolder(std::vector<int> Bins, std::string tvar) :
     {"et_boosted", std::vector<TH1F *>()},
     {"et_vbf", std::vector<TH1F *>()},
   }, 
-  fout( new TFile(("Templates/template_"+tvar+".root").c_str(), "recreate") ),
+  fout( new TFile(("Output/templates/template_"+tvar+".root").c_str(), "recreate") ),
   bins( Bins )
 {
   for (auto it = hists.begin(); it != hists.end(); it++) {

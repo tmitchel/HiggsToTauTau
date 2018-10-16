@@ -17,19 +17,19 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "include/util.h"
-#include "include/event_info.h"
-#include "include/tau_factory.h"
-#include "include/electron_factory.h"
-#include "include/muon_factory.h"
-#include "include/jet_factory.h"
-#include "include/met_factory.h"
-#include "include/SF_factory.h"
-#include "include/btagSF.h"
-#include "include/LumiReweightingStandAlone.h"
-#include "include/CLParser.h"
-#include "include/EmbedWeight.h"
-#include "include/slim_tree.h"
+#include "../include/util.h"
+#include "../include/event_info.h"
+#include "../include/tau_factory.h"
+#include "../include/electron_factory.h"
+#include "../include/muon_factory.h"
+#include "../include/jet_factory.h"
+#include "../include/met_factory.h"
+#include "../include/SF_factory.h"
+#include "../include/btagSF.h"
+#include "../include/LumiReweightingStandAlone.h"
+#include "../include/CLParser.h"
+#include "../include/EmbedWeight.h"
+#include "../include/slim_tree.h"
 
 int main(int argc, char* argv[]) {
 
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
 
   // create output file
   auto suffix = "_output.root";
-  auto prefix = "output/";
+  auto prefix = "Output/trees/";
   std::string filename;
   if (name == sample) {
     filename = prefix + name + systname + suffix;
@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
     norm = 1.0;
   } else if (isEmbed) {
     if (sample.find("embed-H") != std::string::npos) {
-      norm = 1 / .85;
+      norm = 1 / .99;
     } else {
       norm = 1 / .99;
     }
@@ -308,10 +308,10 @@ int main(int argc, char* argv[]) {
 
       // NNLOPS ggH reweighting
       if (sample.find("ggHtoTauTau125") != std::string::npos) {
-        if (Rivet_nJets30 == 0) evtwt *= g_NNLOPS_0jet->Eval(min(Rivet_higgsPt, float(125.0)));
-        if (Rivet_nJets30 == 1) evtwt *= g_NNLOPS_1jet->Eval(min(Rivet_higgsPt, float(625.0)));
-        if (Rivet_nJets30 == 2) evtwt *= g_NNLOPS_2jet->Eval(min(Rivet_higgsPt, float(800.0)));
-        if (Rivet_nJets30 >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(Rivet_higgsPt, float(925.0)));
+        if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(min(event.getHiggsPtRivet(), float(125.0)));
+        if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(min(event.getHiggsPtRivet(), float(625.0)));
+        if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), float(800.0)));
+        if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), float(925.0)));
       }
     } else if (!isData && isEmbed) {
       double Stitching_Weight(1.);
