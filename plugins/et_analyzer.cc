@@ -421,7 +421,7 @@ int main(int argc, char* argv[]) {
 
       if (signalRegion) {
         if (evt_charge == 0) {
-          histos_2d->at("h0_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4()+tau.getP4()).M(), evtwt);
+          histos_2d->at("h0_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
         } else {
           histos_2d->at("h0_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
         }
