@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
     // I hate doing it like this, but when I move the SetBranchAddres I see unexpected behavior
     Int_t cat_inclusive, cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf, cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
-    Float_t eq, tq, hpt, l2decay, vis_mass, mjj, m_sv, weight;
+    Float_t eq, tq, hpt, l2decay, vis_mass, mjj, m_sv, weight, ME_sm_VBF, ME_bkg, NN_disc;
     tree->SetBranchAddress("el_charge", &eq);
     tree->SetBranchAddress("t1_charge", &tq);
     tree->SetBranchAddress("higgs_pT", &hpt);
@@ -69,6 +69,9 @@ int main(int argc, char *argv[]) {
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mjj", &mjj);
     tree->SetBranchAddress("m_sv", &m_sv);
+    tree->SetBranchAddress("ME_sm_VBF", &ME_sm_VBF), 
+    tree->SetBranchAddress("ME_bkg", &ME_bkg), 
+    tree->SetBranchAddress("NN_disc", &NN_disc), 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("cat_inclusive", &cat_inclusive);
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
@@ -85,6 +88,7 @@ int main(int argc, char *argv[]) {
 
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
+      auto MELA = ME_sm_VBF / (ME_sm_VBF + 45 * ME_bkg);
 
       if (eq + tq == 0) {
         // output histograms for the template
@@ -163,7 +167,8 @@ histHolder::histHolder() :
     // x-axis
     bins_l2 {0, 1, 10, 11},
     bins_hpt {0, 100, 150, 200, 250, 300, 5000},
-    bins_mjj {300, 700, 1100, 1500, 10000},
+    //bins_mjj {300, 700, 1100, 1500, 10000},
+    bins_mjj {0., 0.1, 0.5, 0.9, 1.},
 
     // y-axis
     bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
