@@ -61,12 +61,12 @@ int main(int argc, char *argv[]) {
 
     // I hate doing it like this, but when I move the SetBranchAddres I see unexpected behavior
     Int_t cat_inclusive, cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf, cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
-    Float_t eq, tq, hpt, l2decay, lep_pT, mjj, m_sv, weight;
+    Float_t eq, tq, hpt, l2decay, vis_mass, mjj, m_sv, weight;
     tree->SetBranchAddress("el_charge", &eq);
     tree->SetBranchAddress("t1_charge", &tq);
     tree->SetBranchAddress("higgs_pT", &hpt);
     tree->SetBranchAddress("l2decay", &l2decay);
-    tree->SetBranchAddress("lep_pT", &lep_pT);
+    tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mjj", &mjj);
     tree->SetBranchAddress("m_sv", &m_sv);
     tree->SetBranchAddress("evtwt", &weight);
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
       if (eq + tq == 0) {
         // output histograms for the template
         if (cat_0jet > 0) {
-          hists->hists.at("et_0jet").back()->Fill(l2decay, lep_pT, weight);
+          hists->hists.at("et_0jet").back()->Fill(l2decay, vis_mass, weight);
         }
         if (cat_boosted > 0) {
           hists->hists.at("et_boosted").back()->Fill(hpt, m_sv, weight);
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
       } else {
         // get QCD shape from SS loose iso region
         if (cat_qcd_0jet > 0) {
-          fillQCD(hists->qcd_0jet, name, l2decay, lep_pT, weight);
+          fillQCD(hists->qcd_0jet, name, l2decay, vis_mass, weight);
         }
         if (cat_qcd_boosted > 0) {
           fillQCD(hists->qcd_boosted, name, hpt, m_sv, weight);
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 
         // get SS in signal region for loose region normalization
         if (cat_0jet > 0) {
-          fillQCD(hists->qcd_0jet_SS, name, l2decay, lep_pT, weight);
+          fillQCD(hists->qcd_0jet_SS, name, l2decay, vis_mass, weight);
         }
         if (cat_boosted > 0) {
           fillQCD(hists->qcd_boosted_SS, name, hpt, m_sv, weight);
@@ -175,15 +175,15 @@ histHolder::histHolder() :
         fout->mkdir((it->first).c_str());
         fout->cd();
     }
-    qcd_0jet       = new TH2F("qcd_0jet", "qcd_0jet", bins_lpt.size(), &bins_lpt[0], bins_l2.size(), &bins_l2[0]);
-    qcd_0jet_OS    = new TH2F("qcd_0jet_OS"   , "qcd_0jet_OS"   , bins_lpt.size() , &bins_lpt[0] , bins_l2.size() , &bins_l2[0]) ;
-    qcd_0jet_SS    = new TH2F("qcd_0jet_SS"   , "qcd_0jet_SS"   , bins_lpt.size() , &bins_lpt[0] , bins_l2.size() , &bins_l2[0]) ;
-    qcd_boosted    = new TH2F("qcd_boosted"   , "qcd_boosted"   , bins_msv1.size(), &bins_msv1[0], bins_hpt.size(), &bins_hpt[0]);
-    qcd_boosted_OS = new TH2F("qcd_boosted_OS", "qcd_boosted_OS", bins_msv1.size(), &bins_msv1[0], bins_hpt.size(), &bins_hpt[0]);
-    qcd_boosted_SS = new TH2F("qcd_boosted_SS", "qcd_boosted_SS", bins_msv1.size(), &bins_msv1[0], bins_hpt.size(), &bins_hpt[0]);
-    qcd_vbf        = new TH2F("qcd_vbf"       , "qcd_vbf"       , bins_msv2.size(), &bins_msv2[0], bins_mjj.size(), &bins_mjj[0]);
-    qcd_vbf_SS     = new TH2F("qcd_vbf_SS"    , "qcd_vbf_SS"    , bins_msv2.size(), &bins_msv2[0], bins_mjj.size(), &bins_mjj[0]);
-    qcd_vbf_OS     = new TH2F("qcd_vbf_OS"    , "qcd_vbf_OS"    , bins_msv2.size(), &bins_msv2[0], bins_mjj.size(), &bins_mjj[0]);
+    qcd_0jet       = new TH2F("qcd_0jet"      , "qcd_0jet"      , bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] );
+    qcd_0jet_OS    = new TH2F("qcd_0jet_OS"   , "qcd_0jet_OS"   , bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] );
+    qcd_0jet_SS    = new TH2F("qcd_0jet_SS"   , "qcd_0jet_SS"   , bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] );
+    qcd_boosted    = new TH2F("qcd_boosted"   , "qcd_boosted"   , bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]);
+    qcd_boosted_OS = new TH2F("qcd_boosted_OS", "qcd_boosted_OS", bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]);
+    qcd_boosted_SS = new TH2F("qcd_boosted_SS", "qcd_boosted_SS", bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]);
+    qcd_vbf        = new TH2F("qcd_vbf"       , "qcd_vbf"       , bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]);
+    qcd_vbf_SS     = new TH2F("qcd_vbf_SS"    , "qcd_vbf_SS"    , bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]);
+    qcd_vbf_OS     = new TH2F("qcd_vbf_OS"    , "qcd_vbf_OS"    , bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]);
 }
 
 histHolder::~histHolder() {}
@@ -196,11 +196,11 @@ void histHolder::initVectors(std::string name) {
             name = "data_obs";
         }
         if (key.first == "et_0jet") {
-            hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_lpt.size() , &bins_lpt[0] , bins_l2.size() , &bins_l2[0])) ;
-        } else if (key.first == "et_boosted") {
-            hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_msv1.size(), &bins_msv1[0], bins_hpt.size(), &bins_hpt[0]));
-        } else if (key.first == "et_vbf") {
-            hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_msv2.size(), &bins_msv2[0], bins_mjj.size(), &bins_mjj[0]));
+            hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] ));
+        } else if (key.first == "et_boosted") {                                                                          
+            hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
+        } else if (key.first == "et_vbf") {                                                                              
+            hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
         }
     }
 }
