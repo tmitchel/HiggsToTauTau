@@ -17,6 +17,7 @@
 class histHolder {
 public:
   histHolder(std::vector<int>, std::string, std::string);
+  ~histHolder();
   void writeHistos();
   void initVectors(std::string);
 
@@ -33,17 +34,15 @@ void fillQCD(TH2F*, std::string, double, double, double);
 
 int main(int argc, char *argv[]) {
   // get CLI arguments
-  CLParser parser(argc, argv);
-  CLParser parser2(argc, argv);
-  std::string dir = parser.Option("-d");
-  std::string tvar1 = parser.Option("-v1");
-  std::string tvar2 = parser.Option("-v2");
-  std::vector<std::string> sbins1 = parser.MultiOption("-b", 6);
+  CLParser* parser = new CLParser(argc, argv);
+  std::string dir = parser->Option("-d");
+  std::string tvar1 = parser->Option("-v1");
+  std::string tvar2 = parser->Option("-v2");
+  std::vector<std::string> sbins1 = parser->MultiOption("-b", 6);
 
   // get the provided histogram binning
   std::vector<int> bins;
   for (auto sbin : sbins1) {
-    std::cout << sbin << std::endl;
     bins.push_back(std::stoi(sbin));
   }
 
@@ -130,6 +129,8 @@ int main(int argc, char *argv[]) {
   }
   // write the output histograms
   hists->writeHistos();
+  delete hists;
+  delete parser;
 }
 
 // read all *.root files in the given directory and put them in the provided vector
@@ -183,10 +184,15 @@ histHolder::histHolder(std::vector<int> Bins, std::string tvar1, std::string tva
   qcd_vbf        = new TH2F("qcd_vbf"       , "qcd_vbf"       , bins.at(0), bins.at(1), bins.at(2), bins.at(3), bins.at(4), bins.at(5));
 }
 
+histHolder::~histHolder() {}
+
 // change to the correct output directory then create a new TH1F that will be filled for the current input file
 void histHolder::initVectors(std::string name) {
   for (auto key : hists) {
     fout->cd(key.first.c_str());
+    if (name.find("Data") != std::string::npos) {
+      name = "data_obs";
+    }
     hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins.at(0), bins.at(1), bins.at(2), bins.at(3), bins.at(4), bins.at(5)));
   }
 }
@@ -229,4 +235,5 @@ void histHolder::writeHistos() {
     }
   }
   qcd_vbf->Write();
+  fout->Close();
 }
