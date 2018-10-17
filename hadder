@@ -3,8 +3,8 @@ mv output/TT_TTT_output.root output/TTT.root
 mv output/TT_TTJ_output.root output/TTJ.root
 hadd output/ZJ.root output/DY*ZJ*
 hadd output/ZL.root output/DY*ZL*
-hadd output/ZTT.root output/DY*ZTT*
-hadd output/embed.root output/embed-*
+hadd output/mc_ZTT.root output/DY*ZTT*
+hadd output/ZTT.root output/embed-*
 hadd output/W.root output/WJet*.root
 hadd output/VV.root output/T-* output/Tbar* output/VV* output/WZ* output/ZZ* output/WW*
 hadd output/EWKZ.root output/EWKZ2*
