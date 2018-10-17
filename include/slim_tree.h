@@ -30,7 +30,7 @@ public:
         pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
         ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2,
-        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj;
+        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, l2decay, vis_mass;
 };
 
 slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str(), tree_name.c_str()) ) {
@@ -100,6 +100,8 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("higgs_m",             &higgs_m,             "higgs_m/F"            );
     otree->Branch("hjj_pT",              &hjj_pT,              "hjj_pT/F"             );
     otree->Branch("hjj_m",               &hjj_m,               "hjj_m/F"              );
+    otree->Branch("l2decay",             &l2decay,             "l2decay/F"            );
+    otree->Branch("vis_mass",              &vis_mass,              "vis_mass/F"             );
     otree->Branch("dEtajj",              &dEtajj,              "dEtajj/F"             );
     otree->Branch("dPhijj",              &dPhijj,              "dPhijj/F"             );
     otree->Branch("cat_0jet",            &cat_0jet,            "cat_0jet/I"           );
@@ -251,6 +253,8 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet
     t1_phi = t->getPhi();
     t1_mass = t->getMass();
     t1_charge = t->getCharge();
+    vis_mass = (el->getP4() + t->getP4()).M();
+    l2decay = t->getL2DecayMode();
 
     otree->Fill();
 }
@@ -270,6 +274,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, tau *t1, tau *t2, jet_fac
     t2_phi = t2->getPhi();
     t2_mass = t2->getMass();
     t2_charge = t2->getCharge();
+    vis_mass = (t1->getP4() + t2->getP4()).M();
 
     otree->Fill();
 }
@@ -289,6 +294,8 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t1, jet_fa
     t1_phi = t1->getPhi();
     t1_mass = t1->getMass();
     t1_charge = t1->getCharge();
+    vis_mass = (mu->getP4() + t1->getP4()).M();
+    l2decay = t1->getL2DecayMode();
 
     otree->Fill();
 }
