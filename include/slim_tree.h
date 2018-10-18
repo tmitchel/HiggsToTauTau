@@ -22,11 +22,12 @@ public:
         mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
         t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, // t1 is used for et and mt, as well
         t2_pt, t2_eta, t2_phi, t2_mass, t2_charge,
+        njets, nbjets,
         j1_pt, j1_eta, j1_phi,
         j2_pt, j2_eta, j2_phi,
         b1_pt, b1_eta, b1_phi,
         b2_pt, b2_eta, b2_phi,
-        met, metphi, mjj, njets, numGenJets,
+        met, metphi, mjj,  numGenJets,
         pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
         ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2,
@@ -57,6 +58,8 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("t2_mass",             &t2_mass,             "t2_mass/F"            );
     otree->Branch("t2_charge",           &t2_charge,           "t2_charge/F"          );
 
+    otree->Branch("njets",               &njets,               "njets"                );
+    otree->Branch("nbjets",              &nbjets,              "nbjets"               ); 
     otree->Branch("j1_pt",               &j1_pt,               "j1_pt/F"              );
     otree->Branch("j1_eta",              &j1_eta,              "j1_eta/F"             );
     otree->Branch("j1_phi",              &j1_phi,              "j1_phi/F"             );
@@ -73,7 +76,6 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("met",                 &met,                 "met/F"                );
     otree->Branch("metphi",              &metphi,              "metphi/F"             );
     otree->Branch("mjj",                 &mjj,                 "mjj/F"                );
-    otree->Branch("njets",               &njets,               "njets/F"              );
     otree->Branch("numGenJets",          &numGenJets,          "numGenJets/F"         );
 
     otree->Branch("pt_sv",               &pt_sv,               "pt_sv/F"              );
@@ -141,7 +143,6 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     costhetastar = evt->getCosThetaStar();
     Q2V1 = evt->getQ2V1();
     Q2V2 = evt->getQ2V2();
-    njets = fjets->getNjets();
     ME_sm_VBF = evt->getME_sm_VBF();
     ME_sm_ggH = evt->getME_sm_ggH();
     ME_sm_WH = evt->getME_sm_WH();
@@ -151,7 +152,8 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     ME_bkg2 = evt->getME_bkg2();
 
     numGenJets = evt->getNumGenJets();
-
+    njets = fjets->getNjets();
+    nbjets = fjets->getNbtag();
     // dijet info is only ok if you have 2 jets, imagine that
     hjj_pT = 0.;
     hjj_m = 0.;
