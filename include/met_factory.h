@@ -1,3 +1,6 @@
+#ifndef MET_FACTORY_H
+#define MET_FACTORY_H
+
 #include "TTree.h"
 
 class met_factory {
@@ -46,3 +49,6 @@ TLorentzVector met_factory::getP4() {
   p4.SetPtEtaPhiM(met, 0, metphi, 0);
   return p4;
 }
+
+
+#endif

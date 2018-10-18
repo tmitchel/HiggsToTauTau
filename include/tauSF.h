@@ -1,3 +1,6 @@
+#ifndef TAUSF_H
+#define TAUSF_H
+
 #include <map>
 #include <string>
 #include "TMath.h"
@@ -184,3 +187,4 @@ double tauSF::VBF_ZmmSF(double mjj, std::string syst) {
     }
     return sf;
 }
+#endif

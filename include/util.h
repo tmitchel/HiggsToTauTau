@@ -1,3 +1,6 @@
+#ifndef UTIL_H
+#define UTIL_H
+
 #include <map>
 
 class Helper {
@@ -294,3 +297,6 @@ double GetZmmSF(float jets, float mj, float pthi, float taupt, float syst) {
   }
   return aweight;
 }
+
+
+#endif

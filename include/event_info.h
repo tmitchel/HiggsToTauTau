@@ -1,3 +1,5 @@
+#ifndef EVENT_INFO_H
+#define EVENT_INFO_H
 
 /////////////////////////////////////////
 // Purpose: To hold general event data //
@@ -228,3 +230,5 @@ Bool_t event_info::getPassIsoMu22eta2p1() {
 Bool_t event_info::getPassIsoTkMu22eta2p1() {
   return PassIsoTkMu22eta2p1;
 }
+
+#endif

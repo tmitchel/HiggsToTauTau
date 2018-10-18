@@ -1,3 +1,5 @@
+#ifndef DITAU_FACTORY_H
+#define DITAU_FACTORY_H
 #include <vector>
 #include <utility>
 #include <string>
@@ -10,7 +12,7 @@ class ditau_factory;
 ////////////////////////////////////////////////////
 // Purpose: To hold a single composite tau lepton //
 ////////////////////////////////////////////////////
-class tau {
+class ditau {
   friend ditau_factory;
 private:
   std::string name = "tau";
@@ -20,8 +22,8 @@ private:
   TLorentzVector p4;
 public:
 
-  tau(Float_t, Float_t, Float_t, Float_t, Float_t);
-  ~tau() {};
+  ditau(Float_t, Float_t, Float_t, Float_t, Float_t);
+  ~ditau() {};
 
   void scalePt(Float_t scalePt) {
     pt *= scalePt;
@@ -51,7 +53,7 @@ public:
 };
 
 // initialize member data and set TLorentzVector
-tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) :
+ditau::ditau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) :
   pt(Pt),
   eta(Eta),
   phi(Phi),
@@ -79,7 +81,7 @@ public:
   ditau_factory (TTree*);
   virtual ~ditau_factory () {};
 
-  std::pair<tau, tau> run_factory();
+  std::pair<ditau, ditau> run_factory();
 };
 
 // read data from tree Int_to member variables
@@ -125,8 +127,8 @@ ditau_factory::ditau_factory(TTree* input) {
 }
 
 // create electron object and set member data
-std::pair<tau, tau> ditau_factory::run_factory() {
-  tau t1(pt_1, eta_1, phi_1, m_1, q_1);
+std::pair<ditau, ditau> ditau_factory::run_factory() {
+  ditau t1(pt_1, eta_1, phi_1, m_1, q_1);
   t1.px = px_1;
   t1.py = py_1;
   t1.pz = pz_1;
@@ -139,7 +141,7 @@ std::pair<tau, tau> ditau_factory::run_factory() {
   t1.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_1;
   t1.LooseIsoMVA = byLooseIsolationMVArun2v1DBoldDMwLT_1;
 
-  tau t2(pt_2, eta_2, phi_2, m_2, q_2);
+  ditau t2(pt_2, eta_2, phi_2, m_2, q_2);
   t2.px = px_2;
   t2.py = py_2;
   t2.pz = pz_2;
@@ -158,3 +160,5 @@ std::pair<tau, tau> ditau_factory::run_factory() {
   } 
   return std::make_pair(t2, t1);
 }
+
+#endif
