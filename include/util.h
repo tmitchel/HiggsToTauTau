@@ -1,3 +1,6 @@
+#ifndef UTIL_H
+#define UTIL_H
+
 #include <map>
 
 class Helper {
@@ -55,8 +58,9 @@ luminosity(35870.),
     {"SMH_gg110", 57.90 * 0.0791},
     {"SMH_ggH120", 47.38 * 0.0698},
     {"SMH_ggH125", 44.14 * 0.0627},
-    {"ggHtoTauTau125", 44.14 * 0.0627},
     {"SMH_ggH130", 41.23 * 0.0541},
+    {"ggHtoTauTau125_v1", 44.14 * 0.0627},
+    {"ggHtoTauTau125_v2", 44.14 * 0.0627},
     {"SMH_gg140", 36.0 * 0.0360},
     {"ST_tW_antitop", 35.6},
     {"ST_tW_top", 35.6},
@@ -293,3 +297,6 @@ double GetZmmSF(float jets, float mj, float pthi, float taupt, float syst) {
   }
   return aweight;
 }
+
+
+#endif

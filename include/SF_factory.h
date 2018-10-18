@@ -1,4 +1,5 @@
-
+#ifndef SF_FACTORY_H
+#define SF_FACTORY_H
 
 class SF_factory {
 private:
@@ -137,3 +138,6 @@ double SF_factory::getSF(double pt, double eta) {
 
   return SF;
 }
+
+
+#endif

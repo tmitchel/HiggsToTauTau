@@ -1,3 +1,6 @@
+#ifndef TAU_FACTORY_H
+#define TAU_FACTORY_H
+
 #include <vector>
 #include <string>
 #include <cmath>
@@ -118,3 +121,6 @@ tau tau_factory::run_factory() {
 
   return t;
 }
+
+
+#endif

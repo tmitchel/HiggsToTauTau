@@ -18,13 +18,14 @@ gStyle.SetOptStat(0)
 
 def applyStyle(name, hist, leg):
     overlay = 0
+    print name, hist.Integral()
     if name == 'embed':
         hist.SetFillColor(TColor.GetColor("#ffcc66"))
         hist.SetName("ZTT")
     elif name == 'ZL':
         hist.SetFillColor(TColor.GetColor("#4496c8"))
         hist.SetName('ZL')
-    elif name == 'ZJ' or name == 'TTT' or name == 'TTJ' or name == 'VV':
+    elif name == 'ZJ' or name == 'TTT' or name == 'TTJ' or name == 'VV' or name == 'EWKZ':
         hist.SetFillColor(TColor.GetColor("#12cadd"))
         overlay = 3
     elif name == 'W':
@@ -127,7 +128,11 @@ def fillStackAndLegend(data, sig, holder, leg):
     leg.AddEntry(data, 'Data', 'lep')
     holder = sorted(holder, key=lambda hist: hist.Integral())
     for hist in holder:
+        # if hist.GetName() == 'QCD':
+        #     continue
         stack.Add(hist)
+        #for i in stack.GetHists():
+        #    print i.GetName(), i.Integral()
     for hist in reversed(holder):
         leg.AddEntry(hist, hist.GetName(), 'f')
     leg.AddEntry(sig, 'VBF M=125GeV', 'l')

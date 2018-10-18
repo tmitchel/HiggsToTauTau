@@ -17,20 +17,20 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "include/CLParser.h"
-#include "include/EmbedWeight.h"
-#include "include/LumiReweightingStandAlone.h"
-#include "include/SF_factory.h"
-#include "include/btagSF.h"
-#include "include/ditau_factory.h"
-#include "include/electron_factory.h"
-#include "include/muon_factory.h"
-#include "include/event_info.h"
-#include "include/jet_factory.h"
-#include "include/met_factory.h"
-#include "include/slim_tree.h"
-#include "include/tauSF.h"
-#include "include/util.h"
+#include "../include/CLParser.h"
+#include "../include/EmbedWeight.h"
+#include "../include/event_info.h"
+#include "../include/LumiReweightingStandAlone.h"
+#include "../include/SF_factory.h"
+#include "../include/btagSF.h"
+#include "../include/ditau_factory.h"
+#include "../include/electron_factory.h"
+#include "../include/muon_factory.h"
+#include "../include/jet_factory.h"
+#include "../include/met_factory.h"
+#include "../include/slim_tree.h"
+#include "../include/tauSF.h"
+#include "../include/util.h"
 
 int main(int argc, char* argv[]) {
 
@@ -351,8 +351,8 @@ int main(int argc, char* argv[]) {
     bool vbfCat = (jets.getNjets() > 1 && Higgs.Pt() > 100 && fabs(jet1.getEta() - jet2.getEta()) > 2.5);
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
-    double normMELA(event.getMELA_vbf()); 
-    normMELA /= (event.getMELA_vbf() + (45*event.getMELA_bkg()));
+    double normMELA(event.getME_sm_VBF()); 
+    normMELA /= (event.getME_sm_VBF() + (45*event.getME_bkg()));
 
     if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
       if (boosted) {
