@@ -31,6 +31,8 @@
 #include "../include/EmbedWeight.h"
 #include "../include/slim_tree.h"
 
+typedef std::vector<double> NumV;
+
 int main(int argc, char* argv[]) {
 
   ////////////////////////////////////////////////
@@ -170,6 +172,10 @@ int main(int argc, char* argv[]) {
   met_factory      met(ntuple, syst);
   double n70_count;
 
+  if (sample.find("ggHtoTauTau125") != std::string::npos) {
+    event.setRivets(ntuple);
+  }
+
   // begin the event loop
   Int_t nevts = ntuple->GetEntries();
   for (Int_t i = 0; i < nevts; i++) {
@@ -299,6 +305,8 @@ int main(int argc, char* argv[]) {
         if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), float(800.0)));
         if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), float(925.0)));
       }
+
+      //NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
     } else if (!isData && isEmbed) {
       double Stitching_Weight(1.);
       // get the stitching weight

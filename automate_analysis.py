@@ -44,7 +44,7 @@ start = time.time()
 if options.isData:
     fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile and 'data' in ifile.lower()]
 else:
-    fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile and not 'data' in ifile.lower()]
+    fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile]
 
 systs = ['', 'met_UESUp', 'met_UESDown', 'met_JESUp', 'met_JESDown', 'metphi_UESUp', 'metphi_UESDown', 'metphi_JESUp', 'metphi_JESDown', 'mjj_JESUp', 'mjj_JESDown']
 
