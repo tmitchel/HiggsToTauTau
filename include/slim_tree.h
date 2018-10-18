@@ -1,5 +1,7 @@
 #include <iostream>
 #include "TTree.h"
+#include "ditau_factory.h"
+#include "tau_factory.h"
 
 class slim_tree {
 public:
@@ -8,9 +10,9 @@ public:
 
     // member functions
     // fill the tree for this event
-    void fillTree(std::vector<std::string>, electron*, tau*, jet_factory*, met_factory*, event_info*, Float_t);
-    void fillTree(std::vector<std::string>, muon*    , tau*, jet_factory*, met_factory*, event_info*, Float_t);
-    void fillTree(std::vector<std::string>, tau*     , tau*, jet_factory*, met_factory*, event_info*, Float_t);
+    void fillTree(std::vector<std::string>, electron*  , tau*, jet_factory*, met_factory*, event_info*, Float_t);
+    void fillTree(std::vector<std::string>, muon*      , tau*, jet_factory*, met_factory*, event_info*, Float_t);
+    void fillTree(std::vector<std::string>, ditau*     , ditau*, jet_factory*, met_factory*, event_info*, Float_t);
     void generalFill(std::vector<std::string>, jet_factory*, met_factory*, event_info*, Float_t, TLorentzVector);
 
     // member data
@@ -259,7 +261,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet
     otree->Fill();
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, tau *t1, tau *t2, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight) {
+void slim_tree::fillTree(std::vector<std::string> cat, ditau *t1, ditau *t2, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight) {
 
     TLorentzVector higgs(t1->getP4() + t2->getP4() + fmet->getP4());
     generalFill(cat, fjets, fmet, evt, weight, higgs);

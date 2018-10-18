@@ -1,3 +1,6 @@
+#ifndef ELECTRON_FACTORY_H
+#define ELECTRON_FACTORY_H
+
 #include <vector>
 #include <string>
 #include <cmath>
@@ -87,3 +90,5 @@ electron electron_factory::run_factory() {
 
   return el;
 }
+
+#endif

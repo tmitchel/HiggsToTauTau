@@ -1,3 +1,6 @@
+#ifndef MUON_FACTORY_H
+#define MUON_FACTORY_H
+
 #include <vector>
 #include <string>
 #include <cmath>
@@ -85,3 +88,6 @@ muon muon_factory::run_factory() {
 
   return mu;
 }
+
+
+#endif

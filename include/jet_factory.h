@@ -1,3 +1,6 @@
+#ifndef JET_FACTORY_H
+#define JET_FACTORY_H
+
 #include "TTree.h"
 
 class jet {
@@ -102,3 +105,6 @@ void jet_factory::run_factory() {
   btag_jets.push_back(b1);
   btag_jets.push_back(b2);
 }
+
+
+#endif
