@@ -9,8 +9,8 @@ set -ex
 SELFDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECTDIR="$(dirname "${SELFDIR}")"
 
-sudo chmod 777 $TRAVIS_BUILD_DIR/SMHTT_Analyzers/
-cd $TRAVIS_BUILD_DIR/SMHTT_Analyzers/
+sudo chmod 777 $PROJECTDIR
+cd $PROJECTDIR
 
 bash build plugins/et_analyzer.cc test_et
 bash build plugins/mt_analyzer.cc test_mt
