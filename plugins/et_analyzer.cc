@@ -381,7 +381,7 @@ int main(int argc, char* argv[]) {
     histos->at("pre_el_iso") -> Fill(electron.getIso(), 1.);
 
     // now do mt selection
-    if (mt > 50 || tau.getPt() < 30) {
+    if (tau.getPt() < 30) {
       continue;
     }
 
@@ -422,7 +422,7 @@ int main(int argc, char* argv[]) {
         tree_cat.push_back("looseIso_vbf");
       }
     }
-    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, evtwt);
+    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
 
     // event categorizaation
     if (zeroJet) {
