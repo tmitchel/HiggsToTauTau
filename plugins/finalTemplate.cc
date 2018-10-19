@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
     // I hate doing it like this, but when I move the SetBranchAddres I see unexpected behavior
     Int_t cat_inclusive, cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf, cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
-    Float_t eq, tq, hpt, l2decay, vis_mass, mjj, m_sv, weight, ME_sm_VBF, ME_bkg, NN_disc;
+    Float_t eq, tq, hpt, l2decay, vis_mass, mjj, m_sv, weight, ME_sm_VBF, ME_bkg, NN_disc, nbjets, mt;
     tree->SetBranchAddress("el_charge", &eq);
     tree->SetBranchAddress("t1_charge", &tq);
     tree->SetBranchAddress("higgs_pT", &hpt);
@@ -72,6 +72,8 @@ int main(int argc, char *argv[]) {
     tree->SetBranchAddress("ME_sm_VBF", &ME_sm_VBF), 
     tree->SetBranchAddress("ME_bkg", &ME_bkg), 
     tree->SetBranchAddress("NN_disc", &NN_disc), 
+    tree->SetBranchAddress("mt", &mt);
+    tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("cat_inclusive", &cat_inclusive);
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
@@ -98,7 +100,7 @@ int main(int argc, char *argv[]) {
         if (cat_boosted > 0) {
           hists->hists.at("et_boosted").back()->Fill(hpt, m_sv, weight);
         }
-        if (cat_vbf > 0 && hpt > 50) {
+        if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
           hists->hists.at("et_vbf").back()->Fill(mjj, m_sv, weight);
         }
       } else {
@@ -109,7 +111,7 @@ int main(int argc, char *argv[]) {
         if (cat_qcd_boosted > 0) {
           fillQCD(hists->qcd_boosted, name, hpt, m_sv, weight);
         }
-        if (cat_qcd_vbf > 0 && hpt > 50) {
+        if (cat_qcd_vbf > 0 && mt < 50 && nbjets == 0) {
           fillQCD(hists->qcd_vbf, name, mjj, m_sv, weight);
         }
 
@@ -120,7 +122,7 @@ int main(int argc, char *argv[]) {
         if (cat_boosted > 0) {
           fillQCD(hists->qcd_boosted_SS, name, hpt, m_sv, weight);
         }
-        if (cat_vbf > 0 && hpt > 50) {
+        if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
           fillQCD(hists->qcd_vbf_SS, name, mjj, m_sv, weight);
         }
       }
