@@ -47,7 +47,6 @@ std::vector<std::string> CLParser::MultiOption(const std::string &flag, int dept
     if (found != tokens.end() && ++found != tokens.end()) {
         --depth;
         opts.push_back(*found);
-        std::cout << *found << std::endl;
         *found = *found+std::to_string(rand()); //can't let it find this one again next time, so add a random ending
         MultiOption(*found, depth, 0);
     }
