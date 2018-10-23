@@ -66,10 +66,12 @@ int main(int argc, char *argv[]) {
 
     // I hate doing it like this, but when I move the SetBranchAddres I see unexpected behavior
     Int_t cat_inclusive, cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf, cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
-    Float_t eq, tq, hpt, var, weight;
+    Float_t eq, tq, hpt, mt, nbjets, var, weight;
     tree->SetBranchAddress("el_charge", &eq);
     tree->SetBranchAddress("t1_charge", &tq);
     tree->SetBranchAddress("higgs_pT", &hpt);
+    tree->SetBranchAddress("mt", &mt);
+    tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress(tvar.c_str(), &var);
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("cat_inclusive", &cat_inclusive);
@@ -96,7 +98,7 @@ int main(int argc, char *argv[]) {
         if (cat_boosted > 0) {
           hists->hists.at("et_boosted").back()->Fill(var, weight);
         }
-        if (cat_vbf > 0 && hpt > 50) {
+        if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
           hists->hists.at("et_vbf").back()->Fill(var, weight);
         }
       } else {
@@ -107,7 +109,7 @@ int main(int argc, char *argv[]) {
         if (cat_qcd_boosted > 0) {
           fillQCD(hists->qcd_boosted, name, var, weight);
         }
-        if (cat_qcd_vbf > 0 && hpt > 50) {
+        if (cat_qcd_vbf > 0 && mt < 50 && nbjets == 0) {
           fillQCD(hists->qcd_vbf, name, var, weight);
         }
 
@@ -118,7 +120,7 @@ int main(int argc, char *argv[]) {
         if (cat_boosted > 0) {
           fillQCD(hists->qcd_boosted_SS, name, var, weight);
         }
-        if (cat_vbf > 0 && hpt > 50) {
+        if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
           fillQCD(hists->qcd_vbf_SS, name, var, weight);
         }
       }
@@ -225,4 +227,5 @@ void histHolder::writeHistos() {
     }
   }
   qcd_vbf->Write();
+  fout->Close();
 }
