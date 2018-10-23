@@ -252,4 +252,5 @@ void histHolder::writeHistos() {
     }
   }
   qcd_vbf->Write();
+  fout->Close();
 }

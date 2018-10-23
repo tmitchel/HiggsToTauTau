@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
           hists->hists.at("et_boosted").back()->Fill(hpt, m_sv, weight);
         }
         if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
-          hists->hists.at("et_vbf").back()->Fill(mjj, m_sv, weight);
+          hists->hists.at("et_vbf").back()->Fill(NN_disc, m_sv, weight);
         }
       } else {
         // get QCD shape from SS loose iso region
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
           fillQCD(hists->qcd_boosted, name, hpt, m_sv, weight);
         }
         if (cat_qcd_vbf > 0 && mt < 50 && nbjets == 0) {
-          fillQCD(hists->qcd_vbf, name, mjj, m_sv, weight);
+          fillQCD(hists->qcd_vbf, name, NN_disc, m_sv, weight);
         }
 
         // get SS in signal region for loose region normalization
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
           fillQCD(hists->qcd_boosted_SS, name, hpt, m_sv, weight);
         }
         if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
-          fillQCD(hists->qcd_vbf_SS, name, mjj, m_sv, weight);
+          fillQCD(hists->qcd_vbf_SS, name, NN_disc, m_sv, weight);
         }
       }
     }
@@ -169,8 +169,8 @@ histHolder::histHolder() :
     // x-axis
     bins_l2 {0, 1, 10, 11},
     bins_hpt {0, 100, 150, 200, 250, 300, 5000},
-    bins_mjj {300, 700, 1100, 1500, 10000},
-    //bins_mjj {0., 0.1, 0.5, 0.9, 1.},
+    //bins_mjj {300, 700, 1100, 1500, 10000},
+    bins_mjj {0., 0.1, 0.5, 0.9, 1.},
 
     // y-axis
     bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
