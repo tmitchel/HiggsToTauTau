@@ -20,20 +20,14 @@ def applyStyle(name, hist, leg):
     overlay = 0
     print name, hist.Integral()
     if name == 'ZTT':
-        hist.SetFillColor(TColor.GetColor("#ffcc66"))
+        hist.SetFillColor(TColor.GetColor("#f9cd66"))
         hist.SetName("ZTT")
-    elif name == 'ZL':
-        hist.SetFillColor(TColor.GetColor("#4496c8"))
-        hist.SetName('ZL')
     elif name == 'TTT':
-        hist.SetFillColor(TColor.GetColor("#449942"))
+        hist.SetFillColor(TColor.GetColor("#cfe87f"))
         hist.SetName('TTT')
-    elif name == 'ZJ' or name == 'TTJ' or name == 'VV' or name == 'EWKZ':
-        hist.SetFillColor(TColor.GetColor("#12cadd"))
-        overlay = 3
-    elif name == 'W':
-        hist.SetFillColor(TColor.GetColor("#de5a6a"))
-        hist.SetName('W+jets')
+    elif name == 'ZJ' or name == 'TTJ' or name == 'VV' or name == 'EWKZ' or name == 'W' or name == 'ZL':
+        hist.SetFillColor(TColor.GetColor("#9feff2"))
+        overlay = 4
     elif name == 'QCD':
         hist.SetFillColor(TColor.GetColor("#ffccff"))
         hist.SetName('QCD')
@@ -43,16 +37,16 @@ def applyStyle(name, hist, leg):
     elif name == 'VBF125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
-        hist.SetLineColor(TColor.GetColor('#000000'))
+        hist.SetLineColor(TColor.GetColor('#FF0000'))
         hist.SetLineStyle(7)
         overlay = 2
         # leg.AddEntry(hist, 'VBF M=125GeV', 'l')
-    # elif name == 'ggH125':
-    #     hist.SetFillColor(0)
-    #     hist.SetLineWidth(3)
-    #     hist.SetLineColor(TColor.GetColor('#000000'))
-    #     hist.SetLineStyle(7)
-    #     overlay = 2
+    elif name == 'ggH125':
+        hist.SetFillColor(0)
+        hist.SetLineWidth(3)
+        hist.SetLineColor(TColor.GetColor('#0000FF'))
+        hist.SetLineStyle(7)
+        overlay = 3
     #     leg.AddEntry(hist, 'ggH M=125GeV', 'l')
     else:
         return None, -1, leg
@@ -127,19 +121,16 @@ def formatOther(other, holder):
     return holder
 
 
-def fillStackAndLegend(data, sig, holder, leg):
+def fillStackAndLegend(data, vbf, ggh, holder, leg):
     stack = THStack()
     leg.AddEntry(data, 'Data', 'lep')
+    leg.AddEntry(vbf, 'VBF Higgs(125)x50', 'l')
+    leg.AddEntry(ggh, 'ggH Higgs(125)x50', 'l')
     holder = sorted(holder, key=lambda hist: hist.Integral())
     for hist in holder:
-        # if hist.GetName() == 'QCD':
-        #     continue
         stack.Add(hist)
-        #for i in stack.GetHists():
-        #    print i.GetName(), i.Integral()
     for hist in reversed(holder):
         leg.AddEntry(hist, hist.GetName(), 'f')
-    leg.AddEntry(sig, 'VBF M=125GeV', 'l')
     return stack, leg
 
 def createLegend():
@@ -199,9 +190,10 @@ def main():
     idir = fin.Get(args.cat)
     leg = createLegend()
     data = idir.Get('Data').Clone()
-    sig = data.Clone()
-    sig.Reset()
-    stat = sig.Clone()
+    vbf = data.Clone()
+    vbf.Reset()
+    ggh = vbf.Clone()
+    stat = vbf.Clone()
     other = stat.Clone()
     inStack = []
     hists = [idir.Get(key.GetName()).Clone() for key in idir.GetListOfKeys()]
@@ -213,14 +205,16 @@ def main():
         elif overlay == 1:
             data = hist
         elif overlay == 2:
-            sig = hist
+            vbf = hist
         elif overlay == 3:
+            ggh = hist
+        elif overlay == 4:
             other.Add(hist)
             stat.Add(hist)
 
     can = createCanvas()
     inStack = formatOther(other, inStack)
-    stack, leg = fillStackAndLegend(data, sig, inStack, leg)
+    stack, leg = fillStackAndLegend(data, vbf, ggh, inStack, leg)
     stat = formatStat(stat)
 
     high = max(data.GetMaximum(), stat.GetMaximum()) * 1.2
@@ -229,8 +223,10 @@ def main():
     formatStack(stack)
     data.Draw('same lep')
     stat.Draw('same e2')
-    sig.Scale(50)
-    sig.Draw('same hist')
+    vbf.Scale(50)
+    vbf.Draw('same hist')
+    ggh.Scale(50)
+    ggh.Draw('same hist')
     leg.Draw()
 
     ll = TLatex()
