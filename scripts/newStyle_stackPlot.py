@@ -26,39 +26,36 @@ def applyStyle(name, hist, leg):
         hist.SetFillColor(TColor.GetColor("#cfe87f"))
         hist.SetName('TTT')
     elif name == 'ZJ' or name == 'TTJ' or name == 'VV' or name == 'EWKZ' or name == 'W' or name == 'ZL':
-        hist.SetFillColor(TColor.GetColor("#9feff2"))
+        hist.SetFillColor(TColor.GetColor("#000000"))
         overlay = 4
     elif name == 'QCD':
         hist.SetFillColor(TColor.GetColor("#ffccff"))
         hist.SetName('QCD')
     elif name == 'Data':
         hist.SetLineColor(kBlack)
+        hist.SetMarkerStyle(8)
         overlay = 1
     elif name == 'VBF125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#FF0000'))
-        hist.SetLineStyle(7)
         overlay = 2
-        # leg.AddEntry(hist, 'VBF M=125GeV', 'l')
     elif name == 'ggH125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#0000FF'))
-        hist.SetLineStyle(7)
         overlay = 3
-    #     leg.AddEntry(hist, 'ggH M=125GeV', 'l')
     else:
         return None, -1, leg
     return hist, overlay, leg
 
 
 def createCanvas():
-    can = TCanvas()
-    can.Divide(2, 1)
+    can = TCanvas('can', 'can', 600, 800)
+    can.Divide(3, 1)
     pad1 = can.cd(1)
     pad1.cd()
-    pad1.SetPad(0, .3, 1, 1)
+    pad1.SetPad(0, .5, 1, 1)
     pad1.SetTopMargin(.1)
     pad1.SetBottomMargin(0.02)
     # pad1.SetLogy()
@@ -66,11 +63,18 @@ def createCanvas():
     pad1.SetTicky(1)
 
     pad2 = can.cd(2)
-    pad2.SetPad(0, 0, 1, .3)
+    pad2.SetPad(0, .3, 1, .5)
     pad2.SetTopMargin(0.06)
-    pad2.SetBottomMargin(0.35)
+    pad2.SetBottomMargin(0.032)
     pad2.SetTickx(1)
     pad2.SetTicky(1)
+
+    pad3 = can.cd(3)
+    pad3.SetPad(0, 0, 1, .3)
+    pad3.SetTopMargin(0.06)
+    pad3.SetBottomMargin(0.35)
+    pad3.SetTickx(1)
+    pad3.SetTicky(1)
 
     can.cd(1)
 
@@ -81,7 +85,7 @@ def formatStat(stat):
     stat.SetMarkerStyle(0)
     stat.SetLineWidth(2)
     stat.SetLineColor(0)
-    stat.SetFillStyle(3004)
+    stat.SetFillStyle(3002)
     stat.SetFillColor(kBlack)
     return stat
 
@@ -115,7 +119,7 @@ def formatStack(stack):
     stack.SetTitle('')
 
 def formatOther(other, holder):
-    other.SetFillColor(TColor.GetColor("#12cadd"))
+    other.SetFillColor(TColor.GetColor("#9feff2"))
     other.SetName('Other')
     holder.append(other.Clone())
     return holder
@@ -134,7 +138,7 @@ def fillStackAndLegend(data, vbf, ggh, holder, leg):
     return stack, leg
 
 def createLegend():
-    leg = TLegend(0.65, 0.45, 0.85, 0.85)
+    leg = TLegend(0.55, 0.45, 0.85, 0.85)
     leg.SetLineColor(0)
     leg.SetFillColor(0)
     leg.SetTextFont(61)
@@ -145,26 +149,50 @@ def createLegend():
 
 def formatPull(pull):
     pull.SetTitle('')
-    pull.SetMaximum(2.8)
-    pull.SetMinimum(-2.8)
-    pull.SetFillColor(TColor.GetColor('#bbbbbb'))
-    pull.SetLineColor(TColor.GetColor('#bbbbbb'))
-    pull.GetXaxis().SetTitle(titles[args.var])
+    pull.SetMaximum(2)
+    pull.SetMinimum(0)
+    pull.SetMarkerStyle(21)
     pull.GetXaxis().SetTitleSize(0.18)
     pull.GetXaxis().SetTitleOffset(0.8)
     pull.GetXaxis().SetTitleFont(42)
     pull.GetXaxis().SetLabelFont(42)
     pull.GetXaxis().SetLabelSize(.111)
     pull.GetXaxis().SetNdivisions(505)
+    pull.GetXaxis().SetLabelSize(0)
+    pull.GetXaxis().SetTitleSize(0)
 
-    pull.GetYaxis().SetTitle('#frac{Data - Bkg}{Uncertainty}')
-    pull.GetYaxis().SetTitleSize(0.16)
+    pull.GetYaxis().SetTitle('Data / MC')
+    pull.GetYaxis().SetTitleSize(0.12)
     pull.GetYaxis().SetTitleFont(42)
-    pull.GetYaxis().SetTitleOffset(.251)
+    pull.GetYaxis().SetTitleOffset(.37)
     pull.GetYaxis().SetLabelSize(.12)
-    pull.GetYaxis().SetNdivisions(505)
+    pull.GetYaxis().SetNdivisions(204)
     return pull
 
+
+def formatSigs(pull):
+    pull.SetTitle('')
+    pull.SetMaximum(2)
+    pull.SetMinimum(0)
+    pull.SetMarkerStyle(21)
+    pull.SetMarkerColor(kBlack)
+    pull.SetLineWidth(1)
+    pull.SetLineColor(kBlack)
+    pull.GetXaxis().SetTitle(titles[args.var])
+    pull.GetXaxis().SetTitleSize(0.14)
+    pull.GetXaxis().SetTitleOffset(0.92)
+    pull.GetXaxis().SetTitleFont(42)
+    pull.GetXaxis().SetLabelFont(42)
+    pull.GetXaxis().SetLabelSize(.111)
+    pull.GetXaxis().SetNdivisions(505)
+
+    pull.GetYaxis().SetTitle('VBF / ggH')
+    pull.GetYaxis().SetTitleSize(0.08)
+    pull.GetYaxis().SetTitleFont(42)
+    pull.GetYaxis().SetTitleOffset(.55)
+    pull.GetYaxis().SetLabelSize(.08)
+    pull.GetYaxis().SetNdivisions(204)
+    return pull
 
 def sigmaLines(data):
     low = data.GetBinLowEdge(1)
@@ -172,18 +200,21 @@ def sigmaLines(data):
         data.GetBinWidth(data.GetNbinsX())
 
     ## high line
-    line1 = TLine(low, 2., high, 2.)
-    line1.SetLineWidth(1)
-    line1.SetLineStyle(7)
+    line1 = TLine(low, 0.5, high, 0.5)
+    line1.SetLineStyle(3)
     line1.SetLineColor(kBlack)
 
-    ## low line
-    line2 = TLine(low, -2., high, -2.)
-    line2.SetLineWidth(1)
-    line2.SetLineStyle(7)
+    ## mid line
+    line2 = TLine(low, 1., high, 1.)
+    line2.SetLineStyle(3)
     line2.SetLineColor(kBlack)
 
-    return line1, line2
+    ## low line
+    line3 = TLine(low, 1.5, high, 1.5)
+    line3.SetLineStyle(3)
+    line3.SetLineColor(kBlack)
+
+    return line1, line2, line3
 
 def main():
     fin = TFile('Output/templates/template_'+args.var+'.root', 'read')
@@ -216,24 +247,25 @@ def main():
     inStack = formatOther(other, inStack)
     stack, leg = fillStackAndLegend(data, vbf, ggh, inStack, leg)
     stat = formatStat(stat)
+    leg.AddEntry(stat, 'Uncertainty', 'f')
 
-    high = max(data.GetMaximum(), stat.GetMaximum()) * 1.2
+    high = max(data.GetMaximum(), stat.GetMaximum()) * 1.6
     stack.SetMaximum(high)
     stack.Draw('hist')
     formatStack(stack)
     data.Draw('same lep')
     stat.Draw('same e2')
     vbf.Scale(50)
-    vbf.Draw('same hist')
+    vbf.Draw('same hist e')
     ggh.Scale(50)
-    ggh.Draw('same hist')
+    ggh.Draw('same hist e')
     leg.Draw()
 
     ll = TLatex()
     ll.SetNDC(kTRUE)
     ll.SetTextSize(0.06)
     ll.SetTextFont(42)
-    ll.DrawLatex(0.69, 0.92, "35.9 fb^{-1} (13 TeV)")
+    ll.DrawLatex(0.48, 0.92, "e#tau_{e} 2016, 35.9 fb^{-1} (13 TeV)")
 
     cms = TLatex()
     cms.SetNDC(kTRUE)
@@ -244,29 +276,54 @@ def main():
     prel = TLatex()
     prel.SetNDC(kTRUE)
     prel.SetTextFont(52)
-    prel.SetTextSize(0.09)
-    prel.DrawLatex(0.23, 0.8, "Preliminary")
+    prel.SetTextSize(0.06)
+    prel.DrawLatex(0.14, 0.74, "Preliminary")
+
+    if args.cat == 'et_inclusive':
+        catName = 'Inclusive'
+    elif args.cat == 'et_vbf':
+        catName = 'VBF enriched'
+
+    lcat = TLatex()
+    lcat.SetNDC(kTRUE)
+    lcat.SetTextFont(42)
+    lcat.SetTextSize(0.06)
+    lcat.DrawLatex(0.14, 0.68, catName)
 
     can.cd(2)
     ###########################
     ## create pull histogram ##
     ###########################
-    pull = data.Clone()
-    pull.Add(stat, -1)
-    for ibin in range(pull.GetNbinsX()+1):
-        pullContent = pull.GetBinContent(ibin)
-        uncertainty = TMath.Sqrt(pow(stat.GetBinErrorUp(ibin), 2)+pow(data.GetBinErrorUp(ibin), 2))
-        if uncertainty > 0:
-            pull.SetBinContent(ibin, pullContent / uncertainty)
-        else:
-            pull.SetBinContent(ibin, 0)
 
-    pull = formatPull(pull)
-    pull.Draw('hist')
+    ratio = data.Clone()
+    ratio.Divide(stat)
+    ratio = formatPull(ratio)
+    rat_unc = ratio.Clone()
+    for ibin in range(rat_unc.GetNbinsX()+1):
+        rat_unc.SetBinContent(ibin, 1)
+        rat_unc.SetBinError(ibin, ratio.GetBinError(ibin))
+    rat_unc.SetMarkerSize(0)
+    rat_unc.SetMarkerStyle(8)
+    from ROOT import kGray
+    rat_unc.SetFillColor(kGray)
+    rat_unc.Draw('same e2')
+    ratio.Draw('same lep')
 
-    line1, line2, = sigmaLines(data)
+    line1, line2, line3 = sigmaLines(data)
     line1.Draw()
     line2.Draw()
+    line3.Draw()
+
+    can.cd(3)
+    sig_rat = vbf.Clone()
+    sig_rat.Divide(ggh)
+    sig_rat = formatSigs(sig_rat)
+    sig_rat.Draw('same lep')
+
+    line1.Draw()
+    line2.Draw()
+    line3.Draw()
+
 
     can.SaveAs('Output/plots/'+args.var+'_'+args.cat+'.pdf')
 
