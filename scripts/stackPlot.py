@@ -19,7 +19,7 @@ gStyle.SetOptStat(0)
 def applyStyle(name, hist, leg):
     overlay = 0
     print name, hist.Integral()
-    if name == 'embed':
+    if name == 'ZTT':
         hist.SetFillColor(TColor.GetColor("#ffcc66"))
         hist.SetName("ZTT")
     elif name == 'ZL':
@@ -191,7 +191,7 @@ def sigmaLines(data):
     return line1, line2
 
 def main():
-    fin = TFile('Templates/template_'+args.var+'.root', 'read')
+    fin = TFile('Output/templates/template_'+args.var+'.root', 'read')
     idir = fin.Get(args.cat)
     leg = createLegend()
     data = idir.Get('Data').Clone()
@@ -268,7 +268,7 @@ def main():
     line1.Draw()
     line2.Draw()
 
-    can.SaveAs('Plots/'+args.var+'_'+args.cat+'.pdf')
+    can.SaveAs('Output/plots/'+args.var+'_'+args.cat+'.pdf')
 
 
 if __name__ == "__main__":
