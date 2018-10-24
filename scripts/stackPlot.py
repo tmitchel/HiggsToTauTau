@@ -33,28 +33,25 @@ def applyStyle(name, hist, leg):
         hist.SetName('QCD')
     elif name == 'Data':
         hist.SetLineColor(kBlack)
+        hist.SetMarkerStyle(8)
         overlay = 1
     elif name == 'VBF125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#FF0000'))
-        hist.SetLineStyle(7)
         overlay = 2
-        # leg.AddEntry(hist, 'VBF M=125GeV', 'l')
     elif name == 'ggH125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#0000FF'))
-        hist.SetLineStyle(7)
         overlay = 3
-    #     leg.AddEntry(hist, 'ggH M=125GeV', 'l')
     else:
         return None, -1, leg
     return hist, overlay, leg
 
 
 def createCanvas():
-    can = TCanvas()
+    can = TCanvas('can', 'can', 432, 451)
     can.Divide(2, 1)
     pad1 = can.cd(1)
     pad1.cd()
@@ -115,7 +112,7 @@ def formatStack(stack):
     stack.SetTitle('')
 
 def formatOther(other, holder):
-    other.SetFillColor(TColor.GetColor("#12cadd"))
+    other.SetFillColor(TColor.GetColor("#9feff2"))
     other.SetName('Other')
     holder.append(other.Clone())
     return holder
@@ -134,7 +131,7 @@ def fillStackAndLegend(data, vbf, ggh, holder, leg):
     return stack, leg
 
 def createLegend():
-    leg = TLegend(0.65, 0.45, 0.85, 0.85)
+    leg = TLegend(0.5, 0.45, 0.85, 0.85)
     leg.SetLineColor(0)
     leg.SetFillColor(0)
     leg.SetTextFont(61)
@@ -145,25 +142,48 @@ def createLegend():
 
 def formatPull(pull):
     pull.SetTitle('')
-    pull.SetMaximum(2.8)
-    pull.SetMinimum(-2.8)
-    pull.SetFillColor(TColor.GetColor('#bbbbbb'))
-    pull.SetLineColor(TColor.GetColor('#bbbbbb'))
+    pull.SetMaximum(2)
+    pull.SetMinimum(0)
     pull.GetXaxis().SetTitle(titles[args.var])
+    pull.SetMarkerStyle(21)
     pull.GetXaxis().SetTitleSize(0.18)
     pull.GetXaxis().SetTitleOffset(0.8)
     pull.GetXaxis().SetTitleFont(42)
     pull.GetXaxis().SetLabelFont(42)
     pull.GetXaxis().SetLabelSize(.111)
     pull.GetXaxis().SetNdivisions(505)
+    # pull.GetXaxis().SetLabelSize(0)
+    # pull.GetXaxis().SetTitleSize(0)
 
-    pull.GetYaxis().SetTitle('#frac{Data - Bkg}{Uncertainty}')
-    pull.GetYaxis().SetTitleSize(0.16)
+    pull.GetYaxis().SetTitle('Data / MC')
+    pull.GetYaxis().SetTitleSize(0.12)
     pull.GetYaxis().SetTitleFont(42)
-    pull.GetYaxis().SetTitleOffset(.251)
+    pull.GetYaxis().SetTitleOffset(.37)
     pull.GetYaxis().SetLabelSize(.12)
-    pull.GetYaxis().SetNdivisions(505)
+    pull.GetYaxis().SetNdivisions(204)
     return pull
+
+# def formatPull(pull):
+#     pull.SetTitle('')
+#     pull.SetMaximum(2.8)
+#     pull.SetMinimum(-2.8)
+#     pull.SetFillColor(TColor.GetColor('#bbbbbb'))
+#     pull.SetLineColor(TColor.GetColor('#bbbbbb'))
+#     pull.GetXaxis().SetTitle(titles[args.var])
+#     pull.GetXaxis().SetTitleSize(0.18)
+#     pull.GetXaxis().SetTitleOffset(0.8)
+#     pull.GetXaxis().SetTitleFont(42)
+#     pull.GetXaxis().SetLabelFont(42)
+#     pull.GetXaxis().SetLabelSize(.111)
+#     pull.GetXaxis().SetNdivisions(505)
+
+#     pull.GetYaxis().SetTitle('#frac{Data - Bkg}{Uncertainty}')
+#     pull.GetYaxis().SetTitleSize(0.16)
+#     pull.GetYaxis().SetTitleFont(42)
+#     pull.GetYaxis().SetTitleOffset(.251)
+#     pull.GetYaxis().SetLabelSize(.12)
+#     pull.GetYaxis().SetNdivisions(505)
+#     return pull
 
 
 def sigmaLines(data):
@@ -172,15 +192,15 @@ def sigmaLines(data):
         data.GetBinWidth(data.GetNbinsX())
 
     ## high line
-    line1 = TLine(low, 2., high, 2.)
+    line1 = TLine(low, 1.5, high, 1.5)
     line1.SetLineWidth(1)
-    line1.SetLineStyle(7)
+    line1.SetLineStyle(3)
     line1.SetLineColor(kBlack)
 
     ## low line
-    line2 = TLine(low, -2., high, -2.)
+    line2 = TLine(low, 0.5, high, 0.5)
     line2.SetLineWidth(1)
-    line2.SetLineStyle(7)
+    line2.SetLineStyle(3)
     line2.SetLineColor(kBlack)
 
     return line1, line2
@@ -216,24 +236,25 @@ def main():
     inStack = formatOther(other, inStack)
     stack, leg = fillStackAndLegend(data, vbf, ggh, inStack, leg)
     stat = formatStat(stat)
+    leg.AddEntry(stat, 'Uncertainty', 'f')
 
-    high = max(data.GetMaximum(), stat.GetMaximum()) * 1.2
+    high = max(data.GetMaximum(), stat.GetMaximum()) * 1.6
     stack.SetMaximum(high)
     stack.Draw('hist')
     formatStack(stack)
-    data.Draw('same lep')
+    data.Draw('same le0p')
     stat.Draw('same e2')
     vbf.Scale(50)
-    vbf.Draw('same hist')
+    vbf.Draw('same hist e')
     ggh.Scale(50)
-    ggh.Draw('same hist')
+    ggh.Draw('same hist e')
     leg.Draw()
 
     ll = TLatex()
     ll.SetNDC(kTRUE)
     ll.SetTextSize(0.06)
     ll.SetTextFont(42)
-    ll.DrawLatex(0.69, 0.92, "35.9 fb^{-1} (13 TeV)")
+    ll.DrawLatex(0.42, 0.92, "e#tau_{e} 2016, 35.9 fb^{-1} (13 TeV)")
 
     cms = TLatex()
     cms.SetNDC(kTRUE)
@@ -244,29 +265,52 @@ def main():
     prel = TLatex()
     prel.SetNDC(kTRUE)
     prel.SetTextFont(52)
-    prel.SetTextSize(0.09)
-    prel.DrawLatex(0.23, 0.8, "Preliminary")
+    prel.SetTextSize(0.06)
+    prel.DrawLatex(0.14, 0.74, "Preliminary")
+
+    if args.cat == 'et_inclusive':
+        catName = 'Inclusive'
+    elif args.cat == 'et_vbf':
+        catName = 'VBF enriched'
+
+    lcat = TLatex()
+    lcat.SetNDC(kTRUE)
+    lcat.SetTextFont(42)
+    lcat.SetTextSize(0.06)
+    lcat.DrawLatex(0.14, 0.68, catName)
 
     can.cd(2)
     ###########################
     ## create pull histogram ##
     ###########################
-    pull = data.Clone()
-    pull.Add(stat, -1)
-    for ibin in range(pull.GetNbinsX()+1):
-        pullContent = pull.GetBinContent(ibin)
-        uncertainty = TMath.Sqrt(pow(stat.GetBinErrorUp(ibin), 2)+pow(data.GetBinErrorUp(ibin), 2))
-        if uncertainty > 0:
-            pull.SetBinContent(ibin, pullContent / uncertainty)
-        else:
-            pull.SetBinContent(ibin, 0)
+    # pull = data.Clone()
+    # pull.Add(stat, -1)
+    # for ibin in range(pull.GetNbinsX()+1):
+    #     pullContent = pull.GetBinContent(ibin)
+    #     uncertainty = TMath.Sqrt(pow(stat.GetBinErrorUp(ibin), 2)+pow(data.GetBinErrorUp(ibin), 2))
+    #     if uncertainty > 0:
+    #         pull.SetBinContent(ibin, pullContent / uncertainty)
+    #     else:
+    #         pull.SetBinContent(ibin, 0)
+    ratio = data.Clone()
+    ratio.Divide(stat)
+    ratio = formatPull(ratio)
+    rat_unc = ratio.Clone()
+    for ibin in range(1, rat_unc.GetNbinsX()+1):
+        rat_unc.SetBinContent(ibin, 1)
+        rat_unc.SetBinError(ibin, ratio.GetBinError(ibin))
+    rat_unc.SetMarkerSize(0)
+    rat_unc.SetMarkerStyle(8)
+    from ROOT import kGray
+    rat_unc.SetFillColor(kGray)
+    rat_unc.Draw('same e2')
+    ratio.Draw('same le0p')
 
-    pull = formatPull(pull)
-    pull.Draw('hist')
-
-    line1, line2, = sigmaLines(data)
+    line1, line2 = sigmaLines(data)
     line1.Draw()
     line2.Draw()
+
+
 
     can.SaveAs('Output/plots/'+args.var+'_'+args.cat+'.pdf')
 
