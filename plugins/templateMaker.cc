@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 
       if (eq + tq == 0) {
         // output histograms for the template
-        if (cat_inclusive > 0 && njets > 1 && nbjets == 0) {
+        if (cat_inclusive > 0 && njets > 1 && nbjets == 0 && mt < 50) {
           hists->hists.at("et_inclusive").back()->Fill(var, weight);
         }
         if (cat_0jet > 0) {
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
         }
       } else {
         // get QCD shape from SS loose iso region
-        if (cat_qcd > 0 && njets > 1 && nbjets == 0) {
+        if (cat_qcd > 0 && njets > 1 && nbjets == 0 && mt < 50) {
           fillQCD(hists->qcd_inclusive, name, var, weight);
         }
         if (cat_qcd_0jet > 0) {
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
         }
 
         // get SS in signal region for loose region normalization
-        if (cat_inclusive > 0 && njets > 1 && nbjets == 0) {
+        if (cat_inclusive > 0 && njets > 1 && nbjets == 0 && mt < 50) {
           fillQCD(hists->qcd_inclusive_SS, name, var, weight);
         }
         if (cat_0jet > 0) {
@@ -158,7 +158,7 @@ void read_directory(const std::string &name, std::vector<std::string> &v) {
 void fillQCD(TH1F* hist, std::string name, double var, double weight) {
   if (name.find("Data") != std::string::npos) {
     hist->Fill(var, weight);
-  } else if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT" || name == "TTJ" || name == "W" || name == "VV" || name == "EWKZ") {
+  } else if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT" || name == "TTJ" || name == "W" || name == "VV" || name == "EWKZ" || name == "ZTT") {
     hist->Fill(var, -1*weight);
   }
 }
@@ -208,8 +208,14 @@ void histHolder::initVectors(std::string name) {
 void histHolder::writeHistos() {
   for (auto cat : hists) {
     fout->cd(cat.first.c_str());
+    TH1F* allBkg = new TH1F("allBkg", "allBkg", bins.at(0), bins.at(1), bins.at(2));
     for (auto hist : cat.second) {
       hist->Write();
+      std::string name = hist->GetName();
+      if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT" || name == "TTJ" || name == "W" || name == "VV" || name == "EWKZ" || name == "ZTT") {
+        allBkg->Add(hist);
+      }
+      allBkg->Write();
     }
   }
 
