@@ -151,7 +151,7 @@ void read_directory(const std::string &name, std::vector<std::string> &v) {
 void fillQCD(TH2F *hist, std::string name, double var1, double var2, double weight) {
   if (name.find("Data") != std::string::npos) {
     hist->Fill(var1, var2, weight);
-  } else if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT" || name == "TTJ" || name == "W" || name == "VV") {
+  } else if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT" || name == "TTJ" || name == "W" || name == "VV" || name == "ZTT") {
     hist->Fill(var1, var2, -1 * weight);
   }
 }
