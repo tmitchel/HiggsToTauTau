@@ -6,7 +6,7 @@
 /////////////////////////////////////////
 class event_info {
 private:
-  Float_t genpX, genpY, genM, genpT, numGenJets, genweight, amcatNLO_weight; // gen
+  Float_t genpX, genpY, genM, genpT, numGenJets, genweight, amcatNLO_weight, genDR; // gen
   Float_t npv, npu, rho, extramuon_veto, extraelec_veto;  // event
   Float_t matchEle25, filterEle25, passEle25; // etau trigger
   Float_t passDoubleTauCmbIso35, matchDoubleTauCmbIso35_1, filterDoubleTauCmbIso35_1, matchDoubleTauCmbIso35_2, filterDoubleTauCmbIso35_2; // tt trigger
@@ -59,6 +59,7 @@ public:
   Float_t getNumGenJets()   { return numGenJets;      };
   Float_t getGenWeight()    { return genweight;       };
   Float_t getNLOWeight()    { return amcatNLO_weight; };
+  Float_t getTauGenDR()     { return genDR;           };
 
   // SVFit Info
   Float_t getMSV()          { return m_sv;            };
@@ -139,6 +140,7 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
     input -> SetBranchAddress( "filterEle25", &filterEle25 );
     input -> SetBranchAddress( "passEle25"  , &passEle25   );
   } else if (analyzer == "mt") {
+    input -> SetBranchAddress( "genDR_2"                 , &genDR                   );
     input -> SetBranchAddress( "matchIsoMu19Tau20_1"     , &matchIsoMu19Tau20_1     );
     input -> SetBranchAddress( "matchIsoMu19Tau20_2"     , &matchIsoMu19Tau20_2     );
     input -> SetBranchAddress( "filterIsoMu19Tau20_1"    , &filterIsoMu19Tau20_1    );

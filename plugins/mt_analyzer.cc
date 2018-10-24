@@ -212,21 +212,34 @@ int main(int argc, char* argv[]) {
     auto muon = muons.run_factory();
     auto tau = taus.run_factory();
 
+    if (muon.getPt() > 20 && fabs(muon.getEta()) < 2.1) {
+      histos->at("cutflow")->Fill(1., 1);
+    } else {
+      continue;
+    }
+
     if (isEmbed) {
       event.setEmbed(); // change triggers to work for embedded samples
       tau.scalePt(1.02);
-    }
-    if (muon.getPt() > 20 && fabs(muon.getEta()) < 2.1)  histos->at("cutflow") -> Fill(1., 1);
-    else continue;
-
-    if (muon.getPt()<=23 && (event.getPassCrossTrigger())) {
-      // low energy muon passes IsoMu19Tau20
-	    histos->at("cutflow") -> Fill(2., 1);
-    } else if(muon.getPt()>23 && event.getPassIsoMu22() && event.getPassIsoTkMu22() && event.getPassIsoMu22eta2p1() && event.getPassIsoTkMu22eta2p1()) {
-      // high energy muon passes IsoMu22 || IsoTkMu22 || IsoMu22eta2p1 || IsoTkMu22eta2p1
-    	histos->at("cutflow") -> Fill(2., 1);
+      if (event.getTauGenDR() > 0.2) {
+        continue;
+      }
     } else {
-      continue;
+      if (muon.getPt() <= 23 && (event.getPassCrossTrigger())) { // low energy muon passes IsoMu19Tau20
+        histos->at("cutflow")->Fill(2., 1);
+      } else if (muon.getPt() > 23 && (event.getPassIsoMu22() || event.getPassIsoTkMu22() || event.getPassIsoMu22eta2p1() || event.getPassIsoTkMu22eta2p1())) {
+        histos->at("cutflow")->Fill(2., 1);
+      } else {
+        continue;
+      }
+    }
+
+    if (isData) {
+      if (event.getRun() < 278820 && !muon.getMediumID2016()) {
+        continue;
+      } else if (event.getRun() >= 278820 && !muon.getMediumID()) {
+        continue;
+      }
     }
 
     // tau pT > 30 and |eta| < 2.3
