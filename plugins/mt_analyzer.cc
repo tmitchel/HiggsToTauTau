@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
   // create output file
   auto suffix = "_output.root";
-  auto prefix = "output/";
+  auto prefix = "Output/trees/";
   std::string filename;
   if (name == sample) {
     filename = prefix + name + systname + suffix;
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 
   // cd to root of output file and create tree
   fout->cd();
-  slim_tree *st = new slim_tree("etau_tree");
+  slim_tree *st = new slim_tree("mutau_tree");
 
   // get normalization (lumi & xs are in util.h)
   double norm;
@@ -217,7 +217,7 @@ int main(int argc, char* argv[]) {
     } else {
       continue;
     }
-
+event.setEmbed();
     if (isEmbed) {
       event.setEmbed(); // change triggers to work for embedded samples
       tau.scalePt(1.02);
@@ -225,7 +225,8 @@ int main(int argc, char* argv[]) {
         continue;
       }
     } else {
-      if (muon.getPt() <= 23 && (event.getPassCrossTrigger())) { // low energy muon passes IsoMu19Tau20
+      //std::cout << muon.getPt() << " " << event.getPassCrossTrigger() << " " << event.getPassIsoMu22() << std::endl;
+      if (muon.getPt() <= 23 && event.getPassCrossTrigger()) { // low energy muon passes IsoMu19Tau20
         histos->at("cutflow")->Fill(2., 1);
       } else if (muon.getPt() > 23 && (event.getPassIsoMu22() || event.getPassIsoTkMu22() || event.getPassIsoMu22eta2p1() || event.getPassIsoTkMu22eta2p1())) {
         histos->at("cutflow")->Fill(2., 1);
@@ -233,7 +234,7 @@ int main(int argc, char* argv[]) {
         continue;
       }
     }
-
+    
     if (isData) {
       if (event.getRun() < 278820 && !muon.getMediumID2016()) {
         continue;
@@ -241,11 +242,11 @@ int main(int argc, char* argv[]) {
         continue;
       }
     }
-
+    
     // tau pT > 30 and |eta| < 2.3
     if (tau.getPt() > 30 && fabs(tau.getEta()) < 2.3) histos->at("cutflow") -> Fill(3., 1);
     else continue;
-
+    
     // check against mu/el
     if (tau.getAgainstVLooseElectron() && tau.getAgainstTightMuon()) histos->at("cutflow") -> Fill(4., 1);
     else continue;
