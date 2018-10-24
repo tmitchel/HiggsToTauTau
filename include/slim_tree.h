@@ -33,7 +33,8 @@ public:
         pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
         ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2,
-        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, l2decay, vis_mass;
+        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, l2decay, vis_mass,
+        dmf, dmf_new;
 };
 
 slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str(), tree_name.c_str()) ) {
@@ -107,9 +108,11 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("hjj_pT",              &hjj_pT,              "hjj_pT/F"             );
     otree->Branch("hjj_m",               &hjj_m,               "hjj_m/F"              );
     otree->Branch("l2decay",             &l2decay,             "l2decay/F"            );
-    otree->Branch("vis_mass",              &vis_mass,              "vis_mass/F"             );
+    otree->Branch("vis_mass",            &vis_mass,            "vis_mass/F"           );
     otree->Branch("dEtajj",              &dEtajj,              "dEtajj/F"             );
     otree->Branch("dPhijj",              &dPhijj,              "dPhijj/F"             );
+    otree->Branch("dmf",                 &dmf,                 "dmf/F"                );
+    otree->Branch("dmf_new",             &dmf_new,             "dmf_new/F"            );
     otree->Branch("cat_0jet",            &cat_0jet,            "cat_0jet/I"           );
     otree->Branch("cat_boosted",         &cat_boosted,         "cat_boosted/I"        );
     otree->Branch("cat_vbf",             &cat_vbf,             "cat_vbf/I"            );
@@ -262,6 +265,9 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet
     t1_charge = t->getCharge();
     vis_mass = (el->getP4() + t->getP4()).M();
     l2decay = t->getL2DecayMode();
+
+    dmf = t->getDecayModeFinding();
+    dmf_new = t->getDecayModeFindingNew();
 
     otree->Fill();
 }
