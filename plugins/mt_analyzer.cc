@@ -431,7 +431,7 @@ int main(int argc, char* argv[]) {
         tree_cat.push_back("qcd_vbf");
       }
     }
-    st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, evtwt);
+    st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, mt, evtwt);
 
     if (mt < 50 && tau.getPt() > 30) {
 

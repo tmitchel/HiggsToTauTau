@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
     // I hate doing it like this, but when I move the SetBranchAddres I see unexpected behavior
     Int_t cat_inclusive, cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf, cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
-    Float_t eq, tq, hpt, l2decay, vis_mass, mjj, m_sv, weight, ME_sm_VBF, ME_bkg, NN_disc;
+    Float_t eq, tq, hpt, l2decay, vis_mass, mjj, m_sv, weight, ME_sm_VBF, ME_bkg, NN_disc, nbjets, mt;
     tree->SetBranchAddress("el_charge", &eq);
     tree->SetBranchAddress("t1_charge", &tq);
     tree->SetBranchAddress("higgs_pT", &hpt);
@@ -72,6 +72,8 @@ int main(int argc, char *argv[]) {
     tree->SetBranchAddress("ME_sm_VBF", &ME_sm_VBF), 
     tree->SetBranchAddress("ME_bkg", &ME_bkg), 
     tree->SetBranchAddress("NN_disc", &NN_disc), 
+    tree->SetBranchAddress("mt", &mt);
+    tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("cat_inclusive", &cat_inclusive);
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
@@ -98,8 +100,8 @@ int main(int argc, char *argv[]) {
         if (cat_boosted > 0) {
           hists->hists.at("et_boosted").back()->Fill(hpt, m_sv, weight);
         }
-        if (cat_vbf > 0 && hpt > 50) {
-          hists->hists.at("et_vbf").back()->Fill(mjj, m_sv, weight);
+        if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
+          hists->hists.at("et_vbf").back()->Fill(NN_disc, m_sv, weight);
         }
       } else {
         // get QCD shape from SS loose iso region
@@ -109,8 +111,8 @@ int main(int argc, char *argv[]) {
         if (cat_qcd_boosted > 0) {
           fillQCD(hists->qcd_boosted, name, hpt, m_sv, weight);
         }
-        if (cat_qcd_vbf > 0 && hpt > 50) {
-          fillQCD(hists->qcd_vbf, name, mjj, m_sv, weight);
+        if (cat_qcd_vbf > 0 && mt < 50 && nbjets == 0) {
+          fillQCD(hists->qcd_vbf, name, NN_disc, m_sv, weight);
         }
 
         // get SS in signal region for loose region normalization
@@ -120,8 +122,8 @@ int main(int argc, char *argv[]) {
         if (cat_boosted > 0) {
           fillQCD(hists->qcd_boosted_SS, name, hpt, m_sv, weight);
         }
-        if (cat_vbf > 0 && hpt > 50) {
-          fillQCD(hists->qcd_vbf_SS, name, mjj, m_sv, weight);
+        if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
+          fillQCD(hists->qcd_vbf_SS, name, NN_disc, m_sv, weight);
         }
       }
     }
@@ -149,7 +151,7 @@ void read_directory(const std::string &name, std::vector<std::string> &v) {
 void fillQCD(TH2F *hist, std::string name, double var1, double var2, double weight) {
   if (name.find("Data") != std::string::npos) {
     hist->Fill(var1, var2, weight);
-  } else if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT" || name == "TTJ" || name == "W" || name == "VV") {
+  } else if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT" || name == "TTJ" || name == "W" || name == "VV" || name == "ZTT") {
     hist->Fill(var1, var2, -1 * weight);
   }
 }
@@ -167,8 +169,8 @@ histHolder::histHolder() :
     // x-axis
     bins_l2 {0, 1, 10, 11},
     bins_hpt {0, 100, 150, 200, 250, 300, 5000},
-    bins_mjj {300, 700, 1100, 1500, 10000},
-    //bins_mjj {0., 0.1, 0.5, 0.9, 1.},
+    //bins_mjj {300, 700, 1100, 1500, 10000},
+    bins_mjj {0., 0.1, 0.5, 0.9, 1.},
 
     // y-axis
     bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
