@@ -116,6 +116,8 @@ tau tau_factory::run_factory() {
   t.gen_match = gen_match_2;
   t.tightIsoMVA = byTightIsolationMVArun2v1DBoldDMwLT_2;
   t.AgainstTightElectron = againstElectronTightMVA6_2;
+  t.AgainstVLooseElectron = againstElectronVLooseMVA6_2;
+  t.AgainstTightMuon = againstMuonTight3_2;
   t.AgainstLooseMuon = againstMuonLoose3_2;
   t.dmf = decayModeFinding_2;
   t.dmf_new = decayModeFindingNewDMs_2;
