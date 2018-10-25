@@ -9,6 +9,10 @@ parser.add_argument('--cat', '-c', action='store',
                     dest='cat', default='et_vbf',
                     help='name of category to pull from'
                     )
+parser.add_argument('--channel', '-l', action='store',
+                    dest='channel', default='et',
+                    help='name of channel'   
+                    )
 args = parser.parse_args()
 
 from ROOT import TFile, TLegend, TH1F, TCanvas, THStack, kBlack, TColor, TLatex, kTRUE, TMath, TLine, gStyle
@@ -206,7 +210,7 @@ def sigmaLines(data):
     return line1, line2
 
 def main():
-    fin = TFile('Output/templates/template_'+args.var+'.root', 'read')
+    fin = TFile('../Output/templates/template_{}_{}.root'.format(args.channel, args.var), 'read')
     idir = fin.Get(args.cat)
     leg = createLegend()
     data = idir.Get('Data').Clone()
@@ -268,9 +272,9 @@ def main():
     prel.SetTextSize(0.06)
     prel.DrawLatex(0.14, 0.74, "Preliminary")
 
-    if args.cat == 'et_inclusive':
+    if args.cat == 'et_inclusive' or args.cat == 'mt_inclusive':
         catName = 'Inclusive'
-    elif args.cat == 'et_vbf':
+    elif args.cat == 'et_vbf' or args.cat == 'mt_vbf':
         catName = 'VBF enriched'
 
     lcat = TLatex()
@@ -312,7 +316,7 @@ def main():
 
 
 
-    can.SaveAs('Output/plots/'+args.var+'_'+args.cat+'.pdf')
+    can.SaveAs('../Output/plots/'+args.var+'_'+args.cat+'.pdf')
 
 
 if __name__ == "__main__":
