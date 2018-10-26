@@ -24,6 +24,7 @@ private:
 
   UInt_t run, lumi;
   ULong64_t evt;
+  UInt_t convert_evt;
 
 public:
   event_info (TTree*, std::string, std::string);
@@ -103,7 +104,6 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   input -> SetBranchAddress( pt_sv_name       , &pt_sv           );
   input -> SetBranchAddress( "run"            , &run             );
   input -> SetBranchAddress( "lumi"           , &lumi            );
-  input -> SetBranchAddress( "evt"            , &evt             );
   input -> SetBranchAddress( "npv"            , &npv             );
   input -> SetBranchAddress( "npu"            , &npu             );
   input -> SetBranchAddress( "extramuon_veto" , &extramuon_veto  );
@@ -136,10 +136,12 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   input -> SetBranchAddress( "amcatNLO_weight", &amcatNLO_weight );
 
   if (analyzer == "et") {
+    input -> SetBranchAddress( "evt"        , &evt         );
     input -> SetBranchAddress( "matchEle25" , &matchEle25  );
     input -> SetBranchAddress( "filterEle25", &filterEle25 );
     input -> SetBranchAddress( "passEle25"  , &passEle25   );
   } else if (analyzer == "mt") {
+    input -> SetBranchAddress( "evt"                     , &convert_evt             );
     input -> SetBranchAddress( "tZTTGenDR"               , &genDR                   );
     input -> SetBranchAddress( "matchIsoMu19Tau20_1"     , &matchIsoMu19Tau20_1     );
     input -> SetBranchAddress( "matchIsoMu19Tau20_2"     , &matchIsoMu19Tau20_2     );
@@ -159,6 +161,7 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
     input -> SetBranchAddress( "filterIsoTkMu22eta2p1_1" , &filterIsoTkMu22eta2p1_1 );
     input -> SetBranchAddress( "passIsoTkMu22eta2p1"     , &passIsoTkMu22eta2p1     );
   } else if (analyzer == "tt") {
+    input -> SetBranchAddress( "evt"                      , &convert_evt             );
     input -> SetBranchAddress( "passDoubleTauCmbIso35"    , &passDoubleTauCmbIso35      );
     input -> SetBranchAddress( "matchDoubleTauCmbIso35_1" , &matchDoubleTauCmbIso35_1   );
     input -> SetBranchAddress( "filterDoubleTauCmbIso35_1", &filterDoubleTauCmbIso35_1  );

@@ -57,7 +57,8 @@ muon::muon(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) :
 /////////////////////////////////////////////
 class muon_factory {
 private:
-  Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, gen_match_1, mediumID, mediumID_2016;
+  Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, mediumID, mediumID_2016;
+  Int_t gen_match_1;
 
 public:
   muon_factory (TTree*);

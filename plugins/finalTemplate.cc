@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
-    auto tree = (TTree *)fin->Get("etau_tree");
+    auto tree = (TTree *)fin->Get(tree_name.c_str());
     std::string name = ifile.substr(0, ifile.find(".")).c_str();
 
     hists->initVectors(name);
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
       auto MELA = ME_sm_VBF / (ME_sm_VBF + 45 * ME_bkg);
-
+      auto var = NN_disc;
       // until I remake these trees, correct boosted defintion
       cat_boosted = cat_inclusive && njets == 1;
       cat_qcd_boosted = cat_qcd && njets == 1;
@@ -122,10 +122,10 @@ int main(int argc, char *argv[]) {
           hists->hists.at(channel_prefix+"_0jet").back()->Fill(l2decay, vis_mass, weight);
         }
         if (cat_boosted > 0) {
-          hists->hists.at(channel_prefix+"et_boosted").back()->Fill(hpt, m_sv, weight);
+          hists->hists.at(channel_prefix+"_boosted").back()->Fill(hpt, m_sv, weight);
         }
         if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
-          hists->hists.at(channel_prefix+"et_vbf").back()->Fill(mjj, m_sv, weight);
+          hists->hists.at(channel_prefix+"_vbf").back()->Fill(var, m_sv, weight);
         }
       } else {
         // get QCD shape from SS loose iso region
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
           fillQCD(hists->qcd_boosted, name, hpt, m_sv, weight);
         }
         if (cat_qcd_vbf > 0 && mt < 50 && nbjets == 0) {
-          fillQCD(hists->qcd_vbf, name, mjj, m_sv, weight);
+          fillQCD(hists->qcd_vbf, name, var, m_sv, weight);
         }
 
         // get SS in signal region for loose region normalization
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
           fillQCD(hists->qcd_boosted_SS, name, hpt, m_sv, weight);
         }
         if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
-          fillQCD(hists->qcd_vbf_SS, name, mjj, m_sv, weight);
+          fillQCD(hists->qcd_vbf_SS, name, var, m_sv, weight);
         }
       }
     }
@@ -196,8 +196,8 @@ histHolder::histHolder(std::string channel) :
     // x-axis
     bins_l2 {0, 1, 10, 11},
     bins_hpt {0, 100, 150, 200, 250, 300, 5000},
-    bins_mjj {300, 700, 1100, 1500, 10000},
-    // bins_mjj {0., 0.1, 0.5, 0.9, 1.},
+    //bins_mjj {300, 700, 1100, 1500, 10000},
+     bins_mjj {0., 0.1, 0.5, 0.9, 1.},
 
     // y-axis
     bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},

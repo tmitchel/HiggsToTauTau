@@ -20,21 +20,20 @@ public:
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_inclusive, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf,
         cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
     Float_t evtwt,
-        el_pt, el_eta, el_phi, el_mass, el_charge,
+        el_pt, el_eta, el_phi, el_mass, el_charge, el_iso,
         mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
-        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, // t1 is used for et and mt, as well
+        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_tightIso, t1_mediumIso, // t1 is used for et and mt, as well
         t2_pt, t2_eta, t2_phi, t2_mass, t2_charge,
         njets, nbjets,
         j1_pt, j1_eta, j1_phi,
         j2_pt, j2_eta, j2_phi,
         b1_pt, b1_eta, b1_phi,
         b2_pt, b2_eta, b2_phi,
-        met, metphi, mjj,  numGenJets, mt,
+        met, metphi, mjj,  numGenJets, mt, dmf, dmf_new,
         pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
         ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2,
-        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, l2decay, vis_mass,
-        dmf, dmf_new;
+        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, l2decay, vis_mass;
 };
 
 slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str(), tree_name.c_str()) ) {
@@ -45,6 +44,7 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("el_phi",              &el_phi,              "el_phi/F"             );
     otree->Branch("el_mass",             &el_mass,             "el_mass/F"            );
     otree->Branch("el_charge",           &el_charge,           "el_charge/F"          );
+    otree->Branch("el_iso",              &el_iso,              "el_iso/F"             );
     otree->Branch("mu_pt",               &mu_pt,               "mu_pt/F"              );
     otree->Branch("mu_eta",              &mu_eta,              "mu_eta/F"             );
     otree->Branch("mu_phi",              &mu_phi,              "mu_phi/F"             );
@@ -55,6 +55,8 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("t1_phi",              &t1_phi,              "t1_phi/F"             );
     otree->Branch("t1_mass",             &t1_mass,             "t1_mass/F"            );
     otree->Branch("t1_charge",           &t1_charge,           "t1_charge/F"          );
+    otree->Branch("t1_tightIso",         &t1_tightIso,         "t1_tightIso/F"        );
+    otree->Branch("t1_mediumIso",        &t1_mediumIso,        "t1_mediumIso/F"       );
     otree->Branch("t2_pt",               &t2_pt,               "t2_pt/F"              );
     otree->Branch("t2_eta",              &t2_eta,              "t2_eta/F"             );
     otree->Branch("t2_phi",              &t2_phi,              "t2_phi/F"             );
@@ -82,6 +84,8 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("mt",                  &mt,                  "mt/F"                 );
 
     otree->Branch("numGenJets",          &numGenJets,          "numGenJets/F"         );
+    otree->Branch("dmf",                 &dmf,                 "dmf/F"                );
+    otree->Branch("dmf_new",             &dmf_new,             "dmf_new/F"            );
 
     otree->Branch("pt_sv",               &pt_sv,               "pt_sv/F"              );
     otree->Branch("m_sv",                &m_sv,                "m_sv/F"               );
@@ -111,8 +115,6 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("vis_mass",            &vis_mass,            "vis_mass/F"           );
     otree->Branch("dEtajj",              &dEtajj,              "dEtajj/F"             );
     otree->Branch("dPhijj",              &dPhijj,              "dPhijj/F"             );
-    otree->Branch("dmf",                 &dmf,                 "dmf/F"                );
-    otree->Branch("dmf_new",             &dmf_new,             "dmf_new/F"            );
     otree->Branch("cat_0jet",            &cat_0jet,            "cat_0jet/I"           );
     otree->Branch("cat_boosted",         &cat_boosted,         "cat_boosted/I"        );
     otree->Branch("cat_vbf",             &cat_vbf,             "cat_vbf/I"            );
@@ -258,14 +260,16 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet
     el_phi = el->getPhi();
     el_mass = el->getMass();
     el_charge = el->getCharge();
+    el_iso = el->getIso();
     t1_pt = t->getPt();
     t1_eta = t->getEta();
     t1_phi = t->getPhi();
     t1_mass = t->getMass();
     t1_charge = t->getCharge();
+    t1_tightIso = t->getTightIsoMVA();
+    t1_mediumIso = t->getMediumIsoMVA();
     vis_mass = (el->getP4() + t->getP4()).M();
     l2decay = t->getL2DecayMode();
-
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
 
