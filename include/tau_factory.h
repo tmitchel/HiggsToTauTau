@@ -17,7 +17,7 @@ class tau {
 private:
   std::string name = "tau";
   Int_t gen_match;
-  Float_t pt, eta, phi, mass, charge, px, py, pz, dmf, dmf_new, tightIsoMVA, l2_decayMode;
+  Float_t pt, eta, phi, mass, charge, px, py, pz, tightIsoMVA, l2_decayMode, dmf, dmf_new;
   Bool_t AgainstTightElectron, AgainstVLooseElectron, AgainstTightMuon, AgainstLooseMuon, MediumIsoMVA;
   TLorentzVector p4;
 public:
@@ -41,10 +41,10 @@ public:
   Float_t getPx()                     { return px;                    };
   Float_t getPy()                     { return py;                    };
   Float_t getPz()                     { return pz;                    };
-  Float_t getDecayModeFinding()       { return dmf;                   };
-  Float_t getDecayModeFindingNew()    { return dmf_new;               };
   Float_t getTightIsoMVA()            { return tightIsoMVA;           };
   Float_t getL2DecayMode()            { return l2_decayMode;          };
+  Float_t getDecayModeFinding()       { return dmf;                   };
+  Float_t  getDecayModeFindingNew()   { return dmf_new;               };
   Bool_t getAgainstTightElectron()    { return AgainstTightElectron;  };
   Bool_t getAgainstVLooseElectron()   { return AgainstVLooseElectron; };
   Bool_t getAgainstTightMuon()        { return AgainstTightMuon;      };
@@ -72,9 +72,9 @@ tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) :
 class tau_factory {
 private:
   Int_t gen_match_2;
-  Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, decayModeFinding_2, decayModeFindingNewDMs_2;
-  Float_t byTightIsolationMVArun2v1DBoldDMwLT_2, againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2;
-  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, l2_decayMode;
+  Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2;
+  Float_t byTightIsolationMVArun2v1DBnewDMwLT_2, againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2;
+  Float_t byMediumIsolationMVArun2v1DBnewDMwLT_2, l2_decayMode, dmf, dmf_new;
 
 public:
   tau_factory (TTree*);
@@ -96,15 +96,16 @@ tau_factory::tau_factory(TTree* input) {
   input -> SetBranchAddress( "iso_2",                                   &iso_2                                  );
   input -> SetBranchAddress( "q_2",                                     &q_2                                    );
   input -> SetBranchAddress( "gen_match_2",                             &gen_match_2                            );
-  input -> SetBranchAddress( "decayModeFinding_2",                      &decayModeFinding_2                     );
-  input -> SetBranchAddress( "decayModeFindingNewDMs_2",                &decayModeFindingNewDMs_2               );
-  input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_2",   &byTightIsolationMVArun2v1DBoldDMwLT_2  );
+  input -> SetBranchAddress( "byTightIsolationMVArun2v1DBnewDMwLT_2",   &byTightIsolationMVArun2v1DBnewDMwLT_2  );
   input -> SetBranchAddress( "againstElectronTightMVA6_2",              &againstElectronTightMVA6_2             );
   input -> SetBranchAddress( "againstElectronVLooseMVA6_2",             &againstElectronVLooseMVA6_2            );
   input -> SetBranchAddress( "againstMuonTight3_2",                     &againstMuonTight3_2                    );
   input -> SetBranchAddress( "againstMuonLoose3_2",                     &againstMuonLoose3_2                    );
-  input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_2",  &byMediumIsolationMVArun2v1DBoldDMwLT_2 );
+  input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBnewDMwLT_2",  &byMediumIsolationMVArun2v1DBnewDMwLT_2 );
   input -> SetBranchAddress( "l2_decayMode",                            &l2_decayMode                           );
+  input -> SetBranchAddress( "decayModeFinding_2",                      &dmf                                    );
+  input -> SetBranchAddress( "decayModeFindingNewDMs_2",                &dmf_new                                );
+
 }
 
 // create electron object and set member data
@@ -114,13 +115,15 @@ tau tau_factory::run_factory() {
   t.py = py_2;
   t.pz = pz_2;
   t.gen_match = gen_match_2;
-  t.tightIsoMVA = byTightIsolationMVArun2v1DBoldDMwLT_2;
+  t.tightIsoMVA = byTightIsolationMVArun2v1DBnewDMwLT_2;
   t.AgainstTightElectron = againstElectronTightMVA6_2;
+  t.AgainstVLooseElectron = againstElectronVLooseMVA6_2;
+  t.AgainstTightMuon = againstMuonTight3_2;
   t.AgainstLooseMuon = againstMuonLoose3_2;
-  t.dmf = decayModeFinding_2;
-  t.dmf_new = decayModeFindingNewDMs_2;
   t.l2_decayMode = l2_decayMode;
-  t.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_2;
+  t.MediumIsoMVA = byMediumIsolationMVArun2v1DBnewDMwLT_2;
+  t.dmf = dmf;
+  t.dmf_new = dmf_new;
 
   return t;
 }

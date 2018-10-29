@@ -6,7 +6,7 @@
 /////////////////////////////////////////
 class event_info {
 private:
-  Float_t genpX, genpY, genM, genpT, numGenJets, genweight, amcatNLO_weight; // gen
+  Float_t genpX, genpY, genM, genpT, numGenJets, genweight, amcatNLO_weight, genDR; // gen
   Float_t npv, npu, rho, extramuon_veto, extraelec_veto;  // event
   Float_t matchEle25, filterEle25, passEle25; // etau trigger
   Float_t passDoubleTauCmbIso35, matchDoubleTauCmbIso35_1, filterDoubleTauCmbIso35_1, matchDoubleTauCmbIso35_2, filterDoubleTauCmbIso35_2; // tt trigger
@@ -24,6 +24,7 @@ private:
 
   UInt_t run, lumi;
   ULong64_t evt;
+  UInt_t convert_evt;
 
 public:
   event_info (TTree*, std::string, std::string);
@@ -59,6 +60,7 @@ public:
   Float_t getNumGenJets()   { return numGenJets;      };
   Float_t getGenWeight()    { return genweight;       };
   Float_t getNLOWeight()    { return amcatNLO_weight; };
+  Float_t getTauGenDR()     { return genDR;           };
 
   // SVFit Info
   Float_t getMSV()          { return m_sv;            };
@@ -102,7 +104,6 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   input -> SetBranchAddress( pt_sv_name       , &pt_sv           );
   input -> SetBranchAddress( "run"            , &run             );
   input -> SetBranchAddress( "lumi"           , &lumi            );
-  input -> SetBranchAddress( "evt"            , &evt             );
   input -> SetBranchAddress( "npv"            , &npv             );
   input -> SetBranchAddress( "npu"            , &npu             );
   input -> SetBranchAddress( "extramuon_veto" , &extramuon_veto  );
@@ -135,10 +136,13 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   input -> SetBranchAddress( "amcatNLO_weight", &amcatNLO_weight );
 
   if (analyzer == "et") {
+    input -> SetBranchAddress( "evt"        , &evt         );
     input -> SetBranchAddress( "matchEle25" , &matchEle25  );
     input -> SetBranchAddress( "filterEle25", &filterEle25 );
     input -> SetBranchAddress( "passEle25"  , &passEle25   );
   } else if (analyzer == "mt") {
+    input -> SetBranchAddress( "evt"                     , &convert_evt             );
+    input -> SetBranchAddress( "tZTTGenDR"               , &genDR                   );
     input -> SetBranchAddress( "matchIsoMu19Tau20_1"     , &matchIsoMu19Tau20_1     );
     input -> SetBranchAddress( "matchIsoMu19Tau20_2"     , &matchIsoMu19Tau20_2     );
     input -> SetBranchAddress( "filterIsoMu19Tau20_1"    , &filterIsoMu19Tau20_1    );
@@ -157,6 +161,7 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
     input -> SetBranchAddress( "filterIsoTkMu22eta2p1_1" , &filterIsoTkMu22eta2p1_1 );
     input -> SetBranchAddress( "passIsoTkMu22eta2p1"     , &passIsoTkMu22eta2p1     );
   } else if (analyzer == "tt") {
+    input -> SetBranchAddress( "evt"                      , &convert_evt             );
     input -> SetBranchAddress( "passDoubleTauCmbIso35"    , &passDoubleTauCmbIso35      );
     input -> SetBranchAddress( "matchDoubleTauCmbIso35_1" , &matchDoubleTauCmbIso35_1   );
     input -> SetBranchAddress( "filterDoubleTauCmbIso35_1", &filterDoubleTauCmbIso35_1  );

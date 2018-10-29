@@ -16,7 +16,7 @@
 // class to hold the histograms until I'm ready to write them
 class histHolder {
 public:
-  histHolder(std::vector<int>, std::string);
+  histHolder(std::vector<int>, std::string, std::string);
   void writeHistos();
   void initVectors(std::string);
 
@@ -25,6 +25,7 @@ public:
        *qcd_0jet   , *qcd_boosted   , *qcd_vbf   , *qcd_inclusive;
   TFile *fout;
   std::vector<int> bins;
+  std::string channel_prefix;
   std::map<std::string, std::vector<TH1F *>> hists;
 };
 
@@ -35,7 +36,8 @@ int main(int argc, char *argv[]) {
   // get CLI arguments
   CLParser parser(argc, argv);
   std::string dir = parser.Option("-d");
-  std::string tvar = parser.Option("-t");
+  std::string var_name = parser.Option("-v");
+  std::string tree_name = parser.Option("-t");
   std::vector<std::string> sbins = parser.MultiOption("-b", 3);
 
   // get the provided histogram binning
@@ -50,8 +52,24 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
+  // get channel info
+  std::string channel_prefix, lep_charge;
+  if (tree_name.find("etau_tree") != std::string::npos) {
+    channel_prefix = "et";
+    lep_charge = "el_charge";
+  } else if (tree_name.find("mutau_tree") != std::string::npos) {
+    channel_prefix = "mt";
+    lep_charge = "mu_charge";
+  } else if (tree_name.find("tt_tree") != std::string::npos) {
+    channel_prefix = "tt";
+    lep_charge = "t2_charge";
+  } else {
+    std::cerr << "Um. I don't know that tree. Sorry...";
+    return -1;
+  }
+
   // initialize histogram holder 
-  auto hists = new histHolder(bins, tvar);
+  auto hists = new histHolder(bins, var_name, channel_prefix);
 
   // read all files from input directory
   std::vector<std::string> files;
@@ -59,23 +77,34 @@ int main(int argc, char *argv[]) {
 
   for (auto ifile : files) {
     auto fin = new TFile((dir+"/"+ifile).c_str(), "read");
-    auto tree = (TTree*)fin->Get("etau_tree");
+    auto tree = (TTree*)fin->Get(tree_name.c_str());
     std::string name = ifile.substr(0, ifile.find(".")).c_str();
 
     hists->initVectors(name);
 
     // I hate doing it like this, but when I move the SetBranchAddres I see unexpected behavior
-    Int_t cat_inclusive, cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf, cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
-    Float_t eq, tq, hpt, mt, mjj, njets, nbjets, var, weight;
-    tree->SetBranchAddress("el_charge", &eq);
+    Int_t cat_inclusive, cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, 
+          cat_antiiso_vbf, cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
+    Int_t is_qcd;
+    Float_t eq, tq, hpt, mt, mjj, var, weight;
+    Float_t njets, nbjets;
+
+    tree->SetBranchAddress(lep_charge.c_str(), &eq);
     tree->SetBranchAddress("t1_charge", &tq);
     tree->SetBranchAddress("higgs_pT", &hpt);
     tree->SetBranchAddress("mt", &mt);
-    tree->SetBranchAddress("mjj", &mjj);
+
+    if (var_name.find("mjj") != std::string::npos) {
+      tree->SetBranchAddress("mjj", &var);
+    } else {
+      tree->SetBranchAddress("mjj", &mjj);
+      tree->SetBranchAddress(var_name.c_str(), &var);
+    }
+
     tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("nbjets", &nbjets);
-    tree->SetBranchAddress(tvar.c_str(), &var);
     tree->SetBranchAddress("evtwt", &weight);
+    tree->SetBranchAddress("is_qcd", &is_qcd);
     tree->SetBranchAddress("cat_inclusive", &cat_inclusive);
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
     tree->SetBranchAddress("cat_boosted", &cat_boosted);
@@ -91,24 +120,28 @@ int main(int argc, char *argv[]) {
 
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
+      
+      // until I remake these trees, correct boosted defintion
+      cat_boosted = cat_inclusive && njets == 1;
+      cat_qcd_boosted = cat_qcd && njets == 1;
 
       if (eq + tq == 0) {
         // output histograms for the template
-        if (cat_inclusive > 0 && njets > 1 && nbjets == 0 && mt < 50) {
-          hists->hists.at("et_inclusive").back()->Fill(var, weight);
+        if (cat_inclusive > 0) {
+          hists->hists.at(channel_prefix+"_inclusive").back()->Fill(var, weight);
         }
         if (cat_0jet > 0) {
-          hists->hists.at("et_0jet").back()->Fill(var, weight);
+          hists->hists.at(channel_prefix+"_0jet").back()->Fill(var, weight);
         }
         if (cat_boosted > 0) {
-          hists->hists.at("et_boosted").back()->Fill(var, weight);
+          hists->hists.at(channel_prefix+"_boosted").back()->Fill(var, weight);
         }
         if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
-          hists->hists.at("et_vbf").back()->Fill(var, weight);
+          hists->hists.at(channel_prefix+"_vbf").back()->Fill(var, weight);
         }
       } else {
         // get QCD shape from SS loose iso region
-        if (cat_qcd > 0 && njets > 1 && nbjets == 0 && mt < 50) {
+        if (cat_qcd > 0) {
           fillQCD(hists->qcd_inclusive, name, var, weight);
         }
         if (cat_qcd_0jet > 0) {
@@ -121,8 +154,22 @@ int main(int argc, char *argv[]) {
           fillQCD(hists->qcd_vbf, name, var, weight);
         }
 
+        // // get QCD shape from SS loose iso region
+        // if (is_qcd > 0 && cat_inclusive) {
+        //   fillQCD(hists->qcd_inclusive, name, var, weight);
+        // }
+        // if (is_qcd > 0 && cat_0jet > 0) {
+        //   fillQCD(hists->qcd_0jet, name, var, weight);
+        // }
+        // if (is_qcd > 0 && cat_boosted > 0) {
+        //   fillQCD(hists->qcd_boosted, name, var, weight);
+        // }
+        // if (is_qcd > 0 && mt < 50 && nbjets == 0 && cat_vbf > 0) {
+        //   fillQCD(hists->qcd_vbf, name, var, weight);
+        // }
+
         // get SS in signal region for loose region normalization
-        if (cat_inclusive > 0 && njets > 1 && nbjets == 0 && mt < 50) {
+        if (cat_inclusive > 0) {
           fillQCD(hists->qcd_inclusive_SS, name, var, weight);
         }
         if (cat_0jet > 0) {
@@ -158,7 +205,9 @@ void read_directory(const std::string &name, std::vector<std::string> &v) {
 void fillQCD(TH1F* hist, std::string name, double var, double weight) {
   if (name.find("Data") != std::string::npos) {
     hist->Fill(var, weight);
-  } else if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT" || name == "TTJ" || name == "W" || name == "VV" || name == "EWKZ" || name == "ZTT") {
+  } else if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT"  || 
+             name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "ZTT") 
+  {
     hist->Fill(var, -1*weight);
   }
 }
@@ -166,15 +215,16 @@ void fillQCD(TH1F* hist, std::string name, double var, double weight) {
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
 // and the map from categories to vectors of TH1F*'s. Each TH1F* in the vector corresponds to 
 // one file that is being put into that categories directory in the output tempalte
-histHolder::histHolder(std::vector<int> Bins, std::string tvar) :
+histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string channel_prefix) :
   hists {
-    {"et_inclusive", std::vector<TH1F *>()},
-    {"et_0jet", std::vector<TH1F *>()},
-    {"et_boosted", std::vector<TH1F *>()},
-    {"et_vbf", std::vector<TH1F *>()},
+    {(channel_prefix+"_inclusive").c_str(), std::vector<TH1F *>()},
+    {(channel_prefix+"_0jet").c_str(), std::vector<TH1F *>()},
+    {(channel_prefix+"_boosted").c_str(), std::vector<TH1F *>()},
+    {(channel_prefix+"_vbf").c_str(), std::vector<TH1F *>()},
   }, 
-  fout( new TFile(("Output/templates/template_"+tvar+".root").c_str(), "recreate") ),
-  bins( Bins )
+  fout( new TFile(("Output/templates/template_"+channel_prefix+"_"+var_name+".root").c_str(), "recreate") ),
+  bins( Bins ), 
+  channel_prefix( channel_prefix )
 {
   for (auto it = hists.begin(); it != hists.end(); it++) {
     fout->cd();
@@ -212,14 +262,16 @@ void histHolder::writeHistos() {
     for (auto hist : cat.second) {
       hist->Write();
       std::string name = hist->GetName();
-      if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT" || name == "TTJ" || name == "W" || name == "VV" || name == "EWKZ" || name == "ZTT") {
+      if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT"  || 
+          name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "ZTT") 
+      {
         allBkg->Add(hist);
       }
       allBkg->Write();
     }
   }
 
-  fout->cd("et_inclusive");
+  fout->cd((channel_prefix+"_inclusive").c_str());
   qcd_inclusive->SetName("QCD");
   qcd_inclusive->Scale(1.0 * qcd_inclusive_SS->Integral() / qcd_inclusive->Integral());
   for (auto i = 0; i < qcd_inclusive->GetNbinsX(); i++) {
@@ -229,7 +281,7 @@ void histHolder::writeHistos() {
   }
   qcd_inclusive->Write();
 
-  fout->cd("et_0jet");
+  fout->cd((channel_prefix+"_0jet").c_str());
   qcd_0jet->SetName("QCD");
   qcd_0jet->Scale(1.0 * qcd_0jet_SS->Integral() / qcd_0jet->Integral());
   for (auto i = 0; i < qcd_0jet->GetNbinsX(); i++) {
@@ -239,7 +291,7 @@ void histHolder::writeHistos() {
   }
   qcd_0jet->Write();
 
-  fout->cd("et_boosted");
+  fout->cd((channel_prefix+"_boosted").c_str());
   qcd_boosted->SetName("QCD");
   qcd_boosted->Scale(1.28 * qcd_boosted_SS->Integral() / qcd_boosted->Integral());
   for (auto i = 0; i < qcd_boosted->GetNbinsX(); i++) {
@@ -249,7 +301,7 @@ void histHolder::writeHistos() {
   }
   qcd_boosted->Write();
 
-  fout->cd("et_vbf");
+  fout->cd((channel_prefix+"_vbf").c_str());
   qcd_vbf->SetName("QCD");
   qcd_vbf->Scale(1.0 * qcd_vbf_SS->Integral() / qcd_vbf->Integral());
   for (auto i = 0; i < qcd_vbf->GetNbinsX(); i++) {
