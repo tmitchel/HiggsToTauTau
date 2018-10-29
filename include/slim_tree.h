@@ -18,22 +18,22 @@ public:
     // member data
     TTree* otree;
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_inclusive, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf,
-        cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
+        cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf, is_signal, is_qcd;
     Float_t evtwt,
         el_pt, el_eta, el_phi, el_mass, el_charge, el_iso,
         mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
-        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_tightIso, t1_mediumIso, // t1 is used for et and mt, as well
-        t2_pt, t2_eta, t2_phi, t2_mass, t2_charge,
+        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_tightIso, t1_mediumIso, t1_decayMode, // t1 is used for et and mt, as well
+        t2_pt, t2_eta, t2_phi, t2_mass, t2_charge, t2_tightIso, t2_mediumIso, t2_decayMode,
         njets, nbjets,
         j1_pt, j1_eta, j1_phi,
         j2_pt, j2_eta, j2_phi,
         b1_pt, b1_eta, b1_phi,
         b2_pt, b2_eta, b2_phi,
-        met, metphi, mjj,  numGenJets, mt, dmf, dmf_new,
+        met, metphi, mjj, numGenJets, mt, dmf, dmf_new,
         pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
         ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2,
-        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, l2decay, vis_mass;
+        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass;
 };
 
 slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str(), tree_name.c_str()) ) {
@@ -57,11 +57,19 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("t1_charge",           &t1_charge,           "t1_charge/F"          );
     otree->Branch("t1_tightIso",         &t1_tightIso,         "t1_tightIso/F"        );
     otree->Branch("t1_mediumIso",        &t1_mediumIso,        "t1_mediumIso/F"       );
+    otree->Branch("t1_decayMode",        &t1_decayMode,        "t1_decayMode/F"       );
+    otree->Branch("t1_dmf",              &dmf,                 "t1_dmf/F"             );
+    otree->Branch("t1_dmf_new",          &dmf_new,             "t1_dmf_new/F"         );
     otree->Branch("t2_pt",               &t2_pt,               "t2_pt/F"              );
     otree->Branch("t2_eta",              &t2_eta,              "t2_eta/F"             );
     otree->Branch("t2_phi",              &t2_phi,              "t2_phi/F"             );
     otree->Branch("t2_mass",             &t2_mass,             "t2_mass/F"            );
     otree->Branch("t2_charge",           &t2_charge,           "t2_charge/F"          );
+    otree->Branch("t2_tightIso",         &t2_tightIso,         "t2_tightIso/F"        );
+    otree->Branch("t2_mediumIso",        &t2_mediumIso,        "t2_mediumIso/F"       );
+    otree->Branch("t2_decayMode",        &t2_decayMode,        "t2_decayMode/F"       );
+    otree->Branch("t2_dmf",              &dmf,                 "t2_dmf/F"             );
+    otree->Branch("t2_dmf_new",          &dmf_new,             "t2_dmf_new/F"         );
 
     otree->Branch("njets",               &njets,               "njets"                );
     otree->Branch("nbjets",              &nbjets,              "nbjets"               ); 
@@ -84,8 +92,6 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("mt",                  &mt,                  "mt/F"                 );
 
     otree->Branch("numGenJets",          &numGenJets,          "numGenJets/F"         );
-    otree->Branch("dmf",                 &dmf,                 "dmf/F"                );
-    otree->Branch("dmf_new",             &dmf_new,             "dmf_new/F"            );
 
     otree->Branch("pt_sv",               &pt_sv,               "pt_sv/F"              );
     otree->Branch("m_sv",                &m_sv,                "m_sv/F"               );
@@ -111,10 +117,12 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("higgs_m",             &higgs_m,             "higgs_m/F"            );
     otree->Branch("hjj_pT",              &hjj_pT,              "hjj_pT/F"             );
     otree->Branch("hjj_m",               &hjj_m,               "hjj_m/F"              );
-    otree->Branch("l2decay",             &l2decay,             "l2decay/F"            );
     otree->Branch("vis_mass",            &vis_mass,            "vis_mass/F"           );
     otree->Branch("dEtajj",              &dEtajj,              "dEtajj/F"             );
     otree->Branch("dPhijj",              &dPhijj,              "dPhijj/F"             );
+
+    otree->Branch("is_signal",           &is_signal,           "is_signal/I"          );
+    otree->Branch("is_qcd",              &is_qcd,              "is_qcd/I"             );
     otree->Branch("cat_0jet",            &cat_0jet,            "cat_0jet/I"           );
     otree->Branch("cat_boosted",         &cat_boosted,         "cat_boosted/I"        );
     otree->Branch("cat_vbf",             &cat_vbf,             "cat_vbf/I"            );
@@ -248,6 +256,9 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
             cat_qcd = 1;
         }
     }
+
+    is_signal = cat_inclusive;
+    is_qcd = cat_qcd;
 }
 
 void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t mt, Float_t weight) {
@@ -269,7 +280,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet
     t1_tightIso = t->getTightIsoMVA();
     t1_mediumIso = t->getMediumIsoMVA();
     vis_mass = (el->getP4() + t->getP4()).M();
-    l2decay = t->getL2DecayMode();
+    t1_decayMode = t->getL2DecayMode();
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
 
@@ -312,7 +323,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t1, jet_fa
     t1_mass = t1->getMass();
     t1_charge = t1->getCharge();
     vis_mass = (mu->getP4() + t1->getP4()).M();
-    l2decay = t1->getL2DecayMode();
+    t1_decayMode = t1->getL2DecayMode();
 
     otree->Fill();
 }
