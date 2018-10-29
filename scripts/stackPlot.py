@@ -13,6 +13,14 @@ parser.add_argument('--channel', '-l', action='store',
                     dest='channel', default='et',
                     help='name of channel'   
                     )
+parser.add_argument('--dir', '-d', action='store',
+                    dest='in_dir', default='',
+                    help='input directory starting after ../Output/templates/'
+                    )
+parser.add_argument('--prefix', '-p', action='store',
+                    dest='prefix', default='test',
+                    help='prefix to add to plot name'
+                    )
 args = parser.parse_args()
 
 from ROOT import TFile, TLegend, TH1F, TCanvas, THStack, kBlack, TColor, TLatex, kTRUE, TMath, TLine, gStyle
@@ -104,7 +112,8 @@ titles = {
     'costheta1': 'Cos(#theta_1)',
     'costheta2': 'Cos(#theta_2)',
     'costhetastar': 'Cos(#theta*)',
-    'nbjets': 'N(b-jets)'
+    'nbjets': 'N(b-jets)',
+    'nn_vbf_full': 'NN Disc.'
 }
 
 def formatStack(stack):
@@ -210,7 +219,7 @@ def sigmaLines(data):
     return line1, line2
 
 def main():
-    fin = TFile('../Output/templates/template_{}_{}.root'.format(args.channel, args.var), 'read')
+    fin = TFile('../Output/templates/{}/template_{}_{}.root'.format(args.in_dir, args.channel, args.var), 'read')
     idir = fin.Get(args.cat)
     leg = createLegend()
     data = idir.Get('Data').Clone()
@@ -242,7 +251,7 @@ def main():
     stat = formatStat(stat)
     leg.AddEntry(stat, 'Uncertainty', 'f')
 
-    high = max(data.GetMaximum(), stat.GetMaximum()) * 1.6
+    high = max(data.GetMaximum(), stat.GetMaximum()) * 2.1
     stack.SetMaximum(high)
     stack.Draw('hist')
     formatStack(stack)
@@ -316,7 +325,7 @@ def main():
 
 
 
-    can.SaveAs('../Output/plots/'+args.var+'_'+args.cat+'.pdf')
+    can.SaveAs('../Output/plots/{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat))
 
 
 if __name__ == "__main__":
