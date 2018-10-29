@@ -85,21 +85,26 @@ int main(int argc, char *argv[]) {
     // I hate doing it like this, but when I move the SetBranchAddres I see unexpected behavior
     Int_t cat_inclusive, cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, 
           cat_antiiso_vbf, cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
-    Float_t eq, tq, hpt, mt, mjj, njets, nbjets, var, weight;
+    Int_t is_qcd;
+    Float_t eq, tq, hpt, mt, mjj, var, weight;
+    Float_t njets, nbjets;
 
     tree->SetBranchAddress(lep_charge.c_str(), &eq);
     tree->SetBranchAddress("t1_charge", &tq);
     tree->SetBranchAddress("higgs_pT", &hpt);
     tree->SetBranchAddress("mt", &mt);
+
     if (var_name.find("mjj") != std::string::npos) {
       tree->SetBranchAddress("mjj", &var);
     } else {
       tree->SetBranchAddress("mjj", &mjj);
       tree->SetBranchAddress(var_name.c_str(), &var);
     }
+
     tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("evtwt", &weight);
+    tree->SetBranchAddress("is_qcd", &is_qcd);
     tree->SetBranchAddress("cat_inclusive", &cat_inclusive);
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
     tree->SetBranchAddress("cat_boosted", &cat_boosted);
@@ -148,6 +153,20 @@ int main(int argc, char *argv[]) {
         if (cat_qcd_vbf > 0 && mt < 50 && nbjets == 0) {
           fillQCD(hists->qcd_vbf, name, var, weight);
         }
+
+        // // get QCD shape from SS loose iso region
+        // if (is_qcd > 0 && cat_inclusive) {
+        //   fillQCD(hists->qcd_inclusive, name, var, weight);
+        // }
+        // if (is_qcd > 0 && cat_0jet > 0) {
+        //   fillQCD(hists->qcd_0jet, name, var, weight);
+        // }
+        // if (is_qcd > 0 && cat_boosted > 0) {
+        //   fillQCD(hists->qcd_boosted, name, var, weight);
+        // }
+        // if (is_qcd > 0 && mt < 50 && nbjets == 0 && cat_vbf > 0) {
+        //   fillQCD(hists->qcd_vbf, name, var, weight);
+        // }
 
         // get SS in signal region for loose region normalization
         if (cat_inclusive > 0) {
