@@ -17,4 +17,3 @@ bash build plugins/mt_analyzer.cc test_mt
 bash build plugins/tt_analyzer.cc test_tt
 bash build plugins/finalTemplate.cc test_final
 bash build plugins/templateMaker.cc test_temp
-bash build plugins/templateMaker2D.cc test_temp2D
