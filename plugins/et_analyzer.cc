@@ -49,7 +49,6 @@ int main(int argc, char* argv[]) {
   std::string fname = path + sample + postfix;
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
-  // bool isData = parser.Flag("-d");
   
   std::string systname = "";
   if (!syst.empty()) {
@@ -162,7 +161,6 @@ int main(int argc, char* argv[]) {
   // declare histograms (histogram initializer functions in util.h)
   fout->cd("grabbag");
   auto histos = helper->getHistos1D();
-  auto histos_2d = helper->getHistos2D();
 
   // construct factories
   event_info       event(ntuple, syst, "et");
@@ -370,15 +368,9 @@ int main(int argc, char* argv[]) {
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
-    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && 
-                   (jets.getDijetMass() <= 300 || Higgs.Pt() <= 50 || tau.getPt() == 30)));
+    bool boosted = (jets.getNjets() == 1);
     bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
-
-    histos->at("pre_mt") -> Fill(mt, 1.);
-    histos->at("pre_tau_pt") -> Fill(tau.getPt(), 1.);
-    histos->at("pre_tau_iso") -> Fill(tau.getTightIsoMVA(), 1.);
-    histos->at("pre_el_iso") -> Fill(electron.getIso(), 1.);
 
     // now do mt selection
     if (tau.getPt() < 30) {
@@ -423,87 +415,6 @@ int main(int argc, char* argv[]) {
       }
     }
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
-
-    // event categorizaation
-    if (zeroJet) {
-
-      if (signalRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h0_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        } else {
-          histos_2d->at("h0_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        }
-      } // close if signal block
-
-      if (looseIsoRegion) {
-        histos_2d->at("h0_QCD") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        if (evt_charge == 0) {
-          histos_2d->at("h0_WOS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        } else {
-          histos_2d->at("h0_WSS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        }
-      } // close if loose iso block
-
-    } else if (boosted) {
-
-      if (signalRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h1_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h1_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        }
-      } // close if signal block
-
-      if (looseIsoRegion) {
-        histos_2d->at("h1_QCD") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        if (evt_charge == 0) {
-          histos_2d->at("h1_WOS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h1_WSS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        }
-      } // close if loose iso block
-
-    } else if (vbfCat) {
-
-      if (signalRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h2_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h2_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        }
-      } // close if signal block
-
-      if (looseIsoRegion) {
-        histos_2d->at("h2_QCD") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        if (evt_charge == 0) {
-          histos_2d->at("h2_WOS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h2_WSS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        }
-      } // close if loose iso block
-
-    } else if (VHCat) {
-
-      if (signalRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h3_OS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h3_SS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
-        }
-      } // close if signal block
-
-      if (looseIsoRegion) {
-        histos_2d->at("h3_QCD") -> Fill(tau.getPt(), event.getMSV(), evtwt);
-        if (evt_charge == 0) {
-          histos_2d->at("h3_WOS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h3_WSS") -> Fill(tau.getPt(), event.getMSV(), evtwt);
-        }
-      } // close if loose iso block
-
-    } // close VH
-
-    histos->at("cutflow")->Fill(8., 1.);
 
   } // close event loop
   histos->at("n70")->Fill(1, n70_count);

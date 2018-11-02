@@ -143,7 +143,6 @@ int main(int argc, char* argv[]) {
   // declare histograms (histogram initializer functions in util.h)
   fout->cd("grabbag");
   auto histos = helper->getHistos1D();
-  auto histos_2d = helper->getHistos2D();
 
   // construct factories
   event_info       event(ntuple, syst, "tt");
@@ -406,89 +405,6 @@ int main(int argc, char* argv[]) {
     }
     st->fillTree(tree_cat, &tau1, &tau2, &jets, &met, &event, evtwt);
 
-    if (tau1.getPt() > 50 && tau2.getPt() > 40) {
-
-      // event categorizaation
-      if (zeroJet) {
-
-        if (signalRegion) {
-          if (evt_charge == 0) {
-            histos_2d->at("h0_OS")->Fill(1., event.getMSV(), evtwt);
-          } else {
-            histos_2d->at("h0_SS")->Fill(1., event.getMSV(), evtwt);
-          }
-        } // close if signal block
-
-      } else if (boosted) {
-
-        if (signalRegion) {
-          if (evt_charge == 0) {
-            histos_2d->at("h1_OS")->Fill(event.getPtSV(), event.getMSV(), evtwt);
-          } else {
-            histos_2d->at("h1_SS")->Fill(event.getPtSV(), event.getMSV(), evtwt);
-          }
-        } // close if signal block
-
-      } else if (vbfCat) {
-
-        if (signalRegion) {
-          if (evt_charge == 0) {
-            histos_2d->at("h2_OS")->Fill(1., normMELA, evtwt);
-          } else {
-            histos_2d->at("h2_SS")->Fill(1., normMELA, evtwt);
-          }
-        } // close if signal block
-
-      } // close VBF
-
-      // inclusive selection
-      if (signalRegion) {
-        histos->at("cutflow")->Fill(8., 1.);
-        if (evt_charge == 0) {
-          // fill histograms
-          histos->at("cutflow")->Fill(9., 1.);
-          if (helper->deltaR(tau1.getEta(), tau1.getPhi(), tau2.getEta(), tau2.getPhi()) > 0.5) {
-            histos->at("cutflow")->Fill(10., 1.);
-            histos->at("hel_pt")->Fill(tau1.getPt(), evtwt);
-            histos->at("hel_eta")->Fill(tau1.getEta(), evtwt);
-            histos->at("hel_phi")->Fill(tau1.getPhi(), evtwt);
-            histos->at("htau_pt")->Fill(tau2.getPt(), evtwt);
-            histos->at("htau_eta")->Fill(tau2.getEta(), evtwt);
-            histos->at("htau_phi")->Fill(tau2.getPhi(), evtwt);
-            histos->at("hmet")->Fill(met.getMet(), evtwt);
-            histos->at("hnjets")->Fill(jets.getNjets(), evtwt);
-            histos->at("hmjj")->Fill(jets.getDijetMass(), evtwt);
-            histos->at("hNGenJets")->Fill(event.getNumGenJets(), evtwt);
-            histos->at("pt_sv")->Fill(event.getPtSV(), evtwt);
-            histos->at("m_sv")->Fill(event.getMSV(), evtwt);
-            histos->at("Dbkg_VBF")->Fill(event.getDbkg_VBF(), evtwt);
-            histos->at("Phi")->Fill(event.getPhi(), evtwt);
-            histos->at("Phi1")->Fill(event.getPhi1(), evtwt);
-            histos->at("Q2V1")->Fill(event.getQ2V1(), evtwt);
-            histos->at("Q2V2")->Fill(event.getQ2V2(), evtwt);
-            histos->at("costheta1")->Fill(event.getCosTheta1(), evtwt);
-            histos->at("costheta2")->Fill(event.getCosTheta2(), evtwt);
-            histos->at("costhetastar")->Fill(event.getCosThetaStar(), evtwt);
-          }
-        } else {
-          histos->at("htau_pt_SS")->Fill(tau2.getPt(), evtwt);
-          histos->at("hel_pt_SS")->Fill(tau1.getPt(), evtwt);
-          histos->at("htau_phi_SS")->Fill(tau2.getPhi(), evtwt);
-          histos->at("hel_phi_SS")->Fill(tau1.getPhi(), evtwt);
-          histos->at("hmet_SS")->Fill(met.getMet(), evtwt);
-          histos->at("hmjj_SS")->Fill(jets.getDijetMass(), evtwt);
-        }
-      } // close signal
-      if (qcdRegion) {
-        histos->at("htau_pt_QCD")->Fill(tau2.getPt(), evtwt);
-        histos->at("hel_pt_QCD")->Fill(tau1.getPt(), evtwt);
-        histos->at("htau_phi_QCD")->Fill(tau2.getPhi(), evtwt);
-        histos->at("hel_phi_QCD")->Fill(tau1.getPhi(), evtwt);
-        histos->at("hmet_QCD")->Fill(met.getMet(), evtwt);
-        histos->at("hmjj_QCD")->Fill(jets.getDijetMass(), evtwt);
-      } // close qcd
-
-    } // close tau selection
     histos->at("cutflow")->Fill(7., 1.);
   } // close event loop
 
