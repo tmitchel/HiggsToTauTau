@@ -141,32 +141,18 @@ int main(int argc, char *argv[]) {
         }
       } else {
         // get QCD shape from SS loose iso region
-        if (cat_qcd > 0) {
+        if (cat_qcd > 0 || (is_qcd > 0 && cat_inclusive)) {
           fillQCD(hists->qcd_inclusive, name, var, weight);
         }
-        if (cat_qcd_0jet > 0) {
+        if (cat_qcd_0jet > 0 || (is_qcd > 0 && cat_0jet > 0)) {
           fillQCD(hists->qcd_0jet, name, var, weight);
         }
-        if (cat_qcd_boosted > 0) {
+        if (cat_qcd_boosted > 0 || (is_qcd > 0 && cat_boosted > 0)) {
           fillQCD(hists->qcd_boosted, name, var, weight);
         }
-        if (cat_qcd_vbf > 0 && mt < 50 && nbjets == 0) {
+        if (cat_qcd_vbf > 0 && mt < 50 && nbjets == 0 && (cat_qcd_vbf > 0 || (is_qcd > 0 && cat_vbf > 0))) {
           fillQCD(hists->qcd_vbf, name, var, weight);
         }
-
-        // // get QCD shape from SS loose iso region
-        // if (is_qcd > 0 && cat_inclusive) {
-        //   fillQCD(hists->qcd_inclusive, name, var, weight);
-        // }
-        // if (is_qcd > 0 && cat_0jet > 0) {
-        //   fillQCD(hists->qcd_0jet, name, var, weight);
-        // }
-        // if (is_qcd > 0 && cat_boosted > 0) {
-        //   fillQCD(hists->qcd_boosted, name, var, weight);
-        // }
-        // if (is_qcd > 0 && mt < 50 && nbjets == 0 && cat_vbf > 0) {
-        //   fillQCD(hists->qcd_vbf, name, var, weight);
-        // }
 
         // get SS in signal region for loose region normalization
         if (cat_inclusive > 0) {

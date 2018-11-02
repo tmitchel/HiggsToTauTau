@@ -36,6 +36,7 @@ void read_directory(const std::string &name, std::vector<std::string> &v);
 void fillQCD(TH2F *, std::string, double, double, double);
 
 int main(int argc, char *argv[]) {
+
   // get CLI arguments
   CLParser *parser = new CLParser(argc, argv);
   std::string dir = parser->Option("-d");
@@ -79,12 +80,12 @@ int main(int argc, char *argv[]) {
 
     // I hate doing it like this, but when I move the SetBranchAddres I see unexpected behavior
     Int_t cat_inclusive, cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf, 
-          cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf, is_qcd;
+          cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf, is_qcd, is_signal;
     Float_t eq, tq, hpt, l2decay, vis_mass, mjj, m_sv, weight, ME_sm_VBF, ME_bkg, NN_disc, nbjets, mt, njets;
     tree->SetBranchAddress(lep_charge.c_str(), &eq);
     tree->SetBranchAddress("t1_charge", &tq);
     tree->SetBranchAddress("higgs_pT", &hpt);
-    tree->SetBranchAddress("l2decay", &l2decay);
+    tree->SetBranchAddress("t1_decayMode", &l2decay);
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mjj", &mjj);
     tree->SetBranchAddress("m_sv", &m_sv);
@@ -96,6 +97,7 @@ int main(int argc, char *argv[]) {
     tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("is_qcd", &is_qcd);
+    tree->SetBranchAddress("is_signal", &is_signal);
     tree->SetBranchAddress("cat_inclusive", &cat_inclusive);
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
     tree->SetBranchAddress("cat_boosted", &cat_boosted);
@@ -113,9 +115,6 @@ int main(int argc, char *argv[]) {
       tree->GetEntry(i);
       auto MELA = ME_sm_VBF / (ME_sm_VBF + 45 * ME_bkg);
       auto var = NN_disc;
-      // until I remake these trees, correct boosted defintion
-      cat_boosted = cat_inclusive && njets == 1;
-      cat_qcd_boosted = cat_qcd && njets == 1;
 
       if (eq + tq == 0) {
         // output histograms for the template
@@ -130,28 +129,25 @@ int main(int argc, char *argv[]) {
         }
       } else {
         // get QCD shape from SS loose iso region
-        if (cat_qcd_0jet > 0) {
-          fillQCD(hists->qcd_0jet, name, l2decay, vis_mass, weight);
+        if (cat_qcd_0jet > 0 || (is_qcd > 0 && cat_0jet > 0)) {
+         fillQCD(hists->qcd_0jet, name, l2decay, vis_mass, weight);
         }
-        if (cat_qcd_boosted > 0) {
-          fillQCD(hists->qcd_boosted, name, hpt, m_sv, weight);
+        if (cat_qcd_boosted > 0 || (is_qcd > 0 && cat_boosted > 0)) {
+         fillQCD(hists->qcd_boosted, name, hpt, m_sv, weight);
         }
-        if (cat_qcd_vbf > 0 && mt < 50 && nbjets == 0) {
-          fillQCD(hists->qcd_vbf, name, var, m_sv, weight);
+        if (cat_qcd_vbf > 0 && mt < 50 && nbjets == 0 && (cat_qcd_vbf > 0 || (is_qcd > 0 && cat_vbf > 0))) {
+         fillQCD(hists->qcd_vbf, name, var, m_sv, weight);
         }
 
-        // // get QCD shape from SS loose iso region
-        // if (is_qcd > 0 && cat_inclusive) {
-        //   fillQCD(hists->qcd_inclusive, name, var, weight);
-        // }
+        // get QCD shape from SS loose iso region
         // if (is_qcd > 0 && cat_0jet > 0) {
-        //   fillQCD(hists->qcd_0jet, name, var, weight);
+        //   fillQCD(hists->qcd_0jet, name, l2decay, vis_mass, weight);
         // }
         // if (is_qcd > 0 && cat_boosted > 0) {
-        //   fillQCD(hists->qcd_boosted, name, var, weight);
+        //   fillQCD(hists->qcd_boosted, name, hpt, m_sv, weight);
         // }
         // if (is_qcd > 0 && mt < 50 && nbjets == 0 && cat_vbf > 0) {
-        //   fillQCD(hists->qcd_vbf, name, var, weight);
+        //   fillQCD(hists->qcd_vbf, name, var, m_sv, weight);
         // }
 
         // get SS in signal region for loose region normalization
@@ -212,7 +208,7 @@ histHolder::histHolder(std::string channel) :
     bins_l2 {0, 1, 10, 11},
     bins_hpt {0, 100, 150, 200, 250, 300, 5000},
     //bins_mjj {300, 700, 1100, 1500, 10000},
-     bins_mjj {0., 0.1, 0.5, 0.9, 1.},
+    bins_mjj {0., 0.1, 0.5, 0.9, 1.},
 
     // y-axis
     bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
