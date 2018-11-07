@@ -17,13 +17,12 @@ public:
 
     // member data
     TTree* otree;
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_inclusive, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, cat_antiiso_vbf,
-        cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf, is_signal, is_qcd;
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiiso, is_qcd, is_looseIso;
     Float_t evtwt,
         el_pt, el_eta, el_phi, el_mass, el_charge, el_iso,
         mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
-        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_tightIso, t1_mediumIso, t1_decayMode, // t1 is used for et and mt, as well
-        t2_pt, t2_eta, t2_phi, t2_mass, t2_charge, t2_tightIso, t2_mediumIso, t2_decayMode,
+        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode, // t1 is used for et and mt, as well
+        t2_pt, t2_eta, t2_phi, t2_mass, t2_charge, t2_iso_VL, t2_iso_L, t2_iso_M, t2_iso_T, t2_iso_VT, t2_iso_VVT, t2_decayMode,
         njets, nbjets,
         j1_pt, j1_eta, j1_phi,
         j2_pt, j2_eta, j2_phi,
@@ -55,8 +54,12 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("t1_phi",              &t1_phi,              "t1_phi/F"             );
     otree->Branch("t1_mass",             &t1_mass,             "t1_mass/F"            );
     otree->Branch("t1_charge",           &t1_charge,           "t1_charge/F"          );
-    otree->Branch("t1_tightIso",         &t1_tightIso,         "t1_tightIso/F"        );
-    otree->Branch("t1_mediumIso",        &t1_mediumIso,        "t1_mediumIso/F"       );
+    otree->Branch("t1_iso_VL",           &t1_iso_VL,           "t1_iso_VL/F"          );
+    otree->Branch("t1_iso_L",            &t1_iso_L,            "t1_iso_L/F"           );
+    otree->Branch("t1_iso_M",            &t1_iso_M,            "t1_iso_M/F"           );
+    otree->Branch("t1_iso_T",            &t1_iso_T,            "t1_iso_T/F"           );
+    otree->Branch("t1_iso_VT",           &t1_iso_VT,           "t1_iso_VT/F"          );
+    otree->Branch("t1_iso_VVT",          &t1_iso_VVT,          "t1_iso_VVT/F"         );
     otree->Branch("t1_decayMode",        &t1_decayMode,        "t1_decayMode/F"       );
     otree->Branch("t1_dmf",              &dmf,                 "t1_dmf/F"             );
     otree->Branch("t1_dmf_new",          &dmf_new,             "t1_dmf_new/F"         );
@@ -65,8 +68,12 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("t2_phi",              &t2_phi,              "t2_phi/F"             );
     otree->Branch("t2_mass",             &t2_mass,             "t2_mass/F"            );
     otree->Branch("t2_charge",           &t2_charge,           "t2_charge/F"          );
-    otree->Branch("t2_tightIso",         &t2_tightIso,         "t2_tightIso/F"        );
-    otree->Branch("t2_mediumIso",        &t2_mediumIso,        "t2_mediumIso/F"       );
+    otree->Branch("t2_iso_VL",           &t2_iso_VL,           "t2_iso_VL/F"          );
+    otree->Branch("t2_iso_L",            &t2_iso_L,            "t2_iso_L/F"           );
+    otree->Branch("t2_iso_M",            &t2_iso_M,            "t2_iso_M/F"           );
+    otree->Branch("t2_iso_T",            &t2_iso_T,            "t2_iso_T/F"           );
+    otree->Branch("t2_iso_VT",           &t2_iso_VT,           "t2_iso_VT/F"          );
+    otree->Branch("t2_iso_VVT",          &t2_iso_VVT,          "t2_iso_VVT/F"         );
     otree->Branch("t2_decayMode",        &t2_decayMode,        "t2_decayMode/F"       );
     otree->Branch("t2_dmf",              &dmf,                 "t2_dmf/F"             );
     otree->Branch("t2_dmf_new",          &dmf_new,             "t2_dmf_new/F"         );
@@ -122,19 +129,13 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("dPhijj",              &dPhijj,              "dPhijj/F"             );
 
     otree->Branch("is_signal",           &is_signal,           "is_signal/I"          );
+    otree->Branch("is_antiiso",          &is_antiiso,          "is_antiiso/I"         );
     otree->Branch("is_qcd",              &is_qcd,              "is_qcd/I"             );
+    otree->Branch("is_looseIso",         &is_looseIso,         "is_looseIso/I"        );
     otree->Branch("cat_0jet",            &cat_0jet,            "cat_0jet/I"           );
     otree->Branch("cat_boosted",         &cat_boosted,         "cat_boosted/I"        );
     otree->Branch("cat_vbf",             &cat_vbf,             "cat_vbf/I"            );
-    otree->Branch("cat_inclusive",       &cat_inclusive,       "cat_inclusive/I"      );
-    otree->Branch("cat_antiiso",         &cat_antiiso,         "cat_antiiso/I"        );
-    otree->Branch("cat_antiiso_0jet",    &cat_antiiso_0jet,    "cat_antiiso_0jet/I"   );
-    otree->Branch("cat_antiiso_boosted", &cat_antiiso_boosted, "cat_antiiso_boosted/I");
-    otree->Branch("cat_antiiso_vbf",     &cat_antiiso_vbf,     "cat_antiiso_vbf/I"    );
-    otree->Branch("cat_qcd",             &cat_qcd,             "cat_qcd/I"            );
-    otree->Branch("cat_qcd_0jet",        &cat_qcd_0jet,        "cat_qcd_0jet/I"       );
-    otree->Branch("cat_qcd_boosted",     &cat_qcd_boosted,     "cat_qcd_boosted/I"    );
-    otree->Branch("cat_qcd_vbf",         &cat_qcd_vbf,         "cat_qcd_vbf/I"        );
+    otree->Branch("cat_VH",              &cat_VH,              "cat_VH/I"             );
 }
 
 void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, TLorentzVector higgs, Float_t Mt) {
@@ -206,59 +207,40 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     }
 
     // reset the categories
+    is_signal = 0;
+    is_antiiso = 0;
+    is_qcd = 0;
+    is_looseIso = 0;
     cat_0jet = 0;
     cat_boosted = 0;
     cat_vbf = 0;
-    cat_inclusive = 0;
-    cat_antiiso = 0;
-    cat_antiiso_0jet = 0;
-    cat_antiiso_boosted = 0;
-    cat_antiiso_vbf = 0;
-    cat_qcd = 0;
-    cat_qcd_0jet = 0;
-    cat_qcd_boosted = 0;
-    cat_qcd_vbf = 0;
+    cat_VH = 0;
 
     // decide on which selections have been passed
     for (auto cat : cats) {
+
+        // regions
+        if (cat == "signal") {
+            is_signal = 1;
+        } else if (cat == "antiiso") {
+            is_antiiso = 1;
+        } else if (cat == "looseIso") {
+            is_looseIso = 1;
+        }
+
+        // categories
         if (cat == "0jet") {
-            cat_inclusive = 1;
             cat_0jet = 1;
         } else if (cat == "boosted") {
-            cat_inclusive = 1;
             cat_boosted = 1;
         } else if (cat == "vbf") {
-            cat_inclusive = 1;
             cat_vbf = 1;
-        } else if (cat == "inclusive") {
-            cat_inclusive = 1;
-        } else if (cat == "antiiso_0jet") {
-            cat_antiiso = 1;
-            cat_antiiso_0jet = 1;
-        } else if (cat == "antiiso_boosted") {
-            cat_antiiso = 1;
-            cat_antiiso_boosted = 1;
-        } else if (cat == "antiiso_vbf") {
-            cat_antiiso = 1;
-            cat_antiiso_vbf = 1;
-        } else if (cat == "antiiso") {
-            cat_antiiso = 1;
-        } else if (cat == "looseIso_0jet") {
-            cat_qcd = 1;
-            cat_qcd_0jet = 1;
-        } else if (cat == "looseIso_boosted") {
-            cat_qcd = 1;
-            cat_qcd_boosted = 1;
-        } else if (cat == "looseIso_vbf") {
-            cat_qcd = 1;
-            cat_qcd_vbf = 1;
-        } else if (cat == "looseIso") {
-            cat_qcd = 1;
+        } else if (cat == "VH") {
+            cat_VH = 1;
         }
     }
+    is_qcd = is_looseIso;
 
-    is_signal = cat_inclusive;
-    is_qcd = cat_qcd;
 }
 
 void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t mt, Float_t weight) {
@@ -277,8 +259,12 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet
     t1_phi = t->getPhi();
     t1_mass = t->getMass();
     t1_charge = t->getCharge();
-    t1_tightIso = t->getTightIsoMVA();
-    t1_mediumIso = t->getMediumIsoMVA();
+    t1_iso_VL = t->getVLooseIsoMVA();
+    t1_iso_L = t->getLooseIsoMVA();
+    t1_iso_M = t->getMediumIsoMVA();
+    t1_iso_T = t->getTightIsoMVA();
+    t1_iso_VT = t->getVTightIsoMVA();
+    t1_iso_VVT = t->getVVTightIsoMVA();
     vis_mass = (el->getP4() + t->getP4()).M();
     t1_decayMode = t->getL2DecayMode();
     dmf = t->getDecayModeFinding();
@@ -303,6 +289,19 @@ void slim_tree::fillTree(std::vector<std::string> cat, ditau *t1, ditau *t2, jet
     t2_mass = t2->getMass();
     t2_charge = t2->getCharge();
     vis_mass = (t1->getP4() + t2->getP4()).M();
+    t1_iso_VL = t1->getVLooseIsoMVA();
+    t1_iso_L = t1->getLooseIsoMVA();
+    t1_iso_M = t1->getMediumIsoMVA();
+    t1_iso_T = t1->getTightIsoMVA();
+    t1_iso_VT = t1->getVTightIsoMVA();
+    t1_iso_VVT = t1->getVVTightIsoMVA();
+    t2_iso_VL = t2->getVLooseIsoMVA();
+    t2_iso_L = t2->getLooseIsoMVA();
+    t2_iso_M = t2->getMediumIsoMVA();
+    t2_iso_T = t2->getTightIsoMVA();
+    t2_iso_VT = t2->getVTightIsoMVA();
+    t2_iso_VVT = t2->getVVTightIsoMVA();
+
 
     otree->Fill();
 }
@@ -324,6 +323,13 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t1, jet_fa
     t1_charge = t1->getCharge();
     vis_mass = (mu->getP4() + t1->getP4()).M();
     t1_decayMode = t1->getL2DecayMode();
+    t1_iso_VL = t1->getVLooseIsoMVA();
+    t1_iso_L = t1->getLooseIsoMVA();
+    t1_iso_M = t1->getMediumIsoMVA();
+    t1_iso_T = t1->getTightIsoMVA();
+    t1_iso_VT = t1->getVTightIsoMVA();
+    t1_iso_VVT = t1->getVVTightIsoMVA();
+
 
     otree->Fill();
 }

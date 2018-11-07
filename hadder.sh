@@ -7,6 +7,9 @@ hadd Output/trees//mc_ZTT.root Output/trees//DY*ZTT*
 hadd Output/trees//ZTT.root Output/trees//embed-*
 hadd Output/trees//W.root Output/trees//WJet*.root
 hadd Output/trees//VV.root Output/trees//T-* Output/trees//Tbar* Output/trees//VV* Output/trees//WZ* Output/trees//ZZ* Output/trees//WW*
+hadd Output/trees//VVT.root Output/trees//T-*VVT* Output/trees//Tbar*VVT* Output/trees//VV*VVT* Output/trees//WZ*VVT* Output/trees//ZZ*VVT* Output/trees//WW*VVT*
+hadd Output/trees//VVJ.root Output/trees//T-*VVJ* Output/trees//Tbar*VVJ* Output/trees//VV*VVJ* Output/trees//WZ*VVJ* Output/trees//ZZ*VVJ* Output/trees//WW*VVJ*
+
 hadd Output/trees//EWKZ.root Output/trees//EWKZ2*
 hadd Output/trees//WH125.root Output/trees//WPlus* Output/trees//WMinus*
 mv Output/trees//VBFHtoTauTau125_VBF125_output.root Output/trees/VBF125.root

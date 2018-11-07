@@ -17,8 +17,9 @@ class ditau {
 private:
   std::string name = "tau";
   Int_t gen_match;
-  Float_t pt, eta, phi, mass, charge, px, py, pz, tightIsoMVA, decayMode;
-  Bool_t AgainstTightElectron, AgainstVLooseElectron, AgainstLooseMuon, MediumIsoMVA, LooseIsoMVA, VLooseIsoMVA;
+  Float_t pt, eta, phi, mass, charge, px, py, pz, decayMode;
+  Bool_t AgainstTightElectron, AgainstVLooseElectron, AgainstLooseMuon;
+  Float_t VLooseIsoMVA, LooseIsoMVA, MediumIsoMVA, TightIsoMVA, VTightIsoMVA, VVTightIsoMVA;
   TLorentzVector p4;
 public:
 
@@ -40,14 +41,16 @@ public:
   Float_t getPx()                     { return px;                    };
   Float_t getPy()                     { return py;                    };
   Float_t getPz()                     { return pz;                    };
-  Float_t getTightIsoMVA()            { return tightIsoMVA;           };
   Float_t getDecayMode()              { return decayMode;             };
+  Float_t getVLooseIsoMVA()           { return VLooseIsoMVA;          };
+  Float_t getLooseIsoMVA()            { return LooseIsoMVA;           };
+  Float_t getMediumIsoMVA()           { return MediumIsoMVA;          };
+  Float_t getTightIsoMVA()            { return TightIsoMVA;           };
+  Float_t getVTightIsoMVA()           { return VTightIsoMVA;          };
+  Float_t getVVTightIsoMVA()          { return VVTightIsoMVA;         };
   Bool_t getAgainstTightElectron()    { return AgainstTightElectron;  };
   Bool_t getAgainstVLooseElectron()   { return AgainstVLooseElectron; };
   Bool_t getAgainstLooseMuon()        { return AgainstLooseMuon;      };
-  Bool_t getMediumIsoMVA()            { return MediumIsoMVA;          };
-  Bool_t getLooseIsoMVA()             { return LooseIsoMVA;           };
-  Bool_t getVLooseIsoMVA()            { return VLooseIsoMVA;          };
   Int_t getGenMatch()                 { return gen_match;             };
   Int_t getCharge()                   { return charge;                };
 };
@@ -71,11 +74,13 @@ class ditau_factory {
 private:
   Int_t gen_match_1, gen_match_2;
   Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, iso_1, q_1, mt_1;
-  Float_t byTightIsolationMVArun2v1DBoldDMwLT_1, againstElectronTightMVA6_1, againstElectronVLooseMVA6_1, againstMuonLoose3_1;
-  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_1, t1_decayMode, byLooseIsolationMVArun2v1DBoldDMwLT_1, byVLooseIsolationMVArun2v1DBoldDMwLT_1;
+  Float_t againstElectronTightMVA6_1, againstElectronVLooseMVA6_1, againstMuonLoose3_1, t1_decayMode;
   Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2;
-  Float_t byTightIsolationMVArun2v1DBoldDMwLT_2, againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonLoose3_2;
-  Float_t byMediumIsolationMVArun2v1DBoldDMwLT_2, t2_decayMode, byLooseIsolationMVArun2v1DBoldDMwLT_2, byVLooseIsolationMVArun2v1DBoldDMwLT_2;
+  Float_t againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonLoose3_2, t2_decayMode;
+  Float_t byVLooseIsolationMVArun2v1DBoldDMwLT_1, byLooseIsolationMVArun2v1DBoldDMwLT_1, byMediumIsolationMVArun2v1DBoldDMwLT_1,
+        byTightIsolationMVArun2v1DBoldDMwLT_1, byVTightIsolationMVArun2v1DBoldDMwLT_1, byVVTightIsolationMVArun2v1DBoldDMwLT_1;
+  Float_t byVLooseIsolationMVArun2v1DBoldDMwLT_2, byLooseIsolationMVArun2v1DBoldDMwLT_2, byMediumIsolationMVArun2v1DBoldDMwLT_2,
+          byTightIsolationMVArun2v1DBoldDMwLT_2, byVTightIsolationMVArun2v1DBoldDMwLT_2, byVVTightIsolationMVArun2v1DBoldDMwLT_2;
 
 public:
   ditau_factory (TTree*);
@@ -97,13 +102,15 @@ ditau_factory::ditau_factory(TTree* input) {
   input -> SetBranchAddress( "iso_1",                                   &iso_1                                  );
   input -> SetBranchAddress( "q_1",                                     &q_1                                    );
   input -> SetBranchAddress( "gen_match_1",                             &gen_match_1                            );
-  input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_1",   &byTightIsolationMVArun2v1DBoldDMwLT_1  );
-  input -> SetBranchAddress( "byLooseIsolationMVArun2v1DBoldDMwLT_1",   &byLooseIsolationMVArun2v1DBoldDMwLT_1  );
   input -> SetBranchAddress( "byVLooseIsolationMVArun2v1DBoldDMwLT_1",  &byVLooseIsolationMVArun2v1DBoldDMwLT_1 );
+  input -> SetBranchAddress( "byLooseIsolationMVArun2v1DBoldDMwLT_1",   &byLooseIsolationMVArun2v1DBoldDMwLT_1  );
+  input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_1",  &byMediumIsolationMVArun2v1DBoldDMwLT_1 );
+  input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_1",   &byTightIsolationMVArun2v1DBoldDMwLT_1  );
+  input -> SetBranchAddress( "byVTightIsolationMVArun2v1DBoldDMwLT_1",  &byVTightIsolationMVArun2v1DBoldDMwLT_1 );
+  input -> SetBranchAddress( "byVVTightIsolationMVArun2v1DBoldDMwLT_1", &byVVTightIsolationMVArun2v1DBoldDMwLT_1);
   input -> SetBranchAddress( "againstElectronTightMVA6_1",              &againstElectronTightMVA6_1             );
   input -> SetBranchAddress( "againstElectronVLooseMVA6_1",             &againstElectronVLooseMVA6_1            );
   input -> SetBranchAddress( "againstMuonLoose3_1",                     &againstMuonLoose3_1                    );
-  input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_1",  &byMediumIsolationMVArun2v1DBoldDMwLT_1 );
   input -> SetBranchAddress( "t1_decayMode",                            &t1_decayMode                           );
   input -> SetBranchAddress( "px_2",                                    &px_2                                   );
   input -> SetBranchAddress( "py_2",                                    &py_2                                   );
@@ -116,13 +123,15 @@ ditau_factory::ditau_factory(TTree* input) {
   input -> SetBranchAddress( "iso_2",                                   &iso_2                                  );
   input -> SetBranchAddress( "q_2",                                     &q_2                                    );
   input -> SetBranchAddress( "gen_match_2",                             &gen_match_2                            );
-  input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_2",   &byTightIsolationMVArun2v1DBoldDMwLT_2  );
-  input -> SetBranchAddress( "byLooseIsolationMVArun2v1DBoldDMwLT_2",   &byLooseIsolationMVArun2v1DBoldDMwLT_2  );
   input -> SetBranchAddress( "byVLooseIsolationMVArun2v1DBoldDMwLT_2",  &byVLooseIsolationMVArun2v1DBoldDMwLT_2 );
+  input -> SetBranchAddress( "byLooseIsolationMVArun2v1DBoldDMwLT_2",   &byLooseIsolationMVArun2v1DBoldDMwLT_2  );
+  input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_2",  &byMediumIsolationMVArun2v1DBoldDMwLT_2 );
+  input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_2",   &byTightIsolationMVArun2v1DBoldDMwLT_2  );
+  input -> SetBranchAddress( "byVTightIsolationMVArun2v1DBoldDMwLT_2",  &byVTightIsolationMVArun2v1DBoldDMwLT_2 );
+  input -> SetBranchAddress( "byVVTightIsolationMVArun2v1DBoldDMwLT_2", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
   input -> SetBranchAddress( "againstElectronTightMVA6_2",              &againstElectronTightMVA6_2             );
   input -> SetBranchAddress( "againstElectronVLooseMVA6_1",             &againstElectronVLooseMVA6_1            );
   input -> SetBranchAddress( "againstMuonLoose3_2",                     &againstMuonLoose3_2                    );
-  input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_2",  &byMediumIsolationMVArun2v1DBoldDMwLT_2 );
   input -> SetBranchAddress( "t2_decayMode",                            &t2_decayMode                           );
 }
 
@@ -133,26 +142,32 @@ std::pair<ditau, ditau> ditau_factory::run_factory() {
   t1.py = py_1;
   t1.pz = pz_1;
   t1.gen_match = gen_match_1;
-  t1.tightIsoMVA = byTightIsolationMVArun2v1DBoldDMwLT_1;
   t1.AgainstTightElectron = againstElectronTightMVA6_1;
   t1.AgainstVLooseElectron = againstElectronVLooseMVA6_1;
   t1.AgainstLooseMuon = againstMuonLoose3_1;
   t1.decayMode = t1_decayMode;
-  t1.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_1;
+  t1.VLooseIsoMVA = byVLooseIsolationMVArun2v1DBoldDMwLT_1;
   t1.LooseIsoMVA = byLooseIsolationMVArun2v1DBoldDMwLT_1;
+  t1.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_1;
+  t1.TightIsoMVA = byTightIsolationMVArun2v1DBoldDMwLT_1;
+  t1.VTightIsoMVA = byVTightIsolationMVArun2v1DBoldDMwLT_1;
+  t1.VVTightIsoMVA = byVVTightIsolationMVArun2v1DBoldDMwLT_1;
 
   ditau t2(pt_2, eta_2, phi_2, m_2, q_2);
   t2.px = px_2;
   t2.py = py_2;
   t2.pz = pz_2;
   t2.gen_match = gen_match_2;
-  t2.tightIsoMVA = byTightIsolationMVArun2v1DBoldDMwLT_2;
   t2.AgainstTightElectron = againstElectronTightMVA6_2;
   t2.AgainstVLooseElectron = againstElectronVLooseMVA6_1;
   t2.AgainstLooseMuon = againstMuonLoose3_2;
   t2.decayMode = t2_decayMode;
-  t2.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_2;
+  t2.VLooseIsoMVA = byVLooseIsolationMVArun2v1DBoldDMwLT_2;
   t2.LooseIsoMVA = byLooseIsolationMVArun2v1DBoldDMwLT_2;
+  t2.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_2;
+  t2.TightIsoMVA = byTightIsolationMVArun2v1DBoldDMwLT_2;
+  t2.VTightIsoMVA = byVTightIsolationMVArun2v1DBoldDMwLT_2;
+  t2.VVTightIsoMVA = byVVTightIsolationMVArun2v1DBoldDMwLT_2;
 
   // sort by pT
   if (pt_1 > pt_2) {
