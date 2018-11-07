@@ -45,8 +45,7 @@ int main(int argc, char* argv[]) {
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
   std::string syst = parser.Option("-u");
-  std::string postfix = parser.Option("-P");
-  std::string fname = path + sample + postfix;
+  std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
   
@@ -229,9 +228,9 @@ int main(int argc, char* argv[]) {
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
       continue;
-    } else if ((name == "ZTT" || name == "TTT") && tau.getGenMatch() != 5) {
+    } else if ((name == "ZTT" || name == "TTT" || name == "VVT") && tau.getGenMatch() != 5) {
       continue;
-    } else if ((name == "ZLL" || name == "TTJ") && tau.getGenMatch() == 5) {
+    } else if ((name == "ZLL" || name == "TTJ" || name == "VVJ") && tau.getGenMatch() == 5) {
       continue;
     } else if (name == "ZJ" && tau.getGenMatch() != 6) {
       continue;
@@ -355,9 +354,9 @@ int main(int argc, char* argv[]) {
       histos->at("n70") -> Fill(0.1, evtwt);
       if (jets.getNjets() == 0 && event.getMSV() < 400)
         histos->at("n70") -> Fill(1.1, evtwt);
-      else if (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() < 100))
+      else if (jets.getNjets() == 1)
         histos->at("n70") -> Fill(2.1, evtwt);
-      else if (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() > 100)
+      else if (jets.getNjets() > 1 && jets.getDijetMass() > 300)
         histos->at("n70") -> Fill(3.1, evtwt);
     }
 
@@ -365,55 +364,45 @@ int main(int argc, char* argv[]) {
     bool signalRegion   = (tau.getTightIsoMVA()  && electron.getIso() < 0.10);
     bool looseIsoRegion = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
     bool antiIsoRegion  = (tau.getTightIsoMVA()  && electron.getIso() > 0.10 && electron.getIso() < 0.30);
+    // bool antiIsoRegion = (tau.getTightIsoMVA() == 0 && electron.getIso() < 0.10);
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
-    bool boosted = (jets.getNjets() == 1);
-    bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
+    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && (jets.getDijetMass() < 300 || Higgs.Pt() < 50)));
+    bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() > 50);
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
     // now do mt selection
-    if (tau.getPt() < 30) {
+    if (tau.getPt() < 30 || mt < 50) {
       continue;
     }
 
     std::vector<std::string> tree_cat;
+
+    // regions
     if (signalRegion) {
-      tree_cat.push_back("inclusive");
-      if (zeroJet) {
-        tree_cat.push_back("0jet");
-      } 
-      if (boosted) {
-        tree_cat.push_back("boosted");
-      } 
-      if (vbfCat) {
-        tree_cat.push_back("vbf");
-      }
-    } 
+      tree_cat.push_back("signal");
+    }
     if (antiIsoRegion) {
       tree_cat.push_back("antiiso");
-      if (zeroJet) {
-        tree_cat.push_back("antiiso_0jet");
-      }
-      if (boosted) {
-        tree_cat.push_back("antiiso_boosted");
-      }
-      if (vbfCat) {
-        tree_cat.push_back("antiiso_vbf");
-      }
-    } 
+    }
+
     if (looseIsoRegion) {
       tree_cat.push_back("looseIso");
-      if (zeroJet) {
-        tree_cat.push_back("looseIso_0jet");
-      }
-      if (boosted) {
-        tree_cat.push_back("looseIso_boosted");
-      }
-      if (vbfCat) {
-        tree_cat.push_back("looseIso_vbf");
-      }
     }
+
+    // categorization
+    if (zeroJet) {
+      tree_cat.push_back("0jet");
+    } else if (boosted) {
+      tree_cat.push_back("boosted");
+    } else if (vbfCat) {
+      tree_cat.push_back("vbf");
+    } else if (VHCat) {
+      tree_cat.push_back("VH");
+    }
+
+    // fill the tree
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
 
   } // close event loop

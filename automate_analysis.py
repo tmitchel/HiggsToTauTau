@@ -24,10 +24,6 @@ parser.add_option('--syst', action='store_true',
                   default=False, dest='syst',
                   help='run systematics as well'
                   )
-parser.add_option('--suffix', '-s', action='store',
-                  default='.root', dest='suffix',
-                  help='suffix to strip off root files'
-                  )
 parser.add_option('--path', '-p', action='store',
                   default='root_files/', dest='path',
                   help='path to input file directory'
@@ -37,8 +33,8 @@ parser.add_option('--prefix', '-P', action='store',
                   help='prefix to strip'
 )
 (options, args) = parser.parse_args()
-suffix = options.suffix
 prefix = options.prefix
+suffix = '.root'
 
 start = time.time()
 if options.isData:
@@ -89,9 +85,9 @@ for ifile in fileList:
     elif 'embed' in sample:
         names = ['embed']
     else: 
-        names = ['VV']
+        names = ['VV', 'VVJ', 'VVT']
 
-    callstring = './%s -p %s -s %s -P %s' % (options.exe, tosample, sample, suffix)
+    callstring = './%s -p %s -s %s ' % (options.exe, tosample, sample)
 
     if options.syst:
         for isyst in systs:

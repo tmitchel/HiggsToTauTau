@@ -82,10 +82,8 @@ int main(int argc, char *argv[]) {
 
     hists->initVectors(name);
 
-    // I hate doing it like this, but when I move the SetBranchAddres I see unexpected behavior
-    Int_t cat_inclusive, cat_0jet, cat_boosted, cat_vbf, cat_antiiso, cat_antiiso_0jet, cat_antiiso_boosted, 
-          cat_antiiso_vbf, cat_qcd, cat_qcd_0jet, cat_qcd_boosted, cat_qcd_vbf;
-    Int_t is_qcd;
+    // I hate doing it like this, but when I move the SetBranchAddress I see unexpected behavior
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_qcd, is_antiiso, is_looseIso;
     Float_t eq, tq, hpt, mt, mjj, var, weight;
     Float_t njets, nbjets;
 
@@ -104,68 +102,59 @@ int main(int argc, char *argv[]) {
     tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("evtwt", &weight);
+    tree->SetBranchAddress("is_signal", &is_signal);
     tree->SetBranchAddress("is_qcd", &is_qcd);
-    tree->SetBranchAddress("cat_inclusive", &cat_inclusive);
-    tree->SetBranchAddress("cat_vbf", &cat_vbf);
-    tree->SetBranchAddress("cat_boosted", &cat_boosted);
+    tree->SetBranchAddress("is_antiiso", &is_antiiso);
+    tree->SetBranchAddress("is_looseIso", &is_looseIso);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
-    tree->SetBranchAddress("cat_antiiso", &cat_antiiso);
-    tree->SetBranchAddress("cat_antiiso_0jet", &cat_antiiso_0jet);
-    tree->SetBranchAddress("cat_antiiso_boosted", &cat_antiiso_boosted);
-    tree->SetBranchAddress("cat_antiiso_vbf", &cat_antiiso_vbf);
-    tree->SetBranchAddress("cat_qcd",             &cat_qcd        );
-    tree->SetBranchAddress("cat_qcd_0jet",        &cat_qcd_0jet   );
-    tree->SetBranchAddress("cat_qcd_boosted",     &cat_qcd_boosted);
-    tree->SetBranchAddress("cat_qcd_vbf",         &cat_qcd_vbf    );
+    tree->SetBranchAddress("cat_boosted", &cat_boosted);
+    tree->SetBranchAddress("cat_vbf", &cat_vbf);
+    tree->SetBranchAddress("cat_VH", &cat_VH);
 
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
       
-      // until I remake these trees, correct boosted defintion
-      cat_boosted = cat_inclusive && njets == 1;
-      cat_qcd_boosted = cat_qcd && njets == 1;
-
       if (eq + tq == 0) {
         // output histograms for the template
-        if (cat_inclusive > 0) {
+        if (is_signal > 0) {
           hists->hists.at(channel_prefix+"_inclusive").back()->Fill(var, weight);
-        }
-        if (cat_0jet > 0) {
-          hists->hists.at(channel_prefix+"_0jet").back()->Fill(var, weight);
-        }
-        if (cat_boosted > 0) {
-          hists->hists.at(channel_prefix+"_boosted").back()->Fill(var, weight);
-        }
-        if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
-          hists->hists.at(channel_prefix+"_vbf").back()->Fill(var, weight);
+          if (cat_0jet > 0) {
+            hists->hists.at(channel_prefix+"_0jet").back()->Fill(var, weight);
+          }
+          if (cat_boosted > 0) {
+            hists->hists.at(channel_prefix+"_boosted").back()->Fill(var, weight);
+          }
+          if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
+            hists->hists.at(channel_prefix+"_vbf").back()->Fill(var, weight);
+          }
         }
       } else {
         // get QCD shape from SS loose iso region
-        if (cat_qcd > 0 || (is_qcd > 0 && cat_inclusive)) {
+        if (is_qcd > 0 || is_looseIso > 0) {
           fillQCD(hists->qcd_inclusive, name, var, weight);
-        }
-        if (cat_qcd_0jet > 0 || (is_qcd > 0 && cat_0jet > 0)) {
-          fillQCD(hists->qcd_0jet, name, var, weight);
-        }
-        if (cat_qcd_boosted > 0 || (is_qcd > 0 && cat_boosted > 0)) {
-          fillQCD(hists->qcd_boosted, name, var, weight);
-        }
-        if (cat_qcd_vbf > 0 && mt < 50 && nbjets == 0 && (cat_qcd_vbf > 0 || (is_qcd > 0 && cat_vbf > 0))) {
-          fillQCD(hists->qcd_vbf, name, var, weight);
+          if (cat_0jet) {
+            fillQCD(hists->qcd_0jet, name, var, weight);
+          }
+          if (cat_boosted) {
+            fillQCD(hists->qcd_boosted, name, var, weight);
+          }
+          if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
+            fillQCD(hists->qcd_vbf, name, var, weight);
+          }
         }
 
         // get SS in signal region for loose region normalization
-        if (cat_inclusive > 0) {
+        if (is_signal > 0) {
           fillQCD(hists->qcd_inclusive_SS, name, var, weight);
-        }
-        if (cat_0jet > 0) {
-          fillQCD(hists->qcd_0jet_SS, name, var, weight);
-        }
-        if (cat_boosted > 0) {
-          fillQCD(hists->qcd_boosted_SS, name, var, weight);
-        }
-        if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
-          fillQCD(hists->qcd_vbf_SS, name, var, weight);
+          if (cat_0jet > 0) {
+            fillQCD(hists->qcd_0jet_SS, name, var, weight);
+          }
+          if (cat_boosted > 0) {
+            fillQCD(hists->qcd_boosted_SS, name, var, weight);
+          }
+          if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
+            fillQCD(hists->qcd_vbf_SS, name, var, weight);
+          }
         }
       }
     }
