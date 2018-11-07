@@ -55,7 +55,7 @@ for ifile in fileList:
         names = ['ZTT', 'ZL', 'ZJ']
     elif 'TT' in sample:
         names = ['TTT', 'TTJ']
-    elif 'WJets' in sample or 'EWKW' in sample:
+    elif 'WJets' in sample or 'EWKW' in sample or 'WPlus' in sample or 'WMinus' in sample:
         names = ['W']
     elif 'EWKZ' in sample:
         names = ['EWKZ']
@@ -82,6 +82,9 @@ for ifile in fileList:
     elif 'ZH' in sample:
         mass = sample.split('ZH')[-1]
         names = ['ZH'+mass]
+    elif 'ttH' in sample:
+        mass = sample.split('ttH')[-1]
+        names = ['ttH'+mass]
     elif 'embed' in sample:
         names = ['embed']
     else: 
