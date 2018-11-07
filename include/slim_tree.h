@@ -17,8 +17,8 @@ public:
 
     // member data
     TTree* otree;
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiiso, is_qcd, is_looseIso, FF_had, FF_light, FF_sub, FF_weight_0jet, FF_weight_boosted, FF_weight_vbf, FF_weight, OS, SS;
-    Float_t evtwt,
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiiso, is_qcd, is_looseIso, FF_had, FF_light, FF_sub, OS, SS;
+    Float_t evtwt, FF_weight_0jet, FF_weight_boosted, FF_weight_vbf, FF_weight,
         el_pt, el_eta, el_phi, el_mass, el_charge, el_iso,
         mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
         t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode, // t1 is used for et and mt, as well
@@ -227,6 +227,9 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     cat_VH = 0;
     OS = 0;
     SS = 0;
+    FF_had = 0;
+    FF_light = 0;
+    FF_sub = 0;
 
     // decide on which selections have been passed
     for (auto cat : cats) {

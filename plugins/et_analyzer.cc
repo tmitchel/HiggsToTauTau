@@ -17,27 +17,27 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "../include/util.h"
-#include "../include/event_info.h"
-#include "../include/tau_factory.h"
-#include "../include/electron_factory.h"
-#include "../include/muon_factory.h"
-#include "../include/jet_factory.h"
-#include "../include/met_factory.h"
-#include "../include/SF_factory.h"
-#include "../include/btagSF.h"
-#include "../include/LumiReweightingStandAlone.h"
-#include "../include/CLParser.h"
-#include "../include/EmbedWeight.h"
-#include "../include/slim_tree.h"
+#include "util.h"
+#include "event_info.h"
+#include "tau_factory.h"
+#include "electron_factory.h"
+#include "muon_factory.h"
+#include "jet_factory.h"
+#include "met_factory.h"
+#include "SF_factory.h"
+#include "btagSF.h"
+#include "LumiReweightingStandAlone.h"
+#include "CLParser.h"
+#include "EmbedWeight.h"
+#include "slim_tree.h"
 
 //FF
-#include "../../../../../HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
-#include "../../../../../HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
-#include "../../../../../HTTutilities/Jet2TauFakes/interface/WrapperTFormula.h"
-#include "../../../../../HTTutilities/Jet2TauFakes/interface/WrapperTGraph.h"
-#include "../../../../../HTTutilities/Jet2TauFakes/interface/WrapperTH2F.h"
-#include "../../../../../HTTutilities/Jet2TauFakes/interface/WrapperTH3D.h"
+#include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
+#include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
+#include "HTTutilities/Jet2TauFakes/interface/WrapperTFormula.h"
+#include "HTTutilities/Jet2TauFakes/interface/WrapperTGraph.h"
+#include "HTTutilities/Jet2TauFakes/interface/WrapperTH2F.h"
+#include "HTTutilities/Jet2TauFakes/interface/WrapperTH3D.h"
 
 typedef std::vector<double> NumV;
 
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
   std::string syst = parser.Option("-u");
-  std::string makeTemplate = parser.Flag("-t");
+  bool makeTemplate = parser.Flag("-t");
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
@@ -119,33 +119,33 @@ int main(int argc, char* argv[]) {
   ///////////////////////////////////////////////
 
   // read inputs for lumi reweighting
-  auto lumi_weights = new reweight::LumiReWeighting("inputs/MC_Moriond17_PU25ns_V1.root", "inputs/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
+  auto lumi_weights = new reweight::LumiReWeighting("data/MC_Moriond17_PU25ns_V1.root", "data/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
 
   // tracking corrections
-  TFile *f_Trk = new TFile("inputs/etracking.root");
+  TFile *f_Trk = new TFile("data/etracking.root");
   TH2F *h_Trk = (TH2F*)f_Trk->Get("EGamma_SF2D");
 
   // Z-pT reweighting
-  TFile *zpt_file = new TFile("inputs/zpt_weights_2016_BtoH.root");
+  TFile *zpt_file = new TFile("data/zpt_weights_2016_BtoH.root");
   auto zpt_hist = (TH2F*)zpt_file->Get("zptmass_histo");
 
   //H->tau tau scale factors
-  TFile htt_sf_file("inputs/htt_scalefactors_v16_3.root");
+  TFile htt_sf_file("data/htt_scalefactors_v16_3.root");
   RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
   htt_sf_file.Close();
 
   // embedded sample weights
-  TFile embed_file("inputs/htt_scalefactors_v16_9_embedded.root", "READ");
+  TFile embed_file("data/htt_scalefactors_v16_9_embedded.root", "READ");
   RooWorkspace *wEmbed = (RooWorkspace *)embed_file.Get("w");
   embed_file.Close();
 
-  TFile *fEleRec = new TFile("inputs/EGammaRec.root");
+  TFile *fEleRec = new TFile("data/EGammaRec.root");
   TH2F *histEleRec = (TH2F*)fEleRec->Get("EGamma_SF2D");
 
-  TFile *fEleWP80 = new TFile("inputs/EGammaWP80.root");
+  TFile *fEleWP80 = new TFile("data/EGammaWP80.root");
   TH2F *histEleWP80 = (TH2F*)fEleWP80->Get("EGamma_SF2D");
 
-  TFile *fEleWP90 = new TFile("inputs/EGammaWP90.root");
+  TFile *fEleWP90 = new TFile("data/EGammaWP90.root");
   TH2F *histEleWP90 = (TH2F*)fEleWP90->Get("EGamma_SF2D");
 
   // trigger and ID scale factors
@@ -154,22 +154,27 @@ int main(int argc, char* argv[]) {
   auto myScaleFactor_trgEle25Anti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_antiisolated_Iso0p1to0p3_eff_rb.root");
   auto myScaleFactor_idAnti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_antiisolated_Iso0p1to0p3_eff.root");
 
-  TFile * f_NNLOPS = new TFile("inputs/NNLOPS_reweight.root");
+  TFile * f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
   TGraph * g_NNLOPS_0jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_0jet");
   TGraph * g_NNLOPS_1jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_1jet");
   TGraph * g_NNLOPS_2jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_2jet");
   TGraph * g_NNLOPS_3jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_3jet");
 
-  TFile *ff_file_0jet = TFile::Open("HTTutilities/Jet2TauFakes/data/mt/0Jet/fakeFactors_20180831_tight.root");
-  FakeFactor *ff_0jet = (FakeFactor *)ff_file_0jet->Get("ff_comb");
+  TFile ff_file_0jet("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root");
+  FakeFactor *ff_0jet = (FakeFactor *)ff_file_0jet.Get("ff_comb");
   const std::vector<std::string> &inputNames_0jet = ff_0jet->inputs();
-  TFile *ff_file_boosted = TFile::Open("HTTutilities/Jet2TauFakes/data/mt/boosted/fakeFactors_20180831_tight.root");
-  FakeFactor *ff_boosted = (FakeFactor *)ff_file_boosted->Get("ff_comb");
+  TFile  ff_file_boosted("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root");
+  FakeFactor *ff_boosted = (FakeFactor *)ff_file_boosted.Get("ff_comb");
   const std::vector<std::string> &inputNames_boosted = ff_boosted->inputs();
-  TFile *ff_file_vbf = TFile::Open("HTTutilities/Jet2TauFakes/data/mt/vbf/fakeFactors_20180831_tight.root");
-  FakeFactor *ff_vbf = (FakeFactor *)ff_file_vbf->Get("ff_comb");
+  TFile ff_file_vbf("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root");
+  FakeFactor *ff_vbf = (FakeFactor *)ff_file_vbf.Get("ff_comb");
   const std::vector<std::string> &inputNames_vbf = ff_vbf->inputs();
   std::vector<double> inputs(9);
+
+  // ff_file_0jet.Close();
+  // ff_file_boosted.Close();
+  // ff_file_vbf.Close();
+
 
   //////////////////////////////////////
   // Final setup:                     //
@@ -179,6 +184,7 @@ int main(int argc, char* argv[]) {
   // declare histograms (histogram initializer functions in util.h)
   fout->cd("grabbag");
   auto histos = helper->getHistos1D();
+  auto histos_2d = helper->getHistos2D();
 
   // construct factories
   event_info       event(ntuple, syst, "et");
@@ -410,7 +416,7 @@ int main(int argc, char* argv[]) {
       FF_weight_0jet = ff_0jet->value(inputs);
       FF_weight_boosted = ff_boosted->value(inputs);
       FF_weight_vbf = ff_vbf->value(inputs);
-
+      
       // get the true weight per event assuming rigid categories
       if (zeroJet) {
         FF_weight = FF_weight_0jet;
@@ -458,8 +464,19 @@ int main(int argc, char* argv[]) {
         tree_cat.push_back("SS");
       }
 
+      // FF region
+      if (FF_had) {
+        tree_cat.push_back("FF_had");
+      } 
+      if (FF_light) {
+        tree_cat.push_back("FF_light");
+      }
+      if (FF_sub) {
+        tree_cat.push_back("FF_sub");
+      }
+
       std::vector<double> FF_info = {
-        FF_had, FF_light, FF_sub, FF_weight_0jet, FF_weight_boosted, FF_weight_vbf, FF_weight
+        FF_weight_0jet, FF_weight_boosted, FF_weight_vbf, FF_weight
       };
 
       // fill the tree
@@ -504,8 +521,13 @@ int main(int argc, char* argv[]) {
 
 
   } // close event loop
+ 
   histos->at("n70")->Fill(1, n70_count);
   histos->at("n70")->Write();
+
+    delete ff_0jet;
+  delete ff_boosted;
+  delete ff_vbf;
 
   fin->Close();
   fout->cd();

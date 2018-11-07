@@ -23,5 +23,5 @@ echo "${s// //}"
 set -e
 
 # this is the important part for compiling
-g++ -O3 $1 `root-config --cflags --glibs` -lRooFit -lRooFitCore -o $2
+g++ -O3 $1 `root-config --cflags --glibs`  ${CMSSW_BASE}/lib/slc6_amd64_gcc630/libHTTutilitiesJet2TauFakes.so -lRooFit -lRooFitCore -I ${CMSSW_BASE}/src -I ${CMSSW_BASE}/src/SMHTT_Analyzers/include -o $2
 cp $2 $HOME/bin
