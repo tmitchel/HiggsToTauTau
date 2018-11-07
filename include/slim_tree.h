@@ -139,9 +139,9 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("OS",                  &OS,                  "OS/I"                 );
     otree->Branch("SS",                  &SS,                  "SS/I"                 );
 
-    otree->Branch("FF_had",              &FF_had,              "FF_had/F"             );
-    otree->Branch("FF_light",            &FF_light,            "FF_light/F"           );
-    otree->Branch("FF_sub",              &FF_sub,              "FF_sub/F"             );
+    otree->Branch("FF_had",              &FF_had,              "FF_had/I"             );
+    otree->Branch("FF_light",            &FF_light,            "FF_light/I"           );
+    otree->Branch("FF_sub",              &FF_sub,              "FF_sub/I"             );
     otree->Branch("FF_weight_0jet",      &FF_weight_0jet,      "FF_weight_0jet/F"     );
     otree->Branch("FF_weight_boosted",   &FF_weight_boosted,   "FF_weight_boosted/F"  );
     otree->Branch("FF_weight_vbf",       &FF_weight_vbf,       "FF_weight_vbf/F"      );
@@ -257,16 +257,24 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
         } else if (cat == "SS") {
             SS = 1;
         }
+
+        // FF region
+        if (cat == "FF_had") {
+            FF_had = 1;
+        }
+        if (cat == "FF_light") {
+            FF_light = 1;
+        }
+        if (cat == "FF_sub") {
+            FF_sub = 1;
+        }
     }
     is_qcd = is_looseIso;
 
-    FF_had = FF_info.at(0);
-    FF_light = FF_info.at(1);
-    FF_sub = FF_info.at(2);
-    FF_weight_0jet = FF_info.at(3);
-    FF_weight_boosted = FF_info.at(4);
-    FF_weight_vbf = FF_info.at(5);
-    FF_weight = FF_info.at(6);
+    FF_weight_0jet = FF_info.at(0);
+    FF_weight_boosted = FF_info.at(1);
+    FF_weight_vbf = FF_info.at(2);
+    FF_weight = FF_info.at(3);
 }
 
 void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t mt, Float_t weight, std::vector<double> FF_info) {
