@@ -31,6 +31,14 @@
 #include "../include/EmbedWeight.h"
 #include "../include/slim_tree.h"
 
+//FF
+#include "../../../../../HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
+#include "../../../../../HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
+#include "../../../../../HTTutilities/Jet2TauFakes/interface/WrapperTFormula.h"
+#include "../../../../../HTTutilities/Jet2TauFakes/interface/WrapperTGraph.h"
+#include "../../../../../HTTutilities/Jet2TauFakes/interface/WrapperTH2F.h"
+#include "../../../../../HTTutilities/Jet2TauFakes/interface/WrapperTH3D.h"
+
 typedef std::vector<double> NumV;
 
 int main(int argc, char* argv[]) {
@@ -45,6 +53,7 @@ int main(int argc, char* argv[]) {
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
   std::string syst = parser.Option("-u");
+  std::string makeTemplate = parser.Flag("-t");
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
@@ -130,7 +139,6 @@ int main(int argc, char* argv[]) {
   RooWorkspace *wEmbed = (RooWorkspace *)embed_file.Get("w");
   embed_file.Close();
 
-  // not sure what these are exactly, yetı
   TFile *fEleRec = new TFile("inputs/EGammaRec.root");
   TH2F *histEleRec = (TH2F*)fEleRec->Get("EGamma_SF2D");
 
@@ -151,6 +159,17 @@ int main(int argc, char* argv[]) {
   TGraph * g_NNLOPS_1jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_1jet");
   TGraph * g_NNLOPS_2jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_2jet");
   TGraph * g_NNLOPS_3jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_3jet");
+
+  TFile *ff_file_0jet = TFile::Open("HTTutilities/Jet2TauFakes/data/mt/0Jet/fakeFactors_20180831_tight.root");
+  FakeFactor *ff_0jet = (FakeFactor *)ff_file_0jet->Get("ff_comb");
+  const std::vector<std::string> &inputNames_0jet = ff_0jet->inputs();
+  TFile *ff_file_boosted = TFile::Open("HTTutilities/Jet2TauFakes/data/mt/boosted/fakeFactors_20180831_tight.root");
+  FakeFactor *ff_boosted = (FakeFactor *)ff_file_boosted->Get("ff_comb");
+  const std::vector<std::string> &inputNames_boosted = ff_boosted->inputs();
+  TFile *ff_file_vbf = TFile::Open("HTTutilities/Jet2TauFakes/data/mt/vbf/fakeFactors_20180831_tight.root");
+  FakeFactor *ff_vbf = (FakeFactor *)ff_file_vbf->Get("ff_comb");
+  const std::vector<std::string> &inputNames_vbf = ff_vbf->inputs();
+  std::vector<double> inputs(9);
 
   //////////////////////////////////////
   // Final setup:                     //
@@ -341,6 +360,7 @@ int main(int argc, char* argv[]) {
         tau.scalePt(1.02);
       }
     }
+
     fout->cd();
 
     // calculate mt
@@ -350,6 +370,7 @@ int main(int argc, char* argv[]) {
     double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getPx() + met_x, 2) - pow(electron.getPy() + met_y, 2));
     int evt_charge = tau.getCharge() + electron.getCharge();
 
+    // high MT sideband for W-jets normalization
     if (mt > 80 && mt < 200 && evt_charge == 0 && tau.getTightIsoMVA() && electron.getIso() < 0.10) {
       histos->at("n70") -> Fill(0.1, evtwt);
       if (jets.getNjets() == 0 && event.getMSV() < 400)
@@ -364,7 +385,7 @@ int main(int argc, char* argv[]) {
     bool signalRegion   = (tau.getTightIsoMVA()  && electron.getIso() < 0.10);
     bool looseIsoRegion = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
     bool antiIsoRegion  = (tau.getTightIsoMVA()  && electron.getIso() > 0.10 && electron.getIso() < 0.30);
-    // bool antiIsoRegion = (tau.getTightIsoMVA() == 0 && electron.getIso() < 0.10);
+    bool antiTauIsoRegion = (tau.getVLooseIsoMVA() > 0 && tau.getTightIsoMVA() == 0 && electron.getIso() < 0.10);
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
@@ -372,38 +393,115 @@ int main(int argc, char* argv[]) {
     bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() > 50);
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
+    double FF_weight_0jet(1.), FF_weight_boosted(1.), FF_weight_vbf(1.), FF_weight(1.);
+    bool FF_had = (evt_charge == 0 && signalRegion && (isData || tau.getGenMatch() == 5));
+    bool FF_light = (evt_charge == 0 && signalRegion && !isData && tau.getGenMatch() < 5);
+    bool FF_sub = (evt_charge == 0 && antiTauIsoRegion && (isData || tau.getGenMatch() < 6));
+
+    // Fake-Factor Weights
+    if (!isData) {
+      inputs = {
+        tau.getPt(), tau.getL2DecayMode(), (double)jets.getNjets(),
+        (electron.getP4() + tau.getP4()).M(), mt, electron.getIso(),
+        0.30, 0.50, 0.10
+      };
+
+      // get all Fake-Factor Weights
+      FF_weight_0jet = ff_0jet->value(inputs);
+      FF_weight_boosted = ff_boosted->value(inputs);
+      FF_weight_vbf = ff_vbf->value(inputs);
+
+      // get the true weight per event assuming rigid categories
+      if (zeroJet) {
+        FF_weight = FF_weight_0jet;
+      } else if (boosted) {
+        FF_weight = FF_weight_boosted;
+      } else if (vbfCat) {
+        FF_weight = FF_weight_vbf;
+      }
+    }
+
     // now do mt selection
     if (tau.getPt() < 30 || mt < 50) {
       continue;
     }
 
-    std::vector<std::string> tree_cat;
+    if (!makeTemplate) {
+      std::vector<std::string> tree_cat;
 
-    // regions
-    if (signalRegion) {
-      tree_cat.push_back("signal");
-    }
-    if (antiIsoRegion) {
-      tree_cat.push_back("antiiso");
+      // regions
+      if (signalRegion) {
+        tree_cat.push_back("signal");
+      } else if (antiIsoRegion) {
+        tree_cat.push_back("antiiso");
+      }
+
+      if (looseIsoRegion) {
+        tree_cat.push_back("looseIso");
+      }
+
+      // categorization
+      if (zeroJet) {
+        tree_cat.push_back("0jet");
+      } else if (boosted) {
+        tree_cat.push_back("boosted");
+      } else if (vbfCat) {
+        tree_cat.push_back("vbf");
+      } else if (VHCat) {
+        tree_cat.push_back("VH");
+      }
+
+      // event charge
+      if (evt_charge == 0) {
+        tree_cat.push_back("OS");
+      } else {
+        tree_cat.push_back("SS");
+      }
+
+      std::vector<double> FF_info = {
+        FF_had, FF_light, FF_sub, FF_weight_0jet, FF_weight_boosted, FF_weight_vbf, FF_weight
+      };
+
+      // fill the tree
+      st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, FF_info);
+    } else {
+      // event categorizaation
+      if (zeroJet) {
+        if (signalRegion) {
+          if (evt_charge == 0) {
+            histos_2d->at("h0_OS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+          } else {
+            histos_2d->at("h0_SS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+          }
+        } // close if signal block
+        if (looseIsoRegion) {
+          histos_2d->at("h0_QCD")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        } // close if loose iso block
+      } else if (boosted) {
+        if (signalRegion) {
+          if (evt_charge == 0) {
+            histos_2d->at("h1_OS")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
+          } else {
+            histos_2d->at("h1_SS")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
+          }
+        } // close if signal block
+        if (looseIsoRegion) {
+          histos_2d->at("h1_QCD")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        } // close if loose iso block
+      } else if (vbfCat) {
+        if (signalRegion) {
+          if (evt_charge == 0) {
+            histos_2d->at("h2_OS")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+          } else {
+            histos_2d->at("h2_SS")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+          }
+        } // close if signal block
+        if (looseIsoRegion) {
+          histos_2d->at("h2_QCD")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        } // close if loose iso block
+      }
     }
 
-    if (looseIsoRegion) {
-      tree_cat.push_back("looseIso");
-    }
-
-    // categorization
-    if (zeroJet) {
-      tree_cat.push_back("0jet");
-    } else if (boosted) {
-      tree_cat.push_back("boosted");
-    } else if (vbfCat) {
-      tree_cat.push_back("vbf");
-    } else if (VHCat) {
-      tree_cat.push_back("VH");
-    }
-
-    // fill the tree
-    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
 
   } // close event loop
   histos->at("n70")->Fill(1, n70_count);

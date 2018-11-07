@@ -13,11 +13,11 @@ public:
     void fillTree(std::vector<std::string>, electron*  , tau*, jet_factory*, met_factory*, event_info*, Float_t, Float_t);
     void fillTree(std::vector<std::string>, muon*      , tau*, jet_factory*, met_factory*, event_info*, Float_t, Float_t);
     void fillTree(std::vector<std::string>, ditau*     , ditau*, jet_factory*, met_factory*, event_info*, Float_t);
-    void generalFill(std::vector<std::string>, jet_factory*, met_factory*, event_info*, Float_t, TLorentzVector, Float_t);
+    void generalFill(std::vector<std::string>, jet_factory*, met_factory*, event_info*, Float_t, TLorentzVector, Float_t, std::vector<float>);
 
     // member data
     TTree* otree;
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiiso, is_qcd, is_looseIso;
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiiso, is_qcd, is_looseIso, FF_had, FF_light, FF_sub, OS, SS;
     Float_t evtwt,
         el_pt, el_eta, el_phi, el_mass, el_charge, el_iso,
         mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
@@ -136,9 +136,19 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("cat_boosted",         &cat_boosted,         "cat_boosted/I"        );
     otree->Branch("cat_vbf",             &cat_vbf,             "cat_vbf/I"            );
     otree->Branch("cat_VH",              &cat_VH,              "cat_VH/I"             );
+    otree->Branch("OS",                  &OS,                  "OS/I"                 );
+    otree->Branch("SS",                  &SS,                  "SS/I"                 );
+
+    otree->Branch("FF_had",              &FF_had,              "FF_had/F"             );
+    otree->Branch("FF_light",            &FF_light,            "FF_light/F"           );
+    otree->Branch("FF_sub",              &FF_sub,              "FF_sub/F"             );
+    otree->Branch("FF_weight_0jet",      &FF_weight_0jet,      "FF_weight_0jet/F"     );
+    otree->Branch("FF_weight_boosted",   &FF_weight_boosted,   "FF_weight_boosted/F"  );
+    otree->Branch("FF_weight_vbf",       &FF_weight_vbf,       "FF_weight_vbf/F"      );
+    otree->Branch("FF_weight",           &FF_weight,           "FF_weight/F"          );
 }
 
-void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, TLorentzVector higgs, Float_t Mt) {
+void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, TLorentzVector higgs, Float_t Mt, std::vector<float> FF_info) {
     // create things needed for later
     auto jets(fjets->getJets());
 
@@ -215,6 +225,8 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     cat_boosted = 0;
     cat_vbf = 0;
     cat_VH = 0;
+    OS = 0;
+    SS = 0;
 
     // decide on which selections have been passed
     for (auto cat : cats) {
@@ -238,9 +250,23 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
         } else if (cat == "VH") {
             cat_VH = 1;
         }
+
+        // event charge
+        if (cat == "OS") {
+            OS = 1;
+        } else if (cat == "SS") {
+            SS = 1;
+        }
     }
     is_qcd = is_looseIso;
 
+    FF_had = FF_info.at(0);
+    FF_light = FF_info.at(1);
+    FF_sub = FF_info.at(2);
+    FF_weight_0jet = FF_info.at(3);
+    FF_weight_boosted = FF_info.at(4);
+    FF_weight_vbf = FF_info.at(5);
+    FF_weight = FF_info.at(6);
 }
 
 void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t mt, Float_t weight) {
