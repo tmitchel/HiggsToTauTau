@@ -2,6 +2,7 @@
 #define UTIL_H
 
 #include <map>
+#include <unordered_map>
 
 class Helper {
   private:
@@ -112,26 +113,23 @@ luminosity(35870.),
       Int_t binnum_pth = sizeof(bins_pth) / sizeof(Float_t) - 1;
       Int_t binnum_taupt = sizeof(bins_taupt) / sizeof(Float_t) - 1;
       Int_t binnum_mjj = sizeof(bins_mjj) / sizeof(Float_t) - 1;
+
       fout->mkdir("et_0jet");
       fout->mkdir("et_boosted");
-      fout->mkdir("et_ZH");
       fout->mkdir("et_vbf");
-      fout->mkdir("et_antiiso_0jet_cr");
-      fout->mkdir("et_antiiso_boosted_cr");
-      fout->mkdir("et_antiiso_vbf_cr");
-      fout->mkdir("et_antiiso_ZH_cr");
-      fout->mkdir("et_wjets_0jet_cr");
-      fout->mkdir("et_wjets_boosted_cr");
-      fout->mkdir("et_wjets_vbf_cr");
-      fout->mkdir("et_wjets_ZH_cr");
-      fout->mkdir("et_antiiso_0jet_crSS");
-      fout->mkdir("et_antiiso_boosted_crSS");
-      fout->mkdir("et_antiiso_vbf_crSS");
-      fout->mkdir("et_antiiso_ZH_crSS");
-      fout->mkdir("et_wjets_0jet_crSS");
-      fout->mkdir("et_wjets_boosted_crSS");
-      fout->mkdir("et_wjets_vbf_crSS");
-      fout->mkdir("et_wjets_ZH_crSS");
+      fout->mkdir("et_SS_0jet");
+      fout->mkdir("et_SS_boosted");
+      fout->mkdir("et_SS_vbf");
+      fout->mkdir("et_antiLepIso_0jet");
+      fout->mkdir("et_antiLepIso_boosted");
+      fout->mkdir("et_antiLepIso_vbf");
+      fout->mkdir("et_antiTauIso_0jet");
+      fout->mkdir("et_antiTauIso_boosted");
+      fout->mkdir("et_antiTauIso_vbf");
+      fout->mkdir("et_looseIso_0jet");
+      fout->mkdir("et_looseIso_boosted");
+      fout->mkdir("et_looseIso_vbf");
+
       // Signal Region
       fout->cd("et_0jet");
       histos_2d.insert({"h0_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_taupt, bins_taupt, binnum0, bins0)});
@@ -139,44 +137,60 @@ luminosity(35870.),
       histos_2d.insert({"h1_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_pth, bins_pth, binnum1, bins1)});
       fout->cd("et_vbf");
       histos_2d.insert({"h2_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
-      fout->cd("et_ZH");
-      histos_2d.insert({"h3_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
-      // QCD Region
-      fout->cd("et_antiiso_0jet_cr");
-      histos_2d.insert({"h0_QCD", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_taupt, bins_taupt, binnum0, bins0)});
-      fout->cd("et_antiiso_boosted_cr");
-      histos_2d.insert({"h1_QCD", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_pth, bins_pth, binnum1, bins1)});
-      fout->cd("et_antiiso_vbf_cr");
-      histos_2d.insert({"h2_QCD", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
-      fout->cd("et_antiiso_ZH_cr");
-      histos_2d.insert({"h3_QCD", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
-      // W Region
-      fout->cd("et_wjets_0jet_cr");
-      histos_2d.insert({"h0_WOS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_taupt, bins_taupt, binnum0, bins0)});
-      fout->cd("et_wjets_boosted_cr");
-      histos_2d.insert({"h1_WOS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_pth, bins_pth, binnum1, bins1)});
-      fout->cd("et_wjets_vbf_cr");
-      histos_2d.insert({"h2_WOS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
-      fout->cd("et_wjets_ZH_cr");
-      histos_2d.insert({"h3_WOS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
-      // Same-sign
-      fout->cd("et_antiiso_0jet_crSS");
+
+      fout->cd("et_SS_0jet");
       histos_2d.insert({"h0_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_taupt, bins_taupt, binnum0, bins0)});
-      fout->cd("et_antiiso_boosted_crSS");
+      fout->cd("et_SS_boosted");
       histos_2d.insert({"h1_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_pth, bins_pth, binnum1, bins1)});
-      fout->cd("et_antiiso_vbf_crSS");
+      fout->cd("et_SS_vbf");
       histos_2d.insert({"h2_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
-      fout->cd("et_antiiso_ZH_crSS");
-      histos_2d.insert({"h3_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
-      // W Same-sign
-      fout->cd("et_wjets_0jet_crSS");
-      histos_2d.insert({"h0_WSS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_taupt, bins_taupt, binnum0, bins0)});
-      fout->cd("et_wjets_boosted_crSS");
-      histos_2d.insert({"h1_WSS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_pth, bins_pth, binnum1, bins1)});
-      fout->cd("et_wjets_vbf_crSS");
-      histos_2d.insert({"h2_WSS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
-      fout->cd("et_wjets_ZH_crSS");
-      histos_2d.insert({"h3_WSS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
+
+      // Anti-Isolated Lepton Region
+      fout->cd("et_antiLepIso_0jet_OS");
+      histos_2d.insert({"h0_anti_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_taupt, bins_taupt, binnum0, bins0)});
+      fout->cd("et_antiLepIso_boosted_OS");
+      histos_2d.insert({"h1_anti_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_pth, bins_pth, binnum1, bins1)});
+      fout->cd("et_antiLepIso_vbf_OS");
+      histos_2d.insert({"h2_anti_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
+
+      fout->cd("et_antiLepIso_0jet_SS");
+      histos_2d.insert({"h0_anti_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_taupt, bins_taupt, binnum0, bins0)});
+      fout->cd("et_antiLepIso_boosted_SS");
+      histos_2d.insert({"h1_anti_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_pth, bins_pth, binnum1, bins1)});
+      fout->cd("et_antiLepIso_vbf_SS");
+      histos_2d.insert({"h2_anti_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
+
+      // Anti-Isolated Tau Region
+      fout->cd("et_antiTauIso_0jet_OS");
+      histos_2d.insert({"h0_Fake_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_taupt, bins_taupt, binnum0, bins0)});
+      fout->cd("et_antiTauIso_boosted_OS");
+      histos_2d.insert({"h1_Fake_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_pth, bins_pth, binnum1, bins1)});
+      fout->cd("et_antiTauIso_vbf_OS");
+      histos_2d.insert({"h2_Fake_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
+
+      fout->cd("et_antiTauIso_0jet_SS");
+      histos_2d.insert({"h0_Fake_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_taupt, bins_taupt, binnum0, bins0)});
+      fout->cd("et_antiTauIso_boosted_SS");
+      histos_2d.insert({"h1_Fake_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_pth, bins_pth, binnum1, bins1)});
+      fout->cd("et_antiTauIso_vbf_SS");
+      histos_2d.insert({"h2_Fake_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
+
+      // Loose-Isolated Region
+      fout->cd("et_looseIso_0jet_OS");
+      histos_2d.insert({"h0_loose_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_taupt, bins_taupt, binnum0, bins0)});
+      fout->cd("et_looseIso_boosted_OS");
+      histos_2d.insert({"h1_loose_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_pth, bins_pth, binnum1, bins1)});
+      fout->cd("et_looseIso_vbf_OS");
+      histos_2d.insert({"h2_loose_OS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
+
+      fout->cd("et_looseIso_0jet_SS");
+      histos_2d.insert({"h0_loose_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_taupt, bins_taupt, binnum0, bins0)});
+      fout->cd("et_looseIso_boosted_SS");
+      histos_2d.insert({"h1_loose_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_pth, bins_pth, binnum1, bins1)});
+      fout->cd("et_looseIso_vbf_SS");
+      histos_2d.insert({"h2_loose_SS", new TH2F((name + suffix).c_str(), "Invariant mass", binnum_mjj, bins_mjj, binnum2, bins2)});
+
+      
 }
 
 double GetZmmSF(float jets, float mj, float pthi, float taupt, float syst) {
@@ -211,6 +225,5 @@ double GetZmmSF(float jets, float mj, float pthi, float taupt, float syst) {
   }
   return aweight;
 }
-
 
 #endif

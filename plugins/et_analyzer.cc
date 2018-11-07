@@ -171,11 +171,6 @@ int main(int argc, char* argv[]) {
   const std::vector<std::string> &inputNames_vbf = ff_vbf->inputs();
   std::vector<double> inputs(9);
 
-  // ff_file_0jet.Close();
-  // ff_file_boosted.Close();
-  // ff_file_vbf.Close();
-
-
   //////////////////////////////////////
   // Final setup:                     //
   // Declare histograms and factories //
@@ -482,50 +477,109 @@ int main(int argc, char* argv[]) {
       // fill the tree
       st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, FF_info);
     } else {
+
       // event categorizaation
       if (zeroJet) {
+
         if (signalRegion) {
           if (evt_charge == 0) {
             histos_2d->at("h0_OS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
           } else {
             histos_2d->at("h0_SS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
           }
-        } // close if signal block
+        } 
         if (looseIsoRegion) {
-          histos_2d->at("h0_QCD")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        } // close if loose iso block
+          if (evt_charge == 0){
+            histos_2d->at("h0_loose_OS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+          } else {
+            histos_2d->at("h0_loose_SS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+          }
+        }
+        if (antiIsoRegion) {
+          if (evt_charge == 0) {
+            histos_2d->at("h0_anti_OS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+          } else {
+            histos_2d->at("h0_anti_SS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+          }
+        }
+        if (antiTauIsoRegion) {
+          if (evt_charge == 0) {
+            histos_2d->at("h0_Fake_OS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+          } else {
+            histos_2d->at("h0_Fake_SS")->Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+          }
+        }
+
       } else if (boosted) {
+
         if (signalRegion) {
           if (evt_charge == 0) {
             histos_2d->at("h1_OS")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
           } else {
             histos_2d->at("h1_SS")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
           }
-        } // close if signal block
+        } 
         if (looseIsoRegion) {
-          histos_2d->at("h1_QCD")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } // close if loose iso block
+          if (evt_charge == 0) {
+            histos_2d->at("h1_loose_OS")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
+          } else {
+            histos_2d->at("h1_loose_SS")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
+          }
+        } 
+        if (antiIsoRegion) {
+          if (evt_charge == 0) {
+            histos_2d->at("h1_anti_OS")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
+          } else {
+            histos_2d->at("h1_anti_SS")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
+          }
+        }
+        if (antiTauIsoRegion) {
+          if (evt_charge == 0) {
+            histos_2d->at("h1_Fake_OS")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
+          } else {
+            histos_2d->at("h1_Fake_SS")->Fill(Higgs.Pt(), event.getMSV(), evtwt);
+          }
+        }
+
       } else if (vbfCat) {
+
         if (signalRegion) {
           if (evt_charge == 0) {
             histos_2d->at("h2_OS")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
           } else {
             histos_2d->at("h2_SS")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
           }
-        } // close if signal block
+        } 
         if (looseIsoRegion) {
-          histos_2d->at("h2_QCD")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } // close if loose iso block
+          if (evt_charge == 0) {
+            histos_2d->at("h2_loose_OS")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+          } else {
+            histos_2d->at("h2_loose_SS")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+          }
+        } 
+        if (antiIsoRegion) {
+          if (evt_charge == 0) {
+            histos_2d->at("h2_anti_OS")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+          } else {
+            histos_2d->at("h2_anti_SS")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+          }
+        }
+        if (antiTauIsoRegion) {
+          if (evt_charge == 0) {
+            histos_2d->at("h2_Fake_OS")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+          } else {
+            histos_2d->at("h2_Fake_SS")->Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+          }
+        }
+
       }
     }
-
-
   } // close event loop
  
   histos->at("n70")->Fill(1, n70_count);
   histos->at("n70")->Write();
 
-    delete ff_0jet;
+  delete ff_0jet;
   delete ff_boosted;
   delete ff_vbf;
 
