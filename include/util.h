@@ -27,7 +27,7 @@ public:
 };
 
 Helper::Helper(TFile *fout, std::string name, std::string syst) : 
-luminosity(35870.), 
+luminosity(41500.), 
   systematics {
     {"met_UESDown", "_CMS_scale_met_unclustered_13TeVDown"},
     {"met_UESUp", "_CMS_scale_met_unclustered_13TeVUp"},
@@ -39,15 +39,15 @@ luminosity(35870.),
     {"metphi_JESUp", "_CMS_scale_metphi_clustered_13TeVUp"}
   },
   cross_sections {
-    {"DYJets", 5765.4},
-    {"DYJets_ext1", 5765.4},
-    {"DYJets1", 5765.4},
-    {"DYJets1_ext", 5765.4},
-    {"DYJets2", 5765.4},
-    {"DYJets2_ext", 5765.4},
-    {"DYJets3", 5765.4},
-    {"DYJets3_ext", 5765.4},
-    {"DYJets4", 5765.4},
+    {"DYJets", 6225.42},
+    {"DYJets_ext1", 6225.42},
+    {"DYJets1", 6225.42},
+    {"DYJets1_ext", 6225.42},
+    {"DYJets2", 6225.42},
+    {"DYJets2_ext", 6225.42},
+    {"DYJets3", 6225.42},
+    {"DYJets3_ext", 6225.42},
+    {"DYJets4", 6225.42},
     {"EWKMinus", 20.25},
     {"EWKPlus", 25.62},
     {"EWKZ2l", 3.987},
@@ -58,8 +58,8 @@ luminosity(35870.),
     {"T-tchan", 44.07},
     {"TT", 831.76},
     {"TTHad", 377.96},
-    {"TTLep", 365.35},
-    {"TTSemi", 831.76},
+    {"TTLep", 88.29},
+    {"TTSemi", 365.35},
     {"VV2l2nu", 11.95},
     {"WJets", 61526.7},
     {"WJets_ext1", 61526.7},
@@ -97,8 +97,36 @@ luminosity(35870.),
   histos_1d {
     {"n70", new TH1F("n70", "n70", 6, 0, 6)},
     {"cutflow", new TH1F("cutflow", "Cutflow", 12, -0.5, 11.5)},
+    {"weightflow", new TH1F("weightflow", "weightflow", 10, 0.5, 10.5)},
+    
   }
 {
+      auto hweights = new TH2F("weights","weights", 10, 0.5, 10.5, 800, -2, 2);
+      hweights -> GetXaxis() -> SetBinLabel(1, "xs*lumi/gen");
+      hweights -> GetXaxis() -> SetBinLabel(2, "stitch");
+      hweights -> GetXaxis() -> SetBinLabel(3, "trig SF");
+      hweights -> GetXaxis() -> SetBinLabel(4, "ID SF");
+      hweights -> GetXaxis() -> SetBinLabel(5, "pileup corr");
+      hweights -> GetXaxis() -> SetBinLabel(6, "gen weight");
+      hweights -> GetXaxis() -> SetBinLabel(7, "htt sf");
+      hweights -> GetXaxis() -> SetBinLabel(8, "anti-lepton");
+      hweights -> GetXaxis() -> SetBinLabel(9, "z pt");
+      hweights -> GetXaxis() -> SetBinLabel(10, "zmm");
+      histos_2d["weights"] = hweights;
+
+      auto hweightflow = histos_1d.at("weightflow");
+      hweightflow -> GetXaxis() -> SetBinLabel(1, "xs*lumi/gen");
+      hweightflow -> GetXaxis() -> SetBinLabel(2, "stitch");
+      hweightflow -> GetXaxis() -> SetBinLabel(3, "trig SF");
+      hweightflow -> GetXaxis() -> SetBinLabel(4, "ID SF");
+      hweightflow -> GetXaxis() -> SetBinLabel(5, "pileup corr");
+      hweightflow -> GetXaxis() -> SetBinLabel(6, "gen weight");
+      hweightflow -> GetXaxis() -> SetBinLabel(7, "htt sf");
+      hweightflow -> GetXaxis() -> SetBinLabel(8, "anti-lepton");
+      hweightflow -> GetXaxis() -> SetBinLabel(9, "z pt");
+      hweightflow -> GetXaxis() -> SetBinLabel(10, "zmm");
+      histos_1d["weightflow"] = hweightflow;
+
       std::string suffix = systematics[syst];
 
       Float_t bins0[] = {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400};
@@ -120,15 +148,24 @@ luminosity(35870.),
       fout->mkdir("et_SS_0jet");
       fout->mkdir("et_SS_boosted");
       fout->mkdir("et_SS_vbf");
-      fout->mkdir("et_antiLepIso_0jet");
-      fout->mkdir("et_antiLepIso_boosted");
-      fout->mkdir("et_antiLepIso_vbf");
-      fout->mkdir("et_antiTauIso_0jet");
-      fout->mkdir("et_antiTauIso_boosted");
-      fout->mkdir("et_antiTauIso_vbf");
-      fout->mkdir("et_looseIso_0jet");
-      fout->mkdir("et_looseIso_boosted");
-      fout->mkdir("et_looseIso_vbf");
+      fout->mkdir("et_antiLepIso_0jet_OS");
+      fout->mkdir("et_antiLepIso_boosted_OS");
+      fout->mkdir("et_antiLepIso_vbf_OS");
+      fout->mkdir("et_antiLepIso_0jet_SS");
+      fout->mkdir("et_antiLepIso_boosted_SS");
+      fout->mkdir("et_antiLepIso_vbf_SS");
+      fout->mkdir("et_antiTauIso_0jet_OS");
+      fout->mkdir("et_antiTauIso_boosted_OS");
+      fout->mkdir("et_antiTauIso_vbf_OS");
+      fout->mkdir("et_antiTauIso_0jet_SS");
+      fout->mkdir("et_antiTauIso_boosted_SS");
+      fout->mkdir("et_antiTauIso_vbf_SS");
+      fout->mkdir("et_looseIso_0jet_OS");
+      fout->mkdir("et_looseIso_boosted_OS");
+      fout->mkdir("et_looseIso_vbf_OS");
+      fout->mkdir("et_looseIso_0jet_SS");
+      fout->mkdir("et_looseIso_boosted_SS");
+      fout->mkdir("et_looseIso_vbf_SS");
 
       // Signal Region
       fout->cd("et_0jet");
