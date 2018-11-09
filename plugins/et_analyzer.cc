@@ -450,8 +450,13 @@ int main(int argc, char* argv[]) {
     }
 
     // now do mt selection
-    if (tau.getPt() < 30 || mt < 50) {
+    if (tau.getPt() < 30 || mt > 50) {
       continue;
+    }
+
+    if (signalRegion && evt_charge == 0) {
+      histos->at("el_pt") -> Fill(electron.getPt(), evtwt);
+      histos->at("tau_pt") -> Fill(tau.getPt(), evtwt);
     }
 
     std::vector<std::string> tree_cat;

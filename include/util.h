@@ -98,7 +98,8 @@ luminosity(41500.),
     {"n70", new TH1F("n70", "n70", 6, 0, 6)},
     {"cutflow", new TH1F("cutflow", "Cutflow", 12, -0.5, 11.5)},
     {"weightflow", new TH1F("weightflow", "weightflow", 10, 0.5, 10.5)},
-    
+    {"el_pt", new TH1F("el_pt", "el_pt", 12, 0, 300)},
+    {"tau_pt", new TH1F("tau_pt", "tau_pt", 12, 0, 300)},
   }
 {
       auto hweights = new TH2F("weights","weights", 10, 0.5, 10.5, 800, -2, 2);
