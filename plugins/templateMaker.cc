@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
     hists->initVectors(name);
 
     // I hate doing it like this, but when I move the SetBranchAddress I see unexpected behavior
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_qcd, is_antiiso, is_looseIso;
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_qcd, is_antiLepIso, is_antiTauIso, is_looseIso, OS, SS;
     Float_t eq, tq, hpt, mt, mjj, var, weight;
     Float_t njets, nbjets;
 
@@ -104,17 +104,20 @@ int main(int argc, char *argv[]) {
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("is_signal", &is_signal);
     tree->SetBranchAddress("is_qcd", &is_qcd);
-    tree->SetBranchAddress("is_antiiso", &is_antiiso);
+    tree->SetBranchAddress("is_antiLepIso", &is_antiLepIso);
+    tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("is_looseIso", &is_looseIso);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
     tree->SetBranchAddress("cat_boosted", &cat_boosted);
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
     tree->SetBranchAddress("cat_VH", &cat_VH);
+    tree->SetBranchAddress("OS", &OS);
+    tree->SetBranchAddress("SS", &SS);
 
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
-      
-      if (eq + tq == 0) {
+     
+      if (OS) {
         // output histograms for the template
         if (is_signal > 0) {
           hists->hists.at(channel_prefix+"_inclusive").back()->Fill(var, weight);
@@ -124,7 +127,7 @@ int main(int argc, char *argv[]) {
           if (cat_boosted > 0) {
             hists->hists.at(channel_prefix+"_boosted").back()->Fill(var, weight);
           }
-          if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
+          if (cat_vbf > 0) {
             hists->hists.at(channel_prefix+"_vbf").back()->Fill(var, weight);
           }
         }
@@ -138,7 +141,7 @@ int main(int argc, char *argv[]) {
           if (cat_boosted) {
             fillQCD(hists->qcd_boosted, name, var, weight);
           }
-          if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
+          if (cat_vbf > 0) {
             fillQCD(hists->qcd_vbf, name, var, weight);
           }
         }
@@ -152,7 +155,7 @@ int main(int argc, char *argv[]) {
           if (cat_boosted > 0) {
             fillQCD(hists->qcd_boosted_SS, name, var, weight);
           }
-          if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
+          if (cat_vbf > 0) {
             fillQCD(hists->qcd_vbf_SS, name, var, weight);
           }
         }
@@ -236,54 +239,54 @@ void histHolder::writeHistos() {
     TH1F* allBkg = new TH1F("allBkg", "allBkg", bins.at(0), bins.at(1), bins.at(2));
     for (auto hist : cat.second) {
       hist->Write();
-      std::string name = hist->GetName();
-      if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT"  || 
-          name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "ZTT") 
-      {
-        allBkg->Add(hist);
-      }
-      allBkg->Write();
+      // std::string name = hist->GetName();
+      // if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT"  || 
+      //     name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "ZTT") 
+      // {
+      //   allBkg->Add(hist);
+      // }
+      // allBkg->Write();
     }
   }
 
-  fout->cd((channel_prefix+"_inclusive").c_str());
-  qcd_inclusive->SetName("QCD");
-  qcd_inclusive->Scale(1.0 * qcd_inclusive_SS->Integral() / qcd_inclusive->Integral());
-  for (auto i = 0; i < qcd_inclusive->GetNbinsX(); i++) {
-    if (qcd_inclusive->GetBinContent(i) < 0) {
-      qcd_inclusive->SetBinContent(i, 0);
-    }
-  }
-  qcd_inclusive->Write();
-
-  fout->cd((channel_prefix+"_0jet").c_str());
-  qcd_0jet->SetName("QCD");
-  qcd_0jet->Scale(1.0 * qcd_0jet_SS->Integral() / qcd_0jet->Integral());
-  for (auto i = 0; i < qcd_0jet->GetNbinsX(); i++) {
-    if (qcd_0jet->GetBinContent(i) < 0) {
-      qcd_0jet->SetBinContent(i, 0);
-    }
-  }
-  qcd_0jet->Write();
-
-  fout->cd((channel_prefix+"_boosted").c_str());
-  qcd_boosted->SetName("QCD");
-  qcd_boosted->Scale(1.28 * qcd_boosted_SS->Integral() / qcd_boosted->Integral());
-  for (auto i = 0; i < qcd_boosted->GetNbinsX(); i++) {
-    if (qcd_boosted->GetBinContent(i) < 0) {
-      qcd_boosted->SetBinContent(i, 0);
-    }
-  }
-  qcd_boosted->Write();
-
-  fout->cd((channel_prefix+"_vbf").c_str());
-  qcd_vbf->SetName("QCD");
-  qcd_vbf->Scale(1.0 * qcd_vbf_SS->Integral() / qcd_vbf->Integral());
-  for (auto i = 0; i < qcd_vbf->GetNbinsX(); i++) {
-    if (qcd_vbf->GetBinContent(i) < 0) {
-      qcd_vbf->SetBinContent(i, 0);
-    }
-  }
-  qcd_vbf->Write();
+//  fout->cd((channel_prefix+"_inclusive").c_str());
+//  qcd_inclusive->SetName("QCD");
+//  qcd_inclusive->Scale(1.0 * qcd_inclusive_SS->Integral() / qcd_inclusive->Integral());
+//  for (auto i = 0; i < qcd_inclusive->GetNbinsX(); i++) {
+//    if (qcd_inclusive->GetBinContent(i) < 0) {
+//      qcd_inclusive->SetBinContent(i, 0);
+//    }
+//  }
+//  qcd_inclusive->Write();
+//
+//  fout->cd((channel_prefix+"_0jet").c_str());
+//  qcd_0jet->SetName("QCD");
+//  qcd_0jet->Scale(1.0 * qcd_0jet_SS->Integral() / qcd_0jet->Integral());
+//  for (auto i = 0; i < qcd_0jet->GetNbinsX(); i++) {
+//    if (qcd_0jet->GetBinContent(i) < 0) {
+//      qcd_0jet->SetBinContent(i, 0);
+//    }
+//  }
+//  qcd_0jet->Write();
+//
+//  fout->cd((channel_prefix+"_boosted").c_str());
+//  qcd_boosted->SetName("QCD");
+//  qcd_boosted->Scale(1.28 * qcd_boosted_SS->Integral() / qcd_boosted->Integral());
+//  for (auto i = 0; i < qcd_boosted->GetNbinsX(); i++) {
+//    if (qcd_boosted->GetBinContent(i) < 0) {
+//      qcd_boosted->SetBinContent(i, 0);
+//    }
+//  }
+//  qcd_boosted->Write();
+//
+//  fout->cd((channel_prefix+"_vbf").c_str());
+//  qcd_vbf->SetName("QCD");
+//  qcd_vbf->Scale(1.0 * qcd_vbf_SS->Integral() / qcd_vbf->Integral());
+//  for (auto i = 0; i < qcd_vbf->GetNbinsX(); i++) {
+//    if (qcd_vbf->GetBinContent(i) < 0) {
+//      qcd_vbf->SetBinContent(i, 0);
+//    }
+//  }
+//  qcd_vbf->Write();
   fout->Close();
 }

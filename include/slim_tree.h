@@ -10,19 +10,19 @@ public:
 
     // member functions
     // fill the tree for this event
-    void fillTree(std::vector<std::string>, electron*  , tau*, jet_factory*, met_factory*, event_info*, Float_t, Float_t, std::vector<double>);
-    void fillTree(std::vector<std::string>, muon*      , tau*, jet_factory*, met_factory*, event_info*, Float_t, Float_t, std::vector<double>);
-    void fillTree(std::vector<std::string>, ditau*     , ditau*, jet_factory*, met_factory*, event_info*, Float_t, std::vector<double>);
-    void generalFill(std::vector<std::string>, jet_factory*, met_factory*, event_info*, Float_t, TLorentzVector, Float_t, std::vector<double>);
+    void fillTree(std::vector<std::string>, electron*  , tau*, jet_factory*, met_factory*, event_info*, Float_t, Float_t, double);
+    void fillTree(std::vector<std::string>, muon*      , tau*, jet_factory*, met_factory*, event_info*, Float_t, Float_t, double);
+    void fillTree(std::vector<std::string>, ditau*     , ditau*, jet_factory*, met_factory*, event_info*, Float_t, double);
+    void generalFill(std::vector<std::string>, jet_factory*, met_factory*, event_info*, Float_t, TLorentzVector, Float_t, double);
 
     // member data
     TTree* otree;
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiiso, is_qcd, is_looseIso, FF_had, FF_light, FF_sub, OS, SS;
-    Float_t evtwt, FF_weight_0jet, FF_weight_boosted, FF_weight_vbf, FF_weight,
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiLepIso, is_antiTauIso, is_qcd, is_looseIso, OS, SS;
+    Float_t evtwt, FF_weight,
         el_pt, el_eta, el_phi, el_mass, el_charge, el_iso,
         mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
-        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode, // t1 is used for et and mt, as well
-        t2_pt, t2_eta, t2_phi, t2_mass, t2_charge, t2_iso_VL, t2_iso_L, t2_iso_M, t2_iso_T, t2_iso_VT, t2_iso_VVT, t2_decayMode,
+        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode, t1_genMatch, // t1 is used for et and mt, as well
+        t2_pt, t2_eta, t2_phi, t2_mass, t2_charge, t2_iso_VL, t2_iso_L, t2_iso_M, t2_iso_T, t2_iso_VT, t2_iso_VVT, t2_decayMode, t2_genMatch,
         njets, nbjets,
         j1_pt, j1_eta, j1_phi,
         j2_pt, j2_eta, j2_phi,
@@ -63,6 +63,7 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("t1_decayMode",        &t1_decayMode,        "t1_decayMode/F"       );
     otree->Branch("t1_dmf",              &dmf,                 "t1_dmf/F"             );
     otree->Branch("t1_dmf_new",          &dmf_new,             "t1_dmf_new/F"         );
+    otree->Branch("t1_genMatch",         &t1_genMatch,         "t1_genMatch/F"        );
     otree->Branch("t2_pt",               &t2_pt,               "t2_pt/F"              );
     otree->Branch("t2_eta",              &t2_eta,              "t2_eta/F"             );
     otree->Branch("t2_phi",              &t2_phi,              "t2_phi/F"             );
@@ -77,6 +78,7 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("t2_decayMode",        &t2_decayMode,        "t2_decayMode/F"       );
     otree->Branch("t2_dmf",              &dmf,                 "t2_dmf/F"             );
     otree->Branch("t2_dmf_new",          &dmf_new,             "t2_dmf_new/F"         );
+    otree->Branch("t2_genMatch",         &t2_genMatch,         "t2_genMatch/F"        );
 
     otree->Branch("njets",               &njets,               "njets"                );
     otree->Branch("nbjets",              &nbjets,              "nbjets"               ); 
@@ -112,13 +114,13 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("costhetastar",        &costhetastar,        "costhetastar/F"       );
     otree->Branch("Q2V1"        ,        &Q2V1        ,        "Q2V1/F"               );
     otree->Branch("Q2V2"        ,        &Q2V2        ,        "Q2V2/F"               );
-    otree->Branch("ME_sm_VBF"   ,        &ME_sm_VBF    ,        "ME_sm_/F"            );
-    otree->Branch("ME_sm_ggH"   ,        &ME_sm_ggH    ,        "ME_sm_/F"            );
-    otree->Branch("ME_sm_WH"    ,        &ME_sm_WH     ,        "ME_sm_WH/F"          );
-    otree->Branch("ME_sm_ZH"    ,        &ME_sm_ZH     ,        "ME_sm_ZH/F"          );
-    otree->Branch("ME_bkg"      ,        &ME_bkg       ,        "MEbkg_/F"            );
-    otree->Branch("ME_bkg1"     ,        &ME_bkg1      ,        "MEbkg1_/F"           );
-    otree->Branch("ME_bkg2"     ,        &ME_bkg2      ,        "MEbkg2_/F"           );
+    otree->Branch("ME_sm_VBF"   ,        &ME_sm_VBF    ,       "ME_sm_/F"             );
+    otree->Branch("ME_sm_ggH"   ,        &ME_sm_ggH    ,       "ME_sm_/F"             );
+    otree->Branch("ME_sm_WH"    ,        &ME_sm_WH     ,       "ME_sm_WH/F"           );
+    otree->Branch("ME_sm_ZH"    ,        &ME_sm_ZH     ,       "ME_sm_ZH/F"           );
+    otree->Branch("ME_bkg"      ,        &ME_bkg       ,       "MEbkg_/F"             );
+    otree->Branch("ME_bkg1"     ,        &ME_bkg1      ,       "MEbkg1_/F"            );
+    otree->Branch("ME_bkg2"     ,        &ME_bkg2      ,       "MEbkg2_/F"            );
 
     otree->Branch("higgs_pT",            &higgs_pT,            "higgs_pT/F"           );
     otree->Branch("higgs_m",             &higgs_m,             "higgs_m/F"            );
@@ -129,7 +131,8 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("dPhijj",              &dPhijj,              "dPhijj/F"             );
 
     otree->Branch("is_signal",           &is_signal,           "is_signal/I"          );
-    otree->Branch("is_antiiso",          &is_antiiso,          "is_antiiso/I"         );
+    otree->Branch("is_antiLepIso",       &is_antiLepIso,       "is_antiLepIso/I"      );
+    otree->Branch("is_antiTauIso",       &is_antiTauIso,       "is_antiTauIso/I"      );
     otree->Branch("is_qcd",              &is_qcd,              "is_qcd/I"             );
     otree->Branch("is_looseIso",         &is_looseIso,         "is_looseIso/I"        );
     otree->Branch("cat_0jet",            &cat_0jet,            "cat_0jet/I"           );
@@ -139,16 +142,10 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("OS",                  &OS,                  "OS/I"                 );
     otree->Branch("SS",                  &SS,                  "SS/I"                 );
 
-    otree->Branch("FF_had",              &FF_had,              "FF_had/I"             );
-    otree->Branch("FF_light",            &FF_light,            "FF_light/I"           );
-    otree->Branch("FF_sub",              &FF_sub,              "FF_sub/I"             );
-    otree->Branch("FF_weight_0jet",      &FF_weight_0jet,      "FF_weight_0jet/F"     );
-    otree->Branch("FF_weight_boosted",   &FF_weight_boosted,   "FF_weight_boosted/F"  );
-    otree->Branch("FF_weight_vbf",       &FF_weight_vbf,       "FF_weight_vbf/F"      );
     otree->Branch("FF_weight",           &FF_weight,           "FF_weight/F"          );
 }
 
-void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, TLorentzVector higgs, Float_t Mt, std::vector<double> FF_info) {
+void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, TLorentzVector higgs, Float_t Mt, double ff_weight) {
     // create things needed for later
     auto jets(fjets->getJets());
 
@@ -218,7 +215,8 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
 
     // reset the categories
     is_signal = 0;
-    is_antiiso = 0;
+    is_antiLepIso = 0;
+    is_antiTauIso = 0;
     is_qcd = 0;
     is_looseIso = 0;
     cat_0jet = 0;
@@ -227,9 +225,6 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     cat_VH = 0;
     OS = 0;
     SS = 0;
-    FF_had = 0;
-    FF_light = 0;
-    FF_sub = 0;
 
     // decide on which selections have been passed
     for (auto cat : cats) {
@@ -237,8 +232,10 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
         // regions
         if (cat == "signal") {
             is_signal = 1;
-        } else if (cat == "antiiso") {
-            is_antiiso = 1;
+        } else if (cat == "antiLepIso") {
+            is_antiLepIso = 1;
+        } else if (cat == "antiTauIso") {
+            is_antiTauIso = 1;
         } else if (cat == "looseIso") {
             is_looseIso = 1;
         }
@@ -260,30 +257,16 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
         } else if (cat == "SS") {
             SS = 1;
         }
-
-        // FF region
-        if (cat == "FF_had") {
-            FF_had = 1;
-        }
-        if (cat == "FF_light") {
-            FF_light = 1;
-        }
-        if (cat == "FF_sub") {
-            FF_sub = 1;
-        }
     }
     is_qcd = is_looseIso;
 
-    FF_weight_0jet = FF_info.at(0);
-    FF_weight_boosted = FF_info.at(1);
-    FF_weight_vbf = FF_info.at(2);
-    FF_weight = FF_info.at(3);
+    FF_weight = ff_weight;
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t mt, Float_t weight, std::vector<double> FF_info) {
+void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t mt, Float_t weight, double FF_weight) {
 
     TLorentzVector higgs(el->getP4() + t->getP4() + fmet->getP4());
-    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, FF_info);
+    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, FF_weight);
 
     el_pt = el->getPt();
     el_eta = el->getEta();
@@ -304,16 +287,17 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet
     t1_iso_VVT = t->getVVTightIsoMVA();
     vis_mass = (el->getP4() + t->getP4()).M();
     t1_decayMode = t->getL2DecayMode();
+    t1_genMatch = t->getGenMatch();
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
 
     otree->Fill();
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, ditau *t1, ditau *t2, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight, std::vector<double> FF_info) {
+void slim_tree::fillTree(std::vector<std::string> cat, ditau *t1, ditau *t2, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight, double FF_weight) {
 
     TLorentzVector higgs(t1->getP4() + t2->getP4() + fmet->getP4());
-    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, FF_info);
+    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, FF_weight);
 
     t1_pt = t1->getPt();
     t1_eta = t1->getEta();
@@ -338,15 +322,16 @@ void slim_tree::fillTree(std::vector<std::string> cat, ditau *t1, ditau *t2, jet
     t2_iso_T = t2->getTightIsoMVA();
     t2_iso_VT = t2->getVTightIsoMVA();
     t2_iso_VVT = t2->getVVTightIsoMVA();
-
+    t1_genMatch = t1->getGenMatch();
+    t2_genMatch = t2->getGenMatch();
 
     otree->Fill();
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t1, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t mt, Float_t weight, std::vector<double> FF_info) {
+void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t1, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t mt, Float_t weight, double FF_weight) {
 
     TLorentzVector higgs(mu->getP4() + t1->getP4() + fmet->getP4());
-    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, FF_info);
+    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, FF_weight);
 
     mu_pt = mu->getPt();
     mu_eta = mu->getEta();
@@ -366,7 +351,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t1, jet_fa
     t1_iso_T = t1->getTightIsoMVA();
     t1_iso_VT = t1->getVTightIsoMVA();
     t1_iso_VVT = t1->getVVTightIsoMVA();
-
+    t1_genMatch = t1->getGenMatch();
 
     otree->Fill();
 }
