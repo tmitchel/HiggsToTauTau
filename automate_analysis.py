@@ -31,7 +31,7 @@ parser.add_option('--path', '-p', action='store',
 parser.add_option('--prefix', '-P', action='store',
                   default=None, dest='prefix',
                   help='prefix to strip'
-)
+                  )
 (options, args) = parser.parse_args()
 prefix = options.prefix
 suffix = '.root'
@@ -73,7 +73,7 @@ for ifile in fileList:
     elif 'VBF' in sample:
         mass = sample.split('VBF')[-1]
         names = ['VBF'+mass]
-    elif 'WPlusH' in sample or 'WMinusH' in sample:
+    elif 'WPlus' in sample or 'WMinus' in sample:
         mass = sample.split('HTauTau')[-1]
         names = ['WH'+mass]
     elif 'ZHTauTau' in sample:
