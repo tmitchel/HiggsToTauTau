@@ -285,6 +285,8 @@ def main():
         catName = 'Inclusive'
     elif args.cat == 'et_vbf' or args.cat == 'mt_vbf':
         catName = 'VBF enriched'
+    else:
+      catName = ''
 
     lcat = TLatex()
     lcat.SetNDC(kTRUE)
