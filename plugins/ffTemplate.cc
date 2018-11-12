@@ -206,14 +206,14 @@ void histHolder::fillTemplate(std::vector<std::string> files, std::string dir, s
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, is_signal, OS;
-    Float_t var, weight, t1_pt, t1_decayMode, njets, m_vis, mt, el_iso;
+    Float_t var, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso;
 
     tree->SetBranchAddress(var_name.c_str(), &var);
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("t1_pt", &t1_pt);
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
     tree->SetBranchAddress("njets", &njets);
-    tree->SetBranchAddress("m_vis", &m_vis);
+    tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mt", &mt);
     tree->SetBranchAddress("el_iso", &el_iso);
 
@@ -246,13 +246,34 @@ void histHolder::fillTemplate(std::vector<std::string> files, std::string dir, s
         }
       } else if (is_antiTauIso) {
         auto bin = data.at(inclusive)->FindBin(var);
-        auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, m_vis, mt, el_iso,
+        auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
                           frac_w.at(inclusive)->GetBinContent(bin),
                           frac_tt.at(inclusive)->GetBinContent(bin),
                           frac_qcd.at(inclusive)->GetBinContent(bin)});
-
         fillQCD(fake_inclusive, name, var, weight * fakeweight);
 
+        if (cat_0jet) {
+          auto bin = data.at(zeroJet)->FindBin(var);
+          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
+                                              frac_w.at(zeroJet)->GetBinContent(bin),
+                                              frac_tt.at(zeroJet)->GetBinContent(bin),
+                                              frac_qcd.at(zeroJet)->GetBinContent(bin)});
+          fillQCD(fake_0jet, name, var, weight * fakeweight);
+        } else if (cat_boosted) {
+          auto bin = data.at(boosted)->FindBin(var);
+          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
+                                              frac_w.at(boosted)->GetBinContent(bin),
+                                              frac_tt.at(boosted)->GetBinContent(bin),
+                                              frac_qcd.at(boosted)->GetBinContent(bin)});
+          fillQCD(fake_boosted, name, var, weight * fakeweight);
+        } else if (cat_vbf) {
+          auto bin = data.at(vbf)->FindBin(var);
+          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
+                                              frac_w.at(vbf)->GetBinContent(bin),
+                                              frac_tt.at(vbf)->GetBinContent(bin),
+                                              frac_qcd.at(vbf)->GetBinContent(bin)});
+          fillQCD(fake_vbf, name, var, weight * fakeweight);
+        }
       }
     }
   }
