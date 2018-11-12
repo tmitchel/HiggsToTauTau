@@ -43,7 +43,9 @@ public:
   void writeHistos();
   void initVectors(std::string);
   void fillFake(int, std::string, double, double);
+  void fillQCD(TH1F*, std::string, double, double);
   void calculateFF(std::vector<std::string>, std::string, std::string, std::string);
+  void fillTemplate(std::vector<std::string>, std::string, std::string, std::string);
   void printFlatRates();
 
   TFile *fout;
@@ -97,6 +99,10 @@ int main(int argc, char *argv[]) {
 
   hists->calculateFF(files, dir, tree_name, var_name);
   hists->printFlatRates();
+  hists->fillTemplate(files, dir, tree_name, var_name);
+  hists->writeHistos();
+
+  delete hists->ff_weight;
 }
 
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
@@ -155,8 +161,7 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
   };
 
   TFile ff_file("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root");
-  // ff_weight = (FakeFactor *)ff_file.Get("ff_comb");
-  // std::vector<double> inputs(9);
+  ff_weight = (FakeFactor *)ff_file.Get("ff_comb");
   ff_file.Close();
 }
 
@@ -180,6 +185,77 @@ void histHolder::fillFake(int cat, std::string name, double var, double weight) 
     hist = frac_real.at(cat);
   }
   hist->Fill(var, weight);
+}
+
+void histHolder::fillQCD(TH1F *hist, std::string name, double var, double weight) {
+  if (name.find("Data") != std::string::npos) {
+    hist->Fill(var, weight);
+  } else if (name == "ZTT" || name == "TTT" || name == "VVT") {
+    hist->Fill(var, -1 * weight);
+  }
+}
+
+void histHolder::fillTemplate(std::vector<std::string> files, std::string dir, std::string tree_name, std::string var_name) {
+
+  for (auto ifile : files) {
+    auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
+    auto tree = (TTree *)fin->Get(tree_name.c_str());
+    std::string name = ifile.substr(0, ifile.find(".")).c_str();
+
+    initVectors(name);
+
+    // get variables from file
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, is_signal, OS;
+    Float_t var, weight, t1_pt, t1_decayMode, njets, m_vis, mt, el_iso;
+
+    tree->SetBranchAddress(var_name.c_str(), &var);
+    tree->SetBranchAddress("evtwt", &weight);
+    tree->SetBranchAddress("t1_pt", &t1_pt);
+    tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
+    tree->SetBranchAddress("njets", &njets);
+    tree->SetBranchAddress("m_vis", &m_vis);
+    tree->SetBranchAddress("mt", &mt);
+    tree->SetBranchAddress("el_iso", &el_iso);
+
+    tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
+    tree->SetBranchAddress("is_signal", &is_signal);
+    tree->SetBranchAddress("cat_0jet", &cat_0jet);
+    tree->SetBranchAddress("cat_boosted", &cat_boosted);
+    tree->SetBranchAddress("cat_vbf", &cat_vbf);
+    tree->SetBranchAddress("cat_VH", &cat_VH);
+    tree->SetBranchAddress("OS", &OS);
+
+    for (auto i = 0; i < tree->GetEntries(); i++) {
+      tree->GetEntry(i);
+
+      // only look at opposite-sign events
+      if (OS == 0) {
+        continue;
+      }
+
+      if (is_signal) {
+        hists.at(channel_prefix + "_inclusive").back()->Fill(var, weight);
+        if (cat_0jet > 0) {
+          hists.at(channel_prefix + "_0jet").back()->Fill(var, weight);
+        }
+        if (cat_boosted > 0) {
+          hists.at(channel_prefix + "_boosted").back()->Fill(var, weight);
+        }
+        if (cat_vbf > 0) {
+          hists.at(channel_prefix + "_vbf").back()->Fill(var, weight);
+        }
+      } else if (is_antiTauIso) {
+        auto bin = data.at(inclusive)->FindBin(var);
+        auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, m_vis, mt, el_iso,
+                          frac_w.at(inclusive)->GetBinContent(bin),
+                          frac_tt.at(inclusive)->GetBinContent(bin),
+                          frac_qcd.at(inclusive)->GetBinContent(bin)});
+
+        fillQCD(fake_inclusive, name, var, weight * fakeweight);
+
+      }
+    }
+  }
 }
 
 void histHolder::calculateFF(std::vector<std::string> files, std::string dir, std::string tree_name, std::string var_name) {
@@ -243,11 +319,6 @@ void histHolder::calculateFF(std::vector<std::string> files, std::string dir, st
     frac_real.at(i)->Divide(data.at(i));
     frac_qcd.at(i)->Divide(data.at(i));
   }
-  fout->cd("et_inclusive");
-  frac_w.at(0)->Write();
-//  fout->Close();
-//  delete ff_weight;
-
 }
 
 void histHolder::printFlatRates() {
@@ -306,5 +377,4 @@ void histHolder::writeHistos() {
   fake_vbf->Write();
 
   fout->Close();
-  delete ff_weight;
 }

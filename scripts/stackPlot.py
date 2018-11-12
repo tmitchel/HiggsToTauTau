@@ -43,6 +43,9 @@ def applyStyle(name, hist, leg):
     elif name == 'QCD':
         hist.SetFillColor(TColor.GetColor("#ffccff"))
         hist.SetName('QCD')
+    elif name == 'jetFakes':
+        hist.SetFillColor(TColor.GetColor("#ffccff"))
+        hist.SetName('jet fakes')
     elif name == 'Data':
         hist.SetLineColor(kBlack)
         hist.SetMarkerStyle(8)
