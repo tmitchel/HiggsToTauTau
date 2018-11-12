@@ -216,7 +216,6 @@ void histHolder::fillTemplate(std::vector<std::string> files, std::string dir, s
     }
 
     tree->SetBranchAddress("evtwt", &weight);
-    tree->SetBranchAddress("t1_pt", &t1_pt);
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
     tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("vis_mass", &vis_mass);
