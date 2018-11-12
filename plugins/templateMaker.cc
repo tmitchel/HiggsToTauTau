@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
         }
       } else {
         // get QCD shape from SS loose iso region
-        if (is_qcd > 0 || is_looseIso > 0) {
+        if (is_looseIso > 0) {
           fillQCD(hists->qcd_inclusive, name, var, weight);
           if (cat_0jet) {
             fillQCD(hists->qcd_0jet, name, var, weight);
@@ -249,44 +249,44 @@ void histHolder::writeHistos() {
     }
   }
 
-//  fout->cd((channel_prefix+"_inclusive").c_str());
-//  qcd_inclusive->SetName("QCD");
-//  qcd_inclusive->Scale(1.0 * qcd_inclusive_SS->Integral() / qcd_inclusive->Integral());
-//  for (auto i = 0; i < qcd_inclusive->GetNbinsX(); i++) {
-//    if (qcd_inclusive->GetBinContent(i) < 0) {
-//      qcd_inclusive->SetBinContent(i, 0);
-//    }
-//  }
-//  qcd_inclusive->Write();
-//
-//  fout->cd((channel_prefix+"_0jet").c_str());
-//  qcd_0jet->SetName("QCD");
-//  qcd_0jet->Scale(1.0 * qcd_0jet_SS->Integral() / qcd_0jet->Integral());
-//  for (auto i = 0; i < qcd_0jet->GetNbinsX(); i++) {
-//    if (qcd_0jet->GetBinContent(i) < 0) {
-//      qcd_0jet->SetBinContent(i, 0);
-//    }
-//  }
-//  qcd_0jet->Write();
-//
-//  fout->cd((channel_prefix+"_boosted").c_str());
-//  qcd_boosted->SetName("QCD");
-//  qcd_boosted->Scale(1.28 * qcd_boosted_SS->Integral() / qcd_boosted->Integral());
-//  for (auto i = 0; i < qcd_boosted->GetNbinsX(); i++) {
-//    if (qcd_boosted->GetBinContent(i) < 0) {
-//      qcd_boosted->SetBinContent(i, 0);
-//    }
-//  }
-//  qcd_boosted->Write();
-//
-//  fout->cd((channel_prefix+"_vbf").c_str());
-//  qcd_vbf->SetName("QCD");
-//  qcd_vbf->Scale(1.0 * qcd_vbf_SS->Integral() / qcd_vbf->Integral());
-//  for (auto i = 0; i < qcd_vbf->GetNbinsX(); i++) {
-//    if (qcd_vbf->GetBinContent(i) < 0) {
-//      qcd_vbf->SetBinContent(i, 0);
-//    }
-//  }
-//  qcd_vbf->Write();
+  fout->cd((channel_prefix+"_inclusive").c_str());
+  qcd_inclusive->SetName("QCD");
+  qcd_inclusive->Scale(1.0 * qcd_inclusive_SS->Integral() / qcd_inclusive->Integral());
+  for (auto i = 0; i < qcd_inclusive->GetNbinsX(); i++) {
+    if (qcd_inclusive->GetBinContent(i) < 0) {
+      qcd_inclusive->SetBinContent(i, 0);
+    }
+  }
+  qcd_inclusive->Write();
+
+  fout->cd((channel_prefix+"_0jet").c_str());
+  qcd_0jet->SetName("QCD");
+  qcd_0jet->Scale(1.0 * qcd_0jet_SS->Integral() / qcd_0jet->Integral());
+  for (auto i = 0; i < qcd_0jet->GetNbinsX(); i++) {
+    if (qcd_0jet->GetBinContent(i) < 0) {
+      qcd_0jet->SetBinContent(i, 0);
+    }
+  }
+  qcd_0jet->Write();
+
+  fout->cd((channel_prefix+"_boosted").c_str());
+  qcd_boosted->SetName("QCD");
+  qcd_boosted->Scale(1.28 * qcd_boosted_SS->Integral() / qcd_boosted->Integral());
+  for (auto i = 0; i < qcd_boosted->GetNbinsX(); i++) {
+    if (qcd_boosted->GetBinContent(i) < 0) {
+      qcd_boosted->SetBinContent(i, 0);
+    }
+  }
+  qcd_boosted->Write();
+
+  fout->cd((channel_prefix+"_vbf").c_str());
+  qcd_vbf->SetName("QCD");
+  qcd_vbf->Scale(1.0 * qcd_vbf_SS->Integral() / qcd_vbf->Integral());
+  for (auto i = 0; i < qcd_vbf->GetNbinsX(); i++) {
+    if (qcd_vbf->GetBinContent(i) < 0) {
+      qcd_vbf->SetBinContent(i, 0);
+    }
+  }
+  qcd_vbf->Write();
   fout->Close();
 }

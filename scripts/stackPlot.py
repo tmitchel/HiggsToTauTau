@@ -251,7 +251,7 @@ def main():
     stat = formatStat(stat)
     leg.AddEntry(stat, 'Uncertainty', 'f')
 
-    high = max(data.GetMaximum(), stat.GetMaximum()) * 2.1
+    high = max(data.GetMaximum(), stat.GetMaximum()) * 1.4
     stack.SetMaximum(high)
     stack.Draw('hist')
     formatStack(stack)
