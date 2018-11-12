@@ -208,7 +208,13 @@ void histHolder::fillTemplate(std::vector<std::string> files, std::string dir, s
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, is_signal, OS;
     Float_t var, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso;
 
-    tree->SetBranchAddress(var_name.c_str(), &var);
+    if (var_name.find("t1_pt") != std::string::npos) {
+      tree->SetBranchAddress("t1_pt", &var);
+    } else {
+      tree->SetBranchAddress("t1_pt", &t1_pt);
+      tree->SetBranchAddress(var_name.c_str(), &var);
+    }
+
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("t1_pt", &t1_pt);
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);

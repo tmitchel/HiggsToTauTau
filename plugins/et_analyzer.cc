@@ -276,7 +276,7 @@ int main(int argc, char* argv[]) {
       sf_id        = myScaleFactor_id->getSF(electron.getPt(), electron.getEta());
       sf_id_anti   = myScaleFactor_idAnti->getSF(electron.getPt(), electron.getEta());
 
-      auto PUweight = lumi_weights->weight(event.getNPU());
+      auto PUweight = lumi_weights->weight(event.getNPV());
       auto genweight = event.getGenWeight();
 
       evtwt *= sf_trig;
