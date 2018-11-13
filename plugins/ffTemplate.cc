@@ -340,6 +340,11 @@ void histHolder::calculateFF(std::vector<std::string> files, std::string dir, st
     frac_qcd.at(i)->Add(frac_tt.at(i), -1);
     frac_qcd.at(i)->Add(frac_real.at(i), -1);
 
+    std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+
     frac_w.at(i)->Divide(data.at(i));
     frac_tt.at(i)->Divide(data.at(i));
     frac_real.at(i)->Divide(data.at(i));
@@ -348,12 +353,12 @@ void histHolder::calculateFF(std::vector<std::string> files, std::string dir, st
 }
 
 void histHolder::printFlatRates() {
-  for (int i = 0; i < data.size(); i++) {
-    std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/frac_w.at(i)->GetNbinsX() << std::endl;
-    std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/frac_w.at(i)->GetNbinsX() << std::endl;
-    std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/frac_w.at(i)->GetNbinsX() << std::endl;
-    std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/frac_w.at(i)->GetNbinsX() << std::endl;
-  }
+//  for (int i = 0; i < data.size(); i++) {
+//    std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/frac_w.at(i)->GetNbinsX() << std::endl;
+//    std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/frac_w.at(i)->GetNbinsX() << std::endl;
+//    std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/frac_w.at(i)->GetNbinsX() << std::endl;
+//    std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/frac_w.at(i)->GetNbinsX() << std::endl;
+//  }
 }
 
 // write output histograms including the QCD histograms after scaling by OS/SS ratio
