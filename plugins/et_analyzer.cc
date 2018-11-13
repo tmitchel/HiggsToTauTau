@@ -31,14 +31,6 @@
 #include "EmbedWeight.h"
 #include "slim_tree.h"
 
-//FF
-#include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
-#include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTFormula.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTGraph.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTH2F.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTH3D.h"
-
 typedef std::vector<double> NumV;
 
 int main(int argc, char* argv[]) {
@@ -122,9 +114,6 @@ int main(int argc, char* argv[]) {
 //  auto lumi_weights = new reweight::LumiReWeighting("data/MC_Moriond17_PU25ns_V1.root", "data/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
 
   // tracking corrections
-
-
-  // tracking corrections
   TFile *f_Trk = new TFile("data/etracking.root");
   TH2F *h_Trk = (TH2F*)f_Trk->Get("EGamma_SF2D");
 
@@ -162,10 +151,6 @@ int main(int argc, char* argv[]) {
   TGraph * g_NNLOPS_1jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_1jet");
   TGraph * g_NNLOPS_2jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_2jet");
   TGraph * g_NNLOPS_3jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_3jet");
-
-  TFile ff_file("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root");
-  FakeFactor *ff_weight = (FakeFactor *)ff_file.Get("ff_comb");
-  std::vector<double> inputs(9);
 
   //////////////////////////////////////
   // Final setup:                     //
@@ -435,20 +420,6 @@ int main(int argc, char* argv[]) {
     bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() > 50);
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
-    double FF_weight(1.);
-
-    // Fake-Factor Weights
-    if (!isData) {
-      inputs = {
-        tau.getPt(), tau.getL2DecayMode(), (double)jets.getNjets(),
-        (electron.getP4() + tau.getP4()).M(), mt, electron.getIso(),
-        0.30, 0.50, 0.10
-      };
-
-      // get all Fake-Factor Weights
-      FF_weight = ff_weight->value(inputs);
-    }
-
     // now do mt selection
     if (tau.getPt() < 30 || mt > 50) {
       continue;
@@ -493,7 +464,7 @@ int main(int argc, char* argv[]) {
     }
 
     // fill the tree
-    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, FF_weight);
+    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
 
     // event categorization
     if (zeroJet) {
@@ -594,8 +565,6 @@ int main(int argc, char* argv[]) {
  
   histos->at("n70") -> Fill(1, n70_count);
   histos->at("n70")->Write();
-
-  delete ff_weight;
 
   fin->Close();
   fout->cd();
