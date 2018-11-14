@@ -225,18 +225,18 @@ int main(int argc, char* argv[]) {
     //////////////////////////////////////////////////////////
     
     // remove 2-prong taus
-    if (!tau.getDecayModeFinding()) {
+    if (!tau.getDecayModeFinding() || tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
       continue;
     }
     
     // apply correct lepton pT thresholds
-    if (electron.getPt() < 26) {
-      continue;
-    } else if (electron.getPt() > 26 && electron.getPt() < 34 && (tau.getPt() < 32 || !event.getPassEle24Tau30())) {
-      continue;
-    } else if (electron.getPt() > 34 && !event.getPassEle32()) {
-      continue;
-    } else if (electron.getPt() > 37 && !event.getPassEle35()) {
+    if (electron.getPt() > 37 && event.getPassEle35()) {
+
+    } else if (electron.getPt() > 34 && event.getPassEle32()) {
+
+    } else if (electron.getPt() > 26 && tau.getPt() > 32 && event.getPassEle24Tau30()) {
+
+    } else {
       continue;
     }
 
@@ -267,7 +267,7 @@ int main(int argc, char* argv[]) {
       if (electron.getPt() > 34) {
         sf_trig = singleElTrg_SF->getSF(electron.getPt(), electron.getEta());
       } else if (electron.getPt() < 34) {
-        //sf_trig = crossTrg_SF->getSF(electron.getPt(), electron.getEta());
+        sf_trig = crossTrg_SF->getSF(electron.getPt(), electron.getEta());
       }
       
       // ID SF

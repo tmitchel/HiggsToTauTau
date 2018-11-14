@@ -42,19 +42,20 @@ public:
   ~histHolder() { delete ff_weight; };
   void writeHistos();
   void initVectors(std::string);
-  void fillFake(int, std::string, double, double);
+  void fillFake(int, std::string, double, double, double);
   void fillQCD(TH1F*, std::string, double, double);
-  void calculateFF(std::vector<std::string>, std::string, std::string, std::string);
+  void calculateFF(std::vector<std::string>, std::string, std::string);
   void fillTemplate(std::vector<std::string>, std::string, std::string, std::string);
-  void printFlatRates();
 
   TFile *fout;
   std::vector<int> bins;
+  std::vector<float> mvis_bins, njets_bins;
+  float *mvis_bins_real, *njets_bins_real;
   FakeFactor* ff_weight;
   std::string channel_prefix;
   std::map<std::string, std::vector<TH1F *>> hists;
   TH1F *fake_0jet, *fake_boosted, *fake_vbf, *fake_inclusive;
-  std::vector<TH1F*> data, frac_w, frac_tt, frac_real, frac_qcd;
+  std::vector<TH2F*> data, frac_w, frac_tt, frac_real, frac_qcd;
 };
 
 int main(int argc, char *argv[]) {
@@ -97,7 +98,7 @@ int main(int argc, char *argv[]) {
   std::vector<std::string> files;
   read_directory(dir, files);
 
-  hists->calculateFF(files, dir, tree_name, var_name);
+  hists->calculateFF(files, dir, tree_name);
   hists->fillTemplate(files, dir, tree_name, var_name);
   hists->writeHistos();
 
@@ -116,6 +117,8 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
   }, 
   fout( new TFile(("Output/templates/template_"+channel_prefix+"_"+var_name+".root").c_str(), "recreate") ),
   bins( Bins ), 
+  mvis_bins( {0,50,80,100,110,120,130,150,170,200,250,1000} ),
+  njets_bins( {-0.5,0.5,1.5,15} ),
   channel_prefix( channel_prefix )
 {
   for (auto it = hists.begin(); it != hists.end(); it++) {
@@ -124,39 +127,42 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
     fout->cd();
   }
 
+  mvis_bins_real = &mvis_bins[0];
+  njets_bins_real = &njets_bins[0];
+
   fake_inclusive = new TH1F("fake_inclusive", "fake_inclusive", bins.at(0), bins.at(1), bins.at(2));
   fake_0jet = new TH1F("fake_0jet", "fake_SS", bins.at(0), bins.at(1), bins.at(2));
   fake_boosted = new TH1F("fake_boosted", "fake_SS", bins.at(0), bins.at(1), bins.at(2));
   fake_vbf = new TH1F("fake_vbf", "fake_SS", bins.at(0), bins.at(1), bins.at(2));
   data = {
-      new TH1F("data_inclusive", "data_inclusive", bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("data_0jet"     , "data_0jet"     , bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("data_boosted"  , "data_boosted"  , bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("data_vbf"      , "data_vbf"      , bins.at(0), bins.at(1), bins.at(2)),
+      new TH2F("data_inclusive", "data_inclusive", mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("data_0jet"     , "data_0jet"     , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("data_boosted"  , "data_boosted"  , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("data_vbf"      , "data_vbf"      , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
   };
   frac_w = {
-      new TH1F("frac_w_inclusive", "frac_w_inclusive", bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_w_0jet"     , "frac_w_0jet"     , bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_w_boosted"  , "frac_w_boosted"  , bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_w_vbf"      , "frac_w_vbf"      , bins.at(0), bins.at(1), bins.at(2)),
+      new TH2F("frac_w_inclusive", "frac_w_inclusive", mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_w_0jet"     , "frac_w_0jet"     , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_w_boosted"  , "frac_w_boosted"  , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_w_vbf"      , "frac_w_vbf"      , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
   };
   frac_tt = {
-      new TH1F("frac_tt_inclusive", "frac_tt_inclusive", bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_tt_0jet"     , "frac_tt_0jet"     , bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_tt_boosted"  , "frac_tt_boosted"  , bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_tt_vbf"      , "frac_tt_vbf"      , bins.at(0), bins.at(1), bins.at(2)),
+      new TH2F("frac_tt_inclusive", "frac_tt_inclusive", mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_tt_0jet"     , "frac_tt_0jet"     , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_tt_boosted"  , "frac_tt_boosted"  , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_tt_vbf"      , "frac_tt_vbf"      , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
   };
   frac_real = {
-      new TH1F("frac_real_inclusive", "frac_real_inclusive", bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_real_0jet"     , "frac_real_0jet"     , bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_real_boosted"  , "frac_real_boosted"  , bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_real_vbf"      , "frac_real_vbf"      , bins.at(0), bins.at(1), bins.at(2)),
+      new TH2F("frac_real_inclusive", "frac_real_inclusive", mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_real_0jet"     , "frac_real_0jet"     , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_real_boosted"  , "frac_real_boosted"  , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_real_vbf"      , "frac_real_vbf"      , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
   };
   frac_qcd = {
-      new TH1F("frac_qcd_inclusive", "frac_qcd_inclusive", bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_qcd_0jet"     , "frac_qcd_0jet"     , bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_qcd_boosted"  , "frac_qcd_boosted"  , bins.at(0), bins.at(1), bins.at(2)),
-      new TH1F("frac_qcd_vbf"      , "frac_qcd_vbf"      , bins.at(0), bins.at(1), bins.at(2)),
+      new TH2F("frac_qcd_inclusive", "frac_qcd_inclusive", mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_qcd_0jet"     , "frac_qcd_0jet"     , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_qcd_boosted"  , "frac_qcd_boosted"  , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH2F("frac_qcd_vbf"      , "frac_qcd_vbf"      , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
   };
 
   TFile ff_file("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root");
@@ -172,8 +178,8 @@ void histHolder::initVectors(std::string name) {
   }
 }
 
-void histHolder::fillFake(int cat, std::string name, double var, double weight) {
-  TH1F *hist;
+void histHolder::fillFake(int cat, std::string name, double vis_mass, double njets, double weight) {
+  TH2F *hist;
   if (name == "Data") {
     hist = data.at(cat);
   } else if (name == "W" || name == "ZJ" || name == "VVJ") {
@@ -183,7 +189,7 @@ void histHolder::fillFake(int cat, std::string name, double var, double weight) 
   } else if (name == "ZTT" || name == "TTT" || name == "VVT") {
     hist = frac_real.at(cat);
   }
-  hist->Fill(var, weight);
+  hist->Fill(vis_mass, njets, weight);
 }
 
 void histHolder::fillQCD(TH1F *hist, std::string name, double var, double weight) {
@@ -247,33 +253,34 @@ void histHolder::fillTemplate(std::vector<std::string> files, std::string dir, s
           hists.at(channel_prefix + "_vbf").back()->Fill(var, weight);
         }
       } else if (is_antiTauIso) {
-        auto bin = data.at(inclusive)->FindBin(var);
+        auto bin_x = data.at(inclusive)->GetXaxis()->FindBin(vis_mass);
+        auto bin_y = data.at(inclusive)->GetYaxis()->FindBin(njets);
         auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
-                          frac_w.at(inclusive)->GetBinContent(bin),
-                          frac_tt.at(inclusive)->GetBinContent(bin),
-                          frac_qcd.at(inclusive)->GetBinContent(bin)});
+                                            frac_w.at(inclusive)->GetBinContent(bin_x, bin_y),
+                                            frac_tt.at(inclusive)->GetBinContent(bin_x, bin_y),
+                                            frac_qcd.at(inclusive)->GetBinContent(bin_x, bin_y)});
         fillQCD(fake_inclusive, name, var, weight * fakeweight);
 
         if (cat_0jet) {
           auto bin = data.at(zeroJet)->FindBin(var);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
-                                              frac_w.at(zeroJet)->GetBinContent(bin),
-                                              frac_tt.at(zeroJet)->GetBinContent(bin),
-                                              frac_qcd.at(zeroJet)->GetBinContent(bin)});
+                                              frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
+                                              frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
+                                              frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)});
           fillQCD(fake_0jet, name, var, weight * fakeweight);
         } else if (cat_boosted) {
           auto bin = data.at(boosted)->FindBin(var);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
-                                              frac_w.at(boosted)->GetBinContent(bin),
-                                              frac_tt.at(boosted)->GetBinContent(bin),
-                                              frac_qcd.at(boosted)->GetBinContent(bin)});
+                                              frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
+                                              frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
+                                              frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)});
           fillQCD(fake_boosted, name, var, weight * fakeweight);
         } else if (cat_vbf) {
           auto bin = data.at(vbf)->FindBin(var);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
-                                              frac_w.at(vbf)->GetBinContent(bin),
-                                              frac_tt.at(vbf)->GetBinContent(bin),
-                                              frac_qcd.at(vbf)->GetBinContent(bin)});
+                                              frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
+                                              frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
+                                              frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)});
           fillQCD(fake_vbf, name, var, weight * fakeweight);
         }
       }
@@ -281,7 +288,7 @@ void histHolder::fillTemplate(std::vector<std::string> files, std::string dir, s
   }
 }
 
-void histHolder::calculateFF(std::vector<std::string> files, std::string dir, std::string tree_name, std::string var_name) {
+void histHolder::calculateFF(std::vector<std::string> files, std::string dir, std::string tree_name) {
 
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
@@ -297,9 +304,10 @@ void histHolder::calculateFF(std::vector<std::string> files, std::string dir, st
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, OS;
-    Float_t var, weight;
+    Float_t njets, vis_mass, weight;
 
-    tree->SetBranchAddress(var_name.c_str(), &var);
+    tree->SetBranchAddress("njets", &njets);
+    tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("evtwt", &weight);
 
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
@@ -319,20 +327,20 @@ void histHolder::calculateFF(std::vector<std::string> files, std::string dir, st
 
       // invert tau isolation to fill FF ratio histograms
       if (is_antiTauIso) {
-        fillFake(inclusive, name, var, weight);
+        fillFake(inclusive, name, vis_mass, njets, weight);
         if (cat_0jet > 0) {
-          fillFake(zeroJet, name, var, weight);
+          fillFake(zeroJet, name, vis_mass, njets, weight);
         } else if (cat_boosted > 0) {
-          fillFake(boosted, name, var, weight);
+          fillFake(boosted, name, vis_mass, njets, weight);
         } else if (cat_vbf > 0) {
-          fillFake(vbf, name, var, weight);
+          fillFake(vbf, name, vis_mass, njets, weight);
         }
       }
     }
   }
 
   for (int i = 0; i < data.size(); i++) {
-    frac_qcd.at(i) = (TH1F*)data.at(i)->Clone();
+    frac_qcd.at(i) = (TH2F*)data.at(i)->Clone();
     frac_qcd.at(i)->Add(frac_w.at(i), -1);
     frac_qcd.at(i)->Add(frac_tt.at(i), -1);
     frac_qcd.at(i)->Add(frac_real.at(i), -1);
