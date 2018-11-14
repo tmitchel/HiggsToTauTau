@@ -37,7 +37,7 @@ def applyStyle(name, hist, leg):
     elif name == 'TTT':
         hist.SetFillColor(TColor.GetColor("#cfe87f"))
         hist.SetName('TTT')
-    elif name == 'VVT' or name == 'EWKZ' or name == 'ZL':
+    elif name == 'VVT' or name == 'EWKZ' or name == 'ZL' or name == 'VVJ' or name == 'TTJ' or name == 'ZJ' or name == 'W':
         hist.SetFillColor(TColor.GetColor("#9feff2"))
         overlay = 4
     elif name == 'QCD':

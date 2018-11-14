@@ -79,10 +79,9 @@ int main(int argc, char *argv[]) {
     hists->initVectors(name);
 
     // I hate doing it like this, but when I move the SetBranchAddres I see unexpected behavior
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_qcd, is_antiiso, is_looseIso;
-    Float_t eq, tq, hpt, l2decay, vis_mass, mjj, m_sv, weight, ME_sm_VBF, ME_bkg, NN_disc, nbjets, mt, njets;
-    tree->SetBranchAddress(lep_charge.c_str(), &eq);
-    tree->SetBranchAddress("t1_charge", &tq);
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_qcd, is_looseIso, OS;
+    Float_t hpt, l2decay, vis_mass, mjj, m_sv, weight, ME_sm_VBF, ME_bkg, NN_disc, nbjets, mt, njets;
+    tree->SetBranchAddress("OS", &OS);
     tree->SetBranchAddress("higgs_pT", &hpt);
     tree->SetBranchAddress("t1_decayMode", &l2decay);
     tree->SetBranchAddress("vis_mass", &vis_mass);
@@ -97,7 +96,6 @@ int main(int argc, char *argv[]) {
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("is_signal", &is_signal);
     tree->SetBranchAddress("is_qcd", &is_qcd);
-    tree->SetBranchAddress("is_antiiso", &is_antiiso);
     tree->SetBranchAddress("is_looseIso", &is_looseIso);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
     tree->SetBranchAddress("cat_boosted", &cat_boosted);
@@ -108,9 +106,9 @@ int main(int argc, char *argv[]) {
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
       auto MELA = ME_sm_VBF / (ME_sm_VBF + 45 * ME_bkg);
-      auto var = NN_disc;
+      auto var = mjj;
 
-      if (eq + tq == 0) {
+      if (OS > 0) {
         // output histograms for the template
         if (is_signal > 0) {
           if (cat_0jet > 0) {
@@ -119,7 +117,7 @@ int main(int argc, char *argv[]) {
           if (cat_boosted > 0) {
             hists->hists.at(channel_prefix+"_boosted").back()->Fill(hpt, m_sv, weight);
           }
-          if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
+          if (cat_vbf > 0) {
             hists->hists.at(channel_prefix+"_vbf").back()->Fill(var, m_sv, weight);
           }
         }
@@ -132,7 +130,7 @@ int main(int argc, char *argv[]) {
           if (cat_boosted) {
             fillQCD(hists->qcd_boosted, name, hpt, m_sv, weight);
           }
-          if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
+          if (cat_vbf > 0) {
             fillQCD(hists->qcd_vbf, name, var, m_sv, weight);
           }
         }
@@ -145,7 +143,7 @@ int main(int argc, char *argv[]) {
           if (cat_boosted > 0) {
             fillQCD(hists->qcd_boosted_SS, name, hpt, m_sv, weight);
           }
-          if (cat_vbf > 0 && mt < 50 && nbjets == 0) {
+          if (cat_vbf > 0) {
             fillQCD(hists->qcd_vbf_SS, name, var, m_sv, weight);
           }
         }
@@ -196,8 +194,8 @@ histHolder::histHolder(std::string channel) :
     // x-axis
     bins_l2 {0, 1, 10, 11},
     bins_hpt {0, 100, 150, 200, 250, 300, 5000},
-    //bins_mjj {300, 700, 1100, 1500, 10000},
-    bins_mjj {0., 0.1, 0.5, 0.9, 1.},
+    bins_mjj {300, 700, 1100, 1500, 10000},
+    //bins_mjj {0., 0.1, 0.5, 0.9, 1.},
 
     // y-axis
     bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},

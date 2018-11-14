@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
   auto lumi_weights = new reweight::LumiReWeighting("data/MC_nPU_081118.root", "data/Data_nPU_081118.root", "mc", "pileup");
 
   // tracking corrections
-  TFile* f_Trk = new TFile("LeptonEffiencies/trackingSF.root");
+  TFile* f_Trk = new TFile("LeptonEfficiencies/trackingSF.root");
   TH1F* h_Trk = (TH1F*)f_Trk->Get("effTrackingE");
 
   // Z-pT reweighting!!!
@@ -121,7 +121,9 @@ int main(int argc, char* argv[]) {
   auto zpt_hist = (TH2F*)zpt_file->Get("zptmass_histo");
 
   //H->tau tau scale factors
-  TFile htt_sf_file("LeptonEffiencies/htt_scalefactors_v17_1.root");
+//  TFile htt_sf_file("LeptonEfficiencies/htt_scalefactors_v17_1.root");
+  TFile htt_sf_file("data/htt_scalefactors_v16_3.root");
+
   RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
   htt_sf_file.Close();
 
@@ -176,33 +178,33 @@ int main(int argc, char* argv[]) {
 
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
     Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.);
-    if (name == "W") {
-      if (event.getNumGenJets() == 1) {
-        evtwt = 6.82;
-      } else if (event.getNumGenJets() == 2) {
-        evtwt = 2.099;
-      } else if (event.getNumGenJets() == 3) {
-        evtwt = 0.689;
-      } else if (event.getNumGenJets() == 4) {
-        evtwt = 0.690;
-      } else {
-        evtwt = 25.44;
-      }
-    }
-
-    if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
-      if (event.getNumGenJets() == 1) {
-        evtwt = 0.502938039;
-      } else if (event.getNumGenJets() == 2) {
-        evtwt = 1.042256272;
-      } else if (event.getNumGenJets() == 3) {
-        evtwt = 0.656337234;
-      } else if (event.getNumGenJets() == 4) {
-        evtwt = 0.458531131;
-      } else {
-        evtwt = 2.873324952;
-      }
-    }
+//    if (name == "W") {
+//      if (event.getNumGenJets() == 1) {
+//        evtwt = 6.82;
+//      } else if (event.getNumGenJets() == 2) {
+//        evtwt = 2.099;
+//      } else if (event.getNumGenJets() == 3) {
+//        evtwt = 0.689;
+//      } else if (event.getNumGenJets() == 4) {
+//        evtwt = 0.690;
+//      } else {
+//        evtwt = 25.44;
+//      }
+//    }
+//
+//    if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
+//      if (event.getNumGenJets() == 1) {
+//        evtwt = 0.502938039;
+//      } else if (event.getNumGenJets() == 2) {
+//        evtwt = 1.042256272;
+//      } else if (event.getNumGenJets() == 3) {
+//        evtwt = 0.656337234;
+//      } else if (event.getNumGenJets() == 4) {
+//        evtwt = 0.458531131;
+//      } else {
+//        evtwt = 2.873324952;
+//      }
+//    }
 
     histos->at("weightflow") -> Fill(2., evtwt);
     histos_2d->at("weights") -> Fill(2., evtwt);
@@ -226,7 +228,7 @@ int main(int argc, char* argv[]) {
     if (!tau.getDecayModeFinding()) {
       continue;
     }
-
+    
     // apply correct lepton pT thresholds
     if (electron.getPt() < 26) {
       continue;
@@ -235,6 +237,10 @@ int main(int argc, char* argv[]) {
     } else if (electron.getPt() > 34 && !event.getPassEle32()) {
       continue;
     } else if (electron.getPt() > 37 && !event.getPassEle35()) {
+      continue;
+    }
+
+    if (electron.getP4().DeltaR(tau.getP4()) < 0.5) {
       continue;
     }
 
@@ -256,21 +262,21 @@ int main(int argc, char* argv[]) {
 
     // apply all scale factors/corrections/etc.
     if (!isData && !isEmbed) {
-
+      
       // apply trigger SF's
       if (electron.getPt() > 34) {
         sf_trig = singleElTrg_SF->getSF(electron.getPt(), electron.getEta());
       } else if (electron.getPt() < 34) {
-        sf_trig = crossTrg_SF->getSF(electron.getPt(), electron.getEta());
+        //sf_trig = crossTrg_SF->getSF(electron.getPt(), electron.getEta());
       }
-
+      
       // ID SF
       sf_id = myScaleFactor_id->getSF(electron.getPt(), electron.getEta());
 
       auto PUweight = lumi_weights->weight(event.getNPV());
       auto genweight = event.getGenWeight();
 
-      // evtwt *= sf_trig;
+      evtwt *= sf_trig;
       histos->at("weightflow")-> Fill(3., evtwt);
       histos_2d->at("weights") -> Fill(3., sf_trig);
 
@@ -296,11 +302,11 @@ int main(int argc, char* argv[]) {
 
       htt_sf->var("e_pt")->setVal(electron.getPt());
       htt_sf->var("e_eta")->setVal(electron.getEta());
-      auto htt_sf_val = htt_sf->function("e_trk_ratio")->getVal();
+      //auto htt_sf_val = htt_sf->function("e_trk_ratio")->getVal();
 
-      evtwt *= htt_sf_val;
+      //evtwt *= htt_sf_val;
       histos->at("weightflow")-> Fill(7., evtwt);
-      histos_2d->at("weights") -> Fill(7., htt_sf_val);
+      //histos_2d->at("weights") -> Fill(7., htt_sf_val);
 
       auto tempweight = evtwt;
 
@@ -418,10 +424,10 @@ int main(int argc, char* argv[]) {
     }
 
     // create regions
-    bool signalRegion   = (tau.getTightIsoMVA()  && electron.getIso() < 0.15);
+    bool signalRegion   = (tau.getTightIsoMVA()  && electron.getIso() < 0.10);
     bool looseIsoRegion = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
-    bool antiIsoRegion  = (tau.getTightIsoMVA()  && electron.getIso() > 0.15 && electron.getIso() < 0.30);
-    bool antiTauIsoRegion = (tau.getVLooseIsoMVA() > 0 && tau.getTightIsoMVA() == 0 && electron.getIso() < 0.15);
+    bool antiIsoRegion  = (tau.getTightIsoMVA()  && electron.getIso() > 0.10 && electron.getIso() < 0.30);
+    bool antiTauIsoRegion = (tau.getVLooseIsoMVA() > 0 && tau.getTightIsoMVA() == 0 && electron.getIso() < 0.10);
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);

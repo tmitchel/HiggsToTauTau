@@ -194,9 +194,6 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   }
 
   PassEle25 = passEle25 && filterEle25 && matchEle25;
-  PassEle32 = passEle32 && filterEle32 && matchEle32;
-  PassEle25 = passEle35 && filterEle35 && matchEle35;
-  PassEle24Tau30 = passEle24Tau30 && filterEle24Tau30 && matchEle24Tau30;
   PassDoubleTauCmbIso35 = passDoubleTauCmbIso35 && (matchDoubleTauCmbIso35_1 || matchDoubleTauCmbIso35_2) && (filterDoubleTauCmbIso35_1 || filterDoubleTauCmbIso35_2);
   PassDoubleTau35 = passDoubleTau35 && (matchDoubleTau35_1 || matchDoubleTau35_2) && (filterDoubleTau35_1 || filterDoubleTau35_2);
   PassIsoMu19Tau20 = passIsoMu19Tau20 && (matchIsoMu19Tau20_1 || matchIsoMu19Tau20_2) && (filterIsoMu19Tau20_1 || filterIsoMu19Tau20_2);
@@ -227,14 +224,17 @@ Bool_t event_info::getPassEle25(){
 }
 
 Bool_t event_info::getPassEle32() {
+  PassEle32 = passEle32 && filterEle32 && matchEle32;
   return PassEle32;
 }
 
 Bool_t event_info::getPassEle35() {
+  PassEle35 = passEle35 && filterEle35 && matchEle35;
   return PassEle35;
 }
 
 Bool_t event_info::getPassEle24Tau30() {
+  PassEle24Tau30 = passEle24Tau30 && filterEle24Tau30 && matchEle24Tau30;
   return PassEle24Tau30;
 }
 
