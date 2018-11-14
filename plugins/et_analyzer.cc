@@ -121,8 +121,8 @@ int main(int argc, char* argv[]) {
   auto zpt_hist = (TH2F*)zpt_file->Get("zptmass_histo");
 
   //H->tau tau scale factors
-//  TFile htt_sf_file("LeptonEfficiencies/htt_scalefactors_v17_1.root");
-  TFile htt_sf_file("data/htt_scalefactors_v16_3.root");
+  TFile htt_sf_file("LeptonEfficiencies/htt_scalefactors_v17_1.root");
+//  TFile htt_sf_file("data/htt_scalefactors_v16_3.root");
 
   RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
   htt_sf_file.Close();
