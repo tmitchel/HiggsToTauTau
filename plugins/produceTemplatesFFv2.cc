@@ -56,7 +56,7 @@ public:
   std::vector<TH2F*> data, frac_w, frac_tt, frac_real, frac_qcd;
 
   // binning
-  std::vector<Float_t> mvis_bins, mvis_bins, mvis_bins, njets_bins, njets_bins, njets_bins;
+  std::vector<Float_t> bins_l2, bins_hpt, bins_mjj, bins_lpt, bins_msv1, bins_msv2;
 };
 
 int main(int argc, char *argv[]) {
@@ -110,6 +110,16 @@ histHolder::histHolder(std::string channel_prefix) :
   fout( new TFile(("Output/templates/template_"+channel_prefix+"_finalFFv1.root").c_str(), "recreate") ),
   mvis_bins( {0,50,80,100,110,120,130,150,170,200,250,1000} ),
   njets_bins( {-0.5,0.5,1.5,15} ),
+  // x-axis
+  bins_l2 {0, 1, 10, 11},
+  bins_hpt {0, 100, 150, 200, 250, 300, 5000},
+  bins_mjj {300, 700, 1100, 1500, 10000},
+  //bins_mjj {0., 0.1, 0.5, 0.9, 1.},
+
+  // y-axis
+  bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
+  bins_msv1 {0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300},
+  bins_msv2 {0, 95, 115, 135, 155, 400},
   channel_prefix( channel_prefix )
 {
   for (auto it = hists.begin(); it != hists.end(); it++) {
@@ -118,9 +128,9 @@ histHolder::histHolder(std::string channel_prefix) :
     fout->cd();
   }
 
-  fake_0jet    = new TH2F("fake_0jet"   , "fake_SS", mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] );
-  fake_boosted = new TH2F("fake_boosted", "fake_SS", mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]);
-  fake_vbf     = new TH2F("fake_vbf"    , "fake_SS", mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]);
+  fake_0jet    = new TH2F("fake_0jet"   , "fake_SS", bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] );
+  fake_boosted = new TH2F("fake_boosted", "fake_SS", bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]);
+  fake_vbf     = new TH2F("fake_vbf"    , "fake_SS", bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]);
   data = {
       new TH2F("data_0jet"     , "data_0jet"     , mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] ),
       new TH2F("data_boosted"  , "data_boosted"  , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
@@ -160,11 +170,11 @@ void histHolder::initVectors(std::string name) {
       name = "data_obs";
     }
     if (key.first == channel_prefix + "_0jet") {
-      hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
+      hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]));
     } else if (key.first == channel_prefix + "_boosted") {
-      hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
+      hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
     } else if (key.first == channel_prefix + "_vbf") {
-      hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
+      hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
     }
   }
 }
