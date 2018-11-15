@@ -42,20 +42,18 @@ public:
   ~histHolder() { delete ff_weight; };
   void writeHistos();
   void initVectors(std::string);
-  void fillFraction(int, std::string, double, double, double);
+  void fillFraction(int, std::string, double, double);
   void convertDataToFake(TH1F*, std::string, double, double);
   void histoLoop(std::vector<std::string>, std::string, std::string, std::string);
   void getJetFakes(std::vector<std::string>, std::string, std::string, std::string);
 
   TFile *fout;
   std::vector<int> bins;
-  std::vector<float> mvis_bins, njets_bins;
-  float *mvis_bins_real, *njets_bins_real;
   FakeFactor* ff_weight;
   std::string channel_prefix;
   std::map<std::string, std::vector<TH1F *>> hists;
   TH1F *fake_0jet, *fake_boosted, *fake_vbf, *fake_inclusive;
-  std::vector<TH2F*> data, frac_w, frac_tt, frac_real, frac_qcd;
+  std::vector<TH1F*> data, frac_w, frac_tt, frac_real, frac_qcd;
 };
 
 int main(int argc, char *argv[]) {
@@ -117,8 +115,6 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
   }, 
   fout( new TFile(("Output/templates/template_"+channel_prefix+"_"+var_name+".root").c_str(), "recreate") ),
   bins( Bins ), 
-  mvis_bins( {0,50,80,100,110,120,130,150,170,200,250,1000} ),
-  njets_bins( {-0.5,0.5,1.5,15} ),
   channel_prefix( channel_prefix )
 {
   for (auto it = hists.begin(); it != hists.end(); it++) {
@@ -127,48 +123,41 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
     fout->cd();
   }
 
-  mvis_bins_real = &mvis_bins[0];
-  njets_bins_real = &njets_bins[0];
-
-  // final jetFakes distributions
   fake_inclusive = new TH1F("fake_inclusive", "fake_inclusive", bins.at(0), bins.at(1), bins.at(2));
-  fake_0jet      = new TH1F("fake_0jet"     , "fake_0jet"     , bins.at(0), bins.at(1), bins.at(2));
-  fake_boosted   = new TH1F("fake_boosted"  , "fake_boosted"  , bins.at(0), bins.at(1), bins.at(2));
-  fake_vbf       = new TH1F("fake_vbf"      , "fake_vbf"      , bins.at(0), bins.at(1), bins.at(2));
-  
-  // histograms for getting the fake fractions
+  fake_0jet = new TH1F("fake_0jet", "fake_SS", bins.at(0), bins.at(1), bins.at(2));
+  fake_boosted = new TH1F("fake_boosted", "fake_SS", bins.at(0), bins.at(1), bins.at(2));
+  fake_vbf = new TH1F("fake_vbf", "fake_SS", bins.at(0), bins.at(1), bins.at(2));
   data = {
-      new TH2F("data_inclusive", "data_inclusive", mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("data_0jet"     , "data_0jet"     , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("data_boosted"  , "data_boosted"  , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("data_vbf"      , "data_vbf"      , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH1F("data_inclusive", "data_inclusive", bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("data_0jet"     , "data_0jet"     , bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("data_boosted"  , "data_boosted"  , bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("data_vbf"      , "data_vbf"      , bins.at(0), bins.at(1), bins.at(2)),
   };
   frac_w = {
-      new TH2F("frac_w_inclusive", "frac_w_inclusive", mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_w_0jet"     , "frac_w_0jet"     , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_w_boosted"  , "frac_w_boosted"  , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_w_vbf"      , "frac_w_vbf"      , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH1F("frac_w_inclusive", "frac_w_inclusive", bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_w_0jet"     , "frac_w_0jet"     , bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_w_boosted"  , "frac_w_boosted"  , bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_w_vbf"      , "frac_w_vbf"      , bins.at(0), bins.at(1), bins.at(2)),
   };
   frac_tt = {
-      new TH2F("frac_tt_inclusive", "frac_tt_inclusive", mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_tt_0jet"     , "frac_tt_0jet"     , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_tt_boosted"  , "frac_tt_boosted"  , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_tt_vbf"      , "frac_tt_vbf"      , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH1F("frac_tt_inclusive", "frac_tt_inclusive", bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_tt_0jet"     , "frac_tt_0jet"     , bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_tt_boosted"  , "frac_tt_boosted"  , bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_tt_vbf"      , "frac_tt_vbf"      , bins.at(0), bins.at(1), bins.at(2)),
   };
   frac_real = {
-      new TH2F("frac_real_inclusive", "frac_real_inclusive", mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_real_0jet"     , "frac_real_0jet"     , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_real_boosted"  , "frac_real_boosted"  , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_real_vbf"      , "frac_real_vbf"      , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH1F("frac_real_inclusive", "frac_real_inclusive", bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_real_0jet"     , "frac_real_0jet"     , bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_real_boosted"  , "frac_real_boosted"  , bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_real_vbf"      , "frac_real_vbf"      , bins.at(0), bins.at(1), bins.at(2)),
   };
   frac_qcd = {
-      new TH2F("frac_qcd_inclusive", "frac_qcd_inclusive", mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_qcd_0jet"     , "frac_qcd_0jet"     , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_qcd_boosted"  , "frac_qcd_boosted"  , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
-      new TH2F("frac_qcd_vbf"      , "frac_qcd_vbf"      , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
+      new TH1F("frac_qcd_inclusive", "frac_qcd_inclusive", bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_qcd_0jet"     , "frac_qcd_0jet"     , bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_qcd_boosted"  , "frac_qcd_boosted"  , bins.at(0), bins.at(1), bins.at(2)),
+      new TH1F("frac_qcd_vbf"      , "frac_qcd_vbf"      , bins.at(0), bins.at(1), bins.at(2)),
   };
 
-  // get FakeFactor workspace
   TFile ff_file("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root");
   ff_weight = (FakeFactor *)ff_file.Get("ff_comb");
   ff_file.Close();
@@ -182,9 +171,8 @@ void histHolder::initVectors(std::string name) {
   }
 }
 
-// fill histograms to get the 4 fractions
-void histHolder::fillFraction(int cat, std::string name, double vis_mass, double njets, double weight) {
-  TH2F *hist;
+void histHolder::fillFraction(int cat, std::string name, double var, double weight) {
+  TH1F *hist;
   if (name == "Data") {
     hist = data.at(cat);
   } else if (name == "W" || name == "ZJ" || name == "VVJ") {
@@ -194,10 +182,9 @@ void histHolder::fillFraction(int cat, std::string name, double vis_mass, double
   } else if (name == "ZTT" || name == "TTT" || name == "VVT") {
     hist = frac_real.at(cat);
   }
-  hist->Fill(vis_mass, njets, weight);
+  hist->Fill(var, weight);
 }
 
-// only apply the fake factor to data to get jetFakes
 void histHolder::convertDataToFake(TH1F *hist, std::string name, double var, double weight) {
   if (name.find("Data") != std::string::npos) {
     hist->Fill(var, weight);
@@ -215,25 +202,14 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     fout->cd();
 
     // get variables from file
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, is_signal, OS;
-    Float_t var, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso;
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiTauIso, OS;
+    Float_t var, weight;
 
-    if (var_name.find("t1_pt") != std::string::npos) {
-      tree->SetBranchAddress("t1_pt", &var);
-    } else {
-      tree->SetBranchAddress("t1_pt", &t1_pt);
-      tree->SetBranchAddress(var_name.c_str(), &var);
-    }
-
+    tree->SetBranchAddress(var_name.c_str(), &var);
     tree->SetBranchAddress("evtwt", &weight);
-    tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
-    tree->SetBranchAddress("njets", &njets);
-    tree->SetBranchAddress("vis_mass", &vis_mass);
-    tree->SetBranchAddress("mt", &mt);
-    tree->SetBranchAddress("el_iso", &el_iso);
 
-    tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("is_signal", &is_signal);
+    tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
     tree->SetBranchAddress("cat_boosted", &cat_boosted);
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
@@ -261,28 +237,27 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
         }
       } else if (is_antiTauIso) {
 
-        if (!(name == "W"   || name == "ZJ"  || name == "VVJ" ||
+        if (!(name == "W" || name == "ZJ" || name == "VVJ" ||
               name == "TTJ" ||
               name == "ZTT" || name == "TTT" || name == "VVT" ||
               name == "Data")) {
           continue;
         }
-        
-        fillFraction(inclusive, name, vis_mass, njets, weight);
+
+        fillFraction(inclusive, name, var, weight);
         if (cat_0jet > 0) {
-          fillFraction(zeroJet, name, vis_mass, njets, weight);
+          fillFraction(zeroJet, name, var, weight);
         } else if (cat_boosted > 0) {
-          fillFraction(boosted, name, vis_mass, njets, weight);
+          fillFraction(boosted, name, var, weight);
         } else if (cat_vbf > 0) {
-          fillFraction(vbf, name, vis_mass, njets, weight);
+          fillFraction(vbf, name, var, weight);
         }
       }
     }
   }
 
-  // take the fractions
   for (int i = 0; i < data.size(); i++) {
-    frac_qcd.at(i) = (TH2F*)data.at(i)->Clone();
+    frac_qcd.at(i) = (TH1F*)data.at(i)->Clone();
     frac_qcd.at(i)->Add(frac_w.at(i), -1);
     frac_qcd.at(i)->Add(frac_tt.at(i), -1);
     frac_qcd.at(i)->Add(frac_real.at(i), -1);
@@ -311,7 +286,7 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
     }
 
     // get variables from file
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, is_signal, OS;
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, OS;
     Float_t var, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso;
 
     if (var_name.find("t1_pt") != std::string::npos) {
@@ -344,35 +319,33 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
       }
 
       if (is_antiTauIso) {
-        auto bin_x = data.at(inclusive)->GetXaxis()->FindBin(vis_mass);
-        auto bin_y = data.at(inclusive)->GetYaxis()->FindBin(njets);
-        
+        auto bin = data.at(inclusive)->FindBin(var);
         auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
-                                            frac_w.at(inclusive)->GetBinContent(bin_x, bin_y),
-                                            frac_tt.at(inclusive)->GetBinContent(bin_x, bin_y),
-                                            frac_qcd.at(inclusive)->GetBinContent(bin_x, bin_y)});
+                          frac_w.at(inclusive)->GetBinContent(bin),
+                          frac_tt.at(inclusive)->GetBinContent(bin),
+                          frac_qcd.at(inclusive)->GetBinContent(bin)});
         convertDataToFake(fake_inclusive, name, var, weight * fakeweight);
 
         if (cat_0jet) {
           auto bin = data.at(zeroJet)->FindBin(var);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
-                                              frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
-                                              frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
-                                              frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)});
+                                              frac_w.at(zeroJet)->GetBinContent(bin),
+                                              frac_tt.at(zeroJet)->GetBinContent(bin),
+                                              frac_qcd.at(zeroJet)->GetBinContent(bin)});
           convertDataToFake(fake_0jet, name, var, weight * fakeweight);
         } else if (cat_boosted) {
           auto bin = data.at(boosted)->FindBin(var);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
-                                              frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
-                                              frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
-                                              frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)});
+                                              frac_w.at(boosted)->GetBinContent(bin),
+                                              frac_tt.at(boosted)->GetBinContent(bin),
+                                              frac_qcd.at(boosted)->GetBinContent(bin)});
           convertDataToFake(fake_boosted, name, var, weight * fakeweight);
         } else if (cat_vbf) {
           auto bin = data.at(vbf)->FindBin(var);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
-                                              frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
-                                              frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
-                                              frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)});
+                                              frac_w.at(vbf)->GetBinContent(bin),
+                                              frac_tt.at(vbf)->GetBinContent(bin),
+                                              frac_qcd.at(vbf)->GetBinContent(bin)});
           convertDataToFake(fake_vbf, name, var, weight * fakeweight);
         }
       }
