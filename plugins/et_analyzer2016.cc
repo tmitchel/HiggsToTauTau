@@ -17,20 +17,20 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "CLParser.h"
-#include "EmbedWeight.h"
-#include "LumiReweightingStandAlone.h"
-#include "SF_factory.h"
 #include "ZmmSF.h"
-#include "btagSF.h"
-#include "electron_factory.h"
+#include "swiss_army_class.h"
 #include "event_info.h"
+#include "tau_factory.h"
+#include "electron_factory.h"
+#include "muon_factory.h"
 #include "jet_factory.h"
 #include "met_factory.h"
-#include "muon_factory.h"
+#include "SF_factory.h"
+#include "btagSF.h"
+#include "LumiReweightingStandAlone.h"
+#include "CLParser.h"
+#include "EmbedWeight.h"
 #include "slim_tree.h"
-#include "swiss_army_class.h"
-#include "tau_factory.h"
 
 typedef std::vector<double> NumV;
 
@@ -111,34 +111,28 @@ int main(int argc, char* argv[]) {
   ///////////////////////////////////////////////
 
   // read inputs for lumi reweighting
-  auto lumi_weights = new reweight::LumiReWeighting("data/MC_nPU_081118.root", "data/Data_nPU_081118.root", "mc", "pileup");
+  auto lumi_weights = new reweight::LumiReWeighting("data/MC_Moriond17_PU25ns_V1.root", "data/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
 
-  // tracking corrections
-  TFile* f_Trk = new TFile("LeptonEfficiencies/trackingSF.root");
-  TH1F* h_Trk = (TH1F*)f_Trk->Get("effTrackingE");
-
-  // Z-pT reweighting!!!
+  // Z-pT reweighting
   TFile *zpt_file = new TFile("data/zpt_weights_2016_BtoH.root");
   auto zpt_hist = (TH2F*)zpt_file->Get("zptmass_histo");
 
   //H->tau tau scale factors
-  TFile htt_sf_file("LeptonEfficiencies/htt_scalefactors_v17_1.root");
-//  TFile htt_sf_file("data/htt_scalefactors_v16_3.root");
-
+  TFile htt_sf_file("data/htt_scalefactors_v16_3.root");
   RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
   htt_sf_file.Close();
 
-  // embedded sample weights!!!
+  // embedded sample weights
   TFile embed_file("data/htt_scalefactors_v16_9_embedded.root", "READ");
   RooWorkspace *wEmbed = (RooWorkspace *)embed_file.Get("w");
   embed_file.Close();
 
   // trigger and ID scale factors
-  auto singleElTrg_SF = new SF_factory("LeptonEfficiencies/Electron/Run2017/Electron_Ele32orEle35.root");
-  auto crossTrg_SF = new SF_factory("LeptonEfficiencies/Electron/Run2017/Electron_EleTau_Ele24.root");
-  auto myScaleFactor_id = new SF_factory("LeptonEfficiencies/Electron/Run2017/Electron_IdIso_IsoLt0.10_eff_RerecoFall17.root");
+  auto myScaleFactor_trgEle25 = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_eff.root");
+  auto myScaleFactor_id = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_IsoLt0p1_eff.root");
+  auto myScaleFactor_trgEle25Anti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_antiisolated_Iso0p1to0p3_eff_rb.root");
+  auto myScaleFactor_idAnti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_antiisolated_Iso0p1to0p3_eff.root");
 
-  // NNLOPS weights!!!
   TFile * f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
   TGraph * g_NNLOPS_0jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_0jet");
   TGraph * g_NNLOPS_1jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_1jet");
@@ -178,7 +172,7 @@ int main(int argc, char* argv[]) {
     histos_2d->at("weights") -> Fill(1., norm);
 
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
-    Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.);
+    Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_trig_anti(1.), sf_id(1.), sf_id_anti(1.);
     if (name == "W") {
       if (event.getNumGenJets() == 1) {
         evtwt = 6.82;
@@ -195,15 +189,15 @@ int main(int argc, char* argv[]) {
 
     if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
       if (event.getNumGenJets() == 1) {
-        evtwt = 0.502938039;
+        evtwt = 0.457;
       } else if (event.getNumGenJets() == 2) {
-        evtwt = 1.042256272;
+        evtwt = 0.467;
       } else if (event.getNumGenJets() == 3) {
-        evtwt = 0.656337234;
+        evtwt = 0.480;
       } else if (event.getNumGenJets() == 4) {
-        evtwt = 0.458531131;
+        evtwt = 0.393;
       } else {
-        evtwt = 2.873324952;
+        evtwt = 1.418;
       }
     }
 
@@ -224,24 +218,9 @@ int main(int argc, char* argv[]) {
     //          VLoose Isolation, against leptons           //
     //   - Event: dR(tau,el) > 0.5                          //
     //////////////////////////////////////////////////////////
-    
+
     // remove 2-prong taus
     if (!tau.getDecayModeFinding() || tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
-      continue;
-    }
-    
-    // apply correct lepton pT thresholds
-    if (electron.getPt() > 37 && event.getPassEle35()) {
-      // fired singleEle35
-    } else if (electron.getPt() > 34 && event.getPassEle32()) {
-      // fired singleEle32
-    } else if (electron.getPt() > 26 && tau.getPt() > 32 && event.getPassEle24Tau30()) {
-
-    } else {
-      continue;
-    }
-
-    if (electron.getP4().DeltaR(tau.getP4()) < 0.5) {
       continue;
     }
 
@@ -263,18 +242,14 @@ int main(int argc, char* argv[]) {
 
     // apply all scale factors/corrections/etc.
     if (!isData && !isEmbed) {
-      
-      // apply trigger SF's
-      if (electron.getPt() > 34) {
-        sf_trig = singleElTrg_SF->getSF(electron.getPt(), electron.getEta());
-      } else if (electron.getPt() < 34) {
-        sf_trig = crossTrg_SF->getSF(electron.getPt(), electron.getEta());
-      }
-      
-      // ID SF
-      sf_id = myScaleFactor_id->getSF(electron.getPt(), electron.getEta());
 
-      auto PUweight = lumi_weights->weight(event.getNPV());
+      // apply trigger and id SF's
+      sf_trig      = myScaleFactor_trgEle25->getSF(electron.getPt(), electron.getEta());
+      sf_trig_anti = myScaleFactor_trgEle25Anti->getSF(electron.getPt(), electron.getEta());
+      sf_id        = myScaleFactor_id->getSF(electron.getPt(), electron.getEta());
+      sf_id_anti   = myScaleFactor_idAnti->getSF(electron.getPt(), electron.getEta());
+
+      auto PUweight = lumi_weights->weight(event.getNPU());
       auto genweight = event.getGenWeight();
 
       evtwt *= sf_trig;
@@ -293,37 +268,34 @@ int main(int argc, char* argv[]) {
       histos->at("weightflow")-> Fill(6., evtwt);
       histos_2d->at("weights") -> Fill(6., genweight);
 
-      // tracking efficiency
-      evtwt *= h_Trk->GetBinContent(h_Trk->FindBin(electron.getEta()));
-
       // tau ID efficiency SF
       if (tau.getGenMatch() == 5) {
-        evtwt *= 0.89;
+        evtwt *= 0.95;
       }
 
       htt_sf->var("e_pt")->setVal(electron.getPt());
       htt_sf->var("e_eta")->setVal(electron.getEta());
-      //auto htt_sf_val = htt_sf->function("e_trk_ratio")->getVal();
+      auto htt_sf_val = htt_sf->function("e_trk_ratio")->getVal();
 
-      //evtwt *= htt_sf_val;
+      evtwt *= htt_sf_val;
       histos->at("weightflow")-> Fill(7., evtwt);
-      //histos_2d->at("weights") -> Fill(7., htt_sf_val);
+      histos_2d->at("weights") -> Fill(7., htt_sf_val);
 
       auto tempweight = evtwt;
 
       // // anti-lepton discriminator SFs
       if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3){//Yiwen
-         if (fabs(tau.getEta())<1.460) evtwt *= 1.80;
-         else if (fabs(tau.getEta())>1.558) evtwt *= 1.53;
-         //if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
-         //else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
+         if (fabs(tau.getEta())<1.460) evtwt *= 1.402;
+         else if (fabs(tau.getEta())>1.558) evtwt *= 1.900;
+         if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
+         else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
        }
         else if (tau.getGenMatch() == 2 or tau.getGenMatch() == 4){
-            if (fabs(tau.getEta())<0.4) evtwt *= 1.06;
-            else if (fabs(tau.getEta())<0.8) evtwt *= 1.02;
-            else if (fabs(tau.getEta())<1.2) evtwt *= 1.10;
-            else if (fabs(tau.getEta())<1.7) evtwt *= 1.03;
-            else evtwt *= 1.94;
+            if (fabs(tau.getEta())<0.4) evtwt *= 1.012;
+            else if (fabs(tau.getEta())<0.8) evtwt *= 1.007;
+            else if (fabs(tau.getEta())<1.2) evtwt *= 0.870;
+            else if (fabs(tau.getEta())<1.7) evtwt *= 1.154;
+            else evtwt *= 2.281;
         }
 
       histos->at("weightflow")-> Fill(8., evtwt);
@@ -336,20 +308,20 @@ int main(int argc, char* argv[]) {
         zmm_sf = GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
       } 
 
-      //evtwt *= zpt_sf;
+      evtwt *= zpt_sf;
       histos->at("weightflow")-> Fill(9., evtwt);
       histos_2d->at("weights") -> Fill(9., zpt_sf);
 
-      //evtwt *= zmm_sf;
+      evtwt *= zmm_sf;
       histos->at("weightflow")-> Fill(10., evtwt);
       histos_2d->at("weights") -> Fill(10., zmm_sf);
 
-      //// top-pT Reweighting (only for some systematic)
-      //if (name == "TTT" || name == "TT" || name == "TTJ") {
-      //  float pt_top1 = std::min(float(400.), jets.getTopPt1());
-      //  float pt_top2 = std::min(float(400.), jets.getTopPt2());
-      //  evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
-      //}
+      // top-pT Reweighting (only for some systematic)
+      if (name == "TTT" || name == "TT" || name == "TTJ") {
+        float pt_top1 = std::min(float(400.), jets.getTopPt1());
+        float pt_top2 = std::min(float(400.), jets.getTopPt2());
+        evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
+      }
 
       // b-tagging SF (only used in scaling W, I believe)
       int nbtagged = std::min(2, jets.getNbtag());
@@ -357,13 +329,13 @@ int main(int argc, char* argv[]) {
       float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
       if (nbtagged>2) weight_btag=0;
 
-      //// NNLOPS ggH reweighting
-      //if (sample.find("ggHtoTauTau125") != std::string::npos) {
-      //  if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(min(event.getHiggsPtRivet(), float(125.0)));
-      //  if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(min(event.getHiggsPtRivet(), float(625.0)));
-      //  if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), float(800.0)));
-      //  if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), float(925.0)));
-      //}
+      // NNLOPS ggH reweighting
+      if (sample.find("ggHtoTauTau125") != std::string::npos) {
+        if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(min(event.getHiggsPtRivet(), float(125.0)));
+        if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(min(event.getHiggsPtRivet(), float(625.0)));
+        if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), float(800.0)));
+        if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), float(925.0)));
+      }
 
       //NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
     } else if (!isData && isEmbed) {
