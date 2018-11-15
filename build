@@ -10,7 +10,7 @@ l1=$((${srclen}+28+3))
 l2=$((${binlen}+28+3-${l1}))
 if [ "$l2" -lt 0 ]
 then
-        l2=$(($l2 * -1))
+    l2=$(($l2 * -1))
 fi
 s=$(printf "%-${l1}s" "/")
 echo "${s// //}"
@@ -22,6 +22,12 @@ echo "${s// //}"
 
 set -e
 
+if [ ! -z "${3}" ]
+then
+    doFF="${CMSSW_BASE}/lib/slc6_amd64_gcc630/libHTTutilitiesJet2TauFakes.so"
+fi
+
+
 # this is the important part for compiling
-g++ -O3 $1 `root-config --cflags --glibs`  ${CMSSW_BASE}/lib/slc6_amd64_gcc630/libHTTutilitiesJet2TauFakes.so -lRooFit -lRooFitCore -I ${CMSSW_BASE}/src -I ${CMSSW_BASE}/src/SMHTT_Analyzers/include -o $2
+g++ -O3 $1 `root-config --cflags --glibs` $doFF -lRooFit -lRooFitCore -I ${CMSSW_BASE}/src -I ${CMSSW_BASE}/src/SMHTT_Analyzers/include -I include -o $2
 cp $2 $HOME/bin
