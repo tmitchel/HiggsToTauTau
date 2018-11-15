@@ -178,33 +178,33 @@ int main(int argc, char* argv[]) {
 
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
     Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.);
-//    if (name == "W") {
-//      if (event.getNumGenJets() == 1) {
-//        evtwt = 6.82;
-//      } else if (event.getNumGenJets() == 2) {
-//        evtwt = 2.099;
-//      } else if (event.getNumGenJets() == 3) {
-//        evtwt = 0.689;
-//      } else if (event.getNumGenJets() == 4) {
-//        evtwt = 0.690;
-//      } else {
-//        evtwt = 25.44;
-//      }
-//    }
-//
-//    if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
-//      if (event.getNumGenJets() == 1) {
-//        evtwt = 0.502938039;
-//      } else if (event.getNumGenJets() == 2) {
-//        evtwt = 1.042256272;
-//      } else if (event.getNumGenJets() == 3) {
-//        evtwt = 0.656337234;
-//      } else if (event.getNumGenJets() == 4) {
-//        evtwt = 0.458531131;
-//      } else {
-//        evtwt = 2.873324952;
-//      }
-//    }
+    if (name == "W") {
+      if (event.getNumGenJets() == 1) {
+        evtwt = 6.82;
+      } else if (event.getNumGenJets() == 2) {
+        evtwt = 2.099;
+      } else if (event.getNumGenJets() == 3) {
+        evtwt = 0.689;
+      } else if (event.getNumGenJets() == 4) {
+        evtwt = 0.690;
+      } else {
+        evtwt = 25.44;
+      }
+    }
+
+    if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
+      if (event.getNumGenJets() == 1) {
+        evtwt = 0.502938039;
+      } else if (event.getNumGenJets() == 2) {
+        evtwt = 1.042256272;
+      } else if (event.getNumGenJets() == 3) {
+        evtwt = 0.656337234;
+      } else if (event.getNumGenJets() == 4) {
+        evtwt = 0.458531131;
+      } else {
+        evtwt = 2.873324952;
+      }
+    }
 
     histos->at("weightflow") -> Fill(2., evtwt);
     histos_2d->at("weights") -> Fill(2., evtwt);
@@ -314,8 +314,8 @@ int main(int argc, char* argv[]) {
       if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3){//Yiwen
          if (fabs(tau.getEta())<1.460) evtwt *= 1.80;
          else if (fabs(tau.getEta())>1.558) evtwt *= 1.53;
-         if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
-         else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
+         //if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
+         //else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
        }
         else if (tau.getGenMatch() == 2 or tau.getGenMatch() == 4){
             if (fabs(tau.getEta())<0.4) evtwt *= 1.06;
@@ -335,20 +335,20 @@ int main(int argc, char* argv[]) {
         zmm_sf = GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
       } 
 
-      evtwt *= zpt_sf;
+      //evtwt *= zpt_sf;
       histos->at("weightflow")-> Fill(9., evtwt);
       histos_2d->at("weights") -> Fill(9., zpt_sf);
 
-      evtwt *= zmm_sf;
+      //evtwt *= zmm_sf;
       histos->at("weightflow")-> Fill(10., evtwt);
       histos_2d->at("weights") -> Fill(10., zmm_sf);
 
-      // top-pT Reweighting (only for some systematic)
-      if (name == "TTT" || name == "TT" || name == "TTJ") {
-        float pt_top1 = std::min(float(400.), jets.getTopPt1());
-        float pt_top2 = std::min(float(400.), jets.getTopPt2());
-        evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
-      }
+      //// top-pT Reweighting (only for some systematic)
+      //if (name == "TTT" || name == "TT" || name == "TTJ") {
+      //  float pt_top1 = std::min(float(400.), jets.getTopPt1());
+      //  float pt_top2 = std::min(float(400.), jets.getTopPt2());
+      //  evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
+      //}
 
       // b-tagging SF (only used in scaling W, I believe)
       int nbtagged = std::min(2, jets.getNbtag());
@@ -356,13 +356,13 @@ int main(int argc, char* argv[]) {
       float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
       if (nbtagged>2) weight_btag=0;
 
-      // NNLOPS ggH reweighting
-      if (sample.find("ggHtoTauTau125") != std::string::npos) {
-        if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(min(event.getHiggsPtRivet(), float(125.0)));
-        if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(min(event.getHiggsPtRivet(), float(625.0)));
-        if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), float(800.0)));
-        if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), float(925.0)));
-      }
+      //// NNLOPS ggH reweighting
+      //if (sample.find("ggHtoTauTau125") != std::string::npos) {
+      //  if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(min(event.getHiggsPtRivet(), float(125.0)));
+      //  if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(min(event.getHiggsPtRivet(), float(625.0)));
+      //  if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), float(800.0)));
+      //  if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), float(925.0)));
+      //}
 
       //NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
     } else if (!isData && isEmbed) {
