@@ -11,7 +11,7 @@
 #include "TTree.h"
 
 // user includes
-#include "../include/CLParser.h"
+#include "CLParser.h"
 
 //FF
 #include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
@@ -42,10 +42,10 @@ public:
   ~histHolder() { delete ff_weight; };
   void writeHistos();
   void initVectors(std::string);
-  void fillFake(int, std::string, double, double, double);
+  void fillFraction(int, std::string, double, double, double);
   void convertDataToFake(TH1F*, std::string, double, double);
-  void calculateFF(std::vector<std::string>, std::string, std::string, std::string);
-  void fillTemplate(std::vector<std::string>, std::string, std::string, std::string);
+  void histoLoop(std::vector<std::string>, std::string, std::string, std::string);
+  void getJetFakes(std::vector<std::string>, std::string, std::string, std::string);
 
   TFile *fout;
   std::vector<int> bins;
@@ -98,8 +98,8 @@ int main(int argc, char *argv[]) {
   std::vector<std::string> files;
   read_directory(dir, files);
 
-  hists->calculateFF(files, dir, tree_name, var_name);
-  hists->fillTemplate(files, dir, tree_name, var_name);
+  hists->histoLoop(files, dir, tree_name, var_name);
+  hists->getJetFakes(files, dir, tree_name, var_name);
   hists->writeHistos();
 
   delete hists->ff_weight;
@@ -130,10 +130,13 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
   mvis_bins_real = &mvis_bins[0];
   njets_bins_real = &njets_bins[0];
 
+  // final jetFakes distributions
   fake_inclusive = new TH1F("fake_inclusive", "fake_inclusive", bins.at(0), bins.at(1), bins.at(2));
-  fake_0jet = new TH1F("fake_0jet", "fake_SS", bins.at(0), bins.at(1), bins.at(2));
-  fake_boosted = new TH1F("fake_boosted", "fake_SS", bins.at(0), bins.at(1), bins.at(2));
-  fake_vbf = new TH1F("fake_vbf", "fake_SS", bins.at(0), bins.at(1), bins.at(2));
+  fake_0jet      = new TH1F("fake_0jet"     , "fake_0jet"     , bins.at(0), bins.at(1), bins.at(2));
+  fake_boosted   = new TH1F("fake_boosted"  , "fake_boosted"  , bins.at(0), bins.at(1), bins.at(2));
+  fake_vbf       = new TH1F("fake_vbf"      , "fake_vbf"      , bins.at(0), bins.at(1), bins.at(2));
+  
+  // histograms for getting the fake fractions
   data = {
       new TH2F("data_inclusive", "data_inclusive", mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
       new TH2F("data_0jet"     , "data_0jet"     , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
@@ -165,6 +168,7 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
       new TH2F("frac_qcd_vbf"      , "frac_qcd_vbf"      , mvis_bins.size()-1, mvis_bins_real, njets_bins.size()-1, njets_bins_real),
   };
 
+  // get FakeFactor workspace
   TFile ff_file("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root");
   ff_weight = (FakeFactor *)ff_file.Get("ff_comb");
   ff_file.Close();
@@ -178,7 +182,8 @@ void histHolder::initVectors(std::string name) {
   }
 }
 
-void histHolder::fillFake(int cat, std::string name, double vis_mass, double njets, double weight) {
+// fill histograms to get the 4 fractions
+void histHolder::fillFraction(int cat, std::string name, double vis_mass, double njets, double weight) {
   TH2F *hist;
   if (name == "Data") {
     hist = data.at(cat);
@@ -192,13 +197,14 @@ void histHolder::fillFake(int cat, std::string name, double vis_mass, double nje
   hist->Fill(vis_mass, njets, weight);
 }
 
+// only apply the fake factor to data to get jetFakes
 void histHolder::convertDataToFake(TH1F *hist, std::string name, double var, double weight) {
   if (name.find("Data") != std::string::npos) {
     hist->Fill(var, weight);
   }
 }
 
-void histHolder::fillTemplate(std::vector<std::string> files, std::string dir, std::string tree_name, std::string var_name) {
+void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, std::string tree_name, std::string var_name) {
 
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
@@ -279,7 +285,7 @@ void histHolder::fillTemplate(std::vector<std::string> files, std::string dir, s
   }
 }
 
-void histHolder::calculateFF(std::vector<std::string> files, std::string dir, std::string tree_name, std::string var_name) {
+void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std::string tree_name, std::string var_name) {
 
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
@@ -336,24 +342,25 @@ void histHolder::calculateFF(std::vector<std::string> files, std::string dir, st
         }
       } else if (is_antiTauIso) {
 
-    if (!(name == "W"   || name == "ZJ"  || name == "VVJ" ||
-          name == "TTJ" ||
-          name == "ZTT" || name == "TTT" || name == "VVT" ||
-          name == "Data")) {
-      continue;
-    }
-        fillFake(inclusive, name, vis_mass, njets, weight);
+        if (!(name == "W"   || name == "ZJ"  || name == "VVJ" ||
+              name == "TTJ" ||
+              name == "ZTT" || name == "TTT" || name == "VVT" ||
+              name == "Data")) {
+          continue;
+        }
+        fillFraction(inclusive, name, vis_mass, njets, weight);
         if (cat_0jet > 0) {
-          fillFake(zeroJet, name, vis_mass, njets, weight);
+          fillFraction(zeroJet, name, vis_mass, njets, weight);
         } else if (cat_boosted > 0) {
-          fillFake(boosted, name, vis_mass, njets, weight);
+          fillFraction(boosted, name, vis_mass, njets, weight);
         } else if (cat_vbf > 0) {
-          fillFake(vbf, name, vis_mass, njets, weight);
+          fillFraction(vbf, name, vis_mass, njets, weight);
         }
       }
     }
   }
 
+  // take the fractions
   for (int i = 0; i < data.size(); i++) {
     frac_qcd.at(i) = (TH2F*)data.at(i)->Clone();
     frac_qcd.at(i)->Add(frac_w.at(i), -1);
