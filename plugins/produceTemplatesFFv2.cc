@@ -107,7 +107,7 @@ histHolder::histHolder(std::string channel_prefix) :
     {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_vbf").c_str(), std::vector<TH2F *>()},
   }, 
-  fout( new TFile(("Output/templates/template_"+channel_prefix+"_finalFFv1.root").c_str(), "recreate") ),
+  fout( new TFile(("Output/templates/template_"+channel_prefix+"_finalFFv2.root").c_str(), "recreate") ),
   mvis_bins( {0,50,80,100,110,120,130,150,170,200,250,1000} ),
   njets_bins( {-0.5,0.5,1.5,15} ),
   // x-axis

@@ -25,7 +25,7 @@ public:
        *qcd_0jet_SS, *qcd_boosted_SS, *qcd_vbf_SS,
        *qcd_0jet   , *qcd_boosted   , *qcd_vbf;
   TFile *fout;
-  std::string ch;
+  std::string channel_prefix;
   std::map<std::string, std::vector<TH2F *>> hists;
 
   // binning
@@ -183,8 +183,8 @@ histHolder::histHolder(std::string channel) :
         {(channel+"_boosted").c_str(), std::vector<TH2F *>()},
         {(channel+"_vbf").c_str(), std::vector<TH2F *>()},
     },
-    ch ( channel ),
-    fout(new TFile(("Output/templates/template_"+channel+"final.root").c_str(), "recreate")),
+    channel_prefix ( channel ),
+  fout( new TFile(("Output/templates/template_"+channel_prefix+"_finalOSSS.root").c_str(), "recreate") ),
     // x-axis
     bins_l2 {0, 1, 10, 11},
     bins_hpt {0, 100, 150, 200, 250, 300, 5000},
@@ -221,11 +221,11 @@ void histHolder::initVectors(std::string name) {
         if (name.find("Data") != std::string::npos) {
             name = "data_obs";
         }
-        if (key.first == ch+"_0jet") {
+        if (key.first == channel_prefix+"_0jet") {
             hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] ));
-        } else if (key.first == ch+"_boosted") {                                                                          
+        } else if (key.first == channel_prefix+"_boosted") {                                                                          
             hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
-        } else if (key.first == ch+"_vbf") {                                                                              
+        } else if (key.first == channel_prefix+"_vbf") {                                                                              
             hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
         }
     }
@@ -240,7 +240,7 @@ void histHolder::writeHistos() {
     }
   }
 
-  fout->cd((ch+"_0jet").c_str());
+  fout->cd((channel_prefix+"_0jet").c_str());
   qcd_0jet->SetName("QCD");
   qcd_0jet->Scale(1.0 * qcd_0jet_SS->Integral() / qcd_0jet->Integral());
   for (auto i = 0; i < qcd_0jet->GetNbinsX(); i++) {
@@ -250,7 +250,7 @@ void histHolder::writeHistos() {
   }
   qcd_0jet->Write();
 
-  fout->cd((ch+"_boosted").c_str());
+  fout->cd((channel_prefix+"_boosted").c_str());
   qcd_boosted->SetName("QCD");
   qcd_boosted->Scale(1.28 * qcd_boosted_SS->Integral() / qcd_boosted->Integral());
   for (auto i = 0; i < qcd_boosted->GetNbinsX(); i++) {
@@ -260,7 +260,7 @@ void histHolder::writeHistos() {
   }
   qcd_boosted->Write();
 
-  fout->cd((ch+"_vbf").c_str());
+  fout->cd((channel_prefix+"_vbf").c_str());
   qcd_vbf->SetName("QCD");
   qcd_vbf->Scale(1.0 * qcd_vbf_SS->Integral() / qcd_vbf->Integral());
   for (auto i = 0; i < qcd_vbf->GetNbinsX(); i++) {
