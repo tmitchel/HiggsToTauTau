@@ -21,8 +21,8 @@ public:
     Float_t evtwt,
         el_pt, el_eta, el_phi, el_mass, el_charge, el_iso,
         mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
-        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode, t1_genMatch, // t1 is used for et and mt, as well
-        t2_pt, t2_eta, t2_phi, t2_mass, t2_charge, t2_iso_VL, t2_iso_L, t2_iso_M, t2_iso_T, t2_iso_VT, t2_iso_VVT, t2_decayMode, t2_genMatch,
+        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode, t1_genMatch, // t1 is used for et and mt, as well
+        t2_pt, t2_eta, t2_phi, t2_mass, t2_charge, t2_iso, t2_iso_VL, t2_iso_L, t2_iso_M, t2_iso_T, t2_iso_VT, t2_iso_VVT, t2_decayMode, t2_genMatch,
         njets, nbjets,
         j1_pt, j1_eta, j1_phi,
         j2_pt, j2_eta, j2_phi,
@@ -54,6 +54,7 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("t1_phi",              &t1_phi,              "t1_phi/F"             );
     otree->Branch("t1_mass",             &t1_mass,             "t1_mass/F"            );
     otree->Branch("t1_charge",           &t1_charge,           "t1_charge/F"          );
+    otree->Branch("t1_iso",              &t1_iso,              "t1_iso/F"             );
     otree->Branch("t1_iso_VL",           &t1_iso_VL,           "t1_iso_VL/F"          );
     otree->Branch("t1_iso_L",            &t1_iso_L,            "t1_iso_L/F"           );
     otree->Branch("t1_iso_M",            &t1_iso_M,            "t1_iso_M/F"           );
@@ -69,6 +70,7 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("t2_phi",              &t2_phi,              "t2_phi/F"             );
     otree->Branch("t2_mass",             &t2_mass,             "t2_mass/F"            );
     otree->Branch("t2_charge",           &t2_charge,           "t2_charge/F"          );
+    otree->Branch("t2_iso",              &t2_iso,              "t2_iso/F"             );
     otree->Branch("t2_iso_VL",           &t2_iso_VL,           "t2_iso_VL/F"          );
     otree->Branch("t2_iso_L",            &t2_iso_L,            "t2_iso_L/F"           );
     otree->Branch("t2_iso_M",            &t2_iso_M,            "t2_iso_M/F"           );
@@ -277,6 +279,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet
     t1_phi = t->getPhi();
     t1_mass = t->getMass();
     t1_charge = t->getCharge();
+    t1_iso = t->getIso();
     t1_iso_VL = t->getVLooseIsoMVA();
     t1_iso_L = t->getLooseIsoMVA();
     t1_iso_M = t->getMediumIsoMVA();

@@ -17,7 +17,7 @@ class tau {
 private:
   std::string name = "tau";
   Int_t gen_match;
-  Float_t pt, eta, phi, mass, charge, px, py, pz, l2_decayMode, dmf, dmf_new;
+  Float_t pt, eta, phi, mass, charge, px, py, pz, l2_decayMode, dmf, dmf_new, iso;
   Bool_t AgainstTightElectron, AgainstVLooseElectron, AgainstTightMuon, AgainstLooseMuon;
   Float_t VLooseIsoMVA, LooseIsoMVA, MediumIsoMVA, TightIsoMVA, VTightIsoMVA, VVTightIsoMVA;
   TLorentzVector p4;
@@ -42,6 +42,7 @@ public:
   Float_t getPx()                     { return px;                    };
   Float_t getPy()                     { return py;                    };
   Float_t getPz()                     { return pz;                    };
+  Float_t getIso()                    { return iso;                   };
   Float_t getVLooseIsoMVA()           { return VLooseIsoMVA;          };
   Float_t getLooseIsoMVA()            { return LooseIsoMVA;           };
   Float_t getMediumIsoMVA()           { return MediumIsoMVA;          };
@@ -124,6 +125,7 @@ tau tau_factory::run_factory() {
   t.px = px_2;
   t.py = py_2;
   t.pz = pz_2;
+  t.iso = iso_2;
   t.gen_match = gen_match_2;
   t.AgainstTightElectron = againstElectronTightMVA6_2;
   t.AgainstVLooseElectron = againstElectronVLooseMVA6_2;
