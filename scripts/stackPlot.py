@@ -35,12 +35,15 @@ def applyStyle(name, hist, leg):
     if name == 'ZTT':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
         hist.SetName("ZTT")
+        #hist.Scale(0.4)
     elif name == 'TTT':
         hist.SetFillColor(TColor.GetColor("#cfe87f"))
         hist.SetName('TTT')
-    elif name == 'VVT' or name == 'EWKZ' or name == 'ZL':
+    elif name == 'VVT' or name == 'EWKZ' or name == 'ZL' or name == 'W' or name == 'ZJ' or name == 'VVJ' or name == 'TTJ':
         hist.SetFillColor(TColor.GetColor("#9feff2"))
         overlay = 4
+        #if name == 'W':
+        #  hist.Scale(0.8)
     elif name == 'QCD':
         hist.SetFillColor(TColor.GetColor("#ffccff"))
         hist.SetName('QCD')
@@ -74,7 +77,7 @@ def createCanvas():
     pad1.SetPad(0, .3, 1, 1)
     pad1.SetTopMargin(.1)
     pad1.SetBottomMargin(0.02)
-    # pad1.SetLogy()
+    #pad1.SetLogy()
     pad1.SetTickx(1)
     pad1.SetTicky(1)
 
@@ -102,7 +105,13 @@ def formatStat(stat):
 titles = {
     'el_pt': 'Electron p_{T} [GeV]',
     't1_pt': 'Tau p_{T} [GeV]',
+    'el_eta': 'Electron Eta [GeV]',
+    't1_eta': 'Tau Eta [GeV]',
+    't1_iso': 'Tau Isolation',
+    'mt' : 'M_{T} [GeV]',
+    'vis_mass': 'M_{vis} [GeV]',
     'met': 'Missing E_{T} [GeV]',
+    'metphi' : 'Missing E_{T} #Phi [GeV]',
     'pt_sv': 'SVFit p_{T} [GeV]',
     'm_sv': 'SVFit Mass [GeV]',
     'mjj': 'Dijet Mass [GeV]',
@@ -255,7 +264,7 @@ def main():
     stat = formatStat(stat)
     leg.AddEntry(stat, 'Uncertainty', 'f')
 
-    high = max(data.GetMaximum(), stat.GetMaximum()) * 1.4
+    high = max(data.GetMaximum(), stat.GetMaximum()) * 2.
     stack.SetMaximum(high)
     stack.Draw('hist')
     formatStack(stack)
