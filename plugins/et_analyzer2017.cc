@@ -332,8 +332,8 @@ int main(int argc, char* argv[]) {
       // Z-pT and Zmm Reweighting
       double zpt_sf(1.), zmm_sf(1.);
       if (name=="EWKZLL" || name=="EWKZNuNu" || name=="ZTT" || name=="ZLL" || name=="ZL" || name=="ZJ") {
-        zpt_sf = zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()),zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
-        zmm_sf = GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
+        //zpt_sf = zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()),zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
+        //zmm_sf = GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
       } 
 
       //evtwt *= zpt_sf;
