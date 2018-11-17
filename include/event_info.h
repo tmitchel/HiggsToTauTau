@@ -7,7 +7,7 @@
 class event_info {
 private:
   Float_t genpX, genpY, genM, genpT, numGenJets, genweight, amcatNLO_weight, genDR; // gen
-  Float_t npv, npu, rho, extramuon_veto, extraelec_veto;        // event
+  Float_t npv, npu, rho;        // event
   Float_t matchEle25, filterEle25, passEle25;                   // 2016 etau trigger
   Float_t matchEle27, filterEle27, passEle27;                   // 2017 single el 27 trigger
   Float_t matchEle32, filterEle32, passEle32;                   // 2017 single el 32 trigger
@@ -54,8 +54,6 @@ public:
   Float_t getNPV()          { return npv;             };
   Float_t getNPU()          { return npu;             };
   Float_t getRho()          { return rho;             };
-  Float_t getMuonVeto()     { return extramuon_veto;  };
-  Float_t getElectronVeto() { return extraelec_veto;  };
   UInt_t getRun()           { return run;             };
   UInt_t getLumi()          { return lumi;            };
   ULong64_t getEvt()        { return evt;             };
@@ -114,8 +112,6 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   input -> SetBranchAddress( "lumi"           , &lumi            );
   input -> SetBranchAddress( "npv"            , &npv             );
   input -> SetBranchAddress( "npu"            , &npu             );
-  input -> SetBranchAddress( "extramuon_veto" , &extramuon_veto  );
-  input -> SetBranchAddress( "extraelec_veto" , &extraelec_veto  );
   input -> SetBranchAddress( "genpX"          , &genpX           );
   input -> SetBranchAddress( "genpY"          , &genpY           );
   input -> SetBranchAddress( "genM"           , &genM            );
