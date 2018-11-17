@@ -96,11 +96,7 @@ int main(int argc, char* argv[]) {
   if (isData) {
     norm = 1.0;
   } else if (isEmbed) {
-    if (sample.find("embed-H") != std::string::npos) {
-      norm = 1 / .99;
-    } else {
-      norm = 1 / .99;
-    }
+    norm = 1.0;
   } else {
     norm = helper->getLuminosity() * helper->getCrossSection(sample) / gen_number;
   }
@@ -124,10 +120,11 @@ int main(int argc, char* argv[]) {
   embed_file.Close();
 
   TFile bTag_eff_file("data/tagging_efficiencies_march2018_btageff-all_samp-inc-DeepCSV_medium.root", "READ");
-  TH2F* btag_eff_b = (TH2F*)bTag_eff_file.Get("btag_eff_b");
-  TH2F* btag_eff_c = (TH2F*)bTag_eff_file.Get("btag_eff_c");
-  TH2F* btag_eff_oth = (TH2F*)bTag_eff_file.Get("btag_eff_oth");
-  bTag_eff_file.Close();
+  TH2F* btag_eff_b = (TH2F*)bTag_eff_file.Get("btag_eff_b")->Clone();
+  TH2F* btag_eff_c = (TH2F*)bTag_eff_file.Get("btag_eff_c")->Clone();
+  TH2F* btag_eff_oth = (TH2F*)bTag_eff_file.Get("btag_eff_oth")->Clone();
+//  bTag_eff_file.Close();
+  std::cout << btag_eff_b->Integral() << " " << btag_eff_c->Integral() << " " << btag_eff_oth->Integral() << std::endl;
 
   //////////////////////////////////////
   // Final setup:                     //
@@ -328,17 +325,17 @@ int main(int argc, char* argv[]) {
        evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
       }
 
-      // b-tagging SF (only used in scaling W, I believe)
-      auto bjets = jets.getBtagJets();
-      for (auto& jet : bjets) {
-        if (jet.getFlavor() == 5) {
-          evtwt *= btag_eff_b->GetBinContent(jet.getPt(), jet.getEta());
-        } else if (jet.getFlavor() == 4) {
-          evtwt *= btag_eff_c->GetBinContent(jet.getPt(), jet.getEta());
-        } else {
-          evtwt *= btag_eff_oth->GetBinContent(jet.getPt(), jet.getEta());
-        }
-      }
+      //// b-tagging SF (only used in scaling W, I believe)
+      //auto bjets = jets.getBtagJets();
+      //for (auto& jet : bjets) {
+      //  if (jet.getFlavor() == 5) {
+      //    evtwt *= btag_eff_b->GetBinContent(jet.getPt(), jet.getEta());
+      //  } else if (jet.getFlavor() == 4) {
+      //    evtwt *= btag_eff_c->GetBinContent(jet.getPt(), jet.getEta());
+      //  } else {
+      //    evtwt *= btag_eff_oth->GetBinContent(jet.getPt(), jet.getEta());
+      //  }
+      //}
 
     } else if (!isData && isEmbed) {
 
@@ -364,7 +361,13 @@ int main(int argc, char* argv[]) {
       auto el_cross_eff(1.);  // TODO: currently being measured
       auto tau_cross_eff(1.); // TODO: currently being measured
 
-      evtwt *= (single_eff * fireSingle + el_cross_eff * tau_cross_eff * fireCross);
+      //evtwt *= (single_eff * fireSingle + el_cross_eff * tau_cross_eff * fireCross);
+      
+      auto genweight(event.getGenWeight());
+      if (genweight > 1 || genweight < 0) {
+          genweight = 0;
+      }
+      evtwt *= genweight;
     }
 
     fout->cd();
