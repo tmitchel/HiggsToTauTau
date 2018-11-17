@@ -9,6 +9,7 @@ private:
   Float_t genpX, genpY, genM, genpT, numGenJets, genweight, amcatNLO_weight, genDR; // gen
   Float_t npv, npu, rho, extramuon_veto, extraelec_veto;        // event
   Float_t matchEle25, filterEle25, passEle25;                   // 2016 etau trigger
+  Float_t matchEle27, filterEle27, passEle27;                   // 2017 single el 27 trigger
   Float_t matchEle32, filterEle32, passEle32;                   // 2017 single el 32 trigger
   Float_t matchEle35, filterEle35, passEle35;                   // 2017 single el 35 trigger
   Float_t matchEle24Tau30, filterEle24Tau30, passEle24Tau30;    // 2017 etau cross trigger
@@ -19,7 +20,7 @@ private:
   Float_t matchIsoTkMu22_1, filterIsoTkMu22_1, passIsoTkMu22;                   // single muon trigger
   Float_t matchIsoMu22eta2p1_1, filterIsoMu22eta2p1_1, passIsoMu22eta2p1;       // single muon trigger
   Float_t matchIsoTkMu22eta2p1_1, filterIsoTkMu22eta2p1_1, passIsoTkMu22eta2p1; // single muon trigger
-  Bool_t PassEle25, PassEle32, PassEle35, PassEle24Tau30, PassDoubleTauCmbIso35, PassDoubleTau35, PassIsoMu19Tau20, PassIsoMu22, PassIsoTkMu22, PassIsoMu22eta2p1, PassIsoTkMu22eta2p1;
+  Bool_t PassEle25, PassEle27, PassEle32, PassEle35, PassEle24Tau30, PassDoubleTauCmbIso35, PassDoubleTau35, PassIsoMu19Tau20, PassIsoMu22, PassIsoTkMu22, PassIsoMu22eta2p1, PassIsoTkMu22eta2p1;
   Float_t m_sv, pt_sv; // SVFit
   Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
   Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2;                               // MELA
@@ -37,6 +38,7 @@ public:
 
   // tautau Trigger Info
   Bool_t getPassEle25();
+  Bool_t getPassEle27();
   Bool_t getPassEle32();
   Bool_t getPassEle35();
   Bool_t getPassEle24Tau30();
@@ -146,6 +148,9 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
     input -> SetBranchAddress( "matchEle25"              , &matchEle25       );
     input -> SetBranchAddress( "filterEle25"             , &filterEle25      );
     input -> SetBranchAddress( "passEle25"               , &passEle25        );
+    input -> SetBranchAddress( "eMatchesEle27Path"       , &matchEle27       );
+    input -> SetBranchAddress( "eMatchesEle27Filter"     , &filterEle27      );
+    input -> SetBranchAddress( "Ele27WPTightPass"        , &passEle27        );
     input -> SetBranchAddress( "eMatchesEle32Path"       , &matchEle32       );
     input -> SetBranchAddress( "eMatchesEle32Filter"     , &filterEle32      );
     input -> SetBranchAddress( "Ele32WPTightPass"        , &passEle32        );
@@ -221,6 +226,11 @@ void event_info::setRivets(TTree* input) {
 
 Bool_t event_info::getPassEle25(){
   return PassEle25;
+}
+
+Bool_t event_info::getPassEle27() {
+  PassEle27 = passEle27 && filterEle27 && matchEle27;
+  return PassEle27;
 }
 
 Bool_t event_info::getPassEle32() {
