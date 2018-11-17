@@ -21,7 +21,6 @@
 #include "EmbedWeight.h"
 #include "LumiReweightingStandAlone.h"
 #include "SF_factory.h"
-#include "TauTriggerSFs2017.h"
 #include "ZmmSF.h"
 #include "btagSF.h"
 #include "electron_factory.h"
@@ -115,7 +114,7 @@ int main(int argc, char* argv[]) {
   auto lumi_weights = new reweight::LumiReWeighting("data/MC_nPU_081118.root", "data/Data_nPU_081118.root", "mc", "pileup");
 
   //H->tau tau scale factors
-  TFile htt_sf_file("data/htt_scalefactors_v17_2.root");
+  TFile htt_sf_file("data/htt_scalefactors_2017_v2.root");
   RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
   htt_sf_file.Close();
 
@@ -377,10 +376,10 @@ int main(int argc, char* argv[]) {
     }
 
     // create regions
-    bool signalRegion   = (tau.getTightIsoMVA()  && electron.getIso() < 0.10);
+    bool signalRegion   = (tau.getTightIsoMVA()  && electron.getIso() < 0.15);
     bool looseIsoRegion = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
-    bool antiIsoRegion  = (tau.getTightIsoMVA()  && electron.getIso() > 0.10 && electron.getIso() < 0.30);
-    bool antiTauIsoRegion = (tau.getVLooseIsoMVA() > 0 && tau.getTightIsoMVA() == 0 && electron.getIso() < 0.10);
+    bool antiIsoRegion  = (tau.getTightIsoMVA()  && electron.getIso() > 0.15 && electron.getIso() < 0.30);
+    bool antiTauIsoRegion = (tau.getVLooseIsoMVA() > 0 && tau.getTightIsoMVA() == 0 && electron.getIso() < 0.15);
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
