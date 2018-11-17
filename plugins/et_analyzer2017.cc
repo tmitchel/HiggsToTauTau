@@ -124,6 +124,12 @@ int main(int argc, char* argv[]) {
   RooWorkspace *wEmbed = (RooWorkspace *)embed_file.Get("w");
   embed_file.Close();
 
+  TFile bTag_eff_file("data/tagging_efficiencies_march2018_btageff-all_samp-inc-DeepCSV_medium.root", "READ");
+  TH2F* btag_eff_b = (TH2F*)bTag_eff_file.Get("btag_eff_b");
+  TH2F* btag_eff_c = (TH2F*)bTag_eff_file.Get("btag_eff_c");
+  TH2F* btag_eff_oth = (TH2F*)bTag_eff_file.Get("btag_eff_oth");
+  bTag_eff_file.Close();
+
   //////////////////////////////////////
   // Final setup:                     //
   // Declare histograms and factories //
@@ -324,10 +330,16 @@ int main(int argc, char* argv[]) {
       }
 
       // b-tagging SF (only used in scaling W, I believe)
-      int nbtagged = std::min(2, jets.getNbtag());
       auto bjets = jets.getBtagJets();
-      float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
-      if (nbtagged>2) weight_btag=0;
+      for (auto& jet : bjets) {
+        if (jet.getFlavor() == 5) {
+          evtwt *= btag_eff_b->GetBinContent(jet.getPt(), jet.getEta());
+        } else if (jet.getFlavor() == 4) {
+          evtwt *= btag_eff_c->GetBinContent(jet.getPt(), jet.getEta());
+        } else {
+          evtwt *= btag_eff_oth->GetBinContent(jet.getPt(), jet.getEta());
+        }
+      }
 
     } else if (!isData && isEmbed) {
 
