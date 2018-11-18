@@ -1,7 +1,7 @@
 // system includes
-#include <iostream>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <iostream>
 #include <unordered_map>
 
 // ROOT includes
@@ -107,7 +107,10 @@ int main(int argc, char* argv[]) {
   ///////////////////////////////////////////////
 
   // read inputs for lumi reweighting
-  auto lumi_weights = new reweight::LumiReWeighting("data/MC_nPU_081118.root", "data/Data_nPU_081118.root", "mc", "pileup");
+  TNamed* dbsName = (TNamed*)fin->Get("MiniAOD_name");
+  std::string datasetName = dbsName->GetTitle();
+  std::replace(datasetName.begin(), datasetName.end(), '/', '#');
+  auto lumi_weights = new reweight::LumiReWeighting("data/pudistributions_mc_2017.root", "data/pudistributions_data_2017.root", datasetName.c_str(), "pileup");
 
   //H->tau tau scale factors
   TFile htt_sf_file("data/htt_scalefactors_2017_v2.root");
@@ -325,17 +328,17 @@ int main(int argc, char* argv[]) {
        evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
       }
 
-      //// b-tagging SF (only used in scaling W, I believe)
-      //auto bjets = jets.getBtagJets();
-      //for (auto& jet : bjets) {
-      //  if (jet.getFlavor() == 5) {
-      //    evtwt *= btag_eff_b->GetBinContent(jet.getPt(), jet.getEta());
-      //  } else if (jet.getFlavor() == 4) {
-      //    evtwt *= btag_eff_c->GetBinContent(jet.getPt(), jet.getEta());
-      //  } else {
-      //    evtwt *= btag_eff_oth->GetBinContent(jet.getPt(), jet.getEta());
-      //  }
-      //}
+      // b-tagging SF (only used in scaling W, I believe)
+      auto bjets = jets.getBtagJets();
+      for (auto& jet : bjets) {
+       if (jet.getFlavor() == 5) {
+         evtwt *= btag_eff_b->GetBinContent(jet.getPt(), jet.getEta());
+       } else if (jet.getFlavor() == 4) {
+         evtwt *= btag_eff_c->GetBinContent(jet.getPt(), jet.getEta());
+       } else {
+         evtwt *= btag_eff_oth->GetBinContent(jet.getPt(), jet.getEta());
+       }
+      }
 
     } else if (!isData && isEmbed) {
 
@@ -355,6 +358,7 @@ int main(int argc, char* argv[]) {
       evtwt *= wEmbed->function("e_iso_binned_embed_kit_ratio")->getVal();
 
       // unfolding dimuon selection TODO: store gen info in skimmer
+      
 
       // apply trigger SF's
       auto single_eff = wEmbed->function("e_trg27_trg32_trg35_embed_kit_ratio")->getVal();
