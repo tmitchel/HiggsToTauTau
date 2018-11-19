@@ -31,6 +31,7 @@
 #include "slim_tree.h"
 #include "swiss_army_class.h"
 #include "tau_factory.h"
+#include "TauTriggerSFs2017/TauTriggerSFs2017/interface/TauTriggerSFs2017.h"
 
 typedef std::vector<double> NumV;
 
@@ -106,11 +107,21 @@ int main(int argc, char* argv[]) {
   // Read weights, hists, graphs, etc. for SFs //
   ///////////////////////////////////////////////
 
+  reweight::LumiReWeighting* lumi_weights;
   // read inputs for lumi reweighting
-  TNamed* dbsName = (TNamed*)fin->Get("MiniAOD_name");
-  std::string datasetName = dbsName->GetTitle();
-  std::replace(datasetName.begin(), datasetName.end(), '/', '#');
-  auto lumi_weights = new reweight::LumiReWeighting("data/pudistributions_mc_2017.root", "data/pudistributions_data_2017.root", datasetName.c_str(), "pileup");
+  if (!isData && !isEmbed) {
+
+    TNamed* dbsName = (TNamed*)fin->Get("MiniAOD_name");
+    std::string datasetName = dbsName->GetTitle();
+    if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
+      fin->Close();
+      fout->Close();
+      return 2;
+    }
+    std::replace(datasetName.begin(), datasetName.end(), '/', '#');
+    lumi_weights = new reweight::LumiReWeighting("data/pudistributions_mc_2017.root", "data/pudistributions_data_2017.root", datasetName.c_str(), "pileup");
+    std::cout << datasetName << std::endl;
+  }
 
   //H->tau tau scale factors
   TFile htt_sf_file("data/htt_scalefactors_2017_v2.root");
@@ -126,8 +137,8 @@ int main(int argc, char* argv[]) {
   TH2F* btag_eff_b = (TH2F*)bTag_eff_file.Get("btag_eff_b")->Clone();
   TH2F* btag_eff_c = (TH2F*)bTag_eff_file.Get("btag_eff_c")->Clone();
   TH2F* btag_eff_oth = (TH2F*)bTag_eff_file.Get("btag_eff_oth")->Clone();
-//  bTag_eff_file.Close();
-  std::cout << btag_eff_b->Integral() << " " << btag_eff_c->Integral() << " " << btag_eff_oth->Integral() << std::endl;
+
+  TauTriggerSFs2017* eh = new TauTriggerSFs2017("data/tauTriggerEfficiencies2017_New.root", "data/tauTriggerEfficiencies2017.root", "tight", "MVA");
 
   //////////////////////////////////////
   // Final setup:                     //
@@ -223,13 +234,17 @@ int main(int argc, char* argv[]) {
       fireSingle = true;
     } else if (electron.getPt() > 28 && event.getPassEle27()) {
       fireSingle = true;
-    } else if (electron.getPt() > 25 && electron.getPt() < 28 && tau.getPt() > 35 && event.getPassEle24Tau30()) {
+    } else if (electron.getPt() > 25 && electron.getPt() < 28 && tau.getPt() > 35 && fabs(tau.getEta()) < 2.1 && event.getPassEle24Tau30()) {
       fireCross = true;
     } else {
       continue;
     }
 
     if (electron.getP4().DeltaR(tau.getP4()) < 0.5) {
+      continue;
+    }
+
+    if (fabs(tau.getEta()) > 2.1) {
       continue;
     }
 
@@ -307,11 +322,9 @@ int main(int argc, char* argv[]) {
       auto single_mc_eff = htt_sf->function("e_trg27_trg32_trg35_kit_mc")->getVal();
       auto el_cross_data_eff = htt_sf->function("e_trg_EleTau_Ele24Leg_desy_data")->getVal();
       auto el_cross_mc_eff = htt_sf->function("e_trg_EleTau_Ele24Leg_desy_mc")->getVal();
-      auto tau_cross_data_eff(1.); // TODO: Contact Tyler R. to get these
-      auto tau_cross_mc_eff(1.);   // TODO: Contact Tyler R. to get these
       auto single_eff = single_data_eff / single_mc_eff;
       auto el_cross_eff = el_cross_data_eff / el_cross_mc_eff;
-      auto tau_cross_eff = tau_cross_data_eff / tau_cross_mc_eff;
+      auto tau_cross_eff = eh->getETauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
 
       evtwt *= (single_eff*fireSingle + el_cross_eff*tau_cross_eff*fireCross);
 
@@ -331,12 +344,13 @@ int main(int argc, char* argv[]) {
       // b-tagging SF (only used in scaling W, I believe)
       auto bjets = jets.getBtagJets();
       for (auto& jet : bjets) {
+        auto ptbin( jet.getPt() ), etabin( jet.getEta() );
        if (jet.getFlavor() == 5) {
-         evtwt *= btag_eff_b->GetBinContent(jet.getPt(), jet.getEta());
+         evtwt *= btag_eff_b->GetBinContent(ptbin, etabin);
        } else if (jet.getFlavor() == 4) {
-         evtwt *= btag_eff_c->GetBinContent(jet.getPt(), jet.getEta());
+         evtwt *= btag_eff_c->GetBinContent(ptbin, etabin);
        } else {
-         evtwt *= btag_eff_oth->GetBinContent(jet.getPt(), jet.getEta());
+         evtwt *= btag_eff_oth->GetBinContent(ptbin, etabin);
        }
       }
 

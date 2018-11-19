@@ -36,8 +36,8 @@ private:
   Float_t mjj;
   Float_t jpt_1, jeta_1, jphi_1, jcsv_1;
   Float_t jpt_2, jeta_2, jphi_2, jcsv_2;
-  Float_t bpt_1, beta_1, bphi_1, bcsv_1;
-  Float_t bpt_2, beta_2, bphi_2, bcsv_2;
+  Float_t bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1;
+  Float_t bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2;
   Float_t topQuarkPt1, topQuarkPt2;
   Int_t nbtag, njetspt20, njets;
   std::vector<jet> plain_jets, btag_jets;
@@ -83,10 +83,12 @@ jet_factory::jet_factory(TTree* input, std::string syst) {
   input -> SetBranchAddress ( "beta_1",    &beta_1    );
   input -> SetBranchAddress ( "bphi_1",    &bphi_1    );
   input -> SetBranchAddress ( "bcsv_1",    &bcsv_1    );
+  input -> SetBranchAddress ( "bflavor_1", &bflavor_1 );
   input -> SetBranchAddress ( "bpt_2",     &bpt_2     );
   input -> SetBranchAddress ( "beta_2",    &beta_2    );
   input -> SetBranchAddress ( "bphi_2",    &bphi_2    );
   input -> SetBranchAddress ( "bcsv_2",    &bcsv_2    );
+  input -> SetBranchAddress ( "bflavor_2", &bflavor_2 );
   input -> SetBranchAddress ( "topQuarkPt1", &topQuarkPt1);
   input -> SetBranchAddress ( "topQuarkPt2", &topQuarkPt2);
 
@@ -99,12 +101,20 @@ void jet_factory::run_factory() {
 
   jet j1(jpt_1, jeta_1, jphi_1, jcsv_1);
   jet j2(jpt_2, jeta_2, jphi_2, jcsv_2);
-  jet b1(bpt_1, beta_1, bphi_1, bcsv_1);
-  jet b2(bpt_2, beta_2, bphi_2, bcsv_2);
-  plain_jets.push_back(j1);
-  plain_jets.push_back(j2);
-  btag_jets.push_back(b1);
-  btag_jets.push_back(b2);
+  jet b1(bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1);
+  jet b2(bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2);
+  if (jpt_1 > 0) {
+    plain_jets.push_back(j1);
+  }
+  if (jpt_2 > 0) {
+    plain_jets.push_back(j2);
+  }
+  if (bpt_1 > 0) {
+    btag_jets.push_back(b1);
+  }
+  if (bpt_2 > 0) {
+    btag_jets.push_back(b2);
+  }
 }
 
 
