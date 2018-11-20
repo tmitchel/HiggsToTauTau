@@ -68,18 +68,17 @@ public:
 
 // read data from tree into member variabl
 muon_factory::muon_factory(TTree* input) {
-  input -> SetBranchAddress( "px_1",              &px_1          );
-  input -> SetBranchAddress( "py_1",              &py_1          );
-  input -> SetBranchAddress( "pz_1",              &pz_1          );
-  input -> SetBranchAddress( "pt_1",              &pt_1          );
-  input -> SetBranchAddress( "eta_1",             &eta_1         );
-  input -> SetBranchAddress( "phi_1",             &phi_1         );
-  input -> SetBranchAddress( "m_1",               &m_1           );
-  input -> SetBranchAddress( "q_1",               &q_1           );
-  input -> SetBranchAddress( "iso_1",             &iso_1         );
-  input -> SetBranchAddress( "id_m_medium_1",     &mediumID      );
-  input -> SetBranchAddress( "id_m_medium2016_1", &mediumID_2016 );
-  input -> SetBranchAddress( "gen_match_1",       &gen_match_1   );
+  input -> SetBranchAddress( "px_1",                        &px_1                       );
+  input -> SetBranchAddress( "py_1",                        &py_1                       );
+  input -> SetBranchAddress( "pz_1",                        &pz_1                       );
+  input -> SetBranchAddress( "pt_1",                        &pt_1                       );
+  input -> SetBranchAddress( "eta_1",                       &eta_1                      );
+  input -> SetBranchAddress( "phi_1",                       &phi_1                      );
+  input -> SetBranchAddress( "m_1",                         &m_1                        );
+  input -> SetBranchAddress( "q_1",                         &q_1                        );
+  input -> SetBranchAddress( "iso_1",                       &iso_1                      );
+  input -> SetBranchAddress( "id_m_medium_1",               &mediumID                   );
+  input -> SetBranchAddress( "id_m_medium2016_1",           &mediumID_2016              );
 }
 
 // create muon object and set member data
