@@ -2,6 +2,8 @@
 #include "TTree.h"
 #include "ditau_factory.h"
 #include "tau_factory.h"
+#include "muon_factory.h"
+#include "electron_factory.h"
 
 class slim_tree {
 public:
