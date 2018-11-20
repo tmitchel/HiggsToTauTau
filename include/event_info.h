@@ -28,6 +28,9 @@ private:
   Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
   Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2;                               // MELA
   Float_t Rivet_nJets30, Rivet_higgsPt;
+  Float_t Flag_BadChargedCandidateFilter, Flag_BadPFMuonFilter, Flag_EcalDeadCellTriggerPrimitiveFilter, Flag_HBHENoiseFilter, Flag_HBHENoiseIsoFilter, Flag_badMuons, Flag_duplicateMuons, 
+          Flag_ecalBadCalibFilter, Flag_eeBadScFilter, Flag_globalSuperTightHalo2016Filter, Flag_globalTightHalo2016Filter, Flag_goodVertices;
+
 
   UInt_t run, lumi;
   ULong64_t evt;
@@ -52,6 +55,7 @@ public:
   Bool_t getPassIsoTkMu22();
   Bool_t getPassIsoMu22eta2p1();
   Bool_t getPassIsoTkMu22eta2p1();
+  Bool_t getPassFlags();
   Bool_t getPassMu20Tau27();
   Bool_t getPassMu24();
   Bool_t getPassMu27();
@@ -144,6 +148,19 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   input -> SetBranchAddress( "ME_bkg2"        , &ME_bkg2         );
   input -> SetBranchAddress( "ME_bkg"         , &ME_bkg          );
   input -> SetBranchAddress( "amcatNLO_weight", &amcatNLO_weight );
+  input -> SetBranchAddress("Flag_BadChargedCandidateFilter"         , &Flag_BadChargedCandidateFilter         );
+  input -> SetBranchAddress("Flag_BadPFMuonFilter"                   , &Flag_BadPFMuonFilter                   );
+  input -> SetBranchAddress("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter);
+  input -> SetBranchAddress("Flag_HBHENoiseFilter"                   , &Flag_HBHENoiseFilter                   );
+  input -> SetBranchAddress("Flag_HBHENoiseIsoFilter"                , &Flag_HBHENoiseIsoFilter                );
+  input -> SetBranchAddress("Flag_badMuons"                          , &Flag_badMuons                          );
+  input -> SetBranchAddress("Flag_duplicateMuons"                    , &Flag_duplicateMuons                    );
+  input -> SetBranchAddress("Flag_ecalBadCalibFilter"                , &Flag_ecalBadCalibFilter                );
+  input -> SetBranchAddress("Flag_eeBadScFilter"                     , &Flag_eeBadScFilter                     );
+  input -> SetBranchAddress("Flag_globalSuperTightHalo2016Filter"    , &Flag_globalSuperTightHalo2016Filter    );
+  input -> SetBranchAddress("Flag_globalTightHalo2016Filter"         , &Flag_globalTightHalo2016Filter         );
+  input -> SetBranchAddress("Flag_goodVertices"                      , &Flag_goodVertices                      );
+
 
   if (analyzer == "et") {
     input -> SetBranchAddress( "evt"                     , &evt              );
@@ -227,6 +244,15 @@ void event_info::setEmbed() {
 void event_info::setRivets(TTree* input) {
   input -> SetBranchAddress( "Rivet_nJets30", &Rivet_nJets30 );
   input -> SetBranchAddress( "Rivet_higgsPt", &Rivet_higgsPt );
+}
+
+Bool_t event_info::getPassFlags() {
+  if (Flag_BadChargedCandidateFilter || Flag_BadPFMuonFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_HBHENoiseFilter || Flag_HBHENoiseIsoFilter || 
+                 Flag_ecalBadCalibFilter || Flag_eeBadScFilter || Flag_globalSuperTightHalo2016Filter || Flag_goodVertices) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 Bool_t event_info::getPassEle25(){
