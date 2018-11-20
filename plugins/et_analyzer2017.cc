@@ -176,15 +176,15 @@ int main(int argc, char* argv[]) {
     Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
     if (name == "W") {
       if (event.getNumGenJets() == 1) {
-        evtwt = 6.82;
+        evtwt = 6.963;
       } else if (event.getNumGenJets() == 2) {
-        evtwt = 2.099;
+        evtwt = 16.376;
       } else if (event.getNumGenJets() == 3) {
-        evtwt = 0.689;
+        evtwt = 2.533;
       } else if (event.getNumGenJets() == 4) {
-        evtwt = 0.690;
+        evtwt = 2.419;
       } else {
-        evtwt = 25.44;
+        evtwt = 61.983;
       }
     }
 
@@ -244,7 +244,7 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
-    if (fabs(tau.getEta()) > 2.1) {
+    if (electron.getPt() < 40) {
       continue;
     }
 
@@ -324,7 +324,10 @@ int main(int argc, char* argv[]) {
       auto el_cross_mc_eff = htt_sf->function("e_trg_EleTau_Ele24Leg_desy_mc")->getVal();
       auto single_eff = single_data_eff / single_mc_eff;
       auto el_cross_eff = el_cross_data_eff / el_cross_mc_eff;
-      auto tau_cross_eff = eh->getETauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
+      double tau_cross_eff(1.);
+      if (fireCross) {
+        tau_cross_eff = eh->getETauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
+      }
 
       evtwt *= (single_eff*fireSingle + el_cross_eff*tau_cross_eff*fireCross);
 
@@ -345,13 +348,13 @@ int main(int argc, char* argv[]) {
       auto bjets = jets.getBtagJets();
       for (auto& jet : bjets) {
         auto ptbin( jet.getPt() ), etabin( jet.getEta() );
-       if (jet.getFlavor() == 5) {
-         evtwt *= btag_eff_b->GetBinContent(ptbin, etabin);
-       } else if (jet.getFlavor() == 4) {
-         evtwt *= btag_eff_c->GetBinContent(ptbin, etabin);
-       } else {
-         evtwt *= btag_eff_oth->GetBinContent(ptbin, etabin);
-       }
+        if (jet.getFlavor() == 5) {
+          evtwt *= btag_eff_b->GetBinContent(ptbin, etabin);
+        } else if (jet.getFlavor() == 4) {
+          evtwt *= btag_eff_c->GetBinContent(ptbin, etabin);
+        } else {
+          evtwt *= btag_eff_oth->GetBinContent(ptbin, etabin);
+        }
       }
 
     } else if (!isData && isEmbed) {
@@ -412,7 +415,7 @@ int main(int argc, char* argv[]) {
     bool signalRegion   = (tau.getTightIsoMVA()  && electron.getIso() < 0.15);
     bool looseIsoRegion = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
     bool antiIsoRegion  = (tau.getTightIsoMVA()  && electron.getIso() > 0.15 && electron.getIso() < 0.30);
-    bool antiTauIsoRegion = (tau.getVLooseIsoMVA() > 0 && tau.getTightIsoMVA() == 0 && electron.getIso() < 0.15);
+    bool antiTauIsoRegion = (tau.getTightIsoMVA() == 0 && electron.getIso() < 0.15);
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
