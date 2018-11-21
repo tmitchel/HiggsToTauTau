@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
   auto histos_2d = helper->getHistos2D();
 
   // construct factories
-  event_info       event(ntuple, syst, "et");
+  event_info       event(ntuple, syst, "mt");
   muon_factory     muons(ntuple);
   tau_factory      taus(ntuple);
   jet_factory      jets(ntuple, syst);
@@ -210,15 +210,6 @@ int main(int argc, char* argv[]) {
     auto muon = muons.run_factory();
     auto tau = taus.run_factory();
     jets.run_factory();
-
-    //////////////////////////////////////////////////////////
-    // Event Selection in skimmer:                          //
-    //   - Trigger: Ele25eta2p1Tight -> pass, match, filter //
-    //   - muon: pT > 26, |eta| < 2.1                   //
-    //   - Tau: pt > 27 || 29.5, |eta| < 2.3, lepton vetos, //
-    //          VLoose Isolation, against leptons           //
-    //   - Event: dR(tau,el) > 0.5                          //
-    //////////////////////////////////////////////////////////
     
     // remove 2-prong taus
     if (!tau.getDecayModeFinding() || tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
@@ -312,16 +303,16 @@ int main(int argc, char* argv[]) {
       // apply trigger SF's
       auto single_data_eff = htt_sf->function("m_trg24_27_kit_data")->getVal();
       auto single_mc_eff = htt_sf->function("m_trg24_27_kit_mc")->getVal();
-      auto el_cross_data_eff = htt_sf->function("m_trg20_data")->getVal();
-      auto el_cross_mc_eff = htt_sf->function("m_trg20_mc")->getVal();
+      auto mu_cross_data_eff = htt_sf->function("m_trg20_data")->getVal();
+      auto mu_cross_mc_eff = htt_sf->function("m_trg20_mc")->getVal();
       auto single_eff = single_data_eff / single_mc_eff;
-      auto el_cross_eff = el_cross_data_eff / el_cross_mc_eff;
+      auto mu_cross_eff = mu_cross_data_eff / mu_cross_mc_eff;
       double tau_cross_eff(1.);
       if (fireCross) {
-        tau_cross_eff = eh->getETauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
+        tau_cross_eff = eh->getMuTauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
       }
 
-      evtwt *= (single_eff*fireSingle + el_cross_eff*tau_cross_eff*fireCross);
+      evtwt *= (single_eff*fireSingle + mu_cross_eff*tau_cross_eff*fireCross);
 
       // Z-pT Reweighting
       double zpt_sf(1.);
@@ -371,10 +362,10 @@ int main(int argc, char* argv[]) {
 
       // apply trigger SF's
       auto single_eff = wEmbed->function("m_trg24_27_embed_kit_ratio")->getVal();
-      auto el_cross_eff(1.);  // TODO: currently being measured
+      auto mu_cross_eff(1.);  // TODO: currently being measured
       auto tau_cross_eff(1.); // TODO: currently being measured
 
-      //evtwt *= (single_eff * fireSingle + el_cross_eff * tau_cross_eff * fireCross);
+      evtwt *= (single_eff * fireSingle + mu_cross_eff * tau_cross_eff * fireCross);
       
       auto genweight(event.getGenWeight());
       if (genweight > 1 || genweight < 0) {
@@ -392,17 +383,6 @@ int main(int argc, char* argv[]) {
     double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getPx() + met_x, 2) - pow(muon.getPy() + met_y, 2));
     int evt_charge = tau.getCharge() + muon.getCharge();
 
-    // high MT sideband for W-jets normalization
-    if (mt > 80 && mt < 200 && evt_charge == 0 && tau.getTightIsoMVA() && muon.getIso() < 0.10) {
-      histos->at("n70") -> Fill(0.1, evtwt);
-      if (jets.getNjets() == 0 && event.getMSV() < 400)
-        histos->at("n70") -> Fill(1.1, evtwt);
-      else if (jets.getNjets() == 1)
-        histos->at("n70") -> Fill(2.1, evtwt);
-      else if (jets.getNjets() > 1 && jets.getDijetMass() > 300)
-        histos->at("n70") -> Fill(3.1, evtwt);
-    }
-
     // create regions
     bool signalRegion   = (tau.getTightIsoMVA()  && muon.getIso() < 0.15);
     bool looseIsoRegion = (tau.getMediumIsoMVA() && muon.getIso() < 0.30);
@@ -411,8 +391,8 @@ int main(int argc, char* argv[]) {
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
-    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && (jets.getDijetMass() < 300 || Higgs.Pt() < 50)));
-    bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() > 50);
+    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && (jets.getDijetMass() < 300 || Higgs.Pt() < 50 || event.getPtSV() < 40)));
+    bool vbfCat = (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() > 50 && event.getPtSV() > 40);
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
     // now do mt selection
@@ -460,106 +440,7 @@ int main(int argc, char* argv[]) {
 
     // fill the tree
     st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, mt, evtwt);
-
-    // event categorization
-    if (zeroJet) {
-
-      if (signalRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h0_OS") -> Fill(tau.getL2DecayMode(), (muon.getP4() + tau.getP4()).M(), evtwt);
-        } else {
-          histos_2d->at("h0_SS") -> Fill(tau.getL2DecayMode(), (muon.getP4() + tau.getP4()).M(), evtwt);
-        }
-      } 
-      if (looseIsoRegion) {
-        if (evt_charge == 0){
-          histos_2d->at("h0_loose_OS") -> Fill(tau.getL2DecayMode(), (muon.getP4() + tau.getP4()).M(), evtwt);
-        } else {
-          histos_2d->at("h0_loose_SS") -> Fill(tau.getL2DecayMode(), (muon.getP4() + tau.getP4()).M(), evtwt);
-        }
-      }
-      if (antiIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h0_anti_OS") -> Fill(tau.getL2DecayMode(), (muon.getP4() + tau.getP4()).M(), evtwt);
-        } else {
-          histos_2d->at("h0_anti_SS") -> Fill(tau.getL2DecayMode(), (muon.getP4() + tau.getP4()).M(), evtwt);
-        }
-      }
-      if (antiTauIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h0_Fake_OS") -> Fill(tau.getL2DecayMode(), (muon.getP4() + tau.getP4()).M(), evtwt);
-        } else {
-          histos_2d->at("h0_Fake_SS") -> Fill(tau.getL2DecayMode(), (muon.getP4() + tau.getP4()).M(), evtwt);
-        }
-      }
-
-    } else if (boosted) {
-
-      if (signalRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h1_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h1_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        }
-      } 
-      if (looseIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h1_loose_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h1_loose_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        }
-      } 
-      if (antiIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h1_anti_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h1_anti_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        }
-      }
-      if (antiTauIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h1_Fake_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h1_Fake_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        }
-      }
-
-    } else if (vbfCat) {
-
-      if (signalRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h2_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h2_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        }
-      } 
-      if (looseIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h2_loose_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h2_loose_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        }
-      } 
-      if (antiIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h2_anti_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h2_anti_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        }
-      }
-      if (antiTauIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h2_Fake_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h2_Fake_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        }
-      }
-
-    }
   } // close event loop
- 
-  histos->at("n70") -> Fill(1, n70_count);
-  histos->at("n70")->Write();
 
   fin->Close();
   fout->cd();
