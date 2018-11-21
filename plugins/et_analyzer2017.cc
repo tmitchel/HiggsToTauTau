@@ -244,7 +244,11 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
-    if (electron.getPt() < 40) {
+    if (electron.getPt() < 36) {
+      continue;
+    }
+
+    if (!event.getPassFlags()) {
       continue;
     }
 
@@ -383,6 +387,7 @@ int main(int argc, char* argv[]) {
       auto tau_cross_eff(1.); // TODO: currently being measured
 
       //evtwt *= (single_eff * fireSingle + el_cross_eff * tau_cross_eff * fireCross);
+      evtwt *= fireSingle * single_eff;
       
       auto genweight(event.getGenWeight());
       if (genweight > 1 || genweight < 0) {
