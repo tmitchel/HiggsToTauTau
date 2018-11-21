@@ -38,7 +38,7 @@ void read_directory(const std::string &name, std::vector<std::string> &v) {
 // class to hold the histograms until I'm ready to write them
 class histHolder {
 public:
-  histHolder(std::vector<int>, std::string, std::string);
+  histHolder(std::vector<int>, std::string, std::string, std::string);
   ~histHolder() { delete ff_weight; };
   void writeHistos();
   void initVectors(std::string);
@@ -61,6 +61,7 @@ int main(int argc, char *argv[]) {
   // get CLI arguments
   CLParser parser(argc, argv);
   std::string dir = parser.Option("-d");
+  std::string year = parser.Option("-y");
   std::string var_name = parser.Option("-v");
   std::string tree_name = parser.Option("-t");
   std::vector<std::string> sbins = parser.MultiOption("-b", 3);
@@ -91,7 +92,7 @@ int main(int argc, char *argv[]) {
   }
 
   // initialize histogram holder 
-  auto hists = new histHolder(bins, var_name, channel_prefix);
+  auto hists = new histHolder(bins, var_name, channel_prefix, year);
 
   // read all files from input directory
   std::vector<std::string> files;
@@ -107,14 +108,14 @@ int main(int argc, char *argv[]) {
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
 // and the map from categories to vectors of TH1F*'s. Each TH1F* in the vector corresponds to 
 // one file that is being put into that categories directory in the output tempalte
-histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string channel_prefix) :
+histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string channel_prefix, std::string year) :
   hists {
     {(channel_prefix+"_inclusive").c_str(), std::vector<TH1F *>()},
     {(channel_prefix+"_0jet").c_str(), std::vector<TH1F *>()},
     {(channel_prefix+"_boosted").c_str(), std::vector<TH1F *>()},
     {(channel_prefix+"_vbf").c_str(), std::vector<TH1F *>()},
   }, 
-  fout( new TFile(("Output/templates/template_"+channel_prefix+"_"+var_name+".root").c_str(), "recreate") ),
+  fout( new TFile(("Output/templates/template_"+channel_prefix+"_"+var_name+"_ff"+year+".root").c_str(), "recreate") ),
   bins( Bins ), 
   mvis_bins( {0,50,80,100,110,120,130,150,170,200,250,1000} ),
   njets_bins( {-0.5,0.5,1.5,15} ),
@@ -165,9 +166,16 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
   };
 
   // get FakeFactor workspace
-  TFile ff_file("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root");
-  ff_weight = (FakeFactor *)ff_file.Get("ff_comb");
-  ff_file.Close();
+  TFile *ff_file;
+  if (year == "2017") {
+    ff_file = new TFile("${CMSSW_BASE}/src/SMHTT_Analyzers/data/testFF2017/SM2017/tight/vloose/et/fakeFactors.root", "READ");
+  } else if (year == "2016"){
+    ff_file = new TFile("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root", "READ");
+  } else {
+    std::cerr << "Bad year" << std::endl;
+  }
+  ff_weight = (FakeFactor *)ff_file->Get("ff_comb");
+  ff_file->Close();
 }
 
 // change to the correct output directory then create a new TH1F that will be filled for the current input file
@@ -187,7 +195,7 @@ void histHolder::fillFraction(int cat, std::string name, double vis_mass, double
     hist = frac_w.at(cat);
   } else if (name == "TTJ") {
     hist = frac_tt.at(cat);
-  } else if (name == "ZTT" || name == "TTT" || name == "VVT") {
+  } else if (name == "embed" || name == "TTT" || name == "VVT") {
     hist = frac_real.at(cat);
   }
   hist->Fill(vis_mass, njets, weight);
@@ -259,7 +267,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 
         if (!(name == "W"   || name == "ZJ"  || name == "VVJ" ||
               name == "TTJ" ||
-              name == "ZTT" || name == "TTT" || name == "VVT" ||
+              name == "embed" || name == "TTT" || name == "VVT" ||
               name == "Data")) {
           continue;
         }
