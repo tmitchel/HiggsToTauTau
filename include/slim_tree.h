@@ -22,7 +22,7 @@ public:
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiLepIso, is_antiTauIso, is_qcd, is_looseIso, OS, SS;
     Float_t evtwt,
         el_pt, el_eta, el_phi, el_mass, el_charge, el_iso,
-        mu_pt, mu_eta, mu_phi, mu_mass, mu_charge,
+        mu_pt, mu_eta, mu_phi, mu_mass, mu_charge, mu_iso,
         t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode, t1_genMatch, // t1 is used for et and mt, as well
         t2_pt, t2_eta, t2_phi, t2_mass, t2_charge, t2_iso, t2_iso_VL, t2_iso_L, t2_iso_M, t2_iso_T, t2_iso_VT, t2_iso_VVT, t2_decayMode, t2_genMatch,
         njets, nbjets,
@@ -51,6 +51,7 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("mu_phi",              &mu_phi,              "mu_phi/F"             );
     otree->Branch("mu_mass",             &mu_mass,             "mu_mass/F"            );
     otree->Branch("mu_charge",           &mu_charge,           "mu_charge/F"          );
+    otree->Branch("mu_iso",              &mu_iso,              "mu_iso/F"             );
     otree->Branch("t1_pt",               &t1_pt,               "t1_pt/F"              );
     otree->Branch("t1_eta",              &t1_eta,              "t1_eta/F"             );
     otree->Branch("t1_phi",              &t1_phi,              "t1_phi/F"             );
@@ -341,6 +342,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t1, jet_fa
     mu_phi = mu->getPhi();
     mu_mass = mu->getMass();
     mu_charge = mu->getCharge();
+    mu_iso = mu->getIso();
     t1_pt = t1->getPt();
     t1_eta = t1->getEta();
     t1_phi = t1->getPhi();
