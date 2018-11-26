@@ -120,7 +120,6 @@ int main(int argc, char* argv[]) {
     }
     std::replace(datasetName.begin(), datasetName.end(), '/', '#');
     lumi_weights = new reweight::LumiReWeighting("data/pudistributions_mc_2017.root", "data/pudistributions_data_2017.root", datasetName.c_str(), "pileup");
-    std::cout << datasetName << std::endl;
   }
 
   //H->tau tau scale factors
@@ -348,18 +347,18 @@ int main(int argc, char* argv[]) {
        evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
       }
 
-      // b-tagging SF (only used in scaling W, I believe)
-      auto bjets = jets.getBtagJets();
-      for (auto& jet : bjets) {
-        auto ptbin( jet.getPt() ), etabin( jet.getEta() );
-        if (jet.getFlavor() == 5) {
-          evtwt *= btag_eff_b->GetBinContent(ptbin, etabin);
-        } else if (jet.getFlavor() == 4) {
-          evtwt *= btag_eff_c->GetBinContent(ptbin, etabin);
-        } else {
-          evtwt *= btag_eff_oth->GetBinContent(ptbin, etabin);
-        }
-      }
+      //auto bjets = jets.getBtagJets();
+      //for (auto& jet : bjets) {
+      //  auto ptbin( jet.getPt() ), etabin( jet.getEta() );
+      //  if (jet.getFlavor() == 5) {
+      //    evtwt *= btag_eff_b->GetBinContent(ptbin, etabin);
+      //  } else if (jet.getFlavor() == 4) {
+      //    evtwt *= btag_eff_c->GetBinContent(ptbin, etabin);
+      //  } else {
+      //    evtwt *= btag_eff_oth->GetBinContent(ptbin, etabin);
+      //  }
+      //}
+
 
     } else if (!isData && isEmbed) {
 
@@ -473,102 +472,6 @@ int main(int argc, char* argv[]) {
 
     // fill the tree
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
-
-    // event categorization
-    if (zeroJet) {
-
-      if (signalRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h0_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        } else {
-          histos_2d->at("h0_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        }
-      } 
-      if (looseIsoRegion) {
-        if (evt_charge == 0){
-          histos_2d->at("h0_loose_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        } else {
-          histos_2d->at("h0_loose_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        }
-      }
-      if (antiIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h0_anti_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        } else {
-          histos_2d->at("h0_anti_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        }
-      }
-      if (antiTauIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h0_Fake_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        } else {
-          histos_2d->at("h0_Fake_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
-        }
-      }
-
-    } else if (boosted) {
-
-      if (signalRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h1_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h1_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        }
-      } 
-      if (looseIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h1_loose_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h1_loose_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        }
-      } 
-      if (antiIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h1_anti_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h1_anti_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        }
-      }
-      if (antiTauIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h1_Fake_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h1_Fake_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
-        }
-      }
-
-    } else if (vbfCat) {
-
-      if (signalRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h2_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h2_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        }
-      } 
-      if (looseIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h2_loose_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h2_loose_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        }
-      } 
-      if (antiIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h2_anti_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h2_anti_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        }
-      }
-      if (antiTauIsoRegion) {
-        if (evt_charge == 0) {
-          histos_2d->at("h2_Fake_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        } else {
-          histos_2d->at("h2_Fake_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
-        }
-      }
-
-    }
   } // close event loop
  
   histos->at("n70") -> Fill(1, n70_count);

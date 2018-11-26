@@ -327,18 +327,18 @@ int main(int argc, char* argv[]) {
        evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
       }
 
-      // b-tagging SF (only used in scaling W, I believe)
-      auto bjets = jets.getBtagJets();
-      for (auto& jet : bjets) {
-        auto ptbin( jet.getPt() ), etabin( jet.getEta() );
-        if (jet.getFlavor() == 5) {
-          evtwt *= btag_eff_b->GetBinContent(ptbin, etabin);
-        } else if (jet.getFlavor() == 4) {
-          evtwt *= btag_eff_c->GetBinContent(ptbin, etabin);
-        } else {
-          evtwt *= btag_eff_oth->GetBinContent(ptbin, etabin);
-        }
-      }
+      //// b-tagging SF (only used in scaling W, I believe)
+      //auto bjets = jets.getBtagJets();
+      //for (auto& jet : bjets) {
+      //  auto ptbin( jet.getPt() ), etabin( jet.getEta() );
+      //  if (jet.getFlavor() == 5) {
+      //    evtwt *= btag_eff_b->GetBinContent(ptbin, etabin);
+      //  } else if (jet.getFlavor() == 4) {
+      //    evtwt *= btag_eff_c->GetBinContent(ptbin, etabin);
+      //  } else {
+      //    evtwt *= btag_eff_oth->GetBinContent(ptbin, etabin);
+      //  }
+      //}
 
     } else if (!isData && isEmbed) {
 

@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
 
     // I hate doing it like this, but when I move the SetBranchAddress I see unexpected behavior
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_qcd, is_antiLepIso, is_antiTauIso, is_looseIso, OS, SS;
-    Float_t eq, tq, hpt, mt, mjj, var, weight;
+    Float_t eq, tq, hpt, mt, mjj, var, weight, metphi, el_phi;
     Float_t njets, nbjets;
 
     tree->SetBranchAddress(lep_charge.c_str(), &eq);
@@ -99,7 +99,9 @@ int main(int argc, char *argv[]) {
       tree->SetBranchAddress(var_name.c_str(), &var);
     }
 
-    tree->SetBranchAddress("njets", &njets);
+    tree->SetBranchAddress("metphi", &metphi);
+    tree->SetBranchAddress("el_phi", &el_phi);
+
     tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("is_signal", &is_signal);
@@ -116,6 +118,8 @@ int main(int argc, char *argv[]) {
 
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
+
+      //var = fabs(el_phi - metphi);
      
       if (OS) {
         // output histograms for the template
@@ -183,8 +187,8 @@ void read_directory(const std::string &name, std::vector<std::string> &v) {
 void fillQCD(TH1F* hist, std::string name, double var, double weight) {
   if (name.find("Data") != std::string::npos) {
     hist->Fill(var, weight);
-  } else if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT"  || 
-             name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "ZTT") 
+  } else if (name == "ZL" || name == "ZJ" || name == "TTT"  || 
+             name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "embed") 
   {
     hist->Fill(var, -1*weight);
   }

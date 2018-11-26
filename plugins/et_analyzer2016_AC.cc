@@ -49,7 +49,14 @@ int main(int argc, char* argv[]) {
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
-  
+
+  // YM reweighing code begins
+  bool isVBFAC = sample.find("vbf_ac") != std::string::npos;
+  bool isggHAC = sample.find("ggh_ac") != std::string::npos;
+  bool isWHAC = sample.find("wh_ac") != std::string::npos;
+  bool isZHAC = sample.find("zh_ac") != std::string::npos;
+  // YM reweighing code ends
+
   std::string systname = "";
   if (!syst.empty()) {
     systname = "_" + syst;
@@ -89,7 +96,7 @@ int main(int argc, char* argv[]) {
 
   // cd to root of output file and create tree
   fout->cd();
-  slim_tree* st = new slim_tree("etau_tree"+systname);
+  slim_tree* st = new slim_tree("etau_tree");
 
   // get normalization (lumi & xs are in util.h)
   double norm;
@@ -105,6 +112,131 @@ int main(int argc, char* argv[]) {
     norm = helper->getLuminosity() * helper->getCrossSection(sample) / gen_number;
   }
 
+  ///////////////////////////////////////////////
+  // YM AC reweighing                          //
+  ///////////////////////////////////////////////
+  // a1 - SM
+  // a3 - pseudoscalar (CP-odd)
+  // a2 - SM like heavy mass anomalous Higgs
+  // L1, L1Zg - something like a2, not sure
+  // int - interference term (f05)
+  std::string weightNameComponents[7] = {"a1", "a3", "a3int",
+					 "a2", "a2int",
+					 "L1", "L1int"};
+  //"L1Zg", "L1Zgint"}; <- for 2017, there will be two additional samples (L1Zg and L1Zgint)
+
+  std::string weightsNames[7];
+  std::string ac_prefix = "";
+  if ( isVBFAC ) ac_prefix = "vbf_ac_";
+  if ( isggHAC ) ac_prefix = "ggh_ac_";
+  if ( isWHAC  ) ac_prefix = "wh_ac_";
+  if ( isZHAC  ) ac_prefix = "zh_ac_";
+  for (auto i=0; i!=7; ++i) weightsNames[i] = ac_prefix + weightNameComponents[i];
+
+  // tree name to extrac weights
+  TFile* weightTreeFile;
+  TTree* weightTree;
+  long long eventID;
+  // variables with weights (for ggH only a1 (SM), a3 (CP-odd), and maxmix (int) is used
+  Double_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint;
+
+  std::string fileName = "";
+  int foundEvents = 0;
+  int crapEvents = 0; // hehe
+  
+  unsigned int numWeightFiles = 7;
+  if ( isggHAC ) numWeightFiles = 3;
+
+  if ( isggHAC || isWHAC || isZHAC || isVBFAC ) {
+    for(unsigned int ifile = 0; ifile != numWeightFiles; ++ifile) {
+      // is it interference sample? if yes, skip the weightsNames that do not have int in them
+      if ( sample.find("int") != std::string::npos && 
+	   weightsNames[ifile].find("int") == std::string::npos ) continue;
+      // if it is not an interference sample, skip weightsNames that have int in them
+      if ( sample.find("int") == std::string::npos && 
+	   weightsNames[ifile].find("int") != std::string::npos ) continue;
+      
+      if (sample.find(weightsNames[ifile]) != std::string::npos ) {
+	fileName = "data/AC_weights/" + weightsNames[ifile] + ".root";
+	break;
+      }
+    } 
+  }
+
+  if ( fileName != "" ) {
+    weightTreeFile = TFile::Open((TString)fileName);
+    weightTree = (TTree*)weightTreeFile->Get("weights");
+    weightTree->SetBranchAddress("eventID",  &eventID);
+    weightTree->SetBranchAddress("wt_a1",    &wt_a1);
+    weightTree->SetBranchAddress("wt_a3",    &wt_a3);
+    weightTree->SetBranchAddress("wt_a3int", &wt_a3int);
+    if ( isVBFAC || isWHAC || isZHAC ) {
+      weightTree->SetBranchAddress("wt_a2",      &wt_a2);
+      weightTree->SetBranchAddress("wt_a2int",   &wt_a2int);
+      weightTree->SetBranchAddress("wt_L1",      &wt_L1);
+      weightTree->SetBranchAddress("wt_L1int",   &wt_L1int);
+      weightTree->SetBranchAddress("wt_L1Zg",    &wt_L1Zg);
+      weightTree->SetBranchAddress("wt_L1Zgint", &wt_L1Zgint);
+    }
+  }
+
+  std::map<Long64_t, std::vector<double> > acWeights;
+  if ( isVBFAC || isggHAC || isWHAC || isZHAC ) {
+    for(auto i = 0; i < weightTree->GetEntries(); ++i) {
+      weightTree->GetEntry(i);
+      std::vector<double> w;
+      if ( isVBFAC ) {
+	w.push_back(wt_a1);
+	w.push_back(wt_a2);
+	w.push_back(wt_a3);
+	w.push_back(wt_L1);
+	w.push_back(wt_L1Zg);
+	w.push_back(wt_a2int);
+	w.push_back(wt_a3int);
+	w.push_back(wt_L1int);
+	w.push_back(wt_L1Zgint);
+      } else 
+	for (auto j = 0; j != 9; ++j) w.push_back(0);
+      
+      if ( isggHAC ) {
+	w.push_back(wt_a1);
+	w.push_back(wt_a3);
+	w.push_back(wt_a3int);
+      } else 
+	for (auto j = 0; j != 3; ++j) w.push_back(0);
+      
+      if ( isWHAC ) {
+        w.push_back(wt_a1);
+        w.push_back(wt_a2);
+        w.push_back(wt_a3);
+        w.push_back(wt_L1);
+        w.push_back(wt_L1Zg);
+        w.push_back(wt_a2int);
+        w.push_back(wt_a3int);
+        w.push_back(wt_L1int);
+        w.push_back(wt_L1Zgint);
+      } else
+        for (auto j = 0; j != 9; ++j) w.push_back(0);
+
+      if ( isZHAC ) {
+        w.push_back(wt_a1);
+        w.push_back(wt_a2);
+        w.push_back(wt_a3);
+        w.push_back(wt_L1);
+        w.push_back(wt_L1Zg);
+        w.push_back(wt_a2int);
+        w.push_back(wt_a3int);
+        w.push_back(wt_L1int);
+        w.push_back(wt_L1Zgint);
+      } else
+        for (auto j = 0; j != 9; ++j) w.push_back(0);
+
+      // total size of weights is 9 + 3 + 9 + 9 = 30 weights!
+      acWeights[eventID] = w;
+    } // map of weights is complete
+  } 
+  // YM reweighing code ends;
+    
   ///////////////////////////////////////////////
   // Scale Factors:                            //
   // Read weights, hists, graphs, etc. for SFs //
@@ -165,7 +297,7 @@ int main(int argc, char* argv[]) {
   Int_t nevts = ntuple->GetEntries();
   for (Int_t i = 0; i < nevts; i++) {
     ntuple->GetEntry(i);
-    if (i % 100000 == 0)
+    if (i % 1000 == 0)
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
 
     histos->at("weightflow") -> Fill(1., norm);
@@ -316,18 +448,18 @@ int main(int argc, char* argv[]) {
       histos->at("weightflow")-> Fill(10., evtwt);
       histos_2d->at("weights") -> Fill(10., zmm_sf);
 
-      //// top-pT Reweighting (only for some systematic)
-      //if (name == "TTT" || name == "TT" || name == "TTJ") {
-      //  float pt_top1 = std::min(float(400.), jets.getTopPt1());
-      //  float pt_top2 = std::min(float(400.), jets.getTopPt2());
-      //  evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
-      //}
+      // top-pT Reweighting (only for some systematic)
+      if (name == "TTT" || name == "TT" || name == "TTJ") {
+        float pt_top1 = std::min(float(400.), jets.getTopPt1());
+        float pt_top2 = std::min(float(400.), jets.getTopPt2());
+        evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
+      }
 
-      //// b-tagging SF (only used in scaling W, I believe)
-      //int nbtagged = std::min(2, jets.getNbtag());
-      //auto bjets = jets.getBtagJets();
-      //float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
-      //if (nbtagged>2) weight_btag=0;
+      // b-tagging SF (only used in scaling W, I believe)
+      int nbtagged = std::min(2, jets.getNbtag());
+      auto bjets = jets.getBtagJets();
+      float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
+      if (nbtagged>2) weight_btag=0;
 
       // NNLOPS ggH reweighting
       if (sample.find("ggHtoTauTau125") != std::string::npos) {
@@ -374,6 +506,10 @@ int main(int argc, char* argv[]) {
       if (tau.getGenMatch() == 5) {
         tau.scalePt(1.02);
       }
+
+      // obtain the weights for the anomalous couplings
+      
+
     }
 
     fout->cd();
@@ -451,8 +587,121 @@ int main(int argc, char* argv[]) {
       tree_cat.push_back("SS");
     }
 
+    // YM reweighing code begins
+    // Assign weights to the sample
+    std::vector<double> weights;
+    if ( isVBFAC || isggHAC || isWHAC || isZHAC ) {
+      Long64_t currentEventID = event.getLumi();
+      currentEventID = currentEventID*1000000 + event.getEvt();
+      std::map<Long64_t, std::vector<double> >::const_iterator it = acWeights.find(currentEventID);
+      if ( it == acWeights.end() ) {
+	std::cout << "Crap, cannot find " << currentEventID << " in the map" << std::endl;
+	for (auto i = 0; i != 30; ++i) weights.push_back(0);	
+      } else 
+	weights = it->second;
+    } else {
+      for (auto i = 0; i != 30; ++i) weights.push_back(0);
+    }
     // fill the tree
-    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
+    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, weights);
+    // YM reweighing code ends. Complete.
+
+
+    // event categorization
+    if (zeroJet) {
+
+      if (signalRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h0_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        } else {
+          histos_2d->at("h0_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        }
+      } 
+      if (looseIsoRegion) {
+        if (evt_charge == 0){
+          histos_2d->at("h0_loose_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        } else {
+          histos_2d->at("h0_loose_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        }
+      }
+      if (antiIsoRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h0_anti_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        } else {
+          histos_2d->at("h0_anti_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        }
+      }
+      if (antiTauIsoRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h0_Fake_OS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        } else {
+          histos_2d->at("h0_Fake_SS") -> Fill(tau.getL2DecayMode(), (electron.getP4() + tau.getP4()).M(), evtwt);
+        }
+      }
+
+    } else if (boosted) {
+
+      if (signalRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h1_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h1_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        }
+      } 
+      if (looseIsoRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h1_loose_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h1_loose_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        }
+      } 
+      if (antiIsoRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h1_anti_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h1_anti_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        }
+      }
+      if (antiTauIsoRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h1_Fake_OS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h1_Fake_SS") -> Fill(Higgs.Pt(), event.getMSV(), evtwt);
+        }
+      }
+
+    } else if (vbfCat) {
+
+      if (signalRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h2_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h2_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        }
+      } 
+      if (looseIsoRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h2_loose_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h2_loose_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        }
+      } 
+      if (antiIsoRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h2_anti_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h2_anti_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        }
+      }
+      if (antiTauIsoRegion) {
+        if (evt_charge == 0) {
+          histos_2d->at("h2_Fake_OS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        } else {
+          histos_2d->at("h2_Fake_SS") -> Fill(jets.getDijetMass(), event.getMSV(), evtwt);
+        }
+      }
+
+    }
   } // close event loop
  
   histos->at("n70") -> Fill(1, n70_count);
