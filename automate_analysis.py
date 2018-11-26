@@ -92,7 +92,7 @@ for ifile in fileList:
 
     callstring = './%s -p %s -s %s ' % (options.exe, tosample, sample)
 
-    if options.syst:
+    if options.syst and not 'Data' in sample:
         for isyst in systs:
             for name in names:
                 tocall = callstring + ' -n %s -u %s' % (name, isyst)
