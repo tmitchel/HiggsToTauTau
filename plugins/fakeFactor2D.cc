@@ -168,7 +168,7 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
   // get FakeFactor workspace
   TFile *ff_file;
   if (year == "2017") {
-    ff_file = new TFile("${CMSSW_BASE}/src/SMHTT_Analyzers/data/testFF2017/SM2017/tight/vloose/et/fakeFactors.root", "READ");
+    ff_file = new TFile(("${CMSSW_BASE}/src/SMHTT_Analyzers/data/testFF2017/SM2017/tight/vloose/"+channel_prefix+"/fakeFactors.root").c_str(), "READ");
   } else if (year == "2016"){
     ff_file = new TFile("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root", "READ");
   } else {
@@ -220,21 +220,20 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, is_signal, OS;
-    Float_t var, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso;
+    Float_t var, weight, njets, vis_mass;
 
-    if (var_name.find("t1_pt") != std::string::npos) {
-      tree->SetBranchAddress("t1_pt", &var);
+
+      tree->SetBranchAddress("vis_mass", &vis_mass);
+      tree->SetBranchAddress("njets", &njets);
+    if (var_name.find("vis_mass") != std::string::npos) {
+      var = vis_mass;
+    } else if (var_name.find("njets") != std::string::npos){
+      var = njets;
     } else {
-      tree->SetBranchAddress("t1_pt", &t1_pt);
       tree->SetBranchAddress(var_name.c_str(), &var);
     }
 
     tree->SetBranchAddress("evtwt", &weight);
-    tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
-    tree->SetBranchAddress("njets", &njets);
-    tree->SetBranchAddress("vis_mass", &vis_mass);
-    tree->SetBranchAddress("mt", &mt);
-    tree->SetBranchAddress("el_iso", &el_iso);
 
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("is_signal", &is_signal);
@@ -291,10 +290,10 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     frac_qcd.at(i)->Add(frac_tt.at(i), -1);
     frac_qcd.at(i)->Add(frac_real.at(i), -1);
 
-    std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    //std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    //std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    //std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    //std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/data.at(i)->Integral() << std::endl;
 
     frac_w.at(i)->Divide(data.at(i));
     frac_tt.at(i)->Divide(data.at(i));
@@ -316,21 +315,18 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, is_signal, OS;
-    Float_t var, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso;
-
-    if (var_name.find("t1_pt") != std::string::npos) {
-      tree->SetBranchAddress("t1_pt", &var);
-    } else {
-      tree->SetBranchAddress("t1_pt", &t1_pt);
-      tree->SetBranchAddress(var_name.c_str(), &var);
-    }
+    Float_t var, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso;
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
     tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mt", &mt);
-    tree->SetBranchAddress("el_iso", &el_iso);
+    if (channel_prefix == "et") {
+      tree->SetBranchAddress("el_iso", &lep_iso);
+    } else if (channel_prefix == "mt") {
+      tree->SetBranchAddress("mu_iso", &lep_iso);
+    }
 
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
@@ -338,6 +334,22 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
     tree->SetBranchAddress("cat_VH", &cat_VH);
     tree->SetBranchAddress("OS", &OS);
+
+    if (var_name.find("t1_pt") != std::string::npos) {
+      var = t1_pt;
+    } else if (var_name.find("t1_decayMode") != std::string::npos) {
+      var = t1_decayMode;
+    } else if (var_name.find("njets") != std::string::npos) {
+      var = njets;
+    } else if (var_name.find("vis_mass") != std::string::npos) {
+      var = vis_mass;
+    } else if (var_name.find("mt") != std::string::npos) {
+      var = mt;
+    } else if (var_name.find("lep_iso") != std::string::npos) {
+      var = lep_iso;
+    } else {
+      tree->SetBranchAddress(var_name.c_str(), &var);
+    }
 
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
@@ -351,7 +363,7 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
         auto bin_x = data.at(inclusive)->GetXaxis()->FindBin(vis_mass);
         auto bin_y = data.at(inclusive)->GetYaxis()->FindBin(njets);
         
-        auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
+        auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                             frac_w.at(inclusive)->GetBinContent(bin_x, bin_y),
                                             frac_tt.at(inclusive)->GetBinContent(bin_x, bin_y),
                                             frac_qcd.at(inclusive)->GetBinContent(bin_x, bin_y)});
@@ -359,21 +371,21 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
 
         if (cat_0jet) {
           auto bin = data.at(zeroJet)->FindBin(var);
-          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
+          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                               frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
                                               frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
                                               frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)});
           convertDataToFake(fake_0jet, name, var, weight * fakeweight);
         } else if (cat_boosted) {
           auto bin = data.at(boosted)->FindBin(var);
-          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
+          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                               frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
                                               frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
                                               frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)});
           convertDataToFake(fake_boosted, name, var, weight * fakeweight);
         } else if (cat_vbf) {
           auto bin = data.at(vbf)->FindBin(var);
-          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
+          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                               frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
                                               frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
                                               frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)});
