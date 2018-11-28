@@ -38,7 +38,7 @@ void read_directory(const std::string &name, std::vector<std::string> &v) {
 // class to hold the histograms until I'm ready to write them
 class histHolder {
 public:
-  histHolder(std::string);
+  histHolder(std::string, std::string);
   ~histHolder() { delete ff_weight; };
   void writeHistos();
   void initVectors(std::string);
@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
   // get CLI arguments
   CLParser parser(argc, argv);
   std::string dir = parser.Option("-d");
+  std::string year = parser.Option("-y");
   std::string tree_name = parser.Option("-t");
 
   // get input file directory
@@ -85,7 +86,7 @@ int main(int argc, char *argv[]) {
   }
 
   // initialize histogram holder 
-  auto hists = new histHolder(channel_prefix);
+  auto hists = new histHolder(channel_prefix, year);
 
   // read all files from input directory
   std::vector<std::string> files;
@@ -101,13 +102,13 @@ int main(int argc, char *argv[]) {
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
 // and the map from categories to vectors of TH2F*'s. Each TH2F* in the vector corresponds to 
 // one file that is being put into that categories directory in the output tempalte
-histHolder::histHolder(std::string channel_prefix) :
+histHolder::histHolder(std::string channel_prefix, std::string year) :
   hists {
     {(channel_prefix+"_0jet").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_vbf").c_str(), std::vector<TH2F *>()},
   }, 
-  fout( new TFile(("Output/templates/template_"+channel_prefix+"_finalFFv2.root").c_str(), "recreate") ),
+  fout( new TFile(("Output/templates/template_"+channel_prefix+year+"_finalFFv2.root").c_str(), "recreate") ),
   mvis_bins( {0,50,80,100,110,120,130,150,170,200,250,1000} ),
   njets_bins( {-0.5,0.5,1.5,15} ),
   // x-axis
@@ -157,9 +158,17 @@ histHolder::histHolder(std::string channel_prefix) :
       new TH2F("frac_qcd_vbf"      , "frac_qcd_vbf"      , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
   };
 
-  TFile ff_file("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root");
-  ff_weight = (FakeFactor *)ff_file.Get("ff_comb");
-  ff_file.Close();
+  // get FakeFactor workspace
+  TFile *ff_file;
+  if (year == "2017") {
+    ff_file = new TFile(("${CMSSW_BASE}/src/SMHTT_Analyzers/data/testFF2017/SM2017/tight/vloose/"+channel_prefix+"/fakeFactors.root").c_str(), "READ");
+  } else if (year == "2016"){
+    ff_file = new TFile("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root", "READ");
+  } else {
+    std::cerr << "Bad year" << std::endl;
+  }
+  ff_weight = (FakeFactor *)ff_file->Get("ff_comb");
+  ff_file->Close();
 }
 
 // change to the correct output directory then create a new TH1F that will be filled for the current input file
@@ -187,7 +196,7 @@ void histHolder::fillFraction(int cat, std::string name, double var1, double var
     hist = frac_w.at(cat);
   } else if (name == "TTJ") {
     hist = frac_tt.at(cat);
-  } else if (name == "ZTT" || name == "TTT" || name == "VVT") {
+  } else if (name == "embed" || name == "TTT" || name == "VVT") {
     hist = frac_real.at(cat);
   }
   hist->Fill(var1, var2, weight);
@@ -211,7 +220,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiTauIso, OS;
-    Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, njets, weight;
+    Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, njets, weight, NN_disc;
 
     tree->SetBranchAddress("evtwt", &weight);
 
@@ -219,6 +228,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mjj", &mjj);
+    //tree->SetBranchAddress("NN_disc", &NN_disc);
     tree->SetBranchAddress("m_sv", &m_sv);
     tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("is_signal", &is_signal);
@@ -251,7 +261,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 
         if (!(name == "W" || name == "ZJ" || name == "VVJ" ||
               name == "TTJ" ||
-              name == "ZTT" || name == "TTT" || name == "VVT" ||
+              name == "embed" || name == "TTT" || name == "VVT" ||
               name == "Data")) {
           continue;
         }
