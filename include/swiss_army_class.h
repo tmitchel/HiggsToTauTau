@@ -12,7 +12,7 @@
 
 class Helper {
   private:
-  double luminosity;
+  double luminosity2016, luminosity2017;
   std::map<std::string, double> cross_sections;
   std::unordered_map<std::string, TH1F *> histos_1d;
   std::unordered_map<std::string, TH2F *> histos_2d;
@@ -22,7 +22,8 @@ public:
   Helper(TFile*,std::string,std::string);
   ~Helper(){};
   double getCrossSection(std::string sample) { return cross_sections[sample]; };
-  double getLuminosity() { return luminosity; };
+  double getLuminosity2016() { return luminosity2016; };
+  double getLuminosity2017() { return luminosity2017; };
   std::unordered_map<std::string, TH1F *> *getHistos1D() { return &histos_1d; };
   std::unordered_map<std::string, TH2F *> *getHistos2D() { return &histos_2d; };
 
@@ -33,7 +34,8 @@ public:
 };
 
 Helper::Helper(TFile *fout, std::string name, std::string syst) : 
-luminosity(41500.), 
+luminosity2016(35900.),
+luminosity2017(41500.), 
   systematics {
     {"met_UESDown", "_CMS_scale_met_unclustered_13TeVDown"},
     {"met_UESUp", "_CMS_scale_met_unclustered_13TeVUp"},
