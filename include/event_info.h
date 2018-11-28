@@ -164,9 +164,9 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
 
   if (analyzer == "et") {
     input -> SetBranchAddress( "evt"                     , &evt              );
-    input -> SetBranchAddress( "matchEle25"              , &matchEle25       );
-    input -> SetBranchAddress( "filterEle25"             , &filterEle25      );
-    input -> SetBranchAddress( "passEle25"               , &passEle25        );
+    input -> SetBranchAddress( "eMatchesSingleE25Tight"  , &matchEle25       );
+    input -> SetBranchAddress( "eMatchesEle25TightFilter", &filterEle25      );
+    input -> SetBranchAddress( "singleE25eta2p1TightPass", &passEle25        );
     input -> SetBranchAddress( "eMatchesEle27Path"       , &matchEle27       );
     input -> SetBranchAddress( "eMatchesEle27Filter"     , &filterEle27      );
     input -> SetBranchAddress( "Ele27WPTightPass"        , &passEle27        );
