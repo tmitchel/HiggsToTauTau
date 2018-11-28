@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
   } else if (isEmbed) {
     norm = 1.0;
   } else {
-    norm = helper->getLuminosity() * helper->getCrossSection(sample) / gen_number;
+    norm = helper->getLuminosity2017() * helper->getCrossSection(sample) / gen_number;
   }
 
   ///////////////////////////////////////////////

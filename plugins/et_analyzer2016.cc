@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
       norm = 1 / .99;
     }
   } else {
-    norm = helper->getLuminosity() * helper->getCrossSection(sample) / gen_number;
+    norm = helper->getLuminosity2016() * helper->getCrossSection(sample) / gen_number;
   }
 
   ///////////////////////////////////////////////
