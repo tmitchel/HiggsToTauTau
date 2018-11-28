@@ -226,7 +226,7 @@ void histHolder::fillFraction(int cat, std::string name, double var1, double var
     hist = frac_w.at(cat);
   } else if (name == "TTJ") {
     hist = frac_tt.at(cat);
-  } else if (name == "ZTT" || name == "TTT" || name == "VVT") {
+  } else if (name == "embed" || name == "TTT" || name == "VVT") {
     hist = frac_real.at(cat);
   }
   hist->Fill(var1, var2, weight);
@@ -283,7 +283,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 
         if (!(name == "W" || name == "ZJ" || name == "VVJ" ||
               name == "TTJ" ||
-              name == "ZTT" || name == "TTT" || name == "VVT" ||
+              name == "embed" || name == "TTT" || name == "VVT" ||
               name == "Data")) {
           continue;
         }
