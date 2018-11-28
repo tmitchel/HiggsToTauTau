@@ -32,18 +32,25 @@ gStyle.SetOptStat(0)
 def applyStyle(name, hist, leg):
     overlay = 0
     print name, hist.Integral()
-    if name == 'ZTT':
+    if name == 'embed':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
         hist.SetName("ZTT")
         #hist.Scale(0.4)
     elif name == 'TTT':
         hist.SetFillColor(TColor.GetColor("#cfe87f"))
         hist.SetName('TTT')
-    elif name == 'VVT' or name == 'EWKZ' or name == 'ZL' or name == 'W' or name == 'ZJ' or name == 'VVJ' or name == 'TTJ':
+#    elif name == 'VVT' or name == 'EWKZ' or name == 'ZJ' or name == 'VVJ' or name == 'TTJ':
+    elif name == 'VVT' or name == 'EWKZ':
         hist.SetFillColor(TColor.GetColor("#9feff2"))
         overlay = 4
         #if name == 'W':
         #  hist.Scale(0.8)
+    elif name == 'ZL':
+        hist.SetFillColor(TColor.GetColor("#de5a6a"))
+        hist.SetName('ZL')
+#    elif name == 'W':
+#        hist.SetFillColor(TColor.GetColor("#a0abff"))
+#        hist.SetName('W+jets')
     elif name == 'QCD':
         hist.SetFillColor(TColor.GetColor("#ffccff"))
         hist.SetName('QCD')
@@ -104,8 +111,10 @@ def formatStat(stat):
 
 titles = {
     'el_pt': 'Electron p_{T} [GeV]',
+    'mu_pt': 'Muon p_{T} [GeV]',
     't1_pt': 'Tau p_{T} [GeV]',
     'el_eta': 'Electron Eta [GeV]',
+    'mu_eta': 'Muon Eta [GeV]',
     't1_eta': 'Tau Eta [GeV]',
     't1_iso': 'Tau Isolation',
     'mt' : 'M_{T} [GeV]',
@@ -126,7 +135,13 @@ titles = {
     'costheta2': 'Cos(#theta_2)',
     'costhetastar': 'Cos(#theta*)',
     'nbjets': 'N(b-jets)',
-    'nn_vbf_full': 'NN Disc.'
+    'nn_vbf_full': 'NN Disc.',
+    'dPhi': '#Delta#phi',
+    'njets': 'N(jets)',
+    'j1_eta': 'Lead Jet Eta',
+    'j2_eta': 'Sub-Lead Jet Eta',
+    'j1_pt': 'Lead Jet p_{T}',
+    'j2_pt': 'Sub-Lead Jet p_{T}'
 }
 
 def formatStack(stack):
@@ -232,7 +247,7 @@ def sigmaLines(data):
     return line1, line2
 
 def main():
-    fin = TFile('../Output/templates/{}/template_{}_{}.root'.format(args.in_dir, args.channel, args.var), 'read')
+    fin = TFile('../Output/templates/{}/template_{}_{}_ff2017.root'.format(args.in_dir, args.channel, args.var), 'read')
     idir = fin.Get(args.cat)
     leg = createLegend()
     data = idir.Get('Data').Clone()
@@ -264,7 +279,7 @@ def main():
     stat = formatStat(stat)
     leg.AddEntry(stat, 'Uncertainty', 'f')
 
-    high = max(data.GetMaximum(), stat.GetMaximum()) * 2.
+    high = max(data.GetMaximum(), stat.GetMaximum()) * 2.2
     stack.SetMaximum(high)
     stack.Draw('hist')
     formatStack(stack)
@@ -280,7 +295,10 @@ def main():
     ll.SetNDC(kTRUE)
     ll.SetTextSize(0.06)
     ll.SetTextFont(42)
-    ll.DrawLatex(0.42, 0.92, "e#tau_{e} 2016, 35.9 fb^{-1} (13 TeV)")
+    if 'et_' in args.cat:
+      ll.DrawLatex(0.42, 0.92, "e#tau_{e} 2016, 35.9 fb^{-1} (13 TeV)")
+    if 'mt_' in args.cat:
+      ll.DrawLatex(0.42, 0.92, "#mu#tau_{e} 2016, 35.9 fb^{-1} (13 TeV)")
 
     cms = TLatex()
     cms.SetNDC(kTRUE)
