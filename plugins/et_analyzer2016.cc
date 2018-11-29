@@ -302,8 +302,8 @@ int main(int argc, char* argv[]) {
        }
       }
 
-      // b-tagging SF (only used in scaling W, I believe)
-      float weight_btag( bTagEventWeight(&jets) );
+      // b-tagging SF - no systematic and want 0 jets
+      float weight_btag( jets.bTagEventWeight() );
 
       // NNLOPS ggH reweighting
       if (sample.find("ggHtoTauTau125") != std::string::npos) {
