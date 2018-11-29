@@ -275,16 +275,37 @@ int main(int argc, char* argv[]) {
 
       // Z-pT and Zmm Reweighting
       if (name=="EWKZLL" || name=="EWKZNuNu" || name=="ZTT" || name=="ZLL" || name=="ZL" || name=="ZJ") {
-        evtwt *= zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()),zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
-        evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
+        // Z-pT Reweighting
+        auto nom_zpt_weight = zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()), zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
+        if (syst == "dyShape_Up") {
+          nom_zpt_weight = 1.1 * nom_zpt_weight - 0.1;
+        } else if (syst == "dyShape_Down") {
+          nom_zpt_weight = 0.9 * nom_zpt_weight + 0.1;
+        } 
+        evtwt *= nom_zpt_weight;
+
+        // Zmumu SF
+        if (syst == "zmumuShape_Up") {
+          evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 1);
+        } else if (syst == "zmumuShape_Down") {
+          evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), -1);
+        } else {
+          evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
+        }
       } 
 
-      //// top-pT Reweighting (only for some systematic)
-      //if (name == "TTT" || name == "TT" || name == "TTJ") {
-      //  float pt_top1 = std::min(float(400.), jets.getTopPt1());
-      //  float pt_top2 = std::min(float(400.), jets.getTopPt2());
-      //  evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
-      //}
+      // top-pT Reweighting 
+      if (name == "TTT" || name == "TT" || name == "TTJ") {
+       float pt_top1 = std::min(float(400.), jets.getTopPt1());
+       float pt_top2 = std::min(float(400.), jets.getTopPt2());
+       if (syst == "ttbarShape_Up") {
+         evtwt *= (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1); // 2*√[e^(..)*e^(..)] - 1
+       } else if (syst == "ttbarShape_Up") {
+         // no weight for shift down
+       } else {
+         evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)); // √[e^(..)*e^(..)]
+       }
+      }
 
       //// b-tagging SF (only used in scaling W, I believe)
       //int nbtagged = std::min(2, jets.getNbtag());
@@ -299,8 +320,18 @@ int main(int argc, char* argv[]) {
         if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), float(800.0)));
         if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), float(925.0)));
       }
-
       //NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
+
+      // jet to tau fake rate
+      if (tau.getGenMatch() == 6 && name == "TTJ" or name == "ZJ" or name == "W") {
+        auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
+        if (syst == "jetToTauFake_Up") {
+          evtwt *= (1 - (0.2 * temp_tau_pt / 100));
+        } else if (syst == "jetToTauFake_Down") {
+          evtwt *= (1 + (0.2 * temp_tau_pt / 100));
+        }
+      }
+
     } else if (!isData && isEmbed) {
       double Stitching_Weight(1.);
       // get the stitching weight
