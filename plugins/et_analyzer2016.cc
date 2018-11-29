@@ -155,7 +155,6 @@ int main(int argc, char* argv[]) {
   tau_factory      taus(ntuple);
   jet_factory      jets(ntuple, syst);
   met_factory      met(ntuple, syst);
-  double n70_count;
 
   if (sample.find("ggHtoTauTau125") != std::string::npos) {
     event.setRivets(ntuple);
@@ -167,9 +166,6 @@ int main(int argc, char* argv[]) {
     ntuple->GetEntry(i);
     if (i % 100000 == 0)
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
-
-    histos->at("weightflow") -> Fill(1., norm);
-    histos_2d->at("weights") -> Fill(1., norm);
 
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
     Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_trig_anti(1.), sf_id(1.), sf_id_anti(1.);
@@ -200,9 +196,6 @@ int main(int argc, char* argv[]) {
         evtwt = 1.418;
       }
     }
-
-    histos->at("weightflow") -> Fill(2., evtwt);
-    histos_2d->at("weights") -> Fill(2., evtwt);
 
     histos->at("cutflow") -> Fill(1., 1.);
 
@@ -243,45 +236,27 @@ int main(int argc, char* argv[]) {
     // apply all scale factors/corrections/etc.
     if (!isData && !isEmbed) {
 
-      // apply trigger and id SF's
-      sf_trig      = myScaleFactor_trgEle25->getSF(electron.getPt(), electron.getEta());
-      sf_trig_anti = myScaleFactor_trgEle25Anti->getSF(electron.getPt(), electron.getEta());
-      sf_id        = myScaleFactor_id->getSF(electron.getPt(), electron.getEta());
-      sf_id_anti   = myScaleFactor_idAnti->getSF(electron.getPt(), electron.getEta());
+      // Trigger SF
+      evtwt *= myScaleFactor_trgEle25->getSF(electron.getPt(), electron.getEta());
 
-      auto PUweight = lumi_weights->weight(event.getNPU());
-      auto genweight = event.getGenWeight();
+      // electron ID SF
+      evtwt *= myScaleFactor_id->getSF(electron.getPt(), electron.getEta());
 
-      evtwt *= sf_trig;
-      histos->at("weightflow")-> Fill(3., evtwt);
-      histos_2d->at("weights") -> Fill(3., sf_trig);
+      // Pileup Reweighting
+      evtwt *= lumi_weights->weight(event.getNPU());
 
-      evtwt *= sf_id;
-      histos->at("weightflow")-> Fill(4., evtwt);
-      histos_2d->at("weights") -> Fill(4., sf_id);
-
-      evtwt *= PUweight;
-      histos->at("weightflow")-> Fill(5., evtwt);
-      histos_2d->at("weights") -> Fill(5., PUweight);     
-
-      evtwt *= genweight;
-      histos->at("weightflow")-> Fill(6., evtwt);
-      histos_2d->at("weights") -> Fill(6., genweight);
+      // Apply generator weights
+      evtwt *= event.getGenWeight();
 
       // tau ID efficiency SF
       if (tau.getGenMatch() == 5) {
         evtwt *= 0.95;
       }
 
+      // tracking SF
       htt_sf->var("e_pt")->setVal(electron.getPt());
       htt_sf->var("e_eta")->setVal(electron.getEta());
-      auto htt_sf_val = htt_sf->function("e_trk_ratio")->getVal();
-
-      evtwt *= htt_sf_val;
-      histos->at("weightflow")-> Fill(7., evtwt);
-      histos_2d->at("weights") -> Fill(7., htt_sf_val);
-
-      auto tempweight = evtwt;
+      evtwt *= htt_sf->function("e_trk_ratio")->getVal();
 
       // // anti-lepton discriminator SFs
       if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3){//Yiwen
@@ -298,23 +273,11 @@ int main(int argc, char* argv[]) {
             else evtwt *= 2.281;
         }
 
-      histos->at("weightflow")-> Fill(8., evtwt);
-      histos_2d->at("weights") -> Fill(8., evtwt/tempweight);
-
       // Z-pT and Zmm Reweighting
-      double zpt_sf(1.), zmm_sf(1.);
       if (name=="EWKZLL" || name=="EWKZNuNu" || name=="ZTT" || name=="ZLL" || name=="ZL" || name=="ZJ") {
-        zpt_sf = zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()),zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
-        zmm_sf = GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
+        evtwt *= zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()),zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
+        evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
       } 
-
-      evtwt *= zpt_sf;
-      histos->at("weightflow")-> Fill(9., evtwt);
-      histos_2d->at("weights") -> Fill(9., zpt_sf);
-
-      evtwt *= zmm_sf;
-      histos->at("weightflow")-> Fill(10., evtwt);
-      histos_2d->at("weights") -> Fill(10., zmm_sf);
 
       //// top-pT Reweighting (only for some systematic)
       //if (name == "TTT" || name == "TT" || name == "TTJ") {
@@ -385,17 +348,6 @@ int main(int argc, char* argv[]) {
     double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getPx() + met_x, 2) - pow(electron.getPy() + met_y, 2));
     int evt_charge = tau.getCharge() + electron.getCharge();
 
-    // high MT sideband for W-jets normalization
-    if (mt > 80 && mt < 200 && evt_charge == 0 && tau.getTightIsoMVA() && electron.getIso() < 0.10) {
-      histos->at("n70") -> Fill(0.1, evtwt);
-      if (jets.getNjets() == 0 && event.getMSV() < 400)
-        histos->at("n70") -> Fill(1.1, evtwt);
-      else if (jets.getNjets() == 1)
-        histos->at("n70") -> Fill(2.1, evtwt);
-      else if (jets.getNjets() > 1 && jets.getDijetMass() > 300)
-        histos->at("n70") -> Fill(3.1, evtwt);
-    }
-
     // create regions
     bool signalRegion   = (tau.getTightIsoMVA()  && electron.getIso() < 0.10);
     bool looseIsoRegion = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
@@ -455,9 +407,6 @@ int main(int argc, char* argv[]) {
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
   } // close event loop
  
-  histos->at("n70") -> Fill(1, n70_count);
-  histos->at("n70")->Write();
-
   fin->Close();
   fout->cd();
   fout->Write();

@@ -112,44 +112,12 @@ luminosity2017(41500.),
 
   }, 
   histos_1d {
-    {"n70", new TH1F("n70", "n70", 6, 0, 6)},
     {"cutflow", new TH1F("cutflow", "Cutflow", 12, -0.5, 11.5)},
-    {"weightflow", new TH1F("weightflow", "weightflow", 10, 0.5, 10.5)},
     {"el_pt", new TH1F(name.c_str(), "el_pt", 12, 0, 300)},
     {"tau_pt", new TH1F("tau_pt", "tau_pt", 12, 0, 300)},
   }
 {
-      auto hweights = new TH2F("weights","weights", 10, 0.5, 10.5, 800, -2, 2);
-      hweights -> GetXaxis() -> SetBinLabel(1, "xs*lumi/gen");
-      hweights -> GetXaxis() -> SetBinLabel(2, "stitch");
-      hweights -> GetXaxis() -> SetBinLabel(3, "trig SF");
-      hweights -> GetXaxis() -> SetBinLabel(4, "ID SF");
-      hweights -> GetXaxis() -> SetBinLabel(5, "pileup corr");
-      hweights -> GetXaxis() -> SetBinLabel(6, "gen weight");
-      hweights -> GetXaxis() -> SetBinLabel(7, "htt sf");
-      hweights -> GetXaxis() -> SetBinLabel(8, "anti-lepton");
-      hweights -> GetXaxis() -> SetBinLabel(9, "z pt");
-      hweights -> GetXaxis() -> SetBinLabel(10, "zmm");
-      histos_2d["weights"] = hweights;
-
-      auto hweightflow = histos_1d.at("weightflow");
-      hweightflow -> GetXaxis() -> SetBinLabel(1, "xs*lumi/gen");
-      hweightflow -> GetXaxis() -> SetBinLabel(2, "stitch");
-      hweightflow -> GetXaxis() -> SetBinLabel(3, "trig SF");
-      hweightflow -> GetXaxis() -> SetBinLabel(4, "ID SF");
-      hweightflow -> GetXaxis() -> SetBinLabel(5, "pileup corr");
-      hweightflow -> GetXaxis() -> SetBinLabel(6, "gen weight");
-      hweightflow -> GetXaxis() -> SetBinLabel(7, "htt sf");
-      hweightflow -> GetXaxis() -> SetBinLabel(8, "anti-lepton");
-      hweightflow -> GetXaxis() -> SetBinLabel(9, "z pt");
-      hweightflow -> GetXaxis() -> SetBinLabel(10, "zmm");
-      histos_1d["weightflow"] = hweightflow;
-
-      std::string suffix = systematics[syst];
-
-
-
-      
+  std::string suffix = systematics[syst];  
 }
 
 #endif

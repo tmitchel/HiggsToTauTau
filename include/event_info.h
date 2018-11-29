@@ -48,17 +48,17 @@ public:
   Bool_t getPassEle32();
   Bool_t getPassEle35();
   Bool_t getPassEle24Tau30();
-  Bool_t getPassDoubleTauCmbIso35();
-  Bool_t getPassDoubleTau35();
-  Bool_t getPassCrossTrigger();
+  Bool_t getPassMu19Tau20();
   Bool_t getPassIsoMu22();
   Bool_t getPassIsoTkMu22();
   Bool_t getPassIsoMu22eta2p1();
   Bool_t getPassIsoTkMu22eta2p1();
-  Bool_t getPassFlags();
   Bool_t getPassMu20Tau27();
   Bool_t getPassMu24();
   Bool_t getPassMu27();
+  Bool_t getPassDoubleTauCmbIso35();
+  Bool_t getPassDoubleTau35();
+  Bool_t getPassFlags();
 
   // Event Info
   Float_t getNPV()          { return npv;             };
@@ -279,31 +279,27 @@ Bool_t event_info::getPassEle24Tau30() {
   return PassEle24Tau30;
 }
 
-Bool_t event_info::getPassDoubleTauCmbIso35() {
-  return PassDoubleTauCmbIso35;
-}
-
-Bool_t event_info::getPassDoubleTau35() {
-  return PassDoubleTau35;
-}
-
-Bool_t event_info::getPassCrossTrigger() {
-  return PassIsoMu19Tau20;
+Bool_t event_info::getPassMu19Tau20() {
+  return PassIsoMu19Tau20 = matchIsoMu19Tau20_1 && filterIsoMu19Tau20_1 && passIsoMu19Tau20 && matchIsoMu19Tau20_2 && filterIsoMu19Tau20_2;
 }
 
 Bool_t event_info::getPassIsoMu22() {
+  PassIsoMu22 = matchIsoMu22_1 && filterIsoMu22_1 && passIsoMu22;
   return PassIsoMu22;
 }
 
 Bool_t event_info::getPassIsoTkMu22() {
+  PassIsoTkMu22 = matchIsoTkMu22_1 && filterIsoTkMu22_1 && passIsoTkMu22;
   return PassIsoTkMu22;
 }
 
 Bool_t event_info::getPassIsoMu22eta2p1() {
+  PassIsoMu22eta2p1 = matchIsoMu22eta2p1_1 && filterIsoMu22eta2p1_1 && passIsoMu22eta2p1;
   return PassIsoMu22eta2p1;
 }
 
 Bool_t event_info::getPassIsoTkMu22eta2p1() {
+  PassIsoTkMu22eta2p1 = matchIsoTkMu22eta2p1_1 && filterIsoTkMu22eta2p1_1 && passIsoTkMu22eta2p1;
   return PassIsoTkMu22eta2p1;
 }
 
@@ -320,6 +316,14 @@ Bool_t event_info::getPassMu24(){
 Bool_t event_info::getPassMu27() {
   PassMu20Tau27 = mMatchesIsoMu27Path && mMatchesIsoMu27Filter && IsoMu27Pass;
   return PassMu20Tau27;
+}
+
+Bool_t event_info::getPassDoubleTauCmbIso35() {
+  return PassDoubleTauCmbIso35;
+}
+
+Bool_t event_info::getPassDoubleTau35() {
+  return PassDoubleTau35;
 }
 
 #endif

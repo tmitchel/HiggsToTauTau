@@ -282,6 +282,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet
     t1_phi = t->getPhi();
     t1_mass = t->getMass();
     t1_charge = t->getCharge();
+    t1_decayMode = t->getL2DecayMode();
     t1_iso = t->getIso();
     t1_iso_VL = t->getVLooseIsoMVA();
     t1_iso_L = t->getLooseIsoMVA();
@@ -289,52 +290,17 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet
     t1_iso_T = t->getTightIsoMVA();
     t1_iso_VT = t->getVTightIsoMVA();
     t1_iso_VVT = t->getVVTightIsoMVA();
-    vis_mass = (el->getP4() + t->getP4()).M();
-    t1_decayMode = t->getL2DecayMode();
     t1_genMatch = t->getGenMatch();
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
+    vis_mass = (el->getP4() + t->getP4()).M();
 
     otree->Fill();
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, ditau *t1, ditau *t2, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight) {
+void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t mt, Float_t weight) {
 
-    TLorentzVector higgs(t1->getP4() + t2->getP4() + fmet->getP4());
-    generalFill(cat, fjets, fmet, evt, weight, higgs, mt);
-
-    t1_pt = t1->getPt();
-    t1_eta = t1->getEta();
-    t1_phi = t1->getPhi();
-    t1_mass = t1->getMass();
-    t1_charge = t1->getCharge();
-    t2_pt = t2->getPt();
-    t2_eta = t2->getEta();
-    t2_phi = t2->getPhi();
-    t2_mass = t2->getMass();
-    t2_charge = t2->getCharge();
-    vis_mass = (t1->getP4() + t2->getP4()).M();
-    t1_iso_VL = t1->getVLooseIsoMVA();
-    t1_iso_L = t1->getLooseIsoMVA();
-    t1_iso_M = t1->getMediumIsoMVA();
-    t1_iso_T = t1->getTightIsoMVA();
-    t1_iso_VT = t1->getVTightIsoMVA();
-    t1_iso_VVT = t1->getVVTightIsoMVA();
-    t2_iso_VL = t2->getVLooseIsoMVA();
-    t2_iso_L = t2->getLooseIsoMVA();
-    t2_iso_M = t2->getMediumIsoMVA();
-    t2_iso_T = t2->getTightIsoMVA();
-    t2_iso_VT = t2->getVTightIsoMVA();
-    t2_iso_VVT = t2->getVVTightIsoMVA();
-    t1_genMatch = t1->getGenMatch();
-    t2_genMatch = t2->getGenMatch();
-
-    otree->Fill();
-}
-
-void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t1, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t mt, Float_t weight) {
-
-    TLorentzVector higgs(mu->getP4() + t1->getP4() + fmet->getP4());
+    TLorentzVector higgs(mu->getP4() + t->getP4() + fmet->getP4());
     generalFill(cat, fjets, fmet, evt, weight, higgs, mt);
 
     mu_pt = mu->getPt();
@@ -343,20 +309,57 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t1, jet_fa
     mu_mass = mu->getMass();
     mu_charge = mu->getCharge();
     mu_iso = mu->getIso();
-    t1_pt = t1->getPt();
-    t1_eta = t1->getEta();
-    t1_phi = t1->getPhi();
-    t1_mass = t1->getMass();
-    t1_charge = t1->getCharge();
-    vis_mass = (mu->getP4() + t1->getP4()).M();
-    t1_decayMode = t1->getL2DecayMode();
-    t1_iso_VL = t1->getVLooseIsoMVA();
-    t1_iso_L = t1->getLooseIsoMVA();
-    t1_iso_M = t1->getMediumIsoMVA();
-    t1_iso_T = t1->getTightIsoMVA();
-    t1_iso_VT = t1->getVTightIsoMVA();
-    t1_iso_VVT = t1->getVVTightIsoMVA();
-    t1_genMatch = t1->getGenMatch();
+    t1_pt = t->getPt();
+    t1_eta = t->getEta();
+    t1_phi = t->getPhi();
+    t1_mass = t->getMass();
+    t1_charge = t->getCharge();
+    t1_decayMode = t->getL2DecayMode();
+    t1_iso = t->getIso();
+    t1_iso_VL = t->getVLooseIsoMVA();
+    t1_iso_L = t->getLooseIsoMVA();
+    t1_iso_M = t->getMediumIsoMVA();
+    t1_iso_T = t->getTightIsoMVA();
+    t1_iso_VT = t->getVTightIsoMVA();
+    t1_iso_VVT = t->getVVTightIsoMVA();
+    t1_genMatch = t->getGenMatch();
+    dmf = t->getDecayModeFinding();
+    dmf_new = t->getDecayModeFindingNew();
+    vis_mass = (mu->getP4() + t->getP4()).M();
 
     otree->Fill();
+}
+
+void slim_tree::fillTree(std::vector<std::string> cat, ditau *t1, ditau *t2, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight) {
+
+  TLorentzVector higgs(t1->getP4() + t2->getP4() + fmet->getP4());
+  generalFill(cat, fjets, fmet, evt, weight, higgs, mt);
+
+  t1_pt = t1->getPt();
+  t1_eta = t1->getEta();
+  t1_phi = t1->getPhi();
+  t1_mass = t1->getMass();
+  t1_charge = t1->getCharge();
+  t2_pt = t2->getPt();
+  t2_eta = t2->getEta();
+  t2_phi = t2->getPhi();
+  t2_mass = t2->getMass();
+  t2_charge = t2->getCharge();
+  vis_mass = (t1->getP4() + t2->getP4()).M();
+  t1_iso_VL = t1->getVLooseIsoMVA();
+  t1_iso_L = t1->getLooseIsoMVA();
+  t1_iso_M = t1->getMediumIsoMVA();
+  t1_iso_T = t1->getTightIsoMVA();
+  t1_iso_VT = t1->getVTightIsoMVA();
+  t1_iso_VVT = t1->getVVTightIsoMVA();
+  t2_iso_VL = t2->getVLooseIsoMVA();
+  t2_iso_L = t2->getLooseIsoMVA();
+  t2_iso_M = t2->getMediumIsoMVA();
+  t2_iso_T = t2->getTightIsoMVA();
+  t2_iso_VT = t2->getVTightIsoMVA();
+  t2_iso_VVT = t2->getVVTightIsoMVA();
+  t1_genMatch = t1->getGenMatch();
+  t2_genMatch = t2->getGenMatch();
+
+  otree->Fill();
 }

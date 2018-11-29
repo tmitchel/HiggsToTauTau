@@ -279,7 +279,7 @@ def main():
     stat = formatStat(stat)
     leg.AddEntry(stat, 'Uncertainty', 'f')
 
-    high = max(data.GetMaximum(), stat.GetMaximum()) * 2.2
+    high = max(data.GetMaximum(), stat.GetMaximum()) * 1.4
     stack.SetMaximum(high)
     stack.Draw('hist')
     formatStack(stack)
@@ -296,9 +296,9 @@ def main():
     ll.SetTextSize(0.06)
     ll.SetTextFont(42)
     if 'et_' in args.cat:
-      ll.DrawLatex(0.42, 0.92, "e#tau_{e} 2016, 35.9 fb^{-1} (13 TeV)")
+      ll.DrawLatex(0.42, 0.92, "e#tau_{e} 2017, 41.3 fb^{-1} (13 TeV)")
     if 'mt_' in args.cat:
-      ll.DrawLatex(0.42, 0.92, "#mu#tau_{e} 2016, 35.9 fb^{-1} (13 TeV)")
+      ll.DrawLatex(0.42, 0.93, "#mu#tau_{#mu} 2017, 41.3 fb^{-1} (13 TeV)")
 
     cms = TLatex()
     cms.SetNDC(kTRUE)
@@ -314,6 +314,10 @@ def main():
 
     if args.cat == 'et_inclusive' or args.cat == 'mt_inclusive':
         catName = 'Inclusive'
+    elif args.cat == 'et_0jet' or args.cat == 'mt_0jet':
+        catName = '0-Jet'
+    elif args.cat == 'et_boosted' or args.cat == 'mt_boosted':
+        catName = 'Boosted'
     elif args.cat == 'et_vbf' or args.cat == 'mt_vbf':
         catName = 'VBF enriched'
     else:
