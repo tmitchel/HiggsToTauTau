@@ -4,5 +4,5 @@ job1:
     - cvmfs
   script: 
   - set +e && source /cvmfs/cms.cern.ch/cmsset_default.sh; set -e
-  - scramv1 project CMSSW meh
+  - scramv1 project CMSSW CMSSW_9_4_0
   - echo "hi"
