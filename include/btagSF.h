@@ -1,3 +1,5 @@
+#include "jet_factory.h"
+
 double GetSF(float x, int flavour, int syst){
 
     if (fabs(flavour)==4 or fabs(flavour)==5){
@@ -32,7 +34,7 @@ double GetSF(float x, int flavour, int syst){
 }
 
 
-double bTagEventWeight(int nBtaggedJets, float bjetpt_1, int bjetflavour_1, float bjetpt_2, int bjetflavour_2, int nBTags=0, int syst=0)
+double bTagEventWeight(jet_factory* jets, int nBTags=0, int syst=0)
 {
   /*
     ##################################################################
@@ -48,6 +50,11 @@ double bTagEventWeight(int nBtaggedJets, float bjetpt_1, int bjetflavour_1, floa
     ##################################################################
   */
   
+ auto bjets = jets->getBtagJets();
+ auto bjetpt_1(bjets.at(0).getPt()), bjetflavour_1(bjets.at(0).getFlavor()),
+      bjetpt_2(bjets.at(1).getPt()), bjetflavour_2(bjets.at(1).getFlavor());
+ auto nBtaggedJets = jets->getNbtag();
+
   double weight(0.);
   if( nBTags==0 && nBtaggedJets==0) {
     weight = 1.;
@@ -74,3 +81,38 @@ double bTagEventWeight(int nBtaggedJets, float bjetpt_1, int bjetflavour_1, floa
   return weight;
 }
 
+int PromoteDemote(TH2F *h_btag_eff_b, TH2F *h_btag_eff_c, TH2F *h_btag_eff_oth, jet* bjet, int nbtag, int syst) {
+
+  float SF = GetSF(bjet->getPt(), bjet->getFlavor(), syst);
+  float beff = 1.0;
+  if (bjet->getFlavor() == 5) {
+    // b-jet
+    auto effective_pt = std::min(bjet->getPt(), static_cast<Float_t>(h_btag_eff_b->GetXaxis()->GetBinLowEdge(h_btag_eff_b->GetNbinsX() + 1) - 1)); // get bjet pT or 1 lower than max bin edge
+    beff == h_btag_eff_b->GetBinContent(effective_pt, h_btag_eff_b->GetYaxis()->FindBin(fabs(bjet->getEta())));
+
+  } else if (bjet->getFlavor() == 4) {
+    // c-jet
+    auto effective_pt = std::min(bjet->getPt(), static_cast<Float_t>(h_btag_eff_c->GetXaxis()->GetBinLowEdge(h_btag_eff_c->GetNbinsX() + 1) - 1)); // get bjet pT or 1 lower than max bin edge
+    beff == h_btag_eff_c->GetBinContent(effective_pt, h_btag_eff_c->GetYaxis()->FindBin(fabs(bjet->getEta())));
+
+  } else {
+    // light-jet
+    auto effective_pt = std::min(bjet->getPt(), static_cast<Float_t>(h_btag_eff_oth->GetXaxis()->GetBinLowEdge(h_btag_eff_oth->GetNbinsX() + 1) - 1)); // get bjet pT or 1 lower than max bin edge
+    beff == h_btag_eff_oth->GetBinContent(effective_pt, h_btag_eff_oth->GetYaxis()->FindBin(fabs(bjet->getEta())));
+
+  }
+
+  TRandom3 *rand = new TRandom3();
+  rand->SetSeed((int)((bjet->getEta() + 5) * 100000));
+  float myrand = rand->Rndm();
+
+  if (SF < 1 && myrand < (1 - SF)) {
+    nbtag = nbtag - 1;
+  }
+
+  if (SF > 1 && myrand < ((1 - SF) / (1 - 1.0 / beff))) { 
+    nbtag = nbtag + 1;
+  }
+
+  return nbtag;
+}
