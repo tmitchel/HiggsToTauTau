@@ -3,5 +3,6 @@ job1:
     # Make you job be executed in a shared runner that has CVMFS mounted
     - cvmfs
   script: 
-  - set +e && source /cvmfs/cms.cern.ch/cmsset_default.csh; set -e
+  - set +e && source /cvmfs/cms.cern.ch/cmsset_default.sh; set -e
+  - scramv1 project CMSSW meh
   - echo "hi"
