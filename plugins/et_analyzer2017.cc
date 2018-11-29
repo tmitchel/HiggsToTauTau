@@ -212,11 +212,6 @@ int main(int argc, char* argv[]) {
     //   - Event: dR(tau,el) > 0.5                          //
     //////////////////////////////////////////////////////////
     
-    // remove 2-prong taus
-    if (!tau.getDecayModeFinding() || tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
-      continue;
-    }
-
     bool fireSingle(false), fireCross(false);
     
     // apply correct lepton pT thresholds

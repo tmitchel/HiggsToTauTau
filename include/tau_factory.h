@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 #include <cmath>
 #include "TTree.h"
 #include "TLorentzVector.h"
@@ -21,8 +22,8 @@ private:
   Bool_t AgainstTightElectron, AgainstVLooseElectron, AgainstTightMuon, AgainstLooseMuon;
   Float_t VLooseIsoMVA, LooseIsoMVA, MediumIsoMVA, TightIsoMVA, VTightIsoMVA, VVTightIsoMVA;
   TLorentzVector p4;
-public:
 
+public:
   tau(Float_t, Float_t, Float_t, Float_t, Float_t);
   ~tau() {};
 
@@ -84,14 +85,13 @@ private:
           byTightIsolationMVArun2v1DBoldDMwLT_2, byVTightIsolationMVArun2v1DBoldDMwLT_2, byVVTightIsolationMVArun2v1DBoldDMwLT_2;
 
 public:
-  tau_factory (TTree*);
+  tau_factory (TTree*, int);
   virtual ~tau_factory () {};
-
   tau run_factory();
 };
 
 // read data from tree Int_to member variables
-tau_factory::tau_factory(TTree* input) {
+tau_factory::tau_factory(TTree* input, int year=2017) {
   input -> SetBranchAddress( "px_2",                                    &px_2                                   );
   input -> SetBranchAddress( "py_2",                                    &py_2                                   );
   input -> SetBranchAddress( "pz_2",                                    &pz_2                                   );
@@ -100,32 +100,36 @@ tau_factory::tau_factory(TTree* input) {
   input -> SetBranchAddress( "phi_2",                                   &phi_2                                  );
   input -> SetBranchAddress( "m_2",                                     &m_2                                    );
   input -> SetBranchAddress( "e_2",                                     &e_2                                    );
-//  input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTraw",            &iso_2                                  );
-  input -> SetBranchAddress( "iso_2", &iso_2);
   input -> SetBranchAddress( "q_2",                                     &q_2                                    );
   input -> SetBranchAddress( "gen_match_2",                             &gen_match_2                            );
   input -> SetBranchAddress( "againstElectronTightMVA6_2",              &againstElectronTightMVA6_2             );
   input -> SetBranchAddress( "againstElectronVLooseMVA6_2",             &againstElectronVLooseMVA6_2            );
   input -> SetBranchAddress( "againstMuonTight3_2",                     &againstMuonTight3_2                    );
   input -> SetBranchAddress( "againstMuonLoose3_2",                     &againstMuonLoose3_2                    );
-//  input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTVLoose",  &byVLooseIsolationMVArun2v1DBoldDMwLT_2 );
-//  input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTLoose",   &byLooseIsolationMVArun2v1DBoldDMwLT_2  );
-//  input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTMedium",  &byMediumIsolationMVArun2v1DBoldDMwLT_2 );
-//  input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTTight",   &byTightIsolationMVArun2v1DBoldDMwLT_2  );
-//  input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTVTight",  &byVTightIsolationMVArun2v1DBoldDMwLT_2 );
-//  input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTVVTight", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
-  input -> SetBranchAddress( "byVLooseIsolationMVArun2v1DBoldDMwLT_2",  &byVLooseIsolationMVArun2v1DBoldDMwLT_2 );
-  input -> SetBranchAddress( "byLooseIsolationMVArun2v1DBoldDMwLT_2",   &byLooseIsolationMVArun2v1DBoldDMwLT_2  );
-  input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_2",  &byMediumIsolationMVArun2v1DBoldDMwLT_2 );
-  input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_2",   &byTightIsolationMVArun2v1DBoldDMwLT_2  );
-  input -> SetBranchAddress( "byVTightIsolationMVArun2v1DBoldDMwLT_2",  &byVTightIsolationMVArun2v1DBoldDMwLT_2 );
-  input -> SetBranchAddress( "byVVTightIsolationMVArun2v1DBoldDMwLT_2", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
- 
   input -> SetBranchAddress( "l2_decayMode",                            &l2_decayMode                           );
   input -> SetBranchAddress( "decayModeFinding_2",                      &dmf                                    );
   input -> SetBranchAddress( "decayModeFindingNewDMs_2",                &dmf_new                                );
 
-}
+  if (year == 2017) {
+    input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTraw",     &iso_2                                  );
+    input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTVLoose",  &byVLooseIsolationMVArun2v1DBoldDMwLT_2 );
+    input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTLoose",   &byLooseIsolationMVArun2v1DBoldDMwLT_2  );
+    input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTMedium",  &byMediumIsolationMVArun2v1DBoldDMwLT_2 );
+    input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTTight",   &byTightIsolationMVArun2v1DBoldDMwLT_2  );
+    input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTVTight",  &byVTightIsolationMVArun2v1DBoldDMwLT_2 );
+    input -> SetBranchAddress( "tRerunMVArun2v2DBoldDMwLTVVTight", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
+  } else if (year == 2016) {
+    input -> SetBranchAddress( "iso_2",                                   &iso_2                                  );
+    input -> SetBranchAddress( "byVLooseIsolationMVArun2v1DBoldDMwLT_2",  &byVLooseIsolationMVArun2v1DBoldDMwLT_2 );
+    input -> SetBranchAddress( "byLooseIsolationMVArun2v1DBoldDMwLT_2",   &byLooseIsolationMVArun2v1DBoldDMwLT_2  );
+    input -> SetBranchAddress( "byMediumIsolationMVArun2v1DBoldDMwLT_2",  &byMediumIsolationMVArun2v1DBoldDMwLT_2 );
+    input -> SetBranchAddress( "byTightIsolationMVArun2v1DBoldDMwLT_2",   &byTightIsolationMVArun2v1DBoldDMwLT_2  );
+    input -> SetBranchAddress( "byVTightIsolationMVArun2v1DBoldDMwLT_2",  &byVTightIsolationMVArun2v1DBoldDMwLT_2 );
+    input -> SetBranchAddress( "byVVTightIsolationMVArun2v1DBoldDMwLT_2", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
+  } else {
+    std::cerr << "Bad year given to tau_factory" << std::endl;
+  }
+ }
 
 // create electron object and set member data
 tau tau_factory::run_factory() {
@@ -151,6 +155,5 @@ tau tau_factory::run_factory() {
 
   return t;
 }
-
 
 #endif
