@@ -65,7 +65,7 @@ for ifile in fileList:
         names = ['ZTT', 'ZL', 'ZJ']
     elif 'TT' in sample:
         names = ['TTT', 'TTJ']
-    elif 'WJets' in sample or 'EWKW' in sample or 'WPlus' in sample or 'WMinus' in sample:
+    elif 'WJets' in sample or 'EWKW' in sample:
         names = ['W']
     elif 'EWKZ' in sample:
         names = ['EWKZ']
