@@ -38,7 +38,7 @@ void read_directory(const std::string &name, std::vector<std::string> &v) {
 // class to hold the histograms until I'm ready to write them
 class histHolder {
 public:
-  histHolder(std::string);
+  histHolder(std::string, std::string);
   ~histHolder() { delete ff_weight; };
   void writeHistos();
   void initVectors(std::string);
@@ -53,6 +53,7 @@ public:
   FakeFactor* ff_weight;
   std::string channel_prefix;
   std::vector<std::string> systematics;
+  std::vector<float> mvis_bins, njets_bins;
   std::map<std::string, std::vector<TH2F *>> hists;
   std::map<std::string, std::vector<TH2F *>> FF_systs;
   TH2F *fake_0jet, *fake_boosted, *fake_vbf;
@@ -67,6 +68,7 @@ int main(int argc, char *argv[]) {
   CLParser parser(argc, argv);
   bool doSyst = parser.Flag("-s");
   std::string dir = parser.Option("-d");
+  std::string year = parser.Option("-y");
   std::string tree_name = parser.Option("-t");
 
   // get input file directory
@@ -89,7 +91,7 @@ int main(int argc, char *argv[]) {
   }
 
   // initialize histogram holder 
-  auto hists = new histHolder(channel_prefix);
+  auto hists = new histHolder(channel_prefix, year);
 
   // read all files from input directory
   std::vector<std::string> files;
@@ -108,7 +110,7 @@ int main(int argc, char *argv[]) {
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
 // and the map from categories to vectors of TH2F*'s. Each TH2F* in the vector corresponds to 
 // one file that is being put into that categories directory in the output tempalte
-histHolder::histHolder(std::string channel_prefix) :
+histHolder::histHolder(std::string channel_prefix, std::string year) :
   hists {
     {(channel_prefix+"_0jet").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},
@@ -119,7 +121,9 @@ histHolder::histHolder(std::string channel_prefix) :
     {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_vbf").c_str(), std::vector<TH2F *>()},
   }, 
-  fout( new TFile(("Output/templates/template_"+channel_prefix+"_finalFFv1.root").c_str(), "recreate") ),
+  fout( new TFile(("Output/templates/template_"+channel_prefix+year+"_finalFFv2.root").c_str(), "recreate") ),
+  mvis_bins( {0,50,80,100,110,120,130,150,170,200,250,1000} ),
+  njets_bins( {-0.5,0.5,1.5,15} ),
   // x-axis
   bins_l2 {0, 1, 10, 11},
   bins_hpt {0, 100, 150, 200, 250, 300, 5000},
@@ -130,7 +134,7 @@ histHolder::histHolder(std::string channel_prefix) :
   bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
   bins_msv1 {0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300},
   bins_msv2 {0, 95, 115, 135, 155, 400},
-  channel_prefix( channel_prefix ), 
+  channel_prefix( channel_prefix ),
   systematics {
     "ff_qcd_syst_up"            ,"ff_qcd_syst_down"           ,"ff_qcd_dm0_njet0_stat_up"   ,
     "ff_qcd_dm0_njet0_stat_down","ff_qcd_dm0_njet1_stat_up"   ,"ff_qcd_dm0_njet1_stat_down" ,
@@ -153,34 +157,42 @@ histHolder::histHolder(std::string channel_prefix) :
   fake_boosted = new TH2F("fake_boosted", "fake_SS", bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]);
   fake_vbf     = new TH2F("fake_vbf"    , "fake_SS", bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]);
   data = {
-      new TH2F("data_0jet"     , "data_0jet"     , bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] ),
-      new TH2F("data_boosted"  , "data_boosted"  , bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]),
-      new TH2F("data_vbf"      , "data_vbf"      , bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]),
+      new TH2F("data_0jet"     , "data_0jet"     , mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] ),
+      new TH2F("data_boosted"  , "data_boosted"  , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
+      new TH2F("data_vbf"      , "data_vbf"      , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
   };
   frac_w = {
-      new TH2F("frac_w_0jet"     , "frac_w_0jet"     , bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] ),
-      new TH2F("frac_w_boosted"  , "frac_w_boosted"  , bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]),
-      new TH2F("frac_w_vbf"      , "frac_w_vbf"      , bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]),
+      new TH2F("frac_w_0jet"     , "frac_w_0jet"     , mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] ),
+      new TH2F("frac_w_boosted"  , "frac_w_boosted"  , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
+      new TH2F("frac_w_vbf"      , "frac_w_vbf"      , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
   };
   frac_tt = {
-      new TH2F("frac_tt_0jet"     , "frac_tt_0jet"     , bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] ),
-      new TH2F("frac_tt_boosted"  , "frac_tt_boosted"  , bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]),
-      new TH2F("frac_tt_vbf"      , "frac_tt_vbf"      , bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]),
+      new TH2F("frac_tt_0jet"     , "frac_tt_0jet"     , mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] ),
+      new TH2F("frac_tt_boosted"  , "frac_tt_boosted"  , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
+      new TH2F("frac_tt_vbf"      , "frac_tt_vbf"      , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
   };
   frac_real = {
-      new TH2F("frac_real_0jet"     , "frac_real_0jet"     , bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] ),
-      new TH2F("frac_real_boosted"  , "frac_real_boosted"  , bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]),
-      new TH2F("frac_real_vbf"      , "frac_real_vbf"      , bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]),
+      new TH2F("frac_real_0jet"     , "frac_real_0jet"     , mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] ),
+      new TH2F("frac_real_boosted"  , "frac_real_boosted"  , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
+      new TH2F("frac_real_vbf"      , "frac_real_vbf"      , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
   };
   frac_qcd = {
-      new TH2F("frac_qcd_0jet"     , "frac_qcd_0jet"     , bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] ),
-      new TH2F("frac_qcd_boosted"  , "frac_qcd_boosted"  , bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]),
-      new TH2F("frac_qcd_vbf"      , "frac_qcd_vbf"      , bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]),
+      new TH2F("frac_qcd_0jet"     , "frac_qcd_0jet"     , mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] ),
+      new TH2F("frac_qcd_boosted"  , "frac_qcd_boosted"  , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
+      new TH2F("frac_qcd_vbf"      , "frac_qcd_vbf"      , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
   };
 
-  TFile ff_file("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root");
-  ff_weight = (FakeFactor *)ff_file.Get("ff_comb");
-  ff_file.Close();
+  // get FakeFactor workspace
+  TFile *ff_file;
+  if (year == "2017") {
+    ff_file = new TFile(("${CMSSW_BASE}/src/SMHTT_Analyzers/data/testFF2017/SM2017/tight/vloose/"+channel_prefix+"/fakeFactors.root").c_str(), "READ");
+  } else if (year == "2016"){
+    ff_file = new TFile("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root", "READ");
+  } else {
+    std::cerr << "Bad year" << std::endl;
+  }
+  ff_weight = (FakeFactor *)ff_file->Get("ff_comb");
+  ff_file->Close();
 }
 
 // change to the correct output directory then create a new TH1F that will be filled for the current input file
@@ -207,11 +219,11 @@ void histHolder::initSystematics(std::string name) {
     std::string name = "jetFakes_";
     for (auto syst : systematics) {
       if (key.first == channel_prefix + "_0jet") {
-        FF_systs.at(key.first.c_str()).push_back(new TH2F((name+syst).c_str(), name.c_str(), bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]));
+        FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]));
       } else if (key.first == channel_prefix + "_boosted") {
-        FF_systs.at(key.first.c_str()).push_back(new TH2F((name+syst).c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
+        FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
       } else if (key.first == channel_prefix + "_vbf") {
-        FF_systs.at(key.first.c_str()).push_back(new TH2F((name+syst).c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
+        FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
       }
     }
   }
@@ -232,6 +244,12 @@ void histHolder::fillFraction(int cat, std::string name, double var1, double var
   hist->Fill(var1, var2, weight);
 }
 
+void histHolder::convertDataToFake(TH2F *hist, std::string name, double var1, double var2, double weight) {
+  if (name.find("Data") != std::string::npos) {
+    hist->Fill(var1, var2, weight);
+  }
+}
+
 void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std::string tree_name) {
 
   for (auto ifile : files) {
@@ -244,7 +262,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiTauIso, OS;
-    Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, weight;
+    Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, njets, weight, NN_disc;
 
     tree->SetBranchAddress("evtwt", &weight);
 
@@ -252,7 +270,9 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mjj", &mjj);
+    //tree->SetBranchAddress("NN_disc", &NN_disc);
     tree->SetBranchAddress("m_sv", &m_sv);
+    tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("is_signal", &is_signal);
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
@@ -289,11 +309,11 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
         }
 
         if (cat_0jet > 0) {
-          fillFraction(zeroJet, name, t1_decayMode, vis_mass, weight);
+          fillFraction(zeroJet, name, vis_mass, njets, weight);
         } else if (cat_boosted > 0) {
-          fillFraction(boosted, name, higgs_pT, m_sv, weight);
+          fillFraction(boosted, name, vis_mass, njets, weight);
         } else if (cat_vbf > 0) {
-          fillFraction(vbf, name, mjj, m_sv, weight);
+          fillFraction(vbf, name, vis_mass, njets, weight);
         }
       }
     }
@@ -320,15 +340,13 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, std::string tree_name) {
 
   for (auto ifile : files) {
-
-    // only need to look at data
-    if (ifile.find("Data.root") == std::string::npos) {
-      continue;
-    }
-
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
     auto tree = (TTree *)fin->Get(tree_name.c_str());
     std::string name = ifile.substr(0, ifile.find(".")).c_str();
+
+    if (name != "Data") {
+      continue;
+    }
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, OS;
@@ -363,29 +381,29 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
 
       if (is_antiTauIso) {
         if (cat_0jet) {
-          auto bin_x = data.at(zeroJet)->GetXaxis()->FindBin(t1_decayMode);
-          auto bin_y = data.at(zeroJet)->GetYaxis()->FindBin(vis_mass);
+          auto bin_x = data.at(zeroJet)->GetXaxis()->FindBin(vis_mass);
+          auto bin_y = data.at(zeroJet)->GetYaxis()->FindBin(njets);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
                                               frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
                                               frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
                                               frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)});
-          fake_0jet->Fill(t1_decayMode, vis_mass, weight * fakeweight);
+          convertDataToFake(fake_0jet, name, t1_decayMode, vis_mass, weight * fakeweight);
         } else if (cat_boosted) {
-          auto bin_x = data.at(boosted)->GetXaxis()->FindBin(higgs_pT);
-          auto bin_y = data.at(boosted)->GetYaxis()->FindBin(m_sv);
+          auto bin_x = data.at(boosted)->GetXaxis()->FindBin(vis_mass);
+          auto bin_y = data.at(boosted)->GetYaxis()->FindBin(njets);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
                                               frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
                                               frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
                                               frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)});
-          fake_boosted->Fill(higgs_pT, m_sv, weight * fakeweight);
+          convertDataToFake(fake_boosted, name, higgs_pT, m_sv, weight * fakeweight);
         } else if (cat_vbf) {
-          auto bin_x = data.at(vbf)->GetXaxis()->FindBin(mjj);
-          auto bin_y = data.at(vbf)->GetYaxis()->FindBin(m_sv);
+          auto bin_x = data.at(vbf)->GetXaxis()->FindBin(vis_mass);
+          auto bin_y = data.at(vbf)->GetYaxis()->FindBin(njets);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
                                               frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
                                               frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
                                               frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)});
-          fake_vbf->Fill(mjj, m_sv, weight * fakeweight);
+          convertDataToFake(fake_vbf, name, mjj, m_sv, weight * fakeweight);
         }
       }
     }
@@ -400,7 +418,7 @@ void histHolder::runSystematics(std::vector<std::string> files, std::string dir,
     if (ifile.find("Data") == std::string::npos) {
       continue;
     }
-    
+
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
     auto tree = (TTree *)fin->Get(tree_name.c_str());
     std::string name = ifile.substr(0, ifile.find(".")).c_str();
@@ -442,28 +460,31 @@ void histHolder::runSystematics(std::vector<std::string> files, std::string dir,
       if (is_antiTauIso) {
         for (int i = 0; i < systematics.size(); i++) {
           if (cat_0jet) {
-            auto bin_x = data.at(zeroJet)->GetXaxis()->FindBin(t1_decayMode);
-            auto bin_y = data.at(zeroJet)->GetYaxis()->FindBin(vis_mass);
+            auto bin_x = data.at(zeroJet)->GetXaxis()->FindBin(vis_mass);
+            auto bin_y = data.at(zeroJet)->GetYaxis()->FindBin(njets);
             auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
                                                 frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
                                                 frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
-                                                frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)}, systematics.at(i));
-          FF_systs.at("et_0jet").at(i)->Fill(t1_decayMode, vis_mass, weight * fakeweight);
+                                                frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)},
+                                               systematics.at(i));
+            FF_systs.at("et_0jet").at(i)->Fill(t1_decayMode, vis_mass, weight * fakeweight);
           } else if (cat_boosted) {
-            auto bin_x = data.at(boosted)->GetXaxis()->FindBin(higgs_pT);
-            auto bin_y = data.at(boosted)->GetYaxis()->FindBin(m_sv);
+            auto bin_x = data.at(boosted)->GetXaxis()->FindBin(vis_mass);
+            auto bin_y = data.at(boosted)->GetYaxis()->FindBin(njets);
             auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
                                                 frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
                                                 frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
-                                                frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)}, systematics.at(i));
+                                                frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)},
+                                               systematics.at(i));
             FF_systs.at("et_boosted").at(i)->Fill(higgs_pT, m_sv, weight * fakeweight);
           } else if (cat_vbf) {
-            auto bin_x = data.at(vbf)->GetXaxis()->FindBin(mjj);
-            auto bin_y = data.at(vbf)->GetYaxis()->FindBin(m_sv);
+            auto bin_x = data.at(vbf)->GetXaxis()->FindBin(vis_mass);
+            auto bin_y = data.at(vbf)->GetYaxis()->FindBin(njets);
             auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, el_iso,
                                                 frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
                                                 frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
-                                                frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)}, systematics.at(i));
+                                                frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)},
+                                               systematics.at(i));
             FF_systs.at("et_vbf").at(i)->Fill(mjj, m_sv, weight * fakeweight);
           }
         }
@@ -492,7 +513,7 @@ void histHolder::writeHistos() {
   }
   fake_0jet->Write();
 
-  for (auto& hist : FF_systs.at("et_0jet")) {
+  for (auto &hist : FF_systs.at("et_0jet")) {
     for (auto i = 0; i < hist->GetNbinsX(); i++) {
       for (auto j = 0; j < hist->GetNbinsY(); j++) {
         if (hist->GetBinContent(i, j) < 0) {
@@ -515,7 +536,7 @@ void histHolder::writeHistos() {
   }
   fake_boosted->Write();
 
-  for (auto& hist : FF_systs.at("et_boosted")) {
+  for (auto &hist : FF_systs.at("et_boosted")) {
     for (auto i = 0; i < hist->GetNbinsX(); i++) {
       for (auto j = 0; j < hist->GetNbinsY(); j++) {
         if (hist->GetBinContent(i, j) < 0) {
@@ -538,7 +559,7 @@ void histHolder::writeHistos() {
   }
   fake_vbf->Write();
 
-  for (auto& hist : FF_systs.at("et_vbf")) {
+  for (auto &hist : FF_systs.at("et_vbf")) {
     for (auto i = 0; i < hist->GetNbinsX(); i++) {
       for (auto j = 0; j < hist->GetNbinsY(); j++) {
         if (hist->GetBinContent(i, j) < 0) {
