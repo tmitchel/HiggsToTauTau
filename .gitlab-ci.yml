@@ -1,2 +1,7 @@
 job1:
-  script: echo "hi"
+  tags:
+    # Make you job be executed in a shared runner that has CVMFS mounted
+    - cvmfs
+  script: 
+  - set +e && source /cvmfs/cms.cern.ch/cmsset_default.csh; set -e
+  - echo "hi"
