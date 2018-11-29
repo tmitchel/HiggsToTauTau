@@ -2,7 +2,8 @@ job1:
   tags:
     # Make you job be executed in a shared runner that has CVMFS mounted
     - cvmfs
-  script: 
+  before_script: 
   - set +e && source /cvmfs/cms.cern.ch/cmsset_default.sh; set -e
+  - export SCRAM_ARCH=slc6_amd64_gcc630
   - scramv1 project CMSSW CMSSW_9_4_0
   - echo "hi"
