@@ -42,7 +42,12 @@ if options.isData:
 else:
     fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile]
 
-systs = [
+systs_2016 = [
+    'dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down', 'jetToTauFake_Up', 'jetToTauFake_Down', 'ttbarShape_Up', 'ttbarShape_Down',
+    'allDM_Up', 'allDM_Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down', 'JESUp', 'JESDown'
+]
+
+systs_2017 = [
     '', 'JetEta0to3Down', 'JetEta0to3Up', 'JetEta0to5Down', 'JetEta0to5Up', 'JetEta3to5Down', 
     'JetEta3to5Up', 'JetRelativeSampleDown', 'JetRelativeSampleUp', 'JetRelativeBalDown', 'JetRelativeBalUp',
     'UESDown', 'UESUp'
