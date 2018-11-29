@@ -39,16 +39,17 @@ private:
   Float_t bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1;
   Float_t bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2;
   Float_t topQuarkPt1, topQuarkPt2;
-  Int_t nbtag, njetspt20, njets;
+  Int_t Nbtag, nbtag, njetspt20, njets;
   std::vector<jet> plain_jets, btag_jets;
 
 public:
   jet_factory (TTree*, std::string);
   virtual ~jet_factory () {};
   void run_factory();
+  void promoteDemote(TH2F*, TH2F*, TH2F*, int);
 
   // getters
-  Int_t getNbtag()                { return nbtag;      };
+  Int_t getNbtag()                { return Nbtag;      };
   Int_t getNjets()                { return njets;      };
   Int_t getNjetPt20()             { return njetspt20;  };
   Float_t getDijetMass()          { return mjj;        };
@@ -92,6 +93,8 @@ jet_factory::jet_factory(TTree* input, std::string syst) {
   input -> SetBranchAddress ( "topQuarkPt1", &topQuarkPt1);
   input -> SetBranchAddress ( "topQuarkPt2", &topQuarkPt2);
 
+  Nbtag = nbtag;
+
 }
 
 // initialize member data and set TLorentzVector
@@ -115,6 +118,10 @@ void jet_factory::run_factory() {
   if (bpt_2 > 0) {
     btag_jets.push_back(b2);
   }
+}
+
+void jet_factory::promoteDemote(TH2F *h_btag_eff_b, TH2F *h_btag_eff_c, TH2F *h_btag_eff_oth, int syst=0) {
+  Nbtag = PromoteDemote(h_btag_eff_b, h_btag_eff_c, h_btag_eff_oth, &(this->btag_jets.at(0)), this->nbtag, syst);
 }
 
 

@@ -311,27 +311,23 @@ int main(int argc, char* argv[]) {
       double zpt_sf(1.);
       if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
         evtwt *= htt_sf->function("zptmass_weight_nom")->getVal();
-      } 
-
-      // top-pT Reweighting (only for some systematic)
-      if (name == "TTT" || name == "TT" || name == "TTJ") {
-       float pt_top1 = std::min(float(400.), jets.getTopPt1());
-       float pt_top2 = std::min(float(400.), jets.getTopPt2());
-       evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
       }
 
-      //// b-tagging SF (only used in scaling W, I believe)
-      //auto bjets = jets.getBtagJets();
-      //for (auto& jet : bjets) {
-      //  auto ptbin( jet.getPt() ), etabin( jet.getEta() );
-      //  if (jet.getFlavor() == 5) {
-      //    evtwt *= btag_eff_b->GetBinContent(ptbin, etabin);
-      //  } else if (jet.getFlavor() == 4) {
-      //    evtwt *= btag_eff_c->GetBinContent(ptbin, etabin);
-      //  } else {
-      //    evtwt *= btag_eff_oth->GetBinContent(ptbin, etabin);
-      //  }
-      //}
+      // top-pT Reweighting
+      if (name == "TTT" || name == "TT" || name == "TTJ") {
+        float pt_top1 = std::min(float(400.), jets.getTopPt1());
+        float pt_top2 = std::min(float(400.), jets.getTopPt2());
+        if (syst == "ttbarShape_Up") {
+          evtwt *= (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1); // 2*√[e^(..)*e^(..)] - 1
+        } else if (syst == "ttbarShape_Up") {
+          // no weight for shift down
+        } else {
+          evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)); // √[e^(..)*e^(..)]
+        }
+      }
+
+      // use promote-demote method to correct nbtag with no systematics
+      jets.promoteDemote(btag_eff_oth, btag_eff_oth, btag_eff_oth);
 
     } else if (!isData && isEmbed) {
 

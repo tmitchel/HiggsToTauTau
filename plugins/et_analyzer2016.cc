@@ -302,11 +302,8 @@ int main(int argc, char* argv[]) {
        }
       }
 
-      //// b-tagging SF (only used in scaling W, I believe)
-      //int nbtagged = std::min(2, jets.getNbtag());
-      //auto bjets = jets.getBtagJets();
-      //float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
-      //if (nbtagged>2) weight_btag=0;
+      // b-tagging SF (only used in scaling W, I believe)
+      float weight_btag( bTagEventWeight(&jets) );
 
       // NNLOPS ggH reweighting
       if (sample.find("ggHtoTauTau125") != std::string::npos) {
@@ -382,8 +379,8 @@ int main(int argc, char* argv[]) {
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
-    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && (jets.getDijetMass() < 300 || Higgs.Pt() < 50)));
-    bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() > 50);
+    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300));
+    bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
     // now do mt selection

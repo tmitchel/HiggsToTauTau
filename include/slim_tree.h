@@ -152,6 +152,7 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
 void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, TLorentzVector higgs, Float_t Mt) {
     // create things needed for later
     auto jets(fjets->getJets());
+    auto btags(fjets->getBtagJets());
 
     // start filling branches
     evtwt = weight;
@@ -215,6 +216,17 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
             dEtajj = fabs(jets.at(0).getEta() - jets.at(1).getEta());
             dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi());
         }
+    }
+
+    if (nbjets > 0) {
+      b1_pt = btags.at(0).getPt();
+      b1_eta = btags.at(0).getEta();
+      b1_phi = btags.at(0).getPhi();
+      if (nbjets > 1) {
+        j2_pt = btags.at(1).getPt();
+        j2_eta = btags.at(1).getEta();
+        j2_phi = btags.at(1).getPhi();
+      }
     }
 
     // reset the categories

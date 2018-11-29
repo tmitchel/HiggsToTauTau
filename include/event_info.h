@@ -6,7 +6,7 @@
 /////////////////////////////////////////
 class event_info {
 private:
-  Float_t genpX, genpY, genM, genpT, numGenJets, genweight, amcatNLO_weight, genDR; // gen
+  Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR; // gen
   Float_t npv, npu, rho;        // event
   Float_t matchEle25, filterEle25, passEle25;                   // 2016 etau trigger
   Float_t matchEle27, filterEle27, passEle27;                   // 2017 single el 27 trigger
@@ -75,7 +75,6 @@ public:
   Float_t getGenPt()        { return genpT;           };
   Float_t getNumGenJets()   { return numGenJets;      };
   Float_t getGenWeight()    { return genweight;       };
-  Float_t getNLOWeight()    { return amcatNLO_weight; };
   Float_t getTauGenDR()     { return genDR;           };
 
   // SVFit Info
@@ -146,7 +145,6 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   input -> SetBranchAddress( "ME_bkg1"         , &ME_bkg1         );
   input -> SetBranchAddress( "ME_bkg2"         , &ME_bkg2         );
   input -> SetBranchAddress( "ME_bkg"          , &ME_bkg          );
-  input -> SetBranchAddress( "amcatNLO_weight" , &amcatNLO_weight );
   input -> SetBranchAddress("Flag_BadChargedCandidateFilter"         , &Flag_BadChargedCandidateFilter         );
   input -> SetBranchAddress("Flag_BadPFMuonFilter"                   , &Flag_BadPFMuonFilter                   );
   input -> SetBranchAddress("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter);
