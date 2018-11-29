@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
   // construct factories
   event_info       event(ntuple, syst, "mt");
   muon_factory     muons(ntuple);
-  tau_factory      taus(ntuple);
+  tau_factory      taus(ntuple, 2016);
   jet_factory      jets(ntuple, syst);
   met_factory      met(ntuple, syst);
 

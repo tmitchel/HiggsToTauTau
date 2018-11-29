@@ -152,7 +152,7 @@ int main(int argc, char* argv[]) {
   // construct factories
   event_info       event(ntuple, syst, "et");
   electron_factory electrons(ntuple);
-  tau_factory      taus(ntuple);
+  tau_factory      taus(ntuple, 2016);
   jet_factory      jets(ntuple, syst);
   met_factory      met(ntuple, syst);
 
@@ -211,11 +211,6 @@ int main(int argc, char* argv[]) {
     //          VLoose Isolation, against leptons           //
     //   - Event: dR(tau,el) > 0.5                          //
     //////////////////////////////////////////////////////////
-
-    // remove 2-prong taus
-    if (!tau.getDecayModeFinding() || tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
-      continue;
-    }
 
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
@@ -383,7 +378,7 @@ int main(int argc, char* argv[]) {
     bool signalRegion   = (tau.getTightIsoMVA()  && electron.getIso() < 0.10);
     bool looseIsoRegion = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
     bool antiIsoRegion  = (tau.getTightIsoMVA()  && electron.getIso() > 0.10 && electron.getIso() < 0.30);
-    bool antiTauIsoRegion = (tau.getVLooseIsoMVA() > 0 && tau.getTightIsoMVA() == 0 && electron.getIso() < 0.10);
+    bool antiTauIsoRegion = (tau.getTightIsoMVA() == 0 && electron.getIso() < 0.10);
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
