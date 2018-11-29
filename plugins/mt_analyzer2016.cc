@@ -319,9 +319,9 @@ int main(int argc, char* argv[]) {
         }
       }
 
-      // b-tagging SF (only used in scaling W, I believe)
-      float weight_btag(bTagEventWeight(&jets));
-
+      // b-tagging SF - no systematic and want 0 jets
+      float weight_btag(jets.bTagEventWeight());
+      
       // jet to tau fake rate
       if (tau.getGenMatch() == 6 && name == "TTJ" or name == "ZJ" or name == "W") {
         auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
