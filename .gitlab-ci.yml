@@ -2,7 +2,6 @@ job1:
   tags:
     # Make you job be executed in a shared runner that has CVMFS mounted
     - cvmfs
-    - 
   before_script: 
   - cd ..
   - tar czf repo.tar.gz ltau_analyzers
