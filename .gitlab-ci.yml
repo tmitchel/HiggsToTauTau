@@ -8,6 +8,7 @@ job1:
   - scramv1 project CMSSW CMSSW_9_4_0
   - cd CMSSW_9_4_0/src
   - eval `scramv1 runtime -sh`
+  - cd ../..
   script:
   - echo "start"
   - echo `ls`
