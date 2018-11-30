@@ -10,14 +10,14 @@ job1:
   - scramv1 project CMSSW CMSSW_9_4_0
   - cd CMSSW_9_4_0/src
   - eval `scramv1 runtime -sh`
-  - git clone -b tauTriggers2017_reMiniaod_test git@github.com:truggles/TauTriggerSFs2017.git TauTriggerSFs2017
+  - git clone -b tauTriggers2017_reMiniaod_test https://github.com/truggles/TauTriggerSFs2017.git TauTriggerSFs2017
   - tar xzf repo.tar.gz
   - git clone https://github.com/CMS-HTT/Jet2TauFakes.git HTTutilities/Jet2TauFakes
   - cd HTTutilities/Jet2TauFakes
   - git checkout v0.2.2
   - scram b
   - mkdir data
-  - git clone -b 2017 ssh://git@gitlab.cern.ch:7999/cms-htt/Jet2TauFakesFiles.git data
+  - git clone -b 2017 https://gitlab.cern.ch/cms-htt/Jet2TauFakesFiles.git data
 
   # - cd ../..
   script:
