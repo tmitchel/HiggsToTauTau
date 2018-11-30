@@ -26,7 +26,6 @@
 #include "jet_factory.h"
 #include "met_factory.h"
 #include "SF_factory.h"
-#include "btagSF.h"
 #include "LumiReweightingStandAlone.h"
 #include "CLParser.h"
 #include "EmbedWeight.h"

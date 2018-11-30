@@ -22,7 +22,6 @@
 #include "LumiReweightingStandAlone.h"
 #include "SF_factory.h"
 #include "ZmmSF.h"
-#include "btagSF.h"
 #include "muon_factory.h"
 #include "event_info.h"
 #include "jet_factory.h"
@@ -321,7 +320,7 @@ int main(int argc, char* argv[]) {
 
       // b-tagging SF - no systematic and want 0 jets
       float weight_btag(jets.bTagEventWeight());
-      
+
       // jet to tau fake rate
       if (tau.getGenMatch() == 6 && name == "TTJ" or name == "ZJ" or name == "W") {
         auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
