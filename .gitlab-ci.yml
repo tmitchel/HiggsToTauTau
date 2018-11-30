@@ -12,7 +12,10 @@ job1:
   - mv ../../repo.tar.gz .
   - tar xzf repo.tar.gz
   - eval `scramv1 runtime -sh`
+  - mkdir TauTriggerSFs2017
+  - cd TauTriggerSFs2017
   - git clone -b tauTriggers2017_reMiniaod_test https://github.com/truggles/TauTriggerSFs2017.git TauTriggerSFs2017
+  - cd ..
   - git clone https://github.com/CMS-HTT/Jet2TauFakes.git HTTutilities/Jet2TauFakes
   - cd HTTutilities/Jet2TauFakes
   - git checkout v0.2.2
