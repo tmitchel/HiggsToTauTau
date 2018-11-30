@@ -20,9 +20,7 @@ job1:
   - ssh-keyscan gitlab.cern.ch >> ~/.ssh/known_hosts
   - git config --global user.email "tyler106@ksu.edu"
   - git config --global user.name "tmitchel"
-
   - chmod 644 ~/.ssh/known_hosts
-
   - git clone -b tauTriggers2017_reMiniaod_test https://github.com/truggles/TauTriggerSFs2017.git TauTriggerSFs2017
   - git clone https://github.com/CMS-HTT/Jet2TauFakes.git HTTutilities/Jet2TauFakes
   - cd HTTutilities/Jet2TauFakes
