@@ -15,7 +15,7 @@ job1:
   - eval $(ssh-agent -s)
   # - echo $SSH_PRIVATE_KEY_TYLER
   # - ssh-add -K <(echo "$SSH_PRIVATE_KEY_TYLER")
-  - echo `echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d '\r'`
+  - echo `echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d '\r' | ssh-add > /dev/null`
   # - echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d '\r' | ssh-add - > /dev/null
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
