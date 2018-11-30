@@ -16,8 +16,9 @@ job1:
   - git clone https://github.com/CMS-HTT/Jet2TauFakes.git HTTutilities/Jet2TauFakes
   - cd HTTutilities/Jet2TauFakes
   - git checkout v0.2.2
+  - cd ../..
   - scram b
-  - echo `ls`
+  - cd ltau_analyzers
   script:
   - echo "start"
   - echo `ls`
