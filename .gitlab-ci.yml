@@ -9,9 +9,10 @@ job1:
   - export SCRAM_ARCH=slc6_amd64_gcc630
   - scramv1 project CMSSW CMSSW_9_4_0
   - cd CMSSW_9_4_0/src
+  - mv ../../repo.tar.gz .
+  - tar xzf repo.tar.gz
   - eval `scramv1 runtime -sh`
   - git clone -b tauTriggers2017_reMiniaod_test https://github.com/truggles/TauTriggerSFs2017.git TauTriggerSFs2017
-  - tar xzf repo.tar.gz
   - git clone https://github.com/CMS-HTT/Jet2TauFakes.git HTTutilities/Jet2TauFakes
   - cd HTTutilities/Jet2TauFakes
   - git checkout v0.2.2
