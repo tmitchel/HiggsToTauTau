@@ -1,8 +1,10 @@
+// Copyright 2018 Tyler Mitchell
+
 // system includes
 #include <dirent.h>
+#include <sys/types.h>
 #include <map>
 #include <string>
-#include <sys/types.h>
 #include <iostream>
 
 // ROOT includes
@@ -13,7 +15,7 @@
 // user includes
 #include "CLParser.h"
 
-//FF
+// FF
 #include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
 #include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
 #include "HTTutilities/Jet2TauFakes/interface/WrapperTFormula.h"
@@ -24,12 +26,12 @@
 enum categories {zeroJet, boosted, vbf};
 
 // read all *.root files in the given directory and put them in the provided vector
-void read_directory(const std::string &name, std::vector<std::string> &v) {
+void read_directory(const std::string &name, std::vector<std::string>* v) {
   DIR *dirp = opendir(name.c_str());
   struct dirent *dp;
   while ((dp = readdir(dirp)) != 0) {
     if (static_cast<std::string>(dp->d_name).find("root") != std::string::npos) {
-      v.push_back(dp->d_name);
+      v->push_back(dp->d_name);
     }
   }
   closedir(dirp);
@@ -37,9 +39,9 @@ void read_directory(const std::string &name, std::vector<std::string> &v) {
 
 // class to hold the histograms until I'm ready to write them
 class histHolder {
-public:
+ public:
   histHolder(std::string, std::string);
-  ~histHolder() { delete ff_weight; };
+  ~histHolder() { delete ff_weight; }
   void writeHistos();
   void initVectors(std::string);
   void initSystematics(std::string);
@@ -90,12 +92,12 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  // initialize histogram holder 
+  // initialize histogram holder
   auto hists = new histHolder(channel_prefix, year);
 
   // read all files from input directory
   std::vector<std::string> files;
-  read_directory(dir, files);
+  read_directory(dir, &files);
 
   hists->histoLoop(files, dir, tree_name);
   hists->getJetFakes(files, dir, tree_name);
@@ -108,43 +110,43 @@ int main(int argc, char *argv[]) {
 }
 
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
-// and the map from categories to vectors of TH2F*'s. Each TH2F* in the vector corresponds to 
+// and the map from categories to vectors of TH2F*'s. Each TH2F* in the vector corresponds to
 // one file that is being put into that categories directory in the output tempalte
 histHolder::histHolder(std::string channel_prefix, std::string year) :
   hists {
     {(channel_prefix+"_0jet").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_vbf").c_str(), std::vector<TH2F *>()},
-  }, 
+  },
   FF_systs {
     {(channel_prefix+"_0jet").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_vbf").c_str(), std::vector<TH2F *>()},
-  }, 
+  },
   fout( new TFile(("Output/templates/template_"+channel_prefix+year+"_finalFFv2.root").c_str(), "recreate") ),
-  mvis_bins( {0,50,80,100,110,120,130,150,170,200,250,1000} ),
-  njets_bins( {-0.5,0.5,1.5,15} ),
+  mvis_bins({0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000}),
+  njets_bins({-0.5, 0.5, 1.5, 15}),
   // x-axis
   bins_l2 {0, 1, 10, 11},
   bins_hpt {0, 100, 150, 200, 250, 300, 5000},
   bins_mjj {300, 700, 1100, 1500, 10000},
-  //bins_mjj {0., 0.1, 0.5, 0.9, 1.},
+  // bins_mjj {0., 0.1, 0.5, 0.9, 1.},
 
   // y-axis
   bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
   bins_msv1 {0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300},
   bins_msv2 {0, 95, 115, 135, 155, 400},
-  channel_prefix( channel_prefix ),
+  channel_prefix(channel_prefix),
   systematics {
-    "ff_qcd_syst_up"            ,"ff_qcd_syst_down"           ,"ff_qcd_dm0_njet0_stat_up"   ,
-    "ff_qcd_dm0_njet0_stat_down","ff_qcd_dm0_njet1_stat_up"   ,"ff_qcd_dm0_njet1_stat_down" ,
-    "ff_qcd_dm1_njet0_stat_up"  ,"ff_qcd_dm1_njet0_stat_down" ,"ff_qcd_dm1_njet1_stat_up"   ,
-    "ff_qcd_dm1_njet1_stat_down","ff_w_syst_up"               ,"ff_w_syst_down"             ,"ff_w_dm0_njet0_stat_up",
-    "ff_w_dm0_njet0_stat_down"  ,"ff_w_dm0_njet1_stat_up"     ,"ff_w_dm0_njet1_stat_down"   ,
-    "ff_w_dm1_njet0_stat_up"    ,"ff_w_dm1_njet0_stat_down"   ,"ff_w_dm1_njet1_stat_up"     ,
-    "ff_w_dm1_njet1_stat_down"  ,"ff_tt_syst_up"              ,"ff_tt_syst_down"            ,"ff_tt_dm0_njet0_stat_up",
-    "ff_tt_dm0_njet0_stat_down" ,"ff_tt_dm0_njet1_stat_up"    ,"ff_tt_dm0_njet1_stat_down"  ,
-    "ff_tt_dm1_njet0_stat_up"   ,"ff_tt_dm1_njet0_stat_down"  ,"ff_tt_dm1_njet1_stat_up"    , "ff_tt_dm1_njet1_stat_down"
+    "ff_qcd_syst_up"            , "ff_qcd_syst_down"           , "ff_qcd_dm0_njet0_stat_up"   ,
+    "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up"   , "ff_qcd_dm0_njet1_stat_down" ,
+    "ff_qcd_dm1_njet0_stat_up"  , "ff_qcd_dm1_njet0_stat_down" , "ff_qcd_dm1_njet1_stat_up"   ,
+    "ff_qcd_dm1_njet1_stat_down", "ff_w_syst_up"               , "ff_w_syst_down"             , "ff_w_dm0_njet0_stat_up",
+    "ff_w_dm0_njet0_stat_down"  , "ff_w_dm0_njet1_stat_up"     , "ff_w_dm0_njet1_stat_down"   ,
+    "ff_w_dm1_njet0_stat_up"    , "ff_w_dm1_njet0_stat_down"   , "ff_w_dm1_njet1_stat_up"     ,
+    "ff_w_dm1_njet1_stat_down"  , "ff_tt_syst_up"              , "ff_tt_syst_down"            , "ff_tt_dm0_njet0_stat_up",
+    "ff_tt_dm0_njet0_stat_down" , "ff_tt_dm0_njet1_stat_up"    , "ff_tt_dm0_njet1_stat_down"  ,
+    "ff_tt_dm1_njet0_stat_up"   , "ff_tt_dm1_njet0_stat_down"  , "ff_tt_dm1_njet1_stat_up"    ,  "ff_tt_dm1_njet1_stat_down"
   }
 {
   for (auto it = hists.begin(); it != hists.end(); it++) {
@@ -186,12 +188,12 @@ histHolder::histHolder(std::string channel_prefix, std::string year) :
   TFile *ff_file;
   if (year == "2017") {
     ff_file = new TFile(("${CMSSW_BASE}/src/SMHTT_Analyzers/data/testFF2017/SM2017/tight/vloose/"+channel_prefix+"/fakeFactors.root").c_str(), "READ");
-  } else if (year == "2016"){
+  } else if (year == "2016") {
     ff_file = new TFile("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/et/fakeFactors_20180831_tight.root", "READ");
   } else {
     std::cerr << "Bad year" << std::endl;
   }
-  ff_weight = (FakeFactor *)ff_file->Get("ff_comb");
+  ff_weight = reinterpret_cast<FakeFactor *>(ff_file->Get("ff_comb"));
   ff_file->Close();
 }
 
@@ -251,10 +253,9 @@ void histHolder::convertDataToFake(TH2F *hist, std::string name, double var1, do
 }
 
 void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std::string tree_name) {
-
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
-    auto tree = (TTree *)fin->Get(tree_name.c_str());
+    auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
     std::string name = ifile.substr(0, ifile.find(".")).c_str();
 
     initVectors(name);
@@ -270,7 +271,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mjj", &mjj);
-    //tree->SetBranchAddress("NN_disc", &NN_disc);
+    // tree->SetBranchAddress("NN_disc", &NN_disc);
     tree->SetBranchAddress("m_sv", &m_sv);
     tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("is_signal", &is_signal);
@@ -300,7 +301,6 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
           hists.at(channel_prefix + "_vbf").back()->Fill(mjj, m_sv, weight);
         }
       } else if (is_antiTauIso) {
-
         if (!(name == "W" || name == "ZJ" || name == "VVJ" ||
               name == "TTJ" ||
               name == "ZTT" || name == "TTT" || name == "VVT" ||
@@ -320,7 +320,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
   }
 
   for (int i = 0; i < data.size(); i++) {
-    frac_qcd.at(i) = (TH2F*)data.at(i)->Clone();
+    frac_qcd.at(i) = reinterpret_cast<TH2F *>(data.at(i)->Clone());
     frac_qcd.at(i)->Add(frac_w.at(i), -1);
     frac_qcd.at(i)->Add(frac_tt.at(i), -1);
     frac_qcd.at(i)->Add(frac_real.at(i), -1);
@@ -338,10 +338,9 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 }
 
 void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, std::string tree_name) {
-
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
-    auto tree = (TTree *)fin->Get(tree_name.c_str());
+    auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
     std::string name = ifile.substr(0, ifile.find(".")).c_str();
 
     if (name != "Data") {
@@ -357,7 +356,7 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
       iso = "el_iso";
     } else if (tree_name.find("mutau_tree") != std::string::npos) {
       iso = "mu_iso";
-    } 
+    }
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("t1_pt", &t1_pt);
@@ -366,11 +365,9 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mt", &mt);
     tree->SetBranchAddress(iso.c_str(), &lep_iso);
-
     tree->SetBranchAddress("higgs_pT", &higgs_pT);
     tree->SetBranchAddress("mjj", &mjj);
     tree->SetBranchAddress("m_sv", &m_sv);
-
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
     tree->SetBranchAddress("cat_boosted", &cat_boosted);
@@ -418,16 +415,14 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
 }
 
 void histHolder::runSystematics(std::vector<std::string> files, std::string dir, std::string tree_name) {
-
   for (auto ifile : files) {
-
     // only need to look at data
     if (ifile.find("Data") == std::string::npos) {
       continue;
     }
 
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
-    auto tree = (TTree *)fin->Get(tree_name.c_str());
+    auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
     std::string name = ifile.substr(0, ifile.find(".")).c_str();
 
     initSystematics(name);
@@ -442,7 +437,7 @@ void histHolder::runSystematics(std::vector<std::string> files, std::string dir,
       iso = "el_iso";
     } else if (tree_name.find("mutau_tree") != std::string::npos) {
       iso = "mu_iso";
-    } 
+    }
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("t1_pt", &t1_pt);
@@ -451,11 +446,9 @@ void histHolder::runSystematics(std::vector<std::string> files, std::string dir,
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mt", &mt);
     tree->SetBranchAddress(iso.c_str(), &lep_iso);
-
     tree->SetBranchAddress("higgs_pT", &higgs_pT);
     tree->SetBranchAddress("mjj", &mjj);
     tree->SetBranchAddress("m_sv", &m_sv);
-
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
     tree->SetBranchAddress("cat_boosted", &cat_boosted);

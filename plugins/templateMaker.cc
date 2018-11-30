@@ -1,8 +1,10 @@
+// Copyright 2018 Tyler Mitchell
+
 // system includes
 #include <dirent.h>
+#include <sys/types.h>
 #include <map>
 #include <string>
-#include <sys/types.h>
 #include <iostream>
 
 // ROOT includes
@@ -15,13 +17,13 @@
 
 // class to hold the histograms until I'm ready to write them
 class histHolder {
-public:
+ public:
   histHolder(std::vector<int>, std::string, std::string);
   void writeHistos();
   void initVectors(std::string);
 
-  TH1F *qcd_0jet_OS, *qcd_boosted_OS, *qcd_vbf_OS, *qcd_inclusive_OS, 
-       *qcd_0jet_SS, *qcd_boosted_SS, *qcd_vbf_SS, *qcd_inclusive_SS, 
+  TH1F *qcd_0jet_OS, *qcd_boosted_OS, *qcd_vbf_OS, *qcd_inclusive_OS,
+       *qcd_0jet_SS, *qcd_boosted_SS, *qcd_vbf_SS, *qcd_inclusive_SS,
        *qcd_0jet   , *qcd_boosted   , *qcd_vbf   , *qcd_inclusive;
   TFile *fout;
   std::vector<int> bins;
@@ -29,8 +31,19 @@ public:
   std::map<std::string, std::vector<TH1F *>> hists;
 };
 
-void read_directory(const std::string &name, std::vector<std::string> &v);
-void fillQCD(TH1F*, std::string, double, double);
+// read all *.root files in the given directory and put them in the provided vector
+void read_directory(const std::string &name, std::vector<std::string> *v) {
+  DIR *dirp = opendir(name.c_str());
+  struct dirent *dp;
+  while ((dp = readdir(dirp)) != 0) {
+    if (static_cast<std::string>(dp->d_name).find("root") != std::string::npos) {
+      v->push_back(dp->d_name);
+    }
+  }
+  closedir(dirp);
+}
+
+void fillQCD(TH1F *, std::string, double, double);
 
 int main(int argc, char *argv[]) {
   // get CLI arguments
@@ -68,7 +81,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  // initialize histogram holder 
+  // initialize histogram holder
   auto hists = new histHolder(bins, var_name, channel_prefix);
 
   // read all files from input directory
@@ -77,7 +90,7 @@ int main(int argc, char *argv[]) {
 
   for (auto ifile : files) {
     auto fin = new TFile((dir+"/"+ifile).c_str(), "read");
-    auto tree = (TTree*)fin->Get(tree_name.c_str());
+    auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
     std::string name = ifile.substr(0, ifile.find(".")).c_str();
 
     hists->initVectors(name);
@@ -101,7 +114,6 @@ int main(int argc, char *argv[]) {
 
     tree->SetBranchAddress("metphi", &metphi);
     tree->SetBranchAddress("el_phi", &el_phi);
-
     tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("is_signal", &is_signal);
@@ -119,8 +131,8 @@ int main(int argc, char *argv[]) {
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
 
-      //var = fabs(el_phi - metphi);
-     
+      // var = fabs(el_phi - metphi);
+
       if (OS) {
         // output histograms for the template
         if (is_signal > 0) {
@@ -170,32 +182,19 @@ int main(int argc, char *argv[]) {
   hists->writeHistos();
 }
 
-// read all *.root files in the given directory and put them in the provided vector
-void read_directory(const std::string &name, std::vector<std::string> &v) {
-  DIR *dirp = opendir(name.c_str());
-  struct dirent *dp;
-  while ((dp = readdir(dirp)) != 0) {
-    if (static_cast<std::string>(dp->d_name).find("root") != std::string::npos) {
-      v.push_back(dp->d_name);
-    }
-  }
-  closedir(dirp);
-}
-
-// Fill histogram with positive weight for Data and negative weight for BKG. Equivalent to 
+// Fill histogram with positive weight for Data and negative weight for BKG. Equivalent to
 // doing data-bkg
 void fillQCD(TH1F* hist, std::string name, double var, double weight) {
   if (name.find("Data") != std::string::npos) {
     hist->Fill(var, weight);
-  } else if (name == "ZL" || name == "ZJ" || name == "TTT"  || 
-             name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "embed") 
-  {
+  } else if (name == "ZL" || name == "ZJ" || name == "TTT"  ||
+             name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "embed")  {
     hist->Fill(var, -1*weight);
   }
 }
 
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
-// and the map from categories to vectors of TH1F*'s. Each TH1F* in the vector corresponds to 
+// and the map from categories to vectors of TH1F*'s. Each TH1F* in the vector corresponds to \
 // one file that is being put into that categories directory in the output tempalte
 histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string channel_prefix) :
   hists {
@@ -203,11 +202,10 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
     {(channel_prefix+"_0jet").c_str(), std::vector<TH1F *>()},
     {(channel_prefix+"_boosted").c_str(), std::vector<TH1F *>()},
     {(channel_prefix+"_vbf").c_str(), std::vector<TH1F *>()},
-  }, 
+  },
   fout( new TFile(("Output/templates/template_"+channel_prefix+"_"+var_name+".root").c_str(), "recreate") ),
-  bins( Bins ), 
-  channel_prefix( channel_prefix )
-{
+  bins(Bins),
+  channel_prefix(channel_prefix) {
   for (auto it = hists.begin(); it != hists.end(); it++) {
     fout->cd();
     fout->mkdir((it->first).c_str());
@@ -244,8 +242,8 @@ void histHolder::writeHistos() {
     for (auto hist : cat.second) {
       hist->Write();
       // std::string name = hist->GetName();
-      // if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT"  || 
-      //     name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "ZTT") 
+      // if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT"  ||
+      //     name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "ZTT")
       // {
       //   allBkg->Add(hist);
       // }

@@ -1,3 +1,5 @@
+// Copyright 2018 Tyler Mitchell
+
 // system includes
 #include <iostream>
 #include <cmath>
@@ -17,31 +19,30 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "ZmmSF.h"
-#include "swiss_army_class.h"
-#include "event_info.h"
-#include "tau_factory.h"
-#include "electron_factory.h"
-#include "muon_factory.h"
-#include "jet_factory.h"
-#include "met_factory.h"
-#include "SF_factory.h"
-#include "btagSF.h"
-#include "LumiReweightingStandAlone.h"
-#include "CLParser.h"
-#include "EmbedWeight.h"
-#include "slim_tree.h"
+#include "../include/ZmmSF.h"
+#include "../include/swiss_army_class.h"
+#include "../include/event_info.h"
+#include "../include/tau_factory.h"
+#include "../include/electron_factory.h"
+#include "../include/muon_factory.h"
+#include "../include/jet_factory.h"
+#include "../include/met_factory.h"
+#include "../include/SF_factory.h"
+#include "../include/btagSF.h"
+#include "../include/LumiReweightingStandAlone.h"
+#include "../include/CLParser.h"
+#include "../include/EmbedWeight.h"
+#include "../include/slim_tree.h"
 
-typedef std::vector<double> NumV;
+    typedef std::vector<double> NumV;
 
 int main(int argc, char* argv[]) {
-
   ////////////////////////////////////////////////
   // Initial setup:                             //
   // Get file names, normalization, paths, etc. //
   ////////////////////////////////////////////////
 
-  CLParser parser(argc, argv); 
+  CLParser parser(argc, argv);
   std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
@@ -66,10 +67,10 @@ int main(int argc, char* argv[]) {
   std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
-  auto ntuple = (TTree*)fin->Get("etau_tree");
+  auto ntuple = reinterpret_cast<TTree *>(fin->Get("etau_tree"));
 
   // get number of generated events
-  auto counts = (TH1D*)fin->Get("nevents");
+  auto counts = reinterpret_cast<TH1D *> f(in->Get("nevents"));
   auto gen_number = counts->GetBinContent(2);
 
   // create output file
@@ -109,7 +110,7 @@ int main(int argc, char* argv[]) {
       norm = 1 / .99;
     }
   } else {
-    norm = helper->getLuminosity() * helper->getCrossSection(sample) / gen_number;
+    norm = helper->getLuminosity2016() * helper->getCrossSection(sample) / gen_number;
   }
 
   ///////////////////////////////////////////////
@@ -121,8 +122,8 @@ int main(int argc, char* argv[]) {
   // L1, L1Zg - something like a2, not sure
   // int - interference term (f05)
   std::string weightNameComponents[7] = {"a1", "a3", "a3int",
-					 "a2", "a2int",
-					 "L1", "L1int"};
+           "a2", "a2int",
+           "L1", "L1int"};
   //"L1Zg", "L1Zgint"}; <- for 2017, there will be two additional samples (L1Zg and L1Zgint)
 
   std::string weightsNames[7];
@@ -151,14 +152,14 @@ int main(int argc, char* argv[]) {
     for(unsigned int ifile = 0; ifile != numWeightFiles; ++ifile) {
       // is it interference sample? if yes, skip the weightsNames that do not have int in them
       if ( sample.find("int") != std::string::npos && 
-	   weightsNames[ifile].find("int") == std::string::npos ) continue;
+     weightsNames[ifile].find("int") == std::string::npos ) continue;
       // if it is not an interference sample, skip weightsNames that have int in them
       if ( sample.find("int") == std::string::npos && 
-	   weightsNames[ifile].find("int") != std::string::npos ) continue;
+     weightsNames[ifile].find("int") != std::string::npos ) continue;
       
       if (sample.find(weightsNames[ifile]) != std::string::npos ) {
-	fileName = "data/AC_weights/" + weightsNames[ifile] + ".root";
-	break;
+  fileName = "data/AC_weights/" + weightsNames[ifile] + ".root";
+  break;
       }
     } 
   }
@@ -186,24 +187,24 @@ int main(int argc, char* argv[]) {
       weightTree->GetEntry(i);
       std::vector<double> w;
       if ( isVBFAC ) {
-	w.push_back(wt_a1);
-	w.push_back(wt_a2);
-	w.push_back(wt_a3);
-	w.push_back(wt_L1);
-	w.push_back(wt_L1Zg);
-	w.push_back(wt_a2int);
-	w.push_back(wt_a3int);
-	w.push_back(wt_L1int);
-	w.push_back(wt_L1Zgint);
+  w.push_back(wt_a1);
+  w.push_back(wt_a2);
+  w.push_back(wt_a3);
+  w.push_back(wt_L1);
+  w.push_back(wt_L1Zg);
+  w.push_back(wt_a2int);
+  w.push_back(wt_a3int);
+  w.push_back(wt_L1int);
+  w.push_back(wt_L1Zgint);
       } else 
-	for (auto j = 0; j != 9; ++j) w.push_back(0);
+  for (auto j = 0; j != 9; ++j) w.push_back(0);
       
       if ( isggHAC ) {
-	w.push_back(wt_a1);
-	w.push_back(wt_a3);
-	w.push_back(wt_a3int);
+  w.push_back(wt_a1);
+  w.push_back(wt_a3);
+  w.push_back(wt_a3int);
       } else 
-	for (auto j = 0; j != 3; ++j) w.push_back(0);
+  for (auto j = 0; j != 3; ++j) w.push_back(0);
       
       if ( isWHAC ) {
         w.push_back(wt_a1);
@@ -247,16 +248,16 @@ int main(int argc, char* argv[]) {
 
   // Z-pT reweighting
   TFile *zpt_file = new TFile("data/zpt_weights_2016_BtoH.root");
-  auto zpt_hist = (TH2F*)zpt_file->Get("zptmass_histo");
+  auto zpt_hist = reinterpret_cast<TH2F *>(zpt_file->Get("zptmass_histo"));
 
   //H->tau tau scale factors
   TFile htt_sf_file("data/htt_scalefactors_v16_3.root");
-  RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
+  RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
   htt_sf_file.Close();
 
   // embedded sample weights
   TFile embed_file("data/htt_scalefactors_v16_9_embedded.root", "READ");
-  RooWorkspace *wEmbed = (RooWorkspace *)embed_file.Get("w");
+  RooWorkspace *wEmbed = reinterpret_cast<RooWorkspace *>(embed_file.Get("w"));
   embed_file.Close();
 
   // trigger and ID scale factors
@@ -266,10 +267,10 @@ int main(int argc, char* argv[]) {
   auto myScaleFactor_idAnti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_antiisolated_Iso0p1to0p3_eff.root");
 
   TFile * f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
-  TGraph * g_NNLOPS_0jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_0jet");
-  TGraph * g_NNLOPS_1jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_1jet");
-  TGraph * g_NNLOPS_2jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_2jet");
-  TGraph * g_NNLOPS_3jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_3jet");
+  TGraph * g_NNLOPS_0jet = reinterpret_cast<TGraph*>(f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_0jet"));
+  TGraph * g_NNLOPS_1jet = reinterpret_cast<TGraph*>(f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_1jet"));
+  TGraph * g_NNLOPS_2jet = reinterpret_cast<TGraph*>(f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_2jet"));
+  TGraph * g_NNLOPS_3jet = reinterpret_cast<TGraph*>(f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_3jet"));
 
   //////////////////////////////////////
   // Final setup:                     //
@@ -415,14 +416,14 @@ int main(int argc, char* argv[]) {
 
       auto tempweight = evtwt;
 
-      // // anti-lepton discriminator SFs
-      if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3){//Yiwen
+      // anti-lepton discriminator SFs
+      if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3){  // Yiwen
          if (fabs(tau.getEta())<1.460) evtwt *= 1.402;
          else if (fabs(tau.getEta())>1.558) evtwt *= 1.900;
          if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
          else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
        }
-        else if (tau.getGenMatch() == 2 or tau.getGenMatch() == 4){
+        else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4){
             if (fabs(tau.getEta())<0.4) evtwt *= 1.012;
             else if (fabs(tau.getEta())<0.8) evtwt *= 1.007;
             else if (fabs(tau.getEta())<1.2) evtwt *= 0.870;
@@ -435,7 +436,7 @@ int main(int argc, char* argv[]) {
 
       // Z-pT and Zmm Reweighting
       double zpt_sf(1.), zmm_sf(1.);
-      if (name=="EWKZLL" || name=="EWKZNuNu" || name=="ZTT" || name=="ZLL" || name=="ZL" || name=="ZJ") {
+      if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
         zpt_sf = zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()),zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
         zmm_sf = GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
       } 
@@ -450,26 +451,23 @@ int main(int argc, char* argv[]) {
 
       // top-pT Reweighting (only for some systematic)
       if (name == "TTT" || name == "TT" || name == "TTJ") {
-        float pt_top1 = std::min(float(400.), jets.getTopPt1());
-        float pt_top2 = std::min(float(400.), jets.getTopPt2());
+        float pt_top1 = std::min(static_cast<float>(400.), jets.getTopPt1());
+        float pt_top2 = std::min(static_cast<float>(400.), jets.getTopPt2());
         evtwt *= sqrt(exp(0.0615-0.0005*pt_top1)*exp(0.0615-0.0005*pt_top2));
       }
 
-      // b-tagging SF (only used in scaling W, I believe)
-      int nbtagged = std::min(2, jets.getNbtag());
-      auto bjets = jets.getBtagJets();
-      float weight_btag( bTagEventWeight(nbtagged, bjets.at(0).getPt(), bjets.at(0).getFlavor(), bjets.at(1).getPt(), bjets.at(1).getFlavor() ,1,0,0) );
-      if (nbtagged>2) weight_btag=0;
+      // b-tagging SF - no systematic and want 0 jets
+      float weight_btag(jets.bTagEventWeight());
 
       // NNLOPS ggH reweighting
       if (sample.find("ggHtoTauTau125") != std::string::npos) {
-        if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(min(event.getHiggsPtRivet(), float(125.0)));
-        if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(min(event.getHiggsPtRivet(), float(625.0)));
-        if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), float(800.0)));
-        if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), float(925.0)));
+        if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
+        if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
+        if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
+        if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
       }
 
-      //NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
+      // NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
     } else if (!isData && isEmbed) {
       double Stitching_Weight(1.);
       // get the stitching weight
@@ -491,7 +489,7 @@ int main(int argc, char* argv[]) {
 
       // get correction factor
       std::vector<double> corrFactor = EmdWeight_Electron(wEmbed, electron.getPt(), electron.getEta(), electron.getIso());
-      double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]); // id SF, iso SF, trg eff. SF
+      double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]);  // id SF, iso SF, trg eff. SF
 
       // data to mc trigger ratio
       double trg_ratio(m_sel_trg_ratio(wEmbed, electron.getPt(), electron.getEta(), tau.getPt(), tau.getEta()));
@@ -595,10 +593,10 @@ int main(int argc, char* argv[]) {
       currentEventID = currentEventID*1000000 + event.getEvt();
       std::map<Long64_t, std::vector<double> >::const_iterator it = acWeights.find(currentEventID);
       if ( it == acWeights.end() ) {
-	std::cout << "Crap, cannot find " << currentEventID << " in the map" << std::endl;
-	for (auto i = 0; i != 30; ++i) weights.push_back(0);	
+  std::cout << "Crap, cannot find " << currentEventID << " in the map" << std::endl;
+  for (auto i = 0; i != 30; ++i) weights.push_back(0);	
       } else 
-	weights = it->second;
+  weights = it->second;
     } else {
       for (auto i = 0; i != 30; ++i) weights.push_back(0);
     }

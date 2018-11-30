@@ -1,9 +1,11 @@
+// Copyright 2018 Tyler Mitchell
+
 // system includes
 #include <dirent.h>
+#include <sys/types.h>
 #include <iostream>
 #include <map>
 #include <string>
-#include <sys/types.h>
 
 // ROOT includes
 #include "TFile.h"
@@ -15,8 +17,8 @@
 
 // class to hold the histograms until I'm ready to write them
 class histHolder {
-public:
-  histHolder(std::string);
+ public:
+  explicit histHolder(std::string);
   ~histHolder();
   void writeHistos();
   void initVectors(std::string);
@@ -33,12 +35,12 @@ public:
 };
 
 // read all *.root files in the given directory and put them in the provided vector
-void read_directory(const std::string &name, std::vector<std::string> &v) {
+void read_directory(const std::string &name, std::vector<std::string>* v) {
   DIR *dirp = opendir(name.c_str());
   struct dirent *dp;
   while ((dp = readdir(dirp)) != 0) {
     if (static_cast<std::string>(dp->d_name).find("root") != std::string::npos) {
-      v.push_back(dp->d_name);
+      v->push_back(dp->d_name);
     }
   }
   closedir(dirp);
@@ -47,7 +49,6 @@ void read_directory(const std::string &name, std::vector<std::string> &v) {
 void fillQCD(TH2F *, std::string, double, double, double);
 
 int main(int argc, char *argv[]) {
-
   // get CLI arguments
   CLParser *parser = new CLParser(argc, argv);
   std::string dir = parser->Option("-d");
@@ -80,11 +81,11 @@ int main(int argc, char *argv[]) {
 
   // read all files from input directory
   std::vector<std::string> files;
-  read_directory(dir, files);
+  read_directory(dir, &files);
 
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
-    auto tree = (TTree *)fin->Get(tree_name.c_str());
+    auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
     std::string name = ifile.substr(0, ifile.find(".")).c_str();
 
     hists->initVectors(name);
@@ -98,9 +99,9 @@ int main(int argc, char *argv[]) {
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mjj", &mjj);
     tree->SetBranchAddress("m_sv", &m_sv);
-    tree->SetBranchAddress("ME_sm_VBF", &ME_sm_VBF), 
-    tree->SetBranchAddress("ME_bkg", &ME_bkg), 
-    tree->SetBranchAddress("NN_disc", &NN_disc), 
+    tree->SetBranchAddress("ME_sm_VBF", &ME_sm_VBF);
+    tree->SetBranchAddress("ME_bkg", &ME_bkg);
+    tree->SetBranchAddress("NN_disc", &NN_disc);
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("is_signal", &is_signal);
     tree->SetBranchAddress("is_looseIso", &is_looseIso);
@@ -168,8 +169,7 @@ void fillQCD(TH2F *hist, std::string name, double var1, double var2, double weig
   if (name.find("Data") != std::string::npos) {
     hist->Fill(var1, var2, weight);
   } else if (name == "embed" || name == "ZL" || name == "ZJ" || name == "TTT"  ||
-             name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "ZTT") 
-  {
+             name == "TTJ"   || name == "W"  || name == "VV" || name == "EWKZ" || name == "ZTT") {
     hist->Fill(var1, var2, -1 * weight);
   }
 }
@@ -177,19 +177,19 @@ void fillQCD(TH2F *hist, std::string name, double var1, double var2, double weig
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
 // and the map from categories to vectors of TH1F*'s. Each TH1F* in the vector corresponds to
 // one file that is being put into that categories directory in the output tempalte
-histHolder::histHolder(std::string channel) : 
+histHolder::histHolder(std::string channel) :
     hists{
         {(channel+"_0jet").c_str(), std::vector<TH2F *>()},
         {(channel+"_boosted").c_str(), std::vector<TH2F *>()},
         {(channel+"_vbf").c_str(), std::vector<TH2F *>()},
     },
-    channel_prefix ( channel ),
+    channel_prefix(channel),
   fout( new TFile(("Output/templates/template_"+channel_prefix+"_finalOSSS.root").c_str(), "recreate") ),
     // x-axis
     bins_l2 {0, 1, 10, 11},
     bins_hpt {0, 100, 150, 200, 250, 300, 5000},
     bins_mjj {300, 700, 1100, 1500, 10000},
-    //bins_mjj {0., 0.1, 0.5, 0.9, 1.},
+    // bins_mjj {0., 0.1, 0.5, 0.9, 1.},
 
     // y-axis
     bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
@@ -223,9 +223,9 @@ void histHolder::initVectors(std::string name) {
         }
         if (key.first == channel_prefix+"_0jet") {
             hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] ));
-        } else if (key.first == channel_prefix+"_boosted") {                                                                          
+        } else if (key.first == channel_prefix+"_boosted") {
             hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
-        } else if (key.first == channel_prefix+"_vbf") {                                                                              
+        } else if (key.first == channel_prefix+"_vbf") {
             hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
         }
     }
