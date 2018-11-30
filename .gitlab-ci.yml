@@ -46,5 +46,5 @@ job1:
 run_cpplint:
     type: test
     script:
-        - cpplint --linelength=1000 --exclude=./plugins/et_analyzer2016_AC.cc --exclude=./plugins/mt_templateMaker.cc ./plugins/*
+        - cpplint --linelength=1000 --exclude=./plugins/et_analyzer2016_AC.cc --exclude=./plugins/mt_templateMaker.cc --exclude=./plugins/tt_analyzer.cc ./plugins/*
   

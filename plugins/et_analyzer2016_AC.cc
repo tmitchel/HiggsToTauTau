@@ -1,3 +1,5 @@
+// Copyright 2018 Tyler Mitchell
+
 // system includes
 #include <iostream>
 #include <cmath>
@@ -32,7 +34,7 @@
 #include "../include/EmbedWeight.h"
 #include "../include/slim_tree.h"
 
-typedef std::vector<double> NumV;
+    typedef std::vector<double> NumV;
 
 int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////
