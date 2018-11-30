@@ -1,3 +1,5 @@
+image: gitlab-registry.cern.ch/computersecurity/security-services-code-checking:latest
+
 job1:
   tags:
     # Make you job be executed in a shared runner that has CVMFS mounted
