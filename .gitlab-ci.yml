@@ -9,3 +9,4 @@ job1:
   script:
   - echo "start"
   - echo `ls`
+  - ./build plugins/et_analyzer2017.cc test
