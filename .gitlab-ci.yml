@@ -1,5 +1,14 @@
 image: gitlab-registry.cern.ch/computersecurity/security-services-code-checking:latest
 
+#
+# Job: run CppLint
+#
+run_cpplint:
+    type: test
+    script:
+        - cpplint ./plugins/*
+
+
 job1:
   tags:
     # Make you job be executed in a shared runner that has CVMFS mounted
