@@ -17,7 +17,7 @@ job1:
   - cd HTTutilities/Jet2TauFakes
   - git checkout v0.2.2
   - scram b
-  - cd ltau_analyzers
+  - echo `ls`
   script:
   - echo "start"
   - echo `ls`
