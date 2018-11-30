@@ -17,30 +17,28 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "CLParser.h"
-#include "EmbedWeight.h"
-#include "LumiReweightingStandAlone.h"
-#include "SF_factory.h"
-#include "ZmmSF.h"
-#include "muon_factory.h"
-#include "event_info.h"
-#include "jet_factory.h"
-#include "met_factory.h"
-#include "muon_factory.h"
-#include "slim_tree.h"
-#include "swiss_army_class.h"
-#include "tau_factory.h"
+#include "../include/CLParser.h"
+#include "../include/EmbedWeight.h"
+#include "../include/LumiReweightingStandAlone.h"
+#include "../include/SF_factory.h"
+#include "../include/ZmmSF.h"
+#include "../include/muon_factory.h"
+#include "../include/event_info.h"
+#include "../include/jet_factory.h"
+#include "../include/met_factory.h"
+#include "../include/slim_tree.h"
+#include "../include/swiss_army_class.h"
+#include "../include/tau_factory.h"
 
 typedef std::vector<double> NumV;
 
 int main(int argc, char* argv[]) {
-
   ////////////////////////////////////////////////
   // Initial setup:                             //
   // Get file names, normalization, paths, etc. //
   ////////////////////////////////////////////////
 
-  CLParser parser(argc, argv); 
+  CLParser parser(argc, argv);
   std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
@@ -58,10 +56,10 @@ int main(int argc, char* argv[]) {
   std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
-  auto ntuple = (TTree*)fin->Get("mutau_tree");
+  auto ntuple = reinterpret_cast<TTree*>(fin->Get("mutau_tree"));
 
   // get number of generated events
-  auto counts = (TH1D*)fin->Get("nevents");
+  auto counts = reinterpret_cast<TH1D*>(fin->Get("nevents"));
   auto gen_number = counts->GetBinContent(2);
 
   // create output file
@@ -110,16 +108,16 @@ int main(int argc, char* argv[]) {
 
   // Z-pT reweighting
   TFile *zpt_file = new TFile("data/zpt_weights_2016_BtoH.root");
-  auto zpt_hist = (TH2F *)zpt_file->Get("zptmass_histo");
+  auto zpt_hist = reinterpret_cast<TH2F *>(zpt_file->Get("zptmass_histo"));
 
   //H->tau tau scale factors
   TFile htt_sf_file("data/htt_scalefactors_sm_moriond_v1.root");
-  RooWorkspace *htt_sf = (RooWorkspace *)htt_sf_file.Get("w");
+  RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
   htt_sf_file.Close();
 
   // embedded sample weights
   TFile embed_file("data/htt_scalefactors_v16_9_embedded.root", "READ");
-  RooWorkspace *wEmbed = (RooWorkspace *)embed_file.Get("w");
+  RooWorkspace *wEmbed = reinterpret_cast<RooWorkspace *>(embed_file.Get("w"));
   embed_file.Close();
 
   // trigger and ID scale factors
@@ -235,7 +233,6 @@ int main(int argc, char* argv[]) {
 
     // apply all scale factors/corrections/etc.
     if (!isData && !isEmbed) {
-
       // Trigger SF
       if (muon.getPt() < 23) {
         htt_sf->var("t_pt")->setVal(tau.getPt());
@@ -262,7 +259,7 @@ int main(int argc, char* argv[]) {
       }
 
       // // anti-lepton discriminator SFs
-      if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3) { //Yiwen
+      if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {  // Yiwen
         if (fabs(tau.getEta()) < 1.460)
           evtwt *= 1.402;
         else if (fabs(tau.getEta()) > 1.558)
@@ -271,7 +268,7 @@ int main(int argc, char* argv[]) {
           evtwt *= 0.98;
         else if (sample == "ZL" && tau.getL2DecayMode() == 1)
           evtwt *= 1.20;
-      } else if (tau.getGenMatch() == 2 or tau.getGenMatch() == 4) {
+      } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
         if (fabs(tau.getEta()) < 0.4)
           evtwt *= 1.012;
         else if (fabs(tau.getEta()) < 0.8)
@@ -307,14 +304,14 @@ int main(int argc, char* argv[]) {
 
       // top-pT Reweighting
       if (name == "TTT" || name == "TT" || name == "TTJ") {
-        float pt_top1 = std::min(float(400.), jets.getTopPt1());
-        float pt_top2 = std::min(float(400.), jets.getTopPt2());
+        float pt_top1 = std::min(static_cast<float>(400.), jets.getTopPt1());
+        float pt_top2 = std::min(static_cast<float>(400.), jets.getTopPt2());
         if (syst == "ttbarShape_Up") {
-          evtwt *= (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1); // 2*√[e^(..)*e^(..)] - 1
+          evtwt *= (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1);  // 2*√[e^(..)*e^(..)] - 1
         } else if (syst == "ttbarShape_Up") {
           // no weight for shift down
         } else {
-          evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)); // √[e^(..)*e^(..)]
+          evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2));  // √[e^(..)*e^(..)]
         }
       }
 
@@ -322,7 +319,7 @@ int main(int argc, char* argv[]) {
       float weight_btag(jets.bTagEventWeight());
 
       // jet to tau fake rate
-      if (tau.getGenMatch() == 6 && name == "TTJ" or name == "ZJ" or name == "W") {
+      if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W") {
         auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
         if (syst == "jetToTauFake_Up") {
           evtwt *= (1 - (0.2 * temp_tau_pt / 100));
@@ -435,7 +432,7 @@ int main(int argc, char* argv[]) {
 
     // fill the tree
     st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, mt, evtwt);
-  } // close event loop
+  }  // close event loop
 
   fin->Close();
   fout->cd();

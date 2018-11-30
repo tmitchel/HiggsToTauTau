@@ -17,19 +17,19 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "CLParser.h"
-#include "EmbedWeight.h"
-#include "LumiReweightingStandAlone.h"
-#include "SF_factory.h"
-#include "ZmmSF.h"
-#include "muon_factory.h"
-#include "event_info.h"
-#include "jet_factory.h"
-#include "met_factory.h"
-#include "muon_factory.h"
-#include "slim_tree.h"
-#include "swiss_army_class.h"
-#include "tau_factory.h"
+#include "../include/CLParser.h"
+#include "../include/EmbedWeight.h"
+#include "../include/LumiReweightingStandAlone.h"
+#include "../include/SF_factory.h"
+#include "../include/ZmmSF.h"
+#include "../include/muon_factory.h"
+#include "../include/event_info.h"
+#include "../include/jet_factory.h"
+#include "../include/met_factory.h"
+#include "../include/muon_factory.h"
+#include "../include/slim_tree.h"
+#include "../include/swiss_army_class.h"
+#include "../include/tau_factory.h"
 #include "TauTriggerSFs2017/TauTriggerSFs2017/interface/TauTriggerSFs2017.h" 
 
 typedef std::vector<double> NumV;
@@ -59,10 +59,10 @@ int main(int argc, char* argv[]) {
   std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
-  auto ntuple = (TTree*)fin->Get("mutau_tree");
+  auto ntuple = reinterpret_cast<TTree *>(fin->Get("mutau_tree"));
 
   // get number of generated events
-  auto counts = (TH1D*)fin->Get("nevents");
+  auto counts = reinterpret_cast<TH1D *>(fin->Get("nevents"));
   auto gen_number = counts->GetBinContent(2);
 
   // create output file
@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
   // read inputs for lumi reweighting
   if (!isData && !isEmbed) {
 
-    TNamed* dbsName = (TNamed*)fin->Get("MiniAOD_name");
+    TNamed* dbsName = reinterpret_cast<TNamed*>(fin->Get("MiniAOD_name"));
     std::string datasetName = dbsName->GetTitle();
     if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
       fin->Close();
@@ -124,18 +124,18 @@ int main(int argc, char* argv[]) {
 
   //H->tau tau scale factors
   TFile htt_sf_file("data/htt_scalefactors_2017_v2.root");
-  RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
+  RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
   htt_sf_file.Close();
 
   // embedded sample weights
   TFile embed_file("data/htt_scalefactors_v17_5.root", "READ");
-  RooWorkspace *wEmbed = (RooWorkspace *)embed_file.Get("w");
+  RooWorkspace *wEmbed = reinterpret_cast<RooWorkspace *>(embed_file.Get("w"));
   embed_file.Close();
 
   TFile bTag_eff_file("data/tagging_efficiencies_march2018_btageff-all_samp-inc-DeepCSV_medium.root", "READ");
-  TH2F* btag_eff_b = (TH2F*)bTag_eff_file.Get("btag_eff_b")->Clone();
-  TH2F* btag_eff_c = (TH2F*)bTag_eff_file.Get("btag_eff_c")->Clone();
-  TH2F* btag_eff_oth = (TH2F*)bTag_eff_file.Get("btag_eff_oth")->Clone();
+  TH2F *btag_eff_b = reinterpret_cast<TH2F *>(bTag_eff_file.Get("btag_eff_b")->Clone());
+  TH2F *btag_eff_c = reinterpret_cast<TH2F *>(bTag_eff_file.Get("btag_eff_c")->Clone());
+  TH2F *btag_eff_oth = reinterpret_cast<TH2F *>(bTag_eff_file.Get("btag_eff_oth")->Clone());
 
   TauTriggerSFs2017* eh = new TauTriggerSFs2017("data/tauTriggerEfficiencies2017_New.root", "data/tauTriggerEfficiencies2017.root", "tight", "MVA");
 
@@ -254,13 +254,13 @@ int main(int argc, char* argv[]) {
       }
 
       // // anti-lepton discriminator SFs
-      if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3) { //Yiwen
+      if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3) {  // Yiwen
         if (fabs(tau.getEta()) < 1.460)
           evtwt *= 1.80;
         else if (fabs(tau.getEta()) > 1.558)
           evtwt *= 1.53;
-        //if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
-        //else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
+        // if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
+        // else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
       } else if (tau.getGenMatch() == 2 or tau.getGenMatch() == 4) {
         if (fabs(tau.getEta()) < 0.4)
           evtwt *= 1.06;
@@ -283,8 +283,8 @@ int main(int argc, char* argv[]) {
       // give inputs to workspace
       htt_sf->var("m_pt")->setVal(muon.getPt());
       htt_sf->var("m_eta")->setVal(muon.getEta());
-      htt_sf->var("z_gen_mass")->setVal(event.getGenM()); // TODO: check if these are the right variables
-      htt_sf->var("z_gen_pt")->setVal(event.getGenPt());  // TODO: check if these are the right variables
+      htt_sf->var("z_gen_mass")->setVal(event.getGenM());  // TODO(tmitchel): check if these are the right variables.
+      htt_sf->var("z_gen_pt")->setVal(event.getGenPt());   // TODO(tmitchel): check if these are the right variables.
 
       // muon ID SF
       evtwt *= htt_sf->function("m_id_kit_ratio")->getVal();
@@ -314,14 +314,14 @@ int main(int argc, char* argv[]) {
 
       // top-pT Reweighting
       if (name == "TTT" || name == "TT" || name == "TTJ") {
-        float pt_top1 = std::min(float(400.), jets.getTopPt1());
-        float pt_top2 = std::min(float(400.), jets.getTopPt2());
+        float pt_top1 = std::min(static_cast<float>(400.), jets.getTopPt1());
+        float pt_top2 = std::min(static_cast<float>(400.), jets.getTopPt2());
         if (syst == "ttbarShape_Up") {
-          evtwt *= (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1); // 2*√[e^(..)*e^(..)] - 1
+          evtwt *= (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1);  // 2*√[e^(..)*e^(..)] - 1
         } else if (syst == "ttbarShape_Up") {
           // no weight for shift down
         } else {
-          evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)); // √[e^(..)*e^(..)]
+          evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2));  // √[e^(..)*e^(..)]
         }
       }
 
@@ -345,13 +345,13 @@ int main(int argc, char* argv[]) {
       // muon iso SF
       evtwt *= wEmbed->function("m_iso_binned_embed_kit_ratio")->getVal();
 
-      // unfolding dimuon selection TODO: store gen info in skimmer
+      // unfolding dimuon selection TODO(tmitchel): store gen info in skimmer.
       
 
       // apply trigger SF's
       auto single_eff = wEmbed->function("m_trg24_27_embed_kit_ratio")->getVal();
-      auto mu_cross_eff(1.);  // TODO: currently being measured
-      auto tau_cross_eff(1.); // TODO: currently being measured
+      auto mu_cross_eff(1.);   // TODO(tmitchel): currently being measured.
+      auto tau_cross_eff(1.);  // TODO(tmitchel): currently being measured.
 
       evtwt *= (single_eff * fireSingle + mu_cross_eff * tau_cross_eff * fireCross);
       
@@ -428,7 +428,7 @@ int main(int argc, char* argv[]) {
 
     // fill the tree
     st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, mt, evtwt);
-  } // close event loop
+  }  // close event loop
 
   fin->Close();
   fout->cd();
