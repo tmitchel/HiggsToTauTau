@@ -29,5 +29,5 @@ fi
 
 
 # this is the important part for compiling
-g++ -O3 $1 `root-config --cflags --glibs` ${CMSSW_BASE}/lib/slc6_amd64_gcc630/libTauTriggerSFs2017TauTriggerSFs2017.so $doFF -lRooFit -lRooFitCore -I ${CMSSW_BASE}/src -I ${CMSSW_BASE}/src/SMHTT_Analyzers/include -I include -o $2
+g++ -O3 $1 `root-config --cflags --glibs` ${CMSSW_BASE}/lib/slc6_amd64_gcc630/libTauTriggerSFs2017TauTriggerSFs2017.so $doFF -lRooFit -lRooFitCore -I ${CMSSW_BASE}/src -I ${CMSSW_BASE}/src/SMHTT_Analyzers/include -I ${CMSSW_BASE}/src/SMHTT_Analyzers -o $2
 cp $2 $HOME/bin
