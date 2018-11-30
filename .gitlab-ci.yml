@@ -46,5 +46,5 @@ job1:
 run_cpplint:
     type: test
     script:
-        - cpplint ./plugins/*
+        - cpplint linelength=1000 ./plugins/*
   
