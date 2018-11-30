@@ -14,7 +14,7 @@ job1:
   - eval `scramv1 runtime -sh`
   - eval $(ssh-agent -s)
   # - echo $SSH_PRIVATE_KEY_TYLER
-  - echo $SSH_PRIVATE_KEY_TYLER | tr -d '\r' | ssh-add - > /dev/null
+  - echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d '\r' | ssh-add - > /dev/null
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
   - ssh-keyscan gitlab.cern.ch >> ~/.ssh/known_hosts
