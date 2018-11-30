@@ -292,8 +292,8 @@ int main(int argc, char* argv[]) {
       // give inputs to workspace
       htt_sf->var("e_pt")->setVal(electron.getPt());
       htt_sf->var("e_eta")->setVal(electron.getEta());
-      htt_sf->var("z_gen_mass")->setVal(event.getGenM()); // TODO: check if these are the right variables
-      htt_sf->var("z_gen_pt")->setVal(event.getGenPt());  // TODO: check if these are the right variables
+      htt_sf->var("z_gen_mass")->setVal(event.getGenM());  // TODO(tmitchel): check if these are the right variables.
+      htt_sf->var("z_gen_pt")->setVal(event.getGenPt());   // TODO(tmitchel): check if these are the right variables.
 
       // electron ID SF
       evtwt *= htt_sf->function("e_id90_kit_ratio")->getVal();
@@ -341,7 +341,6 @@ int main(int argc, char* argv[]) {
       jets.promoteDemote(btag_eff_oth, btag_eff_oth, btag_eff_oth);
 
     } else if (!isData && isEmbed) {
-
       // tau ID eff SF
       if (tau.getGenMatch() == 5) {
         evtwt *= 0.97;
@@ -357,17 +356,17 @@ int main(int argc, char* argv[]) {
       // electron iso SF
       evtwt *= wEmbed->function("e_iso_binned_embed_kit_ratio")->getVal();
 
-      // unfolding dimuon selection TODO: store gen info in skimmer
-      
+      // unfolding dimuon selection TODO(tmitchel): store gen info in skimmer
+
 
       // apply trigger SF's
       auto single_eff = wEmbed->function("e_trg27_trg32_trg35_embed_kit_ratio")->getVal();
-      auto el_cross_eff(1.);  // TODO: currently being measured
-      auto tau_cross_eff(1.); // TODO: currently being measured
+      auto el_cross_eff(1.);   // TODO(tmitchel): currently being measured.
+      auto tau_cross_eff(1.);  // TODO(tmitchel): currently being measured.
 
-      //evtwt *= (single_eff * fireSingle + el_cross_eff * tau_cross_eff * fireCross);
+      // evtwt *= (single_eff * fireSingle + el_cross_eff * tau_cross_eff * fireCross);
       evtwt *= fireSingle * single_eff;
-      
+
       auto genweight(event.getGenWeight());
       if (genweight > 1 || genweight < 0) {
           genweight = 0;
@@ -441,7 +440,7 @@ int main(int argc, char* argv[]) {
 
     // fill the tree
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
-  } // close event loop
+  }  // close event loop
 
   fin->Close();
   fout->cd();
