@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
-  
+
   std::string systname = "";
   if (!syst.empty()) {
     systname = "_" + syst;
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
   TFile *zpt_file = new TFile("data/zpt_weights_2016_BtoH.root");
   auto zpt_hist = reinterpret_cast<TH2F *>(zpt_file->Get("zptmass_histo"));
 
-  //H->tau tau scale factors
+  // H->tau tau scale factors
   TFile htt_sf_file("data/htt_scalefactors_sm_moriond_v1.root");
   RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
   htt_sf_file.Close();
@@ -196,7 +196,7 @@ int main(int argc, char* argv[]) {
     auto muon = muons.run_factory();
     auto tau = taus.run_factory();
     jets.run_factory();
-    
+
     // remove 2-prong taus
     if (!tau.getDecayModeFinding() || tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
       continue;
@@ -331,7 +331,6 @@ int main(int argc, char* argv[]) {
       }
 
     } else if (!isData && isEmbed) {
-
       float Stitching_Weight = 1.0;
       if (event.getRun() >= 272007 && event.getRun() < 275657) {
         Stitching_Weight = (1.0 / 0.899 * 1.02);
@@ -351,7 +350,7 @@ int main(int argc, char* argv[]) {
 
       // get correction factor
       std::vector<double> corrFactor = EmdWeight_Muon(wEmbed, muon.getPt(), muon.getEta(), muon.getIso());
-      double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]); // id SF, iso SF, trg eff. SF
+      double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]);  // id SF, iso SF, trg eff. SF
 
       // data to mc trigger ratio
       double trg_ratio(m_sel_trg_ratio(wEmbed, muon.getPt(), muon.getEta(), tau.getPt(), tau.getEta()));

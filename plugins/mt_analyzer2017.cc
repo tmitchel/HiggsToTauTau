@@ -28,22 +28,20 @@
 #include "../include/event_info.h"
 #include "../include/jet_factory.h"
 #include "../include/met_factory.h"
-#include "../include/muon_factory.h"
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
-#include "TauTriggerSFs2017/TauTriggerSFs2017/interface/TauTriggerSFs2017.h" 
+#include "TauTriggerSFs2017/TauTriggerSFs2017/interface/TauTriggerSFs2017.h"
 
 typedef std::vector<double> NumV;
 
 int main(int argc, char* argv[]) {
-
   ////////////////////////////////////////////////
   // Initial setup:                             //
   // Get file names, normalization, paths, etc. //
   ////////////////////////////////////////////////
 
-  CLParser parser(argc, argv); 
+  CLParser parser(argc, argv);
   std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
@@ -51,7 +49,7 @@ int main(int argc, char* argv[]) {
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
-  
+
   std::string systname = "";
   if (!syst.empty()) {
     systname = "_" + syst;
@@ -111,7 +109,6 @@ int main(int argc, char* argv[]) {
   reweight::LumiReWeighting* lumi_weights;
   // read inputs for lumi reweighting
   if (!isData && !isEmbed) {
-
     TNamed* dbsName = reinterpret_cast<TNamed*>(fin->Get("MiniAOD_name"));
     std::string datasetName = dbsName->GetTitle();
     if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
@@ -124,7 +121,7 @@ int main(int argc, char* argv[]) {
     std::cout << datasetName << std::endl;
   }
 
-  //H->tau tau scale factors
+  // H->tau tau scale factors
   TFile htt_sf_file("data/htt_scalefactors_2017_v2.root");
   RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
   htt_sf_file.Close();
@@ -204,14 +201,14 @@ int main(int argc, char* argv[]) {
     auto muon = muons.run_factory();
     auto tau = taus.run_factory();
     jets.run_factory();
-    
+
     // remove 2-prong taus
     if (!tau.getDecayModeFinding() || tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
       continue;
     }
 
     bool fireSingle(false), fireCross(false);
-    
+
     // apply correct lepton pT thresholds
     if (muon.getPt() > 28 && event.getPassMu27()) {
       fireSingle = true;
@@ -249,21 +246,20 @@ int main(int argc, char* argv[]) {
 
     // apply all scale factors/corrections/etc.
     if (!isData && !isEmbed) {
-
       // tau ID efficiency SF
       if (tau.getGenMatch() == 5) {
         evtwt *= 0.89;
       }
 
       // // anti-lepton discriminator SFs
-      if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3) {  // Yiwen
+      if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {  // Yiwen
         if (fabs(tau.getEta()) < 1.460)
           evtwt *= 1.80;
         else if (fabs(tau.getEta()) > 1.558)
           evtwt *= 1.53;
         // if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
         // else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
-      } else if (tau.getGenMatch() == 2 or tau.getGenMatch() == 4) {
+      } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
         if (fabs(tau.getEta()) < 0.4)
           evtwt *= 1.06;
         else if (fabs(tau.getEta()) < 0.8)
@@ -331,7 +327,6 @@ int main(int argc, char* argv[]) {
       jets.promoteDemote(btag_eff_oth, btag_eff_oth, btag_eff_oth);
 
     } else if (!isData && isEmbed) {
-
       // tau ID eff SF
       if (tau.getGenMatch() == 5) {
         evtwt *= 0.97;
@@ -348,7 +343,7 @@ int main(int argc, char* argv[]) {
       evtwt *= wEmbed->function("m_iso_binned_embed_kit_ratio")->getVal();
 
       // unfolding dimuon selection TODO(tmitchel): store gen info in skimmer.
-      
+
 
       // apply trigger SF's
       auto single_eff = wEmbed->function("m_trg24_27_embed_kit_ratio")->getVal();
@@ -356,7 +351,7 @@ int main(int argc, char* argv[]) {
       auto tau_cross_eff(1.);  // TODO(tmitchel): currently being measured.
 
       evtwt *= (single_eff * fireSingle + mu_cross_eff * tau_cross_eff * fireCross);
-      
+
       auto genweight(event.getGenWeight());
       if (genweight > 1 || genweight < 0) {
           genweight = 0;
