@@ -17,7 +17,7 @@ job1:
   # - ssh-add -K <(echo "$SSH_PRIVATE_KEY_TYLER")
   # - echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d '\r' | ssh-add > /dev/null
   # - echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d '\r' | ssh-add - > /dev/null
-  - echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d ' ' | base64 --decode > private.ssh_key
+  - echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d ' ' > private.ssh_key
   - chmod 600 private.ssh_key
   - cat private.ssh_key
   - ssh-add private.ssh_key
