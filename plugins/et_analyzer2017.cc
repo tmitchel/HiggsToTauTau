@@ -22,7 +22,6 @@
 #include "LumiReweightingStandAlone.h"
 #include "SF_factory.h"
 #include "ZmmSF.h"
-#include "btagSF.h"
 #include "electron_factory.h"
 #include "event_info.h"
 #include "jet_factory.h"
