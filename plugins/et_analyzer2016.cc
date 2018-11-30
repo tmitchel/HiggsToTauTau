@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
-  
+
   std::string systname = "";
   if (!syst.empty()) {
     systname = "_" + syst;
@@ -251,8 +251,8 @@ int main(int argc, char* argv[]) {
       evtwt *= htt_sf->function("e_trk_ratio")->getVal();
 
       // anti-lepton discriminator SFs
-      if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3){//Yiwen
-        if (fabs(tau.getEta()) < 1.460) { 
+      if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {  // Yiwen
+        if (fabs(tau.getEta()) < 1.460) {
           evtwt *= 1.402;
         } else if (fabs(tau.getEta()) > 1.558) {
           evtwt *= 1.900;
@@ -261,8 +261,8 @@ int main(int argc, char* argv[]) {
           evtwt *= 0.98;
         } else if (sample == "ZL" && tau.getL2DecayMode() == 1) {
           evtwt *= 1.20;
-        } 
-      } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4){
+        }
+      } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
         if (fabs(tau.getEta()) < 0.4) {
           evtwt *= 1.012;
         } else if (fabs(tau.getEta()) < 0.8) {
@@ -277,14 +277,14 @@ int main(int argc, char* argv[]) {
       }
 
       // Z-pT and Zmm Reweighting
-      if (name=="EWKZLL" || name=="EWKZNuNu" || name=="ZTT" || name=="ZLL" || name=="ZL" || name=="ZJ") {
+      if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
         // Z-pT Reweighting
         auto nom_zpt_weight = zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()), zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
         if (syst == "dyShape_Up") {
           nom_zpt_weight = 1.1 * nom_zpt_weight - 0.1;
         } else if (syst == "dyShape_Down") {
           nom_zpt_weight = 0.9 * nom_zpt_weight + 0.1;
-        } 
+        }
         evtwt *= nom_zpt_weight;
 
         // Zmumu SF
@@ -295,35 +295,35 @@ int main(int argc, char* argv[]) {
         } else {
           evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
         }
-      } 
+      }
 
-      // top-pT Reweighting 
+      // top-pT Reweighting
       if (name == "TTT" || name == "TT" || name == "TTJ") {
-       float pt_top1 = std::min(float(400.), jets.getTopPt1());
-       float pt_top2 = std::min(float(400.), jets.getTopPt2());
-       if (syst == "ttbarShape_Up") {
-         evtwt *= (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1); // 2*√[e^(..)*e^(..)] - 1
+        float pt_top1 = std::min(static_cast<float>(400.), jets.getTopPt1());
+        float pt_top2 = std::min(static_cast<float>(400.), jets.getTopPt2());
+        if (syst == "ttbarShape_Up") {
+          evtwt *= (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1);  // 2*√[e^(..)*e^(..)] - 1
        } else if (syst == "ttbarShape_Up") {
          // no weight for shift down
        } else {
-         evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)); // √[e^(..)*e^(..)]
+         evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2));  // √[e^(..)*e^(..)]
        }
       }
 
       // b-tagging SF - no systematic and want 0 jets
-      float weight_btag( jets.bTagEventWeight() );
+      float weight_btag(jets.bTagEventWeight());
 
       // NNLOPS ggH reweighting
       if (sample.find("ggHtoTauTau125") != std::string::npos) {
-        if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(min(event.getHiggsPtRivet(), float(125.0)));
-        if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(min(event.getHiggsPtRivet(), float(625.0)));
-        if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), float(800.0)));
-        if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), float(925.0)));
+        if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
+        if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
+        if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
+        if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
       }
-      //NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
+      // NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
 
       // jet to tau fake rate
-      if (tau.getGenMatch() == 6 && name == "TTJ" or name == "ZJ" or name == "W") {
+      if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W") {
         auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
         if (syst == "jetToTauFake_Up") {
           evtwt *= (1 - (0.2 * temp_tau_pt / 100));
@@ -353,7 +353,7 @@ int main(int argc, char* argv[]) {
 
       // get correction factor
       std::vector<double> corrFactor = EmdWeight_Electron(wEmbed, electron.getPt(), electron.getEta(), electron.getIso());
-      double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]); // id SF, iso SF, trg eff. SF
+      double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]);  // id SF, iso SF, trg eff. SF
 
       // data to mc trigger ratio
       double trg_ratio(m_sel_trg_ratio(wEmbed, electron.getPt(), electron.getEta(), tau.getPt(), tau.getEta()));
@@ -436,8 +436,8 @@ int main(int argc, char* argv[]) {
 
     // fill the tree
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
-  } // close event loop
- 
+  }  // close event loop
+
   fin->Close();
   fout->cd();
   fout->Write();
