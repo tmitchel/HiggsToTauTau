@@ -12,31 +12,30 @@ job1:
   - mv ../../repo.tar.gz .
   - tar xzf repo.tar.gz
   - eval `scramv1 runtime -sh`
-  - eval $(ssh-agent -s)
+  # - eval $(ssh-agent -s)
   # - echo $SSH_PRIVATE_KEY_TYLER
   # - ssh-add -K <(echo "$SSH_PRIVATE_KEY_TYLER")
   # - echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d '\r' | ssh-add > /dev/null
-  - mkdir -p ~/.ssh
-  - echo "${DEPLOY_KEY}" | tr -d '\r' | ssh-add - 
+  # - mkdir -p ~/.ssh
+  # - echo "${DEPLOY_KEY}" | tr -d '\r' | ssh-add - 
   # - echo "${SSH_PRIVATE_KEY_TYLER_}" | tr -d ' ' > private.ssh_key
   # - chmod 600 private.ssh_key
   # - cat private.ssh_key
   # - ssh-add private.ssh_key
-  - chmod 700 ~/.ssh
-  - ssh-keyscan gitlab.cern.ch >> ~/.ssh/known_hosts
-  - git config --global user.email "tyler106@ksu.edu"
-  - git config --global user.name "tmitchel"
-  - chmod 644 ~/.ssh/known_hosts
-  - git clone -b tauTriggers2017_reMiniaod_test git@github.com:truggles/TauTriggerSFs2017.git TauTriggerSFs2017
-  # - git clone -b tauTriggers2017_reMiniaod_test https://github.com/truggles/TauTriggerSFs2017.git TauTriggerSFs2017
+  # - chmod 700 ~/.ssh
+  # - ssh-keyscan gitlab.cern.ch >> ~/.ssh/known_hosts
+  # - git config --global user.email "tyler106@ksu.edu"
+  # - git config --global user.name "tmitchel"
+  # - chmod 644 ~/.ssh/known_hosts
+  - git clone -b tauTriggers2017_reMiniaod_test https://github.com/truggles/TauTriggerSFs2017.git TauTriggerSFs2017
   - git clone https://github.com/CMS-HTT/Jet2TauFakes.git HTTutilities/Jet2TauFakes
   - cd HTTutilities/Jet2TauFakes
   - git checkout v0.2.2
   - scram b
-  - mkdir data
-  - git clone -b 2017 ssh://git@gitlab.cern.ch:7999/cms-htt/Jet2TauFakesFiles.git data
+  # - mkdir data
+  # - git clone -b 2017 ssh://git@gitlab.cern.ch:7999/cms-htt/Jet2TauFakesFiles.git data
 
-  # - cd ../..
+  - cd ltau_analyzers
   script:
   - echo "start"
   - echo `ls`
