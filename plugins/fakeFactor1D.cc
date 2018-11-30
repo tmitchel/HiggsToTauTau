@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 
   // read all files from input directory
   std::vector<std::string> files;
-  read_directory(dir, files);
+  read_directory(dir, &files);
 
   hists->histoLoop(files, dir, tree_name, var_name);
   hists->getJetFakes(files, dir, tree_name, var_name);
