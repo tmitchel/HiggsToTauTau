@@ -1,4 +1,14 @@
+image: gitlab-registry.cern.ch/computersecurity/security-services-code-checking:latest
+
+#
+# Job types
+#
+types:
+    - build
+    - test
+
 job1:
+  type: build
   tags:
     # Make you job be executed in a shared runner that has CVMFS mounted
     - cvmfs
@@ -29,4 +39,12 @@ job1:
   - ./build plugins/et_analyzer2017.cc test
   - ./build plugins/mt_analyzer2016.cc test
   - ./build plugins/mt_analyzer2017.cc test
+
+#
+# Job: run CppLint
+#
+run_cpplint:
+    type: test
+    script:
+        - cpplint --linelength=1000 --exclude=./plugins/et_analyzer2016_AC.cc --exclude=./plugins/mt_templateMaker.cc --exclude=./plugins/tt_analyzer.cc ./plugins/*
   
