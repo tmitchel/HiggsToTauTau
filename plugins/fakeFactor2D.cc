@@ -1,8 +1,8 @@
 // system includes
 #include <dirent.h>
+#include <sys/types.h>
 #include <map>
 #include <string>
-#include <sys/types.h>
 #include <iostream>
 
 // ROOT includes
