@@ -5,7 +5,6 @@ job1:
   before_script: 
   - cd ..
   - tar czf repo.tar.gz ltau_analyzers
-  - tar czf repo2.tar.gz testing
   - set +e && source /cvmfs/cms.cern.ch/cmsset_default.sh; set -e
   - export SCRAM_ARCH=slc6_amd64_gcc630
   - scramv1 project CMSSW CMSSW_9_4_0
@@ -13,7 +12,6 @@ job1:
   - eval `scramv1 runtime -sh`
   - git clone -b tauTriggers2017_reMiniaod_test git@github.com:truggles/TauTriggerSFs2017.git TauTriggerSFs2017
   - tar xzf repo.tar.gz
-  - tar xzf repo2.tar.gz
   - git clone https://github.com/CMS-HTT/Jet2TauFakes.git HTTutilities/Jet2TauFakes
   - cd HTTutilities/Jet2TauFakes
   - git checkout v0.2.2
