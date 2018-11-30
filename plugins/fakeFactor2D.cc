@@ -38,8 +38,8 @@ void read_directory(const std::string &name, std::vector<std::string>* v) {
 // class to hold the histograms until I'm ready to write them
 class histHolder {
  public:
-  histHolder(std::vector<int>, std::string, std::string, std::string)
-  ~histHolder() { delete ff_weight; };
+  histHolder(std::vector<int>, std::string, std::string, std::string);
+  ~histHolder() { delete ff_weight; }
   void writeHistos();
   void initVectors(std::string);
   void fillFraction(int, std::string, double, double, double);
@@ -117,8 +117,8 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
   },
   fout( new TFile(("Output/templates/template_"+channel_prefix+"_"+var_name+"_ff"+year+".root").c_str(), "recreate") ),
   bins(Bins),
-  mvis_bins({0,50,80,100,110,120,130,150,170,200,250,1000}),
-  njets_bins({-0.5,0.5,1.5,15}),
+  mvis_bins({0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000}),
+  njets_bins({-0.5, 0.5, 1.5, 15}),
   channel_prefix(channel_prefix) {
   for (auto it = hists.begin(); it != hists.end(); it++) {
     fout->cd();
@@ -224,7 +224,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     tree->SetBranchAddress("njets", &njets);
     if (var_name.find("vis_mass") != std::string::npos) {
       var = vis_mass;
-    } else if (var_name.find("njets") != std::string::npos){
+    } else if (var_name.find("njets") != std::string::npos) {
       var = njets;
     } else {
       tree->SetBranchAddress(var_name.c_str(), &var);
@@ -285,10 +285,10 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     frac_qcd.at(i)->Add(frac_tt.at(i), -1);
     frac_qcd.at(i)->Add(frac_real.at(i), -1);
 
-    //std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    //std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    //std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    //std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    // std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    // std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    // std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    // std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/data.at(i)->Integral() << std::endl;
 
     frac_w.at(i)->Divide(data.at(i));
     frac_tt.at(i)->Divide(data.at(i));
@@ -298,7 +298,6 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 }
 
 void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, std::string tree_name, std::string var_name) {
-
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
     auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
@@ -357,7 +356,7 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
       if (is_antiTauIso) {
         auto bin_x = data.at(inclusive)->GetXaxis()->FindBin(vis_mass);
         auto bin_y = data.at(inclusive)->GetYaxis()->FindBin(njets);
-        
+
         auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                             frac_w.at(inclusive)->GetBinContent(bin_x, bin_y),
                                             frac_tt.at(inclusive)->GetBinContent(bin_x, bin_y),
