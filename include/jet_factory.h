@@ -2,6 +2,7 @@
 #define JET_FACTORY_H
 
 #include "TTree.h"
+#include "TRandom3.h"
 
 class jet {
 private:
@@ -107,26 +108,18 @@ void jet_factory::run_factory() {
   jet j2(jpt_2, jeta_2, jphi_2, jcsv_2);
   jet b1(bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1);
   jet b2(bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2);
-  if (jpt_1 > 0) {
+  // if (jpt_1 > 0) {
     plain_jets.push_back(j1);
-  }
-  if (jpt_2 > 0) {
+  // }
+  // if (jpt_2 > 0) {
     plain_jets.push_back(j2);
-  }
-  if (bpt_1 > 0) {
+  // }
+  // if (bpt_1 > 0) {
     btag_jets.push_back(b1);
-  }
-  if (bpt_2 > 0) {
+  // }
+  // if (bpt_2 > 0) {
     btag_jets.push_back(b2);
-  }
-}
-
-void jet_factory::promoteDemote(TH2F *h_btag_eff_b, TH2F *h_btag_eff_c, TH2F *h_btag_eff_oth, int syst=0) {
-  Nbtag = btagSF::_PromoteDemote(h_btag_eff_b, h_btag_eff_c, h_btag_eff_oth, &(this->btag_jets.at(0)), this->nbtag, syst);
-}
-
-double jet_factory::bTagEventWeight(int nBTags=0, int syst=0) {
-  return btagSF::_bTagEventWeight(this, nBTags, syst);
+  // }
 }
 
 namespace btagSF {
@@ -248,5 +241,12 @@ namespace btagSF {
   }
 }
 
+void jet_factory::promoteDemote(TH2F *h_btag_eff_b, TH2F *h_btag_eff_c, TH2F *h_btag_eff_oth, int syst = 0) {
+  Nbtag = btagSF::_PromoteDemote(h_btag_eff_b, h_btag_eff_c, h_btag_eff_oth, &(this->btag_jets.at(0)), this->nbtag, syst);
+}
+
+double jet_factory::bTagEventWeight(int nBTags = 0, int syst = 0) {
+  return btagSF::_bTagEventWeight(this, nBTags, syst);
+}
 
 #endif
