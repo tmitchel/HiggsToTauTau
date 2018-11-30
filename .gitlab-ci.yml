@@ -15,8 +15,12 @@ job1:
   - eval $(ssh-agent -s)
   # - echo $SSH_PRIVATE_KEY_TYLER
   # - ssh-add -K <(echo "$SSH_PRIVATE_KEY_TYLER")
-  - echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d '\r' | ssh-add > /dev/null
+  # - echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d '\r' | ssh-add > /dev/null
   # - echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d '\r' | ssh-add - > /dev/null
+  - echo "${SSH_PRIVATE_KEY_TYLER}" | tr -d ' ' | base64 --decode > private.ssh_key
+  - chmod 600 private.ssh_key
+  - cat private.ssh_key
+  - ssh-add private.ssh_key
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
   - ssh-keyscan gitlab.cern.ch >> ~/.ssh/known_hosts
