@@ -2,6 +2,7 @@
 #define JET_FACTORY_H
 
 #include "TTree.h"
+#include "TRandom3.h"
 
 class jet {
 private:
