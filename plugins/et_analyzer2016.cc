@@ -34,13 +34,12 @@
 typedef std::vector<double> NumV;
 
 int main(int argc, char* argv[]) {
-
   ////////////////////////////////////////////////
   // Initial setup:                             //
   // Get file names, normalization, paths, etc. //
   ////////////////////////////////////////////////
 
-  CLParser parser(argc, argv); 
+  CLParser parser(argc, argv);
   std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
@@ -58,10 +57,10 @@ int main(int argc, char* argv[]) {
   std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
-  auto ntuple = (TTree*)fin->Get("etau_tree");
+  auto ntuple = reinterpret_cast<TTree *>(fin->Get("etau_tree"));
 
   // get number of generated events
-  auto counts = (TH1D*)fin->Get("nevents");
+  auto counts = reinterpret_cast<TH1D*>(fin->Get("nevents"));
   auto gen_number = counts->GetBinContent(2);
 
   // create output file
@@ -114,16 +113,16 @@ int main(int argc, char* argv[]) {
 
   // Z-pT reweighting
   TFile *zpt_file = new TFile("data/zpt_weights_2016_BtoH.root");
-  auto zpt_hist = (TH2F*)zpt_file->Get("zptmass_histo");
+  auto zpt_hist = reinterpret_cast<TH2F*>(zpt_file->Get("zptmass_histo"));
 
-  //H->tau tau scale factors
+  // H->tau tau scale factors
   TFile htt_sf_file("data/htt_scalefactors_v16_3.root");
-  RooWorkspace *htt_sf = (RooWorkspace*)htt_sf_file.Get("w");
+  RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
   htt_sf_file.Close();
 
   // embedded sample weights
   TFile embed_file("data/htt_scalefactors_v16_9_embedded.root", "READ");
-  RooWorkspace *wEmbed = (RooWorkspace *)embed_file.Get("w");
+  RooWorkspace *wEmbed = reinterpret_cast<RooWorkspace *>(embed_file.Get("w"));
   embed_file.Close();
 
   // trigger and ID scale factors
@@ -133,10 +132,10 @@ int main(int argc, char* argv[]) {
   auto myScaleFactor_idAnti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_antiisolated_Iso0p1to0p3_eff.root");
 
   TFile * f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
-  TGraph * g_NNLOPS_0jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_0jet");
-  TGraph * g_NNLOPS_1jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_1jet");
-  TGraph * g_NNLOPS_2jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_2jet");
-  TGraph * g_NNLOPS_3jet = (TGraph*) f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_3jet");
+  TGraph * g_NNLOPS_0jet = reinterpret_cast<TGraph*>(f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_0jet"));
+  TGraph * g_NNLOPS_1jet = reinterpret_cast<TGraph*>(f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_1jet"));
+  TGraph * g_NNLOPS_2jet = reinterpret_cast<TGraph*>(f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_2jet"));
+  TGraph * g_NNLOPS_3jet = reinterpret_cast<TGraph*>(f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_3jet"));
 
   //////////////////////////////////////
   // Final setup:                     //
@@ -229,7 +228,6 @@ int main(int argc, char* argv[]) {
 
     // apply all scale factors/corrections/etc.
     if (!isData && !isEmbed) {
-
       // Trigger SF
       evtwt *= myScaleFactor_trgEle25->getSF(electron.getPt(), electron.getEta());
 
@@ -252,20 +250,31 @@ int main(int argc, char* argv[]) {
       htt_sf->var("e_eta")->setVal(electron.getEta());
       evtwt *= htt_sf->function("e_trk_ratio")->getVal();
 
-      // // anti-lepton discriminator SFs
-      if (tau.getGenMatch() == 1 or tau.getGenMatch() == 3){//Yiwen
-         if (fabs(tau.getEta())<1.460) evtwt *= 1.402;
-         else if (fabs(tau.getEta())>1.558) evtwt *= 1.900;
-         if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
-         else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
-       }
-        else if (tau.getGenMatch() == 2 or tau.getGenMatch() == 4){
-            if (fabs(tau.getEta())<0.4) evtwt *= 1.012;
-            else if (fabs(tau.getEta())<0.8) evtwt *= 1.007;
-            else if (fabs(tau.getEta())<1.2) evtwt *= 0.870;
-            else if (fabs(tau.getEta())<1.7) evtwt *= 1.154;
-            else evtwt *= 2.281;
+      // anti-lepton discriminator SFs
+      if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3){//Yiwen
+        if (fabs(tau.getEta()) < 1.460) { 
+          evtwt *= 1.402;
+        } else if (fabs(tau.getEta()) > 1.558) {
+          evtwt *= 1.900;
         }
+        if (name == "ZL" && tau.getL2DecayMode() == 0) {
+          evtwt *= 0.98;
+        } else if (sample == "ZL" && tau.getL2DecayMode() == 1) {
+          evtwt *= 1.20;
+        } 
+      } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4){
+        if (fabs(tau.getEta()) < 0.4) {
+          evtwt *= 1.012;
+        } else if (fabs(tau.getEta()) < 0.8) {
+          evtwt *= 1.007;
+        } else if (fabs(tau.getEta()) < 1.2) {
+          evtwt *= 0.870;
+        } else if (fabs(tau.getEta()) < 1.7) {
+          evtwt *= 1.154;
+        } else {
+          evtwt *= 2.281;
+        }
+      }
 
       // Z-pT and Zmm Reweighting
       if (name=="EWKZLL" || name=="EWKZNuNu" || name=="ZTT" || name=="ZLL" || name=="ZL" || name=="ZJ") {
