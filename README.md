@@ -1,6 +1,6 @@
 # 2016 Higgs to Tau-Tau Analysis Code 
 
-[![Build Status](https://travis-ci.com/KState-HEP-HTT/SMHTT_Analyzers.svg?branch=master)](https://travis-ci.com/KState-HEP-HTT/SMHTT_Analyzers)
+[![pipeline status](https://gitlab.cern.ch/KState-HEP-HTT/ltau_analyzers/badges/master/pipeline.svg)](https://gitlab.cern.ch/KState-HEP-HTT/ltau_analyzers/commits/master)
 
 This code is used for the study of a Higgs boson decaying to a pair of tau leptons. The repository includes four analyzers, corresponding to the four final states being studied: electron-tau (et), muon-tau (mt), tau-tau (tt), and electron-muon (emu).
 
