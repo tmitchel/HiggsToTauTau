@@ -5,7 +5,7 @@
 ## a directory.                                           ##
 ############################################################
 
-from os import popen
+from os import popen, makedirs
 from subprocess import call
 from optparse import OptionParser
 import time
@@ -32,9 +32,18 @@ parser.add_option('--prefix', '-P', action='store',
                   default=None, dest='prefix',
                   help='prefix to strip'
                   )
+parser.add_option('--output-dir', action='store',
+                  default='', dest='output_dir', 
+                  help='name of output directory after Output/trees'
+                  )
 (options, args) = parser.parse_args()
 prefix = options.prefix
 suffix = '.root'
+
+try:
+    makedirs('Output/trees/{}'.format(options.output_dir))
+except:
+    pass
 
 start = time.time()
 if options.isData:
@@ -99,7 +108,7 @@ for ifile in fileList:
     else: 
         names = ['VV', 'VVJ', 'VVT']
 
-    callstring = './%s -p %s -s %s ' % (options.exe, tosample, sample)
+    callstring = './%s -p %s -s %s -d %s' % (options.exe, tosample, sample, options.output_dir)
 
     if options.syst and not 'Data' in sample:
         for isyst in systs:
