@@ -220,19 +220,12 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, is_signal, OS;
-    Float_t var, weight, njets, vis_mass, nbjets;
+    Float_t var, weight, njets, vis_mass, nbjets, mjj;
 
     tree->SetBranchAddress("vis_mass", &vis_mass);
+    tree->SetBranchAddress("mjj", &mjj);
     tree->SetBranchAddress("njets", &njets);
-    if (var_name.find("vis_mass") != std::string::npos) {
-      var = vis_mass;
-    } else if (var_name.find("njets") != std::string::npos) {
-      var = njets;
-    } else {
-      tree->SetBranchAddress(var_name.c_str(), &var);
-    }
     tree->SetBranchAddress("nbjets", &nbjets);
-
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("is_signal", &is_signal);
@@ -242,12 +235,26 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     tree->SetBranchAddress("cat_VH", &cat_VH);
     tree->SetBranchAddress("OS", &OS);
 
+    if (!(var_name == "vis_mass" || var_name == "njets" || var_name == "nbjets" || var_name == "mjj")) {
+      tree->SetBranchAddress(var_name.c_str(), &var);
+    }
+
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
 
       // only look at opposite-sign events
-      if (OS == 0 || nbjets > 0) {
+      if (OS == 0) {
         continue;
+      }
+
+      if (var_name == "vis_mass") {
+        var = vis_mass;
+      } else if (var_name == "njets") {
+        var = njets;
+      } else if (var_name == "nbjets") {
+        var = nbjets;
+      } else if (var_name == "mjj") {
+        var = mjj;
       }
 
       if (is_signal) {
@@ -288,10 +295,10 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     frac_qcd.at(i)->Add(frac_tt.at(i), -1);
     frac_qcd.at(i)->Add(frac_real.at(i), -1);
 
-    // std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    // std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    // std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    // std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+    std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/data.at(i)->Integral() << std::endl;
 
     frac_w.at(i)->Divide(data.at(i));
     frac_tt.at(i)->Divide(data.at(i));
@@ -312,40 +319,29 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, is_signal, OS;
-    Float_t var, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso, nbjets;
+    Float_t var, weight, t1_pt, t1_decayMode, njets, vis_mass, mjj, mt, lep_iso, nbjets;
 
     tree->SetBranchAddress("evtwt", &weight);
+    tree->SetBranchAddress("t1_pt", &t1_pt);
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
     tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mt", &mt);
-    if (channel_prefix == "et") {
-      tree->SetBranchAddress("el_iso", &lep_iso);
-    } else if (channel_prefix == "mt") {
-      tree->SetBranchAddress("mu_iso", &lep_iso);
-    }
-
+    tree->SetBranchAddress("mjj", &mjj);
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
     tree->SetBranchAddress("cat_boosted", &cat_boosted);
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
     tree->SetBranchAddress("cat_VH", &cat_VH);
     tree->SetBranchAddress("OS", &OS);
+    if (channel_prefix == "et") {
+      tree->SetBranchAddress("el_iso", &lep_iso);
+    } else if (channel_prefix == "mt") {
+      tree->SetBranchAddress("mu_iso", &lep_iso);
+    }
 
-    if (var_name.find("t1_pt") != std::string::npos) {
-      var = t1_pt;
-    } else if (var_name.find("t1_decayMode") != std::string::npos) {
-      var = t1_decayMode;
-    } else if (var_name.find("njets") != std::string::npos) {
-      var = njets;
-    } else if (var_name.find("vis_mass") != std::string::npos) {
-      var = vis_mass;
-    } else if (var_name.find("mt") != std::string::npos) {
-      var = mt;
-    } else if (var_name.find("lep_iso") != std::string::npos) {
-      var = lep_iso;
-    } else {
+    if (!(var_name == "t1_pt" || var_name == "t1_decayMode" || var_name == "njets" || var_name == "nbjets" || var_name == "vis_mass" || var_name == "mt"  || name == "mjj")) {
       tree->SetBranchAddress(var_name.c_str(), &var);
     }
 
@@ -353,8 +349,24 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
       tree->GetEntry(i);
 
       // only look at opposite-sign events
-      if (OS == 0 || nbjets > 0) {
+      if (OS == 0) {
         continue;
+      }
+
+      if (var_name == "t1_pt") {
+        var = t1_pt;
+      } else if (var_name == "t1_decayMode") {
+        var = t1_decayMode;
+      } else if (var_name == "njets") {
+        var = njets;
+      } else if (var_name == "nbjets") {
+        var = nbjets;
+      } else if (var_name == "vis_mass") {
+        var = vis_mass;
+      } else if (var_name == "mt") {
+        var = mt;
+      } else if (var_name == "mjj") {
+        var = mjj;
       }
 
       if (is_antiTauIso) {

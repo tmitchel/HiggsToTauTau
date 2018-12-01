@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
   std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
+  std::string output_dir = parser.Option("-d");
   std::string syst = parser.Option("-u");
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
@@ -67,7 +68,7 @@ int main(int argc, char* argv[]) {
 
   // create output file
   auto suffix = "_output.root";
-  auto prefix = "Output/trees/";
+  auto prefix = "Output/trees/" + output_dir;
   std::string filename;
   if (name == sample) {
     filename = prefix + name + systname + suffix;
@@ -389,12 +390,12 @@ int main(int argc, char* argv[]) {
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
-    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 400));
-    bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 400);
-    bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 400);
+    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300));
+    bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
+    bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
     // now do mt selection
-    if (tau.getPt() < 30 || mt > 50 || jets.getNbtag() > 0) {
+    if (tau.getPt() < 30 || mt > 50) {
       continue;
     }
 
