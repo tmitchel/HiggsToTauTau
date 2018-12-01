@@ -196,7 +196,7 @@ void histHolder::fillFraction(int cat, std::string name, double vis_mass, double
     hist = frac_w.at(cat);
   } else if (name == "TTJ") {
     hist = frac_tt.at(cat);
-  } else if (name == "embed" || name == "TTT" || name == "VVT") {
+  } else if (name == "ZTT" || name == "TTT" || name == "VVT") {
     hist = frac_real.at(cat);
   }
   hist->Fill(vis_mass, njets, weight);
@@ -220,7 +220,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, is_signal, OS;
-    Float_t var, weight, njets, vis_mass;
+    Float_t var, weight, njets, vis_mass, nbjets;
 
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("njets", &njets);
@@ -231,6 +231,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     } else {
       tree->SetBranchAddress(var_name.c_str(), &var);
     }
+    tree->SetBranchAddress("nbjets", &nbjets);
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
@@ -245,7 +246,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
       tree->GetEntry(i);
 
       // only look at opposite-sign events
-      if (OS == 0) {
+      if (OS == 0 || nbjets > 0) {
         continue;
       }
 
@@ -263,7 +264,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
       } else if (is_antiTauIso) {
         if (!(name == "W"   || name == "ZJ"  || name == "VVJ" ||
               name == "TTJ" ||
-              name == "embed" || name == "TTT" || name == "VVT" ||
+              name == "ZTT" || name == "TTT" || name == "VVT" ||
               name == "Data")) {
           continue;
         }
@@ -311,11 +312,12 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, is_signal, OS;
-    Float_t var, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso;
+    Float_t var, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso, nbjets;
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
     tree->SetBranchAddress("njets", &njets);
+    tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mt", &mt);
     if (channel_prefix == "et") {
@@ -351,7 +353,7 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
       tree->GetEntry(i);
 
       // only look at opposite-sign events
-      if (OS == 0) {
+      if (OS == 0 || nbjets > 0) {
         continue;
       }
 

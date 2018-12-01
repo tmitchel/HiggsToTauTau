@@ -95,7 +95,6 @@ jet_factory::jet_factory(TTree* input, std::string syst) {
   input -> SetBranchAddress ( "topQuarkPt1", &topQuarkPt1);
   input -> SetBranchAddress ( "topQuarkPt2", &topQuarkPt2);
 
-  Nbtag = nbtag;
 
 }
 
@@ -103,6 +102,8 @@ jet_factory::jet_factory(TTree* input, std::string syst) {
 void jet_factory::run_factory() {
   plain_jets.clear();
   btag_jets.clear();
+
+  Nbtag = nbtag;
 
   jet j1(jpt_1, jeta_1, jphi_1, jcsv_1);
   jet j2(jpt_2, jeta_2, jphi_2, jcsv_2);
