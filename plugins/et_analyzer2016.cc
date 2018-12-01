@@ -389,12 +389,12 @@ int main(int argc, char* argv[]) {
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
-    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300));
-    bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
-    bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
+    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 400));
+    bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 400);
+    bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 400);
 
     // now do mt selection
-    if (tau.getPt() < 30 || mt > 50) {
+    if (tau.getPt() < 30 || mt > 50 || jets.getNbtag() > 0) {
       continue;
     }
 

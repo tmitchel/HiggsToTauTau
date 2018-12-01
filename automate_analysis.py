@@ -59,7 +59,6 @@ for ifile in fileList:
     if prefix:
       sample = sample.replace(prefix, '')
     tosample = ifile.replace(sample+suffix,'')
-    print sample
 
     if 'DYJets' in sample:
         names = ['ZTT', 'ZL', 'ZJ']

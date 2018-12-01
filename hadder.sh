@@ -1,3 +1,6 @@
+find Output/trees/*.root -type f -size -15k | xargs rm
+rm Output/trees/*_amc_*.root
+
 hadd Output/trees/Data.root Output/trees/data*
 hadd Output/trees/TTT.root Output/trees/*_TTT_*.root
 hadd Output/trees/TTJ.root Output/trees/*_TTJ_*.root
@@ -7,7 +10,7 @@ hadd Output/trees/ZL.root Output/trees/*_ZL_*.root
 hadd Output/trees/mc_ZTT.root Output/trees/DY*ZTT*
 hadd Output/trees/ZTT.root Output/trees/embed${1}-*
 
-hadd Output/trees/W.root Output/trees/*_W_*.root
+hadd Output/trees/W.root Output/trees/WJets*_W_*.root
 
 hadd Output/trees/VVT.root Output/trees/*_VVT_*.root
 hadd Output/trees/VVJ.root Output/trees/*_VVJ_*.root

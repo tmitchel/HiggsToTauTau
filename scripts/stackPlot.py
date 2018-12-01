@@ -32,7 +32,7 @@ gStyle.SetOptStat(0)
 def applyStyle(name, hist, leg):
     overlay = 0
     print name, hist.Integral()
-    if name == 'embed':
+    if name == 'ZTT':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
         hist.SetName("ZTT")
         #hist.Scale(0.4)
@@ -247,7 +247,7 @@ def sigmaLines(data):
     return line1, line2
 
 def main():
-    fin = TFile('../Output/templates/{}/template_{}_{}_ff2017.root'.format(args.in_dir, args.channel, args.var), 'read')
+    fin = TFile('../Output/templates/{}/template_{}_{}_ff2016.root'.format(args.in_dir, args.channel, args.var), 'read')
     idir = fin.Get(args.cat)
     leg = createLegend()
     data = idir.Get('Data').Clone()
