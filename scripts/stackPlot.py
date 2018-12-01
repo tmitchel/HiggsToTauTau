@@ -14,6 +14,10 @@ parser.add_argument('--channel', '-l', action='store',
                     dest='channel', default='et',
                     help='name of channel'   
                     )
+parser.add_argument('--year', '-y', action='store',
+                    dest='year', default='2016',
+                    help='year to plot'   
+                    )
 parser.add_argument('--dir', '-d', action='store',
                     dest='in_dir', default='',
                     help='input directory starting after ../Output/templates/'
@@ -21,6 +25,10 @@ parser.add_argument('--dir', '-d', action='store',
 parser.add_argument('--prefix', '-p', action='store',
                     dest='prefix', default='test',
                     help='prefix to add to plot name'
+                    )
+parser.add_argument('--scale', '-s', action='store', type=float,
+                    dest='scale', default=1.,
+                    help='scale top of hist by x'
                     )
 args = parser.parse_args()
 
@@ -35,22 +43,15 @@ def applyStyle(name, hist, leg):
     if name == 'ZTT':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
         hist.SetName("ZTT")
-        #hist.Scale(0.4)
     elif name == 'TTT':
         hist.SetFillColor(TColor.GetColor("#cfe87f"))
         hist.SetName('TTT')
-#    elif name == 'VVT' or name == 'EWKZ' or name == 'ZJ' or name == 'VVJ' or name == 'TTJ':
     elif name == 'VVT' or name == 'EWKZ':
         hist.SetFillColor(TColor.GetColor("#9feff2"))
         overlay = 4
-        #if name == 'W':
-        #  hist.Scale(0.8)
     elif name == 'ZL':
         hist.SetFillColor(TColor.GetColor("#de5a6a"))
         hist.SetName('ZL')
-#    elif name == 'W':
-#        hist.SetFillColor(TColor.GetColor("#a0abff"))
-#        hist.SetName('W+jets')
     elif name == 'QCD':
         hist.SetFillColor(TColor.GetColor("#ffccff"))
         hist.SetName('QCD')
@@ -246,14 +247,25 @@ def sigmaLines(data):
 
     return line1, line2
 
+
+def blindData(data, signal, background):
+    for ibin in range(data.GetNbinsX()+1):
+        sig = signal.GetBinContent(ibin)
+        bkg = background.GetBinContent(ibin)
+        if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
+            data.SetBinContent(ibin, 0)
+
+    return data
+
 def main():
-    fin = TFile('../Output/templates/{}/template_{}_{}_ff2016.root'.format(args.in_dir, args.channel, args.var), 'read')
+    fin = TFile('../Output/templates/{}/template_{}_{}_ff{}.root'.format(args.in_dir, args.channel, args.var, args.year), 'read')
     idir = fin.Get(args.cat)
     leg = createLegend()
     data = idir.Get('Data').Clone()
     vbf = data.Clone()
     vbf.Reset()
     ggh = vbf.Clone()
+    allSig = vbf.Clone()
     stat = vbf.Clone()
     other = stat.Clone()
     inStack = []
@@ -267,11 +279,15 @@ def main():
             data = hist
         elif overlay == 2:
             vbf = hist
+            allSig.Add(hist)
         elif overlay == 3:
             ggh = hist
+            allSig.Add(hist)
         elif overlay == 4:
             other.Add(hist)
             stat.Add(hist)
+        elif overlay == 5:
+            allSig.Add(hist)
 
     can = createCanvas()
     inStack = formatOther(other, inStack)
@@ -279,11 +295,13 @@ def main():
     stat = formatStat(stat)
     leg.AddEntry(stat, 'Uncertainty', 'f')
 
-    high = max(data.GetMaximum(), stat.GetMaximum()) * 1.4
+    data = blindData(data, allSig, stat)
+
+    high = max(data.GetMaximum(), stat.GetMaximum()) * args.scale
     stack.SetMaximum(high)
     stack.Draw('hist')
     formatStack(stack)
-    data.Draw('same le0p')
+    data.Draw('same lep')
     stat.Draw('same e2')
     vbf.Scale(50)
     vbf.Draw('same hist e')
@@ -296,9 +314,15 @@ def main():
     ll.SetTextSize(0.06)
     ll.SetTextFont(42)
     if 'et_' in args.cat:
-      ll.DrawLatex(0.42, 0.92, "e#tau_{e} 2017, 41.3 fb^{-1} (13 TeV)")
-    if 'mt_' in args.cat:
-      ll.DrawLatex(0.42, 0.93, "#mu#tau_{#mu} 2017, 41.3 fb^{-1} (13 TeV)")
+        lepLabel = "e#tau_{e}"
+    elif 'mt_' in args.cat:
+        lepLabel = "#mu#tau_{#mu}"
+    if args.year == '2016':
+        lumi = "41.3 fb^{-1}"
+    elif args.year == '2017':
+        lumi = "35.9 fb^{-1}"
+    
+    ll.DrawLatex(0.42, 0.92, "{} {}, {} (13 TeV)".format(lepLabel, args.year, lumi))
 
     cms = TLatex()
     cms.SetNDC(kTRUE)
@@ -354,15 +378,13 @@ def main():
     from ROOT import kGray
     rat_unc.SetFillColor(kGray)
     rat_unc.Draw('same e2')
-    ratio.Draw('same le0p')
+    ratio.Draw('same lep')
 
     line1, line2 = sigmaLines(data)
     line1.Draw()
     line2.Draw()
 
-
-
-    can.SaveAs('../Output/plots/{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat))
+    can.SaveAs('../Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat, args.year))
 
 
 if __name__ == "__main__":

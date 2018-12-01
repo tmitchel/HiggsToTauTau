@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 
   // read all files from input directory
   std::vector<std::string> files;
-  read_directory(dir, files);
+  read_directory(dir, &files);
 
   for (auto ifile : files) {
     auto fin = new TFile((dir+"/"+ifile).c_str(), "read");
