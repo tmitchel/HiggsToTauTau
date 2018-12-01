@@ -377,8 +377,8 @@ int main(int argc, char* argv[]) {
 
     // create categories
     bool zeroJet = (jets.getNjets() == 0);
-    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && (jets.getDijetMass() < 300 || Higgs.Pt() < 50 || event.getPtSV() < 40)));
-    bool vbfCat = (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() > 50 && event.getPtSV() > 40);
+    bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300));
+    bool vbfCat = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
     // now do mt selection
