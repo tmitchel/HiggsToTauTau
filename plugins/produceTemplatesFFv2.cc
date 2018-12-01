@@ -40,7 +40,7 @@ void read_directory(const std::string &name, std::vector<std::string>* v) {
 // class to hold the histograms until I'm ready to write them
 class histHolder {
  public:
-  histHolder(std::string, std::string);
+  histHolder(std::string, std::string, bool);
   ~histHolder() { delete ff_weight; }
   void writeHistos();
   void initVectors(std::string);
@@ -51,6 +51,7 @@ class histHolder {
   void getJetFakes(std::vector<std::string>, std::string, std::string);
   void runSystematics(std::vector<std::string>, std::string, std::string);
 
+  bool doNN;
   TFile *fout;
   FakeFactor* ff_weight;
   std::string channel_prefix;
@@ -69,6 +70,7 @@ int main(int argc, char *argv[]) {
   // get CLI arguments
   CLParser parser(argc, argv);
   bool doSyst = parser.Flag("-s");
+  bool doNN = parser.Flag("-n");
   std::string dir = parser.Option("-d");
   std::string year = parser.Option("-y");
   std::string tree_name = parser.Option("-t");
@@ -93,7 +95,7 @@ int main(int argc, char *argv[]) {
   }
 
   // initialize histogram holder
-  auto hists = new histHolder(channel_prefix, year);
+  auto hists = new histHolder(channel_prefix, year, doNN);
 
   // read all files from input directory
   std::vector<std::string> files;
@@ -112,7 +114,7 @@ int main(int argc, char *argv[]) {
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
 // and the map from categories to vectors of TH2F*'s. Each TH2F* in the vector corresponds to
 // one file that is being put into that categories directory in the output tempalte
-histHolder::histHolder(std::string channel_prefix, std::string year) :
+histHolder::histHolder(std::string channel_prefix, std::string year, bool doNN) :
   hists {
     {(channel_prefix+"_0jet").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},
@@ -137,6 +139,7 @@ histHolder::histHolder(std::string channel_prefix, std::string year) :
   bins_msv1 {0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300},
   bins_msv2 {0, 95, 115, 135, 155, 400},
   channel_prefix(channel_prefix),
+  doNN(doNN),
   systematics {
     "ff_qcd_syst_up"            , "ff_qcd_syst_down"           , "ff_qcd_dm0_njet0_stat_up"   ,
     "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up"   , "ff_qcd_dm0_njet1_stat_down" ,
@@ -153,6 +156,10 @@ histHolder::histHolder(std::string channel_prefix, std::string year) :
     fout->cd();
     fout->mkdir((it->first).c_str());
     fout->cd();
+  }
+
+  if (doNN) {
+    bins_mjj = {0., 0.1, 0.5, 0.9, 1.};
   }
 
   fake_0jet    = new TH2F("fake_0jet"   , "fake_SS", bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] );
@@ -253,6 +260,7 @@ void histHolder::convertDataToFake(TH2F *hist, std::string name, double var1, do
 }
 
 void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std::string tree_name) {
+  float observable(0.);
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
     auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
@@ -266,12 +274,10 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, njets, weight, NN_disc;
 
     tree->SetBranchAddress("evtwt", &weight);
-
     tree->SetBranchAddress("higgs_pT", &higgs_pT);
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mjj", &mjj);
-    // tree->SetBranchAddress("NN_disc", &NN_disc);
     tree->SetBranchAddress("m_sv", &m_sv);
     tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("is_signal", &is_signal);
@@ -282,12 +288,23 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     tree->SetBranchAddress("cat_VH", &cat_VH);
     tree->SetBranchAddress("OS", &OS);
 
+    if (doNN) {
+      tree->SetBranchAddress("NN_disc", &NN_disc);
+    }
+
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
 
       // only look at opposite-sign events
       if (OS == 0) {
         continue;
+      }
+
+      // choose VBF category variable
+      if (doNN) {
+        observable = NN_disc;
+      } else {
+        observable = mjj;
       }
 
       if (is_signal) {
@@ -298,7 +315,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
           hists.at(channel_prefix + "_boosted").back()->Fill(higgs_pT, m_sv, weight);
         }
         if (cat_vbf > 0) {
-          hists.at(channel_prefix + "_vbf").back()->Fill(mjj, m_sv, weight);
+          hists.at(channel_prefix + "_vbf").back()->Fill(observable, m_sv, weight);
         }
       } else if (is_antiTauIso) {
         if (!(name == "W" || name == "ZJ" || name == "VVJ" ||
@@ -338,6 +355,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
 }
 
 void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, std::string tree_name) {
+  float observable(0.);
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
     auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
@@ -349,7 +367,7 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, OS;
-    Float_t higgs_pT, mjj, m_sv, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso;
+    Float_t higgs_pT, mjj, m_sv, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso, NN_disc;
 
     std::string iso;
     if (tree_name.find("etau_tree") != std::string::npos) {
@@ -375,12 +393,23 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
     tree->SetBranchAddress("cat_VH", &cat_VH);
     tree->SetBranchAddress("OS", &OS);
 
+    if (doNN) {
+      tree->SetBranchAddress("NN_disc", &NN_disc);
+    }
+
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
 
       // only look at opposite-sign events
       if (OS == 0) {
         continue;
+      }
+
+      // choose VBF category variable
+      if (doNN) {
+        observable = NN_disc;
+      } else {
+        observable = mjj;
       }
 
       if (is_antiTauIso) {
@@ -400,14 +429,14 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
                                               frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
                                               frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)});
           convertDataToFake(fake_boosted, name, higgs_pT, m_sv, weight * fakeweight);
-        } else if (cat_vbf) {
+        } else if (cat_vbf > 0) {
           auto bin_x = data.at(vbf)->GetXaxis()->FindBin(vis_mass);
           auto bin_y = data.at(vbf)->GetYaxis()->FindBin(njets);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                               frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
                                               frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
                                               frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)});
-          convertDataToFake(fake_vbf, name, mjj, m_sv, weight * fakeweight);
+          convertDataToFake(fake_vbf, name, observable, m_sv, weight * fakeweight);
         }
       }
     }
@@ -415,6 +444,7 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
 }
 
 void histHolder::runSystematics(std::vector<std::string> files, std::string dir, std::string tree_name) {
+  float observable(0.);
   for (auto ifile : files) {
     // only need to look at data
     if (ifile.find("Data") == std::string::npos) {
@@ -430,7 +460,7 @@ void histHolder::runSystematics(std::vector<std::string> files, std::string dir,
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, OS;
-    Float_t higgs_pT, mjj, m_sv, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso;
+    Float_t higgs_pT, mjj, m_sv, weight, t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso, NN_disc;
 
     std::string iso;
     if (tree_name.find("etau_tree") != std::string::npos) {
@@ -456,12 +486,23 @@ void histHolder::runSystematics(std::vector<std::string> files, std::string dir,
     tree->SetBranchAddress("cat_VH", &cat_VH);
     tree->SetBranchAddress("OS", &OS);
 
+    if (doNN) {
+      tree->SetBranchAddress("NN_disc", &NN_disc);
+    }
+
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
 
       // only look at opposite-sign events
       if (OS == 0) {
         continue;
+      }
+
+      // choose VBF category variable
+      if (doNN) {
+        observable = NN_disc;
+      } else {
+        observable = mjj;
       }
 
       if (is_antiTauIso) {
@@ -484,7 +525,7 @@ void histHolder::runSystematics(std::vector<std::string> files, std::string dir,
                                                 frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)},
                                                systematics.at(i));
             FF_systs.at("et_boosted").at(i)->Fill(higgs_pT, m_sv, weight * fakeweight);
-          } else if (cat_vbf) {
+          } else if (cat_vbf > 0) {
             auto bin_x = data.at(vbf)->GetXaxis()->FindBin(vis_mass);
             auto bin_y = data.at(vbf)->GetYaxis()->FindBin(njets);
             auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
