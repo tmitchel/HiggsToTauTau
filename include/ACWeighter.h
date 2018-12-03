@@ -195,8 +195,6 @@ std::vector<double> ACWeighter::getWeights(Long64_t currentEventID) {
 
 
 ACWeighter::~ACWeighter() {
-  weightTreeFile->Close();
-  delete weightTree;
 }
 
 #endif  // INCLUDE_ACWEIGHTER_H_

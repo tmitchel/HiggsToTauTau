@@ -59,6 +59,16 @@ int main(int argc, char* argv[]) {
     systname = "_" + syst;
   }
 
+  if (sample.find("vbf_") != std::string::npos) {
+    sample = "VBF125";
+  } else if (sample.find("ggh_") != std::string::npos) {
+    sample = "ggH125";
+  } else if (sample.find("wh_") != std::string::npos) {
+
+  } else if (sample.find("zh_") != std::string::npos) {
+    sample = "ZH125";
+  }
+
   // open input file
   std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());

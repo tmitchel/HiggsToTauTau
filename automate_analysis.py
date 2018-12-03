@@ -16,6 +16,10 @@ parser.add_option('--data', '-d', action='store_true',
                   default=False, dest='isData',
                   help='run on data or MC'
                   )
+parser.add_option('--acSample', '-a', action='store_true',
+                  default=False, dest='ACsample',
+                  help='is an anomolous coupling sample'
+                  )
 parser.add_option('--exe', '-e', action='store',
                   default='Analyze', dest='exe',
                   help='name of executable'
@@ -109,6 +113,8 @@ for ifile in fileList:
         names = ['VV', 'VVJ', 'VVT']
 
     callstring = './%s -p %s -s %s -d %s ' % (options.exe, tosample, sample, options.output_dir)
+    if options.ACsample:
+      callstring += ' -a '
 
     if options.syst and not 'Data' in sample:
         for isyst in systs:
@@ -119,6 +125,7 @@ for ifile in fileList:
         for name in names:
             tocall = callstring + ' -n %s ' % name 
             call(tocall, shell=True)
+
 
     print tocall
 
