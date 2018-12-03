@@ -165,11 +165,15 @@ def fillStackAndLegend(data, vbf, ggh, holder, leg):
     leg.AddEntry(data, 'Data', 'lep')
     leg.AddEntry(vbf, 'VBF Higgs(125)x50', 'l')
     leg.AddEntry(ggh, 'ggH Higgs(125)x50', 'l')
+    leg.AddEntry(filter(lambda x: x.GetName() == 'ZTT', holder)[0], 'ZTT', 'f')
+    leg.AddEntry(filter(lambda x: x.GetName() == 'ZL', holder)[0], 'ZL', 'f')
+    leg.AddEntry(filter(lambda x: x.GetName() == 'jet fakes', holder)[0], 'jetFakes', 'f')
+    leg.AddEntry(filter(lambda x: x.GetName() == 'TTT', holder)[0], 'TTT', 'f')
+    leg.AddEntry(filter(lambda x: x.GetName() == 'Other', holder)[0], 'Others', 'f')
+
     holder = sorted(holder, key=lambda hist: hist.Integral())
     for hist in holder:
         stack.Add(hist)
-    for hist in reversed(holder):
-        leg.AddEntry(hist, hist.GetName(), 'f')
     return stack, leg
 
 def createLegend():
