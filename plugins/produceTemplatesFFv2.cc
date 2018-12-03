@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
 // and the map from categories to vectors of TH2F*'s. Each TH2F* in the vector corresponds to
 // one file that is being put into that categories directory in the output tempalte
-histHolder::histHolder(std::string channel_prefix, std::string year, bool doNN, bool old=false) :
+histHolder::histHolder(std::string channel_prefix, std::string year, bool doNN, bool old = false) :
   hists {
     {(channel_prefix+"_0jet").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},

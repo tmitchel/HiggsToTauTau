@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
   } else if (sample.find("ggh_") != std::string::npos) {
     sample = "ggH125";
   } else if (sample.find("wh_") != std::string::npos) {
-
+    // need to figure out plus or minus
   } else if (sample.find("zh_") != std::string::npos) {
     sample = "ZH125";
   }
