@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 
   // create output file
   auto suffix = "_output.root";
-  auto prefix = "Output/trees/" + output_dir;
+  auto prefix = "Output/trees/" + output_dir + "/";
   std::string filename;
   if (name == sample) {
     filename = prefix + name + systname + suffix;

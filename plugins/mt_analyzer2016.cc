@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
   // create output file
   auto suffix = "_output.root";
-  auto prefix = "Output/trees/" + output_dir;
+  auto prefix = "Output/trees/" + output_dir + "/";
   std::string filename;
   if (name == sample) {
     filename = prefix + name + systname + suffix;
@@ -156,9 +156,6 @@ int main(int argc, char* argv[]) {
     if (i % 100000 == 0)
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
 
-    histos->at("weightflow") -> Fill(1., norm);
-    histos_2d->at("weights") -> Fill(1., norm);
-
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
     Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
     if (name == "W") {
@@ -189,9 +186,6 @@ int main(int argc, char* argv[]) {
       }
     }
 
-    histos->at("weightflow") -> Fill(2., evtwt);
-    histos_2d->at("weights") -> Fill(2., evtwt);
-
     histos->at("cutflow") -> Fill(1., 1.);
 
     auto muon = muons.run_factory();
@@ -205,6 +199,10 @@ int main(int argc, char* argv[]) {
 
     // apply special ID for data
     if (isData && !muon.getMediumID()) {
+      continue;
+    }
+
+    if (fabs(muon.getEta()) > 2.1) {
       continue;
     }
 
