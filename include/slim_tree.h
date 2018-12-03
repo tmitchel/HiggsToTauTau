@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "TTree.h"
 #include "ditau_factory.h"
 #include "tau_factory.h"
@@ -6,16 +7,16 @@
 #include "electron_factory.h"
 
 class slim_tree {
-public:
-    slim_tree(std::string);
-    ~slim_tree() {}; // default destructor
+ public:
+    slim_tree(std::string, bool);
+    ~slim_tree() {};  // default destructor
 
     // member functions
     // fill the tree for this event
-    void fillTree(std::vector<std::string>, electron*  , tau*, jet_factory*, met_factory*, event_info*, Float_t, Float_t);
-    void fillTree(std::vector<std::string>, muon*      , tau*, jet_factory*, met_factory*, event_info*, Float_t, Float_t);
-    void fillTree(std::vector<std::string>, ditau*     , ditau*, jet_factory*, met_factory*, event_info*, Float_t);
-    void generalFill(std::vector<std::string>, jet_factory*, met_factory*, event_info*, Float_t, TLorentzVector, Float_t);
+    void fillTree(std::vector<std::string>, electron*  , tau*  , jet_factory*, met_factory*, event_info*, Float_t, Float_t, std::shared_ptr<std::vector<double>>);
+    void fillTree(std::vector<std::string>, muon*      , tau*  , jet_factory*, met_factory*, event_info*, Float_t, Float_t, std::shared_ptr<std::vector<double>>);
+    void fillTree(std::vector<std::string>, ditau*     , ditau*, jet_factory*, met_factory*, event_info*, Float_t, std::shared_ptr<std::vector<double>>);
+    void generalFill(std::vector<std::string>, jet_factory *, met_factory *, event_info *, Float_t, TLorentzVector, Float_t, std::shared_ptr<std::vector<double>>);
 
     // member data
     TTree* otree;
@@ -23,7 +24,7 @@ public:
     Float_t evtwt,
         el_pt, el_eta, el_phi, el_mass, el_charge, el_iso,
         mu_pt, mu_eta, mu_phi, mu_mass, mu_charge, mu_iso,
-        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode, t1_genMatch, // t1 is used for et and mt, as well
+        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode, t1_genMatch,  // t1 is used for et and mt, as well
         t2_pt, t2_eta, t2_phi, t2_mass, t2_charge, t2_iso, t2_iso_VL, t2_iso_L, t2_iso_M, t2_iso_T, t2_iso_VT, t2_iso_VVT, t2_decayMode, t2_genMatch,
         njets, nbjets,
         j1_pt, j1_eta, j1_phi,
@@ -35,9 +36,14 @@ public:
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
         ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2,
         higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass;
+
+    // Anomolous coupling branches
+    Float_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint, wt_ggH_a1, wt_ggH_a3, wt_ggH_a3int, wt_wh_a1, wt_wh_a2, wt_wh_a3, wt_wh_L1, 
+            wt_wh_L1Zg, wt_wh_a2int, wt_wh_a3int, wt_wh_L1int, wt_wh_L1Zgint, wt_zh_a1, wt_zh_a2, wt_zh_a3, wt_zh_L1, wt_zh_L1Zg, wt_zh_a2int, wt_zh_a3int, wt_zh_L1int, 
+            wt_zh_L1Zgint;
 };
 
-slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str(), tree_name.c_str()) ) {
+slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree( new TTree(tree_name.c_str(), tree_name.c_str()) ) {
     otree->Branch("evtwt",               &evtwt,               "evtwt/F"              );
 
     otree->Branch("el_pt",               &el_pt,               "el_pt/F"              );
@@ -147,9 +153,46 @@ slim_tree::slim_tree(std::string tree_name) : otree( new TTree(tree_name.c_str()
     otree->Branch("OS",                  &OS,                  "OS/I"                 );
     otree->Branch("SS",                  &SS,                  "SS/I"                 );
 
+    // include weights for anomolous coupling
+    if (isAC) {
+      otree->Branch("wt_a1", &wt_a1);
+      otree->Branch("wt_a2", &wt_a2);
+      otree->Branch("wt_a3", &wt_a3);
+      otree->Branch("wt_L1", &wt_L1);
+      otree->Branch("wt_L1Zg", &wt_L1Zg);
+      otree->Branch("wt_a2int", &wt_a2int);
+      otree->Branch("wt_a3int", &wt_a3int);
+      otree->Branch("wt_L1int", &wt_L1int);
+      otree->Branch("wt_L1Zgint", &wt_L1Zgint);
+
+      otree->Branch("wt_ggH_a1", &wt_ggH_a1);
+      otree->Branch("wt_ggH_a3", &wt_ggH_a3);
+      otree->Branch("wt_ggH_a3int", &wt_ggH_a3int);
+
+      otree->Branch("wt_wh_a1", &wt_wh_a1);
+      otree->Branch("wt_wh_a2", &wt_wh_a2);
+      otree->Branch("wt_wh_a3", &wt_wh_a3);
+      otree->Branch("wt_wh_L1", &wt_wh_L1);
+      otree->Branch("wt_wh_L1Zg", &wt_wh_L1Zg);
+      otree->Branch("wt_wh_a2int", &wt_wh_a2int);
+      otree->Branch("wt_wh_a3int", &wt_wh_a3int);
+      otree->Branch("wt_wh_L1int", &wt_wh_L1int);
+      otree->Branch("wt_wh_L1Zgint", &wt_wh_L1Zgint);
+
+      otree->Branch("wt_zh_a1", &wt_zh_a1);
+      otree->Branch("wt_zh_a2", &wt_zh_a2);
+      otree->Branch("wt_zh_a3", &wt_zh_a3);
+      otree->Branch("wt_zh_L1", &wt_zh_L1);
+      otree->Branch("wt_zh_L1Zg", &wt_zh_L1Zg);
+      otree->Branch("wt_zh_a2int", &wt_zh_a2int);
+      otree->Branch("wt_zh_a3int", &wt_zh_a3int);
+      otree->Branch("wt_zh_L1int", &wt_zh_L1int);
+      otree->Branch("wt_zh_L1Zgint", &wt_zh_L1Zgint);
+    }
 }
 
-void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, TLorentzVector higgs, Float_t Mt) {
+void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t weight, 
+                            TLorentzVector higgs, Float_t Mt, std::shared_ptr<std::vector<double>> ac_weights = nullptr) {
     // create things needed for later
     auto jets(fjets->getJets());
     auto btags(fjets->getBtagJets());
@@ -276,44 +319,79 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     }
     is_qcd = is_looseIso;
 
+    // anomolous coupling files
+    if (ac_weights != nullptr) {
+      wt_a1 = ac_weights->at(0);
+      wt_a2 = ac_weights->at(1);
+      wt_a3 = ac_weights->at(2);
+      wt_L1Zg = ac_weights->at(3);
+      wt_a2int = ac_weights->at(4);
+      wt_a3int = ac_weights->at(5);
+      wt_L1int = ac_weights->at(6);
+      wt_L1Zgint = ac_weights->at(7);
+      wt_ggH_a1 = ac_weights->at(8);
+      wt_ggH_a3 = ac_weights->at(9);
+      wt_ggH_a3 = ac_weights->at(10);
+      wt_ggH_a3int = ac_weights->at(11);
+      wt_wh_a1 = ac_weights->at(12);
+      wt_wh_a2 = ac_weights->at(13);
+      wt_wh_a3 = ac_weights->at(14);
+      wt_wh_L1 = ac_weights->at(15);
+      wt_wh_L1Zg = ac_weights->at(16);
+      wt_wh_a2int = ac_weights->at(17);
+      wt_wh_a3int = ac_weights->at(18);
+      wt_wh_L1int = ac_weights->at(19);
+      wt_wh_L1Zgint = ac_weights->at(20);
+      wt_zh_a1 = ac_weights->at(21);
+      wt_zh_a2 = ac_weights->at(22);
+      wt_zh_a3 = ac_weights->at(23);
+      wt_zh_L1 = ac_weights->at(24);
+      wt_zh_L1Zg = ac_weights->at(25);
+      wt_zh_a2int = ac_weights->at(26);
+      wt_zh_a3int = ac_weights->at(27);
+      wt_zh_L1int = ac_weights->at(28);
+      wt_zh_L1Zgint = ac_weights->at(29);
+    }
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, electron* el, tau* t, jet_factory* fjets, met_factory* fmet, event_info* evt, Float_t mt, Float_t weight) {
+void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet_factory *fjets, met_factory *fmet, event_info *evt, 
+                         Float_t mt, Float_t weight, std::shared_ptr<std::vector<double>>ac_weights = nullptr) {
 
-    TLorentzVector higgs(el->getP4() + t->getP4() + fmet->getP4());
-    generalFill(cat, fjets, fmet, evt, weight, higgs, mt);
+  TLorentzVector higgs(el->getP4() + t->getP4() + fmet->getP4());
+  generalFill(cat, fjets, fmet, evt, weight, higgs, mt, ac_weights);
 
-    el_pt = el->getPt();
-    el_eta = el->getEta();
-    el_phi = el->getPhi();
-    el_mass = el->getMass();
-    el_charge = el->getCharge();
-    el_iso = el->getIso();
-    t1_pt = t->getPt();
-    t1_eta = t->getEta();
-    t1_phi = t->getPhi();
-    t1_mass = t->getMass();
-    t1_charge = t->getCharge();
-    t1_decayMode = t->getL2DecayMode();
-    t1_iso = t->getIso();
-    t1_iso_VL = t->getVLooseIsoMVA();
-    t1_iso_L = t->getLooseIsoMVA();
-    t1_iso_M = t->getMediumIsoMVA();
-    t1_iso_T = t->getTightIsoMVA();
-    t1_iso_VT = t->getVTightIsoMVA();
-    t1_iso_VVT = t->getVVTightIsoMVA();
-    t1_genMatch = t->getGenMatch();
-    dmf = t->getDecayModeFinding();
-    dmf_new = t->getDecayModeFindingNew();
-    vis_mass = (el->getP4() + t->getP4()).M();
+  el_pt = el->getPt();
+  el_eta = el->getEta();
+  el_phi = el->getPhi();
+  el_mass = el->getMass();
+  el_charge = el->getCharge();
+  el_iso = el->getIso();
+  t1_pt = t->getPt();
+  t1_eta = t->getEta();
+  t1_phi = t->getPhi();
+  t1_mass = t->getMass();
+  t1_charge = t->getCharge();
+  t1_decayMode = t->getL2DecayMode();
+  t1_iso = t->getIso();
+  t1_iso_VL = t->getVLooseIsoMVA();
+  t1_iso_L = t->getLooseIsoMVA();
+  t1_iso_M = t->getMediumIsoMVA();
+  t1_iso_T = t->getTightIsoMVA();
+  t1_iso_VT = t->getVTightIsoMVA();
+  t1_iso_VVT = t->getVVTightIsoMVA();
+  t1_genMatch = t->getGenMatch();
+  dmf = t->getDecayModeFinding();
+  dmf_new = t->getDecayModeFindingNew();
+  vis_mass = (el->getP4() + t->getP4()).M();
 
-    otree->Fill();
+  otree->Fill();
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t mt, Float_t weight) {
+void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_factory *fjets, met_factory *fmet, event_info *evt, 
+                         Float_t mt, Float_t weight, std::shared_ptr<std::vector<double>> ac_weights = nullptr) {
 
     TLorentzVector higgs(mu->getP4() + t->getP4() + fmet->getP4());
-    generalFill(cat, fjets, fmet, evt, weight, higgs, mt);
+    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, ac_weights);
 
     mu_pt = mu->getPt();
     mu_eta = mu->getEta();
@@ -342,7 +420,8 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     otree->Fill();
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, ditau *t1, ditau *t2, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight) {
+void slim_tree::fillTree(std::vector<std::string> cat, ditau *t1, ditau *t2, jet_factory *fjets, met_factory *fmet, 
+                         event_info *evt, Float_t weight, std::shared_ptr<std::vector<double>>ac_weights = nullptr) {
 
   TLorentzVector higgs(t1->getP4() + t2->getP4() + fmet->getP4());
   generalFill(cat, fjets, fmet, evt, weight, higgs, mt);

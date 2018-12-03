@@ -33,8 +33,9 @@
 #include "../include/CLParser.h"
 #include "../include/EmbedWeight.h"
 #include "../include/slim_tree.h"
+#include "../include/ACWeighter.h"
 
-    typedef std::vector<double> NumV;
+typedef std::vector<double> NumV;
 
 int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////
@@ -43,20 +44,14 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////
 
   CLParser parser(argc, argv);
-  std::string sample = parser.Option("-s");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
   std::string syst = parser.Option("-u");
+  std::string sample = parser.Option("-s");
+  std::string output_dir = parser.Option("-d");
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
-
-  // YM reweighing code begins
-  bool isVBFAC = sample.find("vbf_ac") != std::string::npos;
-  bool isggHAC = sample.find("ggh_ac") != std::string::npos;
-  bool isWHAC = sample.find("wh_ac") != std::string::npos;
-  bool isZHAC = sample.find("zh_ac") != std::string::npos;
-  // YM reweighing code ends
 
   std::string systname = "";
   if (!syst.empty()) {
@@ -70,8 +65,11 @@ int main(int argc, char* argv[]) {
   auto ntuple = reinterpret_cast<TTree *>(fin->Get("etau_tree"));
 
   // get number of generated events
-  auto counts = reinterpret_cast<TH1D *> f(in->Get("nevents"));
+  auto counts = reinterpret_cast<TH1D *>(fin->Get("nevents"));
   auto gen_number = counts->GetBinContent(2);
+
+  // reweighter for anomolous coupling samples
+  ACWeighter ac_weights = ACWeighter(sample);
 
   // create output file
   auto suffix = "_output.root";
@@ -114,131 +112,6 @@ int main(int argc, char* argv[]) {
   }
 
   ///////////////////////////////////////////////
-  // YM AC reweighing                          //
-  ///////////////////////////////////////////////
-  // a1 - SM
-  // a3 - pseudoscalar (CP-odd)
-  // a2 - SM like heavy mass anomalous Higgs
-  // L1, L1Zg - something like a2, not sure
-  // int - interference term (f05)
-  std::string weightNameComponents[7] = {"a1", "a3", "a3int",
-           "a2", "a2int",
-           "L1", "L1int"};
-  //"L1Zg", "L1Zgint"}; <- for 2017, there will be two additional samples (L1Zg and L1Zgint)
-
-  std::string weightsNames[7];
-  std::string ac_prefix = "";
-  if ( isVBFAC ) ac_prefix = "vbf_ac_";
-  if ( isggHAC ) ac_prefix = "ggh_ac_";
-  if ( isWHAC  ) ac_prefix = "wh_ac_";
-  if ( isZHAC  ) ac_prefix = "zh_ac_";
-  for (auto i=0; i!=7; ++i) weightsNames[i] = ac_prefix + weightNameComponents[i];
-
-  // tree name to extrac weights
-  TFile* weightTreeFile;
-  TTree* weightTree;
-  long long eventID;
-  // variables with weights (for ggH only a1 (SM), a3 (CP-odd), and maxmix (int) is used
-  Double_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint;
-
-  std::string fileName = "";
-  int foundEvents = 0;
-  int crapEvents = 0; // hehe
-  
-  unsigned int numWeightFiles = 7;
-  if ( isggHAC ) numWeightFiles = 3;
-
-  if ( isggHAC || isWHAC || isZHAC || isVBFAC ) {
-    for(unsigned int ifile = 0; ifile != numWeightFiles; ++ifile) {
-      // is it interference sample? if yes, skip the weightsNames that do not have int in them
-      if ( sample.find("int") != std::string::npos && 
-     weightsNames[ifile].find("int") == std::string::npos ) continue;
-      // if it is not an interference sample, skip weightsNames that have int in them
-      if ( sample.find("int") == std::string::npos && 
-     weightsNames[ifile].find("int") != std::string::npos ) continue;
-      
-      if (sample.find(weightsNames[ifile]) != std::string::npos ) {
-  fileName = "data/AC_weights/" + weightsNames[ifile] + ".root";
-  break;
-      }
-    } 
-  }
-
-  if ( fileName != "" ) {
-    weightTreeFile = TFile::Open((TString)fileName);
-    weightTree = (TTree*)weightTreeFile->Get("weights");
-    weightTree->SetBranchAddress("eventID",  &eventID);
-    weightTree->SetBranchAddress("wt_a1",    &wt_a1);
-    weightTree->SetBranchAddress("wt_a3",    &wt_a3);
-    weightTree->SetBranchAddress("wt_a3int", &wt_a3int);
-    if ( isVBFAC || isWHAC || isZHAC ) {
-      weightTree->SetBranchAddress("wt_a2",      &wt_a2);
-      weightTree->SetBranchAddress("wt_a2int",   &wt_a2int);
-      weightTree->SetBranchAddress("wt_L1",      &wt_L1);
-      weightTree->SetBranchAddress("wt_L1int",   &wt_L1int);
-      weightTree->SetBranchAddress("wt_L1Zg",    &wt_L1Zg);
-      weightTree->SetBranchAddress("wt_L1Zgint", &wt_L1Zgint);
-    }
-  }
-
-  std::map<Long64_t, std::vector<double> > acWeights;
-  if ( isVBFAC || isggHAC || isWHAC || isZHAC ) {
-    for(auto i = 0; i < weightTree->GetEntries(); ++i) {
-      weightTree->GetEntry(i);
-      std::vector<double> w;
-      if ( isVBFAC ) {
-  w.push_back(wt_a1);
-  w.push_back(wt_a2);
-  w.push_back(wt_a3);
-  w.push_back(wt_L1);
-  w.push_back(wt_L1Zg);
-  w.push_back(wt_a2int);
-  w.push_back(wt_a3int);
-  w.push_back(wt_L1int);
-  w.push_back(wt_L1Zgint);
-      } else 
-  for (auto j = 0; j != 9; ++j) w.push_back(0);
-      
-      if ( isggHAC ) {
-  w.push_back(wt_a1);
-  w.push_back(wt_a3);
-  w.push_back(wt_a3int);
-      } else 
-  for (auto j = 0; j != 3; ++j) w.push_back(0);
-      
-      if ( isWHAC ) {
-        w.push_back(wt_a1);
-        w.push_back(wt_a2);
-        w.push_back(wt_a3);
-        w.push_back(wt_L1);
-        w.push_back(wt_L1Zg);
-        w.push_back(wt_a2int);
-        w.push_back(wt_a3int);
-        w.push_back(wt_L1int);
-        w.push_back(wt_L1Zgint);
-      } else
-        for (auto j = 0; j != 9; ++j) w.push_back(0);
-
-      if ( isZHAC ) {
-        w.push_back(wt_a1);
-        w.push_back(wt_a2);
-        w.push_back(wt_a3);
-        w.push_back(wt_L1);
-        w.push_back(wt_L1Zg);
-        w.push_back(wt_a2int);
-        w.push_back(wt_a3int);
-        w.push_back(wt_L1int);
-        w.push_back(wt_L1Zgint);
-      } else
-        for (auto j = 0; j != 9; ++j) w.push_back(0);
-
-      // total size of weights is 9 + 3 + 9 + 9 = 30 weights!
-      acWeights[eventID] = w;
-    } // map of weights is complete
-  } 
-  // YM reweighing code ends;
-    
-  ///////////////////////////////////////////////
   // Scale Factors:                            //
   // Read weights, hists, graphs, etc. for SFs //
   ///////////////////////////////////////////////
@@ -250,7 +123,7 @@ int main(int argc, char* argv[]) {
   TFile *zpt_file = new TFile("data/zpt_weights_2016_BtoH.root");
   auto zpt_hist = reinterpret_cast<TH2F *>(zpt_file->Get("zptmass_histo"));
 
-  //H->tau tau scale factors
+  // H->tau tau scale factors
   TFile htt_sf_file("data/htt_scalefactors_v16_3.root");
   RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
   htt_sf_file.Close();
@@ -585,25 +458,12 @@ int main(int argc, char* argv[]) {
       tree_cat.push_back("SS");
     }
 
-    // YM reweighing code begins
-    // Assign weights to the sample
-    std::vector<double> weights;
-    if ( isVBFAC || isggHAC || isWHAC || isZHAC ) {
-      Long64_t currentEventID = event.getLumi();
-      currentEventID = currentEventID*1000000 + event.getEvt();
-      std::map<Long64_t, std::vector<double> >::const_iterator it = acWeights.find(currentEventID);
-      if ( it == acWeights.end() ) {
-  std::cout << "Crap, cannot find " << currentEventID << " in the map" << std::endl;
-  for (auto i = 0; i != 30; ++i) weights.push_back(0);	
-      } else 
-  weights = it->second;
-    } else {
-      for (auto i = 0; i != 30; ++i) weights.push_back(0);
-    }
-    // fill the tree
-    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, weights);
-    // YM reweighing code ends. Complete.
+    Long64_t currentEventID = event.getLumi();
+    currentEventID = currentEventID * 1000000 + event.getEvt();
+    std::vector<double> weights = ac_weights.getWeights(currentEventID);
 
+    // fill the tree
+    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, &weights);
 
     // event categorization
     if (zeroJet) {

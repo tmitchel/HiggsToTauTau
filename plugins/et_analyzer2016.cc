@@ -1,9 +1,10 @@
 // Copyright 2018 Tyler Mitchell
 
 // system includes
-#include <iostream>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <memory>
 #include <unordered_map>
 
 // ROOT includes
@@ -19,19 +20,20 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "../include/ZmmSF.h"
-#include "../include/swiss_army_class.h"
-#include "../include/event_info.h"
-#include "../include/tau_factory.h"
-#include "../include/electron_factory.h"
-#include "../include/muon_factory.h"
-#include "../include/jet_factory.h"
-#include "../include/met_factory.h"
-#include "../include/SF_factory.h"
-#include "../include/LumiReweightingStandAlone.h"
+#include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
 #include "../include/EmbedWeight.h"
+#include "../include/LumiReweightingStandAlone.h"
+#include "../include/SF_factory.h"
+#include "../include/ZmmSF.h"
+#include "../include/electron_factory.h"
+#include "../include/event_info.h"
+#include "../include/jet_factory.h"
+#include "../include/met_factory.h"
+#include "../include/muon_factory.h"
 #include "../include/slim_tree.h"
+#include "../include/swiss_army_class.h"
+#include "../include/tau_factory.h"
 
 typedef std::vector<double> NumV;
 
@@ -42,11 +44,12 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////
 
   CLParser parser(argc, argv);
-  std::string sample = parser.Option("-s");
+  bool doAC = parser.Flag("-a");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
-  std::string output_dir = parser.Option("-d");
   std::string syst = parser.Option("-u");
+  std::string sample = parser.Option("-s");
+  std::string output_dir = parser.Option("-d");
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
@@ -65,6 +68,9 @@ int main(int argc, char* argv[]) {
   // get number of generated events
   auto counts = reinterpret_cast<TH1D*>(fin->Get("nevents"));
   auto gen_number = counts->GetBinContent(2);
+
+  // reweighter for anomolous coupling samples
+  ACWeighter ac_weights = ACWeighter(sample);
 
   // create output file
   auto suffix = "_output.root";
@@ -437,8 +443,15 @@ int main(int argc, char* argv[]) {
       tree_cat.push_back("SS");
     }
 
+    std::shared_ptr<std::vector<double>> weights;
+    Long64_t currentEventID = event.getLumi();
+    currentEventID = currentEventID * 1000000 + event.getEvt();
+    if (doAC) {
+      weights = std::make_shared<std::vector<double>>(ac_weights.getWeights(currentEventID));
+    }
+
     // fill the tree
-    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
+    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, weights);
   }  // close event loop
 
   fin->Close();
