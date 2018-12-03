@@ -38,7 +38,7 @@ class ACWeighter {
 
     // variables with weights (for ggH only a1 (SM), a3 (CP-odd), and maxmix (int) is used
     Double_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint;
-}
+};
 
 ACWeighter::ACWeighter(std::string sample) :
   foundEvents(0),
