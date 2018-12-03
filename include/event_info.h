@@ -177,7 +177,7 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
     input -> SetBranchAddress( "eMatchesEle24Tau30Filter", &filterEle24Tau30 );
     input -> SetBranchAddress( "Ele24Tau30Pass"          , &passEle24Tau30   );
   } else if (analyzer == "mt") {
-    input -> SetBranchAddress( "evt"                     , &convert_evt             );
+    input -> SetBranchAddress( "evt"                     , &evt             );
     input -> SetBranchAddress( "tZTTGenDR"               , &genDR                   );
     input -> SetBranchAddress( "matchIsoMu19Tau20_1"     , &matchIsoMu19Tau20_1     );
     input -> SetBranchAddress( "matchIsoMu19Tau20_2"     , &matchIsoMu19Tau20_2     );
