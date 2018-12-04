@@ -71,6 +71,7 @@ int main(int argc, char* argv[]) {
 
   // reweighter for anomolous coupling samples
   ACWeighter ac_weights = ACWeighter(sample);
+  ac_weights.fillWeightMap();
 
   // create output file
   auto suffix = "_output.root";
