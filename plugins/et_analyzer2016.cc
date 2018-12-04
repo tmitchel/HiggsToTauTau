@@ -459,7 +459,7 @@ int main(int argc, char* argv[]) {
     currentEventID = currentEventID * 1000000 + event.getEvt();
     if (doAC) {
       weights = std::make_shared<std::vector<double>>(ac_weights.getWeights(currentEventID));
-   }
+    }
 
     // fill the tree
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, weights);
