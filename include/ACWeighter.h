@@ -191,6 +191,7 @@ std::vector<double> ACWeighter::getWeights(Long64_t currentEventID) {
   if (it != acWeights.end()) {
     weights = it->second;
   }
+  return weights;
 }
 
 

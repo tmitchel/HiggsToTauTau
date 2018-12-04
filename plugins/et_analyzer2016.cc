@@ -59,16 +59,6 @@ int main(int argc, char* argv[]) {
     systname = "_" + syst;
   }
 
-  if (sample.find("vbf_") != std::string::npos) {
-    sample = "VBF125";
-  } else if (sample.find("ggh_") != std::string::npos) {
-    sample = "ggH125";
-  } else if (sample.find("wh_") != std::string::npos) {
-    // need to figure out plus or minus
-  } else if (sample.find("zh_") != std::string::npos) {
-    sample = "ZH125";
-  }
-
   // open input file
   std::cout << "Opening file... " << sample << std::endl;
   auto fin = TFile::Open(fname.c_str());
@@ -106,7 +96,17 @@ int main(int argc, char* argv[]) {
 
   // cd to root of output file and create tree
   fout->cd();
-  slim_tree* st = new slim_tree("etau_tree"+systname);
+  slim_tree* st = new slim_tree("etau_tree"+systname, doAC);
+
+  if (sample.find("vbf_") != std::string::npos) {
+    sample = "VBF125";
+  } else if (sample.find("ggh_") != std::string::npos) {
+    sample = "ggH125";
+  } else if (sample.find("wh_") != std::string::npos) {
+    // need to figure out plus or minus
+  } else if (sample.find("zh_") != std::string::npos) {
+    sample = "ZH125";
+  }
 
   // get normalization (lumi & xs are in util.h)
   double norm;
@@ -453,12 +453,12 @@ int main(int argc, char* argv[]) {
       tree_cat.push_back("SS");
     }
 
-    std::shared_ptr<std::vector<double>> weights;
+    std::shared_ptr<std::vector<double>> weights(nullptr);
     Long64_t currentEventID = event.getLumi();
     currentEventID = currentEventID * 1000000 + event.getEvt();
     if (doAC) {
       weights = std::make_shared<std::vector<double>>(ac_weights.getWeights(currentEventID));
-    }
+   }
 
     // fill the tree
     st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, weights);
