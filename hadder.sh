@@ -1,27 +1,27 @@
-find Output/trees/*.root -type f -size -15k | xargs rm
-rm Output/trees/*_amc_*.root
+find ${2}/*.root -type f -size -15k | xargs rm
+rm ${2}/*_amc_*.root
 
-hadd Output/trees/Data.root Output/trees/data*
-hadd Output/trees/TTT.root Output/trees/*_TTT_*.root
-hadd Output/trees/TTJ.root Output/trees/*_TTJ_*.root
+hadd ${2}/Data.root ${2}/data*
+hadd ${2}/TTT.root ${2}/*_TTT_*.root
+hadd ${2}/TTJ.root ${2}/*_TTJ_*.root
 
-hadd Output/trees/ZJ.root Output/trees/*_ZJ_*.root
-hadd Output/trees/ZL.root Output/trees/*_ZL_*.root
-hadd Output/trees/mc_ZTT.root Output/trees/DY*ZTT*
-hadd Output/trees/ZTT.root Output/trees/embed${1}-*
+hadd ${2}/ZJ.root ${2}/*_ZJ_*.root
+hadd ${2}/ZL.root ${2}/*_ZL_*.root
+hadd ${2}/mc_ZTT.root ${2}/DY*ZTT*
+hadd ${2}/ZTT.root ${2}/embed${1}-*
 
-hadd Output/trees/W.root Output/trees/WJets*_W_*.root
+hadd ${2}/W.root ${2}/WJets*_W_*.root
 
-hadd Output/trees/VVT.root Output/trees/*_VVT_*.root
-hadd Output/trees/VVJ.root Output/trees/*_VVJ_*.root
+hadd ${2}/VVT.root ${2}/*_VVT_*.root
+hadd ${2}/VVJ.root ${2}/*_VVJ_*.root
 
-hadd Output/trees/EWKZ.root Output/trees/*_EWKZ_*.root
+hadd ${2}/EWKZ.root ${2}/*_EWKZ_*.root
 
-hadd Output/trees/WH125.root Output/trees/WPlus* Output/trees/WMinus*
+hadd ${2}/WH125.root ${2}/WPlus* ${2}/WMinus*
 
-hadd -f Output/trees/VBF125.root Output/trees/VBF*.root
-hadd -f Output/trees/ZH125.root Output/trees/ZH*.root
-hadd Output/trees/ggH125.root Output/trees/ggH*
+hadd -f ${2}/VBF125.root ${2}/VBF*.root
+hadd -f ${2}/ZH125.root ${2}/ZH*.root
+hadd ${2}/ggH125.root ${2}/ggH*
 
-mkdir Output/trees/originals
-mv Output/trees/*output*.root Output/trees/originals
+mkdir ${2}/originals
+mv ${2}/*output*.root ${2}/originals

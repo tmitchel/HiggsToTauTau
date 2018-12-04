@@ -243,7 +243,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
       tree->GetEntry(i);
 
       // only look at opposite-sign events
-      if (OS == 0) {
+      if (OS == 0 || nbjets > 0) {
         continue;
       }
 
@@ -262,10 +262,10 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
         if (cat_0jet > 0) {
           hists.at(channel_prefix + "_0jet").back()->Fill(var, weight);
         }
-        if (cat_boosted > 0) {
+        if (njets == 1 || (njets > 1 && mjj < 400)) {
           hists.at(channel_prefix + "_boosted").back()->Fill(var, weight);
         }
-        if (cat_vbf > 0) {
+        if (njets > 1 && mjj > 400) {
           hists.at(channel_prefix + "_vbf").back()->Fill(var, weight);
         }
       } else if (is_antiTauIso) {
@@ -279,9 +279,9 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
         fillFraction(inclusive, name, vis_mass, njets, weight);
         if (cat_0jet > 0) {
           fillFraction(zeroJet, name, vis_mass, njets, weight);
-        } else if (cat_boosted > 0) {
+        } else if (njets == 1 || (njets > 1 && mjj < 400)) {
           fillFraction(boosted, name, vis_mass, njets, weight);
-        } else if (cat_vbf > 0) {
+        } else if (njets > 1 && mjj > 400) {
           fillFraction(vbf, name, vis_mass, njets, weight);
         }
       }
@@ -349,7 +349,7 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
       tree->GetEntry(i);
 
       // only look at opposite-sign events
-      if (OS == 0) {
+      if (OS == 0 || nbjets > 0) {
         continue;
       }
 
@@ -386,14 +386,14 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
                                               frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
                                               frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)});
           convertDataToFake(fake_0jet, name, var, weight * fakeweight);
-        } else if (cat_boosted) {
+        } else if (njets == 1 || (njets > 1 && mjj < 400)) {
           auto bin = data.at(boosted)->FindBin(var);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                               frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
                                               frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
                                               frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)});
           convertDataToFake(fake_boosted, name, var, weight * fakeweight);
-        } else if (cat_vbf) {
+        } else if (njets > 1 && mjj > 400) {
           auto bin = data.at(vbf)->FindBin(var);
           auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                               frac_w.at(vbf)->GetBinContent(bin_x, bin_y),

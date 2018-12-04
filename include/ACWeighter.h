@@ -1,6 +1,7 @@
 #ifndef INCLUDE_ACWEIGHTER_H_
 #define INCLUDE_ACWEIGHTER_H_
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
@@ -50,10 +51,10 @@ ACWeighter::ACWeighter(std::string sample) :
     "L1", "L1int"
     // "L1Zg", "L1Zgint" <- for 2017, there will be two additional samples (L1Zg and L1Zgint)
   } {
-  isVBFAC = sample.find("vbf_ac") != std::string::npos;
-  isggHAC = sample.find("ggh_ac") != std::string::npos;
-  isWHAC = sample.find("wh_ac") != std::string::npos;
-  isZHAC = sample.find("zh_ac") != std::string::npos;
+  isVBFAC = sample.find("vbf_") != std::string::npos;
+  isggHAC = sample.find("ggH_") != std::string::npos;
+  isWHAC = sample.find("wh_") != std::string::npos;
+  isZHAC = sample.find("zh_") != std::string::npos;
 
   // get the correct prefix
   if (isVBFAC) {
@@ -66,16 +67,13 @@ ACWeighter::ACWeighter(std::string sample) :
     ac_prefix = "zh_ac_";
   }
 
-  // tack prefix on to the beginning of the name
-  for (auto &name : weightNames) {
-    name = ac_prefix + name;
-  }
-
   // ggH AC only has 3 files
   if (isggHAC) {
     numWeightFiles = 3;
   }
 
+  std::transform(sample.begin(), sample.end(), sample.begin(), ::tolower);
+  
   if (isggHAC || isWHAC || isZHAC || isVBFAC) {
     for (unsigned int ifile = 0; ifile != numWeightFiles; ++ifile) {
       // is it interference sample? if yes, skip the weightsNames that do not have int in them
@@ -89,14 +87,14 @@ ACWeighter::ACWeighter(std::string sample) :
           weightNames.at(ifile).find("int") != std::string::npos) {
         continue;
       }
-
+      
       if (sample.find(weightNames.at(ifile)) != std::string::npos) {
-        fileName = "data/AC_weights/" + weightNames[ifile] + ".root";
+        fileName = "data/AC_weights/" + ac_prefix + weightNames[ifile] + ".root";
         break;
       }
     }
   }
-
+  
   // set the branches
   if (fileName != "") {
     weightTreeFile = TFile::Open(fileName.c_str());
@@ -191,12 +189,11 @@ std::vector<double> ACWeighter::getWeights(Long64_t currentEventID) {
   if (it != acWeights.end()) {
     weights = it->second;
   }
+  return weights;
 }
 
 
 ACWeighter::~ACWeighter() {
-  weightTreeFile->Close();
-  delete weightTree;
 }
 
 #endif  // INCLUDE_ACWEIGHTER_H_
