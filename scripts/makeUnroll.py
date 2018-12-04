@@ -18,9 +18,13 @@ parser.add_argument('--year', '-y', action='store',
                     dest='year', default='2016',
                     help='year to plot'   
                     )
-parser.add_argument('--dir', '-d', action='store',
-                    dest='in_dir', default='',
-                    help='input directory starting after ../Output/templates/'
+parser.add_argument('--fin', '-f', action='store',
+                    dest='fin', default='',
+                    help='input file'
+                    )
+parser.add_argument('--fout', action='store',
+                    dest='fout', default='',
+                    help='output file'
                     )
 parser.add_argument('--prefix', '-p', action='store',
                     dest='prefix', default='test',
@@ -40,7 +44,7 @@ gStyle.SetOptStat(0)
 def applyStyle(name, hist, leg):
     overlay = 0
     print name, hist.Integral()
-    if name == 'ZTT':
+    if name == 'embedded':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
         hist.SetName("ZTT")
     elif name == 'TTT':
@@ -58,7 +62,7 @@ def applyStyle(name, hist, leg):
     elif name == 'jetFakes':
         hist.SetFillColor(TColor.GetColor("#ffccff"))
         hist.SetName('jet fakes')
-    elif name == 'Data':
+    elif name == 'data_obs':
         hist.SetLineColor(kBlack)
         hist.SetMarkerStyle(8)
         overlay = 1
@@ -114,41 +118,9 @@ def formatStat(stat):
 
 
 titles = {
-    'el_pt': 'Electron p_{T} [GeV]',
-    'mu_pt': 'Muon p_{T} [GeV]',
-    't1_pt': 'Tau p_{T} [GeV]',
-    'el_eta': 'Electron Eta [GeV]',
-    'mu_eta': 'Muon Eta [GeV]',
-    't1_eta': 'Tau Eta [GeV]',
-    'el_phi': 'Electron Phi [GeV]',
-    'mu_phi': 'Muon Phi [GeV]',
-    't1_phi': 'Tau Phi [GeV]',
-    't1_iso': 'Tau Isolation',
-    'mt' : 'M_{T} [GeV]',
-    'vis_mass': 'M_{vis} [GeV]',
-    'met': 'Missing E_{T} [GeV]',
-    'metphi' : 'Missing E_{T} #Phi [GeV]',
-    'pt_sv': 'SVFit p_{T} [GeV]',
-    'm_sv': 'SVFit Mass [GeV]',
-    'mjj': 'Dijet Mass [GeV]',
-    'Dbkg_VBF': 'MELA VBF Disc',
-    'Dbkg_ggH': 'MELA ggH Disc',
-    'NN_disc': 'NN Disc.',
-    'Q2V1': 'Q^2 V1',
-    'Q2V2': 'Q^2 V2',
-    'Phi': '#phi',
-    'Phi1': '#phi_1',
-    'costheta1': 'Cos(#theta_1)',
-    'costheta2': 'Cos(#theta_2)',
-    'costhetastar': 'Cos(#theta*)',
-    'nbjets': 'N(b-jets)',
-    'nn_vbf_full': 'NN Disc.',
-    'dPhi': '#Delta#phi',
-    'njets': 'N(jets)',
-    'j1_eta': 'Lead Jet Eta',
-    'j2_eta': 'Sub-Lead Jet Eta',
-    'j1_pt': 'Lead Jet p_{T} [GeV]',
-    'j2_pt': 'Sub-Lead Jet p_{T} [GeV]'
+    'unroll_mjj': 'Unrolled mjj vs SVFit mass',
+    'unroll_nn': 'Unrolled NN vs SVFit mass',
+
 }
 
 def formatStack(stack):
@@ -156,7 +128,7 @@ def formatStack(stack):
     stack.GetYaxis().SetTitle('Events / Bin')
     stack.GetYaxis().SetTitleFont(42)
     stack.GetYaxis().SetTitleSize(.05)
-    stack.GetYaxis().SetTitleOffset(1.2)
+    stack.GetYaxis().SetTitleOffset(.92)
     stack.SetTitle('')
 
 def formatOther(other, holder):
@@ -165,18 +137,22 @@ def formatOther(other, holder):
     holder.append(other.Clone())
     return holder
 
-
 def fillStackAndLegend(data, vbf, ggh, holder, leg):
     stack = THStack()
     leg.AddEntry(data, 'Data', 'lep')
     leg.AddEntry(vbf, 'VBF Higgs(125)x50', 'l')
     leg.AddEntry(ggh, 'ggH Higgs(125)x50', 'l')
+    leg.AddEntry(filter(lambda x: x.GetName() == 'ZTT', holder)[0], 'ZTT', 'f')
+    leg.AddEntry(filter(lambda x: x.GetName() == 'ZL', holder)[0], 'ZL', 'f')
+    leg.AddEntry(filter(lambda x: x.GetName() == 'jet fakes', holder)[0], 'jetFakes', 'f')
+    leg.AddEntry(filter(lambda x: x.GetName() == 'TTT', holder)[0], 'TTT', 'f')
+    leg.AddEntry(filter(lambda x: x.GetName() == 'Other', holder)[0], 'Others', 'f')
+
     holder = sorted(holder, key=lambda hist: hist.Integral())
     for hist in holder:
         stack.Add(hist)
-    for hist in reversed(holder):
-        leg.AddEntry(hist, hist.GetName(), 'f')
     return stack, leg
+
 
 def createLegend():
     leg = TLegend(0.5, 0.45, 0.85, 0.85)
@@ -206,7 +182,7 @@ def formatPull(pull):
     pull.GetYaxis().SetTitle('Data / MC')
     pull.GetYaxis().SetTitleSize(0.12)
     pull.GetYaxis().SetTitleFont(42)
-    pull.GetYaxis().SetTitleOffset(.475)
+    pull.GetYaxis().SetTitleOffset(.37)
     pull.GetYaxis().SetLabelSize(.12)
     pull.GetYaxis().SetNdivisions(204)
     return pull
@@ -259,20 +235,22 @@ def blindData(data, signal, background):
         sig = signal.GetBinContent(ibin)
         bkg = background.GetBinContent(ibin)
         if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
-            data.SetBinContent(ibin, 0)
+            print ibin, 'be tooooo significant'
+            data.SetBinContent(ibin, -1)
 
-    if args.var == 'NN_disc':
-        middleBin = data.FindBin(0.5)
-        for ibin in range(middleBin, data.GetNbinsX()+1):
-            data.SetBinContent(ibin, 0)
+        if args.var == 'unroll_nn':
+            blindBins = [3, 4, 5, 8, 9, 10, 13, 14, 15, 18, 19, 20]
+            for ibin in blindBins:
+                data.SetBinContent(ibin, -1)
+
 
     return data
 
 def main():
-    fin = TFile('../Output/templates/{}/template_{}_{}_ff{}.root'.format(args.in_dir, args.channel, args.var, args.year), 'read')
+    fin = TFile(args.fin, 'read')
     idir = fin.Get(args.cat)
     leg = createLegend()
-    data = idir.Get('Data').Clone()
+    data = idir.Get('data_obs').Clone()
     vbf = data.Clone()
     vbf.Reset()
     ggh = vbf.Clone()
@@ -395,7 +373,7 @@ def main():
     line1.Draw()
     line2.Draw()
 
-    can.SaveAs('../Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat, args.year))
+    can.SaveAs('{}.pdf'.format(args.fout))
 
 
 if __name__ == "__main__":
