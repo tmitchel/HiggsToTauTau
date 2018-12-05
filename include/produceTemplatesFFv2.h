@@ -1,11 +1,11 @@
 
 // system includes
+#include <dirent.h>
+#include <sys/types.h>
 #include <map>
 #include <string>
 #include <vector>
-#include <dirent.h>
 #include <iostream>
-#include <sys/types.h>
 
 // ROOT includes
 #include "TFile.h"
