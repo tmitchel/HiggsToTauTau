@@ -278,9 +278,9 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
         var = higgs_pT;
       }
 
-      if (cat0) {
+      if (is_signal) {
         hists.at(channel_prefix + "_inclusive").back()->Fill(var, weight);
-        if (cat_0jet > 0) {
+        if (cat0) {
           hists.at(channel_prefix + "_0jet").back()->Fill(var, weight);
         }
         if (cat1) {
@@ -298,11 +298,11 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
         }
 
         fillFraction(inclusive, name, vis_mass, njets, weight);
-        if (cat_0jet > 0) {
+        if (cat0) {
           fillFraction(zeroJet, name, vis_mass, njets, weight);
-        } else if (njets == 1 || (njets > 1 && mjj < 400)) {
+        } else if (cat1) {
           fillFraction(boosted, name, vis_mass, njets, weight);
-        } else if (njets > 1 && mjj > 400) {
+        } else if (cat2) {
           fillFraction(vbf, name, vis_mass, njets, weight);
         }
       }
