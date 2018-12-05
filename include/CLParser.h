@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <string>
+#include <vector>
 
 class CLParser {
     private:
