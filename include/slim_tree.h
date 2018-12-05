@@ -321,35 +321,38 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
 
     // anomolous coupling files
     if (ac_weights != nullptr) {
-      wt_a1 = ac_weights->at(0);
-      wt_a2 = ac_weights->at(1);
-      wt_a3 = ac_weights->at(2);
-      wt_L1Zg = ac_weights->at(3);
-      wt_a2int = ac_weights->at(4);
-      wt_a3int = ac_weights->at(5);
-      wt_L1int = ac_weights->at(6);
-      wt_L1Zgint = ac_weights->at(7);
-      wt_ggH_a1 = ac_weights->at(8);
-      wt_ggH_a3 = ac_weights->at(9);
-      wt_ggH_a3 = ac_weights->at(10);
-      wt_ggH_a3int = ac_weights->at(11);
-      wt_wh_a1 = ac_weights->at(12);
-      wt_wh_a2 = ac_weights->at(13);
-      wt_wh_a3 = ac_weights->at(14);
-      wt_wh_L1 = ac_weights->at(15);
-      wt_wh_L1Zg = ac_weights->at(16);
-      wt_wh_a2int = ac_weights->at(17);
-      wt_wh_a3int = ac_weights->at(18);
-      wt_wh_L1int = ac_weights->at(19);
+      wt_a1         = ac_weights->at(0);
+      wt_a2         = ac_weights->at(1);
+      wt_a3         = ac_weights->at(2);
+      wt_L1         = ac_weights->at(3);
+      wt_L1Zg       = ac_weights->at(4);
+      wt_a2int      = ac_weights->at(5);
+      wt_a3int      = ac_weights->at(6);
+      wt_L1int      = ac_weights->at(7);
+      wt_L1Zgint    = ac_weights->at(8);
+
+      wt_ggH_a1     = ac_weights->at(9);
+      wt_ggH_a3     = ac_weights->at(10);
+      wt_ggH_a3int  = ac_weights->at(11);
+
+      wt_wh_a1      = ac_weights->at(12);
+      wt_wh_a2      = ac_weights->at(13);
+      wt_wh_a3      = ac_weights->at(14);
+      wt_wh_L1      = ac_weights->at(15);
+      wt_wh_L1Zg    = ac_weights->at(16);
+      wt_wh_a2int   = ac_weights->at(17);
+      wt_wh_a3int   = ac_weights->at(18);
+      wt_wh_L1int   = ac_weights->at(19);
       wt_wh_L1Zgint = ac_weights->at(20);
-      wt_zh_a1 = ac_weights->at(21);
-      wt_zh_a2 = ac_weights->at(22);
-      wt_zh_a3 = ac_weights->at(23);
-      wt_zh_L1 = ac_weights->at(24);
-      wt_zh_L1Zg = ac_weights->at(25);
-      wt_zh_a2int = ac_weights->at(26);
-      wt_zh_a3int = ac_weights->at(27);
-      wt_zh_L1int = ac_weights->at(28);
+
+      wt_zh_a1      = ac_weights->at(21);
+      wt_zh_a2      = ac_weights->at(22);
+      wt_zh_a3      = ac_weights->at(23);
+      wt_zh_L1      = ac_weights->at(24);
+      wt_zh_L1Zg    = ac_weights->at(25);
+      wt_zh_a2int   = ac_weights->at(26);
+      wt_zh_a3int   = ac_weights->at(27);
+      wt_zh_L1int   = ac_weights->at(28);
       wt_zh_L1Zgint = ac_weights->at(29);
     }
 }

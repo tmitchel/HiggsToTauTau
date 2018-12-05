@@ -48,7 +48,7 @@ ACWeighter::ACWeighter(std::string sample) :
   weightNames {
     "a1", "a3", "a3int",
     "a2", "a2int",
-    "L1", "L1int"
+    "l1", "l1int"
     // "L1Zg", "L1Zgint" <- for 2017, there will be two additional samples (L1Zg and L1Zgint)
   } {
   isVBFAC = sample.find("vbf_") != std::string::npos;
@@ -77,6 +77,7 @@ ACWeighter::ACWeighter(std::string sample) :
   if (isggHAC || isWHAC || isZHAC || isVBFAC) {
     for (unsigned int ifile = 0; ifile != numWeightFiles; ++ifile) {
       // is it interference sample? if yes, skip the weightsNames that do not have int in them
+
       if (sample.find("int") != std::string::npos &&
           weightNames.at(ifile).find("int") == std::string::npos) {
         continue;
@@ -94,6 +95,8 @@ ACWeighter::ACWeighter(std::string sample) :
       }
     }
   }
+
+  std::cout << "fileName: " << fileName << std::endl;
   
   // set the branches
   if (fileName != "") {
