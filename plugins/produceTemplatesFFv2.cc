@@ -1,26 +1,7 @@
 // Copyright 2018 Tyler Mitchell
-
-// system includes
-#include <dirent.h>
-#include <sys/types.h>
-#include <iostream>
-
-// ROOT includes
-#include "TFile.h"
-#include "TH2F.h"
-#include "TTree.h"
-
 // user includes
 #include "CLParser.h"
 #include "produceTemplatesFFv2.h"
-
-// FF
-#include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
-#include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTFormula.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTGraph.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTH2F.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTH3D.h"
 
 int main(int argc, char *argv[]) {
   // get CLI arguments

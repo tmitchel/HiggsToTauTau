@@ -1,7 +1,24 @@
 
+// system includes
 #include <map>
 #include <string>
 #include <vector>
+#include <dirent.h>
+#include <iostream>
+#include <sys/types.h>
+
+// ROOT includes
+#include "TFile.h"
+#include "TH2F.h"
+#include "TTree.h"
+
+// FF
+#include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
+#include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
+#include "HTTutilities/Jet2TauFakes/interface/WrapperTFormula.h"
+#include "HTTutilities/Jet2TauFakes/interface/WrapperTGraph.h"
+#include "HTTutilities/Jet2TauFakes/interface/WrapperTH2F.h"
+#include "HTTutilities/Jet2TauFakes/interface/WrapperTH3D.h"
 
 enum categories { zeroJet,
                   boosted,
@@ -21,7 +38,7 @@ void read_directory(const std::string &name, std::vector<std::string> *v) {
 
 // class to hold the histograms until I'm ready to write them
 class histHolder {
-public:
+ public:
   histHolder(std::string, std::string, bool, bool);
   ~histHolder() { delete ff_weight; }
   void writeHistos();
