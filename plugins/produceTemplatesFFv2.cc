@@ -312,9 +312,12 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
       }
 
       if (!old_selection) {
+        if (nbjets > 0) {
+          continue;
+        }
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && mjj < 400));
-        cat2 = (njets > 1 && mjj > 400 && nbjets == 0);
+        cat2 = (njets > 1 && mjj > 400);
       } else {
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
@@ -429,9 +432,12 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
       }
 
       if (!old_selection) {
+        if (nbjets > 0) {
+          continue;
+        }
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && mjj < 400));
-        cat2 = (njets > 1 && mjj > 400 && nbjets == 0);
+        cat2 = (njets > 1 && mjj > 400);
       } else {
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
@@ -534,9 +540,12 @@ void histHolder::runSystematics(std::vector<std::string> files, std::string dir,
       }
 
       if (!old_selection) {
+        if (nbjets > 0) {
+          continue;
+        }
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && mjj < 400));
-        cat2 = (njets > 1 && mjj > 400 && nbjets == 0);
+        cat2 = (njets > 1 && mjj > 400);
       } else {
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
