@@ -134,12 +134,12 @@ titles = {
     'Dbkg_VBF': 'MELA VBF Disc',
     'Dbkg_ggH': 'MELA ggH Disc',
     'NN_disc': 'NN Disc.',
-    'Q2V1': 'Q^2 V1',
-    'Q2V2': 'Q^2 V2',
+    'Q2V1': 'Q^{2} V1 [GeV]',
+    'Q2V2': 'Q^{2} V2 [GeV]',
     'Phi': '#phi',
-    'Phi1': '#phi_1',
-    'costheta1': 'Cos(#theta_1)',
-    'costheta2': 'Cos(#theta_2)',
+    'Phi1': '#phi_{1}',
+    'costheta1': 'Cos(#theta_{1})',
+    'costheta2': 'Cos(#theta_{2})',
     'costhetastar': 'Cos(#theta*)',
     'nbjets': 'N(b-jets)',
     'nn_vbf_full': 'NN Disc.',
@@ -148,7 +148,8 @@ titles = {
     'j1_eta': 'Lead Jet Eta',
     'j2_eta': 'Sub-Lead Jet Eta',
     'j1_pt': 'Lead Jet p_{T} [GeV]',
-    'j2_pt': 'Sub-Lead Jet p_{T} [GeV]'
+    'j2_pt': 'Sub-Lead Jet p_{T} [GeV]',
+    'hjj_pT': 'pT(Higgs,j1,j2) [GeV]'
 }
 
 def formatStack(stack):
