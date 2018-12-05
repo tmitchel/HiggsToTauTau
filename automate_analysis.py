@@ -109,6 +109,14 @@ for ifile in fileList:
         names = ['ttH'+mass]
     elif 'embed' in sample:
         names = ['embed']
+    elif 'vbf' in sample:
+        names = ['VBF125']
+    elif 'ggH' in sample:
+        names = ['ggH125']
+    elif 'wh' in sample:
+        names = ['WH125']
+    elif 'zh' in sample:
+        names = ['ZH125']
     else: 
         names = ['VV', 'VVJ', 'VVT']
 
