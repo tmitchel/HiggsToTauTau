@@ -311,17 +311,17 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
         observable = mjj;
       }
 
-      if (!old_selection) {
+      if (old_selection) {
+        cat0 = (cat_0jet > 0);
+        cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
+        cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50);
+      } else {
         if (nbjets > 0) {
           continue;
         }
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && mjj < 400));
         cat2 = (njets > 1 && mjj > 400);
-      } else {
-        cat0 = (cat_0jet > 0);
-        cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
-        cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50);
       }
 
       if (is_signal) {
@@ -398,7 +398,7 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
     tree->SetBranchAddress("t1_pt", &t1_pt);
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
     tree->SetBranchAddress("njets", &njets);
-    tree->SetBranchAddress("njets", &njets);
+    tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mt", &mt);
     tree->SetBranchAddress(iso.c_str(), &lep_iso);
@@ -431,17 +431,17 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
         observable = mjj;
       }
 
-      if (!old_selection) {
+      if (old_selection) {
+        cat0 = (cat_0jet > 0);
+        cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
+        cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50);
+      } else {
         if (nbjets > 0) {
           continue;
         }
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && mjj < 400));
         cat2 = (njets > 1 && mjj > 400);
-      } else {
-        cat0 = (cat_0jet > 0);
-        cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
-        cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50);
       }
 
       if (is_antiTauIso) {
@@ -506,7 +506,7 @@ void histHolder::runSystematics(std::vector<std::string> files, std::string dir,
     tree->SetBranchAddress("t1_pt", &t1_pt);
     tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
     tree->SetBranchAddress("njets", &njets);
-    tree->SetBranchAddress("njets", &njets);
+    tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("vis_mass", &vis_mass);
     tree->SetBranchAddress("mt", &mt);
     tree->SetBranchAddress(iso.c_str(), &lep_iso);
@@ -539,17 +539,17 @@ void histHolder::runSystematics(std::vector<std::string> files, std::string dir,
         observable = mjj;
       }
 
-      if (!old_selection) {
+      if (old_selection) {
+        cat0 = (cat_0jet > 0);
+        cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
+        cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50);
+      } else {
         if (nbjets > 0) {
           continue;
         }
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && mjj < 400));
         cat2 = (njets > 1 && mjj > 400);
-      } else {
-        cat0 = (cat_0jet > 0);
-        cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
-        cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50);
       }
 
       if (is_antiTauIso) {
