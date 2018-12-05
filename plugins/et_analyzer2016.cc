@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
   } else if (sample.find("zh_") != std::string::npos) {
     sample = "ZH125";
   }
-  
+
   // get normalization (lumi & xs are in util.h)
   double norm;
   if (isData) {
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
   } else {
     norm = helper->getLuminosity2016() * helper->getCrossSection(sample) / gen_number;
   }
-  
+
   ///////////////////////////////////////////////
   // Scale Factors:                            //
   // Read weights, hists, graphs, etc. for SFs //
