@@ -49,11 +49,13 @@ This section is intended to help someone quickly get started producing plots and
 To start, there are many files containing scale factors, corrections, etc. that need to be gathered. For those that can't be easily grabbed, I put a tarball in the /afs area that can be copied.
 
 1. Setup a new CMSSW release (needed for fake factor and 2017 tau trigger SFs)
-    - `cmsrel CMSSW_9_4_0 && cd CMSSW_9_4_0/src && cmsenv`
+```
+cmsrel CMSSW_9_4_0 && cd CMSSW_9_4_0/src && cmsenv
+```
 2. Clone and build all necessary repositories, including this one.
     - clone this repo
         ```
-        git clone ssh://git@gitlab.cern.ch:7999/KState-HEP-HTT/ltau_analyzers.git
+        git clone -b acWeights ssh://git@gitlab.cern.ch:7999/KState-HEP-HTT/ltau_analyzers.git
         ```
     - get lepton SF files
         ```
