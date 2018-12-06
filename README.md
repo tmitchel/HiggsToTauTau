@@ -104,7 +104,7 @@ cmsrel CMSSW_9_4_0 && cd CMSSW_9_4_0/src && cmsenv
     This command requires some explanation because it has many options. The purpose of this script is to run a provided binary on all *.root files in a given directory. The binary is supplied with the `-e` option and the input directory is supplied with the `-p` option. Because the analyzers use the name of the input root file to lookup the correct cross-section, any prefixes added to the filenames (looking at you SVFit and MELA) need to be stripped before providing the sample name to the binary. This is done using the `-P` option. Note that this is an uppercase P, while the path is provided with lowercase p. All processed files are stored in `Output/trees/`. The `--output-dir` option can be used to create a new directory in `Output/trees/` and store the processed files there. Lastly, the `-a` option enable the AC reweighter. The reweighter is used for AC samples to read weights from `data/AC_weights` files and store them in the output tree.
 
     NOTE: The AC sample directory shown in the previous command is the current, up-to-date directory. The binaries will complain about missing branches (mainly trigger branches), but they aren't used for 2016 and the warnings can be ignored.
-6. hadd the appropriate files together
+6. hadd the appropriate files together `(Don't do this for AC samples. hadd manually until we have validated that weights work correctly)`
     ```
     bash hadder.sh El Output/trees/etau2016_AC_test1
     ```
