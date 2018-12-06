@@ -11,6 +11,7 @@ int main(int argc, char *argv[]) {
   bool old = parser.Flag("-O");
   std::string dir = parser.Option("-d");
   std::string year = parser.Option("-y");
+  std::string acWeight = parser.Option("-w");
   std::string tree_name = parser.Option("-t");
 
   // get input file directory
@@ -40,10 +41,7 @@ int main(int argc, char *argv[]) {
   read_directory(dir, &files);
 
   hists->histoLoop(files, dir, tree_name);
-  hists->getJetFakes(files, dir, tree_name);
-  if (doSyst) {
-    hists->runSystematics(files, dir, tree_name);
-  }
+  hists->getJetFakes(files, dir, tree_name, acWeight, doSyst);
   hists->writeHistos();
 
   delete hists->ff_weight;
@@ -159,7 +157,7 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
   }
 }
 
-void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, std::string tree_name) {
+void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, std::string tree_name, std::string acWeight = "None", bool doSyst = false) {
   float observable(0.);
   bool cat0(false), cat1(false), cat2(false);
   for (auto ifile : files) {
@@ -169,6 +167,12 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
 
     if (name != "Data") {
       continue;
+    }
+
+    // create systematics histograms
+    if (doSyst) {
+      initSystematics(name);
+      fout->cd();
     }
 
     // get variables from file
@@ -258,117 +262,38 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
                                               frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)});
           convertDataToFake(fake_vbf, name, observable, m_sv, weight * fakeweight);
         }
-      }
-    }
-  }
-}
 
-void histHolder::runSystematics(std::vector<std::string> files, std::string dir, std::string tree_name) {
-  float observable(0.);
-  bool cat0(false), cat1(false), cat2(false);
-  for (auto ifile : files) {
-    // only need to look at data
-    if (ifile.find("Data") == std::string::npos) {
-      continue;
-    }
-
-    auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
-    auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
-    std::string name = ifile.substr(0, ifile.find(".")).c_str();
-
-    initSystematics(name);
-    fout->cd();
-
-    // get variables from file
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, OS;
-    Float_t higgs_pT, mjj, m_sv, weight, t1_pt, t1_decayMode, njets, nbjets, vis_mass, mt, lep_iso, NN_disc;
-
-    std::string iso;
-    if (tree_name.find("etau_tree") != std::string::npos) {
-      iso = "el_iso";
-    } else if (tree_name.find("mutau_tree") != std::string::npos) {
-      iso = "mu_iso";
-    }
-
-    tree->SetBranchAddress("evtwt", &weight);
-    tree->SetBranchAddress("t1_pt", &t1_pt);
-    tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
-    tree->SetBranchAddress("njets", &njets);
-    tree->SetBranchAddress("nbjets", &nbjets);
-    tree->SetBranchAddress("vis_mass", &vis_mass);
-    tree->SetBranchAddress("mt", &mt);
-    tree->SetBranchAddress(iso.c_str(), &lep_iso);
-    tree->SetBranchAddress("higgs_pT", &higgs_pT);
-    tree->SetBranchAddress("mjj", &mjj);
-    tree->SetBranchAddress("m_sv", &m_sv);
-    tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
-    tree->SetBranchAddress("cat_0jet", &cat_0jet);
-    tree->SetBranchAddress("cat_boosted", &cat_boosted);
-    tree->SetBranchAddress("cat_vbf", &cat_vbf);
-    tree->SetBranchAddress("cat_VH", &cat_VH);
-    tree->SetBranchAddress("OS", &OS);
-
-    if (doNN) {
-      tree->SetBranchAddress("NN_disc", &NN_disc);
-    }
-
-    for (auto i = 0; i < tree->GetEntries(); i++) {
-      tree->GetEntry(i);
-
-      // only look at opposite-sign events
-      if (OS == 0) {
-        continue;
-      }
-
-      // choose VBF category variable
-      if (doNN) {
-        observable = NN_disc;
-      } else {
-        observable = mjj;
-      }
-
-      if (old_selection) {
-        cat0 = (cat_0jet > 0);
-        cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
-        cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50);
-      } else {
-        if (nbjets > 0) {
-          continue;
-        }
-        cat0 = (cat_0jet > 0);
-        cat1 = (njets == 1 || (njets > 1 && mjj < 400));
-        cat2 = (njets > 1 && mjj > 400);
-      }
-
-      if (is_antiTauIso) {
-        for (int i = 0; i < systematics.size(); i++) {
-          if (cat0) {
-            auto bin_x = data.at(zeroJet)->GetXaxis()->FindBin(vis_mass);
-            auto bin_y = data.at(zeroJet)->GetYaxis()->FindBin(njets);
-            auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                                frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
-                                                frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
-                                                frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)},
-                                               systematics.at(i));
-            FF_systs.at("et_0jet").at(i)->Fill(t1_decayMode, vis_mass, weight * fakeweight);
-          } else if (cat1) {
-            auto bin_x = data.at(boosted)->GetXaxis()->FindBin(vis_mass);
-            auto bin_y = data.at(boosted)->GetYaxis()->FindBin(njets);
-            auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                                frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
-                                                frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
-                                                frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)},
-                                               systematics.at(i));
-            FF_systs.at("et_boosted").at(i)->Fill(higgs_pT, m_sv, weight * fakeweight);
-          } else if (cat2) {
-            auto bin_x = data.at(vbf)->GetXaxis()->FindBin(vis_mass);
-            auto bin_y = data.at(vbf)->GetYaxis()->FindBin(njets);
-            auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                                frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
-                                                frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
-                                                frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)},
-                                               systematics.at(i));
-            FF_systs.at("et_vbf").at(i)->Fill(mjj, m_sv, weight * fakeweight);
+        // loop through all systematic names and get the corresponding weight to fill a histogram
+        if (doSyst) {
+          for (int i = 0; i < systematics.size(); i++) {
+            if (cat0) {
+              auto bin_x = data.at(zeroJet)->GetXaxis()->FindBin(vis_mass);
+              auto bin_y = data.at(zeroJet)->GetYaxis()->FindBin(njets);
+              auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
+                                                  frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
+                                                  frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
+                                                  frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)},
+                                                systematics.at(i));
+              FF_systs.at("et_0jet").at(i)->Fill(t1_decayMode, vis_mass, weight * fakeweight);
+            } else if (cat1) {
+              auto bin_x = data.at(boosted)->GetXaxis()->FindBin(vis_mass);
+              auto bin_y = data.at(boosted)->GetYaxis()->FindBin(njets);
+              auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
+                                                  frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
+                                                  frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
+                                                  frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)},
+                                                systematics.at(i));
+              FF_systs.at("et_boosted").at(i)->Fill(higgs_pT, m_sv, weight * fakeweight);
+            } else if (cat2) {
+              auto bin_x = data.at(vbf)->GetXaxis()->FindBin(vis_mass);
+              auto bin_y = data.at(vbf)->GetYaxis()->FindBin(njets);
+              auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
+                                                  frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
+                                                  frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
+                                                  frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)},
+                                                systematics.at(i));
+              FF_systs.at("et_vbf").at(i)->Fill(mjj, m_sv, weight * fakeweight);
+            }
           }
         }
       }
