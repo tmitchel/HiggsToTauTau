@@ -146,10 +146,10 @@ int main(int argc, char* argv[]) {
   embed_file.Close();
 
   // trigger and ID scale factors
-  auto myScaleFactor_trgEle25 = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_eff.root");
-  auto myScaleFactor_id = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_IsoLt0p1_eff.root");
-  auto myScaleFactor_trgEle25Anti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_antiisolated_Iso0p1to0p3_eff_rb.root");
-  auto myScaleFactor_idAnti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_antiisolated_Iso0p1to0p3_eff.root");
+  auto myScaleFactor_trgEle25 = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_eff.root");
+  auto myScaleFactor_id = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_IsoLt0p1_eff.root");
+  auto myScaleFactor_trgEle25Anti = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_antiisolated_Iso0p1to0p3_eff_rb.root");
+  auto myScaleFactor_idAnti = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_antiisolated_Iso0p1to0p3_eff.root");
 
   TFile * f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
   TGraph * g_NNLOPS_0jet = reinterpret_cast<TGraph*>(f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_0jet"));

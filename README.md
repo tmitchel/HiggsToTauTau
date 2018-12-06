@@ -61,7 +61,12 @@ To start, there are many files containing scale factors, corrections, etc. that 
         ```
     - get tau trigger SF repo
         ```
+        mkdir TauTriggerSFs2017
+        cd TauTriggerSFs2017
         git clone -b tauTriggers2017_reMiniaod_test git@github.com:truggles/TauTriggerSFs2017.git TauTriggerSFs2017
+        cd TauTriggerSFs2017
+        scram b -j 8
+        cd ../..
         ```
     -  <a href="https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsToTauTauJet2TauFakes#Install">Follow Jet2TauFakes installation instructions</a>
         - change `git clone -b 2017` to `git clone -b 2016` to get the fake factors for 2016
@@ -84,11 +89,11 @@ To start, there are many files containing scale factors, corrections, etc. that 
 4. Later, you will also need to a plugin for creating 1D templates for plotting and a plugin for creating 2D templates for Combine. Might as well compile these right now.
     - Compile the binary for creating 1D templates with fake-factor estimation (using recommended 2D method). These are used for plotting later
         ```
-        ./build plugins/fakeFactor2D.cc plotFF
+        ./build plugins/fakeFactor2D.cc plotFF -f
         ```
     - Compile the binary for creating the 2D template that is given to Combine for limit setting. This also uses embedded samples and 2D fake factor
         ```
-        ./build plugins/produceTemplatesFFv2.cc finalFF
+        ./build plugins/produceTemplatesFFv2.cc finalFF -f
         ```
 5. Use the python automation script to processes all MELA'd files and produce output trees with selection branches and weight branches
     ```
