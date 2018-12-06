@@ -173,9 +173,9 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
   // get FakeFactor workspace
   TFile *ff_file;
   if (year == "2017") {
-    ff_file = new TFile(("${CMSSW_BASE}/src/SMHTT_Analyzers/data/testFF2017/SM2017/tight/vloose/"+channel_prefix+"/fakeFactors.root").c_str(), "READ");
+    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ");
   } else if (year == "2016") {
-    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/"+channel_prefix+"/fakeFactors_20180831_tight.root").c_str(), "READ");
+    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_20180831_tight.root").c_str(), "READ");
   } else {
     std::cerr << "Bad year" << std::endl;
   }

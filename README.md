@@ -67,10 +67,12 @@ To start, there are many files containing scale factors, corrections, etc. that 
         - change `git clone -b 2017` to `git clone -b 2016` to get the fake factors for 2016
     - Compile all repos
         ```
+        cd ../..
         scram b -j 8
         ```
     - Get the tarball full of missing files
         ```
+        cd ltau_analyzers
         cp /afs/hep.wisc.edu/home/tmitchel/public/ltau_analyzer_data.tar.gz .
         tar xzvf ltau_analyzer_data.tar.gz
         ```
