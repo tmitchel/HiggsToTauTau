@@ -55,8 +55,8 @@ class histHolder {
   std::string channel_prefix;
   std::vector<std::string> systematics;
   std::vector<float> mvis_bins, njets_bins;
-  std::map<std::string, std::vector<TH2F *>> hists;
-  std::map<std::string, std::vector<TH2F *>> FF_systs;
+  std::map<std::string, std::string> acNameMap;
+  std::map<std::string, std::vector<TH2F *>> hists, FF_systs;
   TH2F *fake_0jet, *fake_boosted, *fake_vbf;
   std::vector<TH2F *> data, frac_w, frac_tt, frac_real, frac_qcd;
 
@@ -94,6 +94,38 @@ histHolder::histHolder(std::string channel_prefix, std::string year, bool doNN, 
   channel_prefix(channel_prefix),
   doNN(doNN),
   old_selection(old),
+  acNameMap {
+    {"wt_ggH_a1", "reweighted_GGH2Jets_0PM125"},
+    {"wt_ggH_a3", "reweighted_GGH2Jets_0M125"},
+    {"wt_ggH_a3int", "reweighted_GGH2Jets_0Mf05ph0125"},
+    {"wt_wh_a1", "reweighted_WH_htt_0PM125"},
+    {"wt_wh_a2", "reweighted_WH_htt_0PH125"},
+    {"wt_wh_a2int", "reweighted_WH_htt_0PHf05ph0125"},
+    {"wt_wh_a3", "reweighted_WH_htt_0M125"},
+    {"wt_wh_a3int", "reweighted_WH_htt_0Mf05ph0125"},
+    {"wt_wh_L1", "reweighted_WH_htt_0L1125"},
+    {"wt_wh_L1int", "reweighted_WH_htt_0L1f05ph0125"},
+    {"wt_wh_L1Zg", "reweighted_WH_htt_0L1Zg125"},
+    {"wt_wh_L1Zgint", "reweighted_WH_htt_0L1Zgf05ph0125"},
+    {"wt_zh_a1", "reweighted_ZH_htt_0PM125"},
+    {"wt_zh_a2", "reweighted_ZH_htt_0PH125"},
+    {"wt_zh_a2int", "reweighted_ZH_htt_0PHf05ph0125"},
+    {"wt_zh_a3", "reweighted_ZH_htt_0M125"},
+    {"wt_zh_a3int", "reweighted_ZH_htt_0Mf05ph0125"},
+    {"wt_zh_L1", "reweighted_ZH_htt_0L1125"},
+    {"wt_zh_L1int", "reweighted_ZH_htt_0L1f05ph0125"},
+    {"wt_zh_L1Zg", "reweighted_ZH_htt_0L1Zg125"},
+    {"wt_zh_L1Zgint", "reweighted_ZH_htt_0L1Zgf05ph0125"},
+    {"wt_a1", "reweighted_qqH_htt_0PM125"},
+    {"wt_a2", "reweighted_qqH_htt_0PH125"},
+    {"wt_a2int", "reweighted_qqH_htt_0PHf05ph0125"},
+    {"wt_a3", "reweighted_qqH_htt_0M125"},
+    {"wt_a3int", "reweighted_qqH_htt_0Mf05ph0125"},
+    {"wt_L1", "reweighted_qqH_htt_0L1125"},
+    {"wt_L1int", "reweighted_qqH_htt_0L1f05ph0125"},
+    {"wt_L1Zg", "reweighted_qqH_htt_0L1Zg125"},
+    {"wt_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"},
+  }
   systematics {
     "ff_qcd_syst_up"            , "ff_qcd_syst_down"           , "ff_qcd_dm0_njet0_stat_up"   ,
     "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up"   , "ff_qcd_dm0_njet1_stat_down" ,
