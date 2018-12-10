@@ -43,10 +43,10 @@ int main(int argc, char *argv[]) {
   std::vector<string> files;
   read_directory(dir, &files);
 
-  hists->histoLoop(files, dir, tree_name);
+  hists->histoLoop(files, dir, tree_name, "None");
   hists->getJetFakes(files, dir, tree_name, doSyst);
   if (doAC) {
-    for (auto weight : acNameMap) {
+    for (auto weight : hists->acNameMap) {
       hist->histoLoop(files, dir, tree_name, weight->first);
     }
   }
@@ -104,7 +104,7 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
     }
 
     if (acWeight != "None") {
-      tree->SetBranchAddress(acWeight.c_str(), acWeightVal);
+      tree->SetBranchAddress(acWeight.c_str(), &acWeightVal);
     }
 
     for (auto i = 0; i < tree->GetEntries(); i++) {
