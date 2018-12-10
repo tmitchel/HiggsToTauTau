@@ -57,9 +57,19 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
     auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
     string name = ifile.substr(0, ifile.find(".")).c_str();
 
-    bool isAC = name.find("_inc.root") != std::string;
+    bool isAC = name.find("_inc") != string::npos;
     if (isAC) {
-      name = acNameMap[name];
+      if (acWeightVal.find("ggH") != string::npos && name.find("ggH") == string::npos) {
+        continue;
+      } else if (acWeightVal.find("wh") != string::npos && name.find("wh") == string::npos){
+        continue;
+      } else if (acWeightVal.find("zh") != string::npos && name.find("zh") == string::npos) {
+        continue;
+      } else if (acWeightVal.find("vbf") != string::npos && name.find("vbf") == string::npos) {
+        continue;
+      } else {
+        name = acNameMap[acWeightVal];
+      }
     }
 
     initVectors(name);
@@ -88,7 +98,7 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
     if (acWeightVal != "None" && isAC) {
       tree->SetBranchAddress(acWeightVal.c_str(), &acWeight);
     } else {
-      acWeightVal = 1.;
+      acWeight = 1.;
     }
 
     if (doNN) {

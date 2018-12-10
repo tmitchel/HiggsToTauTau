@@ -125,7 +125,7 @@ histHolder::histHolder(std::string channel_prefix, std::string year, bool doNN, 
     {"wt_L1int", "reweighted_qqH_htt_0L1f05ph0125"},
     {"wt_L1Zg", "reweighted_qqH_htt_0L1Zg125"},
     {"wt_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"},
-  }
+  },
   systematics {
     "ff_qcd_syst_up"            , "ff_qcd_syst_down"           , "ff_qcd_dm0_njet0_stat_up"   ,
     "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up"   , "ff_qcd_dm0_njet1_stat_down" ,
