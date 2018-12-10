@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 parser = ArgumentParser()
 parser.add_argument('-e', '--exe', action='store', dest='exe', default='finalFF', help='name of executable')
-parser.add_argument('-y', '--year', action='store', dest='year', defualt='2016', help='year to process')
+parser.add_argument('-y', '--year', action='store', dest='year', default='2016', help='year to process')
 parser.add_argument('-t', '--tree', action='store', dest='tree', default='etau_tree', help='name of input tree')
 parser.add_argument('-d', '--input-dir', action='store', dest='dir', default='Output/templates/', help='path to input files')
 parser.add_argument('--suffix', action='store', dest='suffix', default='final', help='suffix for output file')
@@ -17,5 +17,5 @@ acWeights = [
 ]
 
 for weight in acWeights:
-    callstring = './{} -y {} -t {} -d {} -w {} --suf {}'.format(args.exe, args.year, args.tree, args.dir, weight, args.suffix)
+    callstring = './{} -y {} -t {} -d {} -w {} --suf {}_{}'.format(args.exe, args.year, args.tree, args.dir, weight, weight, args.suffix)
     call(callstring, shell=True)

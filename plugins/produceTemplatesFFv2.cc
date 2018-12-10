@@ -66,7 +66,7 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
         continue;
       } else if (acWeightVal.find("zh") != string::npos && name.find("zh") == string::npos) {
         continue;
-      } else if (acWeightVal.find("vbf") != string::npos && name.find("vbf") == string::npos) {
+      } else if ((acWeightVal.find("wt_a") != string::npos || acWeightVal.find("wt_L") != string::npos) && name.find("vbf") == string::npos) {
         continue;
       } else {
         name = acNameMap[acWeightVal];
