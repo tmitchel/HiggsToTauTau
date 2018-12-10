@@ -160,29 +160,29 @@ int main(int argc, char* argv[]) {
     Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
     if (name == "W") {
       if (event.getNumGenJets() == 1) {
-        evtwt = 6.963;
+        evtwt = 6.82;
       } else if (event.getNumGenJets() == 2) {
-        evtwt = 16.376;
+        evtwt = 2.099;
       } else if (event.getNumGenJets() == 3) {
-        evtwt = 2.533;
+        evtwt = 0.689;
       } else if (event.getNumGenJets() == 4) {
-        evtwt = 2.419;
+        evtwt = 0.690;
       } else {
-        evtwt = 61.983;
+        evtwt = 25.44;
       }
     }
 
     if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
       if (event.getNumGenJets() == 1) {
-        evtwt = 0.502938039;
+        evtwt = 0.457;
       } else if (event.getNumGenJets() == 2) {
-        evtwt = 1.042256272;
+        evtwt = 0.467;
       } else if (event.getNumGenJets() == 3) {
-        evtwt = 0.656337234;
+        evtwt = 0.480;
       } else if (event.getNumGenJets() == 4) {
-        evtwt = 0.458531131;
+        evtwt = 0.393;
       } else {
-        evtwt = 2.873324952;
+        evtwt = 1.418;
       }
     }
 
@@ -206,16 +206,20 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
+    if (isEmbed) {
+      event.setEmbed();
+    }
+
     // apply correct lepton pT thresholds
     bool fireSingle(false), fireCross(false);
     if (muon.getPt() > 23 && (event.getPassIsoMu22() || event.getPassIsoTkMu22() || event.getPassIsoMu22eta2p1() || event.getPassIsoTkMu22eta2p1() )) {
       fireSingle = true;
     } else if (muon.getPt() > 20 && muon.getPt() < 23 && event.getPassMu19Tau20()) {
       fireCross = true;
-    } else {
+    } else if (!isEmbed) {
+      // if it's embedded samples, don't apply trigger
       continue;
     }
-
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
       continue;

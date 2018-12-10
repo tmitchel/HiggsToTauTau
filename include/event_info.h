@@ -36,10 +36,12 @@ private:
   ULong64_t evt;
   UInt_t convert_evt;
 
+  bool isEmbed;
+
 public:
   event_info (TTree*, std::string, std::string);
   virtual ~event_info () {};
-  void setEmbed();
+  void setEmbed() {isEmbed = true;}
   void setRivets(TTree*);
 
   // tautau Trigger Info
@@ -107,7 +109,7 @@ public:
 };
 
 // read data from trees into member variables
-event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
+event_info::event_info(TTree* input, std::string syst, std::string analyzer) : isEmbed(false) {
   std::string m_sv_name("m_sv"), pt_sv_name("pt_sv");
   if (syst.find("UncMet") != std::string::npos || syst.find("ClusteredMet") != std::string::npos || syst.find("DM") != std::string::npos) {
     m_sv_name += syst;
@@ -227,17 +229,6 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) {
   }
 }
 
-void event_info::setEmbed() {
-  PassEle25 = passEle25;
-  PassDoubleTauCmbIso35 = passDoubleTauCmbIso35;
-  PassDoubleTau35 = passDoubleTau35;
-  PassIsoMu19Tau20 = passIsoMu19Tau20;
-  PassIsoMu22 = passIsoMu22;
-  PassIsoTkMu22 = passIsoTkMu22;
-  PassIsoMu22eta2p1 = passIsoMu22eta2p1;
-  PassIsoTkMu22eta2p1 = passIsoTkMu22eta2p1;
-}
-
 void event_info::setRivets(TTree* input) {
   input -> SetBranchAddress( "Rivet_nJets30", &Rivet_nJets30 );
   input -> SetBranchAddress( "Rivet_higgsPt", &Rivet_higgsPt );
@@ -277,26 +268,26 @@ Bool_t event_info::getPassEle24Tau30() {
 }
 
 Bool_t event_info::getPassMu19Tau20() {
-  return PassIsoMu19Tau20 = matchIsoMu19Tau20_1 && filterIsoMu19Tau20_1 && passIsoMu19Tau20 && matchIsoMu19Tau20_2 && filterIsoMu19Tau20_2;
+  return PassIsoMu19Tau20 = isEmbed ? passIsoMu19Tau20 : matchIsoMu19Tau20_1 && filterIsoMu19Tau20_1 && passIsoMu19Tau20 && matchIsoMu19Tau20_2 && filterIsoMu19Tau20_2;
 }
 
 Bool_t event_info::getPassIsoMu22() {
-  PassIsoMu22 = matchIsoMu22_1 && filterIsoMu22_1 && passIsoMu22;
+  PassIsoMu22 = isEmbed ? passIsoMu22 : matchIsoMu22_1 && filterIsoMu22_1 && passIsoMu22;
   return PassIsoMu22;
 }
 
 Bool_t event_info::getPassIsoTkMu22() {
-  PassIsoTkMu22 = matchIsoTkMu22_1 && filterIsoTkMu22_1 && passIsoTkMu22;
+  PassIsoTkMu22 = isEmbed ? passIsoTkMu22 : matchIsoTkMu22_1 && filterIsoTkMu22_1 && passIsoTkMu22;
   return PassIsoTkMu22;
 }
 
 Bool_t event_info::getPassIsoMu22eta2p1() {
-  PassIsoMu22eta2p1 = matchIsoMu22eta2p1_1 && filterIsoMu22eta2p1_1 && passIsoMu22eta2p1;
+  PassIsoMu22eta2p1 = isEmbed ? passIsoMu22eta2p1 : matchIsoMu22eta2p1_1 && filterIsoMu22eta2p1_1 && passIsoMu22eta2p1;
   return PassIsoMu22eta2p1;
 }
 
 Bool_t event_info::getPassIsoTkMu22eta2p1() {
-  PassIsoTkMu22eta2p1 = matchIsoTkMu22eta2p1_1 && filterIsoTkMu22eta2p1_1 && passIsoTkMu22eta2p1;
+  PassIsoTkMu22eta2p1 = isEmbed ? passIsoTkMu22eta2p1 : matchIsoTkMu22eta2p1_1 && filterIsoTkMu22eta2p1_1 && passIsoTkMu22eta2p1;
   return PassIsoTkMu22eta2p1;
 }
 

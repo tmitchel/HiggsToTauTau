@@ -72,7 +72,7 @@ for ifile in fileList:
     if prefix:
       sample = sample.replace(prefix, '')
     tosample = ifile.replace(sample+suffix,'')
-
+    
     if 'DYJets' in sample:
         names = ['ZTT', 'ZL', 'ZJ']
     elif 'TT' in sample:
