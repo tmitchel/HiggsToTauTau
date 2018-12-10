@@ -124,9 +124,9 @@ int main(int argc, char* argv[]) {
   embed_file.Close();
 
   // trigger and ID scale factors
-  auto myScaleFactor_trgMu19 = new SF_factory("LeptonEfficiencies/Muon/Run2016BtoH/Muon_Mu19leg_2016BtoH_eff.root");
-  auto myScaleFactor_trgMu22 = new SF_factory("LeptonEfficiencies/Muon/Run2016BtoH/Muon_Mu22OR_eta2p1_eff.root");
-  auto myScaleFactor_id = new SF_factory("LeptonEfficiencies/Muon/Run2016BtoH/Muon_IdIso_IsoLt0p15_2016BtoH_eff.root");
+  auto myScaleFactor_trgMu19 = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Muon/Run2016BtoH/Muon_Mu19leg_2016BtoH_eff.root");
+  auto myScaleFactor_trgMu22 = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Muon/Run2016BtoH/Muon_Mu22OR_eta2p1_eff.root");
+  auto myScaleFactor_id = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Muon/Run2016BtoH/Muon_IdIso_IsoLt0p15_2016BtoH_eff.root");
 
   //////////////////////////////////////
   // Final setup:                     //
