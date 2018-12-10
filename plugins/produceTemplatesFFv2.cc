@@ -9,12 +9,12 @@ int main(int argc, char *argv[]) {
   // get CLI arguments
   CLParser parser(argc, argv);
   bool old = parser.Flag("-O");
+  bool doAC = parser.Flag("-a");
   bool doNN = parser.Flag("-n");
   bool doSyst = parser.Flag("-s");
   string dir = parser.Option("-d");
   string year = parser.Option("-y");
   string tree_name = parser.Option("-t");
-  string acWeightVal = parser.Option("-w");
   string suffix = parser.Option("--suf");
 
   // get input file directory
@@ -43,14 +43,19 @@ int main(int argc, char *argv[]) {
   std::vector<string> files;
   read_directory(dir, &files);
 
-  hists->histoLoop(files, dir, tree_name, acWeightVal);
+  hists->histoLoop(files, dir, tree_name);
   hists->getJetFakes(files, dir, tree_name, doSyst);
+  if (doAC) {
+    for (auto weight : acNameMap) {
+      hist->histoLoop(files, dir, tree_name, weight->first);
+    }
+  }
   hists->writeHistos();
 
   delete hists->ff_weight;
 }
 
-void histHolder::histoLoop(std::vector<string> files, string dir, string tree_name,  string acWeightVal = "None") {
+void histHolder::histoLoop(std::vector<string> files, string dir, string tree_name, string acWeight = "None") {
   float observable(0.);
   bool cat0(false), cat1(false), cat2(false);
   for (auto ifile : files) {
@@ -58,19 +63,17 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
     auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
     string name = ifile.substr(0, ifile.find(".")).c_str();
 
-    bool isAC = name.find("_inc") != string::npos;
-    if (isAC) {
-      if (acWeightVal.find("ggH") != string::npos && name.find("ggH") == string::npos) {
-        continue;
-      } else if (acWeightVal.find("wh") != string::npos && name.find("wh") == string::npos) {
-        continue;
-      } else if (acWeightVal.find("zh") != string::npos && name.find("zh") == string::npos) {
-        continue;
-      } else if ((acWeightVal.find("wt_a") != string::npos || acWeightVal.find("wt_L") != string::npos) && name.find("vbf") == string::npos) {
-        continue;
-      } else {
-        name = acNameMap[acWeightVal];
-      }
+
+    if (acWeight.find("ggH") != string::npos && name != "ggH_inc") {
+      continue;
+    } else if ((acWeight.find("wt_a") != string::npos || acWeight.find("wt_L") != string::npos) && name != "vbf_inc") {
+      continue;
+    } else if (acWeight.find("wh") != string::npos && name != "wh_inc") {
+      continue;
+    } else if (acWeight.find("zh") != string::npos && name != "zh_inc") {
+      continue;
+    } else if (acWeight != "None") {
+      name = acNameMap[acWeight];
     }
 
     initVectors(name);
@@ -78,7 +81,7 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiTauIso, OS;
-    Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, njets, nbjets, weight, NN_disc, acWeight(1.);
+    Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, njets, nbjets, weight, NN_disc, acWeightVal(1.);
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("higgs_pT", &higgs_pT);
@@ -96,18 +99,17 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
     tree->SetBranchAddress("cat_VH", &cat_VH);
     tree->SetBranchAddress("OS", &OS);
 
-    if (acWeightVal != "None" && isAC) {
-      tree->SetBranchAddress(acWeightVal.c_str(), &acWeight);
-    } else {
-      acWeight = 1.;
-    }
-
     if (doNN) {
       tree->SetBranchAddress("NN_disc", &NN_disc);
     }
 
+    if (acWeight != "None") {
+      tree->SetBranchAddress(acWeight.c_str(), acWeightVal);
+    }
+
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
+      weight *= acWeightVal;  // acWeightVal = 1 for SM
 
       // only look at opposite-sign events
       if (OS == 0) {
@@ -132,10 +134,6 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && mjj < 400));
         cat2 = (njets > 1 && mjj > 400);
-      }
-
-      if (acWeight > 0) {
-        weight *= acWeight;
       }
 
       if (is_signal) {
