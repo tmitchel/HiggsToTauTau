@@ -218,8 +218,8 @@ int main(int argc, char* argv[]) {
       fireCross = true;
     } else if (!isEmbed) {
       // if it's embedded samples, don't apply trigger
-      continue;   
-    }    
+      continue;
+    }
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
       continue;
