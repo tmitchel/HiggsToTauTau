@@ -8,13 +8,14 @@ using std::string;
 int main(int argc, char *argv[]) {
   // get CLI arguments
   CLParser parser(argc, argv);
+  bool old = parser.Flag("-O");
   bool doNN = parser.Flag("-n");
   bool doSyst = parser.Flag("-s");
-  bool old = parser.Flag("-O");
   string dir = parser.Option("-d");
   string year = parser.Option("-y");
   string tree_name = parser.Option("-t");
   string acWeightVal = parser.Option("-w");
+  string suffix = parser.Option("--suf");
 
   // get input file directory
   if (dir.empty()) {
@@ -36,7 +37,7 @@ int main(int argc, char *argv[]) {
   }
 
   // initialize histogram holder
-  auto hists = new histHolder(channel_prefix, year, doNN, old);
+  auto hists = new histHolder(channel_prefix, year, suffix, doNN, old);
 
   // read all files from input directory
   std::vector<string> files;
@@ -49,7 +50,7 @@ int main(int argc, char *argv[]) {
   delete hists->ff_weight;
 }
 
-void histHolder::histoLoop(std::vector<string> files, string dir, string tree_name, string acWeightVal = "None") {
+void histHolder::histoLoop(std::vector<string> files, string dir, string tree_name, string prefix, string acWeightVal = "None") {
   float observable(0.);
   bool cat0(false), cat1(false), cat2(false);
   for (auto ifile : files) {
@@ -61,7 +62,7 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
     if (isAC) {
       if (acWeightVal.find("ggH") != string::npos && name.find("ggH") == string::npos) {
         continue;
-      } else if (acWeightVal.find("wh") != string::npos && name.find("wh") == string::npos){
+      } else if (acWeightVal.find("wh") != string::npos && name.find("wh") == string::npos) {
         continue;
       } else if (acWeightVal.find("zh") != string::npos && name.find("zh") == string::npos) {
         continue;

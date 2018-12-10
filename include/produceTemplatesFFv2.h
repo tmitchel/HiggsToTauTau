@@ -39,7 +39,7 @@ void read_directory(const std::string &name, std::vector<std::string> *v) {
 // class to hold the histograms until I'm ready to write them
 class histHolder {
  public:
-  histHolder(std::string, std::string, bool, bool);
+  histHolder(std::string, std::string, std::string bool, bool);
   ~histHolder() { delete ff_weight; }
   void writeHistos();
   void initVectors(std::string);
@@ -67,7 +67,7 @@ class histHolder {
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
 // and the map from categories to vectors of TH2F*'s. Each TH2F* in the vector corresponds to
 // one file that is being put into that categories directory in the output tempalte
-histHolder::histHolder(std::string channel_prefix, std::string year, bool doNN, bool old = false) :
+histHolder::histHolder(std::string channel_prefix, std::string year, std::string suffix = "final", bool doNN = false, bool old = false) :
   hists {
     {(channel_prefix+"_0jet").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},
@@ -78,14 +78,13 @@ histHolder::histHolder(std::string channel_prefix, std::string year, bool doNN, 
     {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},
     {(channel_prefix+"_vbf").c_str(), std::vector<TH2F *>()},
   },
-  fout( new TFile(("Output/templates/template_"+channel_prefix+year+"_finalFFv2.root").c_str(), "recreate") ),
+  fout( new TFile(("Output/templates/template_"+channel_prefix+year+"_"+suffix+".root").c_str(), "recreate") ),
   mvis_bins({0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000}),
   njets_bins({-0.5, 0.5, 1.5, 15}),
   // x-axis
   bins_l2 {0, 1, 10, 11},
   bins_hpt {0, 100, 150, 200, 250, 300, 5000},
   bins_mjj {300, 700, 1100, 1500, 10000},
-  // bins_mjj {0., 0.1, 0.5, 0.9, 1.},
 
   // y-axis
   bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
