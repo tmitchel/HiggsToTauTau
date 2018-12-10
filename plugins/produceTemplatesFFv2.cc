@@ -118,13 +118,7 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
         cat2 = (njets > 1 && mjj > 400);
       }
 
-      if (name.find("ggH") != string::npos && acWeightVal.find("ggH") != string::npos) {
-        weight *= acWeight;
-      } else if (name.find("wh") != string::npos && acWeightVal.find("wh") != string::npos) {
-        weight *= acWeight;
-      } else if (name.find("zh") != string::npos && acWeightVal.find("zh") != string::npos) {
-        weight *= acWeight;
-      } else if (name.find("vbf") != string::npos && acWeightVal.find("wt_a") != string::npos) {
+      if (acWeight > 0) {
         weight *= acWeight;
       }
 
