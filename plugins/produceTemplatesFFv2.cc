@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
   hists->getJetFakes(files, dir, tree_name, doSyst);
   if (doAC) {
     for (auto weight : hists->acNameMap) {
-      hist->histoLoop(files, dir, tree_name, weight->first);
+      hists->histoLoop(files, dir, tree_name, weight.first);
     }
   }
   hists->writeHistos();
@@ -166,6 +166,9 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
   }
 
   for (int i = 0; i < data.size(); i++) {
+    if (acWeight != "None") {
+      break;
+    }
     frac_qcd.at(i) = reinterpret_cast<TH2F *>(data.at(i)->Clone());
     frac_qcd.at(i)->Add(frac_w.at(i), -1);
     frac_qcd.at(i)->Add(frac_tt.at(i), -1);
