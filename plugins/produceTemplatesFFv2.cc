@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
   delete hists->ff_weight;
 }
 
-void histHolder::histoLoop(std::vector<string> files, string dir, string tree_name, string prefix, string acWeightVal = "None") {
+void histHolder::histoLoop(std::vector<string> files, string dir, string tree_name,  string acWeightVal = "None") {
   float observable(0.);
   bool cat0(false), cat1(false), cat2(false);
   for (auto ifile : files) {

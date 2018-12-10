@@ -39,7 +39,7 @@ void read_directory(const std::string &name, std::vector<std::string> *v) {
 // class to hold the histograms until I'm ready to write them
 class histHolder {
  public:
-  histHolder(std::string, std::string, std::string bool, bool);
+  histHolder(std::string, std::string, std::string, bool, bool);
   ~histHolder() { delete ff_weight; }
   void writeHistos();
   void initVectors(std::string);
