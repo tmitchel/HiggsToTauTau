@@ -6,6 +6,8 @@ parser.add_argument('-e', '--exe', action='store', dest='exe', default='finalFF'
 parser.add_argument('-y', '--year', action='store', dest='year', default='2016', help='year to process')
 parser.add_argument('-t', '--tree', action='store', dest='tree', default='etau_tree', help='name of input tree')
 parser.add_argument('-d', '--input-dir', action='store', dest='dir', default='Output/templates/', help='path to input files')
+parser.add_argument('-O', '--old', action='store_true', dest='old', default=False, help='run old selection')
+parser.add_argument('-n', '--NN', action='store_true', dest='NN', default=False, help='use NN_disc instead of mjj')
 parser.add_argument('--suffix', action='store', dest='suffix', default='final', help='suffix for output file')
 args = parser.parse_args()
 
@@ -18,4 +20,11 @@ acWeights = [
 
 for weight in acWeights:
     callstring = './{} -y {} -t {} -d {} -w {} --suf {}_{}'.format(args.exe, args.year, args.tree, args.dir, weight, weight, args.suffix)
+
+    if args.old:
+        callstring += ' -O '
+
+    if args.NN:
+        callstring += ' -n '
+
     call(callstring, shell=True)
