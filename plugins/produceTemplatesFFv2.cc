@@ -3,16 +3,18 @@
 #include "CLParser.h"
 #include "produceTemplatesFFv2.h"
 
+using std::string;
+
 int main(int argc, char *argv[]) {
   // get CLI arguments
   CLParser parser(argc, argv);
   bool doNN = parser.Flag("-n");
   bool doSyst = parser.Flag("-s");
   bool old = parser.Flag("-O");
-  std::string dir = parser.Option("-d");
-  std::string year = parser.Option("-y");
-  std::string acWeight = parser.Option("-w");
-  std::string tree_name = parser.Option("-t");
+  string dir = parser.Option("-d");
+  string year = parser.Option("-y");
+  string tree_name = parser.Option("-t");
+  string acWeightVal = parser.Option("-w");
 
   // get input file directory
   if (dir.empty()) {
@@ -21,12 +23,12 @@ int main(int argc, char *argv[]) {
   }
 
   // get channel info
-  std::string channel_prefix, lep_charge;
-  if (tree_name.find("etau_tree") != std::string::npos) {
+  string channel_prefix, lep_charge;
+  if (tree_name.find("etau_tree") != string::npos) {
     channel_prefix = "et";
-  } else if (tree_name.find("mutau_tree") != std::string::npos) {
+  } else if (tree_name.find("mutau_tree") != string::npos) {
     channel_prefix = "mt";
-  } else if (tree_name.find("tautau_tree") != std::string::npos) {
+  } else if (tree_name.find("tautau_tree") != string::npos) {
     channel_prefix = "tt";
   } else {
     std::cerr << "Um. I don't know that tree. Sorry...";
@@ -37,30 +39,30 @@ int main(int argc, char *argv[]) {
   auto hists = new histHolder(channel_prefix, year, doNN, old);
 
   // read all files from input directory
-  std::vector<std::string> files;
+  std::vector<string> files;
   read_directory(dir, &files);
 
-  hists->histoLoop(files, dir, tree_name);
-  hists->getJetFakes(files, dir, tree_name, acWeight, doSyst);
+  hists->histoLoop(files, dir, tree_name, acWeightVal);
+  hists->getJetFakes(files, dir, tree_name, doSyst);
   hists->writeHistos();
 
   delete hists->ff_weight;
 }
 
-void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std::string tree_name) {
+void histHolder::histoLoop(std::vector<string> files, string dir, string tree_name, string acWeightVal = "None") {
   float observable(0.);
   bool cat0(false), cat1(false), cat2(false);
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
     auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
-    std::string name = ifile.substr(0, ifile.find(".")).c_str();
+    string name = ifile.substr(0, ifile.find(".")).c_str();
 
     initVectors(name);
     fout->cd();
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiTauIso, OS;
-    Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, njets, nbjets, weight, NN_disc;
+    Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, njets, nbjets, weight, NN_disc, acWeight(1.);
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("higgs_pT", &higgs_pT);
@@ -77,6 +79,12 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
     tree->SetBranchAddress("cat_VH", &cat_VH);
     tree->SetBranchAddress("OS", &OS);
+
+    if (acWeightVal != "None") {
+      tree->SetBranchAddress(acWeightVal.c_str(), &acWeight);
+    } else {
+      acWeightVal = 1.;
+    }
 
     if (doNN) {
       tree->SetBranchAddress("NN_disc", &NN_disc);
@@ -108,6 +116,16 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && mjj < 400));
         cat2 = (njets > 1 && mjj > 400);
+      }
+
+      if (name.find("ggH") != string::npos && acWeights.find("ggH") != string::npos) {
+        weight *= acWeights;
+      } else if (name.find("wh") != string::npos && acWeights.find("wh") != string::npos) {
+        weight *= acWeights;
+      } else if (name.find("zh") != string::npos && acWeights.find("zh") != string::npos) {
+        weight *= acWeights;
+      } else if (name.find("vbf") != string::npos && acWeights.find("wt_a") != string::npos) {
+        weight *= acWeights;
       }
 
       if (is_signal) {
@@ -157,13 +175,13 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
   }
 }
 
-void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, std::string tree_name, std::string acWeight = "None", bool doSyst = false) {
+void histHolder::getJetFakes(std::vector<string> files, string dir, string tree_name, bool doSyst = false) {
   float observable(0.);
   bool cat0(false), cat1(false), cat2(false);
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
     auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
-    std::string name = ifile.substr(0, ifile.find(".")).c_str();
+    string name = ifile.substr(0, ifile.find(".")).c_str();
 
     if (name != "Data") {
       continue;
@@ -179,10 +197,10 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, OS;
     Float_t higgs_pT, mjj, m_sv, weight, t1_pt, t1_decayMode, njets, nbjets, vis_mass, mt, lep_iso, NN_disc;
 
-    std::string iso;
-    if (tree_name.find("etau_tree") != std::string::npos) {
+    string iso;
+    if (tree_name.find("etau_tree") != string::npos) {
       iso = "el_iso";
-    } else if (tree_name.find("mutau_tree") != std::string::npos) {
+    } else if (tree_name.find("mutau_tree") != string::npos) {
       iso = "mu_iso";
     }
 

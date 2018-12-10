@@ -46,8 +46,8 @@ class histHolder {
   void initSystematics(std::string);
   void fillFraction(int, std::string, double, double, double);
   void convertDataToFake(TH2F *, std::string, double, double, double);
-  void histoLoop(std::vector<std::string>, std::string, std::string);
-  void getJetFakes(std::vector<std::string>, std::string, std::string, std::string, bool);
+  void histoLoop(std::vector<std::string>, std::string, std::string, std::string);
+  void getJetFakes(std::vector<std::string>, std::string, std::string, bool);
 
   bool doNN, old_selection;
   TFile *fout;

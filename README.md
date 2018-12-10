@@ -1,4 +1,4 @@
-# 2016 Higgs to Tau-Tau Analysis Code 
+# Higgs to Tau-Tau Analysis Code 
 
 [![pipeline status](https://gitlab.cern.ch/KState-HEP-HTT/ltau_analyzers/badges/master/pipeline.svg)](https://gitlab.cern.ch/KState-HEP-HTT/ltau_analyzers/commits/master)
 
@@ -63,10 +63,8 @@ cmsrel CMSSW_9_4_0 && cd CMSSW_9_4_0/src && cmsenv
         ```
     - get tau trigger SF repo
         ```
-        mkdir TauTriggerSFs2017
-        cd TauTriggerSFs2017
-        git clone -b tauTriggers2017_reMiniaod_test git@github.com:truggles/TauTriggerSFs2017.git TauTriggerSFs2017
-        cd TauTriggerSFs2017
+        git clone -b tauTriggers2017_reMiniaod_test git@github.com:truggles/TauTriggerSFs2017.git TauTriggerSFs2017/TauTriggerSFs2017
+        cd TauTriggerSFs2017/TauTriggerSFs2017
         scram b -j 8
         cd ../..
         ```
