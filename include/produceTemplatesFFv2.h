@@ -74,7 +74,7 @@ class histHolder {
   std::vector<TH2F *> data, fakes, frac_w, frac_tt, frac_real, frac_qcd;
 
   // binning
-  std::vector<Float_t> bins_l2, bins_hpt, bins_mjj, bins_lpt, bins_msv1, bins_msv2;
+  std::vector<Float_t> bins_l2, bins_hpt, bins_mjj, bins_lpt, bins_msv1, bins_msv2, bins_ac_mjj, bins_ac_m_sv;
 };
 
 // histHolder contructor to create the output file, the qcd histograms with the correct binning
@@ -88,11 +88,13 @@ histHolder::histHolder(std::string channel_prefix, std::string year, std::string
   bins_l2 {0, 1, 10, 11},
   bins_hpt {0, 100, 150, 200, 250, 300, 5000},
   bins_mjj {300, 700, 1100, 1500, 10000},
+  bins_ac_mjj {300, 800, 1300, 10000},
 
   // y-axis
   bins_lpt {0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
   bins_msv1 {0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300},
   bins_msv2 {0, 95, 115, 135, 155, 400},
+  bins_ac_m_sv {0, 95, 115, 155, 400},
   channel_prefix(channel_prefix),
   doNN(doNN),
   old_selection(old),
@@ -176,7 +178,11 @@ histHolder::histHolder(std::string channel_prefix, std::string year, std::string
     } else if (cat.find("boosted") != std::string::npos) {
       fakes.push_back(new TH2F("fake_boosted", "fake_SS", bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
     } else {
-      fakes.push_back(new TH2F(("fake_" + cat).c_str(), "fake_SS", bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
+      if (cat.find("vbf_D0") != std::string::npos) {
+        fakes.push_back(new TH2F(("fake_" + cat).c_str(), "fake_SS", bins_ac_mjj.size() - 1, &bins_ac_mjj[0], bins_ac_m_sv.size() - 1, &bins_ac_m_sv[0]));
+      } else {
+        fakes.push_back(new TH2F(("fake_" + cat).c_str(), "fake_SS", bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
+      }
     }
   }
 
@@ -211,7 +217,11 @@ void histHolder::initVectors(std::string name) {
     } else if (key.first == channel_prefix + "_boosted") {
       hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
     } else if (key.first.find("_vbf") != std::string::npos) {
-      hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
+      if (key.first.find("vbf_D0") != std::string::npos) {
+        hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_ac_mjj.size() - 1, &bins_ac_mjj[0], bins_ac_m_sv.size() - 1, &bins_ac_m_sv[0]));
+      } else {
+        hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
+      }
     }
   }
 }
@@ -227,7 +237,11 @@ void histHolder::initSystematics(std::string name) {
       } else if (key.first == channel_prefix + "_boosted") {
         FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
       } else if (key.first.find("_vbf") != std::string::npos) {
-        FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
+        if (key.first.find("vbf_D0") != std::string::npos) {
+          FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_ac_mjj.size() - 1, &bins_ac_mjj[0], bins_ac_m_sv.size() - 1, &bins_ac_m_sv[0]));
+        } else {
+          FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
+        }
       }
     }
   }
