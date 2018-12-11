@@ -34,7 +34,7 @@ class slim_tree {
         met, metphi, mjj, numGenJets, mt, dmf, dmf_new,
         pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
-        ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2,
+        ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH,
         higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass;
 
     // Anomolous coupling branches
@@ -117,6 +117,10 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree( new TTre
     otree->Branch("m_sv",                &m_sv,                "m_sv/F"               );
     otree->Branch("Dbkg_VBF",            &Dbkg_VBF,            "Dbkg_VBF/F"           );
     otree->Branch("Dbkg_ggH",            &Dbkg_ggH,            "Dbkg_ggH/F"           );
+    otree->Branch("D0_VBF",              &D0_VBF ,             "D0_VBF/F"             );
+    otree->Branch("DCP_VBF",             &DCP_VBF,             "DCP_VBF/F"            );
+    otree->Branch("D0_ggH",              &D0_ggH ,             "D0_ggH/F"             );
+    otree->Branch("DCP_ggH",             &DCP_ggH,             "DCP_ggH/F"            );
 
     otree->Branch("Phi"         ,        &Phi         ,        "Phi/F"                );
     otree->Branch("Phi1"        ,        &Phi1        ,        "Phi1/F"               );
@@ -209,6 +213,10 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     m_sv = evt->getMSV();
     Dbkg_VBF = evt->getDbkg_VBF();
     Dbkg_ggH = evt->getDbkg_ggH();
+    D0_VBF = evt->getD0_VBF();
+    DCP_VBF = evt->getDCP_VBF();
+    D0_ggH = evt->getD0_ggH();
+    DCP_ggH = evt->getDCP_ggH();
     Phi = evt->getPhi();
     Phi1 = evt->getPhi1();
     costheta1 = evt->getCosTheta1();
