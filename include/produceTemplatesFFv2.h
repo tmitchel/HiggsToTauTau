@@ -258,7 +258,6 @@ void histHolder::writeHistos() {
   for (auto cat : hists) {
     fout->cd(cat.first.c_str());
     for (auto hist : cat.second) {
-      std::cout << hist->GetName() << std::endl;
       hist->Write();
     }
   }
