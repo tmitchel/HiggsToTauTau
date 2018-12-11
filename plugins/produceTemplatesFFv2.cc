@@ -196,6 +196,37 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
           fillFraction(boosted, name, vis_mass, njets, weight);
         } else if (cat2) {
           fillFraction(vbf, name, vis_mass, njets, weight);
+
+          // Split VBF bins based on MELA variables.
+          if (D0_VBF > 0 && D0_VBF <= 0.2) {
+            fillFraction(vbf_D0_0p0to0p2, name, vis_mass, njets, weight);
+            if (DCP_VBF > 0) {
+              fillFraction(vbf_D0_0p0to0p2_DCPp, name, vis_mass, njets, weight);
+            } else if (DCP_VBF < 0) {
+              fillFraction(vbf_D0_0p0to0p2_DCPm, name, vis_mass, njets, weight);
+            }
+          } else if (D0_VBF <= 0.4) {
+            fillFraction(vbf_D0_0p2to0p4, name, vis_mass, njets, weight);
+            if (DCP_VBF > 0) {
+              fillFraction(vbf_D0_0p2to0p4_DCPp, name, vis_mass, njets, weight);
+            } else if (DCP_VBF < 0) {
+              fillFraction(vbf_D0_0p2to0p4_DCPm, name, vis_mass, njets, weight);
+            }
+          } else if (D0_VBF <= 0.8) {
+            fillFraction(vbf_D0_0p4to0p8, name, vis_mass, njets, weight);
+            if (DCP_VBF > 0) {
+              fillFraction(vbf_D0_0p4to0p8_DCPp, name, vis_mass, njets, weight);
+            } else if (DCP_VBF < 0) {
+              fillFraction(vbf_D0_0p4to0p8_DCPm, name, vis_mass, njets, weight);
+            }
+          } else if (D0_VBF <= 1.0) {
+            fillFraction(vbf_D0_0p8to1p0, name, vis_mass, njets, weight);
+            if (DCP_VBF > 0) {
+              fillFraction(vbf_D0_0p8to1p0_DCPm, name, vis_mass, njets, weight);
+            } else if (DCP_VBF < 0) {
+              fillFraction(vbf_D0_0p8to1p0_DCPm, name, vis_mass, njets, weight);
+            }
+          }
         }
       }
     }
