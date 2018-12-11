@@ -264,8 +264,8 @@ void histHolder::writeHistos() {
   }
 
   for (auto cat = 0; cat < fakes.size(); cat++) {
-    fout->cd(categories.at(cat));
-    auto fake_hist = fakes.at(i);
+    fout->cd(categories.at(cat).c_str());
+    auto fake_hist = fakes.at(cat);
     fake_hist->SetName("jetFakes");
 
     // if fake yield is negative, make it zero
