@@ -22,7 +22,19 @@
 
 enum categories { zeroJet,
                   boosted,
-                  vbf };
+                  vbf,
+                  vbf_D0_0p0to0p2,
+                  vbf_D0_0p2to0p4,
+                  vbf_D0_0p4to0p8,
+                  vbf_D0_0p8to1p0,
+                  vbf_D0_0p0to0p2_DCPp,
+                  vbf_D0_0p2to0p4_DCPp,
+                  vbf_D0_0p4to0p8_DCPp,
+                  vbf_D0_0p8to1p0_DCPp,
+                  vbf_D0_0p0to0p2_DCPm,
+                  vbf_D0_0p2to0p4_DCPm,
+                  vbf_D0_0p4to0p8_DCPm,
+                  vbf_D0_0p8to1p0_DCPm };
 
 // read all *.root files in the given directory and put them in the provided vector
 void read_directory(const std::string &name, std::vector<std::string> *v) {
@@ -53,12 +65,12 @@ class histHolder {
   TFile *fout;
   FakeFactor *ff_weight;
   std::string channel_prefix;
-  std::vector<std::string> systematics;
+  std::vector<std::string> categories, systematics;
   std::vector<float> mvis_bins, njets_bins;
   std::map<std::string, std::string> acNameMap;
   std::map<std::string, std::vector<TH2F *>> hists, FF_systs;
   TH2F *fake_0jet, *fake_boosted, *fake_vbf;
-  std::vector<TH2F *> data, frac_w, frac_tt, frac_real, frac_qcd;
+  std::vector<TH2F *> data, fakes, frac_w, frac_tt, frac_real, frac_qcd;
 
   // binning
   std::vector<Float_t> bins_l2, bins_hpt, bins_mjj, bins_lpt, bins_msv1, bins_msv2;
@@ -68,16 +80,6 @@ class histHolder {
 // and the map from categories to vectors of TH2F*'s. Each TH2F* in the vector corresponds to
 // one file that is being put into that categories directory in the output tempalte
 histHolder::histHolder(std::string channel_prefix, std::string year, std::string suffix = "final", bool doNN = false, bool old = false) :
-  hists {
-    {(channel_prefix+"_0jet").c_str(), std::vector<TH2F *>()},
-    {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},
-    {(channel_prefix+"_vbf").c_str(), std::vector<TH2F *>()},
-  },
-  FF_systs {
-    {(channel_prefix+"_0jet").c_str(), std::vector<TH2F *>()},
-    {(channel_prefix+"_boosted").c_str(), std::vector<TH2F *>()},
-    {(channel_prefix+"_vbf").c_str(), std::vector<TH2F *>()},
-  },
   fout( new TFile(("Output/templates/template_"+channel_prefix+year+"_"+suffix+".root").c_str(), "recreate") ),
   mvis_bins({0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000}),
   njets_bins({-0.5, 0.5, 1.5, 15}),
@@ -125,6 +127,22 @@ histHolder::histHolder(std::string channel_prefix, std::string year, std::string
     {"wt_L1Zg", "reweighted_qqH_htt_0L1Zg125"},
     {"wt_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"},
   },
+  categories {
+    channel_prefix+"0jet",
+    channel_prefix+"boosted",
+    channel_prefix+"vbf",
+    channel_prefix+"vbf_D0_0p0to0p2",
+    channel_prefix+"vbf_D0_0p2to0p4",
+    channel_prefix+"vbf_D0_0p4to0p8",
+    channel_prefix+"vbf_D0_0p8to1p0",
+    channel_prefix+"vbf_D0_0p0to0p2_DCPp",
+    channel_prefix+"vbf_D0_0p2to0p4_DCPp",
+    channel_prefix+"vbf_D0_0p4to0p8_DCPp",
+    channel_prefix+"vbf_D0_0p8to1p0_DCPp",
+    channel_prefix+"vbf_D0_0p0to0p2_DCPm",
+    channel_prefix+"vbf_D0_0p2to0p4_DCPm",
+    channel_prefix+"vbf_D0_0p4to0p8_DCPm",
+    channel_prefix+"vbf_D0_0p8to1p0_DCPm"   },
   systematics {
     "ff_qcd_syst_up"            , "ff_qcd_syst_down"           , "ff_qcd_dm0_njet0_stat_up"   ,
     "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up"   , "ff_qcd_dm0_njet1_stat_down" ,
@@ -147,34 +165,25 @@ histHolder::histHolder(std::string channel_prefix, std::string year, std::string
     bins_mjj = {0., 0.1, 0.5, 0.9, 1.};
   }
 
-  fake_0jet    = new TH2F("fake_0jet"   , "fake_SS", bins_l2.size()  - 1, &bins_l2[0] , bins_lpt.size()  - 1, &bins_lpt[0] );
-  fake_boosted = new TH2F("fake_boosted", "fake_SS", bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]);
-  fake_vbf     = new TH2F("fake_vbf"    , "fake_SS", bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]);
-  data = {
-      new TH2F("data_0jet"     , "data_0jet"     , mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] ),
-      new TH2F("data_boosted"  , "data_boosted"  , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
-      new TH2F("data_vbf"      , "data_vbf"      , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
-  };
-  frac_w = {
-      new TH2F("frac_w_0jet"     , "frac_w_0jet"     , mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] ),
-      new TH2F("frac_w_boosted"  , "frac_w_boosted"  , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
-      new TH2F("frac_w_vbf"      , "frac_w_vbf"      , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
-  };
-  frac_tt = {
-      new TH2F("frac_tt_0jet"     , "frac_tt_0jet"     , mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] ),
-      new TH2F("frac_tt_boosted"  , "frac_tt_boosted"  , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
-      new TH2F("frac_tt_vbf"      , "frac_tt_vbf"      , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
-  };
-  frac_real = {
-      new TH2F("frac_real_0jet"     , "frac_real_0jet"     , mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] ),
-      new TH2F("frac_real_boosted"  , "frac_real_boosted"  , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
-      new TH2F("frac_real_vbf"      , "frac_real_vbf"      , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
-  };
-  frac_qcd = {
-      new TH2F("frac_qcd_0jet"     , "frac_qcd_0jet"     , mvis_bins.size()  - 1, &mvis_bins[0] , njets_bins.size()  - 1, &njets_bins[0] ),
-      new TH2F("frac_qcd_boosted"  , "frac_qcd_boosted"  , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
-      new TH2F("frac_qcd_vbf"      , "frac_qcd_vbf"      , mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]),
-  };
+  // Create empty histograms for each category to fill later.
+  for (auto cat : categories) {
+    hists[cat.c_str()] = std::vector<TH2F *>();
+    FF_systs[cat.c_str()] = std::vector<TH2F *>();
+
+    data.push_back(new TH2F(("data_" + cat).c_str(), ("data_" + cat).c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
+    frac_w.push_back(new TH2F(("frac_w_" + cat).c_str(), ("frac_w_" + cat).c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
+    frac_tt.push_back(new TH2F(("frac_tt_" + cat).c_str(), ("frac_tt_" + cat).c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
+    frac_real.push_back(new TH2F(("frac_real_" + cat).c_str(), ("frac_real_" + cat).c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
+    frac_qcd.push_back(new TH2F(("frac_qcd_" + cat).c_str(), ("frac_qcd_" + cat).c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
+
+    if (cat.find("0jet") != std::string::npos) {
+      fake.push_back(new TH2F("fake_0jet", "fake_SS", bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]));
+    } else if (cat.find("boosted") != std::string::npos) {
+      fake.push_back(new TH2F("fake_boosted", "fake_SS", bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
+    } else {
+      fake.push_back(new TH2F(("fake_" + cat).c_str(), "fake_SS", bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
+    }
+  }
 
   // get FakeFactor workspace
   TFile *ff_file;
@@ -200,7 +209,7 @@ void histHolder::initVectors(std::string name) {
       hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]));
     } else if (key.first == channel_prefix + "_boosted") {
       hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
-    } else if (key.first == channel_prefix + "_vbf") {
+    } else if (key.first.find("_vbf") != std::string::npos) {
       hists.at(key.first.c_str()).push_back(new TH2F(name.c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
     }
   }
@@ -216,7 +225,7 @@ void histHolder::initSystematics(std::string name) {
         FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]));
       } else if (key.first == channel_prefix + "_boosted") {
         FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
-      } else if (key.first == channel_prefix + "_vbf") {
+      } else if (key.first.find("_vbf") != std::string::npos) {
         FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
       }
     }
