@@ -128,21 +128,21 @@ histHolder::histHolder(std::string channel_prefix, std::string year, std::string
     {"wt_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"},
   },
   categories {
-    channel_prefix+"0jet",
-    channel_prefix+"boosted",
-    channel_prefix+"vbf",
-    channel_prefix+"vbf_D0_0p0to0p2",
-    channel_prefix+"vbf_D0_0p2to0p4",
-    channel_prefix+"vbf_D0_0p4to0p8",
-    channel_prefix+"vbf_D0_0p8to1p0",
-    channel_prefix+"vbf_D0_0p0to0p2_DCPp",
-    channel_prefix+"vbf_D0_0p2to0p4_DCPp",
-    channel_prefix+"vbf_D0_0p4to0p8_DCPp",
-    channel_prefix+"vbf_D0_0p8to1p0_DCPp",
-    channel_prefix+"vbf_D0_0p0to0p2_DCPm",
-    channel_prefix+"vbf_D0_0p2to0p4_DCPm",
-    channel_prefix+"vbf_D0_0p4to0p8_DCPm",
-    channel_prefix+"vbf_D0_0p8to1p0_DCPm"   },
+    channel_prefix+"_0jet",
+    channel_prefix+"_boosted",
+    channel_prefix+"_vbf",
+    channel_prefix+"_vbf_D0_0p0to0p2",
+    channel_prefix+"_vbf_D0_0p2to0p4",
+    channel_prefix+"_vbf_D0_0p4to0p8",
+    channel_prefix+"_vbf_D0_0p8to1p0",
+    channel_prefix+"_vbf_D0_0p0to0p2_DCPp",
+    channel_prefix+"_vbf_D0_0p2to0p4_DCPp",
+    channel_prefix+"_vbf_D0_0p4to0p8_DCPp",
+    channel_prefix+"_vbf_D0_0p8to1p0_DCPp",
+    channel_prefix+"_vbf_D0_0p0to0p2_DCPm",
+    channel_prefix+"_vbf_D0_0p2to0p4_DCPm",
+    channel_prefix+"_vbf_D0_0p4to0p8_DCPm",
+    channel_prefix+"_vbf_D0_0p8to1p0_DCPm"   },
   systematics {
     "ff_qcd_syst_up"            , "ff_qcd_syst_down"           , "ff_qcd_dm0_njet0_stat_up"   ,
     "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up"   , "ff_qcd_dm0_njet1_stat_down" ,
@@ -155,12 +155,6 @@ histHolder::histHolder(std::string channel_prefix, std::string year, std::string
     "ff_tt_dm1_njet0_stat_up"   , "ff_tt_dm1_njet0_stat_down"  , "ff_tt_dm1_njet1_stat_up"    ,  "ff_tt_dm1_njet1_stat_down"
   }
 {
-  for (auto it = hists.begin(); it != hists.end(); it++) {
-    fout->cd();
-    fout->mkdir((it->first).c_str());
-    fout->cd();
-  }
-
   if (doNN) {
     bins_mjj = {0., 0.1, 0.5, 0.9, 1.};
   }
@@ -177,12 +171,18 @@ histHolder::histHolder(std::string channel_prefix, std::string year, std::string
     frac_qcd.push_back(new TH2F(("frac_qcd_" + cat).c_str(), ("frac_qcd_" + cat).c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
 
     if (cat.find("0jet") != std::string::npos) {
-      fake.push_back(new TH2F("fake_0jet", "fake_SS", bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]));
+      fakes.push_back(new TH2F("fake_0jet", "fake_SS", bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]));
     } else if (cat.find("boosted") != std::string::npos) {
-      fake.push_back(new TH2F("fake_boosted", "fake_SS", bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
+      fakes.push_back(new TH2F("fake_boosted", "fake_SS", bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
     } else {
-      fake.push_back(new TH2F(("fake_" + cat).c_str(), "fake_SS", bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
+      fakes.push_back(new TH2F(("fake_" + cat).c_str(), "fake_SS", bins_mjj.size() - 1, &bins_mjj[0], bins_msv2.size() - 1, &bins_msv2[0]));
     }
+  }
+
+  for (auto it = hists.begin(); it != hists.end(); it++) {
+    fout->cd();
+    fout->mkdir((it->first).c_str());
+    fout->cd();
   }
 
   // get FakeFactor workspace
@@ -258,6 +258,7 @@ void histHolder::writeHistos() {
   for (auto cat : hists) {
     fout->cd(cat.first.c_str());
     for (auto hist : cat.second) {
+      std::cout << hist->GetName() << std::endl;
       hist->Write();
     }
   }
@@ -281,7 +282,6 @@ void histHolder::writeHistos() {
         }
       }
     }
-    std::cout << hist->GetName() << std::endl;
     hist->Write();
   }
 
@@ -304,7 +304,6 @@ void histHolder::writeHistos() {
         }
       }
     }
-    std::cout << hist->GetName() << std::endl;
     hist->Write();
   }
 
@@ -327,7 +326,6 @@ void histHolder::writeHistos() {
         }
       }
     }
-    std::cout << hist->GetName() << std::endl;
     hist->Write();
   }
 
