@@ -277,73 +277,18 @@ void histHolder::writeHistos() {
       }
     }
     fake_hist->Write();
+
+    for (auto &hist : FF_systs.at(categories.at(cat))) {
+      for (auto i = 0; i < hist->GetNbinsX(); i++) {
+        for (auto j = 0; j < hist->GetNbinsY(); j++) {
+          if (hist->GetBinContent(i, j) < 0) {
+            hist->SetBinContent(i, j, 0);
+          }
+        }
+      }
+      hist->Write();
+    }
   }
-
-  // fout->cd((channel_prefix + "_0jet").c_str());
-  // fake_0jet->SetName("jetFakes");
-  // for (auto i = 0; i < fake_0jet->GetNbinsX(); i++) {
-  //   for (auto j = 0; j < fake_0jet->GetNbinsY(); j++) {
-  //     if (fake_0jet->GetBinContent(i, j) < 0) {
-  //       fake_0jet->SetBinContent(i, j, 0);
-  //     }
-  //   }
-  // }
-  // fake_0jet->Write();
-
-  // for (auto &hist : FF_systs.at(channel_prefix + "_0jet")) {
-  //   for (auto i = 0; i < hist->GetNbinsX(); i++) {
-  //     for (auto j = 0; j < hist->GetNbinsY(); j++) {
-  //       if (hist->GetBinContent(i, j) < 0) {
-  //         hist->SetBinContent(i, j, 0);
-  //       }
-  //     }
-  //   }
-  //   hist->Write();
-  // }
-
-  // fout->cd((channel_prefix + "_boosted").c_str());
-  // fake_boosted->SetName("jetFakes");
-  // for (auto i = 0; i < fake_boosted->GetNbinsX(); i++) {
-  //   for (auto j = 0; j < fake_boosted->GetNbinsY(); j++) {
-  //     if (fake_boosted->GetBinContent(i, j) < 0) {
-  //       fake_boosted->SetBinContent(i, j, 0);
-  //     }
-  //   }
-  // }
-  // fake_boosted->Write();
-
-  // for (auto &hist : FF_systs.at(channel_prefix + "_boosted")) {
-  //   for (auto i = 0; i < hist->GetNbinsX(); i++) {
-  //     for (auto j = 0; j < hist->GetNbinsY(); j++) {
-  //       if (hist->GetBinContent(i, j) < 0) {
-  //         hist->SetBinContent(i, j, 0);
-  //       }
-  //     }
-  //   }
-  //   hist->Write();
-  // }
-
-  // fout->cd((channel_prefix + "_vbf").c_str());
-  // fake_vbf->SetName("jetFakes");
-  // for (auto i = 0; i < fake_vbf->GetNbinsX(); i++) {
-  //   for (auto j = 0; j < fake_vbf->GetNbinsY(); j++) {
-  //     if (fake_vbf->GetBinContent(i, j) < 0) {
-  //       fake_vbf->SetBinContent(i, j, 0);
-  //     }
-  //   }
-  // }
-  // fake_vbf->Write();
-
-  // for (auto &hist : FF_systs.at(channel_prefix + "_vbf")) {
-  //   for (auto i = 0; i < hist->GetNbinsX(); i++) {
-  //     for (auto j = 0; j < hist->GetNbinsY(); j++) {
-  //       if (hist->GetBinContent(i, j) < 0) {
-  //         hist->SetBinContent(i, j, 0);
-  //       }
-  //     }
-  //   }
-  //   hist->Write();
-  // }
 
   fout->Close();
 }
