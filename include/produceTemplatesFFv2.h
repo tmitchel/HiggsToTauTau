@@ -20,7 +20,7 @@
 #include "HTTutilities/Jet2TauFakes/interface/WrapperTH2F.h"
 #include "HTTutilities/Jet2TauFakes/interface/WrapperTH3D.h"
 
-enum categories { zeroJet,
+enum Categories { zeroJet,
                   boosted,
                   vbf,
                   vbf_D0_0p0to0p2,
@@ -58,6 +58,7 @@ class histHolder {
   void initSystematics(std::string);
   void fillFraction(int, std::string, double, double, double);
   void convertDataToFake(TH2F *, std::string, double, double, double);
+  void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double, double);
   void histoLoop(std::vector<std::string>, std::string, std::string, std::string);
   void getJetFakes(std::vector<std::string>, std::string, std::string, bool);
 
@@ -250,6 +251,18 @@ void histHolder::fillFraction(int cat, std::string name, double var1, double var
 void histHolder::convertDataToFake(TH2F *hist, std::string name, double var1, double var2, double weight) {
   if (name.find("Data") != std::string::npos) {
     hist->Fill(var1, var2, weight);
+  }
+}
+
+void histHolder::convertDataToFake(Categories cat, std::string name, double var1, double var2, double vis_mass, double njets, double t1_pt, double t1_decayMode, double mt, double lep_iso, double weight) {
+  auto bin_x = data.at(cat)->GetXaxis()->FindBin(vis_mass);
+  auto bin_y = data.at(cat)->GetYaxis()->FindBin(njets);
+  auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
+                                      frac_w.at(cat)->GetBinContent(bin_x, bin_y),
+                                      frac_tt.at(cat)->GetBinContent(bin_x, bin_y),
+                                      frac_qcd.at(cat)->GetBinContent(bin_x, bin_y)});
+  if (name.find("Data") != std::string::npos) {
+    fakes.at(categories.at(cat))->Fill(var1, var2, weight);
   }
 }
 

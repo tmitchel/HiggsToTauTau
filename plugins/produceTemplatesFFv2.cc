@@ -82,6 +82,7 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiTauIso, OS;
     Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, njets, nbjets, weight, NN_disc, acWeightVal(1.);
+    Float_t D0_VBF, D0_ggH, DCP_VBF, DCP_ggH;
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("higgs_pT", &higgs_pT);
@@ -91,6 +92,10 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
     tree->SetBranchAddress("m_sv", &m_sv);
     tree->SetBranchAddress("njets", &njets);
     tree->SetBranchAddress("nbjets", &nbjets);
+    tree->SetBranchAddress("D0_VBF", &D0_VBF);
+    tree->SetBranchAddress("D0_ggH", &D0_ggH);
+    tree->SetBranchAddress("DCP_VBF", &DCP_VBF);
+    tree->SetBranchAddress("DCP_ggH", &DCP_ggH);
     tree->SetBranchAddress("is_signal", &is_signal);
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
@@ -138,13 +143,44 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
 
       if (is_signal) {
         if (cat0) {
-          hists.at(channel_prefix + "_0jet").back()->Fill(t1_decayMode, vis_mass, weight);
+          hists.at(categories.at(zeroJet)).back()->Fill(t1_decayMode, vis_mass, weight);
         }
         if (cat1) {
-          hists.at(channel_prefix + "_boosted").back()->Fill(higgs_pT, m_sv, weight);
+          hists.at(categories.at(boosted)).back()->Fill(higgs_pT, m_sv, weight);
         }
         if (cat2) {
-          hists.at(channel_prefix + "_vbf").back()->Fill(observable, m_sv, weight);
+          hists.at(categories.at(vbf)).back()->Fill(observable, m_sv, weight);
+
+          // Split VBF bins based on MELA variables.
+          if (D0_VBF > 0 && D0_VBF <= 0.2) {
+            hists.at(categores.at(vbf_D0_0p0to0p2)).back()->Fill(observable, m_sv, weight);
+            if (DCP_VBF > 0) {
+              hists.at(categores.at(vbf_D0_0p0to0p2_DCPp)).back()->Fill(observable, m_sv, weight);
+            } else if (DCP_VBF < 0) {
+              hists.at(categores.at(vbf_D0_0p0to0p2_DCPm)).back()->Fill(observable, m_sv, weight);
+            }
+          } else if (D0_VBF <= 0.4) {
+            hists.at(categores.at(vbf_D0_0p2to0p4)).back()->Fill(observable, m_sv, weight);
+            if (DCP_VBF > 0) {
+              hists.at(categores.at(vbf_D0_0p2to0p4_DCPp)).back()->Fill(observable, m_sv, weight);
+            } else if (DCP_VBF < 0) {
+              hists.at(categores.at(vbf_D0_0p2to0p4_DCPm)).back()->Fill(observable, m_sv, weight);
+            }
+          } else if (D0_VBF <= 0.8) {
+            hists.at(categores.at(vbf_D0_0p4to0p8)).back()->Fill(observable, m_sv, weight);
+            if (DCP_VBF > 0) {
+              hists.at(categores.at(vbf_D0_0p4to0p8_DCPp)).back()->Fill(observable, m_sv, weight);
+            } else if (DCP_VBF < 0) {
+              hists.at(categores.at(vbf_D0_0p4to0p8_DCPm)).back()->Fill(observable, m_sv, weight);
+            }
+          } else if (D0_VBF <= 1.0) {
+            hists.at(categores.at(vbf_D0_0p8to1p0)).back()->Fill(observable, m_sv, weight);
+            if (DCP_VBF > 0) {
+              hists.at(categores.at(vbf_D0_0p8to1p0_DCPp)).back()->Fill(observable, m_sv, weight);
+            } else if (DCP_VBF < 0) {
+              hists.at(categores.at(vbf_D0_0p8to1p0_DCPm)).back()->Fill(observable, m_sv, weight);
+            }
+          }
         }
       } else if (is_antiTauIso) {
         if (!(name == "W" || name == "ZJ" || name == "VVJ" ||
@@ -207,6 +243,7 @@ void histHolder::getJetFakes(std::vector<string> files, string dir, string tree_
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, OS;
     Float_t higgs_pT, mjj, m_sv, weight, t1_pt, t1_decayMode, njets, nbjets, vis_mass, mt, lep_iso, NN_disc;
+    Float_t D0_VBF, D0_ggH, DCP_VBF, DCP_ggH;
 
     string iso;
     if (tree_name.find("etau_tree") != string::npos) {
@@ -226,6 +263,10 @@ void histHolder::getJetFakes(std::vector<string> files, string dir, string tree_
     tree->SetBranchAddress("higgs_pT", &higgs_pT);
     tree->SetBranchAddress("mjj", &mjj);
     tree->SetBranchAddress("m_sv", &m_sv);
+    tree->SetBranchAddress("D0_VBF", &D0_VBF);
+    tree->SetBranchAddress("D0_ggH", &D0_ggH);
+    tree->SetBranchAddress("DCP_VBF", &DCP_VBF);
+    tree->SetBranchAddress("DCP_ggH", &DCP_ggH);
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("cat_0jet", &cat_0jet);
     tree->SetBranchAddress("cat_boosted", &cat_boosted);
@@ -267,29 +308,64 @@ void histHolder::getJetFakes(std::vector<string> files, string dir, string tree_
 
       if (is_antiTauIso) {
         if (cat0) {
-          auto bin_x = data.at(zeroJet)->GetXaxis()->FindBin(vis_mass);
-          auto bin_y = data.at(zeroJet)->GetYaxis()->FindBin(njets);
-          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                              frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
-                                              frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
-                                              frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)});
-          convertDataToFake(fakes.at(zeroJet), name, t1_decayMode, vis_mass, weight * fakeweight);
+          // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
+          convertDataToFake(zeroJet, name, t1_decayMode, vis_mass, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+          // auto bin_x = data.at(zeroJet)->GetXaxis()->FindBin(vis_mass);
+          // auto bin_y = data.at(zeroJet)->GetYaxis()->FindBin(njets);
+          // auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
+          //                                     frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
+          //                                     frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
+          //                                     frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)});
+          // convertDataToFake(fakes.at(zeroJet), name, t1_decayMode, vis_mass, weight * fakeweight);
         } else if (cat1) {
-          auto bin_x = data.at(boosted)->GetXaxis()->FindBin(vis_mass);
-          auto bin_y = data.at(boosted)->GetYaxis()->FindBin(njets);
-          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                              frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
-                                              frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
-                                              frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)});
-          convertDataToFake(fakes.at(boosted), name, higgs_pT, m_sv, weight * fakeweight);
+          convertDataToFake(boosted, name, higgs_pT, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+          // auto bin_x = data.at(boosted)->GetXaxis()->FindBin(vis_mass);
+          // auto bin_y = data.at(boosted)->GetYaxis()->FindBin(njets);
+          // auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
+          //                                     frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
+          //                                     frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
+          //                                     frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)});
+          // convertDataToFake(fakes.at(boosted), name, higgs_pT, m_sv, weight * fakeweight);
         } else if (cat2) {
-          auto bin_x = data.at(vbf)->GetXaxis()->FindBin(vis_mass);
-          auto bin_y = data.at(vbf)->GetYaxis()->FindBin(njets);
-          auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                              frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
-                                              frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
-                                              frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)});
-          convertDataToFake(fakes.at(vbf), name, observable, m_sv, weight * fakeweight);
+          convertDataToFake(vbf, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+
+          // Split VBF bins based on MELA variables.
+          if (D0_VBF > 0 && D0_VBF <= 0.2) {
+            convertDataToFake(vbf_D0_0p0to0p2, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            if (DCP_VBF > 0) {
+              convertDataToFake(vbf_D0_0p0to0p2_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            } else if (DCP_VBF < 0) {
+              convertDataToFake(vbf_D0_0p0to0p2_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            }
+          } else if (D0_VBF <= 0.4) {
+            convertDataToFake(vbf_D0_0p2to0p4, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            if (DCP_VBF > 0) {
+              convertDataToFake(vbf_D0_0p2to0p4_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            } else if (DCP_VBF < 0) {
+              convertDataToFake(vbf_D0_0p2to0p4_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            }
+          } else if (D0_VBF <= 0.8) {
+            convertDataToFake(vbf_D0_0p4to0p8, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            if (DCP_VBF > 0) {
+              convertDataToFake(vbf_D0_0p4to0p8_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            } else if (DCP_VBF < 0) {
+              convertDataToFake(vbf_D0_0p4to0p8_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            }
+          } else if (D0_VBF <= 1.0) {
+            convertDataToFake(vbf_D0_0p8to1p0, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            if (DCP_VBF > 0) {
+              convertDataToFake(vbf_D0_0p8to1p0_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            } else if (DCP_VBF < 0) {
+              convertDataToFake(vbf_D0_0p8to1p0_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            }
+          }
+          // auto bin_x = data.at(vbf)->GetXaxis()->FindBin(vis_mass);
+          // auto bin_y = data.at(vbf)->GetYaxis()->FindBin(njets);
+          // auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
+          //                                     frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
+          //                                     frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
+          //                                     frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)});
+          // convertDataToFake(fakes.at(vbf), name, observable, m_sv, weight * fakeweight);
         }
 
         // loop through all systematic names and get the corresponding weight to fill a histogram
