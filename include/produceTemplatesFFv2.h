@@ -276,7 +276,7 @@ void histHolder::convertDataToFake(Categories cat, std::string name, double var1
                                       frac_tt.at(cat)->GetBinContent(bin_x, bin_y),
                                       frac_qcd.at(cat)->GetBinContent(bin_x, bin_y)});
   if (name.find("Data") != std::string::npos) {
-    fakes.at(categories.at(cat))->Fill(var1, var2, weight);
+    fakes.at(cat)->Fill(var1, var2, weight * fakeweight);
   }
 }
 

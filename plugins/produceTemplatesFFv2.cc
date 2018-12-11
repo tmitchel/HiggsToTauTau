@@ -153,32 +153,32 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
 
           // Split VBF bins based on MELA variables.
           if (D0_VBF > 0 && D0_VBF <= 0.2) {
-            hists.at(categores.at(vbf_D0_0p0to0p2)).back()->Fill(observable, m_sv, weight);
+            hists.at(categories.at(vbf_D0_0p0to0p2)).back()->Fill(observable, m_sv, weight);
             if (DCP_VBF > 0) {
-              hists.at(categores.at(vbf_D0_0p0to0p2_DCPp)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0_0p0to0p2_DCPp)).back()->Fill(observable, m_sv, weight);
             } else if (DCP_VBF < 0) {
-              hists.at(categores.at(vbf_D0_0p0to0p2_DCPm)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0_0p0to0p2_DCPm)).back()->Fill(observable, m_sv, weight);
             }
           } else if (D0_VBF <= 0.4) {
-            hists.at(categores.at(vbf_D0_0p2to0p4)).back()->Fill(observable, m_sv, weight);
+            hists.at(categories.at(vbf_D0_0p2to0p4)).back()->Fill(observable, m_sv, weight);
             if (DCP_VBF > 0) {
-              hists.at(categores.at(vbf_D0_0p2to0p4_DCPp)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0_0p2to0p4_DCPp)).back()->Fill(observable, m_sv, weight);
             } else if (DCP_VBF < 0) {
-              hists.at(categores.at(vbf_D0_0p2to0p4_DCPm)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0_0p2to0p4_DCPm)).back()->Fill(observable, m_sv, weight);
             }
           } else if (D0_VBF <= 0.8) {
-            hists.at(categores.at(vbf_D0_0p4to0p8)).back()->Fill(observable, m_sv, weight);
+            hists.at(categories.at(vbf_D0_0p4to0p8)).back()->Fill(observable, m_sv, weight);
             if (DCP_VBF > 0) {
-              hists.at(categores.at(vbf_D0_0p4to0p8_DCPp)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0_0p4to0p8_DCPp)).back()->Fill(observable, m_sv, weight);
             } else if (DCP_VBF < 0) {
-              hists.at(categores.at(vbf_D0_0p4to0p8_DCPm)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0_0p4to0p8_DCPm)).back()->Fill(observable, m_sv, weight);
             }
           } else if (D0_VBF <= 1.0) {
-            hists.at(categores.at(vbf_D0_0p8to1p0)).back()->Fill(observable, m_sv, weight);
+            hists.at(categories.at(vbf_D0_0p8to1p0)).back()->Fill(observable, m_sv, weight);
             if (DCP_VBF > 0) {
-              hists.at(categores.at(vbf_D0_0p8to1p0_DCPp)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0_0p8to1p0_DCPp)).back()->Fill(observable, m_sv, weight);
             } else if (DCP_VBF < 0) {
-              hists.at(categores.at(vbf_D0_0p8to1p0_DCPm)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0_0p8to1p0_DCPm)).back()->Fill(observable, m_sv, weight);
             }
           }
         }
@@ -241,10 +241,10 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
     frac_qcd.at(i)->Add(frac_tt.at(i), -1);
     frac_qcd.at(i)->Add(frac_real.at(i), -1);
 
-    // std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    // std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    // std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-    // std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+     std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+     std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+     std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+     std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/data.at(i)->Integral() << std::endl;
 
     frac_w.at(i)->Divide(data.at(i));
     frac_tt.at(i)->Divide(data.at(i));
