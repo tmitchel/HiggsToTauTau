@@ -215,7 +215,7 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     Dbkg_ggH = evt->getDbkg_ggH();
     D0_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 0.297979 * 0.297979 * evt->getME_ps_VBF());
     DCP_VBF = evt->getDCP_VBF();
-    D0_ggH = evt->getME_sm_ggH() / (evt->getME_sm_ggH() + 0.297979 * 0.297979 * evt->getME_ps_ggH());
+    D0_ggH = evt->getME_sm_ggH() / (evt->getME_sm_ggH() + 1.0 * 1.0 * evt->getME_ps_ggH());
     DCP_ggH = evt->getDCP_ggH();
     Phi = evt->getPhi();
     Phi1 = evt->getPhi1();
