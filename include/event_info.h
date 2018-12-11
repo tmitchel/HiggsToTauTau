@@ -28,7 +28,7 @@ class event_info {
   Bool_t PassMu24, PassMu27, PassMu20Tau27;
   Float_t m_sv, pt_sv;   // SVFit
   Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;        // MELA
-  Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH;   // MELA
+  Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, ME_ps_VBF, ME_ps_ggH;  // MELA
   Float_t Rivet_nJets30, Rivet_higgsPt;
   Float_t Flag_BadChargedCandidateFilter, Flag_BadPFMuonFilter, Flag_EcalDeadCellTriggerPrimitiveFilter, Flag_HBHENoiseFilter, Flag_HBHENoiseIsoFilter, Flag_badMuons, Flag_duplicateMuons,
           Flag_ecalBadCalibFilter, Flag_eeBadScFilter, Flag_globalSuperTightHalo2016Filter, Flag_globalTightHalo2016Filter, Flag_goodVertices;
@@ -103,6 +103,8 @@ class event_info {
   Float_t getQ2V2()         { return Q2V2;            }
   Float_t getME_sm_VBF()    { return ME_sm_VBF;       }
   Float_t getME_sm_ggH()    { return ME_sm_ggH;       }
+  Float_t getME_ps_VBF()    { return ME_ps_VBF;       }
+  Float_t getME_ps_ggH()    { return ME_ps_ggH;       }
   Float_t getME_sm_WH()     { return ME_sm_WH;        }
   Float_t getME_sm_ZH()     { return ME_sm_ZH;        }
   Float_t getME_bkg()       { return ME_bkg;          }
@@ -151,6 +153,8 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) : i
   input -> SetBranchAddress( "Q2V2"            , &Q2V2            );
   input -> SetBranchAddress( "ME_sm_VBF"       , &ME_sm_VBF       );
   input -> SetBranchAddress( "ME_sm_ggH"       , &ME_sm_ggH       );
+  input -> SetBranchAddress( "ME_ps_VBF"       , &ME_ps_VBF       );
+  input -> SetBranchAddress( "ME_ps_ggH"       , &ME_ps_ggH       );
   input -> SetBranchAddress( "ME_sm_WH"        , &ME_sm_WH        );
   input -> SetBranchAddress( "ME_sm_ZH"        , &ME_sm_ZH        );
   input -> SetBranchAddress( "ME_bkg"          , &ME_bkg          );
