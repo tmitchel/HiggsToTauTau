@@ -222,7 +222,7 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
           } else if (D0_VBF <= 1.0) {
             fillFraction(vbf_D0_0p8to1p0, name, vis_mass, njets, weight);
             if (DCP_VBF > 0) {
-              fillFraction(vbf_D0_0p8to1p0_DCPm, name, vis_mass, njets, weight);
+              fillFraction(vbf_D0_0p8to1p0_DCPp, name, vis_mass, njets, weight);
             } else if (DCP_VBF < 0) {
               fillFraction(vbf_D0_0p8to1p0_DCPm, name, vis_mass, njets, weight);
             }
