@@ -241,10 +241,10 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
     frac_qcd.at(i)->Add(frac_tt.at(i), -1);
     frac_qcd.at(i)->Add(frac_real.at(i), -1);
 
-     std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-     std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-     std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/data.at(i)->Integral() << std::endl;
-     std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+     // std::cout << frac_w.at(i)->GetName() << " " << frac_w.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+     // std::cout << frac_tt.at(i)->GetName() << " " << frac_tt.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+     // std::cout << frac_qcd.at(i)->GetName() << " " << frac_qcd.at(i)->Integral()/data.at(i)->Integral() << std::endl;
+     // std::cout << frac_real.at(i)->GetName() << " " << frac_real.at(i)->Integral()/data.at(i)->Integral() << std::endl;
 
     frac_w.at(i)->Divide(data.at(i));
     frac_tt.at(i)->Divide(data.at(i));
@@ -341,22 +341,8 @@ void histHolder::getJetFakes(std::vector<string> files, string dir, string tree_
         if (cat0) {
           // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
           convertDataToFake(zeroJet, name, t1_decayMode, vis_mass, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
-          // auto bin_x = data.at(zeroJet)->GetXaxis()->FindBin(vis_mass);
-          // auto bin_y = data.at(zeroJet)->GetYaxis()->FindBin(njets);
-          // auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-          //                                     frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
-          //                                     frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
-          //                                     frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)});
-          // convertDataToFake(fakes.at(zeroJet), name, t1_decayMode, vis_mass, weight * fakeweight);
         } else if (cat1) {
           convertDataToFake(boosted, name, higgs_pT, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
-          // auto bin_x = data.at(boosted)->GetXaxis()->FindBin(vis_mass);
-          // auto bin_y = data.at(boosted)->GetYaxis()->FindBin(njets);
-          // auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-          //                                     frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
-          //                                     frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
-          //                                     frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)});
-          // convertDataToFake(fakes.at(boosted), name, higgs_pT, m_sv, weight * fakeweight);
         } else if (cat2) {
           convertDataToFake(vbf, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
 
@@ -390,13 +376,6 @@ void histHolder::getJetFakes(std::vector<string> files, string dir, string tree_
               convertDataToFake(vbf_D0_0p8to1p0_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             }
           }
-          // auto bin_x = data.at(vbf)->GetXaxis()->FindBin(vis_mass);
-          // auto bin_y = data.at(vbf)->GetYaxis()->FindBin(njets);
-          // auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-          //                                     frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
-          //                                     frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
-          //                                     frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)});
-          // convertDataToFake(fakes.at(vbf), name, observable, m_sv, weight * fakeweight);
         }
 
         // loop through all systematic names and get the corresponding weight to fill a histogram
