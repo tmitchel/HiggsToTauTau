@@ -1,15 +1,16 @@
 #include <algorithm>
 #include <cstdlib>
 #include <string>
+#include <vector>
 
 class CLParser {
-    private:
+ private:
     std::vector<std::string> tokens;
     std::vector<std::string> opts;
-    
-    public:
+
+ public:
     CLParser(int&, char**);
-    ~CLParser(){};
+    ~CLParser() {}
     bool Flag(const std::string&);
     std::string Option(const std::string&);
     std::vector<std::string> MultiOption(const std::string&, int, int);
@@ -36,7 +37,7 @@ std::string CLParser::Option(const std::string &flag) {
     return empty;
 }
 
-std::vector<std::string> CLParser::MultiOption(const std::string &flag, int depth, int first=1) {
+std::vector<std::string> CLParser::MultiOption(const std::string &flag, int depth, int first = 1) {
     if (first == 1) {
         opts.clear();
     }
@@ -47,7 +48,7 @@ std::vector<std::string> CLParser::MultiOption(const std::string &flag, int dept
     if (found != tokens.end() && ++found != tokens.end()) {
         --depth;
         opts.push_back(*found);
-        *found = *found+std::to_string(rand()); //can't let it find this one again next time, so add a random ending
+        *found = *found+std::to_string(rand());  // can't let it find this one again next time, so add a random ending
         MultiOption(*found, depth, 0);
     }
     return opts;

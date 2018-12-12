@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
   // create output file
   auto suffix = "_output.root";
-  auto prefix = "Output/trees/" + output_dir;
+  auto prefix = "Output/trees/" + output_dir + "/";
   std::string filename;
   if (name == sample) {
     filename = prefix + name + systname + suffix;
@@ -124,9 +124,9 @@ int main(int argc, char* argv[]) {
   embed_file.Close();
 
   // trigger and ID scale factors
-  auto myScaleFactor_trgMu19 = new SF_factory("LeptonEfficiencies/Muon/Run2016BtoH/Muon_Mu19leg_2016BtoH_eff.root");
-  auto myScaleFactor_trgMu22 = new SF_factory("LeptonEfficiencies/Muon/Run2016BtoH/Muon_Mu22OR_eta2p1_eff.root");
-  auto myScaleFactor_id = new SF_factory("LeptonEfficiencies/Muon/Run2016BtoH/Muon_IdIso_IsoLt0p15_2016BtoH_eff.root");
+  auto myScaleFactor_trgMu19 = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Muon/Run2016BtoH/Muon_Mu19leg_2016BtoH_eff.root");
+  auto myScaleFactor_trgMu22 = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Muon/Run2016BtoH/Muon_Mu22OR_eta2p1_eff.root");
+  auto myScaleFactor_id = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Muon/Run2016BtoH/Muon_IdIso_IsoLt0p15_2016BtoH_eff.root");
 
   //////////////////////////////////////
   // Final setup:                     //
@@ -156,41 +156,35 @@ int main(int argc, char* argv[]) {
     if (i % 100000 == 0)
       std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
 
-    histos->at("weightflow") -> Fill(1., norm);
-    histos_2d->at("weights") -> Fill(1., norm);
-
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
     Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
     if (name == "W") {
       if (event.getNumGenJets() == 1) {
-        evtwt = 6.963;
+        evtwt = 6.82;
       } else if (event.getNumGenJets() == 2) {
-        evtwt = 16.376;
+        evtwt = 2.099;
       } else if (event.getNumGenJets() == 3) {
-        evtwt = 2.533;
+        evtwt = 0.689;
       } else if (event.getNumGenJets() == 4) {
-        evtwt = 2.419;
+        evtwt = 0.690;
       } else {
-        evtwt = 61.983;
+        evtwt = 25.44;
       }
     }
 
     if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
       if (event.getNumGenJets() == 1) {
-        evtwt = 0.502938039;
+        evtwt = 0.457;
       } else if (event.getNumGenJets() == 2) {
-        evtwt = 1.042256272;
+        evtwt = 0.467;
       } else if (event.getNumGenJets() == 3) {
-        evtwt = 0.656337234;
+        evtwt = 0.480;
       } else if (event.getNumGenJets() == 4) {
-        evtwt = 0.458531131;
+        evtwt = 0.393;
       } else {
-        evtwt = 2.873324952;
+        evtwt = 1.418;
       }
     }
-
-    histos->at("weightflow") -> Fill(2., evtwt);
-    histos_2d->at("weights") -> Fill(2., evtwt);
 
     histos->at("cutflow") -> Fill(1., 1.);
 
@@ -208,16 +202,24 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
+    if (fabs(muon.getEta()) > 2.1) {
+      continue;
+    }
+
+    if (isEmbed) {
+      event.setEmbed();
+    }
+
     // apply correct lepton pT thresholds
     bool fireSingle(false), fireCross(false);
     if (muon.getPt() > 23 && (event.getPassIsoMu22() || event.getPassIsoTkMu22() || event.getPassIsoMu22eta2p1() || event.getPassIsoTkMu22eta2p1() )) {
       fireSingle = true;
     } else if (muon.getPt() > 20 && muon.getPt() < 23 && event.getPassMu19Tau20()) {
       fireCross = true;
-    } else {
+    } else if (!isEmbed) {
+      // if it's embedded samples, don't apply trigger
       continue;
     }
-
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
       continue;
@@ -264,24 +266,25 @@ int main(int argc, char* argv[]) {
       // // anti-lepton discriminator SFs
       if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {  // Yiwen
         if (fabs(tau.getEta()) < 1.460)
-          evtwt *= 1.402;
+          evtwt *= 1.213;
         else if (fabs(tau.getEta()) > 1.558)
-          evtwt *= 1.900;
-        if (name == "ZL" && tau.getL2DecayMode() == 0)
-          evtwt *= 0.98;
-        else if (sample == "ZL" && tau.getL2DecayMode() == 1)
-          evtwt *= 1.20;
+          evtwt *= 1.375;
       } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
         if (fabs(tau.getEta()) < 0.4)
-          evtwt *= 1.012;
+          evtwt *= 1.263;
         else if (fabs(tau.getEta()) < 0.8)
-          evtwt *= 1.007;
+          evtwt *= 1.364;
         else if (fabs(tau.getEta()) < 1.2)
-          evtwt *= 0.870;
+          evtwt *= 0.854;
         else if (fabs(tau.getEta()) < 1.7)
-          evtwt *= 1.154;
+          evtwt *= 1.712;
         else
-          evtwt *= 2.281;
+          evtwt *= 2.324;
+
+        if (name == "ZL" && tau.getL2DecayMode() == 0)
+          evtwt *= 0.74;
+        else if (sample == "ZL" && tau.getL2DecayMode() == 1)
+          evtwt *= 1.0;
       }
 
       // Z-pT and Zmm Reweighting

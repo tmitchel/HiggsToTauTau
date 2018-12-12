@@ -16,6 +16,10 @@ parser.add_option('--data', '-d', action='store_true',
                   default=False, dest='isData',
                   help='run on data or MC'
                   )
+parser.add_option('--acSample', '-a', action='store_true',
+                  default=False, dest='ACsample',
+                  help='is an anomolous coupling sample'
+                  )
 parser.add_option('--exe', '-e', action='store',
                   default='Analyze', dest='exe',
                   help='name of executable'
@@ -68,7 +72,7 @@ for ifile in fileList:
     if prefix:
       sample = sample.replace(prefix, '')
     tosample = ifile.replace(sample+suffix,'')
-
+    
     if 'DYJets' in sample:
         names = ['ZTT', 'ZL', 'ZJ']
     elif 'TT' in sample:
@@ -105,10 +109,20 @@ for ifile in fileList:
         names = ['ttH'+mass]
     elif 'embed' in sample:
         names = ['embed']
+    elif 'vbf' in sample:
+        names = ['VBF125']
+    elif 'ggH' in sample:
+        names = ['ggH125']
+    elif 'wh' in sample:
+        names = ['WH125']
+    elif 'zh' in sample:
+        names = ['ZH125']
     else: 
         names = ['VV', 'VVJ', 'VVT']
 
-    callstring = './%s -p %s -s %s -d %s' % (options.exe, tosample, sample, options.output_dir)
+    callstring = './%s -p %s -s %s -d %s ' % (options.exe, tosample, sample, options.output_dir)
+    if options.ACsample:
+      callstring += ' -a '
 
     if options.syst and not 'Data' in sample:
         for isyst in systs:
@@ -117,8 +131,9 @@ for ifile in fileList:
                 call(tocall, shell=True)
     else:
         for name in names:
-            tocall = callstring + ' -n %s' % name 
+            tocall = callstring + ' -n %s ' % name 
             call(tocall, shell=True)
+
 
     print tocall
 

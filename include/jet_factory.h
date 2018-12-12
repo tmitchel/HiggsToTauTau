@@ -230,7 +230,7 @@ namespace btagSF {
     rand->SetSeed((int)((bjet->getEta() + 5) * 100000));
     float myrand = rand->Rndm();
 
-    if (SF < 1 && myrand < (1 - SF)) {
+    if (SF < 1 && myrand < (1 - SF) && nbtag > 0) {
       nbtag = nbtag - 1;
     }
 

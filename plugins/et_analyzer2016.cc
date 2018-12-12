@@ -1,9 +1,10 @@
 // Copyright 2018 Tyler Mitchell
 
 // system includes
-#include <iostream>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <memory>
 #include <unordered_map>
 
 // ROOT includes
@@ -19,19 +20,20 @@
 #include "RooMsgService.h"
 
 // user includes
-#include "../include/ZmmSF.h"
-#include "../include/swiss_army_class.h"
-#include "../include/event_info.h"
-#include "../include/tau_factory.h"
-#include "../include/electron_factory.h"
-#include "../include/muon_factory.h"
-#include "../include/jet_factory.h"
-#include "../include/met_factory.h"
-#include "../include/SF_factory.h"
-#include "../include/LumiReweightingStandAlone.h"
+#include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
 #include "../include/EmbedWeight.h"
+#include "../include/LumiReweightingStandAlone.h"
+#include "../include/SF_factory.h"
+#include "../include/ZmmSF.h"
+#include "../include/electron_factory.h"
+#include "../include/event_info.h"
+#include "../include/jet_factory.h"
+#include "../include/met_factory.h"
+#include "../include/muon_factory.h"
 #include "../include/slim_tree.h"
+#include "../include/swiss_army_class.h"
+#include "../include/tau_factory.h"
 
 typedef std::vector<double> NumV;
 
@@ -42,11 +44,12 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////
 
   CLParser parser(argc, argv);
-  std::string sample = parser.Option("-s");
+  bool doAC = parser.Flag("-a");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
-  std::string output_dir = parser.Option("-d");
   std::string syst = parser.Option("-u");
+  std::string sample = parser.Option("-s");
+  std::string output_dir = parser.Option("-d");
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
@@ -66,9 +69,13 @@ int main(int argc, char* argv[]) {
   auto counts = reinterpret_cast<TH1D*>(fin->Get("nevents"));
   auto gen_number = counts->GetBinContent(2);
 
+  // reweighter for anomolous coupling samples
+  ACWeighter ac_weights = ACWeighter(sample);
+  ac_weights.fillWeightMap();
+
   // create output file
   auto suffix = "_output.root";
-  auto prefix = "Output/trees/" + output_dir;
+  auto prefix = "Output/trees/" + output_dir + "/";
   std::string filename;
   if (name == sample) {
     filename = prefix + name + systname + suffix;
@@ -90,7 +97,17 @@ int main(int argc, char* argv[]) {
 
   // cd to root of output file and create tree
   fout->cd();
-  slim_tree* st = new slim_tree("etau_tree"+systname);
+  slim_tree* st = new slim_tree("etau_tree"+systname, doAC);
+
+  if (sample.find("vbf_") != std::string::npos) {
+    sample = "VBF125";
+  } else if (sample.find("ggH_") != std::string::npos) {
+    sample = "ggH125";
+  } else if (sample.find("wh_") != std::string::npos) {
+    sample = "WMinusHTauTau125";
+  } else if (sample.find("zh_") != std::string::npos) {
+    sample = "ZH125";
+  }
 
   // get normalization (lumi & xs are in util.h)
   double norm;
@@ -129,10 +146,10 @@ int main(int argc, char* argv[]) {
   embed_file.Close();
 
   // trigger and ID scale factors
-  auto myScaleFactor_trgEle25 = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_eff.root");
-  auto myScaleFactor_id = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_IsoLt0p1_eff.root");
-  auto myScaleFactor_trgEle25Anti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_antiisolated_Iso0p1to0p3_eff_rb.root");
-  auto myScaleFactor_idAnti = new SF_factory("LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_antiisolated_Iso0p1to0p3_eff.root");
+  auto myScaleFactor_trgEle25 = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_eff.root");
+  auto myScaleFactor_id = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_IsoLt0p1_eff.root");
+  auto myScaleFactor_trgEle25Anti = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_antiisolated_Iso0p1to0p3_eff_rb.root");
+  auto myScaleFactor_idAnti = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_antiisolated_Iso0p1to0p3_eff.root");
 
   TFile * f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
   TGraph * g_NNLOPS_0jet = reinterpret_cast<TGraph*>(f_NNLOPS-> Get("gr_NNLOPSratio_pt_powheg_0jet"));
@@ -437,8 +454,15 @@ int main(int argc, char* argv[]) {
       tree_cat.push_back("SS");
     }
 
+    std::shared_ptr<std::vector<double>> weights(nullptr);
+    Long64_t currentEventID = event.getLumi();
+    currentEventID = currentEventID * 1000000 + event.getEvt();
+    if (doAC) {
+      weights = std::make_shared<std::vector<double>>(ac_weights.getWeights(currentEventID));
+    }
+
     // fill the tree
-    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
+    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, weights);
   }  // close event loop
 
   fin->Close();
