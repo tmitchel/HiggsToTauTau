@@ -73,6 +73,8 @@ class histHolder {
   void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double, double);
   void histoLoop(std::vector<std::string>, std::string, std::string, std::string);
   void getJetFakes(std::vector<std::string>, std::string, std::string, bool);
+  void fillMELABins(double, double, double, double, double, double, double);
+  void fillMELAFractions(std::string, double, double, double, double, double, double, double);
 
   bool doNN, old_selection;
   TFile *fout;
@@ -219,9 +221,9 @@ histHolder::histHolder(std::string channel_prefix, std::string year, std::string
   // get FakeFactor workspace
   TFile *ff_file;
   if (year == "2017") {
-    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ");
+    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ");
   } else if (year == "2016") {
-    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_20180831_tight.root").c_str(), "READ");
+    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2016/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_20180831_tight.root").c_str(), "READ");
   } else {
     std::cerr << "Bad year" << std::endl;
   }
@@ -341,4 +343,134 @@ void histHolder::writeHistos() {
   }
 
   fout->Close();
+}
+
+void histHolder::fillMELABins(double D0_VBF, double DCP_VBF, double D0_ggH, double DCP_ggH, double observable, double m_sv, double weight) {
+
+  // Split VBF bins based on MELA VBF variables.
+  if (D0_VBF > 0 && D0_VBF <= 0.2) {
+    hists.at(categories.at(vbf_D0_0p0to0p2)).back()->Fill(observable, m_sv, weight);
+    if (DCP_VBF > 0) {
+      hists.at(categories.at(vbf_D0_0p0to0p2_DCPp)).back()->Fill(observable, m_sv, weight);
+    } else if (DCP_VBF < 0) {
+      hists.at(categories.at(vbf_D0_0p0to0p2_DCPm)).back()->Fill(observable, m_sv, weight);
+    }
+  } else if (D0_VBF <= 0.4) {
+    hists.at(categories.at(vbf_D0_0p2to0p4)).back()->Fill(observable, m_sv, weight);
+    if (DCP_VBF > 0) {
+      hists.at(categories.at(vbf_D0_0p2to0p4_DCPp)).back()->Fill(observable, m_sv, weight);
+    } else if (DCP_VBF < 0) {
+      hists.at(categories.at(vbf_D0_0p2to0p4_DCPm)).back()->Fill(observable, m_sv, weight);
+    }
+  } else if (D0_VBF <= 0.8) {
+    hists.at(categories.at(vbf_D0_0p4to0p8)).back()->Fill(observable, m_sv, weight);
+    if (DCP_VBF > 0) {
+      hists.at(categories.at(vbf_D0_0p4to0p8_DCPp)).back()->Fill(observable, m_sv, weight);
+    } else if (DCP_VBF < 0) {
+      hists.at(categories.at(vbf_D0_0p4to0p8_DCPm)).back()->Fill(observable, m_sv, weight);
+    }
+  } else if (D0_VBF <= 1.0) {
+    hists.at(categories.at(vbf_D0_0p8to1p0)).back()->Fill(observable, m_sv, weight);
+    if (DCP_VBF > 0) {
+      hists.at(categories.at(vbf_D0_0p8to1p0_DCPp)).back()->Fill(observable, m_sv, weight);
+    } else if (DCP_VBF < 0) {
+      hists.at(categories.at(vbf_D0_0p8to1p0_DCPm)).back()->Fill(observable, m_sv, weight);
+    }
+  }
+
+  // Split VBF bins based on MELA ggH variables.
+  if (D0_ggH > 0 && D0_ggH <= 0.2) {
+    hists.at(categories.at(vbf_D0ggH_0p0to0p2)).back()->Fill(observable, m_sv, weight);
+    if (DCP_ggH > 0) {
+      hists.at(categories.at(vbf_D0ggH_0p0to0p2_DCPp)).back()->Fill(observable, m_sv, weight);
+    } else if (DCP_ggH < 0) {
+      hists.at(categories.at(vbf_D0ggH_0p0to0p2_DCPm)).back()->Fill(observable, m_sv, weight);
+    }
+  } else if (D0_ggH <= 0.4) {
+    hists.at(categories.at(vbf_D0ggH_0p2to0p4)).back()->Fill(observable, m_sv, weight);
+    if (DCP_ggH > 0) {
+      hists.at(categories.at(vbf_D0ggH_0p2to0p4_DCPp)).back()->Fill(observable, m_sv, weight);
+    } else if (DCP_ggH < 0) {
+      hists.at(categories.at(vbf_D0ggH_0p2to0p4_DCPm)).back()->Fill(observable, m_sv, weight);
+    }
+  } else if (D0_ggH <= 0.7) {
+    hists.at(categories.at(vbf_D0ggH_0p4to0p7)).back()->Fill(observable, m_sv, weight);
+    if (DCP_ggH > 0) {
+      hists.at(categories.at(vbf_D0ggH_0p4to0p7_DCPp)).back()->Fill(observable, m_sv, weight);
+    } else if (DCP_ggH < 0) {
+      hists.at(categories.at(vbf_D0ggH_0p4to0p7_DCPm)).back()->Fill(observable, m_sv, weight);
+    }
+  } else if (D0_ggH <= 1.0) {
+    hists.at(categories.at(vbf_D0ggH_0p7to1p0)).back()->Fill(observable, m_sv, weight);
+    if (DCP_ggH > 0) {
+      hists.at(categories.at(vbf_D0ggH_0p7to1p0_DCPp)).back()->Fill(observable, m_sv, weight);
+    } else if (DCP_ggH < 0) {
+      hists.at(categories.at(vbf_D0ggH_0p7to1p0_DCPm)).back()->Fill(observable, m_sv, weight);
+    }
+  }
+
+}
+
+void histHolder::fillMELAFractions(std::string name, double D0_VBF, double DCP_VBF, double D0_ggH, double DCP_ggH, double vis_mass, double njets, double weight) {
+  // Split VBF bins based on MELA VBF variables.
+  if (D0_VBF > 0 && D0_VBF <= 0.2) {
+    fillFraction(vbf_D0_0p0to0p2, name, vis_mass, njets, weight);
+    if (DCP_VBF > 0) {
+      fillFraction(vbf_D0_0p0to0p2_DCPp, name, vis_mass, njets, weight);
+    } else if (DCP_VBF < 0) {
+      fillFraction(vbf_D0_0p0to0p2_DCPm, name, vis_mass, njets, weight);
+    }
+  } else if (D0_VBF <= 0.4) {
+    fillFraction(vbf_D0_0p2to0p4, name, vis_mass, njets, weight);
+    if (DCP_VBF > 0) {
+      fillFraction(vbf_D0_0p2to0p4_DCPp, name, vis_mass, njets, weight);
+    } else if (DCP_VBF < 0) {
+      fillFraction(vbf_D0_0p2to0p4_DCPm, name, vis_mass, njets, weight);
+    }
+  } else if (D0_VBF <= 0.8) {
+    fillFraction(vbf_D0_0p4to0p8, name, vis_mass, njets, weight);
+    if (DCP_VBF > 0) {
+      fillFraction(vbf_D0_0p4to0p8_DCPp, name, vis_mass, njets, weight);
+    } else if (DCP_VBF < 0) {
+      fillFraction(vbf_D0_0p4to0p8_DCPm, name, vis_mass, njets, weight);
+    }
+  } else if (D0_VBF <= 1.0) {
+    fillFraction(vbf_D0_0p8to1p0, name, vis_mass, njets, weight);
+    if (DCP_VBF > 0) {
+      fillFraction(vbf_D0_0p8to1p0_DCPp, name, vis_mass, njets, weight);
+    } else if (DCP_VBF < 0) {
+      fillFraction(vbf_D0_0p8to1p0_DCPm, name, vis_mass, njets, weight);
+    }
+  }
+
+  // Split VBF bins based on MELA ggH variables.
+  if (D0_ggH > 0 && D0_ggH <= 0.2) {
+    fillFraction(vbf_D0ggH_0p0to0p2, name, vis_mass, njets, weight);
+    if (DCP_ggH > 0) {
+      fillFraction(vbf_D0ggH_0p0to0p2_DCPp, name, vis_mass, njets, weight);
+    } else if (DCP_ggH < 0) {
+      fillFraction(vbf_D0ggH_0p0to0p2_DCPm, name, vis_mass, njets, weight);
+    }
+  } else if (D0_ggH <= 0.4) {
+    fillFraction(vbf_D0ggH_0p2to0p4, name, vis_mass, njets, weight);
+    if (DCP_ggH > 0) {
+      fillFraction(vbf_D0ggH_0p2to0p4_DCPp, name, vis_mass, njets, weight);
+    } else if (DCP_ggH < 0) {
+      fillFraction(vbf_D0ggH_0p2to0p4_DCPm, name, vis_mass, njets, weight);
+    }
+  } else if (D0_ggH <= 0.7) {
+    fillFraction(vbf_D0ggH_0p4to0p7, name, vis_mass, njets, weight);
+    if (DCP_ggH > 0) {
+      fillFraction(vbf_D0ggH_0p4to0p7_DCPp, name, vis_mass, njets, weight);
+    } else if (DCP_ggH < 0) {
+      fillFraction(vbf_D0ggH_0p4to0p7_DCPm, name, vis_mass, njets, weight);
+    }
+  } else if (D0_ggH <= 1.0) {
+    fillFraction(vbf_D0ggH_0p7to1p0, name, vis_mass, njets, weight);
+    if (DCP_ggH > 0) {
+      fillFraction(vbf_D0ggH_0p7to1p0_DCPp, name, vis_mass, njets, weight);
+    } else if (DCP_ggH < 0) {
+      fillFraction(vbf_D0ggH_0p7to1p0_DCPm, name, vis_mass, njets, weight);
+    }
+  }
 }
