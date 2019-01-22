@@ -183,33 +183,33 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
           }
 
           // Split VBF bins based on MELA ggH variables.
-          if (D0_ggH > 0 && D0_ggH <= 0.3) {
-            hists.at(categories.at(vbf_D0ggH_0p00to0p30)).back()->Fill(observable, m_sv, weight);
+          if (D0_ggH > 0 && D0_ggH <= 0.2) {
+            hists.at(categories.at(vbf_D0ggH_0p0to0p2)).back()->Fill(observable, m_sv, weight);
             if (DCP_ggH > 0) {
-              hists.at(categories.at(vbf_D0ggH_0p00to0p30_DCPp)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0ggH_0p0to0p2_DCPp)).back()->Fill(observable, m_sv, weight);
             } else if (DCP_ggH < 0) {
-              hists.at(categories.at(vbf_D0ggH_0p00to0p30_DCPm)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0ggH_0p0to0p2_DCPm)).back()->Fill(observable, m_sv, weight);
             }
-          } else if (D0_ggH <= 0.45) {
-            hists.at(categories.at(vbf_D0ggH_0p30to0p45)).back()->Fill(observable, m_sv, weight);
+          } else if (D0_ggH <= 0.4) {
+            hists.at(categories.at(vbf_D0ggH_0p2to0p4)).back()->Fill(observable, m_sv, weight);
             if (DCP_ggH > 0) {
-              hists.at(categories.at(vbf_D0ggH_0p30to0p45_DCPp)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0ggH_0p2to0p4_DCPp)).back()->Fill(observable, m_sv, weight);
             } else if (DCP_ggH < 0) {
-              hists.at(categories.at(vbf_D0ggH_0p30to0p45_DCPm)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0ggH_0p2to0p4_DCPm)).back()->Fill(observable, m_sv, weight);
             }
-          } else if (D0_ggH <= 0.55) {
-            hists.at(categories.at(vbf_D0ggH_0p45to0p55)).back()->Fill(observable, m_sv, weight);
+          } else if (D0_ggH <= 0.7) {
+            hists.at(categories.at(vbf_D0ggH_0p4to0p7)).back()->Fill(observable, m_sv, weight);
             if (DCP_ggH > 0) {
-              hists.at(categories.at(vbf_D0ggH_0p45to0p55_DCPp)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0ggH_0p4to0p7_DCPp)).back()->Fill(observable, m_sv, weight);
             } else if (DCP_ggH < 0) {
-              hists.at(categories.at(vbf_D0ggH_0p45to0p55_DCPm)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0ggH_0p4to0p7_DCPm)).back()->Fill(observable, m_sv, weight);
             }
           } else if (D0_ggH <= 1.0) {
-            hists.at(categories.at(vbf_D0ggH_0p55to1p00)).back()->Fill(observable, m_sv, weight);
+            hists.at(categories.at(vbf_D0ggH_0p7to1p0)).back()->Fill(observable, m_sv, weight);
             if (DCP_ggH > 0) {
-              hists.at(categories.at(vbf_D0ggH_0p55to1p00_DCPp)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0ggH_0p7to1p0_DCPp)).back()->Fill(observable, m_sv, weight);
             } else if (DCP_ggH < 0) {
-              hists.at(categories.at(vbf_D0ggH_0p55to1p00_DCPm)).back()->Fill(observable, m_sv, weight);
+              hists.at(categories.at(vbf_D0ggH_0p7to1p0_DCPm)).back()->Fill(observable, m_sv, weight);
             }
           }
         }
@@ -260,33 +260,33 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
           }
 
           // Split VBF bins based on MELA ggH variables.
-          if (D0_ggH > 0 && D0_ggH <= 0.3) {
-            fillFraction(vbf_D0ggH_0p00to0p30, name, vis_mass, njets, weight);
+          if (D0_ggH > 0 && D0_ggH <= 0.2) {
+            fillFraction(vbf_D0ggH_0p0to0p2, name, vis_mass, njets, weight);
             if (DCP_ggH > 0) {
-              fillFraction(vbf_D0ggH_0p00to0p30_DCPp, name, vis_mass, njets, weight);
+              fillFraction(vbf_D0ggH_0p0to0p2_DCPp, name, vis_mass, njets, weight);
             } else if (DCP_ggH < 0) {
-              fillFraction(vbf_D0ggH_0p00to0p30_DCPm, name, vis_mass, njets, weight);
+              fillFraction(vbf_D0ggH_0p0to0p2_DCPm, name, vis_mass, njets, weight);
             }
-          } else if (D0_ggH <= 0.45) {
-            fillFraction(vbf_D0ggH_0p30to0p45, name, vis_mass, njets, weight);
+          } else if (D0_ggH <= 0.4) {
+            fillFraction(vbf_D0ggH_0p2to0p4, name, vis_mass, njets, weight);
             if (DCP_ggH > 0) {
-              fillFraction(vbf_D0ggH_0p30to0p45_DCPp, name, vis_mass, njets, weight);
+              fillFraction(vbf_D0ggH_0p2to0p4_DCPp, name, vis_mass, njets, weight);
             } else if (DCP_ggH < 0) {
-              fillFraction(vbf_D0ggH_0p30to0p45_DCPm, name, vis_mass, njets, weight);
+              fillFraction(vbf_D0ggH_0p2to0p4_DCPm, name, vis_mass, njets, weight);
             }
-          } else if (D0_ggH <= 0.55) {
-            fillFraction(vbf_D0ggH_0p45to0p55, name, vis_mass, njets, weight);
+          } else if (D0_ggH <= 0.7) {
+            fillFraction(vbf_D0ggH_0p4to0p7, name, vis_mass, njets, weight);
             if (DCP_ggH > 0) {
-              fillFraction(vbf_D0ggH_0p45to0p55_DCPp, name, vis_mass, njets, weight);
+              fillFraction(vbf_D0ggH_0p4to0p7_DCPp, name, vis_mass, njets, weight);
             } else if (DCP_ggH < 0) {
-              fillFraction(vbf_D0ggH_0p45to0p55_DCPm, name, vis_mass, njets, weight);
+              fillFraction(vbf_D0ggH_0p4to0p7_DCPm, name, vis_mass, njets, weight);
             }
           } else if (D0_ggH <= 1.0) {
-            fillFraction(vbf_D0ggH_0p55to1p00, name, vis_mass, njets, weight);
+            fillFraction(vbf_D0ggH_0p7to1p0, name, vis_mass, njets, weight);
             if (DCP_ggH > 0) {
-              fillFraction(vbf_D0ggH_0p55to1p00_DCPp, name, vis_mass, njets, weight);
+              fillFraction(vbf_D0ggH_0p7to1p0_DCPp, name, vis_mass, njets, weight);
             } else if (DCP_ggH < 0) {
-              fillFraction(vbf_D0ggH_0p55to1p00_DCPm, name, vis_mass, njets, weight);
+              fillFraction(vbf_D0ggH_0p7to1p0_DCPm, name, vis_mass, njets, weight);
             }
           }
         }
@@ -440,33 +440,33 @@ void histHolder::getJetFakes(std::vector<string> files, string dir, string tree_
           }
 
           // Split VBF bins based on MELA ggH variables.
-          if (D0_ggH > 0 && D0_ggH <= 0.3) {
-            convertDataToFake(vbf_D0ggH_0p00to0p30, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+          if (D0_ggH > 0 && D0_ggH <= 0.2) {
+            convertDataToFake(vbf_D0ggH_0p0to0p2, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             if (DCP_ggH > 0) {
-              convertDataToFake(vbf_D0ggH_0p00to0p30_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+              convertDataToFake(vbf_D0ggH_0p0to0p2_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             } else if (DCP_ggH < 0) {
-              convertDataToFake(vbf_D0ggH_0p00to0p30_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+              convertDataToFake(vbf_D0ggH_0p0to0p2_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             }
-          } else if (D0_ggH <= 0.45) {
-            convertDataToFake(vbf_D0ggH_0p30to0p45, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+          } else if (D0_ggH <= 0.4) {
+            convertDataToFake(vbf_D0ggH_0p2to0p4, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             if (DCP_ggH > 0) {
-              convertDataToFake(vbf_D0ggH_0p30to0p45_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+              convertDataToFake(vbf_D0ggH_0p2to0p4_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             } else if (DCP_ggH < 0) {
-              convertDataToFake(vbf_D0ggH_0p30to0p45_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+              convertDataToFake(vbf_D0ggH_0p2to0p4_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             }
-          } else if (D0_ggH <= 0.55) {
-            convertDataToFake(vbf_D0ggH_0p45to0p55, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+          } else if (D0_ggH <= 0.7) {
+            convertDataToFake(vbf_D0ggH_0p4to0p7, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             if (DCP_ggH > 0) {
-              convertDataToFake(vbf_D0ggH_0p45to0p55_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+              convertDataToFake(vbf_D0ggH_0p4to0p7_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             } else if (DCP_ggH < 0) {
-              convertDataToFake(vbf_D0ggH_0p45to0p55_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+              convertDataToFake(vbf_D0ggH_0p4to0p7_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             }
           } else if (D0_ggH <= 1.0) {
-            convertDataToFake(vbf_D0ggH_0p55to1p00, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+            convertDataToFake(vbf_D0ggH_0p7to1p0, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             if (DCP_ggH > 0) {
-              convertDataToFake(vbf_D0ggH_0p55to1p00_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+              convertDataToFake(vbf_D0ggH_0p7to1p0_DCPp, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             } else if (DCP_ggH < 0) {
-              convertDataToFake(vbf_D0ggH_0p55to1p00_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+              convertDataToFake(vbf_D0ggH_0p7to1p0_DCPm, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
             }
           }
         }
