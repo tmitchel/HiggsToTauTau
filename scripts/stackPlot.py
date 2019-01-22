@@ -36,6 +36,8 @@ from ROOT import TFile, TLegend, TH1F, TCanvas, THStack, kBlack, TColor, TLatex,
 from glob import glob
 gStyle.SetOptStat(0)
 
+from ROOT import gROOT, kTRUE
+gROOT.SetBatch(kTRUE)
 
 def applyStyle(name, hist, leg):
     overlay = 0
