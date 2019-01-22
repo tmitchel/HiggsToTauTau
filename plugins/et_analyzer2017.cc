@@ -19,6 +19,7 @@
 #include "RooMsgService.h"
 
 // user includes
+#include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
 #include "../include/EmbedWeight.h"
 #include "../include/LumiReweightingStandAlone.h"
@@ -43,11 +44,12 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////
 
   CLParser parser(argc, argv);
-  std::string sample = parser.Option("-s");
+  bool doAC = parser.Flag("-a");
   std::string name = parser.Option("-n");
   std::string path = parser.Option("-p");
-  std::string output_dir = parser.Option("-d");
   std::string syst = parser.Option("-u");
+  std::string sample = parser.Option("-s");
+  std::string output_dir = parser.Option("-d");
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
@@ -66,6 +68,10 @@ int main(int argc, char* argv[]) {
   // get number of generated events
   auto counts = reinterpret_cast<TH1D*>(fin->Get("nevents"));
   auto gen_number = counts->GetBinContent(2);
+
+  // reweighter for anomolous coupling samples
+  ACWeighter ac_weights = ACWeighter(sample);
+  ac_weights.fillWeightMap();
 
   // create output file
   auto suffix = "_output.root";
@@ -91,7 +97,17 @@ int main(int argc, char* argv[]) {
 
   // cd to root of output file and create tree
   fout->cd();
-  slim_tree* st = new slim_tree("etau_tree");
+  slim_tree* st = new slim_tree("etau_tree", doAC);
+
+  if (sample.find("vbf_") != std::string::npos) {
+    sample = "VBF125";
+  } else if (sample.find("ggH_") != std::string::npos) {
+    sample = "ggH125";
+  } else if (sample.find("wh_") != std::string::npos) {
+    sample = "WMinusHTauTau125";
+  } else if (sample.find("zh_") != std::string::npos) {
+    sample = "ZH125";
+  }
 
   // get normalization (lumi & xs are in util.h)
   double norm;
@@ -110,7 +126,7 @@ int main(int argc, char* argv[]) {
 
   reweight::LumiReWeighting* lumi_weights;
   // read inputs for lumi reweighting
-  if (!isData && !isEmbed) {
+  if (!isData && !isEmbed && !doAC) {
     TNamed* dbsName = reinterpret_cast<TNamed*>(fin->Get("MiniAOD_name"));
     std::string datasetName = dbsName->GetTitle();
     if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
@@ -441,8 +457,15 @@ int main(int argc, char* argv[]) {
       tree_cat.push_back("SS");
     }
 
+    std::shared_ptr<std::vector<double>> weights(nullptr);
+    Long64_t currentEventID = event.getLumi();
+    currentEventID = currentEventID * 1000000 + event.getEvt();
+    if (doAC) {
+      weights = std::make_shared<std::vector<double>>(ac_weights.getWeights(currentEventID));
+    }
+
     // fill the tree
-    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt);
+    st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, weights);
   }  // close event loop
 
   fin->Close();
