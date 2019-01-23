@@ -70,7 +70,7 @@ class HistTool {
   void initVectors1d(std::string);
   void initVectors2d(std::string);
   void initSystematics(std::string);
-  void includePlots(std::vector<Float_t>, std::string);
+  void includePlots(std::vector<int>, std::string);
   void fillFraction(int, std::string, double, double, double);
   void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double);  // 1d
   void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double, double);  // 2d
@@ -88,8 +88,8 @@ class HistTool {
   std::map<std::string, std::string> acNameMap;
   std::map<std::string, std::vector<TH1F *>> hists_1d;
   std::map<std::string, std::vector<TH2F *>> hists_2d, FF_systs;
-  std::vector<TH2F *> fakes_1d;
-  std::vector<TH2F *> data, fakes_2d frac_w, frac_tt, frac_real, frac_qcd;
+  std::vector<TH1F *> fakes_1d;
+  std::vector<TH2F *> data, fakes_2d, frac_w, frac_tt, frac_real, frac_qcd;
 
   // binning
   std::vector<Float_t> bins_l2, bins_hpt, bins_mjj, bins_lpt, bins_msv1, bins_msv2, bins_ac_mjj, bins_ac_m_sv, bins_1d;
@@ -237,7 +237,7 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
   ff_file->Close();
 }
 
-void HistTool::includePlots(std::vector<Float_t> bins1d, std::string var) {
+void HistTool::includePlots(std::vector<int> bins1d, std::string var) {
   if (bins_1d.size() < 3) {
     std::cerr << "Must give more than 3 bin arguments for plotting" << std::endl;
   }
@@ -253,7 +253,7 @@ void HistTool::includePlots(std::vector<Float_t> bins1d, std::string var) {
       fakes_1d.push_back(new TH1F("fake_boosted", "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
     } else {
       if (cat.find("vbf_D0") != std::string::npos) {
-        fakes_1d.push_back(new TH1F(("fake_" + cat).c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
+        fakes_1d.push_back(new TH1F(("fake_" + cat).c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
       } else {
         fakes_1d.push_back(new TH1F(("fake_" + cat).c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
       }
@@ -264,7 +264,7 @@ void HistTool::includePlots(std::vector<Float_t> bins1d, std::string var) {
       fout->cd();
       fout->mkdir("plots");
       fout->cd("plots");
-      for (auto it = hists_1d.begin(); it != hists_2d.end(); it++) {
+      for (auto it = hists_1d.begin(); it != hists_1d.end(); it++) {
         fout->mkdir((var + cat).c_str());
         fout->cd();
       }
@@ -387,7 +387,7 @@ void HistTool::writeTemplates() {
 
   for (auto cat = 0; cat < fakes_2d.size(); cat++) {
     fout->cd(categories.at(cat).c_str());
-    auto fake_hist = fakes.at(cat);
+    auto fake_hist = fakes_2d.at(cat);
     fake_hist->SetName("jetFakes");
 
     // if fake yield is negative, make it zero
@@ -425,7 +425,7 @@ void HistTool::writeHistos() {
 
   for (auto cat = 0; cat < fakes_1d.size(); cat++) {
     fout->cd(("plots/"+var+categories.at(cat)).c_str());
-    auto fake_hist = fakes.at(cat);
+    auto fake_hist = fakes_1d.at(cat);
     fake_hist->SetName("jetFakes");
 
     // if fake yield is negative, make it zero
@@ -456,63 +456,63 @@ void HistTool::writeHistos() {
 void HistTool::fillMELABins(double D0_VBF, double DCP_VBF, double D0_ggH, double DCP_ggH, double observable, double m_sv, double weight) {
   // Split VBF bins based on MELA VBF variables.
   if (D0_VBF > 0 && D0_VBF <= 0.2) {
-    hists.at(categories.at(vbf_D0_0p0to0p2)).back()->Fill(observable, m_sv, weight);
+    hists_2d.at(categories.at(vbf_D0_0p0to0p2)).back()->Fill(observable, m_sv, weight);
     if (DCP_VBF > 0) {
-      hists.at(categories.at(vbf_D0_0p0to0p2_DCPp)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0_0p0to0p2_DCPp)).back()->Fill(observable, m_sv, weight);
     } else if (DCP_VBF < 0) {
-      hists.at(categories.at(vbf_D0_0p0to0p2_DCPm)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0_0p0to0p2_DCPm)).back()->Fill(observable, m_sv, weight);
     }
   } else if (D0_VBF <= 0.4) {
-    hists.at(categories.at(vbf_D0_0p2to0p4)).back()->Fill(observable, m_sv, weight);
+    hists_2d.at(categories.at(vbf_D0_0p2to0p4)).back()->Fill(observable, m_sv, weight);
     if (DCP_VBF > 0) {
-      hists.at(categories.at(vbf_D0_0p2to0p4_DCPp)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0_0p2to0p4_DCPp)).back()->Fill(observable, m_sv, weight);
     } else if (DCP_VBF < 0) {
-      hists.at(categories.at(vbf_D0_0p2to0p4_DCPm)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0_0p2to0p4_DCPm)).back()->Fill(observable, m_sv, weight);
     }
   } else if (D0_VBF <= 0.8) {
-    hists.at(categories.at(vbf_D0_0p4to0p8)).back()->Fill(observable, m_sv, weight);
+    hists_2d.at(categories.at(vbf_D0_0p4to0p8)).back()->Fill(observable, m_sv, weight);
     if (DCP_VBF > 0) {
-      hists.at(categories.at(vbf_D0_0p4to0p8_DCPp)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0_0p4to0p8_DCPp)).back()->Fill(observable, m_sv, weight);
     } else if (DCP_VBF < 0) {
-      hists.at(categories.at(vbf_D0_0p4to0p8_DCPm)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0_0p4to0p8_DCPm)).back()->Fill(observable, m_sv, weight);
     }
   } else if (D0_VBF <= 1.0) {
-    hists.at(categories.at(vbf_D0_0p8to1p0)).back()->Fill(observable, m_sv, weight);
+    hists_2d.at(categories.at(vbf_D0_0p8to1p0)).back()->Fill(observable, m_sv, weight);
     if (DCP_VBF > 0) {
-      hists.at(categories.at(vbf_D0_0p8to1p0_DCPp)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0_0p8to1p0_DCPp)).back()->Fill(observable, m_sv, weight);
     } else if (DCP_VBF < 0) {
-      hists.at(categories.at(vbf_D0_0p8to1p0_DCPm)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0_0p8to1p0_DCPm)).back()->Fill(observable, m_sv, weight);
     }
   }
 
   // Split VBF bins based on MELA ggH variables.
   if (D0_ggH > 0 && D0_ggH <= 0.2) {
-    hists.at(categories.at(vbf_D0ggH_0p0to0p2)).back()->Fill(observable, m_sv, weight);
+    hists_2d.at(categories.at(vbf_D0ggH_0p0to0p2)).back()->Fill(observable, m_sv, weight);
     if (DCP_ggH > 0) {
-      hists.at(categories.at(vbf_D0ggH_0p0to0p2_DCPp)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0ggH_0p0to0p2_DCPp)).back()->Fill(observable, m_sv, weight);
     } else if (DCP_ggH < 0) {
-      hists.at(categories.at(vbf_D0ggH_0p0to0p2_DCPm)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0ggH_0p0to0p2_DCPm)).back()->Fill(observable, m_sv, weight);
     }
   } else if (D0_ggH <= 0.4) {
-    hists.at(categories.at(vbf_D0ggH_0p2to0p4)).back()->Fill(observable, m_sv, weight);
+    hists_2d.at(categories.at(vbf_D0ggH_0p2to0p4)).back()->Fill(observable, m_sv, weight);
     if (DCP_ggH > 0) {
-      hists.at(categories.at(vbf_D0ggH_0p2to0p4_DCPp)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0ggH_0p2to0p4_DCPp)).back()->Fill(observable, m_sv, weight);
     } else if (DCP_ggH < 0) {
-      hists.at(categories.at(vbf_D0ggH_0p2to0p4_DCPm)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0ggH_0p2to0p4_DCPm)).back()->Fill(observable, m_sv, weight);
     }
   } else if (D0_ggH <= 0.7) {
-    hists.at(categories.at(vbf_D0ggH_0p4to0p7)).back()->Fill(observable, m_sv, weight);
+    hists_2d.at(categories.at(vbf_D0ggH_0p4to0p7)).back()->Fill(observable, m_sv, weight);
     if (DCP_ggH > 0) {
-      hists.at(categories.at(vbf_D0ggH_0p4to0p7_DCPp)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0ggH_0p4to0p7_DCPp)).back()->Fill(observable, m_sv, weight);
     } else if (DCP_ggH < 0) {
-      hists.at(categories.at(vbf_D0ggH_0p4to0p7_DCPm)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0ggH_0p4to0p7_DCPm)).back()->Fill(observable, m_sv, weight);
     }
   } else if (D0_ggH <= 1.0) {
-    hists.at(categories.at(vbf_D0ggH_0p7to1p0)).back()->Fill(observable, m_sv, weight);
+    hists_2d.at(categories.at(vbf_D0ggH_0p7to1p0)).back()->Fill(observable, m_sv, weight);
     if (DCP_ggH > 0) {
-      hists.at(categories.at(vbf_D0ggH_0p7to1p0_DCPp)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0ggH_0p7to1p0_DCPp)).back()->Fill(observable, m_sv, weight);
     } else if (DCP_ggH < 0) {
-      hists.at(categories.at(vbf_D0ggH_0p7to1p0_DCPm)).back()->Fill(observable, m_sv, weight);
+      hists_2d.at(categories.at(vbf_D0ggH_0p7to1p0_DCPm)).back()->Fill(observable, m_sv, weight);
     }
   }
 }

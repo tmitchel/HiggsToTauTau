@@ -5,7 +5,7 @@
 #include "plotter_backend.h"
 
 using std::string;
-using vector;
+using std::vector;
 
 int main(int argc, char *argv[]) {
   auto watch = TStopwatch();
@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
   bool doAC = parser.Flag("-a");
   bool doNN = parser.Flag("-n");
   bool doSyst = parser.Flag("-s");
-  string var = parser.Option("-v"_;)
+  string var = parser.Option("-v");
   string dir = parser.Option("-d");
   string year = parser.Option("-y");
   string suffix = parser.Option("--suf");
@@ -168,18 +168,28 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
         cat2 = (njets > 1 && mjj > 400);
       }
 
-      switch (var) {
-        case "higgs_pT"     : var_val = higgs_pT;     break;
-        case "t1_decayMode" : var_val = t1_decayMode; break;
-        case "vis_mass"     : var_val = vis_mass;     break;
-        case "mjj"          : var_val = mjj;          break;
-        case "m_sv"         : var_val = m_sv;         break;
-        case "njets"        : var_val = njets;        break;
-        case "nbjets"       : var_val = nbjets;       break;
-        case "D0_VBF"       : var_val = D0_VBF;       break;
-        case "D0_ggH"       : var_val = D0_ggH;       break;
-        case "DCP_VBF"      : var_val = DCP_VBF;      break;
-        case "DCP_ggH"      : var_val = DCP_ggH;      break;
+      if (var == "higgs_pT") {
+        var_val = higgs_pT;
+      } else if (var == "t1_decayMode") {
+        var_val = t1_decayMode;
+      } else if (var == "vis_mass") {
+        var_val = vis_mass;
+      } else if (var == "mjj") {
+        var_val = mjj;
+      } else if (var == "m_sv") {
+        var_val = m_sv;
+      } else if (var == "njets") {
+        var_val = njets;
+      } else if (var == "nbjets") {
+        var_val = nbjets;
+      } else if (var == "D0_VBF") {
+        var_val = D0_VBF;
+      } else if (var == "D0_ggH") {
+        var_val = D0_ggH;
+      } else if (var == "DCP_VBF") {
+        var_val = DCP_VBF;
+      } else if (var == "DCP_ggH") {
+        var_val = DCP_ggH;
       }
 
       // fill histograms
@@ -339,21 +349,34 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
         cat2 = (njets > 1 && mjj > 400);
       }
 
-      switch (var) {
-        case "higgs_pT"     : var_val = higgs_pT;     break;
-        case "t1_decayMode" : var_val = t1_decayMode; break;
-        case "vis_mass"     : var_val = vis_mass;     break;
-        case "mjj"          : var_val = mjj;          break;
-        case "m_sv"         : var_val = m_sv;         break;
-        case "njets"        : var_val = njets;        break;
-        case "nbjets"       : var_val = nbjets;       break;
-        case "D0_VBF"       : var_val = D0_VBF;       break;
-        case "D0_ggH"       : var_val = D0_ggH;       break;
-        case "DCP_VBF"      : var_val = DCP_VBF;      break;
-        case "DCP_ggH"      : var_val = DCP_ggH;      break;
-        case "t1_pt"        : var_val = t1_pt;        break;
-        case "mt"           : var_val = mt;           break;
-        case "iso.c_str()"  : var_val = iso;          break;
+      if (var == "higgs_pT") {
+        var_val = higgs_pT;
+      } else if (var == "t1_decayMode") {
+        var_val = t1_decayMode;
+      } else if (var == "vis_mass") {
+        var_val = vis_mass;
+      } else if (var == "mjj") {
+        var_val = mjj;
+      } else if (var == "m_sv") {
+        var_val = m_sv;
+      } else if (var == "njets") {
+        var_val = njets;
+      } else if (var == "nbjets") {
+        var_val = nbjets;
+      } else if (var == "D0_VBF") {
+        var_val = D0_VBF;
+      } else if (var == "D0_ggH") {
+        var_val = D0_ggH;
+      } else if (var == "DCP_VBF") {
+        var_val = DCP_VBF;
+      } else if (var == "DCP_ggH") {
+        var_val = DCP_ggH;
+      } else if (var == "t1_pt") {
+        var_val = t1_pt;
+      } else if (var == "mt") {
+        var_val = mt;
+      } else if (var == iso.c_str()) {
+        var_val = lep_iso;
       }
 
       if (is_antiTauIso) {
