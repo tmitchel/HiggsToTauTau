@@ -92,7 +92,8 @@ class HistTool {
   std::vector<TH2F *> data, fakes_2d, frac_w, frac_tt, frac_real, frac_qcd;
 
   // binning
-  std::vector<Float_t> bins_l2, bins_hpt, bins_mjj, bins_lpt, bins_msv1, bins_msv2, bins_ac_mjj, bins_ac_m_sv, bins_1d;
+  std::vector<int> bins_1d;
+  std::vector<Float_t> bins_l2, bins_hpt, bins_mjj, bins_lpt, bins_msv1, bins_msv2, bins_ac_mjj, bins_ac_m_sv;
 };
 
 // HistTool contructor to create the output file, the qcd histograms with the correct binning
@@ -237,57 +238,59 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
   ff_file->Close();
 }
 
-void HistTool::includePlots(std::vector<int> bins1d, std::string var) {
+void HistTool::includePlots(std::vector<int> bins_1d, std::string var) {
   if (bins_1d.size() < 3) {
     std::cerr << "Must give more than 3 bin arguments for plotting" << std::endl;
   }
   this->var = var;
   this->bins_1d = bins_1d;
+  fout->cd();
+  fout->mkdir("plots");
+  fout->cd();
 
   for (auto cat : categories) {
     // add histograms for holding plots
     hists_1d[cat.c_str()] = std::vector<TH1F *>();
     if (cat.find("0jet") != std::string::npos) {
-      fakes_1d.push_back(new TH1F("fake_0jet", "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
+      fakes_1d.push_back(new TH1F((var+"fake_0jet").c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
     } else if (cat.find("boosted") != std::string::npos) {
-      fakes_1d.push_back(new TH1F("fake_boosted", "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
+      fakes_1d.push_back(new TH1F((var+"fake_boosted").c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
     } else {
       if (cat.find("vbf_D0") != std::string::npos) {
-        fakes_1d.push_back(new TH1F(("fake_" + cat).c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
+        fakes_1d.push_back(new TH1F((var+"fake_" + cat).c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
       } else {
-        fakes_1d.push_back(new TH1F(("fake_" + cat).c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
+        fakes_1d.push_back(new TH1F((var+"fake_" + cat).c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
       }
     }
 
     // make a plots directory to store the plots
+
     if (bins_1d.size() > 0) {
       fout->cd();
-      fout->mkdir("plots");
-      fout->cd("plots");
-      for (auto it = hists_1d.begin(); it != hists_1d.end(); it++) {
-        fout->mkdir((var + cat).c_str());
-        fout->cd();
-      }
+      fout->mkdir(("plots/" + var + "_" + cat).c_str());
+      std::cout << "Making... " << "plots/" + var + "_" + cat << std::endl;
+      fout->cd();
     }
   }
 }
 
 // change to the correct output directory then create a new TH2F that will be filled for the current input file
 void HistTool::initVectors1d(std::string name) {
+  fout->cd();
   for (auto key : hists_1d) {
-    fout->cd(key.first.c_str());
+    fout->cd(("plots/"+var+"_"+key.first).c_str());
     if (name.find("Data") != std::string::npos) {
       name = "data_obs";
     }
     if (key.first == channel_prefix + "_0jet") {
-      hists_1d.at((var+key.first).c_str()).push_back(new TH1F(name.c_str(), name.c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
+      hists_1d.at((key.first).c_str()).push_back(new TH1F((var+"_"+name).c_str(), name.c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
     } else if (key.first == channel_prefix + "_boosted") {
-      hists_1d.at((var + key.first).c_str()).push_back(new TH1F(name.c_str(), name.c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
+      hists_1d.at((key.first).c_str()).push_back(new TH1F((var+"_"+name).c_str(), name.c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
     } else if (key.first.find("_vbf") != std::string::npos) {
       if (key.first.find("vbf_D0") != std::string::npos) {
-        hists_1d.at((var + key.first).c_str()).push_back(new TH1F(name.c_str(), name.c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
+        hists_1d.at((key.first).c_str()).push_back(new TH1F((var+"_"+name).c_str(), name.c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
       } else {
-        hists_1d.at((var + key.first).c_str()).push_back(new TH1F(name.c_str(), name.c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
+        hists_1d.at((key.first).c_str()).push_back(new TH1F((var+"_"+name).c_str(), name.c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
       }
     }
   }
@@ -411,20 +414,20 @@ void HistTool::writeTemplates() {
       hist->Write();
     }
   }
-
-  fout->Close();
 }
 
 void HistTool::writeHistos() {
+  fout->cd("meh");
   for (auto cat : hists_1d) {
-    fout->cd(("plots/"+var+cat.first).c_str());
+    fout->cd(("plots/"+var+"_"+cat.first).c_str());
     for (auto hist : cat.second) {
+      std::cout << hist->GetName() << std::endl;
       hist->Write();
     }
   }
-
+  std::cout << __LINE__ << std::endl;
   for (auto cat = 0; cat < fakes_1d.size(); cat++) {
-    fout->cd(("plots/"+var+categories.at(cat)).c_str());
+    fout->cd(("plots/"+var+"_"+categories.at(cat)).c_str());
     auto fake_hist = fakes_1d.at(cat);
     fake_hist->SetName("jetFakes");
 

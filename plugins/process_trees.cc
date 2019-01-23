@@ -1,8 +1,8 @@
 // Copyright 2018 Tyler Mitchell
 // user includes
-#include "CLParser.h"
 #include "TStopwatch.h"
-#include "plotter_backend.h"
+#include "../include/CLParser.h"
+#include "../include/plotter_backend.h"
 
 using std::string;
 using std::vector;
@@ -65,7 +65,9 @@ int main(int argc, char *argv[]) {
       hists->histoLoop(files, dir, tree_name, weight.first);  // fill with different weights
     }
   }
-  hists->writeHistos();  // write histograms to file
+  hists->writeTemplates();  // write histograms to file
+  hists->writeHistos();
+  hists->fout->Close();
 
   std::cout << "Template created.\n Timing Info: \n\t CPU Time: " << watch.CpuTime() << "\n\tReal Time: " << watch.RealTime() << std::endl;
 
@@ -99,6 +101,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     if (bins_1d.size() > 2) {
       initVectors1d(name);
     }
+    fout->cd();
 
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiTauIso, OS;
@@ -133,7 +136,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       tree->SetBranchAddress(acWeight.c_str(), &acWeightVal);
     }
 
-    if (!(var == "higgs_pT" || var == "t1_decayMode" || var == "vis_mass" || var == "mjj" || var == "m_sv" ||
+    if (!(var == "" || var == "higgs_pT" || var == "t1_decayMode" || var == "vis_mass" || var == "mjj" || var == "m_sv" ||
           var == "njets" || var == "nbjets" || var == "D0_VBF" || var == "D0_ggH" || var == "DCP_VBF" || var == "DCP_ggH")) {
       tree->SetBranchAddress(var.c_str(), &var_val);
     }
@@ -315,7 +318,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
       tree->SetBranchAddress("NN_disc", &NN_disc);
     }
 
-    if (!(var == "higgs_pT" || var == "t1_decayMode" || var == "vis_mass" || var == "mjj" || var == "m_sv" ||
+    if (!(var == "" || var == "higgs_pT" || var == "t1_decayMode" || var == "vis_mass" || var == "mjj" || var == "m_sv" ||
           var == "njets" || var == "nbjets" || var == "D0_VBF" || var == "D0_ggH" || var == "DCP_VBF" || var == "DCP_ggH" ||
           var == "t1_pt" || var == "mt" || var == iso.c_str())) {
       tree->SetBranchAddress(var.c_str(), &var_val);
