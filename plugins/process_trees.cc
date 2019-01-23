@@ -211,6 +211,9 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
           passing.push_back(vbf);
           // VBF bins: [0.0, 0.2, 0.4, 0.8, 1.0]
           // ggH bins: [0.0, 0.3, 0.7, 1.0]
+          if (bins_1d.size() > 2) {
+            fillMELABins(D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, var_val, weight);
+          }
           fillMELABins(D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, observable, m_sv, weight);
         }
 
@@ -236,7 +239,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
           fillFraction(vbf, name, vis_mass, njets, weight);
           // VBF bins: [0.0, 0.2, 0.4, 0.8, 1.0]
           // ggH bins: [0.0, 0.3, 0.7, 1.0]
-          fillMELAFractions(name, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, observable, m_sv, weight);
+          fillMELAFractions(name, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, vis_mass, njets, weight);
         }
       }
     }

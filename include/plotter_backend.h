@@ -76,6 +76,7 @@ class HistTool {
   void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double, double);  // 2d
   void histoLoop(std::vector<std::string>, std::string, std::string, std::string);
   void getJetFakes(std::vector<std::string>, std::string, std::string, bool);
+  void fillMELABins(double, double, double, double, double, double);
   void fillMELABins(double, double, double, double, double, double, double);
   void fillMELAFractions(std::string, double, double, double, double, double, double, double);
 
@@ -417,15 +418,12 @@ void HistTool::writeTemplates() {
 }
 
 void HistTool::writeHistos() {
-  fout->cd("meh");
   for (auto cat : hists_1d) {
     fout->cd(("plots/"+var+"_"+cat.first).c_str());
     for (auto hist : cat.second) {
-      std::cout << hist->GetName() << std::endl;
       hist->Write();
     }
   }
-  std::cout << __LINE__ << std::endl;
   for (auto cat = 0; cat < fakes_1d.size(); cat++) {
     fout->cd(("plots/"+var+"_"+categories.at(cat)).c_str());
     auto fake_hist = fakes_1d.at(cat);
@@ -520,6 +518,70 @@ void HistTool::fillMELABins(double D0_VBF, double DCP_VBF, double D0_ggH, double
   }
 }
 
+void HistTool::fillMELABins(double D0_VBF, double DCP_VBF, double D0_ggH, double DCP_ggH, double var, double weight) {
+  // Split VBF bins based on MELA VBF variables.
+  if (D0_VBF > 0 && D0_VBF <= 0.2) {
+    hists_1d.at(categories.at(vbf_D0_0p0to0p2)).back()->Fill(var, weight);
+    if (DCP_VBF > 0) {
+      hists_1d.at(categories.at(vbf_D0_0p0to0p2_DCPp)).back()->Fill(var, weight);
+    } else if (DCP_VBF < 0) {
+      hists_1d.at(categories.at(vbf_D0_0p0to0p2_DCPm)).back()->Fill(var, weight);
+    }
+  } else if (D0_VBF <= 0.4) {
+    hists_1d.at(categories.at(vbf_D0_0p2to0p4)).back()->Fill(var, weight);
+    if (DCP_VBF > 0) {
+      hists_1d.at(categories.at(vbf_D0_0p2to0p4_DCPp)).back()->Fill(var, weight);
+    } else if (DCP_VBF < 0) {
+      hists_1d.at(categories.at(vbf_D0_0p2to0p4_DCPm)).back()->Fill(var, weight);
+    }
+  } else if (D0_VBF <= 0.8) {
+    hists_1d.at(categories.at(vbf_D0_0p4to0p8)).back()->Fill(var, weight);
+    if (DCP_VBF > 0) {
+      hists_1d.at(categories.at(vbf_D0_0p4to0p8_DCPp)).back()->Fill(var, weight);
+    } else if (DCP_VBF < 0) {
+      hists_1d.at(categories.at(vbf_D0_0p4to0p8_DCPm)).back()->Fill(var, weight);
+    }
+  } else if (D0_VBF <= 1.0) {
+    hists_1d.at(categories.at(vbf_D0_0p8to1p0)).back()->Fill(var, weight);
+    if (DCP_VBF > 0) {
+      hists_1d.at(categories.at(vbf_D0_0p8to1p0_DCPp)).back()->Fill(var, weight);
+    } else if (DCP_VBF < 0) {
+      hists_1d.at(categories.at(vbf_D0_0p8to1p0_DCPm)).back()->Fill(var, weight);
+    }
+  }
+
+  // Split VBF bins based on MELA ggH variables.
+  if (D0_ggH > 0 && D0_ggH <= 0.2) {
+    hists_1d.at(categories.at(vbf_D0ggH_0p0to0p2)).back()->Fill(var, weight);
+    if (DCP_ggH > 0) {
+      hists_1d.at(categories.at(vbf_D0ggH_0p0to0p2_DCPp)).back()->Fill(var, weight);
+    } else if (DCP_ggH < 0) {
+      hists_1d.at(categories.at(vbf_D0ggH_0p0to0p2_DCPm)).back()->Fill(var, weight);
+    }
+  } else if (D0_ggH <= 0.4) {
+    hists_1d.at(categories.at(vbf_D0ggH_0p2to0p4)).back()->Fill(var, weight);
+    if (DCP_ggH > 0) {
+      hists_1d.at(categories.at(vbf_D0ggH_0p2to0p4_DCPp)).back()->Fill(var, weight);
+    } else if (DCP_ggH < 0) {
+      hists_1d.at(categories.at(vbf_D0ggH_0p2to0p4_DCPm)).back()->Fill(var, weight);
+    }
+  } else if (D0_ggH <= 0.7) {
+    hists_1d.at(categories.at(vbf_D0ggH_0p4to0p7)).back()->Fill(var, weight);
+    if (DCP_ggH > 0) {
+      hists_1d.at(categories.at(vbf_D0ggH_0p4to0p7_DCPp)).back()->Fill(var, weight);
+    } else if (DCP_ggH < 0) {
+      hists_1d.at(categories.at(vbf_D0ggH_0p4to0p7_DCPm)).back()->Fill(var, weight);
+    }
+  } else if (D0_ggH <= 1.0) {
+    hists_1d.at(categories.at(vbf_D0ggH_0p7to1p0)).back()->Fill(var, weight);
+    if (DCP_ggH > 0) {
+      hists_1d.at(categories.at(vbf_D0ggH_0p7to1p0_DCPp)).back()->Fill(var, weight);
+    } else if (DCP_ggH < 0) {
+      hists_1d.at(categories.at(vbf_D0ggH_0p7to1p0_DCPm)).back()->Fill(var, weight);
+    }
+  }
+}
+
 void HistTool::fillMELAFractions(std::string name, double D0_VBF, double DCP_VBF, double D0_ggH, double DCP_ggH, double vis_mass, double njets, double weight) {
   // Split VBF bins based on MELA VBF variables.
   if (D0_VBF > 0 && D0_VBF <= 0.2) {
@@ -583,3 +645,4 @@ void HistTool::fillMELAFractions(std::string name, double D0_VBF, double DCP_VBF
     }
   }
 }
+
