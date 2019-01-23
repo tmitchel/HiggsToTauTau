@@ -2,10 +2,12 @@
 // user includes
 #include "CLParser.h"
 #include "produceTemplatesFFv2.h"
+#include "TStopwatch.h"
 
 using std::string;
 
 int main(int argc, char *argv[]) {
+  auto watch = TStopwatch();
   // get CLI arguments
   CLParser parser(argc, argv);
   bool old = parser.Flag("-O");
@@ -43,14 +45,16 @@ int main(int argc, char *argv[]) {
   std::vector<string> files;
   read_directory(dir, &files);
 
-  hists->histoLoop(files, dir, tree_name, "None");
-  hists->getJetFakes(files, dir, tree_name, doSyst);
+  hists->histoLoop(files, dir, tree_name, "None");  // fill histograms
+  hists->getJetFakes(files, dir, tree_name, doSyst);  // get QCD, etc from fake factor
   if (doAC) {
     for (auto weight : hists->acNameMap) {
-      hists->histoLoop(files, dir, tree_name, weight.first);
+      hists->histoLoop(files, dir, tree_name, weight.first);  // fill with different weights
     }
   }
-  hists->writeHistos();
+  hists->writeHistos();  // write histograms to file
+
+  std::cout << "Template created.\n Timing Info: \n\t CPU Time: " << watch.CpuTime() << "\n\tReal Time: " << watch.RealTime() << std::endl;
 
   delete hists->ff_weight;
 }
@@ -75,7 +79,7 @@ void histHolder::histoLoop(std::vector<string> files, string dir, string tree_na
     } else if (acWeight != "None") {
       name = acNameMap[acWeight];
     }
-  
+
     // do some initialization
     initVectors(name);
     fout->cd();
@@ -200,6 +204,9 @@ void histHolder::getJetFakes(std::vector<string> files, string dir, string tree_
   float observable(0.);
   bool cat0(false), cat1(false), cat2(false);
   for (auto ifile : files) {
+    if (ifile.find("Data.root") == std::string::npos) {
+      continue;
+    }
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
     auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
     string name = ifile.substr(0, ifile.find(".")).c_str();
