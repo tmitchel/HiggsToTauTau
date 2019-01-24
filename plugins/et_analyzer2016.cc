@@ -61,6 +61,7 @@ int main(int argc, char* argv[]) {
 
   // open input file
   std::cout << "Opening file... " << sample << std::endl;
+  std::cout << "With name...... " << name << std::endl;
   auto fin = TFile::Open(fname.c_str());
   std::cout << "Loading Ntuple..." << std::endl;
   auto ntuple = reinterpret_cast<TTree *>(fin->Get("etau_tree"));
@@ -70,7 +71,7 @@ int main(int argc, char* argv[]) {
   auto gen_number = counts->GetBinContent(2);
 
   // reweighter for anomolous coupling samples
-  ACWeighter ac_weights = ACWeighter(sample);
+  ACWeighter ac_weights = ACWeighter(sample, "2016");
   ac_weights.fillWeightMap();
 
   // create output file
@@ -101,7 +102,7 @@ int main(int argc, char* argv[]) {
 
   if (sample.find("vbf_") != std::string::npos) {
     sample = "VBF125";
-  } else if (sample.find("ggH_") != std::string::npos) {
+  } else if (sample.find("ggH_") != std::string::npos || sample.find("ggh_") != std::string::npos) {
     sample = "ggH125";
   } else if (sample.find("wh_") != std::string::npos) {
     sample = "WMinusHTauTau125";

@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
   auto gen_number = counts->GetBinContent(2);
 
   // reweighter for anomolous coupling samples
-  ACWeighter ac_weights = ACWeighter(sample);
+  ACWeighter ac_weights = ACWeighter(sample, "2016");
   ac_weights.fillWeightMap();
 
   // create output file
@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
   // get correct weights for AC samples
   if (sample.find("vbf_") != std::string::npos) {
     sample = "VBF125";
-  } else if (sample.find("ggH_") != std::string::npos) {
+  } else if (sample.find("ggH_") != std::string::npos || sample.find("ggh_") != std::string::npos) {
     sample = "ggH125";
   } else if (sample.find("wh_") != std::string::npos) {
     sample = "WMinusHTauTau125";
@@ -465,7 +465,8 @@ int main(int argc, char* argv[]) {
 
   fin->Close();
   fout->cd();
-  fout->Write();
+  fout->Write(0,TObject::kOverwrite);
+  // fout->Write();
   fout->Close();
   return 0;
 }
