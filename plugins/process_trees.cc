@@ -83,7 +83,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     string name = ifile.substr(0, ifile.find(".")).c_str();
 
     // see if these are AC files or nah
-    if (acWeight.find("ggH") != string::npos && name != "ggH_inc") {
+    if (acWeight.find("ggH") != string::npos && name != "ggh_inc") {
       continue;
     } else if ((acWeight.find("wt_a") != string::npos || acWeight.find("wt_L") != string::npos) && name != "vbf_inc") {
       continue;
@@ -93,6 +93,14 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       continue;
     } else if (acWeight != "None") {
       name = acNameMap[acWeight];
+    }
+
+    if (name == "ggh_madgraph_twojet") {
+      name = "GGH2Jets_sm_M125";
+    } else if (name == "ggh_madgraph_PS_twojet") {
+      name = "GGH2Jets_pseudoscalar_M125";
+    } else if (name == "ggh_madgraph_Maxmix_twojet") {
+      name = "GGH2Jets_pseudoscalar_Mf05ph0125";
     }
 
     // do some initialization
@@ -167,8 +175,8 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
           continue;
         }
         cat0 = (cat_0jet > 0);
-        cat1 = (njets == 1 || (njets > 1 && mjj < 400));
-        cat2 = (njets > 1 && mjj > 400);
+        cat1 = (njets == 1 || (njets > 1 && (mjj < 300)));
+        cat2 = (njets > 1 && mjj > 300);
       }
 
       if (var == "higgs_pT") {
@@ -226,7 +234,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       } else if (is_antiTauIso) {
         if (!(name == "W" || name == "ZJ" || name == "VVJ" ||
               name == "TTJ" ||
-              name == "ZTT" || name == "TTT" || name == "VVT" ||
+              name == "embedded" || name == "TTT" || name == "VVT" ||
               name == "Data")) {
           continue;
         }
@@ -238,7 +246,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
         } else if (cat2) {
           fillFraction(vbf, name, vis_mass, njets, weight);
           // VBF bins: [0.0, 0.2, 0.4, 0.8, 1.0]
-          // ggH bins: [0.0, 0.3, 0.7, 1.0]
+          // ggH bins: [0.0, 0.2, 0.4, 0.7, 1.0]
           fillMELAFractions(name, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, vis_mass, njets, weight);
         }
       }
@@ -351,8 +359,8 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
           continue;
         }
         cat0 = (cat_0jet > 0);
-        cat1 = (njets == 1 || (njets > 1 && mjj < 400));
-        cat2 = (njets > 1 && mjj > 400);
+        cat1 = (njets == 1 || (njets > 1 && mjj < 300));
+        cat2 = (njets > 1 && mjj > 300);
       }
 
       if (var == "higgs_pT") {
@@ -431,32 +439,32 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
 
           // Split VBF bins based on MELA ggH variables.
           if (D0_ggH > 0 && D0_ggH <= 0.2) {
-            toFill.push_back(vbf_D0ggH_0p0to0p2);
+            toFill.push_back(vbf_ggHMELA_bin1);
             if (DCP_ggH > 0) {
-              toFill.push_back(vbf_D0ggH_0p0to0p2_DCPp);
+              toFill.push_back(vbf_ggHMELA_bin1_DCPp);
             } else if (DCP_ggH < 0) {
-              toFill.push_back(vbf_D0ggH_0p0to0p2_DCPm);
+              toFill.push_back(vbf_ggHMELA_bin1_DCPm);
             }
           } else if (D0_ggH <= 0.4) {
-            toFill.push_back(vbf_D0ggH_0p2to0p4);
+            toFill.push_back(vbf_ggHMELA_bin2);
             if (DCP_ggH > 0) {
-              toFill.push_back(vbf_D0ggH_0p2to0p4_DCPp);
+              toFill.push_back(vbf_ggHMELA_bin2_DCPp);
             } else if (DCP_ggH < 0) {
-              toFill.push_back(vbf_D0ggH_0p2to0p4_DCPm);
+              toFill.push_back(vbf_ggHMELA_bin2_DCPm);
             }
           } else if (D0_ggH <= 0.7) {
-            toFill.push_back(vbf_D0ggH_0p4to0p7);
+            toFill.push_back(vbf_ggHMELA_bin3);
             if (DCP_ggH > 0) {
-              toFill.push_back(vbf_D0ggH_0p4to0p7_DCPp);
+              toFill.push_back(vbf_ggHMELA_bin3_DCPp);
             } else if (DCP_ggH < 0) {
-              toFill.push_back(vbf_D0ggH_0p4to0p7_DCPm);
+              toFill.push_back(vbf_ggHMELA_bin3_DCPm);
             }
           } else if (D0_ggH <= 1.0) {
-            toFill.push_back(vbf_D0ggH_0p7to1p0);
+            toFill.push_back(vbf_ggHMELA_bin4);
             if (DCP_ggH > 0) {
-              toFill.push_back(vbf_D0ggH_0p7to1p0_DCPp);
+              toFill.push_back(vbf_ggHMELA_bin4_DCPp);
             } else if (DCP_ggH < 0) {
-              toFill.push_back(vbf_D0ggH_0p7to1p0_DCPm);
+              toFill.push_back(vbf_ggHMELA_bin4_DCPm);
             }
           }
 
