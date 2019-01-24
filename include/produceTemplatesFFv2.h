@@ -223,7 +223,7 @@ histHolder::histHolder(std::string channel_prefix, std::string year, std::string
   if (year == "2017") {
     ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ");
   } else if (year == "2016") {
-    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2016/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_20180831_tight.root").c_str(), "READ");
+    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2016/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_tight.root").c_str(), "READ");
   } else {
     std::cerr << "Bad year" << std::endl;
   }
