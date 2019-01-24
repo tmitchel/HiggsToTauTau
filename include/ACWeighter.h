@@ -19,7 +19,7 @@
 ///////////////////////////////////////////////
 class ACWeighter {
  public:
-    explicit ACWeighter(std::string);
+    explicit ACWeighter(std::string, std::string);
     ~ACWeighter();
 
     void fillWeightMap();
@@ -41,7 +41,7 @@ class ACWeighter {
     Double_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint;
 };
 
-ACWeighter::ACWeighter(std::string sample) :
+ACWeighter::ACWeighter(std::string sample, std::string year) :
   foundEvents(0),
   crapEvents(0),
   numWeightFiles(7),
@@ -49,13 +49,12 @@ ACWeighter::ACWeighter(std::string sample) :
     "a1", "a3", "a3int",
     "a2", "a2int",
     "l1", "l1int"
-    // "L1Zg", "L1Zgint" <- for 2017, there will be two additional samples (L1Zg and L1Zgint)
   } {
   isVBFAC = sample.find("vbf_") != std::string::npos;
-  isggHAC = sample.find("ggH_") != std::string::npos;
+  isggHAC = (sample.find("ggH_") != std::string::npos || sample.find("ggh_") != std::string::npos) && sample.find("madgraph") == std::string::npos;
   isWHAC = sample.find("wh_") != std::string::npos;
   isZHAC = sample.find("zh_") != std::string::npos;
-
+  
   // get the correct prefix
   if (isVBFAC) {
     ac_prefix = "vbf_ac_";
@@ -70,6 +69,11 @@ ACWeighter::ACWeighter(std::string sample) :
   // ggH AC only has 3 files
   if (isggHAC) {
     numWeightFiles = 3;
+  }
+
+  if (year == "2017") {
+    weightNames.push_back("l1zg");
+    weightNames.push_back("l1zgint");
   }
 
   std::transform(sample.begin(), sample.end(), sample.begin(), ::tolower);
@@ -90,7 +94,7 @@ ACWeighter::ACWeighter(std::string sample) :
       }
       
       if (sample.find(weightNames.at(ifile)) != std::string::npos) {
-        fileName = "data/AC_weights/" + ac_prefix + weightNames[ifile] + ".root";
+        fileName = "data/AC_weights/" + year + "/" + ac_prefix + weightNames[ifile] + ".root";
         break;
       }
     }
@@ -103,16 +107,41 @@ ACWeighter::ACWeighter(std::string sample) :
     weightTreeFile = TFile::Open(fileName.c_str());
     weightTree = reinterpret_cast<TTree *>(weightTreeFile->Get("weights"));
     weightTree->SetBranchAddress("eventID", &eventID);
-    weightTree->SetBranchAddress("wt_a1", &wt_a1);
-    weightTree->SetBranchAddress("wt_a3", &wt_a3);
-    weightTree->SetBranchAddress("wt_a3int", &wt_a3int);
-    if (isVBFAC || isWHAC || isZHAC) {
-      weightTree->SetBranchAddress("wt_a2", &wt_a2);
-      weightTree->SetBranchAddress("wt_a2int", &wt_a2int);
-      weightTree->SetBranchAddress("wt_L1", &wt_L1);
-      weightTree->SetBranchAddress("wt_L1int", &wt_L1int);
-      weightTree->SetBranchAddress("wt_L1Zg", &wt_L1Zg);
-      weightTree->SetBranchAddress("wt_L1Zgint", &wt_L1Zgint);
+
+    if (year == "2017" && isWHAC) {
+      weightTree->SetBranchAddress("wt_wh_a1", &wt_a1);
+      weightTree->SetBranchAddress("wt_wh_a3", &wt_a3);
+      weightTree->SetBranchAddress("wt_wh_a3int", &wt_a3int);
+      weightTree->SetBranchAddress("wt_wh_a2", &wt_a2);
+      weightTree->SetBranchAddress("wt_wh_a2int", &wt_a2int);
+      weightTree->SetBranchAddress("wt_wh_L1", &wt_L1);
+      weightTree->SetBranchAddress("wt_wh_L1int", &wt_L1int);
+      weightTree->SetBranchAddress("wt_wh_L1Zg", &wt_L1Zg);
+      weightTree->SetBranchAddress("wt_wh_L1Zgint", &wt_L1Zgint);
+    } else if (year == "2017" && isZHAC) {
+      weightTree->SetBranchAddress("wt_zh_a1", &wt_a1);
+      weightTree->SetBranchAddress("wt_zh_a3", &wt_a3);
+      weightTree->SetBranchAddress("wt_zh_a3int", &wt_a3int);
+      weightTree->SetBranchAddress("wt_zh_a2", &wt_a2);
+      weightTree->SetBranchAddress("wt_zh_a2int", &wt_a2int);
+      weightTree->SetBranchAddress("wt_zh_L1", &wt_L1);
+      weightTree->SetBranchAddress("wt_zh_L1int", &wt_L1int);
+      weightTree->SetBranchAddress("wt_zh_L1Zg", &wt_L1Zg);
+      weightTree->SetBranchAddress("wt_zh_L1Zgint", &wt_L1Zgint);
+    } else {
+      if (isggHAC || isVBFAC || isWHAC || isZHAC) {
+        weightTree->SetBranchAddress("wt_a1", &wt_a1);
+        weightTree->SetBranchAddress("wt_a3", &wt_a3);
+        weightTree->SetBranchAddress("wt_a3int", &wt_a3int);
+        if (isVBFAC || isWHAC || isZHAC) {
+          weightTree->SetBranchAddress("wt_a2", &wt_a2);
+          weightTree->SetBranchAddress("wt_a2int", &wt_a2int);
+          weightTree->SetBranchAddress("wt_L1", &wt_L1);
+          weightTree->SetBranchAddress("wt_L1int", &wt_L1int);
+          weightTree->SetBranchAddress("wt_L1Zg", &wt_L1Zg);
+          weightTree->SetBranchAddress("wt_L1Zgint", &wt_L1Zgint);
+        }
+      }
     }
   }
 }
