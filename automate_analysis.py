@@ -72,7 +72,7 @@ for ifile in fileList:
     if prefix:
       sample = sample.replace(prefix, '')
     tosample = ifile.replace(sample+suffix,'')
-    
+
     if 'DYJets' in sample:
         names = ['ZTT', 'ZL', 'ZJ']
     elif 'TT' in sample:
@@ -86,7 +86,7 @@ for ifile in fileList:
     elif 'ggHtoTauTau' in sample:
         mass = sample.split('ggHtoTauTau')[-1]
         names = ['ggH'+mass]
-    elif 'ggH' in sample:
+    elif 'ggH125' in sample:
         mass = sample.split('ggH')[-1]
         names = ['ggH'+mass]
     elif 'VBFHtoTauTau' in sample:
@@ -111,12 +111,17 @@ for ifile in fileList:
         names = ['embed']
     elif 'vbf' in sample:
         names = ['VBF125']
-    elif 'ggH' in sample:
+        options.ACsample = True
+    elif 'ggH' in sample or 'ggh' in sample:
         names = ['ggH125']
+        if not 'madgraph' in sample:
+            options.ACsample = True
     elif 'wh' in sample:
         names = ['WH125']
+        options.ACsample = True
     elif 'zh' in sample:
         names = ['ZH125']
+        options.ACsample = True
     else: 
         names = ['VV', 'VVJ', 'VVT']
 

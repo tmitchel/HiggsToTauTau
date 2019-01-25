@@ -120,7 +120,7 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
     {(channel_prefix+"_boosted").c_str(), std::vector<TH1F *>()},
     {(channel_prefix+"_vbf").c_str(), std::vector<TH1F *>()},
   },
-  fout( new TFile(("Output/templates/"+output_dir+"/template_"+channel_prefix+"_"+var_name+"_ff"+year+".root").c_str(), "recreate") ),
+  fout( new TFile(("Output/templates/forplotting/"+output_dir+"/plot_"+channel_prefix+"_"+var_name+"_ff"+year+".root").c_str(), "recreate") ),
   bins(Bins),
   old_selection(old),
   mvis_bins({0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000}),
@@ -173,9 +173,9 @@ histHolder::histHolder(std::vector<int> Bins, std::string var_name, std::string 
   // get FakeFactor workspace
   TFile *ff_file;
   if (year == "2017") {
-    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ");
+    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ");
   } else if (year == "2016") {
-    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_20180831_tight.root").c_str(), "READ");
+    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2016/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_tight.root").c_str(), "READ");
   } else {
     std::cerr << "Bad year" << std::endl;
   }
@@ -364,7 +364,7 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
       tree->SetBranchAddress("mu_iso", &lep_iso);
     }
 
-    if (!(var_name == "t1_pt" || var_name == "t1_decayMode" || var_name == "njets" || var_name == "nbjets" || var_name == "vis_mass" || var_name == "mt"  || name == "mjj" || name == "higgs_pT")) {
+    if (!(var_name == "t1_pt" || var_name == "t1_decayMode" || var_name == "njets" || var_name == "nbjets" || var_name == "vis_mass" || var_name == "mt"  || var_name == "mjj" || var_name == "higgs_pT")) {
       tree->SetBranchAddress(var_name.c_str(), &var);
     }
 
