@@ -465,7 +465,7 @@ int main(int argc, char* argv[]) {
 
   fin->Close();
   fout->cd();
-  fout->Write(0,TObject::kOverwrite);
+  fout->Write(0, TObject::kOverwrite);
   // fout->Write();
   fout->Close();
   return 0;
