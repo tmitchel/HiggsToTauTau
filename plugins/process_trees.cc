@@ -95,6 +95,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       name = acNameMap[acWeight];
     }
 
+    // using madgraph file now so map name correctly
     if (name == "ggh_madgraph_twojet") {
       name = "GGH2Jets_sm_M125";
     } else if (name == "ggh_madgraph_PS_twojet") {
@@ -114,7 +115,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiTauIso, OS;
     Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, njets, nbjets, weight, NN_disc, acWeightVal(1.);
-    Float_t D0_VBF, D0_ggH, DCP_VBF, DCP_ggH, var_val;
+    Float_t D0_VBF, D0_ggH, DCP_VBF, DCP_ggH, var_val, t1_pt;
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("higgs_pT", &higgs_pT);
@@ -135,6 +136,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
     tree->SetBranchAddress("cat_VH", &cat_VH);
     tree->SetBranchAddress("OS", &OS);
+    tree->SetBranchAddress("t1_pt", &t1_pt);
 
     if (doNN) {
       tree->SetBranchAddress("NN_disc", &NN_disc);
@@ -145,7 +147,8 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     }
 
     if (!(var == "" || var == "higgs_pT" || var == "t1_decayMode" || var == "vis_mass" || var == "mjj" || var == "m_sv" ||
-          var == "njets" || var == "nbjets" || var == "D0_VBF" || var == "D0_ggH" || var == "DCP_VBF" || var == "DCP_ggH")) {
+          var == "njets" || var == "nbjets" || var == "D0_VBF" || var == "D0_ggH" || var == "DCP_VBF" || var == "DCP_ggH") &&
+          !(doNN && var == "NN_disc")) {
       tree->SetBranchAddress(var.c_str(), &var_val);
     }
 
@@ -168,8 +171,8 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       // pick either old 2016 selection or optimized one
       if (old_selection) {
         cat0 = (cat_0jet > 0);
-        cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
-        cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50);
+        cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50 || t1_pt < 40)));
+        cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50 && t1_pt > 40);
       } else {
         if (nbjets > 0) {
           continue;
@@ -201,7 +204,12 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
         var_val = DCP_VBF;
       } else if (var == "DCP_ggH") {
         var_val = DCP_ggH;
+      } else if (var == "NN_disc" && doNN) {
+        var_val = NN_disc;
       }
+
+      // find the correct MELA ggH/Higgs pT bin for this event
+      auto ACcat = getCategory(D0_ggH, higgs_pT);
 
       // fill histograms
       if (is_signal) {
@@ -217,12 +225,11 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
         if (cat2) {
           hists_2d.at(categories.at(vbf)).back()->Fill(observable, m_sv, weight);
           passing.push_back(vbf);
-          // VBF bins: [0.0, 0.2, 0.4, 0.8, 1.0]
           // ggH bins: [0.0, 0.3, 0.7, 1.0]
+          hists_2d.at(categories.at(ACcat)).back()->Fill(observable, m_sv, weight);
           if (bins_1d.size() > 2) {
-            fillMELABins(D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, var_val, weight);
+            hists_1d.at(categories.at(ACcat)).back()->Fill(var_val, weight);
           }
-          fillMELABins(D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, observable, m_sv, weight);
         }
 
         // fill plots
@@ -245,9 +252,8 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
           fillFraction(boosted, name, vis_mass, njets, weight);
         } else if (cat2) {
           fillFraction(vbf, name, vis_mass, njets, weight);
-          // VBF bins: [0.0, 0.2, 0.4, 0.8, 1.0]
           // ggH bins: [0.0, 0.2, 0.4, 0.7, 1.0]
-          fillMELAFractions(name, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, vis_mass, njets, weight);
+          fillFraction(ACcat, name, vis_mass, njets, weight);
         }
       }
     }
@@ -331,7 +337,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
 
     if (!(var == "" || var == "higgs_pT" || var == "t1_decayMode" || var == "vis_mass" || var == "mjj" || var == "m_sv" ||
           var == "njets" || var == "nbjets" || var == "D0_VBF" || var == "D0_ggH" || var == "DCP_VBF" || var == "DCP_ggH" ||
-          var == "t1_pt" || var == "mt" || var == iso.c_str())) {
+          var == "t1_pt" || var == "mt" || var == iso.c_str()) && !(doNN && var == "NN_disc")) {
       tree->SetBranchAddress(var.c_str(), &var_val);
     }
 
@@ -352,15 +358,15 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
 
       if (old_selection) {
         cat0 = (cat_0jet > 0);
-        cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50)));
-        cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50);
+        cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50 || t1_pt < 40)));
+        cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50 && t1_pt > 40);
       } else {
         if (nbjets > 0) {
           continue;
         }
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && mjj < 300));
-        cat2 = (njets > 1 && mjj > 300);
+        cat2 = (njets > 1 && mjj > 300); 
       }
 
       if (var == "higgs_pT") {
@@ -391,7 +397,11 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
         var_val = mt;
       } else if (var == iso.c_str()) {
         var_val = lep_iso;
+      } else if (var == "NN_disc" && doNN) {
+        var_val = NN_disc;
       }
+
+      auto ACcat = getCategory(D0_ggH, higgs_pT);
 
       if (is_antiTauIso) {
         if (cat0) {
@@ -405,74 +415,8 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
           convertDataToFake(vbf, name, var_val, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
           convertDataToFake(vbf, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
 
-          // Split VBF bins based on MELA VBF variables.
-          vector<Categories> toFill;
-          if (D0_VBF > 0 && D0_VBF <= 0.2) {
-            toFill.push_back(vbf_D0_0p0to0p2);
-            if (DCP_VBF > 0) {
-              toFill.push_back(vbf_D0_0p0to0p2_DCPp);
-            } else if (DCP_VBF < 0) {
-              toFill.push_back(vbf_D0_0p0to0p2_DCPm);
-            }
-          } else if (D0_VBF <= 0.4) {
-            toFill.push_back(vbf_D0_0p2to0p4);
-            if (DCP_VBF > 0) {
-              toFill.push_back(vbf_D0_0p2to0p4_DCPp);
-            } else if (DCP_VBF < 0) {
-              toFill.push_back(vbf_D0_0p2to0p4_DCPm);
-            }
-          } else if (D0_VBF <= 0.8) {
-            toFill.push_back(vbf_D0_0p4to0p8);
-            if (DCP_VBF > 0) {
-              toFill.push_back(vbf_D0_0p4to0p8_DCPp);
-            } else if (DCP_VBF < 0) {
-              toFill.push_back(vbf_D0_0p4to0p8_DCPm);
-            }
-          } else if (D0_VBF <= 1.0) {
-            toFill.push_back(vbf_D0_0p8to1p0);
-            if (DCP_VBF > 0) {
-              toFill.push_back(vbf_D0_0p8to1p0_DCPp);
-            } else if (DCP_VBF < 0) {
-              toFill.push_back(vbf_D0_0p8to1p0_DCPm);
-            }
-          }
-
-          // Split VBF bins based on MELA ggH variables.
-          if (D0_ggH > 0 && D0_ggH <= 0.2) {
-            toFill.push_back(vbf_ggHMELA_bin1);
-            if (DCP_ggH > 0) {
-              toFill.push_back(vbf_ggHMELA_bin1_DCPp);
-            } else if (DCP_ggH < 0) {
-              toFill.push_back(vbf_ggHMELA_bin1_DCPm);
-            }
-          } else if (D0_ggH <= 0.4) {
-            toFill.push_back(vbf_ggHMELA_bin2);
-            if (DCP_ggH > 0) {
-              toFill.push_back(vbf_ggHMELA_bin2_DCPp);
-            } else if (DCP_ggH < 0) {
-              toFill.push_back(vbf_ggHMELA_bin2_DCPm);
-            }
-          } else if (D0_ggH <= 0.7) {
-            toFill.push_back(vbf_ggHMELA_bin3);
-            if (DCP_ggH > 0) {
-              toFill.push_back(vbf_ggHMELA_bin3_DCPp);
-            } else if (DCP_ggH < 0) {
-              toFill.push_back(vbf_ggHMELA_bin3_DCPm);
-            }
-          } else if (D0_ggH <= 1.0) {
-            toFill.push_back(vbf_ggHMELA_bin4);
-            if (DCP_ggH > 0) {
-              toFill.push_back(vbf_ggHMELA_bin4_DCPp);
-            } else if (DCP_ggH < 0) {
-              toFill.push_back(vbf_ggHMELA_bin4_DCPm);
-            }
-          }
-
-          // now fill for all those categories
-          for (auto &aFill : toFill) {
-            convertDataToFake(aFill, name, var_val, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
-            convertDataToFake(aFill, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
-          }
+          convertDataToFake(ACcat, name, var_val, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
+          convertDataToFake(ACcat, name, observable, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight);
         }
 
         // loop through all systematic names and get the corresponding weight to fill a histogram
