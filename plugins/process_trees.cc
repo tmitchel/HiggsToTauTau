@@ -370,7 +370,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
         }
         cat0 = (cat_0jet > 0);
         cat1 = (njets == 1 || (njets > 1 && mjj < 300));
-        cat2 = (njets > 1 && mjj > 300); 
+        cat2 = (njets > 1 && mjj > 300);
       }
 
       if (var == "higgs_pT") {
