@@ -23,30 +23,42 @@
 enum Categories { zeroJet,
                   boosted,
                   vbf,
-                  vbf_ggHMELA_bin1_lowH,
-                  vbf_ggHMELA_bin2_lowH,
-                  vbf_ggHMELA_bin3_lowH,
-                  vbf_ggHMELA_bin4_lowH,
-                  vbf_ggHMELA_bin5_lowH,
-                  vbf_ggHMELA_bin6_lowH,
-                  vbf_ggHMELA_bin7_lowH,
-                  vbf_ggHMELA_bin8_lowH,
-                  vbf_ggHMELA_bin9_lowH,
-                  vbf_ggHMELA_bin10_lowH,
-                  vbf_ggHMELA_bin11_lowH,
-                  vbf_ggHMELA_bin12_lowH,
-                  vbf_ggHMELA_bin1_highH,
-                  vbf_ggHMELA_bin2_highH,
-                  vbf_ggHMELA_bin3_highH,
-                  vbf_ggHMELA_bin4_highH,
-                  vbf_ggHMELA_bin5_highH,
-                  vbf_ggHMELA_bin6_highH,
-                  vbf_ggHMELA_bin7_highH,
-                  vbf_ggHMELA_bin8_highH,
-                  vbf_ggHMELA_bin9_highH,
-                  vbf_ggHMELA_bin10_highH,
-                  vbf_ggHMELA_bin11_highH,
-                  vbf_ggHMELA_bin12_highH};
+                  vbf_ggHMELA_bin1_NN_bin1,
+                  vbf_ggHMELA_bin2_NN_bin1,
+                  vbf_ggHMELA_bin3_NN_bin1,
+                  vbf_ggHMELA_bin4_NN_bin1,
+                  vbf_ggHMELA_bin5_NN_bin1,
+                  vbf_ggHMELA_bin6_NN_bin1,
+                  vbf_ggHMELA_bin7_NN_bin1,
+                  vbf_ggHMELA_bin8_NN_bin1,
+                  vbf_ggHMELA_bin9_NN_bin1,
+                  vbf_ggHMELA_bin10_NN_bin1,
+                  vbf_ggHMELA_bin11_NN_bin1,
+                  vbf_ggHMELA_bin12_NN_bin1,
+                  vbf_ggHMELA_bin1_NN_bin2,
+                  vbf_ggHMELA_bin2_NN_bin2,
+                  vbf_ggHMELA_bin3_NN_bin2,
+                  vbf_ggHMELA_bin4_NN_bin2,
+                  vbf_ggHMELA_bin5_NN_bin2,
+                  vbf_ggHMELA_bin6_NN_bin2,
+                  vbf_ggHMELA_bin7_NN_bin2,
+                  vbf_ggHMELA_bin8_NN_bin2,
+                  vbf_ggHMELA_bin9_NN_bin2,
+                  vbf_ggHMELA_bin10_NN_bin2,
+                  vbf_ggHMELA_bin11_NN_bin2,
+                  vbf_ggHMELA_bin12_NN_bin2,
+                  vbf_ggHMELA_bin1_NN_bin3,
+                  vbf_ggHMELA_bin2_NN_bin3,
+                  vbf_ggHMELA_bin3_NN_bin3,
+                  vbf_ggHMELA_bin4_NN_bin3,
+                  vbf_ggHMELA_bin5_NN_bin3,
+                  vbf_ggHMELA_bin6_NN_bin3,
+                  vbf_ggHMELA_bin7_NN_bin3,
+                  vbf_ggHMELA_bin8_NN_bin3,
+                  vbf_ggHMELA_bin9_NN_bin3,
+                  vbf_ggHMELA_bin10_NN_bin3,
+                  vbf_ggHMELA_bin11_NN_bin3,
+                  vbf_ggHMELA_bin12_NN_bin3};
 
 // read all *.root files in the given directory and put them in the provided vector
 void read_directory(const std::string &name, std::vector<std::string> *v) {
@@ -105,7 +117,8 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
       // x-axis
       bins_l2{0, 1, 10, 11},
       bins_hpt{0, 100, 150, 200, 250, 300, 5000},
-      bins_mjj{300, 500, 10000},
+      // bins_mjj{300, 500, 10000},
+      bins_mjj{0, 0.5, 1.},
 
       // y-axis
       bins_lpt{0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
@@ -151,30 +164,42 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
           channel_prefix + "_0jet",
           channel_prefix + "_boosted",
           channel_prefix + "_vbf",
-          channel_prefix + "_vbf_ggHMELA_bin1_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin2_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin3_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin4_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin5_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin6_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin7_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin8_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin9_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin10_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin11_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin12_lowH",
-          channel_prefix + "_vbf_ggHMELA_bin1_highH",
-          channel_prefix + "_vbf_ggHMELA_bin2_highH",
-          channel_prefix + "_vbf_ggHMELA_bin3_highH",
-          channel_prefix + "_vbf_ggHMELA_bin4_highH",
-          channel_prefix + "_vbf_ggHMELA_bin5_highH",
-          channel_prefix + "_vbf_ggHMELA_bin6_highH",
-          channel_prefix + "_vbf_ggHMELA_bin7_highH",
-          channel_prefix + "_vbf_ggHMELA_bin8_highH",
-          channel_prefix + "_vbf_ggHMELA_bin9_highH",
-          channel_prefix + "_vbf_ggHMELA_bin10_highH",
-          channel_prefix + "_vbf_ggHMELA_bin11_highH",
-          channel_prefix + "_vbf_ggHMELA_bin12_highH"},
+          channel_prefix + "_vbf_ggHMELA_bin1_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin2_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin3_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin4_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin5_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin6_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin7_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin8_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin9_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin10_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin11_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin1_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin2_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin3_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin4_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin5_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin6_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin7_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin8_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin9_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin10_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin11_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin1_NN_bin3",
+          channel_prefix + "_vbf_ggHMELA_bin2_NN_bin3",
+          channel_prefix + "_vbf_ggHMELA_bin3_NN_bin3",
+          channel_prefix + "_vbf_ggHMELA_bin4_NN_bin3",
+          channel_prefix + "_vbf_ggHMELA_bin5_NN_bin3",
+          channel_prefix + "_vbf_ggHMELA_bin6_NN_bin3",
+          channel_prefix + "_vbf_ggHMELA_bin7_NN_bin3",
+          channel_prefix + "_vbf_ggHMELA_bin8_NN_bin3",
+          channel_prefix + "_vbf_ggHMELA_bin9_NN_bin3",
+          channel_prefix + "_vbf_ggHMELA_bin10_NN_bin3",
+          channel_prefix + "_vbf_ggHMELA_bin11_NN_bin3",
+          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin3"},
       systematics{
           "ff_qcd_syst_up", "ff_qcd_syst_down", "ff_qcd_dm0_njet0_stat_up",
           "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down",
@@ -432,62 +457,88 @@ void HistTool::writeHistos() {
 }
 
 // basically a map from 2 inputs -> 1 Category
-Categories HistTool::getCategory(double D0_ggH, double hpt) {
-  if (hpt < 150.) {
-    if (D0_ggH > 0 && D0_ggH <= 1./5) {
-      return vbf_ggHMELA_bin1_lowH;
-    } else if (D0_ggH <= 3./5) {
-      return vbf_ggHMELA_bin2_lowH;
-    } else if (D0_ggH <= 4./5) {
-      return vbf_ggHMELA_bin3_lowH;
-    } else if (D0_ggH <= 4.5/5) {
-      return vbf_ggHMELA_bin4_lowH;
-    } else if (D0_ggH <= 5./5) {
-      return vbf_ggHMELA_bin5_lowH;
+Categories HistTool::getCategory(double D0_ggH, double nn) {
+  if (nn < 0.2) {
+    if (D0_ggH > 0 && D0_ggH <= 1.5/13) {
+      return vbf_ggHMELA_bin1_NN_bin1;
+    } else if (D0_ggH <= 2./13) {
+      return vbf_ggHMELA_bin2_NN_bin1;
+    } else if (D0_ggH <= 3./13) {
+      return vbf_ggHMELA_bin3_NN_bin1;
+    } else if (D0_ggH <= 4./13) {
+      return vbf_ggHMELA_bin4_NN_bin1;
+    } else if (D0_ggH <= 5./13) {
+      return vbf_ggHMELA_bin5_NN_bin1;
+    } else if (D0_ggH <= 6./13) {
+      return vbf_ggHMELA_bin6_NN_bin1;
+    } else if (D0_ggH <= 7./13) {
+      return vbf_ggHMELA_bin7_NN_bin1;
+    } else if (D0_ggH <= 8./13) {
+      return vbf_ggHMELA_bin8_NN_bin1;
+    } else if (D0_ggH <= 9./13) {
+      return vbf_ggHMELA_bin9_NN_bin1;
+    } else if (D0_ggH <= 10./13) {
+      return vbf_ggHMELA_bin10_NN_bin1;
+    } else if (D0_ggH <= 11./13) {
+      return vbf_ggHMELA_bin11_NN_bin1;
+    } else if (D0_ggH <= 13./13) {
+      return vbf_ggHMELA_bin12_NN_bin1;
     }
-    //  else if (D0_ggH <= 6./10) {
-    //   return vbf_ggHMELA_bin6_lowH;
-    // }
-    //  else if (D0_ggH <= 7./10) {
-    //   return vbf_ggHMELA_bin7_lowH;
-    // } else if (D0_ggH <= 8./10) {
-    //   return vbf_ggHMELA_bin8_lowH;
-    // } else if (D0_ggH <= 9./10) {
-    //   return vbf_ggHMELA_bin9_lowH;
-    // } else if (D0_ggH <= 10./10) {
-    //   return vbf_ggHMELA_bin10_lowH;
-    // } 
-    // else if (D0_ggH <= 11./10) {
-    //   return vbf_ggHMELA_bin11_lowH;
+  } else if (nn < 0.6) {
+    if (D0_ggH > 0 && D0_ggH <= 1./10) {
+      return vbf_ggHMELA_bin1_NN_bin2;
+    } else if (D0_ggH <= 2./10) {
+      return vbf_ggHMELA_bin2_NN_bin2;
+    } else if (D0_ggH <= 3./10) {
+      return vbf_ggHMELA_bin3_NN_bin2;
+    } else if (D0_ggH <= 4./10) {
+      return vbf_ggHMELA_bin4_NN_bin2;
+    } else if (D0_ggH <= 5./10) {
+      return vbf_ggHMELA_bin5_NN_bin2;
+    } else if (D0_ggH <= 6./10) {
+      return vbf_ggHMELA_bin6_NN_bin2;
+    } else if (D0_ggH <= 7./10) {
+      return vbf_ggHMELA_bin7_NN_bin2;
+    } else if (D0_ggH <= 8./10) {
+      return vbf_ggHMELA_bin8_NN_bin2;
+    } else if (D0_ggH <= 9./10) {
+      return vbf_ggHMELA_bin9_NN_bin2;
+    } else if (D0_ggH <= 10./10) {
+      return vbf_ggHMELA_bin10_NN_bin2;
+    }
+    //  else if (D0_ggH <= 11./10) {
+    //   return vbf_ggHMELA_bin11_NN_bin2;
     // } else if (D0_ggH <= 13./10) {
-    //   return vbf_ggHMELA_bin12_lowH;
+    //   return vbf_ggHMELA_bin12_NN_bin2;
     // }
   } else {
-    if (D0_ggH > 0 && D0_ggH <= 1./10) {
-      return vbf_ggHMELA_bin1_highH;
-    } else if (D0_ggH <= 2./10) {
-      return vbf_ggHMELA_bin2_highH;
-    } else if (D0_ggH <= 3./10) {
-      return vbf_ggHMELA_bin3_highH;
-    } else if (D0_ggH <= 4./10) {
-      return vbf_ggHMELA_bin4_highH;
-    } else if (D0_ggH <= 5./10) {
-      return vbf_ggHMELA_bin5_highH;
-    } else if (D0_ggH <= 6./10) {
-      return vbf_ggHMELA_bin6_highH;
-    } else if (D0_ggH <= 7./10) {
-      return vbf_ggHMELA_bin7_highH;
-    } else if (D0_ggH <= 8./10) {
-      return vbf_ggHMELA_bin8_highH;
-    } else if (D0_ggH <= 8.5/10) {
-      return vbf_ggHMELA_bin9_highH;
-    } else if (D0_ggH <= 10./10) {
-      return vbf_ggHMELA_bin10_highH;
-    }
-    //  else if (D0_ggH <= 11./13) {
-    //   return vbf_ggHMELA_bin11_highH;
+    if (D0_ggH > 0 && D0_ggH <= 1./6) {
+      return vbf_ggHMELA_bin1_NN_bin3;
+    } else if (D0_ggH <= 2./6) {
+      return vbf_ggHMELA_bin2_NN_bin3;
+    } else if (D0_ggH <= 3./6) {
+      return vbf_ggHMELA_bin3_NN_bin3;
+    } else if (D0_ggH <= 4./6) {
+      return vbf_ggHMELA_bin4_NN_bin3;
+    } else if (D0_ggH <= 5./6) {
+      return vbf_ggHMELA_bin5_NN_bin3;
+    } else if (D0_ggH <= 6./6) {
+      return vbf_ggHMELA_bin6_NN_bin3;
+    } 
+    // else if (D0_ggH <= 7./8) {
+    //   return vbf_ggHMELA_bin7_NN_bin3;
+    // } else if (D0_ggH <= 8./8) {
+    //   return vbf_ggHMELA_bin8_NN_bin3;
+    // } 
+    // else if (D0_ggH <= 9./10) {
+    //   return vbf_ggHMELA_bin9_NN_bin3;
+    // } else if (D0_ggH <= 10./10) {
+    //   return vbf_ggHMELA_bin10_NN_bin3;
+    // } 
+    // else if (D0_ggH <= 11./13) {
+    //   return vbf_ggHMELA_bin11_NN_bin3;
     // } else if (D0_ggH <= 13./13) {
-    //   return vbf_ggHMELA_bin12_highH;
+    //   return vbf_ggHMELA_bin12_NN_bin3;
     // }
   }
 }

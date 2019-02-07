@@ -115,7 +115,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiTauIso, OS;
     Float_t higgs_pT, t1_decayMode, vis_mass, mjj, m_sv, njets, nbjets, weight, NN_disc, acWeightVal(1.);
-    Float_t D0_VBF, D0_ggH, DCP_VBF, DCP_ggH, var_val, t1_pt;
+    Float_t D0_VBF, D0_ggH, DCP_VBF, DCP_ggH, var_val, t1_pt, VBF_MELA;
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("higgs_pT", &higgs_pT);
@@ -137,10 +137,11 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     tree->SetBranchAddress("cat_VH", &cat_VH);
     tree->SetBranchAddress("OS", &OS);
     tree->SetBranchAddress("t1_pt", &t1_pt);
+    tree->SetBranchAddress("VBF_MELA", &VBF_MELA);
 
-    if (doNN) {
+    // if (doNN) {
       tree->SetBranchAddress("NN_disc", &NN_disc);
-    }
+    // }
 
     if (acWeight != "None") {
       tree->SetBranchAddress(acWeight.c_str(), &acWeightVal);
@@ -167,6 +168,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       } else {
         observable = mjj;
       }
+      observable = VBF_MELA;
 
       // pick either old 2016 selection or optimized one
       if (old_selection) {
@@ -209,7 +211,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       }
 
       // find the correct MELA ggH/Higgs pT bin for this event
-      auto ACcat = getCategory(D0_ggH, higgs_pT);
+      auto ACcat = getCategory(D0_ggH, NN_disc);
 
       // fill histograms
       if (is_signal) {
@@ -300,7 +302,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
     // get variables from file
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_antiTauIso, OS;
     Float_t higgs_pT, mjj, m_sv, weight, t1_pt, t1_decayMode, njets, nbjets, vis_mass, mt, lep_iso, NN_disc;
-    Float_t D0_VBF, D0_ggH, DCP_VBF, DCP_ggH, var_val;
+    Float_t D0_VBF, D0_ggH, DCP_VBF, DCP_ggH, var_val, VBF_MELA;
 
     string iso;
     if (tree_name.find("etau_tree") != string::npos) {
@@ -330,10 +332,11 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
     tree->SetBranchAddress("cat_vbf", &cat_vbf);
     tree->SetBranchAddress("cat_VH", &cat_VH);
     tree->SetBranchAddress("OS", &OS);
+    tree->SetBranchAddress("VBF_MELA", &VBF_MELA);
 
-    if (doNN) {
+    // if (doNN) {
       tree->SetBranchAddress("NN_disc", &NN_disc);
-    }
+    // }
 
     if (!(var == "" || var == "higgs_pT" || var == "t1_decayMode" || var == "vis_mass" || var == "mjj" || var == "m_sv" ||
           var == "njets" || var == "nbjets" || var == "D0_VBF" || var == "D0_ggH" || var == "DCP_VBF" || var == "DCP_ggH" ||
@@ -355,6 +358,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
       } else {
         observable = mjj;
       }
+      observable = VBF_MELA;
 
       if (old_selection) {
         cat0 = (cat_0jet > 0);
@@ -401,7 +405,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
         var_val = NN_disc;
       }
 
-      auto ACcat = getCategory(D0_ggH, higgs_pT);
+      auto ACcat = getCategory(D0_ggH, NN_disc);
 
       if (is_antiTauIso) {
         if (cat0) {
