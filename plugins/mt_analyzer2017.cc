@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
+  bool isMG = sample.find("madgraph") != std::string::npos;
 
   std::string systname = "";
   if (!syst.empty()) {
@@ -101,7 +102,7 @@ int main(int argc, char* argv[]) {
 
   if (sample.find("vbf_") != std::string::npos) {
     sample = "VBF125";
-  } else if (sample.find("ggh_") != std::string::npos) {
+  } else if (sample.find("ggh_") != std::string::npos || isMG) {
     sample = "ggH125";
   } else if (sample.find("wh_") != std::string::npos) {
     sample = "WMinusHTauTau125";
@@ -126,7 +127,7 @@ int main(int argc, char* argv[]) {
 
   reweight::LumiReWeighting* lumi_weights;
   // read inputs for lumi reweighting
-  if (!isData && !isEmbed && !doAC) {
+  if (!isData && !isEmbed && !doAC && !isMG) {
     TNamed* dbsName = reinterpret_cast<TNamed*>(fin->Get("MiniAOD_name"));
     std::string datasetName = dbsName->GetTitle();
     if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
@@ -291,7 +292,7 @@ int main(int argc, char* argv[]) {
       }
 
       // pileup reweighting
-      if (!doAC) {
+      if (!doAC && !isMG) {
         evtwt *= lumi_weights->weight(event.getNPV());
       }
 

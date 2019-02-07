@@ -32,7 +32,7 @@ class slim_tree {
         b1_pt, b1_eta, b1_phi,
         b2_pt, b2_eta, b2_phi,
         met, metphi, mjj, numGenJets, mt, dmf, dmf_new,
-        pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
+        pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH, VBF_MELA,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
         ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH,
         higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass;
@@ -136,6 +136,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree( new TTre
     otree->Branch("ME_bkg"      ,        &ME_bkg       ,       "MEbkg_/F"             );
     otree->Branch("ME_bkg1"     ,        &ME_bkg1      ,       "MEbkg1_/F"            );
     otree->Branch("ME_bkg2"     ,        &ME_bkg2      ,       "MEbkg2_/F"            );
+    otree->Branch("VBF_MELA"    ,        &VBF_MELA     ,       "VBF_MELA/F"           );
 
     otree->Branch("higgs_pT",            &higgs_pT,            "higgs_pT/F"           );
     otree->Branch("higgs_m",             &higgs_m,             "higgs_m/F"            );
@@ -231,6 +232,8 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     ME_bkg = evt->getME_bkg();
     ME_bkg1 = evt->getME_bkg1();
     ME_bkg2 = evt->getME_bkg2();
+
+    VBF_MELA =  (evt->getME_sm_ggH() + evt->getME_ps_ggH()) / (evt->getME_sm_ggH() + evt->getME_ps_ggH() + 8 * evt->getME_sm_VBF());
 
     mt = Mt;
     numGenJets = evt->getNumGenJets();
