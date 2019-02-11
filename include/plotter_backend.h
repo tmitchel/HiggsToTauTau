@@ -34,31 +34,7 @@ enum Categories { zeroJet,
                   vbf_ggHMELA_bin9_NN_bin1,
                   vbf_ggHMELA_bin10_NN_bin1,
                   vbf_ggHMELA_bin11_NN_bin1,
-                  vbf_ggHMELA_bin12_NN_bin1,
-                  vbf_ggHMELA_bin1_NN_bin2,
-                  vbf_ggHMELA_bin2_NN_bin2,
-                  vbf_ggHMELA_bin3_NN_bin2,
-                  vbf_ggHMELA_bin4_NN_bin2,
-                  vbf_ggHMELA_bin5_NN_bin2,
-                  vbf_ggHMELA_bin6_NN_bin2,
-                  vbf_ggHMELA_bin7_NN_bin2,
-                  vbf_ggHMELA_bin8_NN_bin2,
-                  vbf_ggHMELA_bin9_NN_bin2,
-                  vbf_ggHMELA_bin10_NN_bin2,
-                  vbf_ggHMELA_bin11_NN_bin2,
-                  vbf_ggHMELA_bin12_NN_bin2,
-                  vbf_ggHMELA_bin1_NN_bin3,
-                  vbf_ggHMELA_bin2_NN_bin3,
-                  vbf_ggHMELA_bin3_NN_bin3,
-                  vbf_ggHMELA_bin4_NN_bin3,
-                  vbf_ggHMELA_bin5_NN_bin3,
-                  vbf_ggHMELA_bin6_NN_bin3,
-                  vbf_ggHMELA_bin7_NN_bin3,
-                  vbf_ggHMELA_bin8_NN_bin3,
-                  vbf_ggHMELA_bin9_NN_bin3,
-                  vbf_ggHMELA_bin10_NN_bin3,
-                  vbf_ggHMELA_bin11_NN_bin3,
-                  vbf_ggHMELA_bin12_NN_bin3};
+                  vbf_ggHMELA_bin12_NN_bin1};
 
 // read all *.root files in the given directory and put them in the provided vector
 void read_directory(const std::string &name, std::vector<std::string> *v) {
@@ -123,7 +99,8 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
       // y-axis
       bins_lpt{0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
       bins_msv1{0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300},
-      bins_msv2{0, 80, 100, 115, 130, 150, 1000},
+      // bins_msv2{0, 80, 100, 115, 130, 150, 1000},
+      bins_msv2{-3.0, 0, 3.0},
       bins_hpt2{0, 150, 10000},
       channel_prefix(channel_prefix),
       doNN(doNN),
@@ -458,87 +435,29 @@ void HistTool::writeHistos() {
 
 // basically a map from 2 inputs -> 1 Category
 Categories HistTool::getCategory(double D0_ggH, double nn) {
-  if (nn < 0.2) {
-    if (D0_ggH > 0 && D0_ggH <= 1.5/13) {
-      return vbf_ggHMELA_bin1_NN_bin1;
-    } else if (D0_ggH <= 2./13) {
-      return vbf_ggHMELA_bin2_NN_bin1;
-    } else if (D0_ggH <= 3./13) {
-      return vbf_ggHMELA_bin3_NN_bin1;
-    } else if (D0_ggH <= 4./13) {
-      return vbf_ggHMELA_bin4_NN_bin1;
-    } else if (D0_ggH <= 5./13) {
-      return vbf_ggHMELA_bin5_NN_bin1;
-    } else if (D0_ggH <= 6./13) {
-      return vbf_ggHMELA_bin6_NN_bin1;
-    } else if (D0_ggH <= 7./13) {
-      return vbf_ggHMELA_bin7_NN_bin1;
-    } else if (D0_ggH <= 8./13) {
-      return vbf_ggHMELA_bin8_NN_bin1;
-    } else if (D0_ggH <= 9./13) {
-      return vbf_ggHMELA_bin9_NN_bin1;
-    } else if (D0_ggH <= 10./13) {
-      return vbf_ggHMELA_bin10_NN_bin1;
-    } else if (D0_ggH <= 11./13) {
-      return vbf_ggHMELA_bin11_NN_bin1;
-    } else if (D0_ggH <= 13./13) {
-      return vbf_ggHMELA_bin12_NN_bin1;
-    }
-  } else if (nn < 0.6) {
-    if (D0_ggH > 0 && D0_ggH <= 1./10) {
-      return vbf_ggHMELA_bin1_NN_bin2;
-    } else if (D0_ggH <= 2./10) {
-      return vbf_ggHMELA_bin2_NN_bin2;
-    } else if (D0_ggH <= 3./10) {
-      return vbf_ggHMELA_bin3_NN_bin2;
-    } else if (D0_ggH <= 4./10) {
-      return vbf_ggHMELA_bin4_NN_bin2;
-    } else if (D0_ggH <= 5./10) {
-      return vbf_ggHMELA_bin5_NN_bin2;
-    } else if (D0_ggH <= 6./10) {
-      return vbf_ggHMELA_bin6_NN_bin2;
-    } else if (D0_ggH <= 7./10) {
-      return vbf_ggHMELA_bin7_NN_bin2;
-    } else if (D0_ggH <= 8./10) {
-      return vbf_ggHMELA_bin8_NN_bin2;
-    } else if (D0_ggH <= 9./10) {
-      return vbf_ggHMELA_bin9_NN_bin2;
-    } else if (D0_ggH <= 10./10) {
-      return vbf_ggHMELA_bin10_NN_bin2;
-    }
-    //  else if (D0_ggH <= 11./10) {
-    //   return vbf_ggHMELA_bin11_NN_bin2;
-    // } else if (D0_ggH <= 13./10) {
-    //   return vbf_ggHMELA_bin12_NN_bin2;
-    // }
-  } else {
-    if (D0_ggH > 0 && D0_ggH <= 1./6) {
-      return vbf_ggHMELA_bin1_NN_bin3;
-    } else if (D0_ggH <= 2./6) {
-      return vbf_ggHMELA_bin2_NN_bin3;
-    } else if (D0_ggH <= 3./6) {
-      return vbf_ggHMELA_bin3_NN_bin3;
-    } else if (D0_ggH <= 4./6) {
-      return vbf_ggHMELA_bin4_NN_bin3;
-    } else if (D0_ggH <= 5./6) {
-      return vbf_ggHMELA_bin5_NN_bin3;
-    } else if (D0_ggH <= 6./6) {
-      return vbf_ggHMELA_bin6_NN_bin3;
-    } 
-    // else if (D0_ggH <= 7./8) {
-    //   return vbf_ggHMELA_bin7_NN_bin3;
-    // } else if (D0_ggH <= 8./8) {
-    //   return vbf_ggHMELA_bin8_NN_bin3;
-    // } 
-    // else if (D0_ggH <= 9./10) {
-    //   return vbf_ggHMELA_bin9_NN_bin3;
-    // } else if (D0_ggH <= 10./10) {
-    //   return vbf_ggHMELA_bin10_NN_bin3;
-    // } 
-    // else if (D0_ggH <= 11./13) {
-    //   return vbf_ggHMELA_bin11_NN_bin3;
-    // } else if (D0_ggH <= 13./13) {
-    //   return vbf_ggHMELA_bin12_NN_bin3;
-    // }
+  if (D0_ggH > 0 && D0_ggH <= 1./13) {
+    return vbf_ggHMELA_bin1_NN_bin1;
+  } else if (D0_ggH <= 2./13) {
+    return vbf_ggHMELA_bin2_NN_bin1;
+  } else if (D0_ggH <= 3./13) {
+    return vbf_ggHMELA_bin3_NN_bin1;
+  } else if (D0_ggH <= 4./13) {
+    return vbf_ggHMELA_bin4_NN_bin1;
+  } else if (D0_ggH <= 5./13) {
+    return vbf_ggHMELA_bin5_NN_bin1;
+  } else if (D0_ggH <= 6./13) {
+    return vbf_ggHMELA_bin6_NN_bin1;
+  } else if (D0_ggH <= 7./13) {
+    return vbf_ggHMELA_bin7_NN_bin1;
+  } else if (D0_ggH <= 8./13) {
+    return vbf_ggHMELA_bin8_NN_bin1;
+  } else if (D0_ggH <= 9./13) {
+    return vbf_ggHMELA_bin9_NN_bin1;
+  } else if (D0_ggH <= 10./13) {
+    return vbf_ggHMELA_bin10_NN_bin1;
+  } else if (D0_ggH <= 11./13) {
+    return vbf_ggHMELA_bin11_NN_bin1;
+  } else if (D0_ggH <= 13./13) {
+    return vbf_ggHMELA_bin12_NN_bin1;
   }
 }
