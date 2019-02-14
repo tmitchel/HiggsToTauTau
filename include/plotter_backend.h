@@ -435,32 +435,33 @@ void HistTool::writeHistos() {
 
 // basically a map from 2 inputs -> 1 Category
 Categories HistTool::getCategory(double D0_ggH, double nn) {
+  auto edge = 6.28/6.;
   if (nn < 150) {
-    if (D0_ggH > 0 && D0_ggH <= 1.*6/6) {
+    if (D0_ggH > 0 && D0_ggH <= 1.*edge) {
       return vbf_ggHMELA_bin1_NN_bin1;
-    } else if (D0_ggH <= 2.*6/6) {
+    } else if (D0_ggH <= 2.*edge) {
       return vbf_ggHMELA_bin2_NN_bin1;
-    } else if (D0_ggH <= 3.*6/6) {
+    } else if (D0_ggH <= 3.*edge) {
       return vbf_ggHMELA_bin3_NN_bin1;
-    } else if (D0_ggH <= 4.*6/6) {
+    } else if (D0_ggH <= 4.*edge) {
       return vbf_ggHMELA_bin4_NN_bin1;
-    } else if (D0_ggH <= 5.*6/6) {
+    } else if (D0_ggH <= 5.*edge) {
       return vbf_ggHMELA_bin5_NN_bin1;
-    } else if (D0_ggH <= 6.*6/6) {
+    } else if (D0_ggH <= 6.*edge) {
       return vbf_ggHMELA_bin6_NN_bin1;
     }
   } else {
-    if (D0_ggH > 0 && D0_ggH <= 1.*6/6) {
+    if (D0_ggH > 0 && D0_ggH <= 1.*edge) {
       return vbf_ggHMELA_bin1_NN_bin2;
-    } else if (D0_ggH <= 2.*6/6) {
+    } else if (D0_ggH <= 2.*edge) {
       return vbf_ggHMELA_bin2_NN_bin2;
-    } else if (D0_ggH <= 3.*6/6) {
+    } else if (D0_ggH <= 3.*edge) {
       return vbf_ggHMELA_bin3_NN_bin2;
-    } else if (D0_ggH <= 4.*6/6) {
+    } else if (D0_ggH <= 4.*edge) {
       return vbf_ggHMELA_bin4_NN_bin2;
-    } else if (D0_ggH <= 5.*6/6) {
+    } else if (D0_ggH <= 5.*edge) {
       return vbf_ggHMELA_bin5_NN_bin2;
-    } else if (D0_ggH <= 6.*6/6) {
+    } else if (D0_ggH <= 6.*edge) {
       return vbf_ggHMELA_bin6_NN_bin2;
     }
   }
