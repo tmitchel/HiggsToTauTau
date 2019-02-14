@@ -42,9 +42,9 @@ gROOT.SetBatch(kTRUE)
 def applyStyle(name, hist, leg):
     overlay = 0
     print name, hist.Integral()
-    if name == 'ZTT':
+    if name == 'embedded':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
-        hist.SetName("ZTT")
+        hist.SetName("embedded")
     elif name == 'TTT':
         hist.SetFillColor(TColor.GetColor("#cfe87f"))
         hist.SetName('TTT')
@@ -174,7 +174,7 @@ def fillStackAndLegend(data, vbf, ggh, holder, leg):
     leg.AddEntry(data, 'Data', 'lep')
     leg.AddEntry(vbf, 'VBF Higgs(125)x50', 'l')
     leg.AddEntry(ggh, 'ggH Higgs(125)x50', 'l')
-    leg.AddEntry(filter(lambda x: x.GetName() == 'ZTT', holder)[0], 'ZTT', 'f')
+    leg.AddEntry(filter(lambda x: x.GetName() == 'embedded', holder)[0], 'ZTT', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'ZL', holder)[0], 'ZL', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'jet fakes', holder)[0], 'jetFakes', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'TTT', holder)[0], 'TTT', 'f')
@@ -262,21 +262,21 @@ def sigmaLines(data):
 
 
 def blindData(data, signal, background):
-    for ibin in range(data.GetNbinsX()+1):
-        sig = signal.GetBinContent(ibin)
-        bkg = background.GetBinContent(ibin)
-        if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
-            data.SetBinContent(ibin, 0)
-
-    if args.var == 'NN_disc':
-        middleBin = data.FindBin(0.5)
-        for ibin in range(middleBin, data.GetNbinsX()+1):
-            data.SetBinContent(ibin, 0)
+#    for ibin in range(data.GetNbinsX()+1):
+#        sig = signal.GetBinContent(ibin)
+#        bkg = background.GetBinContent(ibin)
+#        if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
+#            data.SetBinContent(ibin, 0)
+#
+#    if args.var == 'NN_disc':
+#        middleBin = data.FindBin(0.5)
+#        for ibin in range(middleBin, data.GetNbinsX()+1):
+#            data.SetBinContent(ibin, 0)
 
     return data
 
 def main():
-    fin = TFile('../Output/templates/{}/template_{}_{}_ff{}.root'.format(args.in_dir, args.channel, args.var, args.year), 'read')
+    fin = TFile('Output/templates/{}/template_{}_{}_ff{}.root'.format(args.in_dir, args.channel, args.var, args.year), 'read')
     idir = fin.Get(args.cat)
     leg = createLegend()
     data = idir.Get('Data').Clone()
@@ -402,7 +402,7 @@ def main():
     line1.Draw()
     line2.Draw()
 
-    can.SaveAs('../Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat, args.year))
+    can.SaveAs('Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat, args.year))
 
 
 if __name__ == "__main__":
