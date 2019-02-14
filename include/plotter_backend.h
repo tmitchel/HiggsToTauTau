@@ -105,13 +105,12 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
       // x-axis
       bins_l2{0, 1, 10, 11},
       bins_hpt{0, 100, 150, 200, 250, 300, 5000},
-      bins_mjj{300, 500, 10000},
-      // bins_mjj{0, 0.5, 1.},
+      // bins_mjj{300, 500, 10000},  // real mjj
+      bins_mjj{0, 0.5, 1.},  // actually VBF MELA
 
       // y-axis
       bins_lpt{0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
       bins_msv1{0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300},
-      // bins_msv2{0, 100, 115, 130, 1000},
       bins_msv2{0, 80, 100, 115, 130, 150, 1000},
       bins_hpt2{0, 150, 10000},
       channel_prefix(channel_prefix),
@@ -188,7 +187,7 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
           "ff_tt_dm0_njet0_stat_down", "ff_tt_dm0_njet1_stat_up", "ff_tt_dm0_njet1_stat_down",
           "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down", "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"} {
   if (doNN) {
-    bins_mjj = {0., 0.3, 1.};
+    // bins_mjj = {0., 0.3, 1.};
   }
 
   // Create empty histograms for each category to fill later.
@@ -435,33 +434,32 @@ void HistTool::writeHistos() {
 
 // basically a map from 2 inputs -> 1 Category
 Categories HistTool::getCategory(double D0_ggH, double nn) {
-  auto edge = 6.28/6.;
-  if (nn < 150) {
-    if (D0_ggH > 0 && D0_ggH <= 1.*edge) {
+  if (nn < 0.5) {
+    if (D0_ggH > 0 && D0_ggH <= 1./6) {
       return vbf_ggHMELA_bin1_NN_bin1;
-    } else if (D0_ggH <= 2.*edge) {
+    } else if (D0_ggH <= 2./6) {
       return vbf_ggHMELA_bin2_NN_bin1;
-    } else if (D0_ggH <= 3.*edge) {
+    } else if (D0_ggH <= 3./6) {
       return vbf_ggHMELA_bin3_NN_bin1;
-    } else if (D0_ggH <= 4.*edge) {
+    } else if (D0_ggH <= 4./6) {
       return vbf_ggHMELA_bin4_NN_bin1;
-    } else if (D0_ggH <= 5.*edge) {
+    } else if (D0_ggH <= 5./6) {
       return vbf_ggHMELA_bin5_NN_bin1;
-    } else if (D0_ggH <= 6.*edge) {
+    } else if (D0_ggH <= 6./6) {
       return vbf_ggHMELA_bin6_NN_bin1;
     }
   } else {
-    if (D0_ggH > 0 && D0_ggH <= 1.*edge) {
+    if (D0_ggH > 0 && D0_ggH <= 1./6) {
       return vbf_ggHMELA_bin1_NN_bin2;
-    } else if (D0_ggH <= 2.*edge) {
+    } else if (D0_ggH <= 2./6) {
       return vbf_ggHMELA_bin2_NN_bin2;
-    } else if (D0_ggH <= 3.*edge) {
+    } else if (D0_ggH <= 3./6) {
       return vbf_ggHMELA_bin3_NN_bin2;
-    } else if (D0_ggH <= 4.*edge) {
+    } else if (D0_ggH <= 4./6) {
       return vbf_ggHMELA_bin4_NN_bin2;
-    } else if (D0_ggH <= 5.*edge) {
+    } else if (D0_ggH <= 5./6) {
       return vbf_ggHMELA_bin5_NN_bin2;
-    } else if (D0_ggH <= 6.*edge) {
+    } else if (D0_ggH <= 6./6) {
       return vbf_ggHMELA_bin6_NN_bin2;
     }
   }

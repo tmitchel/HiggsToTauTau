@@ -169,7 +169,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       } else {
         observable = mjj;
       }
-      // observable = VBF_MELA;
+      observable = VBF_MELA;
 
       // pick either old 2016 selection or optimized one
       if (old_selection) {
@@ -216,7 +216,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       }
 
       // find the correct MELA ggH/Higgs pT bin for this event
-      auto ACcat = getCategory(dPhijj, higgs_pT);
+      auto ACcat = getCategory(D0_ggH, NN_disc);
 
       // fill histograms
       if (is_signal) {
@@ -259,7 +259,6 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
           fillFraction(boosted, name, vis_mass, njets, weight);
         } else if (cat2) {
           fillFraction(vbf, name, vis_mass, njets, weight);
-          // ggH bins: [0.0, 0.2, 0.4, 0.7, 1.0]
           fillFraction(ACcat, name, vis_mass, njets, weight);
         }
       }
@@ -364,7 +363,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
       } else {
         observable = mjj;
       }
-      // observable = VBF_MELA;
+      observable = VBF_MELA;
 
       if (old_selection) {
         cat0 = (cat_0jet > 0);
@@ -415,7 +414,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
         var_val = dPhijj;
       }
 
-      auto ACcat = getCategory(dPhijj, higgs_pT);
+      auto ACcat = getCategory(D0_ggH, NN_disc);
 
       if (is_antiTauIso) {
         if (cat0) {
