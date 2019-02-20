@@ -100,7 +100,7 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
       bins_lpt{0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
       bins_msv1{0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300},
       // bins_msv2{0, 80, 100, 115, 130, 150, 1000},
-      bins_msv2{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5,  0.7, 0.8, 0.9, 0.95, 1.},
+      bins_msv2{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.95, 1.},
       bins_hpt2{0, 150, 10000},
       channel_prefix(channel_prefix),
       doNN(doNN),
@@ -435,29 +435,86 @@ void HistTool::writeHistos() {
 
 // basically a map from 2 inputs -> 1 Category
 Categories HistTool::getCategory(double D0_ggH, double nn) {
-  if (D0_ggH > 0 && D0_ggH <= 1./13) {
+//  double edge = 3.14/6.;
+//  if (D0_ggH > 0 && D0_ggH <= 1.*edge) {
+//    return vbf_ggHMELA_bin1_NN_bin1;
+//  } else if (D0_ggH <= 2.*edge) {
+//    return vbf_ggHMELA_bin2_NN_bin1;
+//  } else if (D0_ggH <= 3.*edge) {
+//    return vbf_ggHMELA_bin3_NN_bin1;
+//  } else if (D0_ggH <= 4.*edge) {
+//    return vbf_ggHMELA_bin4_NN_bin1;
+//  } else if (D0_ggH <= 5.*edge) {
+//    return vbf_ggHMELA_bin5_NN_bin1;
+//  } else if (D0_ggH <= 6.*edge) {
+//    return vbf_ggHMELA_bin6_NN_bin1;
+//  } 
+
+//  double edge = 3.14/12.;
+//  if (D0_ggH > 0 && D0_ggH <= 1.*edge) {
+//    return vbf_ggHMELA_bin1_NN_bin1;
+//  } else if (D0_ggH <= 2.*edge) {
+//    return vbf_ggHMELA_bin2_NN_bin1;
+//  } else if (D0_ggH <= 3.*edge) {
+//    return vbf_ggHMELA_bin3_NN_bin1;
+//  } else if (D0_ggH <= 4.*edge) {
+//    return vbf_ggHMELA_bin4_NN_bin1;
+//  } else if (D0_ggH <= 5.*edge) {
+//    return vbf_ggHMELA_bin5_NN_bin1;
+//  } else if (D0_ggH <= 6.*edge) {
+//    return vbf_ggHMELA_bin6_NN_bin1;
+//  } else if (D0_ggH <= 7.*edge) {
+//    return vbf_ggHMELA_bin7_NN_bin1;
+//  } else if (D0_ggH <= 8.*edge) {
+//    return vbf_ggHMELA_bin8_NN_bin1;
+//  } else if (D0_ggH <= 9.*edge) {
+//    return vbf_ggHMELA_bin9_NN_bin1;
+//  } else if (D0_ggH <= 10.*edge) {
+//    return vbf_ggHMELA_bin10_NN_bin1;
+//  } else if (D0_ggH <= 11.*edge) {
+//    return vbf_ggHMELA_bin11_NN_bin1;
+//  } else if (D0_ggH <= 12.*edge) {
+//    return vbf_ggHMELA_bin12_NN_bin1;
+//  }
+
+  
+  if (D0_ggH > 0 && D0_ggH <= 1./6) {
     return vbf_ggHMELA_bin1_NN_bin1;
-  } else if (D0_ggH <= 2./13) {
+  } else if (D0_ggH <= 2./6) {
     return vbf_ggHMELA_bin2_NN_bin1;
-  } else if (D0_ggH <= 3./13) {
+  } else if (D0_ggH <= 3./6) {
     return vbf_ggHMELA_bin3_NN_bin1;
-  } else if (D0_ggH <= 4./13) {
+  } else if (D0_ggH <= 4./6) {
     return vbf_ggHMELA_bin4_NN_bin1;
-  } else if (D0_ggH <= 5./13) {
+  } else if (D0_ggH <= 5./6) {
     return vbf_ggHMELA_bin5_NN_bin1;
-  } else if (D0_ggH <= 6./13) {
+  } else if (D0_ggH <= 6./6) {
     return vbf_ggHMELA_bin6_NN_bin1;
-  } else if (D0_ggH <= 7./13) {
-    return vbf_ggHMELA_bin7_NN_bin1;
-  } else if (D0_ggH <= 8./13) {
-    return vbf_ggHMELA_bin8_NN_bin1;
-  } else if (D0_ggH <= 9./13) {
-    return vbf_ggHMELA_bin9_NN_bin1;
-  } else if (D0_ggH <= 10./13) {
-    return vbf_ggHMELA_bin10_NN_bin1;
-  } else if (D0_ggH <= 11./13) {
-    return vbf_ggHMELA_bin11_NN_bin1;
-  } else if (D0_ggH <= 13./13) {
-    return vbf_ggHMELA_bin12_NN_bin1;
-  }
+  } 
+
+//   if (D0_ggH > 0 && D0_ggH <= 1./13) {
+//     return vbf_ggHMELA_bin1_NN_bin1;
+//   } else if (D0_ggH <= 2./13) {
+//     return vbf_ggHMELA_bin2_NN_bin1;
+//   } else if (D0_ggH <= 3./13) {
+//     return vbf_ggHMELA_bin3_NN_bin1;
+//   } else if (D0_ggH <= 4./13) {
+//     return vbf_ggHMELA_bin4_NN_bin1;
+//   } else if (D0_ggH <= 5./13) {
+//     return vbf_ggHMELA_bin5_NN_bin1;
+//   } else if (D0_ggH <= 6./13) {
+//     return vbf_ggHMELA_bin6_NN_bin1;
+//   } else if (D0_ggH <= 7./13) {
+//     return vbf_ggHMELA_bin7_NN_bin1;
+//   } else if (D0_ggH <= 8./13) {
+//     return vbf_ggHMELA_bin8_NN_bin1;
+//   } else if (D0_ggH <= 9./13) {
+//     return vbf_ggHMELA_bin9_NN_bin1;
+//   } else if (D0_ggH <= 10./13) {
+//     return vbf_ggHMELA_bin10_NN_bin1;
+//   } else if (D0_ggH <= 11./13) {
+//     return vbf_ggHMELA_bin11_NN_bin1;
+//   } else if (D0_ggH <= 13./13) {
+//     return vbf_ggHMELA_bin12_NN_bin1;
+//   }
 }
