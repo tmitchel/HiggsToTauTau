@@ -7,6 +7,18 @@
 using std::string;
 using std::vector;
 
+// read all *.root files in the given directory and put them in the provided vector
+void read_directory(const string &name, vector<string> *v) {
+  DIR *dirp = opendir(name.c_str());
+  struct dirent *dp;
+  while ((dp = readdir(dirp)) != 0) {
+    if (static_cast<string>(dp->d_name).find("root") != string::npos) {
+      v->push_back(dp->d_name);
+    }
+  }
+  closedir(dirp);
+}
+
 int main(int argc, char *argv[]) {
   auto watch = TStopwatch();
   // get CLI arguments

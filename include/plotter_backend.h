@@ -59,18 +59,6 @@ enum Categories { zeroJet,
                   vbf_ggHMELA_bin11_NN_bin2,
                   vbf_ggHMELA_bin12_NN_bin2 };
 
-// read all *.root files in the given directory and put them in the provided vector
-void read_directory(const string &name, vector<string> *v) {
-  DIR *dirp = opendir(name.c_str());
-  struct dirent *dp;
-  while ((dp = readdir(dirp)) != 0) {
-    if (static_cast<string>(dp->d_name).find("root") != string::npos) {
-      v->push_back(dp->d_name);
-    }
-  }
-  closedir(dirp);
-}
-
 // class to hold the histograms until I'm ready to write them
 class HistTool {
  public:
