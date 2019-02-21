@@ -2,7 +2,7 @@
 // user includes
 #include "TStopwatch.h"
 #include "../include/CLParser.h"
-#include "../include/plotter_backend.h"
+#include "../include/template_backend.h"
 
 using std::string;
 using std::vector;
