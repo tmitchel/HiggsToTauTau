@@ -180,7 +180,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     if (acWeight != "None") {
       break;
     }
-    frac_qcd.at(i) = std::shared_ptr<TH2F>((TH2F*)data.at(i)->Clone());
+    frac_qcd.at(i) = std::shared_ptr<TH2F>(reinterpret_cast<TH2F*>(data.at(i)->Clone()));
     frac_qcd.at(i)->Add(frac_w.at(i).get(), -1);
     frac_qcd.at(i)->Add(frac_tt.at(i).get(), -1);
     frac_qcd.at(i)->Add(frac_real.at(i).get(), -1);
@@ -189,7 +189,6 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     frac_tt.at(i)->Divide(data.at(i).get());
     frac_real.at(i)->Divide(data.at(i).get());
     frac_qcd.at(i)->Divide(data.at(i).get());
-
   }
 }
 
@@ -226,7 +225,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
       } else if (tree_name.find("mutau_tree") != string::npos) {
         iso = t.mu_iso;
       }
-      
+
       // only look at opposite-sign events
       if (t.OS == 0) {
         continue;
