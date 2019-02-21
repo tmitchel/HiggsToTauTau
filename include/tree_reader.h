@@ -10,8 +10,10 @@
 
 class tree_reader {
  public:
+  tree_reader() {}
   explicit tree_reader(std::map<std::string, std::vector<float>>);
-  void setSetBranchAddresses(TTree*, std::string);
+  void setBranches(TTree*, std::string);
+  Float_t getVar(std::string);
 
   Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiLepIso, is_antiTauIso, is_qcd, is_looseIso, OS, SS;
   Float_t evtwt,
@@ -38,7 +40,6 @@ class tree_reader {
       wt_wh_L1Zgint, wt_zh_a1, wt_zh_a2, wt_zh_a3, wt_zh_L1, wt_zh_L1Zg, wt_zh_a2int, wt_zh_a3int, wt_zh_L1int,
       wt_zh_L1Zgint, acWeightVal;
 
-  std::map<std::string, Float_t> event_vars;
   std::map<std::string, std::vector<float>> variables;
 };
 

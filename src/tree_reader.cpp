@@ -1,30 +1,9 @@
 #include "../include/tree_reader.h"
+#include "TMath.h"
 
-tree_reader::tree_reader(std::map<std::string, std::vector<float>> vars) : event_vars{
-                                                                               {"evtwt", evtwt},
-                                                                               {"higgs_pT", higgs_pT},
-                                                                               {"t1_decayMode", t1_decayMode},
-                                                                               {"vis_mass", vis_mass},
-                                                                               {"mjj", mjj},
-                                                                               {"m_sv", m_sv},
-                                                                               {"njets", njets},
-                                                                               {"nbjets", nbjets},
-                                                                               {"D0_VBF", D0_VBF},
-                                                                               {"D0_ggH", D0_ggH},
-                                                                               {"DCP_VBF", DCP_VBF},
-                                                                               {"DCP_ggH", DCP_ggH},
-                                                                               {"t1_pt", t1_pt},
-                                                                               {"VBF_MELA", VBF_MELA},
-                                                                               {"dPhijj", dPhijj},
-                                                                               {"j1_phi", j1_phi},
-                                                                               {"j2_phi", j2_phi},
-                                                                               {"NN_disc", NN_disc},
-                                                                               {"el_iso", el_iso},
-                                                                               {"mu_iso", mu_iso}},
-                                                                           acWeightVal(1.),
-                                                                           variables(vars) {}
+tree_reader::tree_reader(std::map<std::string, std::vector<float>> vars) : acWeightVal(1.), variables(vars) {}
 
-void tree_reader::setSetBranchAddresses(TTree* tree, std::string acName) {
+void tree_reader::setBranches(TTree* tree, std::string acName) {
   tree->SetBranchAddress("evtwt", &evtwt);
 
   tree->SetBranchAddress("el_pt", &el_pt);
@@ -179,3 +158,30 @@ void tree_reader::setSetBranchAddresses(TTree* tree, std::string acName) {
     tree->SetBranchAddress("wt_zh_L1Zgint", &wt_zh_L1Zgint);
   }
 }
+
+// map names to variables in the tree
+// new variables can be created here
+Float_t tree_reader::getVar(std::string var) {
+  if (var == "NN_disc") {
+    return this->NN_disc;
+  } else if (var == "el_pt") {
+    return this->el_pt;
+  } else if (var == "mu_pt") {
+    return this->mu_pt;
+  } else if (var == "t1_pt") {
+    return this->t1_pt;
+  } else if (var == "j1_pt") {
+    return this->j1_pt;
+  } else if (var == "j2_pt") {
+    return this->j2_pt;
+  } else if (var == "VBF_MELA") {
+    return this->VBF_MELA;
+  } else if (var == "D0_ggH") {
+    return this->D0_ggH;
+  } else if (var == "dPhijj") {
+    return TMath::ACos(TMath::Cos(this->j1_phi - this->j2_phi));
+  } else if (var == "m_sv") {
+    return this->m_sv;
+  }
+}
+

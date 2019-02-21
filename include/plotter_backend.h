@@ -75,7 +75,7 @@ class HistTool {
   void initVectors2d(string);
   void initSystematics(string);
   void fillFraction(int, string, double, double, double);
-  void convertDataToFake(Categories, string, double, double, double, double, double, double, double, double);          // 1d
+  void convertDataToFake(Categories, int, string, double, double, double, double, double, double, double, double);     // 1d
   void convertDataToFake(Categories, string, double, double, double, double, double, double, double, double, double);  // 2d
   void histoLoop(vector<string>, string, string, string);
   void getJetFakes(vector<string>, string, string, bool);

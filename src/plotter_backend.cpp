@@ -117,9 +117,9 @@ HistTool::HistTool(string channel_prefix, string year, string suffix, tree_reade
   // get FakeFactor workspace
   shared_ptr<TFile> ff_file;
   if (year == "2017") {
-    ff_file = std::make_shared<TFile>((("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ"));
+    ff_file = std::make_shared<TFile>((("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str()));
   } else if (year == "2016") {
-    ff_file = std::make_shared<TFile>((("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2016/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_tight.root").c_str(), "READ"));
+    ff_file = std::make_shared<TFile>((("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2016/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_tight.root").c_str()));
   } else {
     std::cerr << "Bad year" << std::endl;
   }
@@ -145,27 +145,30 @@ void HistTool::includeTemplates() {
     }
 
     // make all of the directories for templates
-    for (auto it = hists_2d.begin(); it != hists_2d.end(); it++) {
+    // for (auto it = hists_2d.begin(); it != hists_2d.end(); it++) {
       fout->cd();
-      fout->mkdir((it->first).c_str());
+      fout->mkdir(cat.c_str());
       fout->cd();
-    }
+    // }
   }
 }
 
 // create empty histograms to hold jetFakes and create
 // directory structure in TFile. (2D)
 void HistTool::includePlots() {
+  fout->cd();
+  fout->mkdir("plots");
+  fout->cd();
   for (auto it = t.variables.begin(); it != t.variables.end(); it++) {
     auto var = it->first;
     auto bins_1d = it->second;
     fout->cd();
-    fout->mkdir("plots");
+    fout->mkdir(("plots/"+var).c_str());
     fout->cd();
 
     for (auto cat : categories) {
       // add histograms for holding plots
-      hists_1d[cat.c_str()] = vector<shared_ptr<TH1F>>();
+      hists_1d[(var+"/"+cat).c_str()] = vector<shared_ptr<TH1F>>();
       if (cat.find("0jet") != string::npos) {
         fakes_1d.push_back(std::make_shared<TH1F>((var + "fake_0jet").c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
       } else if (cat.find("boosted") != string::npos) {
@@ -192,11 +195,15 @@ void HistTool::initVectors1d(string name) {
 
     fout->cd();
     for (auto key : hists_1d) {
-      fout->cd(("plots/" + var + "/" + key.first).c_str());
+      fout->cd(("plots/" + key.first).c_str());
 
       // convert name for data
       if (name.find("Data") != string::npos) {
         name = "data_obs";
+      }
+
+      if (key.first.find(var) == std::string::npos) {
+        continue;
       }
 
       // create empty histogram for every category
@@ -282,7 +289,7 @@ void HistTool::convertDataToFake(Categories cat, string name, double var1, doubl
 
 // convert get weights to convert data events into
 // jetFakes (1D)
-void HistTool::convertDataToFake(Categories cat, string name, double var1, double vis_mass,
+void HistTool::convertDataToFake(Categories cat, int nvar, string name, double var1, double vis_mass,
                                  double njets, double t1_pt, double t1_decayMode, double mt,
                                  double lep_iso, double weight) {
   auto bin_x = data.at(cat)->GetXaxis()->FindBin(vis_mass);
@@ -292,7 +299,7 @@ void HistTool::convertDataToFake(Categories cat, string name, double var1, doubl
                                       frac_tt.at(cat)->GetBinContent(bin_x, bin_y),
                                       frac_qcd.at(cat)->GetBinContent(bin_x, bin_y)});
   if (name.find("Data") != string::npos) {
-    fakes_1d.at(cat)->Fill(var1, weight * fakeweight);
+    fakes_1d.at(cat*nvar)->Fill(var1, weight * fakeweight);
   }
 }
 
@@ -338,21 +345,21 @@ void HistTool::writeTemplates() {
 
 // Write the output histograms
 void HistTool::writeHistos() {
+  // write normal histograms
+  for (auto cat : hists_1d) {
+    fout->cd(("plots/" + cat.first).c_str());
+    for (auto hist : cat.second) {
+      hist->Write();
+    }
+  }
+
+  int nvar = 1;
   for (auto it = t.variables.begin(); it != t.variables.end(); it++) {
     auto var = it->first;
-
-    // write normal histograms
-    for (auto cat : hists_1d) {
-      fout->cd(("plots/" + var + "/" + cat.first).c_str());
-      for (auto hist : cat.second) {
-        hist->Write();
-      }
-    }
-
     // write jetFakes histograms after setting the correct name
-    for (auto cat = 0; cat < fakes_1d.size(); cat++) {
+    for (auto cat = 0; cat < categories.size(); cat++) {
       fout->cd(("plots/" + var + "/" + categories.at(cat)).c_str());
-      auto fake_hist = fakes_1d.at(cat);
+      auto fake_hist = fakes_1d.at(cat * nvar);
       fake_hist->SetName("jetFakes");
 
       // if fake yield is negative, make it zero
@@ -377,8 +384,10 @@ void HistTool::writeHistos() {
         hist->Write();
       }
     }
+    nvar++;
   }
-  fout->Close();
+  //fout->Close();
+  //std::cout << "CLOSE" << std::endl;
 }
 
 // find the correct "bin" based on input variables
