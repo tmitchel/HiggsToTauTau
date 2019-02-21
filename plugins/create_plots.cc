@@ -261,7 +261,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
               if (cat0) {
                 auto bin_x = data.at(zeroJet)->GetXaxis()->FindBin(t.vis_mass);
                 auto bin_y = data.at(zeroJet)->GetYaxis()->FindBin(t.njets);
-                auto fakeweight = ff_weight->value({t.t1_pt, t.t1_decayMode, t.njets, t.vis_mass,t. mt, iso,
+                auto fakeweight = ff_weight->value({t.t1_pt, t.t1_decayMode, t.njets, t.vis_mass, t.mt, iso,
                                                     frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
                                                     frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
                                                     frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)},
