@@ -224,9 +224,9 @@ HistTool::HistTool(string channel_prefix, string year, string suffix, tree_reade
   // get FakeFactor workspace
   shared_ptr<TFile> ff_file;
   if (year == "2017") {
-    ff_file = std::make_shared<TFile>(TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ"));
+    ff_file = std::make_shared<TFile>((("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ"));
   } else if (year == "2016") {
-    ff_file = std::make_shared<TFile>(TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2016/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_tight.root").c_str(), "READ"));
+    ff_file = std::make_shared<TFile>((("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2016/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_tight.root").c_str(), "READ"));
   } else {
     std::cerr << "Bad year" << std::endl;
   }

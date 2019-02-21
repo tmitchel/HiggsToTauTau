@@ -1,3 +1,6 @@
+#ifndef INCLUDE_TREE_READER_H_
+#define INCLUDE_TREE_READER_H_
+
 #include "TTree.h"
 
 #include <map>
@@ -218,3 +221,6 @@ void tree_reader::setSetBranchAddresses(TTree* tree, std::string acName) {
     tree->SetBranchAddress("wt_zh_L1Zgint", &wt_zh_L1Zgint);
   }
 }
+
+#endif
+

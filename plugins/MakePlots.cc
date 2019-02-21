@@ -2,8 +2,7 @@
 // user includes
 #include "TStopwatch.h"
 #include "../include/CLParser.h"
-#include "./plotter_backend.h"
-#include "./tree_reader.h"
+#include "../include/plotter_backend.h"
 
 using std::string;
 using std::vector;
@@ -165,7 +164,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     if (acWeight != "None") {
       break;
     }
-    frac_qcd.at(i) = std::make_shared<TH2F>(data.at(i)->Clone());
+    frac_qcd.at(i) = std::shared_ptr<TH2F>((TH2F*)data.at(i)->Clone());
     frac_qcd.at(i)->Add(frac_w.at(i).get(), -1);
     frac_qcd.at(i)->Add(frac_tt.at(i).get(), -1);
     frac_qcd.at(i)->Add(frac_real.at(i).get(), -1);
