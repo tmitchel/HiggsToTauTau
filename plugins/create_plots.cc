@@ -23,7 +23,6 @@ int main(int argc, char *argv[]) {
   auto watch = TStopwatch();
   // get CLI arguments
   CLParser parser(argc, argv);
-  bool doAC = parser.Flag("-a");
   bool doSyst = parser.Flag("-s");
   string dir = parser.Option("-d");
   string year = parser.Option("-y");
@@ -55,6 +54,14 @@ int main(int argc, char *argv[]) {
 
   std::map<std::string, std::vector<float>> vars = {
     {"m_sv", {30, 50, 180}},
+    {"el_pt", {30, 30, 200}},
+    {"mu_pt", {30, 30, 200}},
+    {"t1_pt", {30, 30, 200}},
+    {"j1_pt", {30, 30, 200}},
+    {"j2_pt", {30, 30, 200}},
+    {"VBF_MELA", {25, 0, 1}},
+    {"D0_ggH", {25, 0, 1}},
+    {"dPhijj", {25, 0, 3.14}},
     {"NN_disc", {25, 0, 1}}
   };
 
@@ -65,24 +72,18 @@ int main(int argc, char *argv[]) {
   hists->includePlots();
   hists->histoLoop(files, dir, tree_name, "None");    // fill histograms
   hists->getJetFakes(files, dir, tree_name, doSyst);  // get QCD, etc from fake factor
-  if (doAC) {
-    for (auto weight : hists->acNameMap) {
-      hists->histoLoop(files, dir, tree_name, weight.first);  // fill with different weights
-    }
+  for (auto weight : hists->acNameMap) {
+    hists->histoLoop(files, dir, tree_name, weight.first);  // fill with different weights
   }
   hists->writeHistos();
-  hists->fout->Close();
 
   std::cout << "Template created.\n Timing Info: \n\t CPU Time: " << watch.CpuTime() << "\n\tReal Time: " << watch.RealTime() << std::endl;
-
-  delete hists->ff_weight;
 }
 
 void HistTool::histoLoop(vector<string> files, string dir, string tree_name, string acWeight = "None") {
-  float observable(0.);
   bool cat0(false), cat1(false), cat2(false);
   for (auto ifile : files) {
-    auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
+    auto fin = std::make_shared<TFile>((dir + "/" + ifile).c_str());
     auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
     string name = ifile.substr(0, ifile.find(".")).c_str();
 
@@ -114,12 +115,15 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     fout->cd();
 
     // set all the branch addresses before the event loop
-    t.setSetBranchAddresses(tree, acWeight);
+    t.setBranches(tree, acWeight);
 
     // event loop
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
-      Float_t weight = t.evtwt * t.acWeightVal;
+      Float_t weight = t.evtwt;
+      if (acWeight != "None") {
+        weight *= t.acWeightVal;
+      }
 
       // only look at opposite-sign events
       if (t.OS == 0) {
@@ -141,14 +145,14 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       // fill histograms
       if (t.is_signal) {
         for (auto var = t.variables.begin(); var != t.variables.end(); var++) {
-          auto observable = t.event_vars.at(var->first);
+          auto observable = t.getVar(var->first);
           if (cat0) {
-            hists_1d.at(categories.at(zeroJet)).back()->Fill(observable, weight);
+            hists_1d.at(var->first+"/"+categories.at(zeroJet)).back()->Fill(observable, weight);
           } else if (cat1) {
-            hists_1d.at(categories.at(boosted)).back()->Fill(observable, weight);
+            hists_1d.at(var->first+"/"+categories.at(boosted)).back()->Fill(observable, weight);
           } else if (cat2) {
-            hists_1d.at(categories.at(vbf)).back()->Fill(observable, weight);
-            hists_1d.at(categories.at(ACcat)).back()->Fill(observable, weight);
+            hists_1d.at(var->first+"/"+categories.at(vbf)).back()->Fill(observable, weight);
+            hists_1d.at(var->first+"/"+categories.at(ACcat)).back()->Fill(observable, weight);
           }
         }
       } else if (t.is_antiTauIso) {
@@ -185,17 +189,17 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     frac_tt.at(i)->Divide(data.at(i).get());
     frac_real.at(i)->Divide(data.at(i).get());
     frac_qcd.at(i)->Divide(data.at(i).get());
+
   }
 }
 
 void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, bool doSyst = false) {
-  float observable(0.);
   bool cat0(false), cat1(false), cat2(false);
   for (auto ifile : files) {
     if (ifile.find("Data.root") == std::string::npos) {
       continue;
     }
-    auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
+    auto fin = std::make_shared<TFile>((dir + "/" + ifile).c_str());
     auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
     string name = ifile.substr(0, ifile.find(".")).c_str();
 
@@ -210,7 +214,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
     }
 
     // set all the branch addresses before the event loop
-    t.setSetBranchAddresses(tree, "None");
+    t.setBranches(tree, "None");
 
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
@@ -222,6 +226,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
       } else if (tree_name.find("mutau_tree") != string::npos) {
         iso = t.mu_iso;
       }
+      
       // only look at opposite-sign events
       if (t.OS == 0) {
         continue;
@@ -238,16 +243,17 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
       auto ACcat = getCategory(t.D0_ggH, t.NN_disc);
 
       if (t.is_antiTauIso) {
+        int nvar = 1;
         for (auto var = t.variables.begin(); var != t.variables.end(); var++) {
-          auto observable = t.event_vars.at(var->first);
+          auto observable = t.getVar(var->first);
           if (cat0) {
             // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
-            convertDataToFake(zeroJet, name, observable, t.vis_mass, t.njets, t.t1_pt, t.t1_decayMode, t.mt, iso, weight);
+            convertDataToFake(zeroJet, nvar, name, observable, t.vis_mass, t.njets, t.t1_pt, t.t1_decayMode, t.mt, iso, weight);
           } else if (cat1) {
-            convertDataToFake(boosted, name, observable, t.vis_mass, t.njets, t.t1_pt, t.t1_decayMode, t.mt, iso, weight);
+            convertDataToFake(boosted, nvar, name, observable, t.vis_mass, t.njets, t.t1_pt, t.t1_decayMode, t.mt, iso, weight);
           } else if (cat2) {
-            convertDataToFake(vbf, name, observable, t.vis_mass, t.njets, t.t1_pt, t.t1_decayMode, t.mt, iso, weight);
-            convertDataToFake(ACcat, name, observable, t.vis_mass, t.njets, t.t1_pt, t.t1_decayMode, t.mt, iso, weight);
+            convertDataToFake(vbf, nvar, name, observable, t.vis_mass, t.njets, t.t1_pt, t.t1_decayMode, t.mt, iso, weight);
+            convertDataToFake(ACcat, nvar, name, observable, t.vis_mass, t.njets, t.t1_pt, t.t1_decayMode, t.mt, iso, weight);
           }
 
           // loop through all systematic names and get the corresponding weight to fill a histogram
@@ -283,6 +289,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
               }
             }
           }
+          nvar++;
         }
       }
     }
