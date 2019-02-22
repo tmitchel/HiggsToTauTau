@@ -37,7 +37,7 @@ gROOT.SetBatch(kTRUE)
 
 def applyStyle(name, hist, leg):
     overlay = 0
-    name = name.replace(args.var, '')
+    name = name.replace(args.var+'_', '')
     print name, hist.Integral()
     if name == 'embedded':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
@@ -296,7 +296,7 @@ def main():
     fin = TFile(args.input, 'read')
     idir = fin.Get('plots/{}/{}'.format(args.var, args.cat))
     leg = createLegend()
-    data = idir.Get('data_obs').Clone()
+    data = idir.Get(args.var+'_data_obs').Clone()
     vbf = data.Clone()
     vbf.Reset()
     ggh = vbf.Clone()
