@@ -37,6 +37,7 @@ gROOT.SetBatch(kTRUE)
 
 def applyStyle(name, hist, leg):
     overlay = 0
+    name = name.replace(args.var, '')
     print name, hist.Integral()
     if name == 'embedded':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
@@ -293,7 +294,7 @@ def blindData(data, signal, background):
 
 def main():
     fin = TFile(args.input, 'read')
-    idir = fin.Get('plots/{}_{}'.format(args.var, args.cat))
+    idir = fin.Get('plots/{}/{}'.format(args.var, args.cat))
     leg = createLegend()
     data = idir.Get('data_obs').Clone()
     vbf = data.Clone()
