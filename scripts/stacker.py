@@ -78,7 +78,12 @@ def applyStyle(name, hist, leg):
         overlay = 9
     elif name == 'VBF125':
         overlay = -2
-    elif name == 'GGH2Jets_sm_M125':
+    elif name == 'GGH2Jets_sm_M125' and 'vbf' in args.cat:
+        hist.SetFillColor(0)
+        hist.SetLineWidth(3)
+        hist.SetLineColor(TColor.GetColor('#0000FF'))
+        overlay = 3
+    elif name == 'JHU_GGH2Jets_sm_M125' and 'boosted' in args.cat:
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#0000FF'))
