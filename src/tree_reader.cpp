@@ -106,6 +106,8 @@ void tree_reader::setBranches(TTree* tree, std::string acName) {
   tree->SetBranchAddress("dEtajj", &dEtajj);
   tree->SetBranchAddress("dPhijj", &dPhijj);
   tree->SetBranchAddress("NN_disc", &NN_disc);
+  tree->SetBranchAddress("NN_disc_vbf", &NN_disc_vbf);
+  tree->SetBranchAddress("NN_disc_boost", &NN_disc_boost);
 
   tree->SetBranchAddress("is_signal", &is_signal);
   tree->SetBranchAddress("is_antiLepIso", &is_antiLepIso);
@@ -162,7 +164,11 @@ void tree_reader::setBranches(TTree* tree, std::string acName) {
 // map names to variables in the tree
 // new variables can be created here
 Float_t tree_reader::getVar(std::string var) {
-  if (var == "NN_disc") {
+  if (var == "NN_disc_vbf") {
+    return this->NN_disc_vbf;
+  } else if (var == "NN_disc_boost") {
+    return this->NN_disc_boost;
+  } else if (var == "NN_disc") {
     return this->NN_disc;
   } else if (var == "el_pt") {
     return this->el_pt;

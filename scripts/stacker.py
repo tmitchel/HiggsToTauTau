@@ -147,6 +147,8 @@ titles = {
     'Dbkg_VBF': 'MELA VBF Disc',
     'Dbkg_ggH': 'MELA ggH Disc',
     'NN_disc': 'D_{NN}^{VBF}',
+    'NN_disc_vbf': 'D_{NN}^{VBF}',
+    'NN_disc_boost': 'D_{NN}^{VBF}',
     'Q2V1': 'Q^{2} V1 [GeV]',
     'Q2V2': 'Q^{2} V2 [GeV]',
     'Phi': '#phi',
