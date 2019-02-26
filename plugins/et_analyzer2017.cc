@@ -53,6 +53,7 @@ int main(int argc, char* argv[]) {
   std::string fname = path + sample + ".root";
   bool isData = sample.find("data") != std::string::npos;
   bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
+  bool isMG = sample.find("madgraph") != std::string::npos;
 
   std::string systname = "";
   if (!syst.empty()) {
@@ -127,7 +128,7 @@ int main(int argc, char* argv[]) {
 
   reweight::LumiReWeighting* lumi_weights;
   // read inputs for lumi reweighting
-  if (!isData && !isEmbed && !doAC) {
+  if (!isData && !isEmbed && !doAC && !isMG) {
     TNamed* dbsName = reinterpret_cast<TNamed*>(fin->Get("MiniAOD_name"));
     std::string datasetName = dbsName->GetTitle();
     if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
@@ -145,7 +146,7 @@ int main(int argc, char* argv[]) {
   htt_sf_file.Close();
 
   // embedded sample weights
-  TFile embed_file("data/htt_scalefactors_v17_5.root", "READ");
+  TFile embed_file("data/htt_scalefactors_v17_6.root", "READ");
   RooWorkspace *wEmbed = reinterpret_cast<RooWorkspace *>(embed_file.Get("w"));
   embed_file.Close();
 
@@ -179,10 +180,13 @@ int main(int argc, char* argv[]) {
 
   // begin the event loop
   Int_t nevts = ntuple->GetEntries();
+  int progress(0), fraction((nevts-1)/10);
   for (Int_t i = 0; i < nevts; i++) {
     ntuple->GetEntry(i);
-    if (i % 100000 == 0)
-      std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
+    if (i == progress * fraction) {
+      std::cout << "\tProcessing: " << progress*10 << "% complete.\r" << std::flush;
+      progress++;
+    }
 
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
     Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
@@ -229,6 +233,11 @@ int main(int argc, char* argv[]) {
     //   - Event: dR(tau,el) > 0.5                          //
     //////////////////////////////////////////////////////////
 
+    // remove 2-prong taus
+    if (!tau.getDecayModeFinding() || tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
+      continue;
+    }
+
     bool fireSingle(false), fireCross(false);
 
     // apply correct lepton pT thresholds
@@ -240,15 +249,11 @@ int main(int argc, char* argv[]) {
       fireSingle = true;
     } else if (electron.getPt() > 25 && electron.getPt() < 28 && tau.getPt() > 35 && fabs(tau.getEta()) < 2.1 && event.getPassEle24Tau30()) {
       fireCross = true;
-    } else {
+    } else if (!isEmbed) {  // embedded trigger has some weirdness dealt with later
       continue;
     }
 
     if (electron.getP4().DeltaR(tau.getP4()) < 0.5) {
-      continue;
-    }
-
-    if (electron.getPt() < 36) {
       continue;
     }
 
@@ -292,19 +297,19 @@ int main(int argc, char* argv[]) {
         //  else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
       } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
         if (fabs(tau.getEta()) < 0.4)
-          evtwt *= 1.06;
+          evtwt *= 1.17;
         else if (fabs(tau.getEta()) < 0.8)
-          evtwt *= 1.02;
+          evtwt *= 1.29;
         else if (fabs(tau.getEta()) < 1.2)
-          evtwt *= 1.10;
+          evtwt *= 1.14;
         else if (fabs(tau.getEta()) < 1.7)
-          evtwt *= 1.03;
+          evtwt *= 0.93;
         else
-          evtwt *= 1.94;
+          evtwt *= 1.61;
       }
 
       // pileup reweighting
-      if (!doAC) {
+      if (!doAC && !isMG) {
         evtwt *= lumi_weights->weight(event.getNPV());
       }
 
@@ -367,27 +372,49 @@ int main(int argc, char* argv[]) {
       if (tau.getGenMatch() == 5) {
         evtwt *= 0.97;
       }
-
       // set workspace variables
+      wEmbed->var("t_pt")->setVal(tau.getPt());
       wEmbed->var("e_pt")->setVal(electron.getPt());
       wEmbed->var("e_eta")->setVal(electron.getEta());
+      wEmbed->var("e_iso")->setVal(electron.getIso());
+      wEmbed->var("gt1_pt")->setVal(electron.getGenPt());
+      wEmbed->var("gt1_eta")->setVal(electron.getGenEta());
+      wEmbed->var("gt2_pt")->setVal(tau.getGenPt());
+      wEmbed->var("gt2_eta")->setVal(tau.getGenEta());
 
+      // double muon trigger eff in selection
+      evtwt *= wEmbed->function("m_sel_trg_ratio")->getVal();
+
+      // muon ID eff in selectionm
+      evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
+      
       // electron ID SF
-      evtwt *= wEmbed->function("e_id90_embed_kit_ratio")->getVal();
+      evtwt *= wEmbed->function("e_id90_kit_ratio")->getVal();
 
       // electron iso SF
-      evtwt *= wEmbed->function("e_iso_binned_embed_kit_ratio")->getVal();
-
-      // unfolding dimuon selection TODO(tmitchel): store gen info in skimmer
+      evtwt *= wEmbed->function("e_iso_kit_ratio")->getVal();
 
 
       // apply trigger SF's
-      auto single_eff = wEmbed->function("e_trg27_trg32_trg35_embed_kit_ratio")->getVal();
-      auto el_cross_eff(1.);   // TODO(tmitchel): currently being measured.
-      auto tau_cross_eff(1.);  // TODO(tmitchel): currently being measured.
-
-      // evtwt *= (single_eff * fireSingle + el_cross_eff * tau_cross_eff * fireCross);
-      evtwt *= fireSingle * single_eff;
+      auto single_eff(1.), el_leg_eff(1.), tau_leg_eff(1.);
+      if (fabs(electron.getEta()) < 1.479) {
+        // apply trigger now
+        if (!fireSingle && !fireCross) {
+          continue;
+        }
+        single_eff = wEmbed->function("e_trg27_trg32_trg35_embed_kit_ratio")->getVal();
+        el_leg_eff = wEmbed->function("e_trg_EleTau_Ele24Leg_kit_ratio_embed")->getVal();
+        tau_leg_eff = wEmbed->function("et_emb_LooseChargedIsoPFTau30_kit_ratio")->getVal();
+        evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
+      } else {
+        // don't actually apply the trigger
+        single_eff = wEmbed->function("e_trg27_trg32_trg35_kit_data")->getVal();
+        el_leg_eff = wEmbed->function("e_trg_EleTau_Ele24Leg_desy_data")->getVal();
+        if (fabs(tau.getEta()) < 2.1) {
+          tau_leg_eff = eh->getETauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
+        }
+        evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
+      }
 
       auto genweight(event.getGenWeight());
       if (genweight > 1 || genweight < 0) {
@@ -475,5 +502,6 @@ int main(int argc, char* argv[]) {
   fout->cd();
   fout->Write();
   fout->Close();
+  std::cout << std::endl;
   return 0;
 }
