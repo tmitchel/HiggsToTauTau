@@ -109,6 +109,16 @@ void tree_reader::setBranches(TTree* tree, std::string acName) {
   tree->SetBranchAddress("NN_disc_vbf", &NN_disc_vbf);
   tree->SetBranchAddress("NN_disc_boost", &NN_disc_boost);
 
+  tree->SetBranchAddress("lt_dphi", &lt_dphi);
+  tree->SetBranchAddress("MT_lepMET", &MT_lepMET);
+  tree->SetBranchAddress("MT_HiggsMET", &MT_HiggsMET);
+  tree->SetBranchAddress("hj_dphi", &hj_dphi);
+  tree->SetBranchAddress("jmet_dphi", &jmet_dphi);
+  tree->SetBranchAddress("MT_t2MET", &MT_t2MET);
+  tree->SetBranchAddress("hj_deta", &hj_deta);
+  tree->SetBranchAddress("hmet_dphi", &hmet_dphi);
+  tree->SetBranchAddress("hj_dr", &hj_dr);
+
   tree->SetBranchAddress("is_signal", &is_signal);
   tree->SetBranchAddress("is_antiLepIso", &is_antiLepIso);
   tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
@@ -188,6 +198,26 @@ Float_t tree_reader::getVar(std::string var) {
     return TMath::ACos(TMath::Cos(this->j1_phi - this->j2_phi));
   } else if (var == "m_sv") {
     return this->m_sv;
+  } else if (var == "lt_dphi") {
+    return this->lt_dphi;
+  } else if (var == "MT_lepMET") {
+    return this->MT_lepMET;
+  } else if (var == "MT_HiggsMET") {
+    return this->MT_HiggsMET;
+  } else if (var == "hj_dphi") {
+    return this->hj_dphi;
+  } else if (var == "jmet_dphi") {
+    return this->jmet_dphi;
+  } else if (var == "MT_t2MET") {
+    return this->MT_t2MET;
+  } else if (var == "hj_deta") {
+    return this->hj_deta;
+  } else if (var == "hmet_dphi") {
+    return this->hmet_dphi;
+  } else if (var == "hj_dr") {
+    return this->hj_dr;
+  } else if (var == "met") {
+    return this->met;
   }
 }
 

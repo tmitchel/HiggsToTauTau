@@ -53,17 +53,20 @@ int main(int argc, char *argv[]) {
   read_directory(dir, &files);
 
   std::map<std::string, std::vector<float>> vars = {
-    //{"m_sv", {30, 50, 180}},
-    //{"el_pt", {30, 30, 200}},
-    //{"mu_pt", {30, 30, 200}},
-    //{"t1_pt", {30, 30, 200}},
-    //{"j1_pt", {30, 30, 200}},
-    //{"j2_pt", {30, 30, 200}},
-    //{"VBF_MELA", {25, 0, 1}},
-    //{"D0_ggH", {25, 0, 1}},
-    //{"dPhijj", {25, 0, 3.14}},
-    //{"NN_disc", {25, 0, 1}}
-    {"NN_disc_vbf", {25, 0, 1}},
+    // {"m_sv", {30, 50, 180}},
+    // {"mu_pt", {30, 30, 200}},
+    // {"t1_pt", {30, 30, 200}},
+    // {"met", {30, 0, 500}},
+    // {"lt_dphi", {30, 0, 3.14}},
+    // {"higgs_pT", {30, 0, 300}},
+    // {"MT_lepMET", {30, 0, 55}},
+    // {"MT_HiggsMET", {30, 0, 300}},
+    // {"hj_dphi", {30, 0, 3.14}},
+    // {"jmet_dphi", {30, 0, 3.14}},
+    // {"MT_t2MET", {30, 0, 300}},
+    // {"hj_deta", {30, 0, 5}},
+    // {"hmet_dphi", {30, 0, 3.14}},
+    // {"hj_dr", {30, 0, 5}}
     {"NN_disc_boost", {25, 0, 1}}
   };
 
@@ -244,7 +247,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
       auto ACcat = getCategory(t.D0_ggH, t.NN_disc_vbf);
 
       if (t.is_antiTauIso) {
-        int nvar = 1;
+        int nvar = 0;
         for (auto var = t.variables.begin(); var != t.variables.end(); var++) {
           auto observable = t.getVar(var->first);
           if (cat0) {
@@ -290,7 +293,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
               }
             }
           }
-          nvar++;
+          nvar += categories.size();
         }
       }
     }

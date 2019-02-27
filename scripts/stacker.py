@@ -173,7 +173,16 @@ titles = {
     'higgs_pT': 'pT(Higgs) [GeV]',
     'VBF_MELA': 'D_{2jet}^{ggH}',
     'super': 'super',
-    'dPhijj': 'dPhijj'
+    'dPhijj': 'dPhijj',
+    'lt_dphi': 'lt_dphi',
+    "MT_lepMET": 'MT_lepMET',
+    "MT_HiggsMET": "MT_HiggsMET",
+    "hj_dphi": "hj_dphi",
+    "jmet_dphi": "jmet_dphi",
+    "MT_t2MET": "MT_t2MET",
+    "hj_deta": "hj_deta",
+    "hmet_dphi": "hmet_dphi",
+    "hj_dr": "hj_dr"
 }
 
 def formatStack(stack):
@@ -302,7 +311,9 @@ def blindData(data, signal, background):
 def main():
     fin = TFile(args.input, 'read')
     idir = fin.Get('plots/{}/{}'.format(args.var, args.cat))
+#    idir = fin.Get('plots/{}_{}'.format(args.var, args.cat))
     leg = createLegend()
+#    data = idir.Get('data_obs').Clone()
     data = idir.Get(args.var+'_data_obs').Clone()
     vbf = data.Clone()
     vbf.Reset()

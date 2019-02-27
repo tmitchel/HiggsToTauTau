@@ -10,7 +10,7 @@
 
 class tree_reader {
  public:
-  tree_reader() {}
+  tree_reader();
   explicit tree_reader(std::map<std::string, std::vector<float>>);
   void setBranches(TTree*, std::string);
   Float_t getVar(std::string);
@@ -32,7 +32,8 @@ class tree_reader {
       pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH, VBF_MELA,
       Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
       ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH,
-      higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, NN_disc, NN_disc_vbf, NN_disc_boost;
+      higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, NN_disc, NN_disc_vbf, NN_disc_boost, lt_dphi,
+      MT_lepMET, MT_HiggsMET, hj_dphi, jmet_dphi, MT_t2MET, hj_deta, hmet_dphi, hj_dr;
 
   // Anomolous coupling SetBranchAddresses
   Float_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint, wt_ggH_a1, wt_ggH_a3,
