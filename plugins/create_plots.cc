@@ -67,7 +67,8 @@ int main(int argc, char *argv[]) {
     // {"hj_deta", {30, 0, 5}},
     // {"hmet_dphi", {30, 0, 3.14}},
     // {"hj_dr", {30, 0, 5}}
-    {"NN_disc_boost", {25, 0, 1}}
+    {"NN_disc_boost", {25, 0, 1}},
+    {"higgs_pT", {30, 0, 400}}
   };
 
   // initialize histogram holder

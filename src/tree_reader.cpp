@@ -218,6 +218,8 @@ Float_t tree_reader::getVar(std::string var) {
     return this->hj_dr;
   } else if (var == "met") {
     return this->met;
+  } else if (var == "higgs_pT") {
+    return this->higgs_pT;
   }
 }
 
