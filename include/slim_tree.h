@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include "TTree.h"
+#include "TMath.h"
 #include "ditau_factory.h"
 #include "tau_factory.h"
 #include "muon_factory.h"
@@ -276,8 +277,8 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
         j1_phi = jets.at(0).getPhi();
         hj_dphi = fabs(jets.at(0).getPhi() - higgs.Phi());
         hj_deta = fabs(jets.at(0).getEta() - higgs.Eta());
-        jmet_dphi = fabs(metphi - jets.at(0).getPhi());
-        hmet_dphi = fabs(metphi - higgs.Phi());
+        jmet_dphi = TMath::ACos(TMath::Cos((metphi - jets.at(0).getPhi())));
+        hmet_dphi = (metphi - higgs.Phi());
         hj_dr = higgs.DeltaR(jets.at(0).getP4());
 
         if (njets > 1) {
@@ -287,7 +288,7 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
             hjj_pT = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).Pt();
             hjj_m = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).M();
             dEtajj = fabs(jets.at(0).getEta() - jets.at(1).getEta());
-            dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi());
+            TMath::ACos(TMath::Cos(dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi())));
         }
     }
 
