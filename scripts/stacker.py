@@ -165,7 +165,15 @@ titles = {
     'higgs_pT': 'pT(Higgs) [GeV]',
     'VBF_MELA': 'D_{2jet}^{ggH}',
     'super': 'super',
-    'dPhijj': 'dPhijj'
+    'dPhijj': 'dPhijj',
+    'MT_lepMET': 'MT_lepMET',
+    'MT_HiggsMET': 'MT_HiggsMET',
+    'MT_t2MET': 'MT_t2MET',
+    'hj_dphi': 'hj_dphi',
+    'jmet_dphi': 'jmet_dphi',
+    'hj_deta': 'hj_deta',
+    'hj_dr': 'hj_dr',
+    'hmet_dphi': 'hmet_dphi'
 }
 
 def formatStack(stack):
