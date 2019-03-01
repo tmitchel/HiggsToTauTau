@@ -216,7 +216,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       } else if (var == "super") {
         var_val = super;
       }
-      super = NN_disc;
+      // super = NN_disc;
       // D0_ggH = TMath::ACos(TMath::Cos(j1_phi - j2_phi));
 
       // find the correct MELA ggH/Higgs pT bin for this event
@@ -419,7 +419,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
       } else if (var == "super") {
         var_val = super;
       }
-      super = NN_disc;
+      // super = NN_disc;
       // D0_ggH = TMath::ACos(TMath::Cos(j1_phi - j2_phi));
 
       auto ACcat = getCategory(D0_ggH, NN_disc);
