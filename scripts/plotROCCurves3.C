@@ -42,27 +42,30 @@ TH1F* reorder(TH1F* s, TH1F* b, bool signal = true) {
   
 
 void plotROCCurves3() {
+  // gROOT->ProcessLine(".L ~/.root/CMSStyle.C");
+  // CMSstyle();
 
   TFile *file;
   TH1F* s;
   TH1F* b;
   TString names[12] = {
     "NN_disc",
-    "VBF_MELA",
+    "Dbkg_VBF",
     "mjj",
-    "m_sv"
+    //"m_sv"
   };
 
   TString labels[12] = {
     "NN Disc.",
-    "D_{bkg}^{VBF}",
+    "MELA VBF",
     "M_{jj}",
+    //"M_{#tau#tau}"
   };
   
   
-  TH2F* frame = new TH2F("frame","Di-Tau Channel",1000,0.,1,1000,0,1);
-  frame->GetXaxis()->SetTitle("eff VBF H#rightarrow#tau_{h}#tau_{h}");
-  frame->GetYaxis()->SetTitle("eff QCD");
+  TH2F* frame = new TH2F("frame","E+Tau Channel",1000,0.,1,1000,0,1);
+  frame->GetXaxis()->SetTitle("eff VBF H#rightarrowe#tau");
+  frame->GetYaxis()->SetTitle("eff ZTT+2jets");
   gStyle->SetOptStat(0);
   frame->Draw();
 
@@ -71,13 +74,11 @@ void plotROCCurves3() {
   TLegend* leg = new TLegend(0.21, 0.41, 0.41, 0.89);
   leg->SetBorderSize(0);
   
-  for(int iSample = 0; iSample != 1; ++iSample) {
-    std::cout << "plots/Quick/templates/"+names[iSample]+".root" << std::endl;
-    file = TFile::Open("plots/Quick/templates/"+names[iSample]+".root");
-    std::cout << file->GetName() << std::endl;
-    s = (TH1F*)file->Get("mt_vbf/VBF125");
-    b = (TH1F*)file->Get("mt_vbf/QCD");
-    std::cout << s->Integral() << std::endl;
+  for(int iSample = 0; iSample != 3; ++iSample) {
+
+    file = TFile::Open("../Output/templates/template_"+names[iSample]+".root");
+    s = (TH1F*)file->Get("et_vbf/VBF125");
+    b = (TH1F*)file->Get("et_vbf/ZTT");
     s->SetLineColor(kRed);
     b->SetLineColor(kBlue);
     
@@ -112,6 +113,8 @@ void plotROCCurves3() {
     }
     gr[iSample]->Draw("P");
 
+    //h_s->DrawNormalized("HISTO");
+    //h_b->DrawNormalized("HISTOSAME");
     leg->AddEntry(gr[iSample], labels[iSample], "pl");
     cout << "Done " << names[iSample] << endl;
 
@@ -120,4 +123,7 @@ void plotROCCurves3() {
   leg->Draw();
 
 }
+  
 
+
+ 

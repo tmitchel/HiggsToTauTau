@@ -18,7 +18,7 @@ class tau {
 private:
   std::string name = "tau";
   Int_t gen_match;
-  Float_t pt, eta, phi, mass, charge, px, py, pz, l2_decayMode, dmf, dmf_new, iso, gen_pt, gen_eta, gen_phi;
+  Float_t pt, eta, phi, mass, charge, px, py, pz, l2_decayMode, dmf, dmf_new, iso;
   Bool_t AgainstTightElectron, AgainstVLooseElectron, AgainstTightMuon, AgainstLooseMuon;
   Float_t VLooseIsoMVA, LooseIsoMVA, MediumIsoMVA, TightIsoMVA, VTightIsoMVA, VVTightIsoMVA;
   TLorentzVector p4;
@@ -58,9 +58,6 @@ public:
   Bool_t getAgainstTightMuon()        { return AgainstTightMuon;      };
   Bool_t getAgainstLooseMuon()        { return AgainstLooseMuon;      };
   Int_t getGenMatch()                 { return gen_match;             };
-  Float_t getGenPt()                  { return gen_pt;                };
-  Float_t getGenEta()                 { return gen_eta;               };
-  Float_t getGenPhi()                 { return gen_phi;               };
   Int_t getCharge()                   { return charge;                };
 };
 
@@ -82,7 +79,7 @@ tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) :
 class tau_factory {
 private:
   Int_t gen_match_2;
-  Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, tZTTGenPt, tZTTGenEta, tZTTGenPhi;
+  Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2;
   Float_t againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2, l2_decayMode, dmf, dmf_new;
   Float_t byVLooseIsolationMVArun2v1DBoldDMwLT_2, byLooseIsolationMVArun2v1DBoldDMwLT_2, byMediumIsolationMVArun2v1DBoldDMwLT_2,
           byTightIsolationMVArun2v1DBoldDMwLT_2, byVTightIsolationMVArun2v1DBoldDMwLT_2, byVVTightIsolationMVArun2v1DBoldDMwLT_2;
@@ -105,9 +102,6 @@ tau_factory::tau_factory(TTree* input, int year=2017) {
   input -> SetBranchAddress( "e_2",                                     &e_2                                    );
   input -> SetBranchAddress( "q_2",                                     &q_2                                    );
   input -> SetBranchAddress( "gen_match_2",                             &gen_match_2                            );
-  input -> SetBranchAddress( "tZTTGenPt",                               &tZTTGenPt                              );
-  input -> SetBranchAddress( "tZTTGenEta",                              &tZTTGenEta                             );
-  input -> SetBranchAddress( "tZTTGenPhi",                              &tZTTGenPhi                             );
   input -> SetBranchAddress( "againstElectronTightMVA6_2",              &againstElectronTightMVA6_2             );
   input -> SetBranchAddress( "againstElectronVLooseMVA6_2",             &againstElectronVLooseMVA6_2            );
   input -> SetBranchAddress( "againstMuonTight3_2",                     &againstMuonTight3_2                    );
@@ -158,9 +152,6 @@ tau tau_factory::run_factory() {
   t.VVTightIsoMVA = byVVTightIsolationMVArun2v1DBoldDMwLT_2;
   t.dmf = dmf;
   t.dmf_new = dmf_new;
-  t.gen_pt = tZTTGenPt;
-  t.gen_eta = tZTTGenEta;
-  t.gen_phi = tZTTGenPhi;
 
   return t;
 }

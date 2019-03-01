@@ -16,7 +16,7 @@ class muon {
   friend muon_factory;
  private:
   std::string name = "muon";
-  Float_t pt, eta, phi, mass, charge, px, py, pz, iso, gen_match, mediumID, gen_pt, gen_eta, gen_phi, gen_energy;
+  Float_t pt, eta, phi, mass, charge, px, py, pz, iso, gen_match, mediumID;
   TLorentzVector p4;
  public:
 
@@ -35,10 +35,6 @@ class muon {
   Float_t getPz()           { return pz;            };
   Float_t getIso()          { return iso;           };
   Float_t getGenMatch()     { return gen_match;     };
-  Float_t getGenPt()        { return gen_pt;        };
-  Float_t getGenEta()       { return gen_eta;       };
-  Float_t getGenPhi()       { return gen_phi;       };
-  Float_t getGenE()         { return gen_energy;    };
   Float_t getMediumID()     { return mediumID;      };
   Int_t getCharge()         { return charge;        };
 };
@@ -60,7 +56,7 @@ muon::muon(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) :
 /////////////////////////////////////////////
 class muon_factory {
 private:
-  Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, mediumID, mGenPt, mGenEta, mGenPhi, mGenEnergy;
+  Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, mediumID;
   Int_t gen_match_1;
 
 public:
@@ -71,21 +67,16 @@ public:
 
 // read data from tree into member variabl
 muon_factory::muon_factory(TTree* input) {
-  input -> SetBranchAddress( "px_1",          &px_1       );
-  input -> SetBranchAddress( "py_1",          &py_1       );
-  input -> SetBranchAddress( "pz_1",          &pz_1       );
-  input -> SetBranchAddress( "pt_1",          &pt_1       );
-  input -> SetBranchAddress( "eta_1",         &eta_1      );
-  input -> SetBranchAddress( "phi_1",         &phi_1      );
-  input -> SetBranchAddress( "m_1",           &m_1        );
-  input -> SetBranchAddress( "q_1",           &q_1        );
-  input -> SetBranchAddress( "iso_1",         &iso_1      );
-  input -> SetBranchAddress( "id_m_medium_1", &mediumID   );
-  input -> SetBranchAddress( "mGenPt",        &mGenPt     );
-  input -> SetBranchAddress( "mGenEta",       &mGenEta    );
-  input -> SetBranchAddress( "mGenPhi",       &mGenPhi    );
-  input -> SetBranchAddress( "mGenEnergy",    &mGenEnergy );
-  
+  input -> SetBranchAddress( "px_1",                        &px_1                       );
+  input -> SetBranchAddress( "py_1",                        &py_1                       );
+  input -> SetBranchAddress( "pz_1",                        &pz_1                       );
+  input -> SetBranchAddress( "pt_1",                        &pt_1                       );
+  input -> SetBranchAddress( "eta_1",                       &eta_1                      );
+  input -> SetBranchAddress( "phi_1",                       &phi_1                      );
+  input -> SetBranchAddress( "m_1",                         &m_1                        );
+  input -> SetBranchAddress( "q_1",                         &q_1                        );
+  input -> SetBranchAddress( "iso_1",                       &iso_1                      );
+  input -> SetBranchAddress( "id_m_medium_1",               &mediumID                   );
 }
 
 // create muon object and set member data
@@ -97,10 +88,6 @@ muon muon_factory::run_factory() {
   mu.iso = iso_1;
   mu.gen_match = gen_match_1;
   mu.mediumID = mediumID;
-  mu.gen_pt = mGenPt;
-  mu.gen_eta = mGenEta;
-  mu.gen_phi = mGenPhi;
-  mu.gen_energy = mGenEnergy;
 
   return mu;
 }
