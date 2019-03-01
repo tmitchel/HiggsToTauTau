@@ -262,8 +262,8 @@ void histHolder::histoLoop(std::vector<std::string> files, std::string dir, std:
           continue;
         }
         cat0 = (cat_0jet > 0);
-        cat1 = (njets == 1 || (njets > 1 && mjj < 300));
-        cat2 = (njets > 1 && mjj > 300);
+        cat1 = (njets == 1 || (njets > 1 && mjj < 400));
+        cat2 = (njets > 1 && mjj > 400);
       }
 
       if (var_name == "vis_mass") {
@@ -385,8 +385,8 @@ void histHolder::getJetFakes(std::vector<std::string> files, std::string dir, st
           continue;
         }
         cat0 = (cat_0jet > 0);
-        cat1 = (njets == 1 || (njets > 1 && mjj < 300));
-        cat2 = (njets > 1 && mjj > 300);
+        cat1 = (njets == 1 || (njets > 1 && mjj < 400));
+        cat2 = (njets > 1 && mjj > 400);
       }
 
       if (var_name == "t1_pt") {
