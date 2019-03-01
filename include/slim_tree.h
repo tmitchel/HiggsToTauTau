@@ -278,7 +278,7 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
         hj_dphi = fabs(jets.at(0).getPhi() - higgs.Phi());
         hj_deta = fabs(jets.at(0).getEta() - higgs.Eta());
         jmet_dphi = TMath::ACos(TMath::Cos((metphi - jets.at(0).getPhi())));
-        hmet_dphi = (metphi - higgs.Phi());
+        hmet_dphi = TMath::ACos(TMath::Cos((metphi - higgs.Phi())));
         hj_dr = higgs.DeltaR(jets.at(0).getP4());
 
         if (njets > 1) {
@@ -288,7 +288,7 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
             hjj_pT = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).Pt();
             hjj_m = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).M();
             dEtajj = fabs(jets.at(0).getEta() - jets.at(1).getEta());
-            TMath::ACos(TMath::Cos(dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi())));
+            dPhijj = TMath::ACos(TMath::Cos((jets.at(0).getPhi() - jets.at(1).getPhi())));
         }
     }
 
