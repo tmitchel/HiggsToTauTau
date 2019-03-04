@@ -36,7 +36,7 @@ class slim_tree {
         pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH, VBF_MELA,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
         ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH,
-        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, MT_lepMET, MT_t2MET, MT_HiggsMET, hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr;
+        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, MT_lepMET, MT_t2MET, MT_HiggsMET, hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr, lt_dphi;
 
     // Anomolous coupling branches
     Float_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint, wt_ggH_a1, wt_ggH_a3, wt_ggH_a3int, wt_wh_a1, wt_wh_a2, wt_wh_a3, wt_wh_L1, 
@@ -154,6 +154,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree( new TTre
     otree->Branch("hj_deta",             &hj_deta,             "hj_deta/F"            );
     otree->Branch("hmet_dphi",           &hmet_dphi,           "hmet_dphi/F"          );
     otree->Branch("hj_dr",               &hj_dr,               "hj_dr/F"              );
+    otree->Branch("lt_dphi",             &lt_dphi,             "lt_dphi/F"            );
 
     otree->Branch("is_signal",           &is_signal,           "is_signal/I"          );
     otree->Branch("is_antiLepIso",       &is_antiLepIso,       "is_antiLepIso/I"      );
@@ -423,6 +424,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
   auto met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
   MT_lepMET = sqrt(pow(el->getPt() + met_pt, 2) - pow(el->getPx() + met_x, 2) - pow(el->getPy() + met_y, 2));
   MT_t2MET = sqrt(pow(t->getPt() + met_pt, 2) - pow(t->getPx() + met_x, 2) - pow(t->getPy() + met_y, 2));
+  lt_dphi = TMath::ACos(TMath::Cos(el->getPhi() - t->getPhi()));
 
   otree->Fill();
 }
@@ -462,6 +464,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     auto met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
     MT_lepMET = sqrt(pow(mu->getPt() + met_pt, 2) - pow(mu->getPx() + met_x, 2) - pow(mu->getPy() + met_y, 2));
     MT_t2MET = sqrt(pow(t->getPt() + met_pt, 2) - pow(t->getPx() + met_x, 2) - pow(t->getPy() + met_y, 2));
+    lt_dphi = TMath::ACos(TMath::Cos(mu->getPhi() - t->getPhi()));
 
     otree->Fill();
 }
