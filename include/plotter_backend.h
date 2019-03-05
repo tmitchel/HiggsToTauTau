@@ -67,12 +67,9 @@ class HistTool {
   ~HistTool() { delete ff_weight; }
   void writeHistos();
   void writeTemplates();
-  void initVectors1d(std::string);
   void initVectors2d(std::string);
   void initSystematics(std::string);
-  void includePlots(std::vector<int>, std::string);
   void fillFraction(int, std::string, double, double, double);
-  void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double);  // 1d
   void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double, double);  // 2d
   void histoLoop(std::vector<std::string>, std::string, std::string, std::string);
   void getJetFakes(std::vector<std::string>, std::string, std::string, bool);
@@ -85,13 +82,10 @@ class HistTool {
   std::vector<std::string> categories, systematics;
   std::vector<float> mvis_bins, njets_bins;
   std::map<std::string, std::string> acNameMap;
-  std::map<std::string, std::vector<TH1F *>> hists_1d;
   std::map<std::string, std::vector<TH2F *>> hists_2d, FF_systs;
-  std::vector<TH1F *> fakes_1d;
   std::vector<TH2F *> data, fakes_2d, frac_w, frac_tt, frac_real, frac_qcd;
 
   // binning
-  std::vector<int> bins_1d;
   std::vector<Float_t> bins_l2, bins_hpt, bins_mjj, bins_lpt, bins_msv1, bins_msv2, bins_hpt2;
 };
 
@@ -112,10 +106,7 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
       bins_lpt{0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
       bins_msv1{0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300},
       bins_msv2{0, 80, 100, 115, 130, 150, 1000},
-      bins_hpt2{0, 150, 10000},
       channel_prefix(channel_prefix),
-      doNN(doNN),
-      old_selection(old),
       acNameMap{
           {"wt_ggH_a1", "JHU_GGH2Jets_sm_M125"},
           {"wt_ggH_a3", "JHU_GGH2Jets_pseudoscalar_M125"},
@@ -186,9 +177,6 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
           "ff_w_dm1_njet1_stat_down", "ff_tt_syst_up", "ff_tt_syst_down", "ff_tt_dm0_njet0_stat_up",
           "ff_tt_dm0_njet0_stat_down", "ff_tt_dm0_njet1_stat_up", "ff_tt_dm0_njet1_stat_down",
           "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down", "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"} {
-  if (doNN) {
-    // bins_mjj = {0., 0.3, 1.};
-  }
 
   // Create empty histograms for each category to fill later.
   for (auto cat : categories) {
@@ -231,56 +219,6 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
   }
   ff_weight = reinterpret_cast<FakeFactor *>(ff_file->Get("ff_comb"));
   ff_file->Close();
-}
-
-void HistTool::includePlots(std::vector<int> bins_1d, std::string var) {
-  if (bins_1d.size() < 3) {
-    std::cerr << "Must give more than 3 bin arguments for plotting" << std::endl;
-  }
-  this->var = var;
-  this->bins_1d = bins_1d;
-  fout->cd();
-  fout->mkdir("plots");
-  fout->cd();
-
-  for (auto cat : categories) {
-    // add histograms for holding plots
-    hists_1d[cat.c_str()] = std::vector<TH1F *>();
-    if (cat.find("0jet") != std::string::npos) {
-      fakes_1d.push_back(new TH1F((var+"fake_0jet").c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
-    } else if (cat.find("boosted") != std::string::npos) {
-      fakes_1d.push_back(new TH1F((var+"fake_boosted").c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
-    } else {
-      fakes_1d.push_back(new TH1F((var+"fake_" + cat).c_str(), "fake_SS", bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
-    }
-
-    // make a plots directory to store the plots
-
-    if (bins_1d.size() > 0) {
-      fout->cd();
-      fout->mkdir(("plots/" + var + "_" + cat).c_str());
-      std::cout << "Making... " << "plots/" + var + "_" + cat << std::endl;
-      fout->cd();
-    }
-  }
-}
-
-// change to the correct output directory then create a new TH2F that will be filled for the current input file
-void HistTool::initVectors1d(std::string name) {
-  fout->cd();
-  for (auto key : hists_1d) {
-    fout->cd(("plots/"+var+"_"+key.first).c_str());
-    if (name.find("Data") != std::string::npos) {
-      name = "data_obs";
-    }
-    if (key.first == channel_prefix + "_0jet") {
-      hists_1d.at((key.first).c_str()).push_back(new TH1F((name).c_str(), name.c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
-    } else if (key.first == channel_prefix + "_boosted") {
-      hists_1d.at((key.first).c_str()).push_back(new TH1F((name).c_str(), name.c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
-    } else if (key.first.find("_vbf") != std::string::npos) {
-      hists_1d.at((key.first).c_str()).push_back(new TH1F((name).c_str(), name.c_str(), bins_1d.at(0), bins_1d.at(1), bins_1d.at(2)));
-    }
-  }
 }
 
 // change to the correct output directory then create a new TH2F that will be filled for the current input file
@@ -344,20 +282,6 @@ void HistTool::convertDataToFake(Categories cat, std::string name, double var1, 
   }
 }
 
-void HistTool::convertDataToFake(Categories cat, std::string name, double var1, double vis_mass, double njets, double t1_pt, double t1_decayMode, double mt, double lep_iso, double weight) {
-  if (bins_1d.size() > 2) {
-    auto bin_x = data.at(cat)->GetXaxis()->FindBin(vis_mass);
-    auto bin_y = data.at(cat)->GetYaxis()->FindBin(njets);
-    auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                        frac_w.at(cat)->GetBinContent(bin_x, bin_y),
-                                        frac_tt.at(cat)->GetBinContent(bin_x, bin_y),
-                                        frac_qcd.at(cat)->GetBinContent(bin_x, bin_y)});
-    if (name.find("Data") != std::string::npos) {
-      fakes_1d.at(cat)->Fill(var1, weight * fakeweight);
-    }
-  }
-}
-
 // write output histograms including the QCD histograms after scaling by OS/SS ratio
 void HistTool::writeTemplates() {
   for (auto cat : hists_2d) {
@@ -395,46 +319,9 @@ void HistTool::writeTemplates() {
   }
 }
 
-void HistTool::writeHistos() {
-  for (auto cat : hists_1d) {
-    fout->cd(("plots/"+var+"_"+cat.first).c_str());
-    for (auto hist : cat.second) {
-      hist->Write();
-    }
-  }
-  for (auto cat = 0; cat < fakes_1d.size(); cat++) {
-    fout->cd(("plots/"+var+"_"+categories.at(cat)).c_str());
-    auto fake_hist = fakes_1d.at(cat);
-    fake_hist->SetName("jetFakes");
-
-    // if fake yield is negative, make it zero
-    for (auto i = 0; i < fake_hist->GetNbinsX(); i++) {
-      for (auto j = 0; j < fake_hist->GetNbinsY(); j++) {
-        if (fake_hist->GetBinContent(i, j) < 0) {
-          fake_hist->SetBinContent(i, j, 0);
-        }
-      }
-    }
-    fake_hist->Write();
-
-    for (auto &hist : FF_systs.at(categories.at(cat))) {
-      for (auto i = 0; i < hist->GetNbinsX(); i++) {
-        for (auto j = 0; j < hist->GetNbinsY(); j++) {
-          if (hist->GetBinContent(i, j) < 0) {
-            hist->SetBinContent(i, j, 0);
-          }
-        }
-      }
-      hist->Write();
-    }
-  }
-
-  fout->Close();
-}
-
 // basically a map from 2 inputs -> 1 Category
 Categories HistTool::getCategory(double D0_ggH, double nn) {
-  double edge = 1./6.;
+  double edge = 1./6;
   // double edge = 3.14/6.;
   // if (nn < 150) {
   if (nn < 0.5) {

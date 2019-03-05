@@ -108,7 +108,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
     tree->SetBranchAddress("t1_pt", &t1_pt);
     tree->SetBranchAddress("VBF_MELA", &VBF_MELA);
     tree->SetBranchAddress("dPhijj", &dPhijj);
-    tree->SetBranchAddress("NN_disc", &NN_disc);
+    tree->SetBranchAddress("NN_disc_vbf", &NN_disc);
 
     if (acWeight != "None") {
       tree->SetBranchAddress(acWeight.c_str(), &acWeightVal);
@@ -142,12 +142,10 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
 
       // fill histograms
       if (is_signal) {
-        vector<Categories> passing;
         if (cat0) {
           hists_2d.at(categories.at(zeroJet)).back()->Fill(t1_decayMode, vis_mass, weight);
         } else if (cat1) {
           hists_2d.at(categories.at(boosted)).back()->Fill(higgs_pT, m_sv, weight);
-          passing.push_back(boosted);
         } else if (cat2) {
           hists_2d.at(categories.at(vbf)).back()->Fill(observable, m_sv, weight);
           hists_2d.at(categories.at(ACcat)).back()->Fill(observable, m_sv, weight);
@@ -245,7 +243,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
     tree->SetBranchAddress("OS", &OS);
     tree->SetBranchAddress("VBF_MELA", &VBF_MELA);
     tree->SetBranchAddress("dPhijj", &dPhijj);
-    tree->SetBranchAddress("NN_disc", &NN_disc);
+    tree->SetBranchAddress("NN_disc_vbf", &NN_disc);
 
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
