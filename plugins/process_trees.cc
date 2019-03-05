@@ -125,6 +125,9 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
 
       // choose observables
       observable = VBF_MELA;
+      // observable = mjj;
+      // D0_ggH = dPhijj;
+      // NN_disc = higgs_pT;
 
       // pick either old 2016 selection or optimized one
       if (nbjets > 0) {
@@ -254,6 +257,9 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
 
       // choose observables
       observable = VBF_MELA;
+      // observable = mjj;
+      // D0_ggH = dPhijj;
+      // NN_disc = higgs_pT;
 
       if (nbjets > 0) {
         continue;
