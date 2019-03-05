@@ -101,8 +101,8 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
       bins_msv1{0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300},
       // bins_msv2{0, 80, 100, 115, 130, 150, 1000},
       // bins_msv2{-5, -1.25, -0.75, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2., 3.},  // Fisher Disc
-      bins_msv2{0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5,  0.6, 0.65, 0.7, 0.8},  // Perceptron
-      // bins_msv2{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.95, 1.},  // NN including m_sv
+      // bins_msv2{0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5,  0.6, 0.65, 0.7, 0.8},  // Perceptron
+      bins_msv2{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.95, 1.},  // NN including m_sv
       bins_hpt2{0, 150, 10000},
       channel_prefix(channel_prefix),
       doNN(doNN),
@@ -189,9 +189,6 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
           "ff_w_dm1_njet1_stat_down", "ff_tt_syst_up", "ff_tt_syst_down", "ff_tt_dm0_njet0_stat_up",
           "ff_tt_dm0_njet0_stat_down", "ff_tt_dm0_njet1_stat_up", "ff_tt_dm0_njet1_stat_down",
           "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down", "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"} {
-  if (doNN) {
-    bins_mjj = {0., 0.3, 1.};
-  }
 
   // Create empty histograms for each category to fill later.
   for (auto cat : categories) {
@@ -437,20 +434,20 @@ void HistTool::writeHistos() {
 
 // basically a map from 2 inputs -> 1 Category
 Categories HistTool::getCategory(double D0_ggH, double nn) {
-//  double edge = 3.14/6.;
-//  if (D0_ggH > 0 && D0_ggH <= 1.*edge) {
-//    return vbf_ggHMELA_bin1_NN_bin1;
-//  } else if (D0_ggH <= 2.*edge) {
-//    return vbf_ggHMELA_bin2_NN_bin1;
-//  } else if (D0_ggH <= 3.*edge) {
-//    return vbf_ggHMELA_bin3_NN_bin1;
-//  } else if (D0_ggH <= 4.*edge) {
-//    return vbf_ggHMELA_bin4_NN_bin1;
-//  } else if (D0_ggH <= 5.*edge) {
-//    return vbf_ggHMELA_bin5_NN_bin1;
-//  } else if (D0_ggH <= 6.*edge) {
-//    return vbf_ggHMELA_bin6_NN_bin1;
-//  } 
+  double edge = 1./6.;
+  if (D0_ggH > 0 && D0_ggH <= 1.*edge) {
+    return vbf_ggHMELA_bin1_NN_bin1;
+  } else if (D0_ggH <= 2.*edge) {
+    return vbf_ggHMELA_bin2_NN_bin1;
+  } else if (D0_ggH <= 3.*edge) {
+    return vbf_ggHMELA_bin3_NN_bin1;
+  } else if (D0_ggH <= 4.*edge) {
+    return vbf_ggHMELA_bin4_NN_bin1;
+  } else if (D0_ggH <= 5.*edge) {
+    return vbf_ggHMELA_bin5_NN_bin1;
+  } else if (D0_ggH <= 6.*edge) {
+    return vbf_ggHMELA_bin6_NN_bin1;
+  } 
 
 //  double edge = 3.14/12.;
 //  if (D0_ggH > 0 && D0_ggH <= 1.*edge) {
@@ -478,45 +475,4 @@ Categories HistTool::getCategory(double D0_ggH, double nn) {
 //  } else if (D0_ggH <= 12.*edge) {
 //    return vbf_ggHMELA_bin12_NN_bin1;
 //  }
-
-  
-  if (D0_ggH > 0 && D0_ggH <= 1./6) {
-    return vbf_ggHMELA_bin1_NN_bin1;
-  } else if (D0_ggH <= 2./6) {
-    return vbf_ggHMELA_bin2_NN_bin1;
-  } else if (D0_ggH <= 3./6) {
-    return vbf_ggHMELA_bin3_NN_bin1;
-  } else if (D0_ggH <= 4./6) {
-    return vbf_ggHMELA_bin4_NN_bin1;
-  } else if (D0_ggH <= 5./6) {
-    return vbf_ggHMELA_bin5_NN_bin1;
-  } else if (D0_ggH <= 6./6) {
-    return vbf_ggHMELA_bin6_NN_bin1;
-  } 
-
-//   if (D0_ggH > 0 && D0_ggH <= 1./13) {
-//     return vbf_ggHMELA_bin1_NN_bin1;
-//   } else if (D0_ggH <= 2./13) {
-//     return vbf_ggHMELA_bin2_NN_bin1;
-//   } else if (D0_ggH <= 3./13) {
-//     return vbf_ggHMELA_bin3_NN_bin1;
-//   } else if (D0_ggH <= 4./13) {
-//     return vbf_ggHMELA_bin4_NN_bin1;
-//   } else if (D0_ggH <= 5./13) {
-//     return vbf_ggHMELA_bin5_NN_bin1;
-//   } else if (D0_ggH <= 6./13) {
-//     return vbf_ggHMELA_bin6_NN_bin1;
-//   } else if (D0_ggH <= 7./13) {
-//     return vbf_ggHMELA_bin7_NN_bin1;
-//   } else if (D0_ggH <= 8./13) {
-//     return vbf_ggHMELA_bin8_NN_bin1;
-//   } else if (D0_ggH <= 9./13) {
-//     return vbf_ggHMELA_bin9_NN_bin1;
-//   } else if (D0_ggH <= 10./13) {
-//     return vbf_ggHMELA_bin10_NN_bin1;
-//   } else if (D0_ggH <= 11./13) {
-//     return vbf_ggHMELA_bin11_NN_bin1;
-//   } else if (D0_ggH <= 13./13) {
-//     return vbf_ggHMELA_bin12_NN_bin1;
-//   }
 }
