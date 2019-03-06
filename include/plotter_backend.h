@@ -93,8 +93,8 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
       // x-axis
       bins_l2{0, 1, 10, 11},
       bins_hpt{0, 100, 150, 200, 250, 300, 5000},
-      // bins_mjj{300, 500, 10000},
-      bins_mjj{0, 0.5, 1.},
+      // bins_mjj{300, 500, 10000},  // real mjj
+      bins_mjj{0, 0.5, 1.},  // actually VBF MELA
 
       // y-axis
       bins_lpt{0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
@@ -169,19 +169,7 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
           channel_prefix + "_vbf_ggHMELA_bin9_NN_bin2",
           channel_prefix + "_vbf_ggHMELA_bin10_NN_bin2",
           channel_prefix + "_vbf_ggHMELA_bin11_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin1_NN_bin3",
-          channel_prefix + "_vbf_ggHMELA_bin2_NN_bin3",
-          channel_prefix + "_vbf_ggHMELA_bin3_NN_bin3",
-          channel_prefix + "_vbf_ggHMELA_bin4_NN_bin3",
-          channel_prefix + "_vbf_ggHMELA_bin5_NN_bin3",
-          channel_prefix + "_vbf_ggHMELA_bin6_NN_bin3",
-          channel_prefix + "_vbf_ggHMELA_bin7_NN_bin3",
-          channel_prefix + "_vbf_ggHMELA_bin8_NN_bin3",
-          channel_prefix + "_vbf_ggHMELA_bin9_NN_bin3",
-          channel_prefix + "_vbf_ggHMELA_bin10_NN_bin3",
-          channel_prefix + "_vbf_ggHMELA_bin11_NN_bin3",
-          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin3"},
+          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2",},
       systematics{
           "ff_qcd_syst_up", "ff_qcd_syst_down", "ff_qcd_dm0_njet0_stat_up",
           "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down",

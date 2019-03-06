@@ -20,7 +20,7 @@ parser.add_argument('--year', '-y', action='store',
                     )
 parser.add_argument('--dir', '-d', action='store',
                     dest='in_dir', default='',
-                    help='input directory starting after ../Output/templates/'
+                    help='input directory'
                     )
 parser.add_argument('--prefix', '-p', action='store',
                     dest='prefix', default='test',
@@ -60,7 +60,7 @@ def applyStyle(name, hist, leg):
     elif name == 'jetFakes':
         hist.SetFillColor(TColor.GetColor("#ffccff"))
         hist.SetName('jet fakes')
-    elif name == 'Data':
+    elif name == 'data_obs':
         hist.SetLineColor(kBlack)
         hist.SetMarkerStyle(8)
         overlay = 1
@@ -115,45 +115,6 @@ def formatStat(stat):
     return stat
 
 
-titles = {
-    'el_pt': 'Electron p_{T} [GeV]',
-    'mu_pt': 'Muon p_{T} [GeV]',
-    't1_pt': 'Tau p_{T} [GeV]',
-    'el_eta': 'Electron Eta [GeV]',
-    'mu_eta': 'Muon Eta [GeV]',
-    't1_eta': 'Tau Eta [GeV]',
-    'el_phi': 'Electron Phi [GeV]',
-    'mu_phi': 'Muon Phi [GeV]',
-    't1_phi': 'Tau Phi [GeV]',
-    't1_iso': 'Tau Isolation',
-    'mt' : 'M_{T} [GeV]',
-    'vis_mass': 'M_{vis} [GeV]',
-    'met': 'Missing E_{T} [GeV]',
-    'metphi' : 'Missing E_{T} #Phi [GeV]',
-    'pt_sv': 'SVFit p_{T} [GeV]',
-    'm_sv': 'SVFit Mass [GeV]',
-    'mjj': 'Dijet Mass [GeV]',
-    'Dbkg_VBF': 'MELA VBF Disc',
-    'Dbkg_ggH': 'MELA ggH Disc',
-    'NN_disc': 'NN Disc.',
-    'Q2V1': 'Q^{2} V1 [GeV]',
-    'Q2V2': 'Q^{2} V2 [GeV]',
-    'Phi': '#phi',
-    'Phi1': '#phi_{1}',
-    'costheta1': 'Cos(#theta_{1})',
-    'costheta2': 'Cos(#theta_{2})',
-    'costhetastar': 'Cos(#theta*)',
-    'nbjets': 'N(b-jets)',
-    'nn_vbf_full': 'NN Disc.',
-    'dPhi': '#Delta#phi',
-    'njets': 'N(jets)',
-    'j1_eta': 'Lead Jet Eta',
-    'j2_eta': 'Sub-Lead Jet Eta',
-    'j1_pt': 'Lead Jet p_{T} [GeV]',
-    'j2_pt': 'Sub-Lead Jet p_{T} [GeV]',
-    'hjj_pT': 'pT(Higgs,j1,j2) [GeV]'
-}
-
 def formatStack(stack):
     stack.GetXaxis().SetLabelSize(0)
     stack.GetYaxis().SetTitle('Events / Bin')
@@ -199,7 +160,7 @@ def formatPull(pull):
     pull.SetTitle('')
     pull.SetMaximum(2)
     pull.SetMinimum(0)
-    pull.GetXaxis().SetTitle(titles[args.var])
+    pull.GetXaxis().SetTitle('Unrolled')
     pull.SetMarkerStyle(21)
     pull.GetXaxis().SetTitleSize(0.18)
     pull.GetXaxis().SetTitleOffset(0.8)
@@ -276,10 +237,10 @@ def blindData(data, signal, background):
     return data
 
 def main():
-    fin = TFile('Output/templates/{}/template_{}_{}_ff{}.root'.format(args.in_dir, args.channel, args.var, args.year), 'read')
+    fin = TFile(args.in_dir, 'read')
     idir = fin.Get(args.cat)
     leg = createLegend()
-    data = idir.Get('Data').Clone()
+    data = idir.Get('data_obs').Clone()
     vbf = data.Clone()
     vbf.Reset()
     ggh = vbf.Clone()
@@ -402,7 +363,7 @@ def main():
     line1.Draw()
     line2.Draw()
 
-    can.SaveAs('Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat, args.year))
+    can.SaveAs('Output/plots/{}_{}_{}.pdf'.format(args.prefix, args.cat, args.year))
 
 
 if __name__ == "__main__":
