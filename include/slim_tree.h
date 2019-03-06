@@ -276,10 +276,10 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
         j1_pt = jets.at(0).getPt();
         j1_eta = jets.at(0).getEta();
         j1_phi = jets.at(0).getPhi();
-        hj_dphi = fabs(jets.at(0).getPhi() - higgs.Phi());
+        hj_dphi = TMath::ACos(TMath::Cos(jets.at(0).getPhi() - higgs.Phi()));
         hj_deta = fabs(jets.at(0).getEta() - higgs.Eta());
-        jmet_dphi = TMath::ACos(TMath::Cos((metphi - jets.at(0).getPhi())));
-        hmet_dphi = TMath::ACos(TMath::Cos((metphi - higgs.Phi())));
+        jmet_dphi = TMath::ACos(TMath::Cos(fmet->getMetPhi() - jets.at(0).getPhi()));
+        hmet_dphi = TMath::ACos(TMath::Cos(fmet->getMetPhi() - higgs.Phi()));
         hj_dr = higgs.DeltaR(jets.at(0).getP4());
 
         if (njets > 1) {

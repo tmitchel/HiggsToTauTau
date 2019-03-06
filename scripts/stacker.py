@@ -37,6 +37,7 @@ gROOT.SetBatch(kTRUE)
 
 def applyStyle(name, hist, leg):
     overlay = 0
+    name = name.replace(args.var+'_', '')
     print name, hist.Integral()
     if name == 'embedded':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
@@ -77,12 +78,20 @@ def applyStyle(name, hist, leg):
         overlay = 9
     elif name == 'VBF125':
         overlay = -2
-    elif name == 'GGH2Jets_sm_M125':
+    elif name == 'GGH2Jets_sm_M125' and 'vbf' in args.cat:
+        hist.SetFillColor(0)
+        hist.SetLineWidth(3)
+        hist.SetLineColor(TColor.GetColor('#0000FF'))
+        overlay = 3
+    elif name == 'ggh_madgraph' and 'boosted' in args.cat:
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#0000FF'))
         overlay = 3
     elif name == 'ggH125':
+        hist.SetFillColor(0)
+        hist.SetLineWidth(3)
+        hist.SetLineColor(TColor.GetColor('#0000FF'))
         overlay = -3
     else:
         return None, -1, leg
@@ -99,7 +108,7 @@ def createCanvas():
     pad1.SetPad(0, .3, 1, 1)
     pad1.SetTopMargin(.1)
     pad1.SetBottomMargin(0.02)
-#    pad1.SetLogy()
+    #pad1.SetLogy()
     pad1.SetTickx(1)
     pad1.SetTicky(1)
 
@@ -146,6 +155,8 @@ titles = {
     'Dbkg_VBF': 'MELA VBF Disc',
     'Dbkg_ggH': 'MELA ggH Disc',
     'NN_disc': 'D_{NN}^{VBF}',
+    'NN_disc_vbf': 'D_{NN}^{VBF}',
+    'NN_disc_boost': 'D_{NN}^{VBF}',
     'Q2V1': 'Q^{2} V1 [GeV]',
     'Q2V2': 'Q^{2} V2 [GeV]',
     'Phi': '#phi',
@@ -166,14 +177,15 @@ titles = {
     'VBF_MELA': 'D_{2jet}^{ggH}',
     'super': 'super',
     'dPhijj': 'dPhijj',
-    'MT_lepMET': 'MT_lepMET',
-    'MT_HiggsMET': 'MT_HiggsMET',
-    'MT_t2MET': 'MT_t2MET',
-    'hj_dphi': 'hj_dphi',
-    'jmet_dphi': 'jmet_dphi',
-    'hj_deta': 'hj_deta',
-    'hj_dr': 'hj_dr',
-    'hmet_dphi': 'hmet_dphi'
+    'lt_dphi': 'lt_dphi',
+    "MT_lepMET": 'MT_lepMET',
+    "MT_HiggsMET": "MT_HiggsMET",
+    "hj_dphi": "hj_dphi",
+    "jmet_dphi": "jmet_dphi",
+    "MT_t2MET": "MT_t2MET",
+    "hj_deta": "hj_deta",
+    "hmet_dphi": "hmet_dphi",
+    "hj_dr": "hj_dr"
 }
 
 def formatStack(stack):
@@ -301,9 +313,11 @@ def blindData(data, signal, background):
 
 def main():
     fin = TFile(args.input, 'read')
-    idir = fin.Get('plots/{}_{}'.format(args.var, args.cat))
+    idir = fin.Get('plots/{}/{}'.format(args.var, args.cat))
+#    idir = fin.Get('plots/{}_{}'.format(args.var, args.cat))
     leg = createLegend()
-    data = idir.Get('data_obs').Clone()
+#    data = idir.Get('data_obs').Clone()
+    data = idir.Get(args.var+'_data_obs').Clone()
     vbf = data.Clone()
     vbf.Reset()
     ggh = vbf.Clone()

@@ -140,8 +140,8 @@ def formatOther(other, holder):
 def fillStackAndLegend(data, vbf, ggh, holder, leg):
     stack = THStack()
     leg.AddEntry(data, 'Data', 'lep')
-    leg.AddEntry(vbf, 'VBF Higgs(125)x50', 'l')
-    leg.AddEntry(ggh, 'ggH Higgs(125)x50', 'l')
+    leg.AddEntry(vbf, 'VBF Higgs(125)x100', 'l')
+    leg.AddEntry(ggh, 'ggH Higgs(125)x100', 'l')
     leg.AddEntry(filter(lambda x: x.GetName() == 'ZTT', holder)[0], 'ZTT', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'ZL', holder)[0], 'ZL', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'jet fakes', holder)[0], 'jetFakes', 'f')
@@ -292,9 +292,9 @@ def main():
     formatStack(stack)
     data.Draw('same lep')
     stat.Draw('same e2')
-    vbf.Scale(50)
+    vbf.Scale(100)
     vbf.Draw('same hist e')
-    ggh.Scale(50)
+    ggh.Scale(100)
     ggh.Draw('same hist e')
     leg.Draw()
 
