@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
   htt_sf_file.Close();
 
   // embedded sample weights
-  TFile embed_file("data/htt_scalefactors_v17_5.root", "READ");
+  TFile embed_file("data/htt_scalefactors_v17_6.root", "READ");
   RooWorkspace *wEmbed = reinterpret_cast<RooWorkspace *>(embed_file.Get("w"));
   embed_file.Close();
 
@@ -180,10 +180,13 @@ int main(int argc, char* argv[]) {
 
   // begin the event loop
   Int_t nevts = ntuple->GetEntries();
+  int progress(0), fraction((nevts-1)/10);
   for (Int_t i = 0; i < nevts; i++) {
     ntuple->GetEntry(i);
-    if (i % 100000 == 0)
-      std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
+    if (i == progress * fraction) {
+      std::cout << "\tProcessing: " << progress*10 << "% complete.\r" << std::flush;
+      progress++;
+    }
 
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
     Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
@@ -243,10 +246,6 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
-    if (muon.getPt() < 28) {
-      continue;
-    }
-
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
       continue;
@@ -280,15 +279,15 @@ int main(int argc, char* argv[]) {
         // else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
       } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
         if (fabs(tau.getEta()) < 0.4)
-          evtwt *= 1.06;
+          evtwt *= 1.17;
         else if (fabs(tau.getEta()) < 0.8)
-          evtwt *= 1.02;
+          evtwt *= 1.29;
         else if (fabs(tau.getEta()) < 1.2)
-          evtwt *= 1.10;
+          evtwt *= 1.14;
         else if (fabs(tau.getEta()) < 1.7)
-          evtwt *= 1.03;
+          evtwt *= 0.93;
         else
-          evtwt *= 1.94;
+          evtwt *= 1.61;
       }
 
       // pileup reweighting
@@ -307,7 +306,6 @@ int main(int argc, char* argv[]) {
 
       // muon ID SF
       evtwt *= htt_sf->function("m_id_kit_ratio")->getVal();
-
       // muon Iso SF
       evtwt *= htt_sf->function("m_iso_kit_ratio")->getVal();
 
@@ -354,8 +352,20 @@ int main(int argc, char* argv[]) {
       }
 
       // set workspace variables
+      wEmbed->var("t_pt")->setVal(tau.getPt());
       wEmbed->var("m_pt")->setVal(muon.getPt());
       wEmbed->var("m_eta")->setVal(muon.getEta());
+      wEmbed->var("m_iso")->setVal(muon.getIso());
+      wEmbed->var("gt1_pt")->setVal(muon.getGenPt());
+      wEmbed->var("gt1_eta")->setVal(muon.getGenEta());
+      wEmbed->var("gt2_pt")->setVal(tau.getGenPt());
+      wEmbed->var("gt2_eta")->setVal(tau.getGenEta());
+
+      // double muon trigger eff in selection
+      evtwt *= wEmbed->function("m_sel_trg_ratio")->getVal();
+
+      // muon ID eff in selectionm
+      evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
 
       // muon ID SF
       evtwt *= wEmbed->function("m_id_embed_kit_ratio")->getVal();
@@ -363,13 +373,10 @@ int main(int argc, char* argv[]) {
       // muon iso SF
       evtwt *= wEmbed->function("m_iso_binned_embed_kit_ratio")->getVal();
 
-      // unfolding dimuon selection TODO(tmitchel): store gen info in skimmer.
-
-
       // apply trigger SF's
       auto single_eff = wEmbed->function("m_trg24_27_embed_kit_ratio")->getVal();
-      auto mu_cross_eff(1.);   // TODO(tmitchel): currently being measured.
-      auto tau_cross_eff(1.);  // TODO(tmitchel): currently being measured.
+      auto mu_cross_eff = wEmbed->function("m_trg_MuTau_Mu20Leg_kit_ratio_embed")->getVal();
+      auto tau_cross_eff = wEmbed->function("mt_emb_LooseChargedIsoPFTau27_kit_ratio")->getVal();  // TODO(tmitchel): currently being measured.
 
       evtwt *= (single_eff * fireSingle + mu_cross_eff * tau_cross_eff * fireCross);
 
@@ -459,5 +466,6 @@ int main(int argc, char* argv[]) {
   fout->cd();
   fout->Write();
   fout->Close();
+  std::cout << std::endl;
   return 0;
 }

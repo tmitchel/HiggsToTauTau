@@ -289,7 +289,7 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
             hjj_pT = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).Pt();
             hjj_m = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).M();
             dEtajj = fabs(jets.at(0).getEta() - jets.at(1).getEta());
-            dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi());
+            dPhijj = TMath::ACos(TMath::Cos((jets.at(0).getPhi() - jets.at(1).getPhi())));
         }
     }
 
