@@ -133,7 +133,7 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       // vbf_var3 = dPhijj;
       // vbf_var3 = TMath::ACos(TMath::Cos(j1_phi - j2_phi));
 
-      // event selection 
+      // event selection
       if (nbjets > 0) {
         continue;
       }
