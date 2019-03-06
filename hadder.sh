@@ -21,16 +21,12 @@ hadd ${2}/WH125.root ${2}/WPlus* ${2}/WMinus*
 
 hadd -f ${2}/VBF125.root ${2}/VBF*.root
 hadd -f ${2}/ZH125.root ${2}/ZH*.root
-hadd ${2}/ggH125.root ${2}/ggHto*
+hadd ${2}/ggH125.root ${2}/ggH*
 
 hadd ${2}/ggh_inc.root ${2}/ggh_*
 hadd ${2}/vbf_inc.root ${2}/vbf_*
 hadd ${2}/wh_inc.root ${2}/wh_*
 hadd ${2}/zh_inc.root ${2}/zh_*
-
-hadd ${2}/ggh_madgraph_twojet.root ${2}/ggH_TwoJet_madgraph_ggH125_output.root
-hadd ${2}/ggh_madgraph_PS_twojet.root ${2}/ggH_PS_TwoJet_madgraph_ggH125_output.root
-hadd ${2}/ggh_madgraph_Maxmix_twojet.root ${2}/ggH_Maxmix_TwoJet_madgraph_ggH125_output.root
 
 mkdir ${2}/originals
 mv ${2}/*output*.root ${2}/originals

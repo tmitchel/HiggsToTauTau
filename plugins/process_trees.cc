@@ -140,9 +140,6 @@ void HistTool::histoLoop(vector<string> files, string dir, string tree_name, str
       cat2 = (njets > 1 && mjj > 300);
 
 
-      // find the correct MELA ggH/Higgs pT bin for this event
-      auto ACcat = getCategory(D0_ggH, NN_disc);
-
       // fill histograms
       if (is_signal) {
         if (cat0) {
@@ -270,8 +267,6 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
       cat0 = (cat_0jet > 0);
       cat1 = (njets == 1 || (njets > 1 && mjj < 300));
       cat2 = (njets > 1 && mjj > 300);
-
-      auto ACcat = getCategory(D0_ggH, NN_disc);
 
       if (is_antiTauIso) {
         if (cat0) {
