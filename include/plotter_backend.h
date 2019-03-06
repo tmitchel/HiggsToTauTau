@@ -102,7 +102,10 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
       // bins_msv2{0, 80, 100, 115, 130, 150, 1000},
       // bins_msv2{-5, -1.25, -0.75, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2., 3.},  // Fisher Disc
       // bins_msv2{0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5,  0.6, 0.65, 0.7, 0.8},  // Perceptron
-      bins_msv2{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.95, 1.},  // NN including m_sv
+      // bins_msv2{0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 1.},  // NN including m_sv et2016/mt2017
+      // bins_msv2{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.95, 1.}, // mt2016
+      bins_msv2{0, 0.05, 0.1, 0.15, 0.18, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.},  // NN including m_sv et2017
+
       bins_hpt2{0, 150, 10000},
       channel_prefix(channel_prefix),
       doNN(doNN),
