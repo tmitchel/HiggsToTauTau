@@ -108,7 +108,7 @@ def createCanvas():
     pad1.SetPad(0, .3, 1, 1)
     pad1.SetTopMargin(.1)
     pad1.SetBottomMargin(0.02)
-    #pad1.SetLogy()
+    pad1.SetLogy()
     pad1.SetTickx(1)
     pad1.SetTicky(1)
 
