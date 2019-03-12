@@ -56,8 +56,10 @@ else:
     fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile]
 
 systs_2016 = [
-    'dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down', 'jetToTauFake_Up', 'jetToTauFake_Down', 'ttbarShape_Up', 'ttbarShape_Down',
-    'allDM_Up', 'allDM_Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down', 'JESUp', 'JESDown'
+    '', 'dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down', 'jetToTauFake_Up', 'jetToTauFake_Down', 'ttbarShape_Up', 'ttbarShape_Down', # in analyzer
+    'vbfMass_JetTotalUp', 'vbfMass_JetTotalUp', 'jetVeto30_JetTotalUp', 'jetVeto30_JetTotalUp', # JEC from FSA ntuples
+    'Up', 'Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', # tau energy scale from SVFit
+    'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down' # MET corrections from SVFit/FSA
 ]
 
 systs_2017 = [
@@ -65,6 +67,7 @@ systs_2017 = [
     'JetEta3to5Up', 'JetRelativeSampleDown', 'JetRelativeSampleUp', 'JetRelativeBalDown', 'JetRelativeBalUp',
     'UESDown', 'UESUp'
 ]
+
 systs = ['', 'met_UESUp', 'met_UESDown', 'met_JESUp', 'met_JESDown', 'metphi_UESUp', 'metphi_UESDown', 'metphi_JESUp', 'metphi_JESDown', 'mjj_JESUp', 'mjj_JESDown']
 
 for ifile in fileList:
@@ -132,6 +135,8 @@ for ifile in fileList:
     if options.syst and not 'Data' in sample:
         for isyst in systs:
             for name in names:
+                if ('DM' in isyst or isyst == 'Up' or isyst == 'Down') and not ('ZL' in name or 'ZJ' in name):
+                    continue
                 tocall = callstring + ' -n %s -u %s' % (name, isyst)
                 call(tocall, shell=True)
     else:

@@ -29,14 +29,23 @@ class met_factory {
 
 // initialize member data and set TLorentzVector
 met_factory::met_factory(TTree* input, std::string syst) {
-  auto met_name("met"), metphi_name("metphi");
-  if (syst.find(metphi_name) != std::string::npos) {
-    metphi_name = syst.c_str();
-  } else if (syst.find(met_name) != std::string::npos) {
-    met_name = syst.c_str();
+  std::string met_name("met"), metphi_name("metphi");
+  if (syst == "UncMet_Up") {
+    met_name += "_UESUp";
+    metphi_name += "_UESUp";
+  } else if (syst == "UncMet_Down") {
+    met_name += "_UESDown";
+    metphi_name += "_UESDown";
+  } else if (syst == "ClusteredMet_Up") {
+    met_name += "_JESUp";
+    metphi_name += "_JESUp";
+  } else if (syst == "ClusteredMet_Down") {
+    met_name += "_JESDown";
+    metphi_name += "_JESDown";
   }
-  input->SetBranchAddress(met_name, &met);
-  input->SetBranchAddress(metphi_name, &metphi);
+
+  input->SetBranchAddress(met_name.c_str(), &met);
+  input->SetBranchAddress(metphi_name.c_str(), &metphi);
   input->SetBranchAddress("metSig", &metSig);
   input->SetBranchAddress("metcov00", &metcov00);
   input->SetBranchAddress("metcov10", &metcov10);
