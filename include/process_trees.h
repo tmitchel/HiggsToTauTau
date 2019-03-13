@@ -51,15 +51,14 @@ void read_directory(const std::string &name, std::vector<std::string> *v) {
 // class to hold the histograms until I'm ready to write them
 class HistTool {
  public:
-  HistTool(std::string, std::string, std::string, bool, bool);
+  HistTool(std::string, std::string, std::string, std::string);
   ~HistTool() { delete ff_weight; }
-  void writeHistos();
-  void writeTemplates();
+  void writeTemplates(std::string);
   void initVectors2d(std::string);
   void initSystematics(std::string);
   void fillFraction(int, std::string, double, double, double);
   void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double, double, int);  // 2d
-  void histoLoop(std::vector<std::string>, std::string, std::string, std::string);
+  void histoLoop(std::vector<std::string>, std::string, std::string, std::string, std::string);
   void getJetFakes(std::vector<std::string>, std::string, std::string, bool);
   Categories getCategory(double, double);
 
@@ -80,7 +79,7 @@ class HistTool {
 // HistTool contructor to create the output file, the qcd histograms with the correct binning
 // and the map from categories to vectors of TH2F*'s. Each TH2F* in the vector corresponds to
 // one file that is being put into that categories directory in the output tempalte
-HistTool::HistTool(std::string channel_prefix, std::string year, std::string suffix = "final", bool doNN = false, bool old = false)
+HistTool::HistTool(std::string channel_prefix, std::string year, std::string suffix = "final", std::string syst = "")
     : fout(new TFile(("Output/templates/" + channel_prefix + year + "_" + suffix + ".root").c_str(), "recreate")),
       mvis_bins({0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000}),
       njets_bins({-0.5, 0.5, 1.5, 15}),
@@ -133,33 +132,33 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
           {"wt_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"},
       },
       categories{
-          channel_prefix + "_0jet",
-          channel_prefix + "_boosted",
-          channel_prefix + "_vbf",
-          channel_prefix + "_vbf_ggHMELA_bin1_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin2_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin3_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin4_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin5_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin6_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin7_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin8_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin9_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin10_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin11_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin1_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin2_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin3_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin4_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin5_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin6_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin7_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin8_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin9_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin10_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin11_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2"},
+          syst + channel_prefix + "_0jet",
+          syst + channel_prefix + "_boosted",
+          syst + channel_prefix + "_vbf",
+          syst + channel_prefix + "_vbf_ggHMELA_bin1_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin2_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin3_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin4_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin5_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin6_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin7_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin8_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin9_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin10_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin11_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin12_NN_bin1",
+          syst + channel_prefix + "_vbf_ggHMELA_bin1_NN_bin2",
+          syst + channel_prefix + "_vbf_ggHMELA_bin2_NN_bin2",
+          syst + channel_prefix + "_vbf_ggHMELA_bin3_NN_bin2",
+          syst + channel_prefix + "_vbf_ggHMELA_bin4_NN_bin2",
+          syst + channel_prefix + "_vbf_ggHMELA_bin5_NN_bin2",
+          syst + channel_prefix + "_vbf_ggHMELA_bin6_NN_bin2",
+          syst + channel_prefix + "_vbf_ggHMELA_bin7_NN_bin2",
+          syst + channel_prefix + "_vbf_ggHMELA_bin8_NN_bin2",
+          syst + channel_prefix + "_vbf_ggHMELA_bin9_NN_bin2",
+          syst + channel_prefix + "_vbf_ggHMELA_bin10_NN_bin2",
+          syst + channel_prefix + "_vbf_ggHMELA_bin11_NN_bin2",
+          syst + channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2"},
       systematics{
           "ff_qcd_syst_up", "ff_qcd_syst_down", "ff_qcd_dm0_njet0_stat_up",
           "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down",
@@ -288,7 +287,7 @@ void HistTool::convertDataToFake(Categories cat, std::string name, double var1, 
 }
 
 // write output histograms including the QCD histograms after scaling by OS/SS ratio
-void HistTool::writeTemplates() {
+void HistTool::writeTemplates(std::string name = "") {
   for (auto cat : hists_2d) {
     fout->cd(cat.first.c_str());
     for (auto hist : cat.second) {
