@@ -58,7 +58,7 @@ class HistTool {
   void initVectors2d(std::string);
   void initSystematics(std::string);
   void fillFraction(int, std::string, double, double, double);
-  void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double, double, std::string);  // 2d
+  void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double, double, int);  // 2d
   void histoLoop(std::vector<std::string>, std::string, std::string, std::string);
   void getJetFakes(std::vector<std::string>, std::string, std::string, bool);
   Categories getCategory(double, double);
@@ -264,11 +264,11 @@ void HistTool::fillFraction(int cat, std::string name, double var1, double var2,
 
 void HistTool::convertDataToFake(Categories cat, std::string name, double var1, double var2, double vis_mass,
                                  double njets, double t1_pt, double t1_decayMode, double mt, double lep_iso,
-                                 double weight, std::string syst = "None") {
+                                 double weight, int syst = -1) {
   auto bin_x = data.at(cat)->GetXaxis()->FindBin(vis_mass);
   auto bin_y = data.at(cat)->GetYaxis()->FindBin(njets);
   double fakeweight;
-  if (syst != "None") {
+  if (syst == -1) {
     fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                         frac_w.at(cat)->GetBinContent(bin_x, bin_y),
                                         frac_tt.at(cat)->GetBinContent(bin_x, bin_y),
@@ -280,9 +280,9 @@ void HistTool::convertDataToFake(Categories cat, std::string name, double var1, 
     fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                    frac_w.at(cat)->GetBinContent(bin_x, bin_y),
                                    frac_tt.at(cat)->GetBinContent(bin_x, bin_y),
-                                   frac_qcd.at(cat)->GetBinContent(bin_x, bin_y)}, syst);
+                                   frac_qcd.at(cat)->GetBinContent(bin_x, bin_y)}, systematics.at(syst));
     if (name.find("Data") != std::string::npos) {
-      FF_systs.at(syst).at(cat)->Fill(var1, var2, weight * fakeweight);
+      FF_systs.at(categories.at(cat)).at(syst)->Fill(var1, var2, weight * fakeweight);
     }
   }
 }

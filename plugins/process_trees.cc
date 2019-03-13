@@ -293,12 +293,12 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
           for (int i = 0; i < systematics.size(); i++) {
             if (cat0) {
               // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
-              convertDataToFake(zeroJet, name, t1_decayMode, vis_mass, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, systematics.at(i));  // 2d template
+              convertDataToFake(zeroJet, name, t1_decayMode, vis_mass, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, i);  // 2d template
             } else if (cat1) {
-              convertDataToFake(boosted, name, higgs_pT, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, systematics.at(i));
+              convertDataToFake(boosted, name, higgs_pT, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, i);
             } else if (cat2) {
-              convertDataToFake(vbf, name, vbf_var1, vbf_var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, systematics.at(i));
-              convertDataToFake(ACcat, name, vbf_var1, vbf_var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, systematics.at(i));
+              convertDataToFake(vbf, name, vbf_var1, vbf_var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, i);
+              convertDataToFake(ACcat, name, vbf_var1, vbf_var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, i);
             }
           }
         }
