@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include "TTree.h"
+#include "TMath.h"
 #include "ditau_factory.h"
 #include "tau_factory.h"
 #include "muon_factory.h"
@@ -32,10 +33,10 @@ class slim_tree {
         b1_pt, b1_eta, b1_phi,
         b2_pt, b2_eta, b2_phi,
         met, metphi, mjj, numGenJets, mt, dmf, dmf_new,
-        pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH,
+        pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH, VBF_MELA,
         Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
         ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH,
-        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass;
+        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, MT_lepMET, MT_t2MET, MT_HiggsMET, hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr, lt_dphi;
 
     // Anomolous coupling branches
     Float_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint, wt_ggH_a1, wt_ggH_a3, wt_ggH_a3int, wt_wh_a1, wt_wh_a2, wt_wh_a3, wt_wh_L1, 
@@ -136,6 +137,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree( new TTre
     otree->Branch("ME_bkg"      ,        &ME_bkg       ,       "MEbkg_/F"             );
     otree->Branch("ME_bkg1"     ,        &ME_bkg1      ,       "MEbkg1_/F"            );
     otree->Branch("ME_bkg2"     ,        &ME_bkg2      ,       "MEbkg2_/F"            );
+    otree->Branch("VBF_MELA"    ,        &VBF_MELA     ,       "VBF_MELA/F"           );
 
     otree->Branch("higgs_pT",            &higgs_pT,            "higgs_pT/F"           );
     otree->Branch("higgs_m",             &higgs_m,             "higgs_m/F"            );
@@ -144,6 +146,15 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree( new TTre
     otree->Branch("vis_mass",            &vis_mass,            "vis_mass/F"           );
     otree->Branch("dEtajj",              &dEtajj,              "dEtajj/F"             );
     otree->Branch("dPhijj",              &dPhijj,              "dPhijj/F"             );
+    otree->Branch("MT_lepMET",           &MT_lepMET,           "MT_lepMET/F"          );
+    otree->Branch("MT_HiggsMET",         &MT_HiggsMET,         "MT_HiggsMET/F"        );
+    otree->Branch("hj_dphi",             &hj_dphi,             "hj_dphi/F"            );
+    otree->Branch("jmet_dphi",           &jmet_dphi,           "jmet_dphi/F"          );
+    otree->Branch("MT_t2MET",            &MT_t2MET,            "MT_t2MET/F"           );
+    otree->Branch("hj_deta",             &hj_deta,             "hj_deta/F"            );
+    otree->Branch("hmet_dphi",           &hmet_dphi,           "hmet_dphi/F"          );
+    otree->Branch("hj_dr",               &hj_dr,               "hj_dr/F"              );
+    otree->Branch("lt_dphi",             &lt_dphi,             "lt_dphi/F"            );
 
     otree->Branch("is_signal",           &is_signal,           "is_signal/I"          );
     otree->Branch("is_antiLepIso",       &is_antiLepIso,       "is_antiLepIso/I"      );
@@ -232,6 +243,13 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
     ME_bkg1 = evt->getME_bkg1();
     ME_bkg2 = evt->getME_bkg2();
 
+    VBF_MELA =  (evt->getME_sm_ggH() + evt->getME_ps_ggH()) / (evt->getME_sm_ggH() + evt->getME_ps_ggH() + 8 * evt->getME_sm_VBF());
+
+    auto met_x = fmet->getMet() * cos(fmet->getMetPhi());
+    auto met_y = fmet->getMet() * sin(fmet->getMetPhi());
+    auto met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
+    MT_HiggsMET = sqrt(pow(higgs.Pt() + met_pt, 2) - pow(higgs.Px() + met_x, 2) - pow(higgs.Py() + met_y, 2));
+
     mt = Mt;
     numGenJets = evt->getNumGenJets();
     njets = fjets->getNjets();
@@ -258,6 +276,12 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
         j1_pt = jets.at(0).getPt();
         j1_eta = jets.at(0).getEta();
         j1_phi = jets.at(0).getPhi();
+        hj_dphi = TMath::ACos(TMath::Cos(jets.at(0).getPhi() - higgs.Phi()));
+        hj_deta = fabs(jets.at(0).getEta() - higgs.Eta());
+        jmet_dphi = TMath::ACos(TMath::Cos(fmet->getMetPhi() - jets.at(0).getPhi()));
+        hmet_dphi = TMath::ACos(TMath::Cos(fmet->getMetPhi() - higgs.Phi()));
+        hj_dr = higgs.DeltaR(jets.at(0).getP4());
+
         if (njets > 1) {
             j2_pt = jets.at(1).getPt();
             j2_eta = jets.at(1).getEta();
@@ -265,7 +289,7 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory* fjets, m
             hjj_pT = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).Pt();
             hjj_m = (higgs + jets.at(0).getP4() + jets.at(1).getP4()).M();
             dEtajj = fabs(jets.at(0).getEta() - jets.at(1).getEta());
-            dPhijj = fabs(jets.at(0).getPhi() - jets.at(1).getPhi());
+            dPhijj = TMath::ACos(TMath::Cos((jets.at(0).getPhi() - jets.at(1).getPhi())));
         }
     }
 
@@ -395,6 +419,13 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
   dmf_new = t->getDecayModeFindingNew();
   vis_mass = (el->getP4() + t->getP4()).M();
 
+  auto met_x = fmet->getMet() * cos(fmet->getMetPhi());
+  auto met_y = fmet->getMet() * sin(fmet->getMetPhi());
+  auto met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
+  MT_lepMET = sqrt(pow(el->getPt() + met_pt, 2) - pow(el->getPx() + met_x, 2) - pow(el->getPy() + met_y, 2));
+  MT_t2MET = sqrt(pow(t->getPt() + met_pt, 2) - pow(t->getPx() + met_x, 2) - pow(t->getPy() + met_y, 2));
+  lt_dphi = TMath::ACos(TMath::Cos(el->getPhi() - t->getPhi()));
+
   otree->Fill();
 }
 
@@ -427,6 +458,13 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (mu->getP4() + t->getP4()).M();
+
+    auto met_x = fmet->getMet() * cos(fmet->getMetPhi());
+    auto met_y = fmet->getMet() * sin(fmet->getMetPhi());
+    auto met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
+    MT_lepMET = sqrt(pow(mu->getPt() + met_pt, 2) - pow(mu->getPx() + met_x, 2) - pow(mu->getPy() + met_y, 2));
+    MT_t2MET = sqrt(pow(t->getPt() + met_pt, 2) - pow(t->getPx() + met_x, 2) - pow(t->getPy() + met_y, 2));
+    lt_dphi = TMath::ACos(TMath::Cos(mu->getPhi() - t->getPhi()));
 
     otree->Fill();
 }

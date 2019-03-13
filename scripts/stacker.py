@@ -10,17 +10,13 @@ parser.add_argument('--cat', '-c', action='store',
                     dest='cat', default='et_vbf',
                     help='name of category to pull from'
                     )
-parser.add_argument('--channel', '-l', action='store',
-                    dest='channel', default='et',
-                    help='name of channel'   
-                    )
 parser.add_argument('--year', '-y', action='store',
                     dest='year', default='2016',
                     help='year to plot'   
                     )
-parser.add_argument('--dir', '-d', action='store',
-                    dest='in_dir', default='',
-                    help='input directory starting after ../Output/templates/'
+parser.add_argument('--input', '-i', action='store',
+                    dest='input', default='',
+                    help='path to input file'
                     )
 parser.add_argument('--prefix', '-p', action='store',
                     dest='prefix', default='test',
@@ -41,6 +37,7 @@ gROOT.SetBatch(kTRUE)
 
 def applyStyle(name, hist, leg):
     overlay = 0
+    name = name.replace(args.var+'_', '')
     print name, hist.Integral()
     if name == 'embedded':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
@@ -60,20 +57,42 @@ def applyStyle(name, hist, leg):
     elif name == 'jetFakes':
         hist.SetFillColor(TColor.GetColor("#ffccff"))
         hist.SetName('jet fakes')
-    elif name == 'Data':
+    elif name == 'Data' or name == 'data_obs':
         hist.SetLineColor(kBlack)
         hist.SetMarkerStyle(8)
         overlay = 1
-    elif name == 'VBF125':
+    elif name == 'GGH2Jets_pseudoscalar_Mf05ph0125':
+        hist.SetFillColor(0)
+        hist.SetLineWidth(3)
+        hist.SetLineColor(TColor.GetColor('#F0F000'))
+        overlay = 8
+    elif name == 'reweighted_qqH_htt_0PM125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#FF0000'))
         overlay = 2
-    elif name == 'ggH125':
+    elif name == 'GGH2Jets_pseudoscalar_M125':
+        hist.SetFillColor(0)
+        hist.SetLineWidth(3)
+        hist.SetLineColor(TColor.GetColor('#00FF00'))
+        overlay = 9
+    elif name == 'VBF125':
+        overlay = -2
+    elif name == 'GGH2Jets_sm_M125' and 'vbf' in args.cat:
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#0000FF'))
         overlay = 3
+    elif name == 'ggh_madgraph' and 'boosted' in args.cat:
+        hist.SetFillColor(0)
+        hist.SetLineWidth(3)
+        hist.SetLineColor(TColor.GetColor('#0000FF'))
+        overlay = 3
+    elif name == 'ggH125':
+        hist.SetFillColor(0)
+        hist.SetLineWidth(3)
+        hist.SetLineColor(TColor.GetColor('#0000FF'))
+        overlay = -3
     else:
         return None, -1, leg
     return hist, overlay, leg
@@ -89,7 +108,7 @@ def createCanvas():
     pad1.SetPad(0, .3, 1, 1)
     pad1.SetTopMargin(.1)
     pad1.SetBottomMargin(0.02)
-    #pad1.SetLogy()
+    pad1.SetLogy()
     pad1.SetTickx(1)
     pad1.SetTicky(1)
 
@@ -135,7 +154,9 @@ titles = {
     'mjj': 'Dijet Mass [GeV]',
     'Dbkg_VBF': 'MELA VBF Disc',
     'Dbkg_ggH': 'MELA ggH Disc',
-    'NN_disc': 'NN Disc.',
+    'NN_disc': 'D_{NN}^{VBF}',
+    'NN_disc_vbf': 'D_{NN}^{VBF}',
+    'NN_disc_boost': 'D_{NN}^{VBF}',
     'Q2V1': 'Q^{2} V1 [GeV]',
     'Q2V2': 'Q^{2} V2 [GeV]',
     'Phi': '#phi',
@@ -151,7 +172,20 @@ titles = {
     'j2_eta': 'Sub-Lead Jet Eta',
     'j1_pt': 'Lead Jet p_{T} [GeV]',
     'j2_pt': 'Sub-Lead Jet p_{T} [GeV]',
-    'hjj_pT': 'pT(Higgs,j1,j2) [GeV]'
+    'hjj_pT': 'pT(Higgs,j1,j2) [GeV]',
+    'higgs_pT': 'pT(Higgs) [GeV]',
+    'VBF_MELA': 'D_{2jet}^{ggH}',
+    'super': 'super',
+    'dPhijj': 'dPhijj',
+    'lt_dphi': 'lt_dphi',
+    "MT_lepMET": 'MT_lepMET',
+    "MT_HiggsMET": "MT_HiggsMET",
+    "hj_dphi": "hj_dphi",
+    "jmet_dphi": "jmet_dphi",
+    "MT_t2MET": "MT_t2MET",
+    "hj_deta": "hj_deta",
+    "hmet_dphi": "hmet_dphi",
+    "hj_dr": "hj_dr"
 }
 
 def formatStack(stack):
@@ -169,11 +203,13 @@ def formatOther(other, holder):
     return holder
 
 
-def fillStackAndLegend(data, vbf, ggh, holder, leg):
+def fillStackAndLegend(data, vbf, ggh, ggh_ps, ggh_int, holder, leg):
     stack = THStack()
     leg.AddEntry(data, 'Data', 'lep')
-    leg.AddEntry(vbf, 'VBF Higgs(125)x50', 'l')
-    leg.AddEntry(ggh, 'ggH Higgs(125)x50', 'l')
+    leg.AddEntry(vbf, 'VBF Higgs(125)x100', 'l')
+    leg.AddEntry(ggh, 'ggH Higgs(125)x100', 'l')
+    # leg.AddEntry(ggh_ps, 'ggH PS Higgs(125)x50', 'l')
+    # leg.AddEntry(ggh_int, 'ggH INT Higgs(125)x50', 'l')
     leg.AddEntry(filter(lambda x: x.GetName() == 'embedded', holder)[0], 'ZTT', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'ZL', holder)[0], 'ZL', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'jet fakes', holder)[0], 'jetFakes', 'f')
@@ -262,27 +298,33 @@ def sigmaLines(data):
 
 
 def blindData(data, signal, background):
-#    for ibin in range(data.GetNbinsX()+1):
-#        sig = signal.GetBinContent(ibin)
-#        bkg = background.GetBinContent(ibin)
-#        if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
-#            data.SetBinContent(ibin, 0)
-#
-#    if args.var == 'NN_disc':
-#        middleBin = data.FindBin(0.5)
-#        for ibin in range(middleBin, data.GetNbinsX()+1):
-#            data.SetBinContent(ibin, 0)
+    # for ibin in range(data.GetNbinsX()+1):
+    #     sig = signal.GetBinContent(ibin)
+    #     bkg = background.GetBinContent(ibin)
+    #     if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
+    #         data.SetBinContent(ibin, 0)
+
+    # if args.var == 'NN_disc':
+    #     middleBin = data.FindBin(0.5)
+    #     for ibin in range(middleBin, data.GetNbinsX()+1):
+    #         data.SetBinContent(ibin, 0)
 
     return data
 
 def main():
-    fin = TFile('Output/templates/{}/template_{}_{}_ff{}.root'.format(args.in_dir, args.channel, args.var, args.year), 'read')
-    idir = fin.Get(args.cat)
+    fin = TFile(args.input, 'read')
+    idir = fin.Get('plots/{}/{}'.format(args.var, args.cat))
+#    idir = fin.Get('plots/{}_{}'.format(args.var, args.cat))
     leg = createLegend()
-    data = idir.Get('Data').Clone()
+#    data = idir.Get('data_obs').Clone()
+    data = idir.Get(args.var+'_data_obs').Clone()
     vbf = data.Clone()
     vbf.Reset()
     ggh = vbf.Clone()
+    ggh_ps = vbf.Clone()
+    ggh_int = vbf.Clone()
+    ph_vbf = vbf.Clone()
+    ph_ggh = vbf.Clone()
     allSig = vbf.Clone()
     stat = vbf.Clone()
     other = stat.Clone()
@@ -298,18 +340,34 @@ def main():
         elif overlay == 2:
             vbf = hist
             allSig.Add(hist)
+        elif overlay == -2:
+            pw_vbf = hist
         elif overlay == 3:
             ggh = hist
             allSig.Add(hist)
+        elif overlay == -3:
+            pw_ggh = hist
         elif overlay == 4:
             other.Add(hist)
             stat.Add(hist)
         elif overlay == 5:
             allSig.Add(hist)
-
+        elif overlay == 8:
+            ggh_int = hist
+        elif overlay == 9:
+            ggh_ps = hist
     can = createCanvas()
     inStack = formatOther(other, inStack)
-    stack, leg = fillStackAndLegend(data, vbf, ggh, inStack, leg)
+
+    vbf.Scale(pw_vbf.Integral()/vbf.Integral())
+    ggh.Scale(pw_ggh.Integral()/ggh.Integral())
+    if ggh_ps.Integral() > 0:
+      ggh_ps.Scale(pw_ggh.Integral()/ggh_ps.Integral())
+    if ggh_int.Integral() > 0:
+      ggh_int.Scale(pw_ggh.Integral()/ggh_int.Integral())
+
+
+    stack, leg = fillStackAndLegend(data, vbf, ggh, ggh_ps, ggh_int, inStack, leg)
     stat = formatStat(stat)
     leg.AddEntry(stat, 'Uncertainty', 'f')
 
@@ -321,10 +379,14 @@ def main():
     formatStack(stack)
     data.Draw('same lep')
     stat.Draw('same e2')
-    vbf.Scale(50)
+    vbf.Scale(100)
     vbf.Draw('same hist e')
-    ggh.Scale(50)
+    ggh.Scale(100)
     ggh.Draw('same hist e')
+    # ggh_int.Scale(50)
+    # ggh_int.Draw('same hist e')
+    # ggh_ps.Scale(50)
+    # ggh_ps.Draw('same hist e')
     leg.Draw()
 
     ll = TLatex()
