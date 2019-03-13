@@ -122,32 +122,33 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) : i
       costhetastar_name("costhetastar"), Q2V1_name("Q2V1"), Q2V2_name("Q2V2"), ME_sm_VBF_name("ME_sm_VBF"), ME_sm_ggH_name("ME_sm_ggH"), ME_sm_WH_name("ME_sm_WH"), ME_sm_ZH_name("ME_sm_ZH"),
       ME_ps_VBF_name("ME_ps_VBF"), ME_ps_ggH_name("ME_ps_ggH"), ME_bkg1_name("ME_bkg1"), ME_bkg2_name("ME_bkg2"), ME_bkg_name("ME_bkg");
   if (syst.find("UncMet") != std::string::npos || syst.find("ClusteredMet") != std::string::npos || syst.find("DM") != std::string::npos || syst == "Up" || syst == "Down") {
-    m_sv_name += syst;
-    pt_sv_name += syst;
-    Dbkg_VBF_name += syst;
-    Dbkg_ggH_name += syst;
-    Dbkg_ZH_name += syst;
-    Dbkg_WH_name += syst;
-    D_PS_VBF_name += syst;
-    D_CP_VBF_name += syst;
-    D_PS_ggH_name += syst;
-    D_CP_ggH_name += syst;
-    Phi_name += syst;
-    Phi1_name += syst;
-    costheta1_name += syst;
-    costheta2_name += syst;
-    costhetastar_name += syst;
-    Q2V1_name += syst;
-    Q2V2_name += syst;
-    ME_sm_VBF_name += syst;
-    ME_sm_ggH_name += syst;
-    ME_sm_WH_name += syst;
-    ME_sm_ZH_name += syst;
-    ME_ps_VBF_name += syst;
-    ME_ps_ggH_name += syst;
-    ME_bkg1_name += syst;
-    ME_bkg2_name += syst;
-    ME_bkg_name += syst;
+    m_sv_name += "_" + syst;
+    pt_sv_name += "_" + syst;
+    // need to update MELA code to get these branches
+    // Dbkg_VBF_name += "_" + syst;
+    // Dbkg_ggH_name += "_" + syst;
+    // Dbkg_ZH_name += "_" + syst;
+    // Dbkg_WH_name += "_" + syst;
+    // D_PS_VBF_name += "_" + syst;
+    // D_CP_VBF_name += "_" + syst;
+    // D_PS_ggH_name += "_" + syst;
+    // D_CP_ggH_name += "_" + syst;
+    // Phi_name += "_" + syst;
+    // Phi1_name += "_" + syst;
+    // costheta1_name += "_" + syst;
+    // costheta2_name += "_" + syst;
+    // costhetastar_name += "_" + syst;
+    // Q2V1_name += "_" + syst;
+    // Q2V2_name += "_" + syst;
+    // ME_sm_VBF_name += "_" + syst;
+    // ME_sm_ggH_name += "_" + syst;
+    // ME_sm_WH_name += "_" + syst;
+    // ME_sm_ZH_name += "_" + syst;
+    // ME_ps_VBF_name += "_" + syst;
+    // ME_ps_ggH_name += "_" + syst;
+    // ME_bkg1_name += "_" + syst;
+    // ME_bkg2_name += "_" + syst;
+    // ME_bkg_name += "_" + syst;
   }
 
   input->SetBranchAddress(m_sv_name.c_str(), &m_sv);

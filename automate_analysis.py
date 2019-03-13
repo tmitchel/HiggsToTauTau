@@ -62,6 +62,30 @@ systs_2016 = [
     'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down' # MET corrections from SVFit/FSA
 ]
 
+def getSyst2016(name):
+  systs = []
+  
+  if name != 'embed' and name != 'data_obs':
+    systs = [
+      'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down',
+      'vbfMass_JetTotalUp', 'vbfMass_JetTotalUp', 'jetVeto30_JetTotalUp', 'jetVeto30_JetTotalUp',
+      'vbfMass_JetTotalDown', 'vbfMass_JetTotalDown', 'jetVeto30_JetTotalDown', 'jetVeto30_JetTotalDown'
+    ]
+
+  if name == 'TTT' or name == 'TTJ':
+    systs += ['ttbarShape_Up', 'ttbarShape_Down']
+
+  if name == 'TTT' or name == 'VTT':
+    systs += ['Up', 'Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
+
+  if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
+    systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
+
+  if name == 'ZJ' or name == 'ZL':
+    systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
+
+  return systs
+
 systs_2017 = [
     '', 'JetEta0to3Down', 'JetEta0to3Up', 'JetEta0to5Down', 'JetEta0to5Up', 'JetEta3to5Down', 
     'JetEta3to5Up', 'JetRelativeSampleDown', 'JetRelativeSampleUp', 'JetRelativeBalDown', 'JetRelativeBalUp',
@@ -77,13 +101,11 @@ for ifile in fileList:
     tosample = ifile.replace(sample+suffix,'')
 
     if 'DYJets' in sample:
-        names = ['ZTT', 'ZL', 'ZJ']
+        names = ['ZL', 'ZJ']
     elif 'TT' in sample:
         names = ['TTT', 'TTJ']
     elif 'WJets' in sample or 'EWKW' in sample:
         names = ['W']
-    elif 'EWKZ' in sample:
-        names = ['EWKZ']
     elif 'data' in sample.lower():
         names = ['data_obs']
     elif 'ggHtoTauTau' in sample:
@@ -126,17 +148,15 @@ for ifile in fileList:
         names = ['ZH125']
         options.ACsample = True
     else: 
-        names = ['VV', 'VVJ', 'VVT']
+        names = ['VVJ', 'VVT']
 
     callstring = './%s -p %s -s %s -d %s ' % (options.exe, tosample, sample, options.output_dir)
     if options.ACsample:
       callstring += ' -a '
 
-    if options.syst and not 'Data' in sample:
-        for isyst in systs:
-            for name in names:
-                if ('DM' in isyst or isyst == 'Up' or isyst == 'Down') and not ('ZL' in name or 'ZJ' in name):
-                    continue
+    if options.syst and not 'Data' in sample.lower():
+        for name in names:
+            for isyst in getSyst2016(name):
                 tocall = callstring + ' -n %s -u %s' % (name, isyst)
                 call(tocall, shell=True)
     else:

@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
 
   // cd to root of output file and create tree
   fout->cd();
-  slim_tree* st = new slim_tree("mutau_tree", doAC);
+  slim_tree* st = new slim_tree("mutau_tree"+systname, doAC);
 
   // get correct weights for AC samples
   if (sample.find("vbf_") != std::string::npos) {
