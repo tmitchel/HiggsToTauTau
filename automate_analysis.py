@@ -63,10 +63,10 @@ systs_2016 = [
 ]
 
 def getSyst2016(name):
-  systs = []
+  systs = ['']
   
   if name != 'embed' and name != 'data_obs':
-    systs = [
+    systs += [
       'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down',
       'vbfMass_JetTotalUp', 'vbfMass_JetTotalUp', 'jetVeto30_JetTotalUp', 'jetVeto30_JetTotalUp',
       'vbfMass_JetTotalDown', 'vbfMass_JetTotalDown', 'jetVeto30_JetTotalDown', 'jetVeto30_JetTotalDown'
@@ -75,7 +75,7 @@ def getSyst2016(name):
   if name == 'TTT' or name == 'TTJ':
     systs += ['ttbarShape_Up', 'ttbarShape_Down']
 
-  if name == 'TTT' or name == 'VTT':
+  if name == 'TTT' or name == 'VTT' or name == 'embed':
     systs += ['Up', 'Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
 
   if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
