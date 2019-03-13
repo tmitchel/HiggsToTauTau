@@ -43,29 +43,13 @@ int main(int argc, char *argv[]) {
 
   // initialize histogram holder
   auto hists = new HistTool(channel_prefix, year, suffix);
+
   hists->histoLoop(files, dir, tree_name, "None");    // fill histograms
   hists->getJetFakes(files, dir, tree_name, doSyst);  // get QCD, etc from fake factor
   for (auto weight : hists->acNameMap) {
     hists->histoLoop(files, dir, tree_name, weight.first);  // fill with different weights
   }
   hists->writeTemplates();  // write histograms to file
-
-  vector<string> systs = {"_UncMet_Up", "_UncMet_Down", "_ClusteredMet_Up", "_ClusteredMet_Down",
-                          "_vbfMass_JetTotalUp", "_vbfMass_JetTotalUp", "_jetVeto30_JetTotalUp", "_jetVeto30_JetTotalUp",
-                          "_vbfMass_JetTotalDown", "_vbfMass_JetTotalDown", "_jetVeto30_JetTotalDown", "_jetVeto30_JetTotalDown",
-                          "_ttbarShape_Up", "_ttbarShape_Down", "_Up", "_Down", "_DM0_Up", "_DM0_Down", "_DM1_Up", "_DM1_Down", "_DM10_Up",
-                          "_DM10_Down", "_jetToTauFake_Up", "_jetToTauFake_Down", "_dyShape_Up", "_dyShape_Down", "_zmumuShape_Up", "_zmumuShape_Down"};
-  for (auto syst : systs) {
-    // initialize histogram holder
-    auto hists = new HistTool(channel_prefix, year, syst + suffix, syst);
-    hists->histoLoop(files, dir, tree_name, "None", syst);    // fill histograms
-    hists->getJetFakes(files, dir, tree_name, false);  // get QCD, etc from fake factor
-    for (auto weight : hists->acNameMap) {
-      hists->histoLoop(files, dir, tree_name, weight.first, syst);  // fill with different weights
-    }
-    hists->writeTemplates(syst + "/");  // write histograms to file
-  }
-
   hists->fout->Close();
 
   std::cout << "Template created.\n Timing Info: \n\t CPU Time: " << watch.CpuTime() << "\n\tReal Time: " << watch.RealTime() << std::endl;
@@ -73,22 +57,12 @@ int main(int argc, char *argv[]) {
   delete hists->ff_weight;
 }
 
-void HistTool::histoLoop(vector<string> files, string dir, string tree_name, string acWeight = "None", string tree_ext = "") {
+void HistTool::histoLoop(vector<string> files, string dir, string tree_name, string acWeight = "None") {
   float vbf_var1(0.), vbf_var2(0.), vbf_var3(0.);
   bool cat0(false), cat1(false), cat2(false);
   for (auto ifile : files) {
     auto fin = new TFile((dir + "/" + ifile).c_str(), "read");
-    auto real_tree_name = tree_name;
-    auto keys = fin->GetListOfKeys();
-    for (auto key : *keys) {
-      if (tree_name + tree_ext == key->GetName()) {
-        real_tree_name += tree_ext;
-        std::cout << "Processing tree: " << real_tree_name << std::endl;
-        break;
-      }
-    }
-
-    auto tree = reinterpret_cast<TTree *>(fin->Get(real_tree_name.c_str()));
+    auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
     string name = ifile.substr(0, ifile.find(".")).c_str();
 
     // see if these are AC files or nah
