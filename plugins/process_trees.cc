@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 
   // initialize histogram holder
   auto hists = new HistTool(channel_prefix, year, suffix);
-  hists->histoLoop(files, dir, tree_name, "None");    // fill histograms
+  hists->histoLoop(files, dir, tree_name);    // fill histograms
   hists->getJetFakes(files, dir, tree_name, doSyst);  // get QCD, etc from fake factor
   for (auto weight : hists->acNameMap) {
     hists->histoLoop(files, dir, tree_name, weight.first);  // fill with different weights
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
   for (auto syst : systs) {
     // initialize histogram holder
     auto hists = new HistTool(channel_prefix, year, syst + suffix, syst);
-    hists->histoLoop(files, dir, tree_name, "None", syst);    // fill histograms
+    hists->histoLoop(files, dir, tree_name, std::string("None"), syst);    // fill histograms
     hists->getJetFakes(files, dir, tree_name, false);  // get QCD, etc from fake factor
     for (auto weight : hists->acNameMap) {
       hists->histoLoop(files, dir, tree_name, weight.first, syst);  // fill with different weights
