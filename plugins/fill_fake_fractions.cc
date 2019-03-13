@@ -2,23 +2,12 @@
 
 #include "../include/fill_fake_fraction.h"
 
-#include <dirent.h>
-#include <sys/types.h>
 #include <iostream>
 #include <vector>
 
 #include "../include/CLParser.h"
 #include "TFile.h"
-#include "TH2F.h"
 #include "TTree.h"
-
-// FF
-#include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
-#include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTFormula.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTGraph.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTH2F.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTH3D.h"
 
 using std::string;
 using std::vector;
@@ -122,7 +111,9 @@ int main(int argc, char *argv[]) {
         }
       }
     }
+    std::cout << "finished file " << fin->GetName() << std::endl;
     fin->Close();
   }
+
   fractions->writeTemplates();
 }

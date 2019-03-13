@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "../include/CLParser.h"
 #include "TFile.h"
 #include "TH2F.h"
 #include "TTree.h"
@@ -90,6 +89,13 @@ FakeFractions::FakeFractions(std::string channel_prefix, std::string year, std::
     frac_qcd.push_back(new TH2F(("frac_qcd_" + cat).c_str(), ("frac_qcd_" + cat).c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
   }
 
+  // make all of the directories for templates
+  for (auto cat : categories) {
+    fout->cd();
+    fout->mkdir(cat.c_str());
+    fout->cd();
+  }
+
   // get FakeFactor workspace
   TFile *ff_file;
   if (year == "2017") {
@@ -157,4 +163,5 @@ void FakeFractions::writeTemplates() {
     }
   }
   fout->Close();
+  delete ff_weight;
 }
