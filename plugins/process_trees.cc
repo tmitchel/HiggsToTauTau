@@ -289,6 +289,7 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
 
         // loop through all systematic names and get the corresponding weight to fill a histogram
         if (doSyst) {
+          std::cout << "Beginning to fill fake-factor systematic templates" << std::endl;
           for (int i = 0; i < systematics.size(); i++) {
             if (cat0) {
               // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
