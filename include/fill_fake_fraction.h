@@ -40,6 +40,7 @@ class FakeFractions {
   Categories getCategory(double, double);
   void fillFraction(int, std::string, double, double, double);
   void writeTemplates();
+  void fillQCD();
 
  private:
   std::vector<TH2F *> data, frac_w, frac_tt, frac_real, frac_qcd;
@@ -150,6 +151,21 @@ Categories FakeFractions::getCategory(double vbf_var3, double vbf_var4 = -1) {
     return vbf_ggHMELA_bin5_NN_bin1;
   } else if (vbf_var3 <= 6. * edge) {
     return vbf_ggHMELA_bin6_NN_bin1;
+  }
+}
+
+void FakeFractions::fillQCD() {
+  // calculate fake-fractions
+  for (int i = 0; i < data.size(); i++) {
+    frac_qcd.at(i) = reinterpret_cast<TH2F *>(data.at(i)->Clone());
+    frac_qcd.at(i)->Add(frac_w.at(i), -1);
+    frac_qcd.at(i)->Add(frac_tt.at(i), -1);
+    frac_qcd.at(i)->Add(frac_real.at(i), -1);
+
+    frac_w.at(i)->Divide(data.at(i));
+    frac_tt.at(i)->Divide(data.at(i));
+    frac_real.at(i)->Divide(data.at(i));
+    frac_qcd.at(i)->Divide(data.at(i));
   }
 }
 

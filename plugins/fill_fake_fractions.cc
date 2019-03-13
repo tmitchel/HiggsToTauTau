@@ -114,6 +114,6 @@ int main(int argc, char *argv[]) {
     std::cout << "finished file " << fin->GetName() << std::endl;
     fin->Close();
   }
-
+  fractions->fillQCD();
   fractions->writeTemplates();
 }
