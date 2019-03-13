@@ -88,7 +88,7 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
       bins_l2{0, 1, 10, 11},
       bins_hpt{0, 100, 150, 200, 250, 300, 5000},
       // bins_vbf_var1{300, 500, 10000},  // real mjj
-      bins_vbf_var1{0, 0.5, 1.},  // actually VBF MELA
+      bins_vbf_var1{0, 0.25, 0.5, 0.75, 1.},  // actually VBF MELA
 
       // y-axis
       bins_lpt{0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
@@ -98,7 +98,7 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
       // bins_vbf_var2{0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5,  0.6, 0.65, 0.7, 0.8},  // Perceptron
       // bins_vbf_var2{0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 1.},  // NN including m_sv et2016/mt2017
       // bins_vbf_var2{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.95, 1.}, // mt2016
-      bins_vbf_var2{0, 0.05, 0.1, 0.15, 0.18, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.},  // NN including m_sv et2017
+      bins_vbf_var2{0, 0.25, 0.5, 0.75, 1.},
       channel_prefix(channel_prefix),
       acNameMap{
           {"wt_ggH_a1", "JHU_GGH2Jets_sm_M125"},
@@ -327,7 +327,7 @@ Categories HistTool::getCategory(double vbf_var3, double vbf_var4 = -1) {
     return vbf_ggHMELA_bin5_NN_bin1;
   } else if (vbf_var3 <= 6.*edge) {
     return vbf_ggHMELA_bin6_NN_bin1;
-  } 
+  }
 
 //  else if (D0_ggH <= 7.*edge) {
 //    return vbf_ggHMELA_bin7_NN_bin1;

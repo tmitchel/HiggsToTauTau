@@ -220,6 +220,10 @@ Float_t tree_reader::getVar(std::string var) {
     return this->met;
   } else if (var == "higgs_pT") {
     return this->higgs_pT;
+  } else if (var == "Dbkg_ggH") {
+    return (this->ME_sm_ggH/(ME_sm_ggH+45*ME_bkg));
+  } else if (var == "Dbkg_VBF") {
+    return (this->ME_sm_VBF/(ME_sm_VBF+45*ME_bkg));
   }
 }
 
