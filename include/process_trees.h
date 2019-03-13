@@ -34,7 +34,7 @@ enum Categories { zeroJet,
                   vbf_ggHMELA_bin9_NN_bin1,
                   vbf_ggHMELA_bin10_NN_bin1,
                   vbf_ggHMELA_bin11_NN_bin1,
-                  vbf_ggHMELA_bin12_NN_bin1};
+                  vbf_ggHMELA_bin12_NN_bin1 };
 
 // read all *.root files in the given directory and put them in the provided vector
 void read_directory(const std::string &name, std::vector<std::string> *v) {
@@ -58,7 +58,7 @@ class HistTool {
   void initVectors2d(std::string);
   void initSystematics(std::string);
   void fillFraction(int, std::string, double, double, double);
-  void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double, double);  // 2d
+  void convertDataToFake(Categories, std::string, double, double, double, double, double, double, double, double, double, std::string);  // 2d
   void histoLoop(std::vector<std::string>, std::string, std::string, std::string);
   void getJetFakes(std::vector<std::string>, std::string, std::string, bool);
   Categories getCategory(double, double);
@@ -159,7 +159,7 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
           channel_prefix + "_vbf_ggHMELA_bin9_NN_bin2",
           channel_prefix + "_vbf_ggHMELA_bin10_NN_bin2",
           channel_prefix + "_vbf_ggHMELA_bin11_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2",},
+          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2"},
       systematics{
           "ff_qcd_syst_up", "ff_qcd_syst_down", "ff_qcd_dm0_njet0_stat_up",
           "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down",
@@ -170,7 +170,6 @@ HistTool::HistTool(std::string channel_prefix, std::string year, std::string suf
           "ff_w_dm1_njet1_stat_down", "ff_tt_syst_up", "ff_tt_syst_down", "ff_tt_dm0_njet0_stat_up",
           "ff_tt_dm0_njet0_stat_down", "ff_tt_dm0_njet1_stat_up", "ff_tt_dm0_njet1_stat_down",
           "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down", "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"} {
-
   // Create empty histograms for each category to fill later.
   for (auto cat : categories) {
     // make a 2d template
@@ -263,15 +262,28 @@ void HistTool::fillFraction(int cat, std::string name, double var1, double var2,
   hist->Fill(var1, var2, weight);
 }
 
-void HistTool::convertDataToFake(Categories cat, std::string name, double var1, double var2, double vis_mass, double njets, double t1_pt, double t1_decayMode, double mt, double lep_iso, double weight) {
+void HistTool::convertDataToFake(Categories cat, std::string name, double var1, double var2, double vis_mass,
+                                 double njets, double t1_pt, double t1_decayMode, double mt, double lep_iso,
+                                 double weight, std::string syst = "None") {
   auto bin_x = data.at(cat)->GetXaxis()->FindBin(vis_mass);
   auto bin_y = data.at(cat)->GetYaxis()->FindBin(njets);
-  auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                      frac_w.at(cat)->GetBinContent(bin_x, bin_y),
-                                      frac_tt.at(cat)->GetBinContent(bin_x, bin_y),
-                                      frac_qcd.at(cat)->GetBinContent(bin_x, bin_y)});
-  if (name.find("Data") != std::string::npos) {
-    fakes_2d.at(cat)->Fill(var1, var2, weight * fakeweight);
+  double fakeweight;
+  if (syst != "None") {
+    fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
+                                        frac_w.at(cat)->GetBinContent(bin_x, bin_y),
+                                        frac_tt.at(cat)->GetBinContent(bin_x, bin_y),
+                                        frac_qcd.at(cat)->GetBinContent(bin_x, bin_y)});
+    if (name.find("Data") != std::string::npos) {
+      fakes_2d.at(cat)->Fill(var1, var2, weight * fakeweight);
+    }
+  } else {
+    fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
+                                   frac_w.at(cat)->GetBinContent(bin_x, bin_y),
+                                   frac_tt.at(cat)->GetBinContent(bin_x, bin_y),
+                                   frac_qcd.at(cat)->GetBinContent(bin_x, bin_y)}, syst);
+    if (name.find("Data") != std::string::npos) {
+      FF_systs.at(syst).at(cat)->Fill(var1, var2, weight * fakeweight);
+    }
   }
 }
 
@@ -314,32 +326,32 @@ void HistTool::writeTemplates() {
 
 // basically a map from 2 inputs -> 1 Category
 Categories HistTool::getCategory(double vbf_var3, double vbf_var4 = -1) {
-  double edge = 1./6.;
-  if (vbf_var3 > 0 && vbf_var3 <= 1.*edge) {
+  double edge = 1. / 6.;
+  if (vbf_var3 > 0 && vbf_var3 <= 1. * edge) {
     return vbf_ggHMELA_bin1_NN_bin1;
-  } else if (vbf_var3 <= 2.*edge) {
+  } else if (vbf_var3 <= 2. * edge) {
     return vbf_ggHMELA_bin2_NN_bin1;
-  } else if (vbf_var3 <= 3.*edge) {
+  } else if (vbf_var3 <= 3. * edge) {
     return vbf_ggHMELA_bin3_NN_bin1;
-  } else if (vbf_var3 <= 4.*edge) {
+  } else if (vbf_var3 <= 4. * edge) {
     return vbf_ggHMELA_bin4_NN_bin1;
-  } else if (vbf_var3 <= 5.*edge) {
+  } else if (vbf_var3 <= 5. * edge) {
     return vbf_ggHMELA_bin5_NN_bin1;
-  } else if (vbf_var3 <= 6.*edge) {
+  } else if (vbf_var3 <= 6. * edge) {
     return vbf_ggHMELA_bin6_NN_bin1;
   }
 
-//  else if (D0_ggH <= 7.*edge) {
-//    return vbf_ggHMELA_bin7_NN_bin1;
-//  } else if (D0_ggH <= 8.*edge) {
-//    return vbf_ggHMELA_bin8_NN_bin1;
-//  } else if (D0_ggH <= 9.*edge) {
-//    return vbf_ggHMELA_bin9_NN_bin1;
-//  } else if (D0_ggH <= 10.*edge) {
-//    return vbf_ggHMELA_bin10_NN_bin1;
-//  } else if (D0_ggH <= 11.*edge) {
-//    return vbf_ggHMELA_bin11_NN_bin1;
-//  } else if (D0_ggH <= 12.*edge) {
-//    return vbf_ggHMELA_bin12_NN_bin1;
-//  }
+  //  else if (D0_ggH <= 7.*edge) {
+  //    return vbf_ggHMELA_bin7_NN_bin1;
+  //  } else if (D0_ggH <= 8.*edge) {
+  //    return vbf_ggHMELA_bin8_NN_bin1;
+  //  } else if (D0_ggH <= 9.*edge) {
+  //    return vbf_ggHMELA_bin9_NN_bin1;
+  //  } else if (D0_ggH <= 10.*edge) {
+  //    return vbf_ggHMELA_bin10_NN_bin1;
+  //  } else if (D0_ggH <= 11.*edge) {
+  //    return vbf_ggHMELA_bin11_NN_bin1;
+  //  } else if (D0_ggH <= 12.*edge) {
+  //    return vbf_ggHMELA_bin12_NN_bin1;
+  //  }
 }

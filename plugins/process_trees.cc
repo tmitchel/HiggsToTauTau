@@ -291,32 +291,13 @@ void HistTool::getJetFakes(vector<string> files, string dir, string tree_name, b
         if (doSyst) {
           for (int i = 0; i < systematics.size(); i++) {
             if (cat0) {
-              auto bin_x = data.at(zeroJet)->GetXaxis()->FindBin(vis_mass);
-              auto bin_y = data.at(zeroJet)->GetYaxis()->FindBin(njets);
-              auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                                  frac_w.at(zeroJet)->GetBinContent(bin_x, bin_y),
-                                                  frac_tt.at(zeroJet)->GetBinContent(bin_x, bin_y),
-                                                  frac_qcd.at(zeroJet)->GetBinContent(bin_x, bin_y)},
-                                                 systematics.at(i));
-              FF_systs.at("et_0jet").at(i)->Fill(t1_decayMode, vis_mass, weight * fakeweight);
+              // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
+              convertDataToFake(zeroJet, name, t1_decayMode, vis_mass, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, systematics.at(i));  // 2d template
             } else if (cat1) {
-              auto bin_x = data.at(boosted)->GetXaxis()->FindBin(vis_mass);
-              auto bin_y = data.at(boosted)->GetYaxis()->FindBin(njets);
-              auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                                  frac_w.at(boosted)->GetBinContent(bin_x, bin_y),
-                                                  frac_tt.at(boosted)->GetBinContent(bin_x, bin_y),
-                                                  frac_qcd.at(boosted)->GetBinContent(bin_x, bin_y)},
-                                                 systematics.at(i));
-              FF_systs.at("et_boosted").at(i)->Fill(higgs_pT, m_sv, weight * fakeweight);
+              convertDataToFake(boosted, name, higgs_pT, m_sv, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, systematics.at(i));
             } else if (cat2) {
-              auto bin_x = data.at(vbf)->GetXaxis()->FindBin(vis_mass);
-              auto bin_y = data.at(vbf)->GetYaxis()->FindBin(njets);
-              auto fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                                  frac_w.at(vbf)->GetBinContent(bin_x, bin_y),
-                                                  frac_tt.at(vbf)->GetBinContent(bin_x, bin_y),
-                                                  frac_qcd.at(vbf)->GetBinContent(bin_x, bin_y)},
-                                                 systematics.at(i));
-              FF_systs.at("et_vbf").at(i)->Fill(mjj, vbf_var2, weight * fakeweight);
+              convertDataToFake(vbf, name, vbf_var1, vbf_var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, systematics.at(i));
+              convertDataToFake(ACcat, name, vbf_var1, vbf_var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, weight, systematics.at(i));
             }
           }
         }
