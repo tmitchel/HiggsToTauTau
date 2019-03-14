@@ -13,7 +13,7 @@ class Sample : public TemplateTool {
   Sample(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>);
   void set_branches(std::shared_ptr<TTree>, std::string);
   void load_fake_fractions(std::string);
-  void init_systematics(std::string name);
+  void init_systematics();
   void fill_histograms(std::string, std::string, bool, std::string);
   std::string get_category(double);
   void convert_data_to_fake(std::string, double, double, int);
@@ -86,9 +86,9 @@ Sample::Sample(std::string channel_prefix, std::string year, std::string in_samp
 }
 
 // change to the correct output directory then create a new TH1F that will be filled for the current input file
-void Sample::init_systematics(std::string name) {
+void Sample::init_systematics() {
   // systematics still only need the data histograms
-  if (name == "Data") {
+  if (sample_name == "Data" || sample_name == "data_obs") {
     for (auto key : FF_systs) {
       fout->cd(key.first.c_str());
       std::string name = "jetFakes_";
@@ -147,6 +147,8 @@ void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSy
   auto fin = std::unique_ptr<TFile>(TFile::Open(ifile.c_str()));
   auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
   set_branches(tree, acWeight);
+  init_systematics();
+  fout->cd();
 
   bool cat0(false), cat1(false), cat2(false);
   float vbf_var1(0.), vbf_var2(0.), vbf_var3(0.);
@@ -235,8 +237,8 @@ void Sample::convert_data_to_fake(std::string cat, double var1, double var2, int
                                    fake_fractions.at(cat + "_frac_w")->GetBinContent(bin_x, bin_y),
                                    fake_fractions.at(cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
                                    fake_fractions.at(cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)});
-  fakes_2d.at(cat)->Fill(var1, var2, weight * fakeweight);
- } else {
+    fakes_2d.at(cat)->Fill(var1, var2, weight * fakeweight);
+  } else {
     fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                    fake_fractions.at(cat + "_frac_w")->GetBinContent(bin_x, bin_y),
                                    fake_fractions.at(cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
