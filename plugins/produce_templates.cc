@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     sample->Close();
 
     // start by just printing all the keys in the file.
-    for (auto key : fin->GetListOfKeys()) {
+    for (auto key : (*fin->GetListOfKeys())) {
       std::cout << key->GetName() << std::endl;
     }
 
