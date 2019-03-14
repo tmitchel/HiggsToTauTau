@@ -137,6 +137,7 @@ void FakeFractions::fillQCD() {
   // calculate fake-fractions
   for (int i = 0; i < data.size(); i++) {
     frac_qcd.at(i) = reinterpret_cast<TH2F *>(data.at(i)->Clone());
+    frac_qcd.at(i)->SetName(("frac_qcd_"+categories.at(i)).c_str());
     frac_qcd.at(i)->Add(frac_w.at(i), -1);
     frac_qcd.at(i)->Add(frac_tt.at(i), -1);
     frac_qcd.at(i)->Add(frac_real.at(i), -1);
