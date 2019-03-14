@@ -68,8 +68,7 @@ def getSyst2016(name):
   if name != 'embed' and name != 'data_obs':
     systs += [
       'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down',
-      'vbfMass_JetTotalUp', 'vbfMass_JetTotalUp', 'jetVeto30_JetTotalUp', 'jetVeto30_JetTotalUp',
-      'vbfMass_JetTotalDown', 'vbfMass_JetTotalDown', 'jetVeto30_JetTotalDown', 'jetVeto30_JetTotalDown'
+      'vbfMass_JetTotalUp', 'jetVeto30_JetTotalUp', 'vbfMass_JetTotalDown', 'jetVeto30_JetTotalDown'
     ]
 
   if name == 'TTT' or name == 'TTJ':
