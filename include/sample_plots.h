@@ -4,6 +4,7 @@
 #define INCLUDE_SAMPLE_H_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 #include "./TemplateTool.h"
@@ -14,28 +15,29 @@
 // this file so it is easier to read.
 class Sample_Plots : public TemplateTool {
  public:
-  Sample_Plots(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>, std::string, std::vector<Float_t>);
+  Sample_Plots(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>, std::map<std::string, std::vector<float>>);
   void set_branches(std::shared_ptr<TTree>, std::string);
   void load_fake_fractions(std::string);
   void fill_histograms(std::shared_ptr<TTree>, std::string);
   std::string get_category(double);
-  void convert_data_to_fake(std::string, double);
+  void convert_data_to_fake(std::string, double, std::string);
   void write_histograms();
   void set_variable(std::shared_ptr<TTree>);
+  Float_t get_var(std::string);
 
  private:
   std::string sample_name, in_var_name;
   std::map<std::string, TH1F *> fakes, hists;
   std::map<std::string, TH2F *> fake_fractions;
-  std::vector<Float_t> var_bins;
+  std::vector<std::string> plot_variables;
+  std::map<std::string, std::map<std::string, TH1F *>> all_fakes, all_hists;
 
   // get variables from file
-  Int_t is_signal, is_antiTauIso, OS;                  // flags
-  Float_t nbjets, njets, mjj;                          // selection
-  Float_t weight, acWeightVal;                         // weights
-  Float_t lep_iso, mt, t1_decayMode, vis_mass, t1_pt;  // for fake factor
-  Float_t D0_ggH;                                      // for 3D separation
-  Float_t observable;                                  // variable to plot
+  Int_t is_signal, is_antiTauIso, OS;        // flags
+  Float_t weight, acWeightVal;               // weights
+  Float_t lep_iso, mjj, t1_pt, vis_mass, mt, t1_decayMode, njets, nbjets;  // for fake factor                           
+  Float_t D0_ggH;  // 3D separation
+  std::map<std::string, Float_t> variables;  // all variables
 };
 
 // Sample_Plots constructor. Loads all of the basic information from the parent TemplateTool class.
@@ -47,78 +49,50 @@ class Sample_Plots : public TemplateTool {
 //
 // this will give a pointer to the histogram. The fakes is accessed the exact same way, but
 // is only available for data.
-Sample_Plots::Sample_Plots(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix, std::shared_ptr<TFile> output_file, std::string var_name, std::vector<Float_t> var_bins)
+Sample_Plots::Sample_Plots(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix,
+                           std::shared_ptr<TFile> output_file, std::map<std::string, std::vector<float>> in_variables)
     : TemplateTool(channel_prefix, year, suffix, output_file),
       sample_name(in_sample_name),
-      acWeightVal(1.),
-      var_bins(var_bins),
-      in_var_name(var_name) {
-  for (auto cat : categories) {
-    fout->cd(("plots/" + in_var_name + "/" + cat).c_str());
+      acWeightVal(1.) {
+  for (auto it = in_variables.begin(); it != in_variables.end(); it++) {
+    for (auto cat : categories) {
+      fout->cd(("plots/" + it->first + "/" + cat).c_str());
 
-    // convert data name to be appropriate and do ff things
-    if (sample_name.find("Data") != std::string::npos || sample_name == "data_obs") {
-      sample_name = "data_obs";
-      fakes[cat] = new TH1F(("fake_" + cat).c_str(), "fake_SS", var_bins.at(0), var_bins.at(1), var_bins.at(2));
+      // convert data name to be appropriate and do ff things
+      if (sample_name.find("Data") != std::string::npos || sample_name == "data_obs") {
+        sample_name = "data_obs";
+        fakes[cat] = new TH1F(("fake_" + cat).c_str(), "fake_SS", it->second.at(0), it->second.at(1), it->second.at(2));
+      }
+
+      // create output histograms
+      hists[cat] = new TH1F(sample_name.c_str(), sample_name.c_str(), it->second.at(0), it->second.at(1), it->second.at(2));
     }
-
-    // create output histograms
-    hists[cat] = new TH1F(sample_name.c_str(), sample_name.c_str(), var_bins.at(0), var_bins.at(1), var_bins.at(2));
-  }
-  fout->cd();
-}
-
-// set_branches takes an input TTree and sets all of the needed branch
-// addresses to the appropriate member variables. Provided an acWeight,
-// it will also load the acWeight stored in the root file for reweighting
-// JHU samples.
-void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeight) {
-  std::string iso;
-  std::string tree_name = tree->GetName();
-  if (tree_name.find("etau_tree") != std::string::npos) {
-    iso = "el_iso";
-  } else if (tree_name.find("mutau_tree") != std::string::npos) {
-    iso = "mu_iso";
-  }
-
-  tree->SetBranchAddress("evtwt", &weight);
-  tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
-  tree->SetBranchAddress("vis_mass", &vis_mass);
-  tree->SetBranchAddress("mjj", &mjj);
-  tree->SetBranchAddress("mt", &mt);
-  tree->SetBranchAddress(iso.c_str(), &lep_iso);
-  tree->SetBranchAddress("njets", &njets);
-  tree->SetBranchAddress("nbjets", &nbjets);
-  tree->SetBranchAddress("D0_ggH", &D0_ggH);
-  tree->SetBranchAddress("is_signal", &is_signal);
-  tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
-  tree->SetBranchAddress("OS", &OS);
-  tree->SetBranchAddress("t1_pt", &t1_pt);
-
-  if (acWeight != "None") {
-    tree->SetBranchAddress(acWeight.c_str(), &acWeightVal);
+    fout->cd();
+    plot_variables.push_back(it->first);
+    all_fakes[it->first] = fakes;
+    all_hists[it->first] = hists;
   }
 }
 
-void Sample_Plots::set_variable(std::shared_ptr<TTree> tree) {
-  if (in_var_name == "t1_decayMode") {
-    observable = t1_decayMode;
-  } else if (in_var_name == "vis_mass") {
-    observable = vis_mass;
-  } else if (in_var_name == "mjj") {
-    observable = mjj;
-  } else if (in_var_name == "mt") {
-    observable = mt;
-  } else if (in_var_name == "mu_iso" || in_var_name == "el_iso") {
-    observable = lep_iso;
-  } else if (in_var_name == "njets") {
-    observable = njets;
-  } else if (in_var_name == "D0_ggH") {
-    observable = D0_ggH;
-  } else if (in_var_name == "t1_pt") {
-    observable = t1_pt;
+Float_t Sample_Plots::get_var(std::string var) {
+  if (var == "t1_decayMode") {
+    return t1_decayMode;
+  } else if (var == "vis_mass") {
+    return vis_mass;
+  } else if (var == "mjj") {
+    return mjj;
+  } else if (var == "mt") {
+    return mt;
+  } else if (var == "mu_iso" || var == "el_iso") {
+    return lep_iso;
+  } else if (var == "njets") {
+    return njets;
+  } else if (var == "D0_ggH") {
+    return D0_ggH;
+  } else if (var == "t1_pt") {
+    return t1_pt;
   } else {
-    tree->SetBranchAddress(in_var_name.c_str(), &observable);
+    return variables.at(var);
   }
 }
 
@@ -130,7 +104,6 @@ void Sample_Plots::set_variable(std::shared_ptr<TTree> tree) {
 // JHU samples to different coupling scenarios.
 void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWeight = "None") {
   set_branches(tree, acWeight);
-  set_variable(tree);
   fout->cd();
 
   bool cat0(false), cat1(false), cat2(false);
@@ -156,29 +129,30 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
 
     // find the correct MELA ggH/Higgs pT bin for this event
     auto ACcat = get_category(D0_ggH);
-
-    // fill histograms
-    if (is_signal) {
-      if (cat0) {
-        hists.at(channel_prefix + "_0jet")->Fill(observable, weight);
-      } else if (cat1) {
-        hists.at(channel_prefix + "_boosted")->Fill(observable, weight);
-      } else if (cat2) {
-        hists.at(channel_prefix + "_vbf")->Fill(observable, weight);
-        if (ACcat != "skip") {
-          hists.at(ACcat)->Fill(observable, weight);
+    for (auto var : plot_variables) {
+      // fill histograms
+      if (is_signal) {
+        if (cat0) {
+          all_hists.at(var).at(channel_prefix + "_0jet")->Fill(get_var(var), weight);
+        } else if (cat1) {
+          all_hists.at(var).at(channel_prefix + "_boosted")->Fill(get_var(var), weight);
+        } else if (cat2) {
+          all_hists.at(var).at(channel_prefix + "_vbf")->Fill(get_var(var), weight);
+          if (ACcat != "skip") {
+            all_hists.at(var).at(ACcat)->Fill(get_var(var), weight);
+          }
         }
-      }
-    } else if (is_antiTauIso && sample_name == "data_obs") {
-      if (cat0) {
-        // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
-        convert_data_to_fake(channel_prefix + "_0jet", observable);  // 2d template
-      } else if (cat1) {
-        convert_data_to_fake(channel_prefix + "_boosted", observable);
-      } else if (cat2) {
-        convert_data_to_fake(channel_prefix + "_vbf", observable);
-        if (ACcat != "skip") {
-          convert_data_to_fake(ACcat, observable);
+      } else if (is_antiTauIso && sample_name == "data_obs") {
+        if (cat0) {
+          // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
+          convert_data_to_fake(channel_prefix + "_0jet", get_var(var), var);  // 2d template
+        } else if (cat1) {
+          convert_data_to_fake(channel_prefix + "_boosted", get_var(var), var);
+        } else if (cat2) {
+          convert_data_to_fake(channel_prefix + "_vbf", get_var(var), var);
+          if (ACcat != "skip") {
+            convert_data_to_fake(ACcat, get_var(var), var);
+          }
         }
       }
     }
@@ -190,7 +164,7 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
 // from the fake fraction histograms that were loaded in load_fake_fractions. These weights
 // are used with the input variables to fill the fake histogram with the correct weight. If
 // the "syst" parameter is passed, read the weight for the provided systematic shift.
-void Sample_Plots::convert_data_to_fake(std::string cat, double var1) {
+void Sample_Plots::convert_data_to_fake(std::string cat, double var1, std::string j) {
   fout->cd();
   auto bin_x = fake_fractions.at(cat + "_data")->GetXaxis()->FindBin(vis_mass);
   auto bin_y = fake_fractions.at(cat + "_data")->GetYaxis()->FindBin(njets);
@@ -199,7 +173,7 @@ void Sample_Plots::convert_data_to_fake(std::string cat, double var1) {
                                  fake_fractions.at(cat + "_frac_w")->GetBinContent(bin_x, bin_y),
                                  fake_fractions.at(cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
                                  fake_fractions.at(cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)});
-  fakes.at(cat)->Fill(var1, weight * fakeweight);
+  all_fakes.at(j).at(cat)->Fill(var1, weight * fakeweight);
 }
 
 // load_fake_fractions opens the given file and reads the
@@ -267,14 +241,185 @@ std::string Sample_Plots::get_category(double vbf_var3) {
 // histogram. Additionally, if this Sample_Plots is for data, write the fake factor
 // histograms in the same directory.
 void Sample_Plots::write_histograms() {
-  for (auto cat : categories) {
-    fout->cd(("plots/" + in_var_name + "/" + cat).c_str());
-    hists.at(cat)->Write();
-    if (sample_name == "data_obs") {
-      auto hist = fakes.at(cat);
-      hist->SetName("jetFakes");
-      hist->Write();
+  auto i = 0;
+  for (auto var : plot_variables) {
+    for (auto cat : categories) {
+      fout->cd(("plots/" + var + "/" + cat).c_str());
+      all_hists.at(var).at(cat)->Write();
+      if (sample_name == "data_obs") {
+        auto hist = all_fakes.at(var).at(cat);
+        hist->SetName("jetFakes");
+        hist->Write();
+      }
     }
+    i++;
+  }
+}
+
+// set_branches takes an input TTree and sets all of the needed branch
+// addresses to the appropriate member variables. Provided an acWeight,
+// it will also load the acWeight stored in the root file for reweighting
+// JHU samples.
+void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeight) {
+  std::string iso;
+  std::string tree_name = tree->GetName();
+  if (tree_name.find("etau_tree") != std::string::npos) {
+    iso = "el_iso";
+  } else if (tree_name.find("mutau_tree") != std::string::npos) {
+    iso = "mu_iso";
+  }
+
+  // now make the map
+  variables = {
+      {"el_pt", 0},
+      {"el_eta", 0},
+      {"el_phi", 0},
+      {"el_mass", 0},
+      {"mu_pt", 0},
+      {"mu_eta", 0},
+      {"mu_phi", 0},
+      {"mu_mass", 0},
+      {"t1_eta", 0},
+      {"t1_phi", 0},
+      {"t1_mass", 0},
+      {"t1_iso", 0},
+      {"j1_pt", 0},
+      {"j1_eta", 0},
+      {"j1_phi", 0},
+      {"j2_pt", 0},
+      {"j2_eta", 0},
+      {"j2_phi", 0},
+      {"b1_pt", 0},
+      {"b1_eta", 0},
+      {"b1_phi", 0},
+      {"b2_pt", 0},
+      {"b2_eta", 0},
+      {"b2_phi", 0},
+      {"met", 0},
+      {"metphi", 0},
+      {"numGenJets", 0},
+      {"pt_sv", 0},
+      {"m_sv", 0},
+      {"Dbkg_VBF", 0},
+      {"Dbkg_ggH", 0},
+      {"D0_VBF", 0},
+      {"DCP_VBF", 0},
+      {"D0_ggH", 0},
+      {"DCP_ggH", 0},
+      {"Phi", 0},
+      {"Phi1", 0},
+      {"costheta1", 0},
+      {"costheta2", 0},
+      {"costhetastar", 0},
+      {"Q2V1", 0},
+      {"Q2V2", 0},
+      {"ME_sm_VBF", 0},
+      {"ME_sm_ggH", 0},
+      {"ME_sm_WH", 0},
+      {"ME_sm_ZH", 0},
+      {"ME_bkg", 0},
+      {"ME_bkg1", 0},
+      {"ME_bkg2", 0},
+      {"VBF_MELA", 0},
+      {"higgs_pT", 0},
+      {"higgs_m", 0},
+      {"hjj_pT", 0},
+      {"hjj_m", 0},
+      {"vis_mass", 0},
+      {"dEtajj", 0},
+      {"dPhijj", 0},
+      {"MT_lepMET", 0},
+      {"MT_HiggsMET", 0},
+      {"hj_dphi", 0},
+      {"jmet_dphi", 0},
+      {"MT_t2MET", 0},
+      {"hj_deta", 0},
+      {"hmet_dphi", 0},
+      {"hj_dr", 0},
+      {"lt_dphi", 0},
+  };
+
+  tree->SetBranchAddress("evtwt", &weight);
+  tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
+  tree->SetBranchAddress("vis_mass", &vis_mass);
+  tree->SetBranchAddress("mjj", &mjj);
+  tree->SetBranchAddress("mt", &mt);
+  tree->SetBranchAddress(iso.c_str(), &lep_iso);
+  tree->SetBranchAddress("njets", &njets);
+  tree->SetBranchAddress("nbjets", &nbjets);
+  tree->SetBranchAddress("D0_ggH", &D0_ggH);
+  tree->SetBranchAddress("is_signal", &is_signal);
+  tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
+  tree->SetBranchAddress("OS", &OS);
+  tree->SetBranchAddress("t1_pt", &t1_pt);
+  tree->SetBranchAddress("el_pt", &variables.at("el_pt"));
+  tree->SetBranchAddress("el_eta", &variables.at("el_eta"));
+  tree->SetBranchAddress("el_phi", &variables.at("el_phi"));
+  tree->SetBranchAddress("el_mass", &variables.at("el_mass"));
+  tree->SetBranchAddress("mu_pt", &variables.at("mu_pt"));
+  tree->SetBranchAddress("mu_eta", &variables.at("mu_eta"));
+  tree->SetBranchAddress("mu_phi", &variables.at("mu_phi"));
+  tree->SetBranchAddress("mu_mass", &variables.at("mu_mass"));
+  tree->SetBranchAddress("t1_eta", &variables.at("t1_eta"));
+  tree->SetBranchAddress("t1_phi", &variables.at("t1_phi"));
+  tree->SetBranchAddress("t1_mass", &variables.at("t1_mass"));
+  tree->SetBranchAddress("t1_iso", &variables.at("t1_iso"));
+  tree->SetBranchAddress("j1_pt", &variables.at("j1_pt"));
+  tree->SetBranchAddress("j1_eta", &variables.at("j1_eta"));
+  tree->SetBranchAddress("j1_phi", &variables.at("j1_phi"));
+  tree->SetBranchAddress("j2_pt", &variables.at("j2_pt"));
+  tree->SetBranchAddress("j2_eta", &variables.at("j2_eta"));
+  tree->SetBranchAddress("j2_phi", &variables.at("j2_phi"));
+  tree->SetBranchAddress("b1_pt", &variables.at("b1_pt"));
+  tree->SetBranchAddress("b1_eta", &variables.at("b1_eta"));
+  tree->SetBranchAddress("b1_phi", &variables.at("b1_phi"));
+  tree->SetBranchAddress("b2_pt", &variables.at("b2_pt"));
+  tree->SetBranchAddress("b2_eta", &variables.at("b2_eta"));
+  tree->SetBranchAddress("b2_phi", &variables.at("b2_phi"));
+  tree->SetBranchAddress("met", &variables.at("met"));
+  tree->SetBranchAddress("metphi", &variables.at("metphi"));
+  tree->SetBranchAddress("numGenJets", &variables.at("numGenJets"));
+  tree->SetBranchAddress("pt_sv", &variables.at("pt_sv"));
+  tree->SetBranchAddress("m_sv", &variables.at("m_sv"));
+  tree->SetBranchAddress("Dbkg_VBF", &variables.at("Dbkg_VBF"));
+  tree->SetBranchAddress("Dbkg_ggH", &variables.at("Dbkg_ggH"));
+  tree->SetBranchAddress("D0_VBF", &variables.at("D0_VBF"));
+  tree->SetBranchAddress("DCP_VBF", &variables.at("DCP_VBF"));
+  tree->SetBranchAddress("D0_ggH", &variables.at("D0_ggH"));
+  tree->SetBranchAddress("DCP_ggH", &variables.at("DCP_ggH"));
+  tree->SetBranchAddress("Phi", &variables.at("Phi"));
+  tree->SetBranchAddress("Phi1", &variables.at("Phi1"));
+  tree->SetBranchAddress("costheta1", &variables.at("costheta1"));
+  tree->SetBranchAddress("costheta2", &variables.at("costheta2"));
+  tree->SetBranchAddress("costhetastar", &variables.at("costhetastar"));
+  tree->SetBranchAddress("Q2V1", &variables.at("Q2V1"));
+  tree->SetBranchAddress("Q2V2", &variables.at("Q2V2"));
+  tree->SetBranchAddress("ME_sm_VBF", &variables.at("ME_sm_VBF"));
+  tree->SetBranchAddress("ME_sm_ggH", &variables.at("ME_sm_ggH"));
+  tree->SetBranchAddress("ME_sm_WH", &variables.at("ME_sm_WH"));
+  tree->SetBranchAddress("ME_sm_ZH", &variables.at("ME_sm_ZH"));
+  tree->SetBranchAddress("ME_bkg", &variables.at("ME_bkg"));
+  tree->SetBranchAddress("ME_bkg1", &variables.at("ME_bkg1"));
+  tree->SetBranchAddress("ME_bkg2", &variables.at("ME_bkg2"));
+  tree->SetBranchAddress("VBF_MELA", &variables.at("VBF_MELA"));
+  tree->SetBranchAddress("higgs_pT", &variables.at("higgs_pT"));
+  tree->SetBranchAddress("higgs_m", &variables.at("higgs_m"));
+  tree->SetBranchAddress("hjj_pT", &variables.at("hjj_pT"));
+  tree->SetBranchAddress("hjj_m", &variables.at("hjj_m"));
+  tree->SetBranchAddress("vis_mass", &variables.at("vis_mass"));
+  tree->SetBranchAddress("dEtajj", &variables.at("dEtajj"));
+  tree->SetBranchAddress("dPhijj", &variables.at("dPhijj"));
+  tree->SetBranchAddress("MT_lepMET", &variables.at("MT_lepMET"));
+  tree->SetBranchAddress("MT_HiggsMET", &variables.at("MT_HiggsMET"));
+  tree->SetBranchAddress("hj_dphi", &variables.at("hj_dphi"));
+  tree->SetBranchAddress("jmet_dphi", &variables.at("jmet_dphi"));
+  tree->SetBranchAddress("MT_t2MET", &variables.at("MT_t2MET"));
+  tree->SetBranchAddress("hj_deta", &variables.at("hj_deta"));
+  tree->SetBranchAddress("hmet_dphi", &variables.at("hmet_dphi"));
+  tree->SetBranchAddress("hj_dr", &variables.at("hj_dr"));
+  tree->SetBranchAddress("lt_dphi", &variables.at("lt_dphi"));
+  if (acWeight != "None") {
+    tree->SetBranchAddress(acWeight.c_str(), &acWeightVal);
   }
 }
 

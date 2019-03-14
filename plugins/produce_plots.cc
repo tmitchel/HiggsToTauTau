@@ -44,10 +44,10 @@ int main(int argc, char *argv[]) {
   std::map<std::string, std::vector<float>> vars = {
       {"m_sv", {30, 50, 180}},
       // {"mu_pt", {30, 30, 200}},
-      // {"t1_pt", {30, 30, 200}},
-      // {"met", {30, 0, 500}},
+      {"t1_pt", {30, 30, 200}},
+      {"met", {30, 0, 500}},
       // {"lt_dphi", {30, 0, 3.14}},
-      // {"higgs_pT", {30, 0, 300}},
+      {"higgs_pT", {30, 0, 300}},
       // {"MT_lepMET", {30, 0, 55}},
       // {"MT_HiggsMET", {30, 0, 300}},
       // {"hj_dphi", {30, 0, 3.14}},
@@ -88,16 +88,13 @@ int main(int argc, char *argv[]) {
     // open the file
     auto fin = std::unique_ptr<TFile>(TFile::Open((dir + "/" + ifile).c_str()));
 
-    // loop over variables to plot
-    for (auto it = vars.begin(); it != vars.end(); it++) {
-      // run for nominal case first
-      auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));                     // open TTree
-      auto sample = std::make_unique<Sample_Plots>(channel_prefix, year, name, suffix, fout, it->first, it->second);  // create Sample_Plots
-      sample->load_fake_fractions(ff_name);                                                                           // load fractions from input file
-      sample->fill_histograms(tree);                                                                                  // do event loop and fill histos
-      sample->write_histograms();                                                                                     // write all to the file
-      sample->Close();                                                                                                // delete the ff_weight pointer
-    }
+    // run for nominal case first
+    auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));    // open TTree
+    auto sample = std::make_unique<Sample_Plots>(channel_prefix, year, name, suffix, fout, vars);  // create Sample_Plots
+    sample->load_fake_fractions(ff_name);                                                          // load fractions from input file
+    sample->fill_histograms(tree);                                                                 // do event loop and fill histos
+    sample->write_histograms();                                                                    // write all to the file
+    sample->Close();                                                                               // delete the ff_weight pointer
 
     // AC reweighting for JHU samples only
     if (ifile.find("_inc.root") != std::string::npos) {
@@ -105,7 +102,7 @@ int main(int argc, char *argv[]) {
       for (auto ac_weight : ac_weights) {
         auto fin = std::unique_ptr<TFile>(TFile::Open((dir + "/" + ifile).c_str()));
         auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
-        auto jhu_sample = std::make_unique<Sample_Plots>(channel_prefix, year, ac_weight.second, suffix, fout, "m_sv", vars.at("m_sv"));
+        auto jhu_sample = std::make_unique<Sample_Plots>(channel_prefix, year, ac_weight.second, suffix, fout, vars);
         jhu_sample->load_fake_fractions(ff_name);
         jhu_sample->fill_histograms(tree, ac_weight.first);
         jhu_sample->write_histograms();
@@ -113,4 +110,5 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+  std::cout << "Plots created.\n Timing Info: \n\t CPU Time: " << watch.CpuTime() << "\n\tReal Time: " << watch.RealTime() << std::endl;
 }
