@@ -11,11 +11,11 @@
 class Sample : public TemplateTool {
  public:
   Sample(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>);
-  void set_branches(TTree *, std::string);
+  void set_branches(std::shared_ptr<TTree>, std::string);
   void load_fake_fractions(std::string);
   void init_systematics(std::string name);
   void fill_histograms(std::string, std::string, bool, std::string);
-  std::string get_category(double, double);
+  std::string get_category(double);
   void convert_data_to_fake(std::string, double, double, int);
   void write_histograms(bool, std::string);
 
@@ -54,19 +54,15 @@ Sample::Sample(std::string channel_prefix, std::string year, std::string in_samp
       // bins_vbf_var2{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.95, 1.}, // mt2016
       bins_vbf_var2{0, 0.25, 0.5, 0.75, 1.} {
   for (auto cat : categories) {
-    // make directory in TFile
-    fout->cd();
-    fout->mkdir(cat.c_str());
     fout->cd(cat.c_str());
 
     // convert data name to be appropriate and do ff things
-    if (sample_name.find("Data") != std::string::npos) {
+    if (sample_name.find("Data") != std::string::npos || sample_name == "data_obs") {
       sample_name = "data_obs";
-
       // also push the fake factor histograms only for Data
-      if (cat.find("0jet") != std::string::npos) {
+      if (cat == channel_prefix + "_0jet") {
         fakes_2d[cat] = new TH2F("fake_0jet", "fake_SS", bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]);
-      } else if (cat.find("boosted") != std::string::npos) {
+      } else if (cat == channel_prefix + "_boosted") {
         fakes_2d[cat] = new TH2F("fake_boosted", "fake_SS", bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]);
       } else {
         fakes_2d[cat] = new TH2F(("fake_" + cat).c_str(), "fake_SS", bins_vbf_var1.size() - 1, &bins_vbf_var1[0], bins_vbf_var2.size() - 1, &bins_vbf_var2[0]);
@@ -110,7 +106,7 @@ void Sample::init_systematics(std::string name) {
   }
 }
 
-void Sample::set_branches(TTree *tree, std::string acWeight) {
+void Sample::set_branches(std::shared_ptr<TTree> tree, std::string acWeight) {
   std::string iso;
   std::string tree_name = tree->GetName();
   if (tree_name.find("etau_tree") != std::string::npos) {
@@ -148,8 +144,8 @@ void Sample::set_branches(TTree *tree, std::string acWeight) {
 }
 
 void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSyst = false, std::string acWeight = "None") {
-  auto fin = new TFile(ifile.c_str(), "read");
-  auto tree = reinterpret_cast<TTree *>(fin->Get(tree_name.c_str()));
+  auto fin = std::unique_ptr<TFile>(TFile::Open(ifile.c_str()));
+  auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
   set_branches(tree, acWeight);
 
   bool cat0(false), cat1(false), cat2(false);
@@ -182,7 +178,7 @@ void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSy
     cat2 = (njets > 1 && mjj > 300);
 
     // find the correct MELA ggH/Higgs pT bin for this event
-    auto ACcat = get_category(vbf_var3, -1);
+    auto ACcat = get_category(vbf_var3);
 
     // fill histograms
     if (is_signal) {
@@ -192,9 +188,11 @@ void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSy
         hists_2d.at(channel_prefix + "_boosted")->Fill(higgs_pT, m_sv, weight);
       } else if (cat2) {
         hists_2d.at(channel_prefix + "_vbf")->Fill(vbf_var1, vbf_var2, weight);
-        hists_2d.at(ACcat)->Fill(vbf_var1, vbf_var2, weight);
+        if (ACcat != "skip") {
+          hists_2d.at(ACcat)->Fill(vbf_var1, vbf_var2, weight);
+        }
       }
-    } else if (is_antiTauIso && sample_name == "Data") {
+    } else if (is_antiTauIso && sample_name == "data_obs") {
       if (cat0) {
         // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
         convert_data_to_fake(channel_prefix + "_0jet", t1_decayMode, vis_mass, -1);  // 2d template
@@ -202,7 +200,9 @@ void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSy
         convert_data_to_fake(channel_prefix + "_boosted", higgs_pT, m_sv, -1);
       } else if (cat2) {
         convert_data_to_fake(channel_prefix + "_vbf", vbf_var1, vbf_var2, -1);
-        convert_data_to_fake(ACcat, vbf_var1, vbf_var2, -1);
+        if (ACcat != "skip") {
+          convert_data_to_fake(ACcat, vbf_var1, vbf_var2, -1);
+        }
       }
 
       // loop through all systematic names and get the corresponding weight to fill a histogram
@@ -215,7 +215,9 @@ void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSy
             convert_data_to_fake(channel_prefix + "_boosted", higgs_pT, m_sv, i);
           } else if (cat2) {
             convert_data_to_fake(channel_prefix + "_vbf", vbf_var1, vbf_var2, i);
-            convert_data_to_fake(ACcat, vbf_var1, vbf_var2, i);
+            if (ACcat != "skip") {
+              convert_data_to_fake(ACcat, vbf_var1, vbf_var2, i);
+            }
           }
         }
       }
@@ -224,6 +226,7 @@ void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSy
 }
 
 void Sample::convert_data_to_fake(std::string cat, double var1, double var2, int syst = -1) {
+  fout->cd();
   auto bin_x = fake_fractions.at(cat + "_data")->GetXaxis()->FindBin(vis_mass);
   auto bin_y = fake_fractions.at(cat + "_data")->GetYaxis()->FindBin(njets);
   double fakeweight;
@@ -232,8 +235,8 @@ void Sample::convert_data_to_fake(std::string cat, double var1, double var2, int
                                    fake_fractions.at(cat + "_frac_w")->GetBinContent(bin_x, bin_y),
                                    fake_fractions.at(cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
                                    fake_fractions.at(cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)});
-    fakes_2d.at(cat)->Fill(var1, var2, weight * fakeweight);
-  } else {
+  fakes_2d.at(cat)->Fill(var1, var2, weight * fakeweight);
+ } else {
     fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
                                    fake_fractions.at(cat + "_frac_w")->GetBinContent(bin_x, bin_y),
                                    fake_fractions.at(cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
@@ -245,29 +248,33 @@ void Sample::convert_data_to_fake(std::string cat, double var1, double var2, int
 
 void Sample::load_fake_fractions(std::string file_name) {
   auto ifile = new TFile(file_name.c_str(), "READ");
+  fout->cd();
   for (auto cat : categories) {
-    fake_fractions[cat + "_data"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "data_" + cat).c_str()));
-    fake_fractions[cat + "_frac_w"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_w_" + cat).c_str()));
-    fake_fractions[cat + "_frac_tt"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_tt_" + cat).c_str()));
-    fake_fractions[cat + "_frac_qcd"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_qcd_" + cat).c_str()));
+    fake_fractions[cat + "_data"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "data_" + cat).c_str())->Clone());
+    fake_fractions[cat + "_frac_w"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_w_" + cat).c_str())->Clone());
+    fake_fractions[cat + "_frac_tt"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_tt_" + cat).c_str())->Clone());
+    fake_fractions[cat + "_frac_qcd"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_qcd_" + cat).c_str())->Clone());
   }
+  ifile->Close();
 }
 
 // basically a map from 2 inputs -> 1 Category
-std::string Sample::get_category(double vbf_var3, double vbf_var4 = -1) {
+std::string Sample::get_category(double vbf_var3) {
   double edge = 1. / 6.;
-  if (vbf_var3 > 0 && vbf_var3 <= 1. * edge) {
-    return "vbf_ggHMELA_bin1_NN_bin1";
+  if (vbf_var3 >= 0 && vbf_var3 <= 1. * edge) {
+    return channel_prefix + "_vbf_ggHMELA_bin1_NN_bin1";
   } else if (vbf_var3 <= 2. * edge) {
-    return "vbf_ggHMELA_bin2_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin2_NN_bin1";
   } else if (vbf_var3 <= 3. * edge) {
-    return "vbf_ggHMELA_bin3_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin3_NN_bin1";
   } else if (vbf_var3 <= 4. * edge) {
-    return "vbf_ggHMELA_bin4_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin4_NN_bin1";
   } else if (vbf_var3 <= 5. * edge) {
-    return "vbf_ggHMELA_bin5_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin5_NN_bin1";
   } else if (vbf_var3 <= 6. * edge) {
-    return "vbf_ggHMELA_bin6_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin6_NN_bin1";
+  } else {
+    return "skip";
   }
 
   //  else if (D0_ggH <= 7.*edge) {
@@ -290,15 +297,11 @@ void Sample::write_histograms(bool doSyst = false, std::string newName = "") {
     fout->cd(cat.c_str());
 
     // potentially change the name (for JHU)
-    if (newName != "") {
-      auto hist = hists_2d.at(cat);
-      hist->SetName(newName.c_str());
-    } else {
-      hists_2d.at(cat)->Write();
-    }
-
-    if (sample_name == "Data") {
-      fakes_2d.at(cat)->Write();
+    hists_2d.at(cat)->Write();
+    if (sample_name == "data_obs") {
+      auto hist = fakes_2d.at(cat);
+      hist->SetName("jetFakes");
+      hist->Write();
     }
   }
 }

@@ -55,6 +55,9 @@ void read_directory(const std::string &name, std::vector<std::string> *v) {
 class TemplateTool {
  public:
   std::vector<std::pair<std::string, std::string>> get_AC_weights(std::string);
+  std::vector<std::string> get_categories() { return categories; }
+  TemplateTool(std::string);
+  void Close() { delete ff_weight;  }
 
  protected:
   TemplateTool(std::string, std::string, std::string, std::shared_ptr<TFile>);
@@ -168,5 +171,83 @@ std::vector<std::pair<std::string, std::string>> TemplateTool::get_AC_weights(st
     return acNameMap.at("zh");
     }
 }
+
+TemplateTool::TemplateTool(std::string channel_prefix)
+    : channel_prefix(channel_prefix),
+      acNameMap{
+          {"ggh",
+           {std::make_pair("wt_ggH_a1", "JHU_GGH2Jets_sm_M125"),
+            std::make_pair("wt_ggH_a3", "JHU_GGH2Jets_pseudoscalar_M125"),
+            std::make_pair("wt_ggH_a3int", "JHU_GGH2Jets_pseudoscalar_Mf05ph0125")}},
+          {"wh",
+           {std::make_pair("wt_wh_a1", "reweighted_WH_htt_0PM125"),
+            std::make_pair("wt_wh_a2", "reweighted_WH_htt_0PH125"),
+            std::make_pair("wt_wh_a2int", "reweighted_WH_htt_0PHf05ph0125"),
+            std::make_pair("wt_wh_a3", "reweighted_WH_htt_0M125"),
+            std::make_pair("wt_wh_a3int", "reweighted_WH_htt_0Mf05ph0125"),
+            std::make_pair("wt_wh_L1", "reweighted_WH_htt_0L1125"),
+            std::make_pair("wt_wh_L1int", "reweighted_WH_htt_0L1f05ph0125"),
+            std::make_pair("wt_wh_L1Zg", "reweighted_WH_htt_0L1Zg125"),
+            std::make_pair("wt_wh_L1Zgint", "reweighted_WH_htt_0L1Zgf05ph0125")}},
+          {"zh",
+           {std::make_pair("wt_zh_a1", "reweighted_ZH_htt_0PM125"),
+            std::make_pair("wt_zh_a2", "reweighted_ZH_htt_0PH125"),
+            std::make_pair("wt_zh_a2int", "reweighted_ZH_htt_0PHf05ph0125"),
+            std::make_pair("wt_zh_a3", "reweighted_ZH_htt_0M125"),
+            std::make_pair("wt_zh_a3int", "reweighted_ZH_htt_0Mf05ph0125"),
+            std::make_pair("wt_zh_L1", "reweighted_ZH_htt_0L1125"),
+            std::make_pair("wt_zh_L1int", "reweighted_ZH_htt_0L1f05ph0125"),
+            std::make_pair("wt_zh_L1Zg", "reweighted_ZH_htt_0L1Zg125"),
+            std::make_pair("wt_zh_L1Zgint", "reweighted_ZH_htt_0L1Zgf05ph0125")}},
+          {"vbf",
+           {
+               std::make_pair("wt_a1", "reweighted_qqH_htt_0PM125"),
+               std::make_pair("wt_a2", "reweighted_qqH_htt_0PH125"),
+               std::make_pair("wt_a2int", "reweighted_qqH_htt_0PHf05ph0125"),
+               std::make_pair("wt_a3", "reweighted_qqH_htt_0M125"),
+               std::make_pair("wt_a3int", "reweighted_qqH_htt_0Mf05ph0125"),
+               std::make_pair("wt_L1", "reweighted_qqH_htt_0L1125"),
+               std::make_pair("wt_L1int", "reweighted_qqH_htt_0L1f05ph0125"),
+               std::make_pair("wt_L1Zg", "reweighted_qqH_htt_0L1Zg125"),
+               std::make_pair("wt_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"),
+           }}},
+      categories{
+          channel_prefix + "_0jet",
+          channel_prefix + "_boosted",
+          channel_prefix + "_vbf",
+          channel_prefix + "_vbf_ggHMELA_bin1_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin2_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin3_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin4_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin5_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin6_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin7_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin8_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin9_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin10_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin11_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin1",
+          channel_prefix + "_vbf_ggHMELA_bin1_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin2_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin3_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin4_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin5_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin6_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin7_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin8_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin9_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin10_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin11_NN_bin2",
+          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2"},
+      systematics{
+          "ff_qcd_syst_up", "ff_qcd_syst_down", "ff_qcd_dm0_njet0_stat_up",
+          "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down",
+          "ff_qcd_dm1_njet0_stat_up", "ff_qcd_dm1_njet0_stat_down", "ff_qcd_dm1_njet1_stat_up",
+          "ff_qcd_dm1_njet1_stat_down", "ff_w_syst_up", "ff_w_syst_down", "ff_w_dm0_njet0_stat_up",
+          "ff_w_dm0_njet0_stat_down", "ff_w_dm0_njet1_stat_up", "ff_w_dm0_njet1_stat_down",
+          "ff_w_dm1_njet0_stat_up", "ff_w_dm1_njet0_stat_down", "ff_w_dm1_njet1_stat_up",
+          "ff_w_dm1_njet1_stat_down", "ff_tt_syst_up", "ff_tt_syst_down", "ff_tt_dm0_njet0_stat_up",
+          "ff_tt_dm0_njet0_stat_down", "ff_tt_dm0_njet1_stat_up", "ff_tt_dm0_njet1_stat_down",
+          "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down", "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"} {}
 
 #endif  // INCLUDE_TEMPLATETOOL_H_

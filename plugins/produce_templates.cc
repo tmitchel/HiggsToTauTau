@@ -45,25 +45,34 @@ int main(int argc, char *argv[]) {
   vector<string> files;
   read_directory(dir, &files);
   auto fout = std::make_shared<TFile>(("Output/templates/" + channel_prefix + year + "_" + suffix + ".root").c_str(), "recreate");
+  auto info = std::make_unique<TemplateTool>(channel_prefix);
+  for (auto cat : info->get_categories()) {
+    // make directory in TFile
+    fout->cd();
+    fout->mkdir(cat.c_str());
+  }
+  fout->cd();
 
   for (auto ifile : files) {
     // initialize histogram holder
-    auto name = ifile.substr(0, ifile.find(".")).c_str();
-    auto sample = std::make_shared<Sample>(channel_prefix, year, name, suffix, fout);
+    auto name = ifile.substr(0, ifile.find("."));
+    std::cout << name << std::endl;
+    auto sample = std::make_unique<Sample>(channel_prefix, year, name, suffix, fout);
     sample->load_fake_fractions(ff_name);
     sample->fill_histograms(dir + "/" + ifile, tree_name, doSyst);
     sample->write_histograms(doSyst);
+    sample->Close();
 
     // AC reweighting for JHU samples
     if (ifile.find("_inc.root") != std::string::npos) {
-      auto ac_weights = sample->get_AC_weights(ifile);
+      auto ac_weights = info->get_AC_weights(ifile);
       for (auto ac_weight : ac_weights) {
-        auto jhu_sample = std::make_shared<Sample>(channel_prefix, year, name, suffix, fout);
+        auto jhu_sample = std::make_unique<Sample>(channel_prefix, year, ac_weight.second, suffix, fout);
         jhu_sample->load_fake_fractions(ff_name);
         jhu_sample->fill_histograms(dir + "/" + ifile, tree_name, doSyst, ac_weight.first);
         jhu_sample->write_histograms(doSyst, ac_weight.second);
+        jhu_sample->Close();
       }
     }
   }
-  fout->Close();
 }
