@@ -8,13 +8,13 @@
 #include <vector>
 #include "./TemplateTool.h"
 
-// Sample inherits from the TemplateTool, which contains basic information like
+// Sample_Template inherits from the TemplateTool, which contains basic information like
 // ff systematic names, the acWeight map, and the names of the categories for
 // the analysis. This is mainly used just to keep all of the long lists out of
 // this file so it is easier to read.
-class Sample : public TemplateTool {
+class Sample_Template : public TemplateTool {
  public:
-  Sample(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>, std::string);
+  Sample_Template(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>, std::string);
   void set_branches(std::shared_ptr<TTree>, std::string);
   void load_fake_fractions(std::string);
   void init_systematics();
@@ -38,7 +38,7 @@ class Sample : public TemplateTool {
   Float_t higgs_pT, m_sv, NN_disc, D0_VBF, D0_ggH, DCP_VBF, DCP_ggH, VBF_MELA, j1_phi, j2_phi;  // observables
 };
 
-// Sample constructor. Loads all of the basic information from the parent TemplateTool class.
+// Sample_Template constructor. Loads all of the basic information from the parent TemplateTool class.
 // Empty histograms for fake jets and for normal samples are created and stored in the maps:
 // fakes_2d and hists_2d. The category is used as the key for the maps. To get the
 // "mt_vbf_ggHMELA_bin1_NN_bin1" histogram use
@@ -48,7 +48,7 @@ class Sample : public TemplateTool {
 // this will give a pointer to the histogram. The fakes_2d is accessed the exact same way, but
 // is only available for data. The FF_syst map is also created for the fake fraction systematics,
 // but you must call init_systematics to actually use it.
-Sample::Sample(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix, std::shared_ptr<TFile> output_file, std::string ext = "")
+Sample_Template::Sample_Template(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix, std::shared_ptr<TFile> output_file, std::string ext = "")
     : TemplateTool(channel_prefix, year, suffix, output_file),
       sample_name(in_sample_name),
       acWeightVal(1.),
@@ -100,7 +100,7 @@ Sample::Sample(std::string channel_prefix, std::string year, std::string in_samp
 }
 
 // init_systematics creates empty histograms for all fake factor systematics shifts.
-// This is only done when the Sample is data. The shifts are stored in a map where
+// This is only done when the Sample_Template is data. The shifts are stored in a map where
 // the category is the key. For each entry in the map, there is a vector containing
 // all of the shifts in the order from the systematics member variable. For example,
 // to get the "ff_qcd_syst_down" shift for the "et_boosted" category use
@@ -109,7 +109,7 @@ Sample::Sample(std::string channel_prefix, std::string year, std::string in_samp
 //
 // Use the index 1 beacuse "ff_qcd_syst_down" is the second item in the systematics
 // vector.
-void Sample::init_systematics() {
+void Sample_Template::init_systematics() {
   // systematics still only need the data histograms
   if (sample_name == "Data" || sample_name == "data_obs") {
     for (auto key : FF_systs) {
@@ -133,7 +133,7 @@ void Sample::init_systematics() {
 // addresses to the appropriate member variables. Provided an acWeight,
 // it will also load the acWeight stored in the root file for reweighting
 // JHU samples.
-void Sample::set_branches(std::shared_ptr<TTree> tree, std::string acWeight) {
+void Sample_Template::set_branches(std::shared_ptr<TTree> tree, std::string acWeight) {
   std::string iso;
   std::string tree_name = tree->GetName();
   if (tree_name.find("etau_tree") != std::string::npos) {
@@ -172,11 +172,11 @@ void Sample::set_branches(std::shared_ptr<TTree> tree, std::string acWeight) {
 
 // fill_histograms does the main work. It will open the given file and loop
 // through all events making selections and filling histograms. Additionally,
-// if the Sample is for data, it will fill the fake jets histogram. If "doSyst"
+// if the Sample_Template is for data, it will fill the fake jets histogram. If "doSyst"
 // is true, fill_histograms will also do all the jet fakes systematics shifts,
-// provided the Sample is for data. Passing "acWeight" allows you to reweight
+// provided the Sample_Template is for data. Passing "acWeight" allows you to reweight
 // JHU samples to different coupling scenarios.
-void Sample::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst = false, std::string acWeight = "None") {
+void Sample_Template::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst = false, std::string acWeight = "None") {
   set_branches(tree, acWeight);
   init_systematics();
   fout->cd();
@@ -263,7 +263,7 @@ void Sample::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst = false, s
 // from the fake fraction histograms that were loaded in load_fake_fractions. These weights
 // are used with the input variables to fill the fake histogram with the correct weight. If
 // the "syst" parameter is passed, read the weight for the provided systematic shift.
-void Sample::convert_data_to_fake(std::string cat, double var1, double var2, int syst = -1) {
+void Sample_Template::convert_data_to_fake(std::string cat, double var1, double var2, int syst = -1) {
   fout->cd();
   auto bin_x = fake_fractions.at(cat + "_data")->GetXaxis()->FindBin(vis_mass);
   auto bin_y = fake_fractions.at(cat + "_data")->GetYaxis()->FindBin(njets);
@@ -293,7 +293,7 @@ void Sample::convert_data_to_fake(std::string cat, double var1, double var2, int
 //       fake_fractions.at("et_vbf_frac_w");
 //
 // this will return a pointer to the histogram.
-void Sample::load_fake_fractions(std::string file_name) {
+void Sample_Template::load_fake_fractions(std::string file_name) {
   auto ifile = new TFile(file_name.c_str(), "READ");
   fout->cd();
   for (auto cat : categories) {
@@ -311,7 +311,7 @@ void Sample::load_fake_fractions(std::string file_name) {
 // make a 2D histogram. If for some reason the given parameter
 // doesn't fit in any bins, return "skip" to be handled by the
 // caller.
-std::string Sample::get_category(double vbf_var3) {
+std::string Sample_Template::get_category(double vbf_var3) {
   double edge = 1. / 6.;
   if (vbf_var3 >= 0 && vbf_var3 <= 1. * edge) {
     return channel_prefix + "_vbf_ggHMELA_bin1_NN_bin1";
@@ -346,9 +346,9 @@ std::string Sample::get_category(double vbf_var3) {
 
 // write_histograms is used to write the histograms to the output root file.
 // First, change into the correct directory for the category then write the
-// histogram. Additionally, if this Sample is for data, write the fake factor
+// histogram. Additionally, if this Sample_Template is for data, write the fake factor
 // histograms in the same directory.
-void Sample::write_histograms(bool doSyst = false, std::string newName = "") {
+void Sample_Template::write_histograms(bool doSyst = false, std::string newName = "") {
   for (auto cat : categories) {
     fout->cd(cat.c_str());
 

@@ -14,6 +14,7 @@
 
 // ROOT includes
 #include "TFile.h"
+#include "TH1F.h"
 #include "TH2F.h"
 #include "TTree.h"
 
@@ -64,7 +65,7 @@ class TemplateTool {
   std::vector<std::pair<std::string, std::string>> get_AC_weights(std::string);
   std::vector<std::string> get_categories() { return categories; }
   explicit TemplateTool(std::string);
-  void Close() { delete ff_weight;  }  // make sure to explicitly delete this. (NEEDED)
+  void Close() { delete ff_weight; }  // make sure to explicitly delete this. (NEEDED)
   void make_extension_map(std::string channel_prefix);
   std::string get_extension(std::string);
 
@@ -151,7 +152,7 @@ std::vector<std::pair<std::string, std::string>> TemplateTool::get_AC_weights(st
     return acNameMap.at("wh");
   } else if (name.find("zh_inc") != std::string::npos) {
     return acNameMap.at("zh");
-    }
+  }
 }
 
 // make_extension_map constructs the extension map only when requested.
