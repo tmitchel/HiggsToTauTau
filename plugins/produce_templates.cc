@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
   read_directory(dir, &files);
   auto fout = std::make_shared<TFile>(("Output/templates/" + channel_prefix + year + "_" + suffix + ".root").c_str(), "recreate");
   auto info = std::make_unique<TemplateTool>(channel_prefix);
+  info->make_extension_map(channel_prefix);
   for (auto cat : info->get_categories()) {
     // make directory in TFile
     fout->cd();
@@ -68,9 +69,20 @@ int main(int argc, char *argv[]) {
     sample->write_histograms(doSyst);
     sample->Close();
 
-    // start by just printing all the keys in the file.
-    for (auto key : (*fin->GetListOfKeys())) {
-      std::cout << key->GetName() << std::endl;
+    // run all systematics stored in tree
+    if (doSyst) {
+      for (auto key : (*fin->GetListOfKeys())) {
+        std::string syst_tree_name = key->GetName();
+        if (syst_tree_name.find(tree_name) != std::string::npos) {
+          auto ext = info->get_extension(syst_tree_name);
+          auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(syst_tree_name.c_str())));
+          auto sample = std::make_unique<Sample>(channel_prefix, year, name, suffix, fout, ext);
+          sample->load_fake_fractions(ff_name);
+          sample->fill_histograms(tree, doSyst);
+          sample->write_histograms(doSyst);
+          sample->Close();
+        }
+      }
     }
 
     // AC reweighting for JHU samples
