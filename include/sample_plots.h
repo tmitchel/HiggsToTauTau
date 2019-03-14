@@ -14,12 +14,12 @@
 // this file so it is easier to read.
 class Sample_Plots : public TemplateTool {
  public:
-  Sample_Plots(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>, std::string, std::vector<Float_t>);
+  Sample_Plots(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>, std::map<std::string, std::vector<float>>);
   void set_branches(std::shared_ptr<TTree>, std::string);
   void load_fake_fractions(std::string);
   void fill_histograms(std::shared_ptr<TTree>, std::string);
   std::string get_category(double);
-  void convert_data_to_fake(std::string, double);
+  void convert_data_to_fake(std::string, double, std::string);
   void write_histograms();
   void set_variable(std::shared_ptr<TTree>);
 
@@ -27,7 +27,8 @@ class Sample_Plots : public TemplateTool {
   std::string sample_name, in_var_name;
   std::map<std::string, TH1F *> fakes, hists;
   std::map<std::string, TH2F *> fake_fractions;
-  std::vector<Float_t> var_bins;
+  // std::map<std::string, std::vector<float>> variables;
+  std::map<std::string, std::map<std::string, TH1F *>> all_fakes, all_hists;
 
   // get variables from file
   Int_t is_signal, is_antiTauIso, OS;                  // flags
@@ -35,7 +36,7 @@ class Sample_Plots : public TemplateTool {
   Float_t weight, acWeightVal;                         // weights
   Float_t lep_iso, mt, t1_decayMode, vis_mass, t1_pt;  // for fake factor
   Float_t D0_ggH;                                      // for 3D separation
-  Float_t observable;                                  // variable to plot
+  std::map<std::string, Float_t *> observables;                  // variable to plot
 };
 
 // Sample_Plots constructor. Loads all of the basic information from the parent TemplateTool class.
@@ -47,25 +48,30 @@ class Sample_Plots : public TemplateTool {
 //
 // this will give a pointer to the histogram. The fakes is accessed the exact same way, but
 // is only available for data.
-Sample_Plots::Sample_Plots(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix, std::shared_ptr<TFile> output_file, std::string var_name, std::vector<Float_t> var_bins)
+Sample_Plots::Sample_Plots(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix,
+                           std::shared_ptr<TFile> output_file, std::map<std::string, std::vector<float>> variables)
     : TemplateTool(channel_prefix, year, suffix, output_file),
       sample_name(in_sample_name),
-      acWeightVal(1.),
-      var_bins(var_bins),
-      in_var_name(var_name) {
-  for (auto cat : categories) {
-    fout->cd(("plots/" + in_var_name + "/" + cat).c_str());
+      acWeightVal(1.) {
+      // variables(in_variables) {
+  for (auto it = variables.begin(); it != variables.end(); it++) {
+    observables[it->first] = new Float_t(0.);  // entry for each variable to register later
+    for (auto cat : categories) {
+      fout->cd(("plots/" + it->first + "/" + cat).c_str());
 
-    // convert data name to be appropriate and do ff things
-    if (sample_name.find("Data") != std::string::npos || sample_name == "data_obs") {
-      sample_name = "data_obs";
-      fakes[cat] = new TH1F(("fake_" + cat).c_str(), "fake_SS", var_bins.at(0), var_bins.at(1), var_bins.at(2));
+      // convert data name to be appropriate and do ff things
+      if (sample_name.find("Data") != std::string::npos || sample_name == "data_obs") {
+        sample_name = "data_obs";
+        fakes[cat] = new TH1F(("fake_" + cat).c_str(), "fake_SS", it->second.at(0), it->second.at(1), it->second.at(2));
+      }
+
+      // create output histograms
+      hists[cat] = new TH1F(sample_name.c_str(), sample_name.c_str(), it->second.at(0), it->second.at(1), it->second.at(2));
     }
-
-    // create output histograms
-    hists[cat] = new TH1F(sample_name.c_str(), sample_name.c_str(), var_bins.at(0), var_bins.at(1), var_bins.at(2));
+    fout->cd();
+    all_fakes[it->first] = fakes;
+    all_hists[it->first] = hists;
   }
-  fout->cd();
 }
 
 // set_branches takes an input TTree and sets all of the needed branch
@@ -101,24 +107,28 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
 }
 
 void Sample_Plots::set_variable(std::shared_ptr<TTree> tree) {
-  if (in_var_name == "t1_decayMode") {
-    observable = t1_decayMode;
-  } else if (in_var_name == "vis_mass") {
-    observable = vis_mass;
-  } else if (in_var_name == "mjj") {
-    observable = mjj;
-  } else if (in_var_name == "mt") {
-    observable = mt;
-  } else if (in_var_name == "mu_iso" || in_var_name == "el_iso") {
-    observable = lep_iso;
-  } else if (in_var_name == "njets") {
-    observable = njets;
-  } else if (in_var_name == "D0_ggH") {
-    observable = D0_ggH;
-  } else if (in_var_name == "t1_pt") {
-    observable = t1_pt;
-  } else {
-    tree->SetBranchAddress(in_var_name.c_str(), &observable);
+  int i = 0;
+  for (auto it = observables.begin(); it != observables.end(); it++) {
+    if (in_var_name == "t1_decayMode") {
+      it->second = &t1_decayMode;
+    } else if (in_var_name == "vis_mass") {
+      it->second = &vis_mass;
+    } else if (in_var_name == "mjj") {
+      it->second = &mjj;
+    } else if (in_var_name == "mt") {
+      it->second = &mt;
+    } else if (in_var_name == "mu_iso" || in_var_name == "el_iso") {
+      it->second = &lep_iso;
+    } else if (in_var_name == "njets") {
+      it->second = &njets;
+    } else if (in_var_name == "D0_ggH") {
+      it->second = &D0_ggH;
+    } else if (in_var_name == "t1_pt") {
+      it->second = &t1_pt;
+    } else {
+      tree->SetBranchAddress(in_var_name.c_str(), &(it->second));
+    }
+    i++;
   }
 }
 
@@ -157,28 +167,30 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
     // find the correct MELA ggH/Higgs pT bin for this event
     auto ACcat = get_category(D0_ggH);
 
-    // fill histograms
-    if (is_signal) {
-      if (cat0) {
-        hists.at(channel_prefix + "_0jet")->Fill(observable, weight);
-      } else if (cat1) {
-        hists.at(channel_prefix + "_boosted")->Fill(observable, weight);
-      } else if (cat2) {
-        hists.at(channel_prefix + "_vbf")->Fill(observable, weight);
-        if (ACcat != "skip") {
-          hists.at(ACcat)->Fill(observable, weight);
+    for (auto it = observables.begin(); it != observables.end(); it++) {
+      // fill histograms
+      if (is_signal) {
+        if (cat0) {
+          all_hists.at(it->first).at(channel_prefix + "_0jet")->Fill(*(it->second), weight);
+        } else if (cat1) {
+          all_hists.at(it->first).at(channel_prefix + "_boosted")->Fill(*(it->second), weight);
+        } else if (cat2) {
+          all_hists.at(it->first).at(channel_prefix + "_vbf")->Fill(*(it->second), weight);
+          if (ACcat != "skip") {
+            all_hists.at(it->first).at(ACcat)->Fill(*(it->second), weight);
+          }
         }
-      }
-    } else if (is_antiTauIso && sample_name == "data_obs") {
-      if (cat0) {
-        // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
-        convert_data_to_fake(channel_prefix + "_0jet", observable);  // 2d template
-      } else if (cat1) {
-        convert_data_to_fake(channel_prefix + "_boosted", observable);
-      } else if (cat2) {
-        convert_data_to_fake(channel_prefix + "_vbf", observable);
-        if (ACcat != "skip") {
-          convert_data_to_fake(ACcat, observable);
+      } else if (is_antiTauIso && sample_name == "data_obs") {
+        if (cat0) {
+          // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
+          convert_data_to_fake(channel_prefix + "_0jet", *(it->second), it->first);  // 2d template
+        } else if (cat1) {
+          convert_data_to_fake(channel_prefix + "_boosted", *(it->second), it->first);
+        } else if (cat2) {
+          convert_data_to_fake(channel_prefix + "_vbf", *(it->second), it->first);
+          if (ACcat != "skip") {
+            convert_data_to_fake(ACcat, *(it->second), it->first);
+          }
         }
       }
     }
@@ -190,7 +202,7 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
 // from the fake fraction histograms that were loaded in load_fake_fractions. These weights
 // are used with the input variables to fill the fake histogram with the correct weight. If
 // the "syst" parameter is passed, read the weight for the provided systematic shift.
-void Sample_Plots::convert_data_to_fake(std::string cat, double var1) {
+void Sample_Plots::convert_data_to_fake(std::string cat, double var1, std::string j) {
   fout->cd();
   auto bin_x = fake_fractions.at(cat + "_data")->GetXaxis()->FindBin(vis_mass);
   auto bin_y = fake_fractions.at(cat + "_data")->GetYaxis()->FindBin(njets);
@@ -199,7 +211,7 @@ void Sample_Plots::convert_data_to_fake(std::string cat, double var1) {
                                  fake_fractions.at(cat + "_frac_w")->GetBinContent(bin_x, bin_y),
                                  fake_fractions.at(cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
                                  fake_fractions.at(cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)});
-  fakes.at(cat)->Fill(var1, weight * fakeweight);
+  all_fakes.at(j).at(cat)->Fill(var1, weight * fakeweight);
 }
 
 // load_fake_fractions opens the given file and reads the
@@ -267,14 +279,18 @@ std::string Sample_Plots::get_category(double vbf_var3) {
 // histogram. Additionally, if this Sample_Plots is for data, write the fake factor
 // histograms in the same directory.
 void Sample_Plots::write_histograms() {
-  for (auto cat : categories) {
-    fout->cd(("plots/" + in_var_name + "/" + cat).c_str());
-    hists.at(cat)->Write();
-    if (sample_name == "data_obs") {
-      auto hist = fakes.at(cat);
-      hist->SetName("jetFakes");
-      hist->Write();
+  auto i = 0;
+  for (auto it = observables.begin(); it != observables.end(); it++) {
+    for (auto cat : categories) {
+      fout->cd(("plots/" + it->first + "/" + cat).c_str());
+      all_hists.at(it->first).at(cat)->Write();
+      if (sample_name == "data_obs") {
+        auto hist = all_fakes.at(it->first).at(cat);
+        hist->SetName("jetFakes");
+        hist->Write();
+      }
     }
+    i++;
   }
 }
 

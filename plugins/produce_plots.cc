@@ -88,16 +88,13 @@ int main(int argc, char *argv[]) {
     // open the file
     auto fin = std::unique_ptr<TFile>(TFile::Open((dir + "/" + ifile).c_str()));
 
-    // loop over variables to plot
-    for (auto it = vars.begin(); it != vars.end(); it++) {
-      // run for nominal case first
-      auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));                     // open TTree
-      auto sample = std::make_unique<Sample_Plots>(channel_prefix, year, name, suffix, fout, it->first, it->second);  // create Sample_Plots
-      sample->load_fake_fractions(ff_name);                                                                           // load fractions from input file
-      sample->fill_histograms(tree);                                                                                  // do event loop and fill histos
-      sample->write_histograms();                                                                                     // write all to the file
-      sample->Close();                                                                                                // delete the ff_weight pointer
-    }
+    // run for nominal case first
+    auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));    // open TTree
+    auto sample = std::make_unique<Sample_Plots>(channel_prefix, year, name, suffix, fout, vars);  // create Sample_Plots
+    sample->load_fake_fractions(ff_name);                                                          // load fractions from input file
+    sample->fill_histograms(tree);                                                                 // do event loop and fill histos
+    sample->write_histograms();                                                                    // write all to the file
+    sample->Close();                                                                               // delete the ff_weight pointer
 
     // AC reweighting for JHU samples only
     if (ifile.find("_inc.root") != std::string::npos) {
