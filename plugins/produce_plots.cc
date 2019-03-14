@@ -90,9 +90,8 @@ int main(int argc, char *argv[]) {
 
     // run for nominal case first
     auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));  // open TTree
-    auto sample = std::make_unique<Sample_Plots>(channel_prefix, year, name, suffix, fout, vars.at("m_sv"));      // create Sample_Plots
+    auto sample = std::make_unique<Sample_Plots>(channel_prefix, year, name, suffix, fout, "m_sv", vars.at("m_sv"));      // create Sample_Plots
     sample->load_fake_fractions(ff_name);                                                        // load fractions from input file
-    sample->set_variable(tree, "m_sv");
     sample->fill_histograms(tree);                                                               // do event loop and fill histos
     sample->write_histograms();                                                                  // write all to the file
     sample->Close();                                                                             // delete the ff_weight pointer
@@ -103,9 +102,8 @@ int main(int argc, char *argv[]) {
       for (auto ac_weight : ac_weights) {
         auto fin = std::unique_ptr<TFile>(TFile::Open((dir + "/" + ifile).c_str()));
         auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
-        auto jhu_sample = std::make_unique<Sample_Plots>(channel_prefix, year, ac_weight.second, suffix, fout, vars.at("m_sv"));
+        auto jhu_sample = std::make_unique<Sample_Plots>(channel_prefix, year, ac_weight.second, suffix, fout, "m_sv", vars.at("m_sv"));
         jhu_sample->load_fake_fractions(ff_name);
-        jhu_sample->set_variable(tree, "m_sv");
         jhu_sample->fill_histograms(tree, ac_weight.first);
         jhu_sample->write_histograms();
         jhu_sample->Close();

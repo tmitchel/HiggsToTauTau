@@ -14,14 +14,14 @@
 // this file so it is easier to read.
 class Sample_Plots : public TemplateTool {
  public:
-  Sample_Plots(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>, std::vector<Float_t>);
+  Sample_Plots(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>, std::string, std::vector<Float_t>);
   void set_branches(std::shared_ptr<TTree>, std::string);
   void load_fake_fractions(std::string);
   void fill_histograms(std::shared_ptr<TTree>, std::string);
   std::string get_category(double);
   void convert_data_to_fake(std::string, double);
   void write_histograms();
-  void set_variable(std::shared_ptr<TTree>, std::string);
+  void set_variable(std::shared_ptr<TTree>);
 
  private:
   std::string sample_name, in_var_name;
@@ -47,13 +47,14 @@ class Sample_Plots : public TemplateTool {
 //
 // this will give a pointer to the histogram. The fakes is accessed the exact same way, but
 // is only available for data.
-Sample_Plots::Sample_Plots(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix, std::shared_ptr<TFile> output_file, std::vector<Float_t> var_bins)
+Sample_Plots::Sample_Plots(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix, std::shared_ptr<TFile> output_file, std::string var_name, std::vector<Float_t> var_bins)
     : TemplateTool(channel_prefix, year, suffix, output_file),
       sample_name(in_sample_name),
       acWeightVal(1.),
-      var_bins(var_bins) {
+      var_bins(var_bins),
+      in_var_name(var_name) {
   for (auto cat : categories) {
-    fout->cd(cat.c_str());
+    fout->cd(("plots/" + in_var_name + "/" + cat).c_str());
 
     // convert data name to be appropriate and do ff things
     if (sample_name.find("Data") != std::string::npos || sample_name == "data_obs") {
@@ -99,26 +100,25 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
   }
 }
 
-void Sample_Plots::set_variable(std::shared_ptr<TTree> tree, std::string var_name) {
-  in_var_name = var_name;
-  if (var_name == "t1_decayMode") {
+void Sample_Plots::set_variable(std::shared_ptr<TTree> tree) {
+  if (in_var_name == "t1_decayMode") {
     observable = t1_decayMode;
-  } else if (var_name == "vis_mass") {
+  } else if (in_var_name == "vis_mass") {
     observable = vis_mass;
-  } else if (var_name == "mjj") {
+  } else if (in_var_name == "mjj") {
     observable = mjj;
-  } else if (var_name == "mt") {
+  } else if (in_var_name == "mt") {
     observable = mt;
-  } else if (var_name == "mu_iso" || var_name == "el_iso") {
+  } else if (in_var_name == "mu_iso" || in_var_name == "el_iso") {
     observable = lep_iso;
-  } else if (var_name == "njets") {
+  } else if (in_var_name == "njets") {
     observable = njets;
-  } else if (var_name == "D0_ggH") {
+  } else if (in_var_name == "D0_ggH") {
     observable = D0_ggH;
-  } else if (var_name == "t1_pt") {
+  } else if (in_var_name == "t1_pt") {
     observable = t1_pt;
   } else {
-    tree->SetBranchAddress(var_name.c_str(), &observable);
+    tree->SetBranchAddress(in_var_name.c_str(), &observable);
   }
 }
 
@@ -130,6 +130,7 @@ void Sample_Plots::set_variable(std::shared_ptr<TTree> tree, std::string var_nam
 // JHU samples to different coupling scenarios.
 void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWeight = "None") {
   set_branches(tree, acWeight);
+  set_variable(tree);
   fout->cd();
 
   bool cat0(false), cat1(false), cat2(false);
