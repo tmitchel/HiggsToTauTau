@@ -16,6 +16,7 @@
 #include "TFile.h"
 #include "TH2F.h"
 #include "TTree.h"
+
 // FF
 #include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
 #include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
@@ -52,63 +53,41 @@ void read_directory(const std::string &name, std::vector<std::string> *v) {
   closedir(dirp);
 }
 
+// TemplateTool is used to hold all of the long, hard-coded lists
+// that are needed for making templates. It holds the category names,
+// acWeight name and weight mappings, the map from systematic input
+// names to names ready for combine, and the list of fake factor
+// systematics. This class doesn't do anything besides hold this
+// information and return it when asked.
 class TemplateTool {
  public:
   std::vector<std::pair<std::string, std::string>> get_AC_weights(std::string);
   std::vector<std::string> get_categories() { return categories; }
-  TemplateTool(std::string);
-  void Close() { delete ff_weight;  }
+  explicit TemplateTool(std::string);
+  void Close() { delete ff_weight;  }  // make sure to explicitly delete this. (NEEDED)
+  void make_extension_map(std::string channel_prefix);
+  std::string get_extension(std::string);
 
  protected:
   TemplateTool(std::string, std::string, std::string, std::shared_ptr<TFile>);
 
   std::shared_ptr<TFile> fout;
   FakeFactor *ff_weight;
-  std::string channel_prefix, var;
-  std::map<std::string, std::vector<std::pair<std::string, std::string>>> acNameMap;
   std::vector<std::string> categories, systematics;
+  std::string channel_prefix, var;
+
+ private:
+  std::map<std::string, std::vector<std::pair<std::string, std::string>>> acNameMap;
+  std::map<std::string, std::string> extension_map;
 };
 
+// This constructor is what is used by the Sample class. It only initializes that data
+// that will be needed by the sample. This is the category list, potentially the fake
+// factors systematic list, and loads the fake factor files. A pointer to the already
+// open output file is kept for writing.
 TemplateTool::TemplateTool(std::string channel_prefix, std::string year, std::string suffix, std::shared_ptr<TFile> output_file)
     : fout(output_file),
       channel_prefix(channel_prefix),
-      acNameMap{
-          {"ggh",
-           {std::make_pair("wt_ggH_a1", "JHU_GGH2Jets_sm_M125"),
-            std::make_pair("wt_ggH_a3", "JHU_GGH2Jets_pseudoscalar_M125"),
-            std::make_pair("wt_ggH_a3int", "JHU_GGH2Jets_pseudoscalar_Mf05ph0125")}},
-          {"wh",
-           {std::make_pair("wt_wh_a1", "reweighted_WH_htt_0PM125"),
-            std::make_pair("wt_wh_a2", "reweighted_WH_htt_0PH125"),
-            std::make_pair("wt_wh_a2int", "reweighted_WH_htt_0PHf05ph0125"),
-            std::make_pair("wt_wh_a3", "reweighted_WH_htt_0M125"),
-            std::make_pair("wt_wh_a3int", "reweighted_WH_htt_0Mf05ph0125"),
-            std::make_pair("wt_wh_L1", "reweighted_WH_htt_0L1125"),
-            std::make_pair("wt_wh_L1int", "reweighted_WH_htt_0L1f05ph0125"),
-            std::make_pair("wt_wh_L1Zg", "reweighted_WH_htt_0L1Zg125"),
-            std::make_pair("wt_wh_L1Zgint", "reweighted_WH_htt_0L1Zgf05ph0125")}},
-          {"zh",
-           {std::make_pair("wt_zh_a1", "reweighted_ZH_htt_0PM125"),
-            std::make_pair("wt_zh_a2", "reweighted_ZH_htt_0PH125"),
-            std::make_pair("wt_zh_a2int", "reweighted_ZH_htt_0PHf05ph0125"),
-            std::make_pair("wt_zh_a3", "reweighted_ZH_htt_0M125"),
-            std::make_pair("wt_zh_a3int", "reweighted_ZH_htt_0Mf05ph0125"),
-            std::make_pair("wt_zh_L1", "reweighted_ZH_htt_0L1125"),
-            std::make_pair("wt_zh_L1int", "reweighted_ZH_htt_0L1f05ph0125"),
-            std::make_pair("wt_zh_L1Zg", "reweighted_ZH_htt_0L1Zg125"),
-            std::make_pair("wt_zh_L1Zgint", "reweighted_ZH_htt_0L1Zgf05ph0125")}},
-          {"vbf",
-           {
-               std::make_pair("wt_a1", "reweighted_qqH_htt_0PM125"),
-               std::make_pair("wt_a2", "reweighted_qqH_htt_0PH125"),
-               std::make_pair("wt_a2int", "reweighted_qqH_htt_0PHf05ph0125"),
-               std::make_pair("wt_a3", "reweighted_qqH_htt_0M125"),
-               std::make_pair("wt_a3int", "reweighted_qqH_htt_0Mf05ph0125"),
-               std::make_pair("wt_L1", "reweighted_qqH_htt_0L1125"),
-               std::make_pair("wt_L1int", "reweighted_qqH_htt_0L1f05ph0125"),
-               std::make_pair("wt_L1Zg", "reweighted_qqH_htt_0L1Zg125"),
-               std::make_pair("wt_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"),
-           }}},
       categories{
           channel_prefix + "_0jet",
           channel_prefix + "_boosted",
@@ -160,6 +139,9 @@ TemplateTool::TemplateTool(std::string channel_prefix, std::string year, std::st
   ff_file->Close();
 }
 
+// get_AC_weight makes sure the provided name corresponds to
+// a JHU sample for reweighting, then returns the vector of
+// pairs that has the weight name and the new sample name.
 std::vector<std::pair<std::string, std::string>> TemplateTool::get_AC_weights(std::string name) {
   if (name.find("ggh_inc") != std::string::npos) {
     return acNameMap.at("ggh");
@@ -172,6 +154,45 @@ std::vector<std::pair<std::string, std::string>> TemplateTool::get_AC_weights(st
     }
 }
 
+// make_extension_map constructs the extension map only when requested.
+// The map is used to translate from a tree name to the name that should
+// be used in the histograms provided to combine.
+void TemplateTool::make_extension_map(std::string channel_prefix) {
+  extension_map = {
+      {channel_prefix + "au_tree_UncMet_Up", "_CMS_scale_met_unclustered_13TeVUp"},
+      {channel_prefix + "au_tree_UncMet_Down", "_CMS_scale_met_unclustered_13TeVDown"},
+      {channel_prefix + "au_tree_ClusteredMet_Up", "_CMS_scale_met_clustered_13TeVUp"},
+      {channel_prefix + "au_tree_ClusteredMet_Down", "_CMS_scale_met_clustered_13TeVDown"},
+      {channel_prefix + "au_tree_vbfMass_JetTotalUp", "_CMS_scale_jm_13TeVUp"},
+      {channel_prefix + "au_tree_jetVeto30_JetTotalUp", "_CMS_scale_jn_13TeVUp"},
+      {channel_prefix + "au_tree_vbfMass_JetTotalDown", "_CMS_scale_jm_13TeVDown"},
+      {channel_prefix + "au_tree_jetVeto30_JetTotalDown", "_CMS_scale_jn_13TeVDown"},
+      {channel_prefix + "au_tree_ttbarShape_Up", "_CMS_htt_ttbarShape_13TeVUp"},
+      {channel_prefix + "au_tree_ttbarShape_Down", "_CMS_htt_ttbarShape_13TeVDown"},
+      {channel_prefix + "au_tree_Up", "_CMS_scale_t_allprong_13TeVUp"},
+      {channel_prefix + "au_tree_Down", "_CMS_scale_t_allprong_13TeVDown"},
+      {channel_prefix + "au_tree_DM0_Up", "_CMS_scale_t_1prong_13TeVUp"},
+      {channel_prefix + "au_tree_DM0_Down", "_CMS_scale_t_1prong_13TeVDown"},
+      {channel_prefix + "au_tree_DM1_Up", "_CMS_scale_t_1prong1pizero_13TeVUp"},
+      {channel_prefix + "au_tree_DM1_Down", "_CMS_scale_t_1prong1pizero_13TeVDown"},
+      {channel_prefix + "au_tree_DM10_Up", "_CMS_scale_t_3prong_13TeVUp"},
+      {channel_prefix + "au_tree_DM10_Down", "_CMS_scale_t_3prong_13TeVDown"},
+      {channel_prefix + "au_tree_jetToTauFake_Up", "_CMS_htt_jetToTauFake_13TeVUp"},
+      {channel_prefix + "au_tree_jetToTauFake_Down", "_CMS_htt_jetToTauFake_13TeVDown"},
+      {channel_prefix + "au_tree_dyShape_Up", "_CMS_htt_dyShape_13TeVUp"},
+      {channel_prefix + "au_tree_dyShape_Down", "_CMS_htt_dyShape_13TeVDown"},
+      {channel_prefix + "au_tree_zmumuShape_Up", "_CMS_htt_zmumuShape_VBF_13TeVUp"},
+      {channel_prefix + "au_tree_zmumuShape_Down", "_CMS_htt_zmumuShape_VBF_13TeVDown"}};
+}
+
+// get_extension returns the histogram name needed for combine
+// after being provided the input name from the tree.
+std::string TemplateTool::get_extension(std::string name) {
+  return extension_map.at(name);
+}
+
+// This constructor is used just to get some information and is NOT
+// used by Sample. It just constructs the acNameMap and the categories.
 TemplateTool::TemplateTool(std::string channel_prefix)
     : channel_prefix(channel_prefix),
       acNameMap{
@@ -238,16 +259,6 @@ TemplateTool::TemplateTool(std::string channel_prefix)
           channel_prefix + "_vbf_ggHMELA_bin9_NN_bin2",
           channel_prefix + "_vbf_ggHMELA_bin10_NN_bin2",
           channel_prefix + "_vbf_ggHMELA_bin11_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2"},
-      systematics{
-          "ff_qcd_syst_up", "ff_qcd_syst_down", "ff_qcd_dm0_njet0_stat_up",
-          "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down",
-          "ff_qcd_dm1_njet0_stat_up", "ff_qcd_dm1_njet0_stat_down", "ff_qcd_dm1_njet1_stat_up",
-          "ff_qcd_dm1_njet1_stat_down", "ff_w_syst_up", "ff_w_syst_down", "ff_w_dm0_njet0_stat_up",
-          "ff_w_dm0_njet0_stat_down", "ff_w_dm0_njet1_stat_up", "ff_w_dm0_njet1_stat_down",
-          "ff_w_dm1_njet0_stat_up", "ff_w_dm1_njet0_stat_down", "ff_w_dm1_njet1_stat_up",
-          "ff_w_dm1_njet1_stat_down", "ff_tt_syst_up", "ff_tt_syst_down", "ff_tt_dm0_njet0_stat_up",
-          "ff_tt_dm0_njet0_stat_down", "ff_tt_dm0_njet1_stat_up", "ff_tt_dm0_njet1_stat_down",
-          "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down", "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"} {}
+          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2"} {}
 
 #endif  // INCLUDE_TEMPLATETOOL_H_

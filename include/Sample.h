@@ -14,11 +14,11 @@
 // this file so it is easier to read.
 class Sample : public TemplateTool {
  public:
-  Sample(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>);
+  Sample(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>, std::string);
   void set_branches(std::shared_ptr<TTree>, std::string);
   void load_fake_fractions(std::string);
   void init_systematics();
-  void fill_histograms(std::string, std::string, bool, std::string);
+  void fill_histograms(std::shared_ptr<TTree>, bool, std::string);
   std::string get_category(double);
   void convert_data_to_fake(std::string, double, double, int);
   void write_histograms(bool, std::string);
@@ -48,7 +48,7 @@ class Sample : public TemplateTool {
 // this will give a pointer to the histogram. The fakes_2d is accessed the exact same way, but
 // is only available for data. The FF_syst map is also created for the fake fraction systematics,
 // but you must call init_systematics to actually use it.
-Sample::Sample(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix, std::shared_ptr<TFile> output_file)
+Sample::Sample(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix, std::shared_ptr<TFile> output_file, std::string ext = "")
     : TemplateTool(channel_prefix, year, suffix, output_file),
       sample_name(in_sample_name),
       acWeightVal(1.),
@@ -88,11 +88,11 @@ Sample::Sample(std::string channel_prefix, std::string year, std::string in_samp
 
     // push empty histograms into map to be filled
     if (cat == channel_prefix + "_0jet") {
-      hists_2d[cat] = new TH2F(sample_name.c_str(), sample_name.c_str(), bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]);
+      hists_2d[cat] = new TH2F((sample_name+ext).c_str(), (sample_name+ext).c_str(), bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]);
     } else if (cat == channel_prefix + "_boosted") {
-      hists_2d[cat] = new TH2F(sample_name.c_str(), sample_name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]);
+      hists_2d[cat] = new TH2F((sample_name+ext).c_str(), (sample_name+ext).c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]);
     } else if (cat.find("_vbf") != std::string::npos) {
-      hists_2d[cat] = new TH2F(sample_name.c_str(), sample_name.c_str(), bins_vbf_var1.size() - 1, &bins_vbf_var1[0], bins_vbf_var2.size() - 1, &bins_vbf_var2[0]);
+      hists_2d[cat] = new TH2F((sample_name+ext).c_str(), (sample_name+ext).c_str(), bins_vbf_var1.size() - 1, &bins_vbf_var1[0], bins_vbf_var2.size() - 1, &bins_vbf_var2[0]);
     }
   }
 
@@ -176,9 +176,7 @@ void Sample::set_branches(std::shared_ptr<TTree> tree, std::string acWeight) {
 // is true, fill_histograms will also do all the jet fakes systematics shifts,
 // provided the Sample is for data. Passing "acWeight" allows you to reweight
 // JHU samples to different coupling scenarios.
-void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSyst = false, std::string acWeight = "None") {
-  auto fin = std::unique_ptr<TFile>(TFile::Open(ifile.c_str()));
-  auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
+void Sample::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst = false, std::string acWeight = "None") {
   set_branches(tree, acWeight);
   init_systematics();
   fout->cd();
