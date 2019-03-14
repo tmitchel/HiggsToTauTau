@@ -59,7 +59,9 @@ int main(int argc, char *argv[]) {
     std::cout << name << std::endl;
     auto sample = std::make_unique<Sample>(channel_prefix, year, name, suffix, fout);
     sample->load_fake_fractions(ff_name);
-    sample->fill_histograms(dir + "/" + ifile, tree_name, doSyst);
+    auto fin = std::unique_ptr<TFile>(TFile::Open((dir + "/" + ifile).c_str()));
+    auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
+    sample->fill_histograms(tree, doSyst);
     sample->write_histograms(doSyst);
     sample->Close();
 
@@ -69,7 +71,9 @@ int main(int argc, char *argv[]) {
       for (auto ac_weight : ac_weights) {
         auto jhu_sample = std::make_unique<Sample>(channel_prefix, year, ac_weight.second, suffix, fout);
         jhu_sample->load_fake_fractions(ff_name);
-        jhu_sample->fill_histograms(dir + "/" + ifile, tree_name, doSyst, ac_weight.first);
+        auto fin = std::unique_ptr<TFile>(TFile::Open((dir + "/" + ifile).c_str()));
+        auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
+        jhu_sample->fill_histograms(tree, doSyst, ac_weight.first);
         jhu_sample->write_histograms(doSyst, ac_weight.second);
         jhu_sample->Close();
       }

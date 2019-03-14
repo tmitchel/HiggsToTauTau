@@ -18,7 +18,7 @@ class Sample : public TemplateTool {
   void set_branches(std::shared_ptr<TTree>, std::string);
   void load_fake_fractions(std::string);
   void init_systematics();
-  void fill_histograms(std::string, std::string, bool, std::string);
+  void fill_histograms(std::shared_ptr<TTree>, bool, std::string);
   std::string get_category(double);
   void convert_data_to_fake(std::string, double, double, int);
   void write_histograms(bool, std::string);
@@ -176,9 +176,9 @@ void Sample::set_branches(std::shared_ptr<TTree> tree, std::string acWeight) {
 // is true, fill_histograms will also do all the jet fakes systematics shifts,
 // provided the Sample is for data. Passing "acWeight" allows you to reweight
 // JHU samples to different coupling scenarios.
-void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSyst = false, std::string acWeight = "None") {
-  auto fin = std::unique_ptr<TFile>(TFile::Open(ifile.c_str()));
-  auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
+void Sample::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst = false, std::string acWeight = "None") {
+  // auto fin = std::unique_ptr<TFile>(TFile::Open(ifile.c_str()));
+  // auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
   set_branches(tree, acWeight);
   init_systematics();
   fout->cd();

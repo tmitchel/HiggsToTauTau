@@ -56,7 +56,7 @@ class TemplateTool {
  public:
   std::vector<std::pair<std::string, std::string>> get_AC_weights(std::string);
   std::vector<std::string> get_categories() { return categories; }
-  TemplateTool(std::string);
+  explicit TemplateTool(std::string);
   void Close() { delete ff_weight;  }
 
  protected:
