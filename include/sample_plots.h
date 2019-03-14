@@ -24,7 +24,7 @@ class Sample_Plots : public TemplateTool {
   void set_variable(std::shared_ptr<TTree>, std::string);
 
  private:
-  std::string sample_name;
+  std::string sample_name, in_var_name;
   std::map<std::string, TH1F *> fakes, hists;
   std::map<std::string, TH2F *> fake_fractions;
   std::vector<Float_t> var_bins;
@@ -100,6 +100,7 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
 }
 
 void Sample_Plots::set_variable(std::shared_ptr<TTree> tree, std::string var_name) {
+  in_var_name = var_name;
   if (var_name == "t1_decayMode") {
     observable = t1_decayMode;
   } else if (var_name == "vis_mass") {
@@ -266,9 +267,7 @@ std::string Sample_Plots::get_category(double vbf_var3) {
 // histograms in the same directory.
 void Sample_Plots::write_histograms() {
   for (auto cat : categories) {
-    fout->cd(cat.c_str());
-
-    // potentially change the name (for JHU)
+    fout->cd(("plots/" + in_var_name + "/" + cat).c_str());
     hists.at(cat)->Write();
     if (sample_name == "data_obs") {
       auto hist = fakes.at(cat);
