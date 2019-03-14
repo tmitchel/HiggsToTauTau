@@ -8,6 +8,10 @@
 #include <vector>
 #include "./TemplateTool.h"
 
+// Sample inherits from the TemplateTool, which contains basic information like
+// ff systematic names, the acWeight map, and the names of the categories for
+// the analysis. This is mainly used just to keep all of the long lists out of
+// this file so it is easier to read.
 class Sample : public TemplateTool {
  public:
   Sample(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>);
@@ -34,6 +38,16 @@ class Sample : public TemplateTool {
   Float_t higgs_pT, m_sv, NN_disc, D0_VBF, D0_ggH, DCP_VBF, DCP_ggH, VBF_MELA, j1_phi, j2_phi;  // observables
 };
 
+// Sample constructor. Loads all of the basic information from the parent TemplateTool class.
+// Empty histograms for fake jets and for normal samples are created and stored in the maps:
+// fakes_2d and hists_2d. The category is used as the key for the maps. To get the
+// "mt_vbf_ggHMELA_bin1_NN_bin1" histogram use
+//
+//       hists_2d.at("mt_vbf_ggHMELA_bin1_NN_bin1");
+//
+// this will give a pointer to the histogram. The fakes_2d is accessed the exact same way, but
+// is only available for data. The FF_syst map is also created for the fake fraction systematics,
+// but you must call init_systematics to actually use it.
 Sample::Sample(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix, std::shared_ptr<TFile> output_file)
     : TemplateTool(channel_prefix, year, suffix, output_file),
       sample_name(in_sample_name),
@@ -85,7 +99,16 @@ Sample::Sample(std::string channel_prefix, std::string year, std::string in_samp
   fout->cd();
 }
 
-// change to the correct output directory then create a new TH1F that will be filled for the current input file
+// init_systematics creates empty histograms for all fake factor systematics shifts.
+// This is only done when the Sample is data. The shifts are stored in a map where
+// the category is the key. For each entry in the map, there is a vector containing
+// all of the shifts in the order from the systematics member variable. For example,
+// to get the "ff_qcd_syst_down" shift for the "et_boosted" category use
+//
+//       FF_systs.at("et_boosted").at(1);
+//
+// Use the index 1 beacuse "ff_qcd_syst_down" is the second item in the systematics
+// vector.
 void Sample::init_systematics() {
   // systematics still only need the data histograms
   if (sample_name == "Data" || sample_name == "data_obs") {
@@ -106,6 +129,10 @@ void Sample::init_systematics() {
   }
 }
 
+// set_branches takes an input TTree and sets all of the needed branch
+// addresses to the appropriate member variables. Provided an acWeight,
+// it will also load the acWeight stored in the root file for reweighting
+// JHU samples.
 void Sample::set_branches(std::shared_ptr<TTree> tree, std::string acWeight) {
   std::string iso;
   std::string tree_name = tree->GetName();
@@ -143,6 +170,12 @@ void Sample::set_branches(std::shared_ptr<TTree> tree, std::string acWeight) {
   }
 }
 
+// fill_histograms does the main work. It will open the given file and loop
+// through all events making selections and filling histograms. Additionally,
+// if the Sample is for data, it will fill the fake jets histogram. If "doSyst"
+// is true, fill_histograms will also do all the jet fakes systematics shifts,
+// provided the Sample is for data. Passing "acWeight" allows you to reweight
+// JHU samples to different coupling scenarios.
 void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSyst = false, std::string acWeight = "None") {
   auto fin = std::unique_ptr<TFile>(TFile::Open(ifile.c_str()));
   auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
@@ -227,6 +260,11 @@ void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSy
   }
 }
 
+// convert_data_to_fake puts an event in the fake factor histogram. It takes the category for
+// this event as well as the 2 input variables for the histogram. It then reads the weights
+// from the fake fraction histograms that were loaded in load_fake_fractions. These weights
+// are used with the input variables to fill the fake histogram with the correct weight. If
+// the "syst" parameter is passed, read the weight for the provided systematic shift.
 void Sample::convert_data_to_fake(std::string cat, double var1, double var2, int syst = -1) {
   fout->cd();
   auto bin_x = fake_fractions.at(cat + "_data")->GetXaxis()->FindBin(vis_mass);
@@ -248,6 +286,15 @@ void Sample::convert_data_to_fake(std::string cat, double var1, double var2, int
   }
 }
 
+// load_fake_fractions opens the given file and reads the
+// pre-computed fake fraction histograms for each category.
+// The histograms are stored in a map with the key being
+// the category name + the fraction name. For example, to get
+// the W+jets fraction for category "et_vbf" use
+//
+//       fake_fractions.at("et_vbf_frac_w");
+//
+// this will return a pointer to the histogram.
 void Sample::load_fake_fractions(std::string file_name) {
   auto ifile = new TFile(file_name.c_str(), "READ");
   fout->cd();
@@ -260,7 +307,12 @@ void Sample::load_fake_fractions(std::string file_name) {
   ifile->Close();
 }
 
-// basically a map from 2 inputs -> 1 Category
+// get_category will take a variable and return the category
+// in which this variable belongs. This is to give us
+// "3D histograms" for combine although we can really only
+// make a 2D histogram. If for some reason the given parameter
+// doesn't fit in any bins, return "skip" to be handled by the
+// caller.
 std::string Sample::get_category(double vbf_var3) {
   double edge = 1. / 6.;
   if (vbf_var3 >= 0 && vbf_var3 <= 1. * edge) {
@@ -294,6 +346,10 @@ std::string Sample::get_category(double vbf_var3) {
   //  }
 }
 
+// write_histograms is used to write the histograms to the output root file.
+// First, change into the correct directory for the category then write the
+// histogram. Additionally, if this Sample is for data, write the fake factor
+// histograms in the same directory.
 void Sample::write_histograms(bool doSyst = false, std::string newName = "") {
   for (auto cat : categories) {
     fout->cd(cat.c_str());
@@ -304,6 +360,11 @@ void Sample::write_histograms(bool doSyst = false, std::string newName = "") {
       auto hist = fakes_2d.at(cat);
       hist->SetName("jetFakes");
       hist->Write();
+      if (doSyst) {
+        for (auto ihist : FF_systs.at(cat)) {
+          ihist->Write();
+        }
+      }
     }
   }
 }
