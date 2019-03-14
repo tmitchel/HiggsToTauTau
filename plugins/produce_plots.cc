@@ -72,11 +72,9 @@ int main(int argc, char *argv[]) {
   fout->cd();
   fout->mkdir("plots");
   for (auto it = vars.begin(); it != vars.end(); it++) {
-    fout->cd("plots");
-    fout->mkdir(it->first.c_str());
+    fout->mkdir(("plots/" + it->first).c_str());
     for (auto cat : info->get_categories()) {
-      fout->cd(("plots/" + it->first).c_str());
-      fout->mkdir(cat.c_str());
+      fout->mkdir(("plots/" + it->first + "/" + cat).c_str());
     }
   }
   fout->cd();
