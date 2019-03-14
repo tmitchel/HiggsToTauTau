@@ -59,57 +59,25 @@ class TemplateTool {
   std::vector<std::string> get_categories() { return categories; }
   explicit TemplateTool(std::string);
   void Close() { delete ff_weight;  }
+  void make_extension_map(std::string channel_prefix);
+  std::string get_extension(std::string);
 
  protected:
   TemplateTool(std::string, std::string, std::string, std::shared_ptr<TFile>);
 
   std::shared_ptr<TFile> fout;
   FakeFactor *ff_weight;
-  std::string channel_prefix, var;
-  std::map<std::string, std::vector<std::pair<std::string, std::string>>> acNameMap;
   std::vector<std::string> categories, systematics;
+  std::string channel_prefix, var;
+
+ private:
+  std::map<std::string, std::vector<std::pair<std::string, std::string>>> acNameMap;
+  std::map<std::string, std::string> extension_map;
 };
 
 TemplateTool::TemplateTool(std::string channel_prefix, std::string year, std::string suffix, std::shared_ptr<TFile> output_file)
     : fout(output_file),
       channel_prefix(channel_prefix),
-      acNameMap{
-          {"ggh",
-           {std::make_pair("wt_ggH_a1", "JHU_GGH2Jets_sm_M125"),
-            std::make_pair("wt_ggH_a3", "JHU_GGH2Jets_pseudoscalar_M125"),
-            std::make_pair("wt_ggH_a3int", "JHU_GGH2Jets_pseudoscalar_Mf05ph0125")}},
-          {"wh",
-           {std::make_pair("wt_wh_a1", "reweighted_WH_htt_0PM125"),
-            std::make_pair("wt_wh_a2", "reweighted_WH_htt_0PH125"),
-            std::make_pair("wt_wh_a2int", "reweighted_WH_htt_0PHf05ph0125"),
-            std::make_pair("wt_wh_a3", "reweighted_WH_htt_0M125"),
-            std::make_pair("wt_wh_a3int", "reweighted_WH_htt_0Mf05ph0125"),
-            std::make_pair("wt_wh_L1", "reweighted_WH_htt_0L1125"),
-            std::make_pair("wt_wh_L1int", "reweighted_WH_htt_0L1f05ph0125"),
-            std::make_pair("wt_wh_L1Zg", "reweighted_WH_htt_0L1Zg125"),
-            std::make_pair("wt_wh_L1Zgint", "reweighted_WH_htt_0L1Zgf05ph0125")}},
-          {"zh",
-           {std::make_pair("wt_zh_a1", "reweighted_ZH_htt_0PM125"),
-            std::make_pair("wt_zh_a2", "reweighted_ZH_htt_0PH125"),
-            std::make_pair("wt_zh_a2int", "reweighted_ZH_htt_0PHf05ph0125"),
-            std::make_pair("wt_zh_a3", "reweighted_ZH_htt_0M125"),
-            std::make_pair("wt_zh_a3int", "reweighted_ZH_htt_0Mf05ph0125"),
-            std::make_pair("wt_zh_L1", "reweighted_ZH_htt_0L1125"),
-            std::make_pair("wt_zh_L1int", "reweighted_ZH_htt_0L1f05ph0125"),
-            std::make_pair("wt_zh_L1Zg", "reweighted_ZH_htt_0L1Zg125"),
-            std::make_pair("wt_zh_L1Zgint", "reweighted_ZH_htt_0L1Zgf05ph0125")}},
-          {"vbf",
-           {
-               std::make_pair("wt_a1", "reweighted_qqH_htt_0PM125"),
-               std::make_pair("wt_a2", "reweighted_qqH_htt_0PH125"),
-               std::make_pair("wt_a2int", "reweighted_qqH_htt_0PHf05ph0125"),
-               std::make_pair("wt_a3", "reweighted_qqH_htt_0M125"),
-               std::make_pair("wt_a3int", "reweighted_qqH_htt_0Mf05ph0125"),
-               std::make_pair("wt_L1", "reweighted_qqH_htt_0L1125"),
-               std::make_pair("wt_L1int", "reweighted_qqH_htt_0L1f05ph0125"),
-               std::make_pair("wt_L1Zg", "reweighted_qqH_htt_0L1Zg125"),
-               std::make_pair("wt_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"),
-           }}},
       categories{
           channel_prefix + "_0jet",
           channel_prefix + "_boosted",
@@ -171,6 +139,38 @@ std::vector<std::pair<std::string, std::string>> TemplateTool::get_AC_weights(st
   } else if (name.find("zh_inc") != std::string::npos) {
     return acNameMap.at("zh");
     }
+}
+
+void TemplateTool::make_extension_map(std::string channel_prefix) {
+  extension_map = {
+      {channel_prefix + "_tree_UncMet_Up", "xxx"},
+      {channel_prefix + "_tree_UncMet_Down", "xxx"},
+      {channel_prefix + "_tree_ClusteredMet_Up", "xxx"},
+      {channel_prefix + "_tree_ClusteredMet_Down", "xxx"},
+      {channel_prefix + "_tree_vbfMass_JetTotalUp", "xxx"},
+      {channel_prefix + "_tree_jetVeto30_JetTotalUp", "xxx"},
+      {channel_prefix + "_tree_vbfMass_JetTotalDown", "xxx"},
+      {channel_prefix + "_tree_jetVeto30_JetTotalDown", "xxx"},
+      {channel_prefix + "_tree_ttbarShape_Up", "xxx"},
+      {channel_prefix + "_tree_ttbarShape_Down", "xxx"},
+      {channel_prefix + "_tree_Up", "xxx"},
+      {channel_prefix + "_tree_Down", "xxx"},
+      {channel_prefix + "_tree_DM0_Up", "xxx"},
+      {channel_prefix + "_tree_DM0_Down", "xxx"},
+      {channel_prefix + "_tree_DM1_Up", "xxx"},
+      {channel_prefix + "_tree_DM1_Down", "xxx"},
+      {channel_prefix + "_tree_DM10_Up", "xxx"},
+      {channel_prefix + "_tree_DM10_Down", "xxx"},
+      {channel_prefix + "_tree_jetToTauFake_Up", "xxx"},
+      {channel_prefix + "_tree_jetToTauFake_Down", "xxx"},
+      {channel_prefix + "_tree_dyShape_Up", "xxx"},
+      {channel_prefix + "_tree_dyShape_Down", "xxx"},
+      {channel_prefix + "_tree_zmumuShape_Up", "xxx"},
+      {channel_prefix + "_tree_zmumuShape_Down", "xxx"}};
+}
+
+std::string TemplateTool::get_extension(std::string name) {
+  return extension_map.at(name);
 }
 
 TemplateTool::TemplateTool(std::string channel_prefix)
@@ -239,16 +239,6 @@ TemplateTool::TemplateTool(std::string channel_prefix)
           channel_prefix + "_vbf_ggHMELA_bin9_NN_bin2",
           channel_prefix + "_vbf_ggHMELA_bin10_NN_bin2",
           channel_prefix + "_vbf_ggHMELA_bin11_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2"},
-      systematics{
-          "ff_qcd_syst_up", "ff_qcd_syst_down", "ff_qcd_dm0_njet0_stat_up",
-          "ff_qcd_dm0_njet0_stat_down", "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down",
-          "ff_qcd_dm1_njet0_stat_up", "ff_qcd_dm1_njet0_stat_down", "ff_qcd_dm1_njet1_stat_up",
-          "ff_qcd_dm1_njet1_stat_down", "ff_w_syst_up", "ff_w_syst_down", "ff_w_dm0_njet0_stat_up",
-          "ff_w_dm0_njet0_stat_down", "ff_w_dm0_njet1_stat_up", "ff_w_dm0_njet1_stat_down",
-          "ff_w_dm1_njet0_stat_up", "ff_w_dm1_njet0_stat_down", "ff_w_dm1_njet1_stat_up",
-          "ff_w_dm1_njet1_stat_down", "ff_tt_syst_up", "ff_tt_syst_down", "ff_tt_dm0_njet0_stat_up",
-          "ff_tt_dm0_njet0_stat_down", "ff_tt_dm0_njet1_stat_up", "ff_tt_dm0_njet1_stat_down",
-          "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down", "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"} {}
+          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2"} {}
 
 #endif  // INCLUDE_TEMPLATETOOL_H_
