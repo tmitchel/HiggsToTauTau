@@ -23,6 +23,7 @@ class Sample_Plots : public TemplateTool {
   void convert_data_to_fake(std::string, double, std::string);
   void write_histograms();
   void set_variable(std::shared_ptr<TTree>);
+  Float_t get_var(std::string);
 
  private:
   std::string sample_name, in_var_name;
@@ -34,13 +35,9 @@ class Sample_Plots : public TemplateTool {
   // get variables from file
   Int_t is_signal, is_antiTauIso, OS;        // flags
   Float_t weight, acWeightVal;               // weights
-  Float_t lep_iso;                           // for 3D separation
+  Float_t lep_iso, mjj, t1_pt, vis_mass, mt, t1_decayMode, njets, nbjets;  // for fake factor                           
+  Float_t D0_ggH;  // 3D separation
   std::map<std::string, Float_t> variables;  // all variables
-  Float_t el_pt, el_eta, el_phi, el_mass, mu_pt, mu_eta, mu_phi, mu_mass, t1_pt, t1_eta, t1_phi, t1_mass, t1_iso, t1_decayMode,
-      njets, nbjets, j1_pt, j1_eta, j1_phi, j2_pt, j2_eta, j2_phi, b1_pt, b1_eta, b1_phi, b2_pt, b2_eta, b2_phi,
-      met, metphi, mjj, numGenJets, mt, pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH, VBF_MELA, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2,
-      ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH,
-      higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, MT_lepMET, MT_t2MET, MT_HiggsMET, hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr, lt_dphi;
 };
 
 // Sample_Plots constructor. Loads all of the basic information from the parent TemplateTool class.
@@ -74,6 +71,28 @@ Sample_Plots::Sample_Plots(std::string channel_prefix, std::string year, std::st
     plot_variables.push_back(it->first);
     all_fakes[it->first] = fakes;
     all_hists[it->first] = hists;
+  }
+}
+
+Float_t Sample_Plots::get_var(std::string var) {
+  if (var == "t1_decayMode") {
+    return t1_decayMode;
+  } else if (var == "vis_mass") {
+    return vis_mass;
+  } else if (var == "mjj") {
+    return mjj;
+  } else if (var == "mt") {
+    return mt;
+  } else if (var == "mu_iso" || var == "el_iso") {
+    return lep_iso;
+  } else if (var == "njets") {
+    return njets;
+  } else if (var == "D0_ggH") {
+    return D0_ggH;
+  } else if (var == "t1_pt") {
+    return t1_pt;
+  } else {
+    return variables.at(var);
   }
 }
 
@@ -114,25 +133,25 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
       // fill histograms
       if (is_signal) {
         if (cat0) {
-          all_hists.at(var).at(channel_prefix + "_0jet")->Fill(variables[var], weight);
+          all_hists.at(var).at(channel_prefix + "_0jet")->Fill(get_var(var), weight);
         } else if (cat1) {
-          all_hists.at(var).at(channel_prefix + "_boosted")->Fill(variables[var], weight);
+          all_hists.at(var).at(channel_prefix + "_boosted")->Fill(get_var(var), weight);
         } else if (cat2) {
-          all_hists.at(var).at(channel_prefix + "_vbf")->Fill(variables[var], weight);
+          all_hists.at(var).at(channel_prefix + "_vbf")->Fill(get_var(var), weight);
           if (ACcat != "skip") {
-            all_hists.at(var).at(ACcat)->Fill(variables[var], weight);
+            all_hists.at(var).at(ACcat)->Fill(get_var(var), weight);
           }
         }
       } else if (is_antiTauIso && sample_name == "data_obs") {
         if (cat0) {
           // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
-          convert_data_to_fake(channel_prefix + "_0jet", variables[var], var);  // 2d template
+          convert_data_to_fake(channel_prefix + "_0jet", get_var(var), var);  // 2d template
         } else if (cat1) {
-          convert_data_to_fake(channel_prefix + "_boosted", variables[var], var);
+          convert_data_to_fake(channel_prefix + "_boosted", get_var(var), var);
         } else if (cat2) {
-          convert_data_to_fake(channel_prefix + "_vbf", variables[var], var);
+          convert_data_to_fake(channel_prefix + "_vbf", get_var(var), var);
           if (ACcat != "skip") {
-            convert_data_to_fake(ACcat, variables[var], var);
+            convert_data_to_fake(ACcat, get_var(var), var);
           }
         }
       }
@@ -250,6 +269,76 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
     iso = "mu_iso";
   }
 
+  // now make the map
+  variables = {
+      {"el_pt", 0},
+      {"el_eta", 0},
+      {"el_phi", 0},
+      {"el_mass", 0},
+      {"mu_pt", 0},
+      {"mu_eta", 0},
+      {"mu_phi", 0},
+      {"mu_mass", 0},
+      {"t1_eta", 0},
+      {"t1_phi", 0},
+      {"t1_mass", 0},
+      {"t1_iso", 0},
+      {"j1_pt", 0},
+      {"j1_eta", 0},
+      {"j1_phi", 0},
+      {"j2_pt", 0},
+      {"j2_eta", 0},
+      {"j2_phi", 0},
+      {"b1_pt", 0},
+      {"b1_eta", 0},
+      {"b1_phi", 0},
+      {"b2_pt", 0},
+      {"b2_eta", 0},
+      {"b2_phi", 0},
+      {"met", 0},
+      {"metphi", 0},
+      {"numGenJets", 0},
+      {"pt_sv", 0},
+      {"m_sv", 0},
+      {"Dbkg_VBF", 0},
+      {"Dbkg_ggH", 0},
+      {"D0_VBF", 0},
+      {"DCP_VBF", 0},
+      {"D0_ggH", 0},
+      {"DCP_ggH", 0},
+      {"Phi", 0},
+      {"Phi1", 0},
+      {"costheta1", 0},
+      {"costheta2", 0},
+      {"costhetastar", 0},
+      {"Q2V1", 0},
+      {"Q2V2", 0},
+      {"ME_sm_VBF", 0},
+      {"ME_sm_ggH", 0},
+      {"ME_sm_WH", 0},
+      {"ME_sm_ZH", 0},
+      {"ME_bkg", 0},
+      {"ME_bkg1", 0},
+      {"ME_bkg2", 0},
+      {"VBF_MELA", 0},
+      {"higgs_pT", 0},
+      {"higgs_m", 0},
+      {"hjj_pT", 0},
+      {"hjj_m", 0},
+      {"vis_mass", 0},
+      {"dEtajj", 0},
+      {"dPhijj", 0},
+      {"MT_lepMET", 0},
+      {"MT_HiggsMET", 0},
+      {"hj_dphi", 0},
+      {"jmet_dphi", 0},
+      {"MT_t2MET", 0},
+      {"hj_deta", 0},
+      {"hmet_dphi", 0},
+      {"hj_dr", 0},
+      {"lt_dphi", 0},
+  };
+
   tree->SetBranchAddress("evtwt", &weight);
   tree->SetBranchAddress("t1_decayMode", &t1_decayMode);
   tree->SetBranchAddress("vis_mass", &vis_mass);
@@ -263,158 +352,75 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
   tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
   tree->SetBranchAddress("OS", &OS);
   tree->SetBranchAddress("t1_pt", &t1_pt);
-  tree->SetBranchAddress("el_pt", &el_pt);
-  tree->SetBranchAddress("el_eta", &el_eta);
-  tree->SetBranchAddress("el_phi", &el_phi);
-  tree->SetBranchAddress("el_mass", &el_mass);
-  tree->SetBranchAddress("mu_pt", &mu_pt);
-  tree->SetBranchAddress("mu_eta", &mu_eta);
-  tree->SetBranchAddress("mu_phi", &mu_phi);
-  tree->SetBranchAddress("mu_mass", &mu_mass);
-  tree->SetBranchAddress("t1_eta", &t1_eta);
-  tree->SetBranchAddress("t1_phi", &t1_phi);
-  tree->SetBranchAddress("t1_mass", &t1_mass);
-  tree->SetBranchAddress("t1_iso", &t1_iso);
-  tree->SetBranchAddress("j1_pt", &j1_pt);
-  tree->SetBranchAddress("j1_eta", &j1_eta);
-  tree->SetBranchAddress("j1_phi", &j1_phi);
-  tree->SetBranchAddress("j2_pt", &j2_pt);
-  tree->SetBranchAddress("j2_eta", &j2_eta);
-  tree->SetBranchAddress("j2_phi", &j2_phi);
-  tree->SetBranchAddress("b1_pt", &b1_pt);
-  tree->SetBranchAddress("b1_eta", &b1_eta);
-  tree->SetBranchAddress("b1_phi", &b1_phi);
-  tree->SetBranchAddress("b2_pt", &b2_pt);
-  tree->SetBranchAddress("b2_eta", &b2_eta);
-  tree->SetBranchAddress("b2_phi", &b2_phi);
-  tree->SetBranchAddress("met", &met);
-  tree->SetBranchAddress("metphi", &metphi);
-  tree->SetBranchAddress("numGenJets", &numGenJets);
-  tree->SetBranchAddress("pt_sv", &pt_sv);
-  tree->SetBranchAddress("m_sv", &m_sv);
-  tree->SetBranchAddress("Dbkg_VBF", &Dbkg_VBF);
-  tree->SetBranchAddress("Dbkg_ggH", &Dbkg_ggH);
-  tree->SetBranchAddress("D0_VBF", &D0_VBF);
-  tree->SetBranchAddress("DCP_VBF", &DCP_VBF);
-  tree->SetBranchAddress("D0_ggH", &D0_ggH);
-  tree->SetBranchAddress("DCP_ggH", &DCP_ggH);
-  tree->SetBranchAddress("Phi", &Phi);
-  tree->SetBranchAddress("Phi1", &Phi1);
-  tree->SetBranchAddress("costheta1", &costheta1);
-  tree->SetBranchAddress("costheta2", &costheta2);
-  tree->SetBranchAddress("costhetastar", &costhetastar);
-  tree->SetBranchAddress("Q2V1", &Q2V1);
-  tree->SetBranchAddress("Q2V2", &Q2V2);
-  tree->SetBranchAddress("ME_sm_VBF", &ME_sm_VBF);
-  tree->SetBranchAddress("ME_sm_ggH", &ME_sm_ggH);
-  tree->SetBranchAddress("ME_sm_WH", &ME_sm_WH);
-  tree->SetBranchAddress("ME_sm_ZH", &ME_sm_ZH);
-  tree->SetBranchAddress("ME_bkg", &ME_bkg);
-  tree->SetBranchAddress("ME_bkg1", &ME_bkg1);
-  tree->SetBranchAddress("ME_bkg2", &ME_bkg2);
-  tree->SetBranchAddress("VBF_MELA", &VBF_MELA);
-  tree->SetBranchAddress("higgs_pT", &higgs_pT);
-  tree->SetBranchAddress("higgs_m", &higgs_m);
-  tree->SetBranchAddress("hjj_pT", &hjj_pT);
-  tree->SetBranchAddress("hjj_m", &hjj_m);
-  tree->SetBranchAddress("vis_mass", &vis_mass);
-  tree->SetBranchAddress("dEtajj", &dEtajj);
-  tree->SetBranchAddress("dPhijj", &dPhijj);
-  tree->SetBranchAddress("MT_lepMET", &MT_lepMET);
-  tree->SetBranchAddress("MT_HiggsMET", &MT_HiggsMET);
-  tree->SetBranchAddress("hj_dphi", &hj_dphi);
-  tree->SetBranchAddress("jmet_dphi", &jmet_dphi);
-  tree->SetBranchAddress("MT_t2MET", &MT_t2MET);
-  tree->SetBranchAddress("hj_deta", &hj_deta);
-  tree->SetBranchAddress("hmet_dphi", &hmet_dphi);
-  tree->SetBranchAddress("hj_dr", &hj_dr);
-  tree->SetBranchAddress("lt_dphi", &lt_dphi);
+  tree->SetBranchAddress("el_pt", &variables.at("el_pt"));
+  tree->SetBranchAddress("el_eta", &variables.at("el_eta"));
+  tree->SetBranchAddress("el_phi", &variables.at("el_phi"));
+  tree->SetBranchAddress("el_mass", &variables.at("el_mass"));
+  tree->SetBranchAddress("mu_pt", &variables.at("mu_pt"));
+  tree->SetBranchAddress("mu_eta", &variables.at("mu_eta"));
+  tree->SetBranchAddress("mu_phi", &variables.at("mu_phi"));
+  tree->SetBranchAddress("mu_mass", &variables.at("mu_mass"));
+  tree->SetBranchAddress("t1_eta", &variables.at("t1_eta"));
+  tree->SetBranchAddress("t1_phi", &variables.at("t1_phi"));
+  tree->SetBranchAddress("t1_mass", &variables.at("t1_mass"));
+  tree->SetBranchAddress("t1_iso", &variables.at("t1_iso"));
+  tree->SetBranchAddress("j1_pt", &variables.at("j1_pt"));
+  tree->SetBranchAddress("j1_eta", &variables.at("j1_eta"));
+  tree->SetBranchAddress("j1_phi", &variables.at("j1_phi"));
+  tree->SetBranchAddress("j2_pt", &variables.at("j2_pt"));
+  tree->SetBranchAddress("j2_eta", &variables.at("j2_eta"));
+  tree->SetBranchAddress("j2_phi", &variables.at("j2_phi"));
+  tree->SetBranchAddress("b1_pt", &variables.at("b1_pt"));
+  tree->SetBranchAddress("b1_eta", &variables.at("b1_eta"));
+  tree->SetBranchAddress("b1_phi", &variables.at("b1_phi"));
+  tree->SetBranchAddress("b2_pt", &variables.at("b2_pt"));
+  tree->SetBranchAddress("b2_eta", &variables.at("b2_eta"));
+  tree->SetBranchAddress("b2_phi", &variables.at("b2_phi"));
+  tree->SetBranchAddress("met", &variables.at("met"));
+  tree->SetBranchAddress("metphi", &variables.at("metphi"));
+  tree->SetBranchAddress("numGenJets", &variables.at("numGenJets"));
+  tree->SetBranchAddress("pt_sv", &variables.at("pt_sv"));
+  tree->SetBranchAddress("m_sv", &variables.at("m_sv"));
+  tree->SetBranchAddress("Dbkg_VBF", &variables.at("Dbkg_VBF"));
+  tree->SetBranchAddress("Dbkg_ggH", &variables.at("Dbkg_ggH"));
+  tree->SetBranchAddress("D0_VBF", &variables.at("D0_VBF"));
+  tree->SetBranchAddress("DCP_VBF", &variables.at("DCP_VBF"));
+  tree->SetBranchAddress("D0_ggH", &variables.at("D0_ggH"));
+  tree->SetBranchAddress("DCP_ggH", &variables.at("DCP_ggH"));
+  tree->SetBranchAddress("Phi", &variables.at("Phi"));
+  tree->SetBranchAddress("Phi1", &variables.at("Phi1"));
+  tree->SetBranchAddress("costheta1", &variables.at("costheta1"));
+  tree->SetBranchAddress("costheta2", &variables.at("costheta2"));
+  tree->SetBranchAddress("costhetastar", &variables.at("costhetastar"));
+  tree->SetBranchAddress("Q2V1", &variables.at("Q2V1"));
+  tree->SetBranchAddress("Q2V2", &variables.at("Q2V2"));
+  tree->SetBranchAddress("ME_sm_VBF", &variables.at("ME_sm_VBF"));
+  tree->SetBranchAddress("ME_sm_ggH", &variables.at("ME_sm_ggH"));
+  tree->SetBranchAddress("ME_sm_WH", &variables.at("ME_sm_WH"));
+  tree->SetBranchAddress("ME_sm_ZH", &variables.at("ME_sm_ZH"));
+  tree->SetBranchAddress("ME_bkg", &variables.at("ME_bkg"));
+  tree->SetBranchAddress("ME_bkg1", &variables.at("ME_bkg1"));
+  tree->SetBranchAddress("ME_bkg2", &variables.at("ME_bkg2"));
+  tree->SetBranchAddress("VBF_MELA", &variables.at("VBF_MELA"));
+  tree->SetBranchAddress("higgs_pT", &variables.at("higgs_pT"));
+  tree->SetBranchAddress("higgs_m", &variables.at("higgs_m"));
+  tree->SetBranchAddress("hjj_pT", &variables.at("hjj_pT"));
+  tree->SetBranchAddress("hjj_m", &variables.at("hjj_m"));
+  tree->SetBranchAddress("vis_mass", &variables.at("vis_mass"));
+  tree->SetBranchAddress("dEtajj", &variables.at("dEtajj"));
+  tree->SetBranchAddress("dPhijj", &variables.at("dPhijj"));
+  tree->SetBranchAddress("MT_lepMET", &variables.at("MT_lepMET"));
+  tree->SetBranchAddress("MT_HiggsMET", &variables.at("MT_HiggsMET"));
+  tree->SetBranchAddress("hj_dphi", &variables.at("hj_dphi"));
+  tree->SetBranchAddress("jmet_dphi", &variables.at("jmet_dphi"));
+  tree->SetBranchAddress("MT_t2MET", &variables.at("MT_t2MET"));
+  tree->SetBranchAddress("hj_deta", &variables.at("hj_deta"));
+  tree->SetBranchAddress("hmet_dphi", &variables.at("hmet_dphi"));
+  tree->SetBranchAddress("hj_dr", &variables.at("hj_dr"));
+  tree->SetBranchAddress("lt_dphi", &variables.at("lt_dphi"));
   if (acWeight != "None") {
     tree->SetBranchAddress(acWeight.c_str(), &acWeightVal);
   }
-
-  // now make the map
-  variables = {
-      {"evtwt", weight},
-      {"t1_decayMode", t1_decayMode},
-      {"vis_mass", vis_mass},
-      {"mjj", mjj},
-      {"mt", mt},
-      {iso.c_str(), lep_iso},
-      {"njets", njets},
-      {"nbjets", nbjets},
-      {"D0_ggH", D0_ggH},
-      {"is_signal", is_signal},
-      {"is_antiTauIso", is_antiTauIso},
-      {"OS", OS},
-      {"t1_pt", t1_pt},
-      {"el_pt", el_pt},
-      {"el_eta", el_eta},
-      {"el_phi", el_phi},
-      {"el_mass", el_mass},
-      {"mu_pt", mu_pt},
-      {"mu_eta", mu_eta},
-      {"mu_phi", mu_phi},
-      {"mu_mass", mu_mass},
-      {"t1_eta", t1_eta},
-      {"t1_phi", t1_phi},
-      {"t1_mass", t1_mass},
-      {"t1_iso", t1_iso},
-      {"j1_pt", j1_pt},
-      {"j1_eta", j1_eta},
-      {"j1_phi", j1_phi},
-      {"j2_pt", j2_pt},
-      {"j2_eta", j2_eta},
-      {"j2_phi", j2_phi},
-      {"b1_pt", b1_pt},
-      {"b1_eta", b1_eta},
-      {"b1_phi", b1_phi},
-      {"b2_pt", b2_pt},
-      {"b2_eta", b2_eta},
-      {"b2_phi", b2_phi},
-      {"met", met},
-      {"metphi", metphi},
-      {"numGenJets", numGenJets},
-      {"pt_sv", pt_sv},
-      {"m_sv", m_sv},
-      {"Dbkg_VBF", Dbkg_VBF},
-      {"Dbkg_ggH", Dbkg_ggH},
-      {"D0_VBF", D0_VBF},
-      {"DCP_VBF", DCP_VBF},
-      {"D0_ggH", D0_ggH},
-      {"DCP_ggH", DCP_ggH},
-      {"Phi", Phi},
-      {"Phi1", Phi1},
-      {"costheta1", costheta1},
-      {"costheta2", costheta2},
-      {"costhetastar", costhetastar},
-      {"Q2V1", Q2V1},
-      {"Q2V2", Q2V2},
-      {"ME_sm_VBF", ME_sm_VBF},
-      {"ME_sm_ggH", ME_sm_ggH},
-      {"ME_sm_WH", ME_sm_WH},
-      {"ME_sm_ZH", ME_sm_ZH},
-      {"ME_bkg", ME_bkg},
-      {"ME_bkg1", ME_bkg1},
-      {"ME_bkg2", ME_bkg2},
-      {"VBF_MELA", VBF_MELA},
-      {"higgs_pT", higgs_pT},
-      {"higgs_m", higgs_m},
-      {"hjj_pT", hjj_pT},
-      {"hjj_m", hjj_m},
-      {"vis_mass", vis_mass},
-      {"dEtajj", dEtajj},
-      {"dPhijj", dPhijj},
-      {"MT_lepMET", MT_lepMET},
-      {"MT_HiggsMET", MT_HiggsMET},
-      {"hj_dphi", hj_dphi},
-      {"jmet_dphi", jmet_dphi},
-      {"MT_t2MET", MT_t2MET},
-      {"hj_deta", hj_deta},
-      {"hmet_dphi", hmet_dphi},
-      {"hj_dr", hj_dr},
-      {"lt_dphi", lt_dphi},
-  };
 }
 
 #endif  // INCLUDE_SAMPLE_H_
