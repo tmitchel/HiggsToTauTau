@@ -10,14 +10,6 @@
 #include "TH2F.h"
 #include "TTree.h"
 
-// FF
-#include "HTTutilities/Jet2TauFakes/interface/FakeFactor.h"
-#include "HTTutilities/Jet2TauFakes/interface/IFunctionWrapper.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTFormula.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTGraph.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTH2F.h"
-#include "HTTutilities/Jet2TauFakes/interface/WrapperTH3D.h"
-
 enum Categories { zeroJet,
                   boosted,
                   vbf,
@@ -46,7 +38,6 @@ class FakeFractions {
   std::vector<TH2F *> data, frac_w, frac_tt, frac_real, frac_qcd;
   std::vector<Float_t> mvis_bins, njets_bins;
   std::vector<std::string> categories;
-  FakeFactor *ff_weight;
   TFile *fout;
 };
 
@@ -96,18 +87,6 @@ FakeFractions::FakeFractions(std::string channel_prefix, std::string year, std::
     fout->mkdir(cat.c_str());
     fout->cd();
   }
-
-  // get FakeFactor workspace
-  TFile *ff_file;
-  if (year == "2017") {
-    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ");
-  } else if (year == "2016") {
-    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2016/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_tight.root").c_str(), "READ");
-  } else {
-    std::cerr << "Bad year" << std::endl;
-  }
-  ff_weight = reinterpret_cast<FakeFactor *>(ff_file->Get("ff_comb"));
-  ff_file->Close();
 }
 
 // read all *.root files in the given directory and put them in the provided vector
@@ -179,5 +158,4 @@ void FakeFractions::writeTemplates() {
     }
   }
   fout->Close();
-  delete ff_weight;
 }
