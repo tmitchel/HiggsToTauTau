@@ -44,10 +44,10 @@ int main(int argc, char *argv[]) {
   std::map<std::string, std::vector<float>> vars = {
       {"m_sv", {30, 50, 180}},
       // {"mu_pt", {30, 30, 200}},
-      // {"t1_pt", {30, 30, 200}},
-      // {"met", {30, 0, 500}},
+      {"t1_pt", {30, 30, 200}},
+      {"met", {30, 0, 500}},
       // {"lt_dphi", {30, 0, 3.14}},
-      // {"higgs_pT", {30, 0, 300}},
+      {"higgs_pT", {30, 0, 300}},
       // {"MT_lepMET", {30, 0, 55}},
       // {"MT_HiggsMET", {30, 0, 300}},
       // {"hj_dphi", {30, 0, 3.14}},
@@ -110,4 +110,5 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+  std::cout << "Plots created.\n Timing Info: \n\t CPU Time: " << watch.CpuTime() << "\n\tReal Time: " << watch.RealTime() << std::endl;
 }

@@ -127,7 +127,7 @@ void Sample_Plots::set_variable(std::shared_ptr<TTree> tree) {
     } else if (it->first == "t1_pt") {
       it->second = std::shared_ptr<float_t>(&t1_pt);
     } else {
-      tree->SetBranchAddress(it->first.c_str(), &(*(it->second)));
+      tree->SetBranchAddress(it->first.c_str(), &(*(it->second)));  // LOL. Dereference shared pointer then take address
     }
     i++;
   }
@@ -168,9 +168,7 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
     // find the correct MELA ggH/Higgs pT bin for this event
     auto ACcat = get_category(D0_ggH);
     for (auto it = observables.begin(); it != observables.end(); it++) {
-    // std::cout << observables.size() << std::endl;
-    // std::cout << it->first << std::endl;
-    // std::cout << (it->second) << std::endl;
+
       // fill histograms
       if (is_signal) {
         if (cat0) {
