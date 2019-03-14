@@ -4,6 +4,7 @@
 #define INCLUDE_SAMPLE_H_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 #include "./TemplateTool.h"
@@ -36,7 +37,7 @@ class Sample_Plots : public TemplateTool {
   Float_t weight, acWeightVal;                         // weights
   Float_t lep_iso, mt, t1_decayMode, vis_mass, t1_pt;  // for fake factor
   Float_t D0_ggH;                                      // for 3D separation
-  std::map<std::string, Float_t *> observables;                  // variable to plot
+  std::map<std::string, std::shared_ptr<Float_t>> observables;                  // variable to plot
 };
 
 // Sample_Plots constructor. Loads all of the basic information from the parent TemplateTool class.
@@ -55,7 +56,7 @@ Sample_Plots::Sample_Plots(std::string channel_prefix, std::string year, std::st
       acWeightVal(1.) {
       // variables(in_variables) {
   for (auto it = variables.begin(); it != variables.end(); it++) {
-    observables[it->first] = new Float_t(0.);  // entry for each variable to register later
+    observables[it->first] =  std::make_shared<Float_t>(0.);  // entry for each variable to register later
     for (auto cat : categories) {
       fout->cd(("plots/" + it->first + "/" + cat).c_str());
 
@@ -109,24 +110,24 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
 void Sample_Plots::set_variable(std::shared_ptr<TTree> tree) {
   int i = 0;
   for (auto it = observables.begin(); it != observables.end(); it++) {
-    if (in_var_name == "t1_decayMode") {
-      it->second = &t1_decayMode;
-    } else if (in_var_name == "vis_mass") {
-      it->second = &vis_mass;
-    } else if (in_var_name == "mjj") {
-      it->second = &mjj;
-    } else if (in_var_name == "mt") {
-      it->second = &mt;
-    } else if (in_var_name == "mu_iso" || in_var_name == "el_iso") {
-      it->second = &lep_iso;
-    } else if (in_var_name == "njets") {
-      it->second = &njets;
-    } else if (in_var_name == "D0_ggH") {
-      it->second = &D0_ggH;
-    } else if (in_var_name == "t1_pt") {
-      it->second = &t1_pt;
+    if (it->first == "t1_decayMode") {
+      it->second = std::shared_ptr<float_t>(&t1_decayMode);
+    } else if (it->first == "vis_mass") {
+      it->second = std::shared_ptr<float_t>(&vis_mass);
+    } else if (it->first == "mjj") {
+      it->second = std::shared_ptr<float_t>(&mjj);
+    } else if (it->first == "mt") {
+      it->second = std::shared_ptr<float_t>(&mt);
+    } else if (it->first == "mu_iso" || it->first == "el_iso") {
+      it->second = std::shared_ptr<float_t>(&lep_iso);
+    } else if (it->first == "njets") {
+      it->second = std::shared_ptr<float_t>(&njets);
+    } else if (it->first == "D0_ggH") {
+      it->second = std::shared_ptr<float_t>(&D0_ggH);
+    } else if (it->first == "t1_pt") {
+      it->second = std::shared_ptr<float_t>(&t1_pt);
     } else {
-      tree->SetBranchAddress(in_var_name.c_str(), &(it->second));
+      tree->SetBranchAddress(it->first.c_str(), &(*(it->second)));
     }
     i++;
   }
@@ -166,8 +167,10 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
 
     // find the correct MELA ggH/Higgs pT bin for this event
     auto ACcat = get_category(D0_ggH);
-
     for (auto it = observables.begin(); it != observables.end(); it++) {
+    // std::cout << observables.size() << std::endl;
+    // std::cout << it->first << std::endl;
+    // std::cout << (it->second) << std::endl;
       // fill histograms
       if (is_signal) {
         if (cat0) {
