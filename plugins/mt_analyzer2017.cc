@@ -345,6 +345,16 @@ int main(int argc, char* argv[]) {
       // use promote-demote method to correct nbtag with no systematics
       jets.promoteDemote(btag_eff_oth, btag_eff_oth, btag_eff_oth);
 
+      // jet to tau fake rate
+      if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W" || name == "VVJ") {
+        auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
+        if (syst == "jetToTauFake_Up") {
+          evtwt *= (1 - (0.2 * temp_tau_pt / 100));
+        } else if (syst == "jetToTauFake_Down") {
+          evtwt *= (1 + (0.2 * temp_tau_pt / 100));
+        }
+      }
+
     } else if (!isData && isEmbed) {
       // tau ID eff SF
       if (tau.getGenMatch() == 5) {

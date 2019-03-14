@@ -342,7 +342,7 @@ int main(int argc, char* argv[]) {
       float weight_btag(jets.bTagEventWeight());
 
       // jet to tau fake rate
-      if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W") {
+      if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W" || name == "VVJ") {
         auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
         if (syst == "jetToTauFake_Up") {
           evtwt *= (1 - (0.2 * temp_tau_pt / 100));
