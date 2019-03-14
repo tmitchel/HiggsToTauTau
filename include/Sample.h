@@ -37,7 +37,22 @@ class Sample : public TemplateTool {
 Sample::Sample(std::string channel_prefix, std::string year, std::string in_sample_name, std::string suffix, std::shared_ptr<TFile> output_file)
     : TemplateTool(channel_prefix, year, suffix, output_file),
       sample_name(in_sample_name),
-      acWeightVal(1.) {
+      acWeightVal(1.),
+      // x-axis
+      bins_l2{0, 1, 10, 11},
+      bins_hpt{0, 100, 150, 200, 250, 300, 5000},
+      // bins_vbf_var1{300, 500, 10000},  // real mjj
+      bins_vbf_var1{0, 0.25, 0.5, 0.75, 1.},  // actually VBF MELA
+
+      // y-axis
+      bins_lpt{0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
+      bins_msv1{0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300},
+      // bins_vbf_var2{0, 80, 100, 115, 130, 150, 1000},
+      // bins_vbf_var2{-5, -1.25, -0.75, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2., 3.},  // Fisher Disc
+      // bins_vbf_var2{0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5,  0.6, 0.65, 0.7, 0.8},  // Perceptron
+      // bins_vbf_var2{0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 1.},  // NN including m_sv et2016/mt2017
+      // bins_vbf_var2{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.95, 1.}, // mt2016
+      bins_vbf_var2{0, 0.25, 0.5, 0.75, 1.} {
   for (auto cat : categories) {
     // make directory in TFile
     fout->cd();
