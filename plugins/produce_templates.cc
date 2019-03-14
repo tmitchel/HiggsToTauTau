@@ -4,7 +4,7 @@
 
 // user includes
 #include "../include/CLParser.h"
-#include "../include/Sample.h"
+#include "../include/sample_template.h"
 #include "TMath.h"
 #include "TStopwatch.h"
 
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 
     // run for nominal case first
     auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));  // open TTree
-    auto sample = std::make_unique<Sample>(channel_prefix, year, name, suffix, fout);            // create Sample
+    auto sample = std::make_unique<Sample_Template>(channel_prefix, year, name, suffix, fout);   // create Sample_Template
     sample->load_fake_fractions(ff_name);                                                        // load fractions from input file
     sample->fill_histograms(tree, doSyst);                                                       // do event loop and fill histos
     sample->write_histograms(doSyst);                                                            // write all to the file
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
           std::cout << syst_tree_name << std::endl;
           auto ext = info->get_extension(syst_tree_name);
           auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(syst_tree_name.c_str())));
-          auto sample = std::make_unique<Sample>(channel_prefix, year, name, suffix, fout, ext);
+          auto sample = std::make_unique<Sample_Template>(channel_prefix, year, name, suffix, fout, ext);
           sample->load_fake_fractions(ff_name);
           sample->fill_histograms(tree, doSyst);
           sample->write_histograms(doSyst);
@@ -95,10 +95,10 @@ int main(int argc, char *argv[]) {
     if (ifile.find("_inc.root") != std::string::npos) {
       auto ac_weights = info->get_AC_weights(ifile);
       for (auto ac_weight : ac_weights) {
-        auto jhu_sample = std::make_unique<Sample>(channel_prefix, year, ac_weight.second, suffix, fout);
-        jhu_sample->load_fake_fractions(ff_name);
         auto fin = std::unique_ptr<TFile>(TFile::Open((dir + "/" + ifile).c_str()));
         auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
+        auto jhu_sample = std::make_unique<Sample_Template>(channel_prefix, year, ac_weight.second, suffix, fout);
+        jhu_sample->load_fake_fractions(ff_name);
         jhu_sample->fill_histograms(tree, doSyst, ac_weight.first);
         jhu_sample->write_histograms(doSyst, ac_weight.second);
         jhu_sample->Close();
