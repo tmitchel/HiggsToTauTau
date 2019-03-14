@@ -57,13 +57,21 @@ int main(int argc, char *argv[]) {
     // initialize histogram holder
     auto name = ifile.substr(0, ifile.find("."));
     std::cout << name << std::endl;
+    // open the file
+    auto fin = std::unique_ptr<TFile>(TFile::Open((dir + "/" + ifile).c_str()));
+
+    // run for nominal case first
+    auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
     auto sample = std::make_unique<Sample>(channel_prefix, year, name, suffix, fout);
     sample->load_fake_fractions(ff_name);
-    auto fin = std::unique_ptr<TFile>(TFile::Open((dir + "/" + ifile).c_str()));
-    auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
     sample->fill_histograms(tree, doSyst);
     sample->write_histograms(doSyst);
     sample->Close();
+
+    // start by just printing all the keys in the file.
+    for (auto key : fin->GetListOfKeys()) {
+      std::cout << key->GetName() << std::endl;
+    }
 
     // AC reweighting for JHU samples
     if (ifile.find("_inc.root") != std::string::npos) {
