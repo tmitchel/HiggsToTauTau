@@ -167,7 +167,7 @@ void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSy
     cat2 = (njets > 1 && mjj > 300);
 
     // find the correct MELA ggH/Higgs pT bin for this event
-    auto ACcat = get_category(vbf_var3);
+    auto ACcat = get_category(vbf_var3, -1);
 
     // fill histograms
     if (is_signal) {
@@ -182,12 +182,12 @@ void Sample::fill_histograms(std::string ifile, std::string tree_name, bool doSy
     } else if (is_antiTauIso && sample_name == "Data") {
       if (cat0) {
         // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
-        convert_data_to_fake(channel_prefix + "_0jet", t1_decayMode, vis_mass);  // 2d template
+        convert_data_to_fake(channel_prefix + "_0jet", t1_decayMode, vis_mass, -1);  // 2d template
       } else if (cat1) {
-        convert_data_to_fake(channel_prefix + "_boosted", higgs_pT, m_sv);
+        convert_data_to_fake(channel_prefix + "_boosted", higgs_pT, m_sv, -1);
       } else if (cat2) {
-        convert_data_to_fake(channel_prefix + "_vbf", vbf_var1, vbf_var2);
-        convert_data_to_fake(ACcat, vbf_var1, vbf_var2);
+        convert_data_to_fake(channel_prefix + "_vbf", vbf_var1, vbf_var2, -1);
+        convert_data_to_fake(ACcat, vbf_var1, vbf_var2, -1);
       }
 
       // loop through all systematic names and get the corresponding weight to fill a histogram
