@@ -73,7 +73,8 @@ int main(int argc, char *argv[]) {
     if (doSyst) {
       for (auto key : (*fin->GetListOfKeys())) {
         std::string syst_tree_name = key->GetName();
-        if (syst_tree_name.find(tree_name) != std::string::npos) {
+        if (syst_tree_name.find(tree_name) != std::string::npos && syst_tree_name != tree_name) {
+        std::cout << syst_tree_name << std::endl;
           auto ext = info->get_extension(syst_tree_name);
           auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(syst_tree_name.c_str())));
           auto sample = std::make_unique<Sample>(channel_prefix, year, name, suffix, fout, ext);
