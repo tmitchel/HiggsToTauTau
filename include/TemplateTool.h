@@ -53,12 +53,18 @@ void read_directory(const std::string &name, std::vector<std::string> *v) {
   closedir(dirp);
 }
 
+// TemplateTool is used to hold all of the long, hard-coded lists
+// that are needed for making templates. It holds the category names,
+// acWeight name and weight mappings, the map from systematic input
+// names to names ready for combine, and the list of fake factor
+// systematics. This class doesn't do anything besides hold this
+// information and return it when asked.
 class TemplateTool {
  public:
   std::vector<std::pair<std::string, std::string>> get_AC_weights(std::string);
   std::vector<std::string> get_categories() { return categories; }
   explicit TemplateTool(std::string);
-  void Close() { delete ff_weight;  }
+  void Close() { delete ff_weight;  }  // make sure to explicitly delete this. (NEEDED)
   void make_extension_map(std::string channel_prefix);
   std::string get_extension(std::string);
 
@@ -75,6 +81,10 @@ class TemplateTool {
   std::map<std::string, std::string> extension_map;
 };
 
+// This constructor is what is used by the Sample class. It only initializes that data
+// that will be needed by the sample. This is the category list, potentially the fake
+// factors systematic list, and loads the fake factor files. A pointer to the already
+// open output file is kept for writing.
 TemplateTool::TemplateTool(std::string channel_prefix, std::string year, std::string suffix, std::shared_ptr<TFile> output_file)
     : fout(output_file),
       channel_prefix(channel_prefix),
@@ -129,6 +139,9 @@ TemplateTool::TemplateTool(std::string channel_prefix, std::string year, std::st
   ff_file->Close();
 }
 
+// get_AC_weight makes sure the provided name corresponds to
+// a JHU sample for reweighting, then returns the vector of
+// pairs that has the weight name and the new sample name.
 std::vector<std::pair<std::string, std::string>> TemplateTool::get_AC_weights(std::string name) {
   if (name.find("ggh_inc") != std::string::npos) {
     return acNameMap.at("ggh");
@@ -141,6 +154,9 @@ std::vector<std::pair<std::string, std::string>> TemplateTool::get_AC_weights(st
     }
 }
 
+// make_extension_map constructs the extension map only when requested.
+// The map is used to translate from a tree name to the name that should
+// be used in the histograms provided to combine.
 void TemplateTool::make_extension_map(std::string channel_prefix) {
   extension_map = {
       {channel_prefix + "au_tree_UncMet_Up", "_CMS_scale_met_unclustered_13TeVUp"},
@@ -169,10 +185,14 @@ void TemplateTool::make_extension_map(std::string channel_prefix) {
       {channel_prefix + "au_tree_zmumuShape_Down", "_CMS_htt_zmumuShape_VBF_13TeVDown"}};
 }
 
+// get_extension returns the histogram name needed for combine
+// after being provided the input name from the tree.
 std::string TemplateTool::get_extension(std::string name) {
   return extension_map.at(name);
 }
 
+// This constructor is used just to get some information and is NOT
+// used by Sample. It just constructs the acNameMap and the categories.
 TemplateTool::TemplateTool(std::string channel_prefix)
     : channel_prefix(channel_prefix),
       acNameMap{
