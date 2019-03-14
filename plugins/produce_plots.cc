@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
         auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
         auto jhu_sample = std::make_unique<Sample_Plots>(channel_prefix, year, ac_weight.second, suffix, fout, vars.at("m_sv"));
         jhu_sample->load_fake_fractions(ff_name);
-        sample->set_variable(tree, "m_sv");
+        jhu_sample->set_variable(tree, "m_sv");
         jhu_sample->fill_histograms(tree, ac_weight.first);
         jhu_sample->write_histograms();
         jhu_sample->Close();
