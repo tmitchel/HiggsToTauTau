@@ -261,6 +261,10 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
+    if (tau.getPt() < 30) {
+      continue;
+    }
+
     // Separate Drell-Yan
     if (name == "ZL" && tau.getGenMatch() > 4) {
       continue;
@@ -276,6 +280,23 @@ int main(int argc, char* argv[]) {
 
     // build Higgs
     TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
+
+    // calculate mt
+    double met_x = met.getMet() * cos(met.getMetPhi());
+    double met_y = met.getMet() * sin(met.getMetPhi());
+    double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
+    double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getPx() + met_x, 2) - pow(electron.getPy() + met_y, 2));
+    int evt_charge = tau.getCharge() + electron.getCharge();
+
+    // now do mt selection
+    if (mt > 50) {
+      continue;
+    }
+
+    // only opposite-sign
+    if (evt_charge != 0) {
+      continue;
+    }
 
     // apply all scale factors/corrections/etc.
     if (!isData && !isEmbed) {
@@ -435,12 +456,10 @@ int main(int argc, char* argv[]) {
 
     fout->cd();
 
-    // calculate mt
-    double met_x = met.getMet() * cos(met.getMetPhi());
-    double met_y = met.getMet() * sin(met.getMetPhi());
-    double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-    double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getPx() + met_x, 2) - pow(electron.getPy() + met_y, 2));
-    int evt_charge = tau.getCharge() + electron.getCharge();
+    // b-jet veto
+    if (jets.getNbtag() > 0) {
+      continue;
+    }
 
     // create regions
     bool signalRegion   = (tau.getTightIsoMVA()  && electron.getIso() < 0.15);
@@ -453,6 +472,11 @@ int main(int argc, char* argv[]) {
     bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300));
     bool vbfCat  = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
+
+    // only keep the regions we need
+    if (!signalRegion && !antiTauIsoRegion) {
+      continue;
+    }
 
     // now do mt selection
     if (tau.getPt() < 30 || mt > 50) {
