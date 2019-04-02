@@ -56,7 +56,7 @@ Sample_Template::Sample_Template(std::string channel_prefix, std::string year, s
       bins_l2{0, 1, 10, 11},
       bins_hpt{0, 100, 150, 200, 250, 300, 5000},
       // bins_vbf_var1{300, 500, 10000},  // real mjj
-      bins_vbf_var1{0, 0.25, 0.5, 0.75, 1.},  // actually VBF MELA
+      bins_vbf_var1{0, 0.5, 1.},  // actually VBF MELA
 
       // y-axis
       bins_lpt{0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
