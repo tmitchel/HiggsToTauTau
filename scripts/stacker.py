@@ -77,16 +77,17 @@ def applyStyle(name, hist, leg):
         overlay = 9
     elif name == 'VBF125':
         overlay = -2
-    elif name == 'GGH2Jets_sm_M125' and 'vbf' in args.cat:
+    elif (name == 'GGH2Jets_sm_M125' or name == 'ggh_madgraph_twojet') and 'vbf' in args.cat:
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#0000FF'))
         overlay = 3
-    elif name == 'ggh_madgraph' and 'boosted' in args.cat:
+    elif (name == 'ggh_madgraph' or name == 'JHU_GGH2Jets_sm_M125') and not 'vbf' in args.cat:
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#0000FF'))
         overlay = 3
+        print 'heyo'
     elif name == 'ggH125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
@@ -107,7 +108,7 @@ def createCanvas():
     pad1.SetPad(0, .3, 1, 1)
     pad1.SetTopMargin(.1)
     pad1.SetBottomMargin(0.02)
-    pad1.SetLogy()
+#    pad1.SetLogy()
     pad1.SetTickx(1)
     pad1.SetTicky(1)
 

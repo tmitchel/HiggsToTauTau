@@ -48,7 +48,13 @@ int main(int argc, char *argv[]) {
   // make output file and TemplateTool containing useful information
   auto fout = std::make_shared<TFile>(("Output/templates/" + channel_prefix + year + "_" + suffix + ".root").c_str(), "recreate");
   auto info = std::make_unique<TemplateTool>(channel_prefix);
-  info->make_extension_map(channel_prefix);
+  auto map_prefix = "";
+  if (channel_prefix == "mt") {
+    map_prefix = "mut";
+  } else if (channel_prefix == "et") {
+    map_prefix = "et";
+  }
+  info->make_extension_map(map_prefix);
 
   // make all of the TDirectoryFiles we need
   for (auto cat : info->get_categories()) {

@@ -117,11 +117,11 @@ void Sample_Template::init_systematics() {
       std::string name = "jetFakes_";
       for (auto syst : systematics) {
         if (key.first == channel_prefix + "_0jet") {
-          FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]));
+          FF_systs.at(key.first.c_str()).push_back(new TH2F((name + "CMS_htt_" + syst).c_str(), name.c_str(), bins_l2.size() - 1, &bins_l2[0], bins_lpt.size() - 1, &bins_lpt[0]));
         } else if (key.first == channel_prefix + "_boosted") {
-          FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
+          FF_systs.at(key.first.c_str()).push_back(new TH2F((name + "CMS_htt_" + syst).c_str(), name.c_str(), bins_hpt.size() - 1, &bins_hpt[0], bins_msv1.size() - 1, &bins_msv1[0]));
         } else if (key.first.find("_vbf") != std::string::npos) {
-          FF_systs.at(key.first.c_str()).push_back(new TH2F((name + syst).c_str(), name.c_str(), bins_vbf_var1.size() - 1, &bins_vbf_var1[0], bins_vbf_var2.size() - 1, &bins_vbf_var2[0]));
+          FF_systs.at(key.first.c_str()).push_back(new TH2F((name + "CMS_htt_" + syst).c_str(), name.c_str(), bins_vbf_var1.size() - 1, &bins_vbf_var1[0], bins_vbf_var2.size() - 1, &bins_vbf_var2[0]));
         }
       }
     }
