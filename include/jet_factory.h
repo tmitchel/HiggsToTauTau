@@ -65,6 +65,8 @@ class jet_factory {
 // read data from tree into member variables
 jet_factory::jet_factory(TTree *input, std::string syst) {
   auto mjj_name("vbfMass"), njets_name("njets");
+  // auto mjj_name("vbfMassWoNoisyJets"), njets_name("njets");
+
   if (syst.find(mjj_name) != std::string::npos) {
     mjj_name = syst.c_str();
   } else if (syst.find("jetVeto30") != std::string::npos) {
