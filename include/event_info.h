@@ -28,7 +28,7 @@ class event_info {
   Bool_t PassMu24, PassMu27, PassMu20Tau27;
   Float_t m_sv, pt_sv;                                                                                                                 // SVFit
   Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;                             // MELA
-  Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, ME_ps_VBF, ME_ps_ggH;  // MELA
+  Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, ME_ps_VBF, ME_ps_ggH, ME_sm_ggH_qqInit, ME_ps_ggH_qqInit;;  // MELA
   Float_t Rivet_nJets30, Rivet_higgsPt;
   Float_t Flag_BadChargedCandidateFilter, Flag_BadPFMuonFilter, Flag_EcalDeadCellTriggerPrimitiveFilter, Flag_HBHENoiseFilter, Flag_HBHENoiseIsoFilter, Flag_badMuons, Flag_duplicateMuons,
       Flag_ecalBadCalibFilter, Flag_eeBadScFilter, Flag_globalSuperTightHalo2016Filter, Flag_globalTightHalo2016Filter, Flag_goodVertices;
@@ -100,6 +100,8 @@ class event_info {
   Float_t getCosThetaStar() { return costhetastar; }
   Float_t getQ2V1() { return Q2V1; }
   Float_t getQ2V2() { return Q2V2; }
+  Float_t getME_sm_ggH_qqInit() { return ME_sm_ggH_qqInit; }
+  Float_t getME_ps_ggH_qqInit() { return ME_ps_ggH_qqInit; }
   Float_t getME_sm_VBF() { return ME_sm_VBF; }
   Float_t getME_sm_ggH() { return ME_sm_ggH; }
   Float_t getME_ps_VBF() { return ME_ps_VBF; }
@@ -120,7 +122,8 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) : i
   std::string m_sv_name("m_sv"), pt_sv_name("pt_sv"), Dbkg_VBF_name("Dbkg_VBF"), Dbkg_ggH_name("Dbkg_ggH"), Dbkg_ZH_name("Dbkg_ZH"), Dbkg_WH_name("Dbkg_WH"), D_PS_VBF_name("D_PS_VBF"),
       D_CP_VBF_name("D_CP_VBF"), D_PS_ggH_name("D_PS_ggH"), D_CP_ggH_name("D_CP_ggH"), Phi_name("Phi"), Phi1_name("Phi1"), costheta1_name("costheta1"), costheta2_name("costheta2"),
       costhetastar_name("costhetastar"), Q2V1_name("Q2V1"), Q2V2_name("Q2V2"), ME_sm_VBF_name("ME_sm_VBF"), ME_sm_ggH_name("ME_sm_ggH"), ME_sm_WH_name("ME_sm_WH"), ME_sm_ZH_name("ME_sm_ZH"),
-      ME_ps_VBF_name("ME_ps_VBF"), ME_ps_ggH_name("ME_ps_ggH"), ME_bkg1_name("ME_bkg1"), ME_bkg2_name("ME_bkg2"), ME_bkg_name("ME_bkg");
+      ME_ps_VBF_name("ME_ps_VBF"), ME_ps_ggH_name("ME_ps_ggH"), ME_bkg1_name("ME_bkg1"), ME_bkg2_name("ME_bkg2"), ME_bkg_name("ME_bkg"), ME_sm_ggH_qqInit_name("ME_sm_ggH_qqInit"),
+      ME_ps_ggH_qqInit_name("ME_ps_ggH_qqInit");
   if (syst.find("UncMet") != std::string::npos || syst.find("ClusteredMet") != std::string::npos || syst.find("DM") != std::string::npos || syst == "Up" || syst == "Down") {
     m_sv_name += "_" + syst;
     pt_sv_name += "_" + syst;
@@ -168,6 +171,8 @@ event_info::event_info(TTree* input, std::string syst, std::string analyzer) : i
   input->SetBranchAddress(costhetastar_name.c_str(), &costhetastar);
   input->SetBranchAddress(Q2V1_name.c_str(), &Q2V1);
   input->SetBranchAddress(Q2V2_name.c_str(), &Q2V2);
+  input->SetBranchAddress(ME_sm_ggH_qqInit_name.c_str(), &ME_sm_ggH_qqInit);
+  input->SetBranchAddress(ME_ps_ggH_qqInit_name.c_str(), &ME_ps_ggH_qqInit);
   input->SetBranchAddress(ME_sm_VBF_name.c_str(), &ME_sm_VBF);
   input->SetBranchAddress(ME_sm_ggH_name.c_str(), &ME_sm_ggH);
   input->SetBranchAddress(ME_ps_VBF_name.c_str(), &ME_ps_VBF);
