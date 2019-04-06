@@ -220,6 +220,7 @@ void Sample_Template::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst =
       } else if (cat1) {
         hists_2d.at(channel_prefix + "_boosted")->Fill(higgs_pT, m_sv, weight);
       } else if (cat2) {
+
         hists_2d.at(channel_prefix + "_vbf")->Fill(vbf_var1, vbf_var2, weight);
         if (ACcat != "skip") {
           hists_2d.at(ACcat)->Fill(vbf_var1, vbf_var2, weight);
@@ -232,6 +233,7 @@ void Sample_Template::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst =
       } else if (cat1) {
         convert_data_to_fake(channel_prefix + "_boosted", higgs_pT, m_sv, -1);
       } else if (cat2) {
+        if (vbf_var2 > -1)
         convert_data_to_fake(channel_prefix + "_vbf", vbf_var1, vbf_var2, -1);
         if (ACcat != "skip") {
           convert_data_to_fake(ACcat, vbf_var1, vbf_var2, -1);
@@ -264,21 +266,27 @@ void Sample_Template::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst =
 // are used with the input variables to fill the fake histogram with the correct weight. If
 // the "syst" parameter is passed, read the weight for the provided systematic shift.
 void Sample_Template::convert_data_to_fake(std::string cat, double var1, double var2, int syst = -1) {
+  // fake fractions only for 0jet, boosted, VBF
+  std::string get_cat = cat;
+  if (cat.find("vbf_ggHMELA") != std::string::npos) {
+    get_cat = channel_prefix + "_vbf";
+  }
+
   fout->cd();
-  auto bin_x = fake_fractions.at(cat + "_data")->GetXaxis()->FindBin(vis_mass);
-  auto bin_y = fake_fractions.at(cat + "_data")->GetYaxis()->FindBin(njets);
+  auto bin_x = fake_fractions.at(get_cat + "_data")->GetXaxis()->FindBin(vis_mass);
+  auto bin_y = fake_fractions.at(get_cat + "_data")->GetYaxis()->FindBin(njets);
   double fakeweight;
   if (syst == -1) {
     fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                   fake_fractions.at(cat + "_frac_w")->GetBinContent(bin_x, bin_y),
-                                   fake_fractions.at(cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
-                                   fake_fractions.at(cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)});
+                                   fake_fractions.at(get_cat + "_frac_w")->GetBinContent(bin_x, bin_y),
+                                   fake_fractions.at(get_cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
+                                   fake_fractions.at(get_cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)});
     fakes_2d.at(cat)->Fill(var1, var2, weight * fakeweight);
   } else {
     fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                   fake_fractions.at(cat + "_frac_w")->GetBinContent(bin_x, bin_y),
-                                   fake_fractions.at(cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
-                                   fake_fractions.at(cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)},
+                                   fake_fractions.at(get_cat + "_frac_w")->GetBinContent(bin_x, bin_y),
+                                   fake_fractions.at(get_cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
+                                   fake_fractions.at(get_cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)},
                                   systematics.at(syst));
     FF_systs.at(cat).at(syst)->Fill(var1, var2, weight * fakeweight);
   }
@@ -297,6 +305,10 @@ void Sample_Template::load_fake_fractions(std::string file_name) {
   auto ifile = new TFile(file_name.c_str(), "READ");
   fout->cd();
   for (auto cat : categories) {
+    // fake fractions only for 0jet, boosted, VBF
+    if (cat.find("vbf_ggHMELA") != std::string::npos) {
+      continue;
+    }
     fake_fractions[cat + "_data"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "data_" + cat).c_str())->Clone());
     fake_fractions[cat + "_frac_w"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_w_" + cat).c_str())->Clone());
     fake_fractions[cat + "_frac_tt"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_tt_" + cat).c_str())->Clone());
@@ -314,34 +326,20 @@ void Sample_Template::load_fake_fractions(std::string file_name) {
 std::string Sample_Template::get_category(double vbf_var3) {
   double edge = 1. / 6.;
   if (vbf_var3 >= 0 && vbf_var3 <= 1. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin1_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin1";
   } else if (vbf_var3 <= 2. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin2_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin2";
   } else if (vbf_var3 <= 3. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin3_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin3";
   } else if (vbf_var3 <= 4. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin4_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin4";
   } else if (vbf_var3 <= 5. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin5_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin5";
   } else if (vbf_var3 <= 6. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin6_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin6";
   } else {
     return "skip";
   }
-
-  //  else if (D0_ggH <= 7.*edge) {
-  //    return vbf_ggHMELA_bin7_NN_bin1;
-  //  } else if (D0_ggH <= 8.*edge) {
-  //    return vbf_ggHMELA_bin8_NN_bin1;
-  //  } else if (D0_ggH <= 9.*edge) {
-  //    return vbf_ggHMELA_bin9_NN_bin1;
-  //  } else if (D0_ggH <= 10.*edge) {
-  //    return vbf_ggHMELA_bin10_NN_bin1;
-  //  } else if (D0_ggH <= 11.*edge) {
-  //    return vbf_ggHMELA_bin11_NN_bin1;
-  //  } else if (D0_ggH <= 12.*edge) {
-  //    return vbf_ggHMELA_bin12_NN_bin1;
-  //  }
 }
 
 // write_histograms is used to write the histograms to the output root file.

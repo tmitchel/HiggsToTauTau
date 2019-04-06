@@ -10,26 +10,11 @@
 #include "TH2F.h"
 #include "TTree.h"
 
-enum Categories { zeroJet,
-                  boosted,
-                  vbf,
-                  vbf_ggHMELA_bin1_NN_bin1,
-                  vbf_ggHMELA_bin2_NN_bin1,
-                  vbf_ggHMELA_bin3_NN_bin1,
-                  vbf_ggHMELA_bin4_NN_bin1,
-                  vbf_ggHMELA_bin5_NN_bin1,
-                  vbf_ggHMELA_bin6_NN_bin1,
-                  vbf_ggHMELA_bin7_NN_bin1,
-                  vbf_ggHMELA_bin8_NN_bin1,
-                  vbf_ggHMELA_bin9_NN_bin1,
-                  vbf_ggHMELA_bin10_NN_bin1,
-                  vbf_ggHMELA_bin11_NN_bin1,
-                  vbf_ggHMELA_bin12_NN_bin1 };
+enum Categories { zeroJet, boosted, vbf };
 
 class FakeFractions {
  public:
   FakeFractions(std::string, std::string, std::string);
-  Categories getCategory(double, double);
   void fillFraction(int, std::string, double, double, double);
   void writeTemplates();
   void fillQCD();
@@ -48,31 +33,7 @@ FakeFractions::FakeFractions(std::string channel_prefix, std::string year, std::
       categories{
           channel_prefix + "_0jet",
           channel_prefix + "_boosted",
-          channel_prefix + "_vbf",
-          channel_prefix + "_vbf_ggHMELA_bin1_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin2_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin3_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin4_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin5_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin6_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin7_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin8_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin9_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin10_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin11_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin1",
-          channel_prefix + "_vbf_ggHMELA_bin1_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin2_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin3_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin4_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin5_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin6_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin7_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin8_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin9_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin10_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin11_NN_bin2",
-          channel_prefix + "_vbf_ggHMELA_bin12_NN_bin2"} {
+          channel_prefix + "_vbf"} {
   for (auto cat : categories) {
     data.push_back(new TH2F(("data_" + cat).c_str(), ("data_" + cat).c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
     frac_w.push_back(new TH2F(("frac_w_" + cat).c_str(), ("frac_w_" + cat).c_str(), mvis_bins.size() - 1, &mvis_bins[0], njets_bins.size() - 1, &njets_bins[0]));
@@ -113,24 +74,6 @@ void FakeFractions::fillFraction(int cat, std::string name, double var1, double 
     hist = frac_real.at(cat);
   }
   hist->Fill(var1, var2, weight);
-}
-
-// basically a map from 2 inputs -> 1 Category
-Categories FakeFractions::getCategory(double vbf_var3, double vbf_var4 = -1) {
-  double edge = 1. / 6.;
-  if (vbf_var3 > 0 && vbf_var3 <= 1. * edge) {
-    return vbf_ggHMELA_bin1_NN_bin1;
-  } else if (vbf_var3 <= 2. * edge) {
-    return vbf_ggHMELA_bin2_NN_bin1;
-  } else if (vbf_var3 <= 3. * edge) {
-    return vbf_ggHMELA_bin3_NN_bin1;
-  } else if (vbf_var3 <= 4. * edge) {
-    return vbf_ggHMELA_bin4_NN_bin1;
-  } else if (vbf_var3 <= 5. * edge) {
-    return vbf_ggHMELA_bin5_NN_bin1;
-  } else if (vbf_var3 <= 6. * edge) {
-    return vbf_ggHMELA_bin6_NN_bin1;
-  }
 }
 
 void FakeFractions::fillQCD() {
