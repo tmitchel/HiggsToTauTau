@@ -24,8 +24,8 @@ parser.add_option('--exe', '-e', action='store',
                   default='Analyze', dest='exe',
                   help='name of executable'
                   )
-parser.add_option('--syst', action='store_true',
-                  default=False, dest='syst',
+parser.add_option('--syst', action='store',
+                  default=None, dest='syst',
                   help='run systematics as well'
                   )
 parser.add_option('--path', '-p', action='store',
@@ -55,13 +55,6 @@ if options.isData:
 else:
     fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile]
 
-systs_2016 = [
-    '', 'dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down', 'jetToTauFake_Up', 'jetToTauFake_Down', 'ttbarShape_Up', 'ttbarShape_Down', # in analyzer
-    'vbfMass_JetTotalUp', 'vbfMass_JetTotalUp', 'jetVeto30_JetTotalUp', 'jetVeto30_JetTotalUp', # JEC from FSA ntuples
-    'Up', 'Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', # tau energy scale from SVFit
-    'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down' # MET corrections from SVFit/FSA
-]
-
 def getSyst2016(name):
   systs = ['']
   
@@ -86,13 +79,32 @@ def getSyst2016(name):
 
   return systs
 
-systs_2017 = [
-    '', 'JetEta0to3Down', 'JetEta0to3Up', 'JetEta0to5Down', 'JetEta0to5Up', 'JetEta3to5Down', 
-    'JetEta3to5Up', 'JetRelativeSampleDown', 'JetRelativeSampleUp', 'JetRelativeBalDown', 'JetRelativeBalUp',
-    'UESDown', 'UESUp'
-]
+def getSyst2017(name):
+  systs = ['']
+  
+  if name != 'embed' and name != 'data_obs':
+    systs += [
+      'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down',
+      'JetTotalUp', 'JetTotalDown'
+    ]
 
-systs = ['', 'met_UESUp', 'met_UESDown', 'met_JESUp', 'met_JESDown', 'metphi_UESUp', 'metphi_UESDown', 'metphi_JESUp', 'metphi_JESDown', 'mjj_JESUp', 'mjj_JESDown']
+  if name == 'TTT' or name == 'TTJ':
+    systs += ['ttbarShape_Up', 'ttbarShape_Down']
+
+  if name == 'TTT' or name == 'VTT' or name == 'embed':
+#    systs += ['Up', 'Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
+    systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
+
+  if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
+    systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
+
+  return systs
+
+get_systs = None
+if options.syst == '2016':
+  get_systs = getSyst2016
+elif options.syst == '2017':
+  get_systs = getSyst2017
 
 for ifile in fileList:
     sample = ifile.split('/')[-1].split(suffix)[0]
@@ -154,9 +166,9 @@ for ifile in fileList:
     if options.ACsample:
       callstring += ' -a '
 
-    if options.syst and not 'Data' in sample.lower():
+    if get_systs != None and not 'Data' in sample.lower():
         for name in names:
-            for isyst in getSyst2016(name):
+            for isyst in get_systs(name):
                 tocall = callstring + ' -n %s -u %s' % (name, isyst)
                 call(tocall, shell=True)
     else:
