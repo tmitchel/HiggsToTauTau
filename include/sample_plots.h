@@ -165,14 +165,20 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
 // are used with the input variables to fill the fake histogram with the correct weight. If
 // the "syst" parameter is passed, read the weight for the provided systematic shift.
 void Sample_Plots::convert_data_to_fake(std::string cat, double var1, std::string j) {
+  // fake fractions only for 0jet, boosted, VBF
+  std::string get_cat = cat;
+  if (cat.find("vbf_ggHMELA") != std::string::npos) {
+    get_cat = channel_prefix + "_vbf";
+  }
+
   fout->cd();
-  auto bin_x = fake_fractions.at(cat + "_data")->GetXaxis()->FindBin(vis_mass);
-  auto bin_y = fake_fractions.at(cat + "_data")->GetYaxis()->FindBin(njets);
+  auto bin_x = fake_fractions.at(get_cat + "_data")->GetXaxis()->FindBin(vis_mass);
+  auto bin_y = fake_fractions.at(get_cat + "_data")->GetYaxis()->FindBin(njets);
   double fakeweight;
   fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                 fake_fractions.at(cat + "_frac_w")->GetBinContent(bin_x, bin_y),
-                                 fake_fractions.at(cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
-                                 fake_fractions.at(cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)});
+                                 fake_fractions.at(get_cat + "_frac_w")->GetBinContent(bin_x, bin_y),
+                                 fake_fractions.at(get_cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
+                                 fake_fractions.at(get_cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)});
   all_fakes.at(j).at(cat)->Fill(var1, weight * fakeweight);
 }
 
@@ -189,6 +195,10 @@ void Sample_Plots::load_fake_fractions(std::string file_name) {
   auto ifile = new TFile(file_name.c_str(), "READ");
   fout->cd();
   for (auto cat : categories) {
+    // fake fractions only for 0jet, boosted, VBF
+    if (cat.find("vbf_ggHMELA") != std::string::npos) {
+      continue;
+    }
     fake_fractions[cat + "_data"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "data_" + cat).c_str())->Clone());
     fake_fractions[cat + "_frac_w"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_w_" + cat).c_str())->Clone());
     fake_fractions[cat + "_frac_tt"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_tt_" + cat).c_str())->Clone());
@@ -206,34 +216,20 @@ void Sample_Plots::load_fake_fractions(std::string file_name) {
 std::string Sample_Plots::get_category(double vbf_var3) {
   double edge = 1. / 6.;
   if (vbf_var3 >= 0 && vbf_var3 <= 1. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin1_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin1";
   } else if (vbf_var3 <= 2. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin2_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin2";
   } else if (vbf_var3 <= 3. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin3_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin3";
   } else if (vbf_var3 <= 4. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin4_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin4";
   } else if (vbf_var3 <= 5. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin5_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin5";
   } else if (vbf_var3 <= 6. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin6_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin6";
   } else {
     return "skip";
   }
-
-  //  else if (D0_ggH <= 7.*edge) {
-  //    return vbf_ggHMELA_bin7_NN_bin1;
-  //  } else if (D0_ggH <= 8.*edge) {
-  //    return vbf_ggHMELA_bin8_NN_bin1;
-  //  } else if (D0_ggH <= 9.*edge) {
-  //    return vbf_ggHMELA_bin9_NN_bin1;
-  //  } else if (D0_ggH <= 10.*edge) {
-  //    return vbf_ggHMELA_bin10_NN_bin1;
-  //  } else if (D0_ggH <= 11.*edge) {
-  //    return vbf_ggHMELA_bin11_NN_bin1;
-  //  } else if (D0_ggH <= 12.*edge) {
-  //    return vbf_ggHMELA_bin12_NN_bin1;
-  //  }
 }
 
 // write_histograms is used to write the histograms to the output root file.
@@ -338,6 +334,7 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
       {"hj_dr", 0},
       {"lt_dphi", 0},
       {"NN_disc", 0},
+      {"MELA_D2j", 0}
   };
 
   tree->SetBranchAddress("evtwt", &weight);
@@ -385,8 +382,8 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
   tree->SetBranchAddress("Dbkg_VBF", &variables.at("Dbkg_VBF"));
   tree->SetBranchAddress("Dbkg_ggH", &variables.at("Dbkg_ggH"));
   tree->SetBranchAddress("D0_VBF", &variables.at("D0_VBF"));
+  tree->SetBranchAddress("MELA_D2j", &variables.at("MELA_D2j"));
   tree->SetBranchAddress("DCP_VBF", &variables.at("DCP_VBF"));
-  tree->SetBranchAddress("D0_ggH", &variables.at("D0_ggH"));
   tree->SetBranchAddress("DCP_ggH", &variables.at("DCP_ggH"));
   tree->SetBranchAddress("Phi", &variables.at("Phi"));
   tree->SetBranchAddress("Phi1", &variables.at("Phi1"));
