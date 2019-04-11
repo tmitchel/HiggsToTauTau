@@ -35,12 +35,13 @@ jet::jet(Float_t Pt, Float_t Eta, Float_t Phi, Float_t Csv, Float_t Flavor = -99
 
 class jet_factory {
  private:
+  Bool_t doSyst;
   Float_t mjj;
   Float_t jpt_1, jeta_1, jphi_1, jcsv_1;
   Float_t jpt_2, jeta_2, jphi_2, jcsv_2;
   Float_t bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1;
   Float_t bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2;
-  Float_t topQuarkPt1, topQuarkPt2;
+  Float_t topQuarkPt1, topQuarkPt2, temp_njets;
   Int_t Nbtag, nbtag, njetspt20, njets;
   std::vector<jet> plain_jets, btag_jets;
 
@@ -64,17 +65,22 @@ class jet_factory {
 
 // read data from tree into member variables
 jet_factory::jet_factory(TTree *input, std::string syst) {
-  auto mjj_name("vbfMass"), njets_name("njets");
+  std::string mjj_name("vbfMass"), njets_name("njets");
   // auto mjj_name("vbfMassWoNoisyJets"), njets_name("njets");
 
-  if (syst.find(mjj_name) != std::string::npos) {
-    mjj_name = syst.c_str();
-  } else if (syst.find("jetVeto30") != std::string::npos) {
-    njets_name = syst.c_str();
+  if (syst.find("JetTotalUp") != std::string::npos || syst.find("JetTotalDown") != std::string::npos) {
+    mjj_name += "_" + syst;
+    njets_name = "jetVeto30_" + syst;
+    input->SetBranchAddress(njets_name.c_str(), &temp_njets);
+    njets = temp_njets;
+    doSyst = true;
+  } else {
+    input->SetBranchAddress(njets_name.c_str(), &njets);
+    doSyst = false;
   }
 
-  input->SetBranchAddress(mjj_name, &mjj);
-  input->SetBranchAddress(njets_name, &njets);
+  input->SetBranchAddress(mjj_name.c_str(), &mjj);
+
   input->SetBranchAddress("nbtag", &nbtag);
   input->SetBranchAddress("njetspt20", &njetspt20);
   input->SetBranchAddress("jpt_1", &jpt_1);
@@ -105,6 +111,10 @@ void jet_factory::run_factory() {
   btag_jets.clear();
 
   Nbtag = nbtag;
+
+  if (doSyst) {
+    njets = temp_njets;
+  }
 
   jet j1(jpt_1, jeta_1, jphi_1, jcsv_1);
   jet j2(jpt_2, jeta_2, jphi_2, jcsv_2);

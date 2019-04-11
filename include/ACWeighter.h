@@ -71,9 +71,10 @@ ACWeighter::ACWeighter(std::string sample, std::string year) :
     numWeightFiles = 3;
   }
 
-  if (year == "2017") {
+  if (year == "2017" && isVBFAC) {
     weightNames.push_back("l1zg");
     weightNames.push_back("l1zgint");
+    numWeightFiles = 9;
   }
 
   std::transform(sample.begin(), sample.end(), sample.begin(), ::tolower);
@@ -93,7 +94,8 @@ ACWeighter::ACWeighter(std::string sample, std::string year) :
         continue;
       }
       
-      if (sample.find(weightNames.at(ifile)) != std::string::npos) {
+      std::string substring = sample.substr(sample.find("_")+1);
+      if (substring == weightNames.at(ifile)) {
         fileName = "data/AC_weights/" + year + "/" + ac_prefix + weightNames[ifile] + ".root";
         break;
       }
