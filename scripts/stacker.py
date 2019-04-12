@@ -70,10 +70,10 @@ def applyStyle(name, hist, leg):
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#FF0000'))
         overlay = 2
-    elif name == 'GGH2Jets_pseudoscalar_M125':
+    elif name == 'GGH2Jets_pseudoscalar_M125' or name == 'ggh_madgraph_PS_twojet':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
-        hist.SetLineColor(TColor.GetColor('#00FF00'))
+        hist.SetLineColor(TColor.GetColor('#00AAFF'))
         overlay = 9
     elif name == 'VBF125':
         overlay = -2
@@ -208,7 +208,7 @@ def fillStackAndLegend(data, vbf, ggh, ggh_ps, ggh_int, holder, leg):
     leg.AddEntry(data, 'Data', 'lep')
     leg.AddEntry(vbf, 'VBF Higgs(125)x100', 'l')
     leg.AddEntry(ggh, 'ggH Higgs(125)x100', 'l')
-    # leg.AddEntry(ggh_ps, 'ggH PS Higgs(125)x50', 'l')
+    leg.AddEntry(ggh_ps, 'ggH PS Higgs(125)x100', 'l')
     # leg.AddEntry(ggh_int, 'ggH INT Higgs(125)x50', 'l')
     leg.AddEntry(filter(lambda x: x.GetName() == 'embedded', holder)[0], 'ZTT', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'ZL', holder)[0], 'ZL', 'f')
@@ -298,16 +298,16 @@ def sigmaLines(data):
 
 
 def blindData(data, signal, background):
-    # for ibin in range(data.GetNbinsX()+1):
-    #     sig = signal.GetBinContent(ibin)
-    #     bkg = background.GetBinContent(ibin)
-    #     if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
-    #         data.SetBinContent(ibin, 0)
+    for ibin in range(data.GetNbinsX()+1):
+        sig = signal.GetBinContent(ibin)
+        bkg = background.GetBinContent(ibin)
+        if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
+            data.SetBinContent(ibin, 0)
 
-    # if args.var == 'NN_disc':
-    #     middleBin = data.FindBin(0.5)
-    #     for ibin in range(middleBin, data.GetNbinsX()+1):
-    #         data.SetBinContent(ibin, 0)
+    if args.var == 'NN_disc':
+        middleBin = data.FindBin(0.5)
+        for ibin in range(middleBin, data.GetNbinsX()+1):
+            data.SetBinContent(ibin, 0)
 
     return data
 
@@ -385,8 +385,8 @@ def main():
     ggh.Draw('same hist e')
     # ggh_int.Scale(50)
     # ggh_int.Draw('same hist e')
-    # ggh_ps.Scale(50)
-    # ggh_ps.Draw('same hist e')
+    ggh_ps.Scale(100)
+    ggh_ps.Draw('same hist e')
     leg.Draw()
 
     ll = TLatex()
