@@ -120,6 +120,7 @@ Helper::Helper(TFile *fout, std::string name, std::string syst) : luminosity2016
                                                                       {"cutflow", new TH1F("cutflow", "Cutflow", 12, -0.5, 11.5)},
                                                                       {"el_pt", new TH1F(name.c_str(), "el_pt", 12, 0, 300)},
                                                                       {"tau_pt", new TH1F("tau_pt", "tau_pt", 12, 0, 300)},
+                                                                      {"triggers", new TH1F("triggers", "triggers", 4, -0.5, 3.5)}
                                                                   } {
   std::string suffix = systematics[syst];
 }

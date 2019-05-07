@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 
   if (sample.find("vbf_") != std::string::npos) {
     sample = "VBF125";
-  } else if (sample.find("ggh_") != std::string::npos || isMG) {
+  } else if (sample.find("ggH_") != std::string::npos || sample.find("ggh_") != std::string::npos || isMG) {
     sample = "ggH125";
   } else if (sample.find("wh_") != std::string::npos) {
     sample = "WMinusHTauTau125";
@@ -229,15 +229,23 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
+    if (!event.getPassFlags(isData)) {
+      continue;
+    }
+
     bool fireSingle(false), fireCross(false);
+    Float_t trigger(0.);
 
     // apply correct lepton pT thresholds
     if (muon.getPt() > 28 && event.getPassMu27()) {
       fireSingle = true;
+      trigger = 1;
     } else if (muon.getPt() > 25 && event.getPassMu24()) {
       fireSingle = true;
+      trigger = 2;
     } else if (muon.getPt() > 21 && muon.getPt() < 25 && tau.getPt() > 32 && fabs(tau.getEta()) < 2.1 && event.getPassMu20Tau27()) {
       fireCross = true;
+      trigger = 3;
     } else {
       continue;
     }
@@ -246,12 +254,8 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
-    if (tau.getPt() < 30) {
-      continue;
-    }
-
     // Separate Drell-Yan
-    if (name == "ZL" && tau.getGenMatch() > 4) {
+    if ((name == "ZL" || name == "TTL" || name == "VVL") && tau.getGenMatch() > 4) {
       continue;
     } else if ((name == "ZTT" || name == "TTT" || name == "VVT") && tau.getGenMatch() != 5) {
       continue;
@@ -387,15 +391,21 @@ int main(int argc, char* argv[]) {
       wEmbed->var("m_pt")->setVal(muon.getPt());
       wEmbed->var("m_eta")->setVal(muon.getEta());
       wEmbed->var("m_iso")->setVal(muon.getIso());
-      wEmbed->var("gt1_pt")->setVal(muon.getGenPt());
-      wEmbed->var("gt1_eta")->setVal(muon.getGenEta());
-      wEmbed->var("gt2_pt")->setVal(tau.getGenPt());
-      wEmbed->var("gt2_eta")->setVal(tau.getGenEta());
+      wEmbed->var("gt1_pt")->setVal(muon.getPt());
+      wEmbed->var("gt1_eta")->setVal(muon.getEta());
+      wEmbed->var("gt2_pt")->setVal(tau.getPt());
+      wEmbed->var("gt2_eta")->setVal(tau.getEta());
 
       // double muon trigger eff in selection
       evtwt *= wEmbed->function("m_sel_trg_ratio")->getVal();
 
-      // muon ID eff in selectionm
+      // muon ID eff in selection
+      wEmbed->var("gt_pt")->setVal(muon.getPt());
+      wEmbed->var("gt_eta")->setVal(muon.getEta());
+      evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
+
+      wEmbed->var("gt_pt")->setVal(tau.getPt());
+      wEmbed->var("gt_eta")->setVal(tau.getEta());
       evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
 
       // muon ID SF
@@ -488,7 +498,7 @@ int main(int argc, char* argv[]) {
     }
 
     // fill the tree
-    st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, mt, evtwt, weights);
+    st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, mt, evtwt, weights, trigger);
   }  // close event loop
 
   fin->Close();

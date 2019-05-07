@@ -115,7 +115,7 @@ for ifile in fileList:
     if 'DYJets' in sample:
         names = ['ZL', 'ZJ']
     elif 'TT' in sample:
-        names = ['TTT', 'TTJ']
+        names = ['TTT', 'TTJ', 'TTL']
     elif 'WJets' in sample or 'EWKW' in sample:
         names = ['W']
     elif 'data' in sample.lower():
@@ -160,7 +160,7 @@ for ifile in fileList:
         names = ['ZH125']
         options.ACsample = True
     else: 
-        names = ['VVJ', 'VVT']
+        names = ['VVJ', 'VVT', 'VVL']
 
     callstring = './%s -p %s -s %s -d %s ' % (options.exe, tosample, sample, options.output_dir)
     if options.ACsample:

@@ -334,7 +334,8 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
       {"hj_dr", 0},
       {"lt_dphi", 0},
       {"NN_disc", 0},
-      {"MELA_D2j", 0}
+      {"MELA_D2j", 0},
+      {"trigger", 0}
   };
 
   tree->SetBranchAddress("evtwt", &weight);
@@ -417,6 +418,7 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
   tree->SetBranchAddress("hj_dr", &variables.at("hj_dr"));
   tree->SetBranchAddress("lt_dphi", &variables.at("lt_dphi"));
   tree->SetBranchAddress("NN_disc", &variables.at("NN_disc"));
+  tree->SetBranchAddress("trigger", &variables.at("trigger"));
   if (acWeight != "None") {
     tree->SetBranchAddress(acWeight.c_str(), &acWeightVal);
   }

@@ -41,13 +41,15 @@ def applyStyle(name, hist, leg):
     if name == 'embedded':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
         hist.SetName("embedded")
+        hist.SetFillColor(TColor.GetColor("#f9cd66"))
+        hist.SetName("embedded")
     elif name == 'TTT':
         hist.SetFillColor(TColor.GetColor("#cfe87f"))
         hist.SetName('TTT')
     elif name == 'VVT' or name == 'EWKZ':
         hist.SetFillColor(TColor.GetColor("#9feff2"))
         overlay = 4
-    elif name == 'ZL':
+    elif name == 'ZL' or name == 'VVL' or name == 'TTL':
         hist.SetFillColor(TColor.GetColor("#de5a6a"))
         hist.SetName('ZL')
     elif name == 'QCD':
@@ -87,7 +89,6 @@ def applyStyle(name, hist, leg):
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#0000FF'))
         overlay = 3
-        print 'heyo'
     elif name == 'ggH125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
@@ -108,7 +109,7 @@ def createCanvas():
     pad1.SetPad(0, .3, 1, 1)
     pad1.SetTopMargin(.1)
     pad1.SetBottomMargin(0.02)
-#    pad1.SetLogy()
+    pad1.SetLogy()
     pad1.SetTickx(1)
     pad1.SetTicky(1)
 
@@ -185,7 +186,12 @@ titles = {
     "MT_t2MET": "MT_t2MET",
     "hj_deta": "hj_deta",
     "hmet_dphi": "hmet_dphi",
-    "hj_dr": "hj_dr"
+    "hj_dr": "hj_dr",
+    "D0_ggH": "D_{0-}^{ggH}",
+    "D0_VBF": "D_{0-}^{VBF}",
+    "t1_decayMode": "t1_decayMode",
+    "trigger": "trigger"
+
 }
 
 def formatStack(stack):
@@ -298,25 +304,26 @@ def sigmaLines(data):
 
 
 def blindData(data, signal, background):
-    for ibin in range(data.GetNbinsX()+1):
-        sig = signal.GetBinContent(ibin)
-        bkg = background.GetBinContent(ibin)
-        if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
-            data.SetBinContent(ibin, 0)
+    # for ibin in range(data.GetNbinsX()+1):
+    #     sig = signal.GetBinContent(ibin)
+    #     bkg = background.GetBinContent(ibin)
+    #     if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
+    #         data.SetBinContent(ibin, 0)
 
-    if args.var == 'NN_disc':
-        middleBin = data.FindBin(0.5)
-        for ibin in range(middleBin, data.GetNbinsX()+1):
-            data.SetBinContent(ibin, 0)
+    # if args.var == 'NN_disc':
+    #     middleBin = data.FindBin(0.5)
+    #     for ibin in range(middleBin, data.GetNbinsX()+1):
+    #         data.SetBinContent(ibin, 0)
 
     return data
 
 def main():
     fin = TFile(args.input, 'read')
+    
     idir = fin.Get('plots/{}/{}'.format(args.var, args.cat))
-#    idir = fin.Get('plots/{}_{}'.format(args.var, args.cat))
+    # idir = fin.Get('grabbag/triggers')
     leg = createLegend()
-#    data = idir.Get('data_obs').Clone()
+    # data = idir.Get('Data').Clone()
     data = idir.Get('data_obs').Clone()
     vbf = data.Clone()
     vbf.Reset()

@@ -61,7 +61,7 @@ class event_info {
   Bool_t getPassMu27();
   Bool_t getPassDoubleTauCmbIso35();
   Bool_t getPassDoubleTau35();
-  Bool_t getPassFlags();
+  Bool_t getPassFlags(Bool_t);
 
   // Event Info
   Float_t getNPV() { return npv; }
@@ -278,9 +278,10 @@ void event_info::setRivets(TTree* input) {
   input->SetBranchAddress("Rivet_higgsPt", &Rivet_higgsPt);
 }
 
-Bool_t event_info::getPassFlags() {
-  if (Flag_BadChargedCandidateFilter || Flag_BadPFMuonFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_HBHENoiseFilter || Flag_HBHENoiseIsoFilter ||
-      Flag_ecalBadCalibFilter || Flag_eeBadScFilter || Flag_globalSuperTightHalo2016Filter || Flag_goodVertices) {
+Bool_t event_info::getPassFlags(bool is_data) {
+  if (Flag_goodVertices || Flag_globalTightHalo2016Filter || Flag_HBHENoiseFilter || Flag_HBHENoiseIsoFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter || Flag_BadChargedCandidateFilter) {
+    return false;
+  } else if (is_data && (Flag_eeBadScFilter || Flag_ecalBadCalibFilter)) {
     return false;
   } else {
     return true;
@@ -336,7 +337,9 @@ Bool_t event_info::getPassIsoTkMu22eta2p1() {
 }
 
 Bool_t event_info::getPassMu20Tau27() {
-  PassMu24 = mMatchesIsoMu20Tau27Path && mMatchesIsoMu20Tau27Filter && tMatchesIsoMu20Tau27Path && tMatchesIsoMu20Tau27Filter && Mu20Tau27Pass;
+//   PassMu24 = mMatchesIsoMu20Tau27Path && mMatchesIsoMu20Tau27Filter && tMatchesIsoMu20Tau27Path && tMatchesIsoMu20Tau27Filter && Mu20Tau27Pass;
+  PassMu24 = mMatchesIsoMu20Tau27Path && tMatchesIsoMu20Tau27Path && tMatchesIsoMu20Tau27Filter && Mu20Tau27Pass;
+
   return PassMu24;
 }
 
