@@ -2,9 +2,10 @@
 
 ## Mu-Tau Channel - 2016
 
-
+---
 
 ## Mu-Tau Channel - 2017
+---
 
 ### Skim Level Selection
  - Mu24 || Mu27 || Mu20Tau27
@@ -33,9 +34,9 @@
  - ele veto == 0
  - dimuon veto == 0
 
-### Skim Level Weights
+#### Skim Level Weights
 
-#### Tau Energy Scale in MC
+##### Tau Energy Scale in MC
 
 | Decay Mode | Gen Matching | Scale Factor |
 |:----------:|:------------:|:------------:|
@@ -46,7 +47,7 @@
 | 1          | 1 or 3       |1.036         |
 | 10         | 1 or 3       |1.000         |
 
-#### Tau Energy Scale in Embedded
+##### Tau Energy Scale in Embedded
 
 | Decay Mode | Gen Matching | Scale Factor |
 |:----------:|:------------:|:------------:|
@@ -56,7 +57,7 @@
 
 TES corrections are propogated to MET as well
 
-#### Recoil Corrections
+##### Recoil Corrections
 Based on:
 - MET pX
 - MET pY
@@ -68,5 +69,59 @@ Based on:
 - corrected MET pX
 - corrected MET pY
 
+#### Analysis Level Selection
 
-### Analysis Level Selection
+- Tau Decay Mode == 5 || 6
+- Triggers with matching/filtering
+  - Mu27 with mu pT > 28
+  - Mu24 with mu pT > 25
+  - Mu20Tau27 with 21 < mu pT < 25
+- deltaR(mu, tau) > 0.5
+- Transverse Mass < 50
+- Opposite Sign
+- Veto b-jets
+- Gen-Matching for different processes
+
+- Signal Region
+  - Tight tau isolation
+  - muon isolation < 0.15
+- Tau Anti-Isolation Region
+  - Tau fails tight isolation
+  - muon isolation < 0.15
+
+#### Analysis Level Weights
+
+- Cross Section * Lumi Weighting or Stitching Weights
+- MC Only
+  - tau ID: 89%
+  - Anti-lepton Discriminator
+    - | eta < 0.4 | eta < 0.8 | eta < 1.2 | eta < 1.7 | eta < 2.1 |
+      |:---------:|:---------:|:---------:|:---------:|:---------:|
+      | 1.17      | 1.29      | 1.14      | 0.93      | 1.61      |
+  - Pileup Reweighting with sample-specific weights based on NPV
+  - Generator Weights
+  - Workspace Variables and Weights:
+    - muon pT, muon eta, gen Z mass, gen Z pT
+    - m_id_kit_ratio
+    - m_iso_kit_ratio
+    - Trigger SF = single * (firedTrigger) + mu_leg * tau_leg * (firedCross)
+      - m_trg24_27_kit_data / m_trg24_27_kit_mc
+      - m_trg20_data / m_trg20_mc
+      - getMuTauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral)
+    - zptmass_weight_nom for DY processes
+  - sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2));
+  - premote-demote for b-tag SF
+- Embedded Only
+  - tau ID: 97%
+  - Workspace Variables and Weights:
+    - tau pT, muon pT, muon eta, muon isolation, gen mu pT, gen mu eta, gen tau pT, gen tau eta
+    - m_sel_trg_ratio
+    - m_sel_idEmb_ratio
+    - m_id_embed_kit_ratio
+    - m_iso_binned_embed_kit_ratio
+    - Trigger SF = single * (firedTrigger) + mu_leg * tau_leg * (firedCross)
+      - m_trg24_27_embed_kit_ratio
+      - m_trg_MuTau_Mu20Leg_kit_ratio_embed
+      - mt_emb_LooseChargedIsoPFTau27_kit_ratio
+    - Generator Weight
+    - 
