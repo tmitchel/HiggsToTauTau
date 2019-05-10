@@ -35,7 +35,7 @@ class Sample_Plots : public TemplateTool {
   // get variables from file
   Int_t is_signal, is_antiTauIso, OS;        // flags
   Float_t weight, acWeightVal;               // weights
-  Float_t lep_iso, mjj, t1_pt, vis_mass, mt, t1_decayMode, njets, nbjets;  // for fake factor                           
+  Float_t lep_iso, mjj, t1_pt, vis_mass, mt, t1_decayMode, njets, nbjets;  // for fake factor
   Float_t D0_ggH;  // 3D separation
   std::map<std::string, Float_t> variables;  // all variables
 };
@@ -428,4 +428,4 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
   }
 }
 
-#endif  // INCLUDE_SAMPLE_H_
+#endif  // INCLUDE_PRODUCE_PLOTS_H_
