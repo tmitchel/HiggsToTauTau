@@ -254,5 +254,8 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--input-dir', '-i', action='store',
                         dest='input_dir', help='path to input files')
-
+    parser.add_argument('--var', '-v', action='store',
+                        dest='var', help='variable to plot')
+    parser.add_argument('--cat', '-c', action='store',
+                        dest='cat', help='category to plot')
     main(parser.parse_args())
