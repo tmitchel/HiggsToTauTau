@@ -63,11 +63,11 @@ Sample_Plots::Sample_Plots(std::string channel_prefix, std::string year, std::st
 
             fout->cd(("plots/" + it->first + "/SS_iso_" + cat).c_str());
             SS_iso[cat] =
-                new TH1F(("SS_iso_" + cat).c_str(), "SS_iso", it->second.at(0), it->second.at(1), it->second.at(2));
+                new TH1F(("SS_iso_" + sample_name).c_str(), "SS_iso", it->second.at(0), it->second.at(1), it->second.at(2));
 
             fout->cd(("plots/" + it->first + "/SS_anti_" + cat).c_str());
             SS_anti[cat] =
-                new TH1F(("SS_anti_" + cat).c_str(), "SS_anti", it->second.at(0), it->second.at(1), it->second.at(2));
+                new TH1F(("SS_anti_" + sample_name).c_str(), "SS_anti", it->second.at(0), it->second.at(1), it->second.at(2));
         }
         fout->cd();
         plot_variables.push_back(it->first);
