@@ -119,6 +119,10 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
       continue;
     }
 
+    if (mt > 50) {
+      continue;
+    }
+
     // event selection
     if (nbjets > 0) {
       continue;

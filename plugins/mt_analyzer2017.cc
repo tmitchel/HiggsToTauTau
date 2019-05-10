@@ -277,15 +277,15 @@ int main(int argc, char* argv[]) {
     double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getPx() + met_x, 2) - pow(muon.getPy() + met_y, 2));
     int evt_charge = tau.getCharge() + muon.getCharge();
 
-    // now do mt selection
-    if (mt > 50) {
-      continue;
-    }
+    // // now do mt selection
+    // if (mt > 50) {
+    //   continue;
+    // }
 
-    // only opposite-sign
-    if (evt_charge != 0) {
-      continue;
-    }
+    // // only opposite-sign
+    // if (evt_charge != 0) {
+    //   continue;
+    // }
 
     // apply all scale factors/corrections/etc.
     if (!isData && !isEmbed) {
@@ -400,13 +400,13 @@ int main(int argc, char* argv[]) {
       evtwt *= wEmbed->function("m_sel_trg_ratio")->getVal();
 
       // muon ID eff in selection
-      wEmbed->var("gt_pt")->setVal(muon.getPt());
-      wEmbed->var("gt_eta")->setVal(muon.getEta());
+      // wEmbed->var("gt_pt")->setVal(muon.getPt());
+      // wEmbed->var("gt_eta")->setVal(muon.getEta());
       evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
 
-      wEmbed->var("gt_pt")->setVal(tau.getPt());
-      wEmbed->var("gt_eta")->setVal(tau.getEta());
-      evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
+      // wEmbed->var("gt_pt")->setVal(tau.getPt());
+      // wEmbed->var("gt_eta")->setVal(tau.getEta());
+      // evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
 
       // muon ID SF
       evtwt *= wEmbed->function("m_id_embed_kit_ratio")->getVal();

@@ -113,7 +113,7 @@ for ifile in fileList:
     tosample = ifile.replace(sample+suffix,'')
 
     if 'DYJets' in sample:
-        names = ['ZL', 'ZJ']
+        names = ['ZL', 'ZJ', 'ZTT']
     elif 'TT' in sample:
         names = ['TTT', 'TTJ', 'TTL']
     elif 'WJets' in sample or 'EWKW' in sample:

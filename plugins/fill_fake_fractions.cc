@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
     // get variables from file
     Int_t is_antiTauIso, OS;
-    Float_t vis_mass, mjj, m_sv, njets, nbjets, weight;
+    Float_t vis_mass, mjj, m_sv, njets, nbjets, MT, weight;
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("vis_mass", &vis_mass);
@@ -63,12 +63,17 @@ int main(int argc, char *argv[]) {
     tree->SetBranchAddress("nbjets", &nbjets);
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("OS", &OS);
+    tree->SetBranchAddress("mt", &MT);
 
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
 
       // only look at opposite-sign events
       if (OS == 0) {
+        continue;
+      }
+
+      if (MT > 50) {
         continue;
       }
 

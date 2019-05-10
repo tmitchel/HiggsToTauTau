@@ -257,11 +257,7 @@ int main(int argc, char* argv[]) {
       continue;
     }
 
-    if (!event.getPassFlags()) {
-      continue;
-    }
-
-    if (tau.getPt() < 30) {
+    if (!event.getPassFlags(isData)) {
       continue;
     }
 
@@ -288,15 +284,15 @@ int main(int argc, char* argv[]) {
     double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getPx() + met_x, 2) - pow(electron.getPy() + met_y, 2));
     int evt_charge = tau.getCharge() + electron.getCharge();
 
-    // now do mt selection
-    if (mt > 50) {
-      continue;
-    }
+    // // now do mt selection
+    // if (mt > 50) {
+    //   continue;
+    // }
 
-    // only opposite-sign
-    if (evt_charge != 0) {
-      continue;
-    }
+    // // only opposite-sign
+    // if (evt_charge != 0) {
+    //   continue;
+    // }
 
     // apply all scale factors/corrections/etc.
     if (!isData && !isEmbed) {
@@ -408,10 +404,10 @@ int main(int argc, char* argv[]) {
       wEmbed->var("e_pt")->setVal(electron.getPt());
       wEmbed->var("e_eta")->setVal(electron.getEta());
       wEmbed->var("e_iso")->setVal(electron.getIso());
-      wEmbed->var("gt1_pt")->setVal(electron.getGenPt());
-      wEmbed->var("gt1_eta")->setVal(electron.getGenEta());
-      wEmbed->var("gt2_pt")->setVal(tau.getGenPt());
-      wEmbed->var("gt2_eta")->setVal(tau.getGenEta());
+      wEmbed->var("gt1_pt")->setVal(electron.getPt());
+      wEmbed->var("gt1_eta")->setVal(electron.getEta());
+      wEmbed->var("gt2_pt")->setVal(tau.getPt());
+      wEmbed->var("gt2_eta")->setVal(tau.getEta());
 
       // double muon trigger eff in selection
       evtwt *= wEmbed->function("m_sel_trg_ratio")->getVal();
@@ -475,11 +471,6 @@ int main(int argc, char* argv[]) {
 
     // only keep the regions we need
     if (!signalRegion && !antiTauIsoRegion) {
-      continue;
-    }
-
-    // now do mt selection
-    if (tau.getPt() < 30 || mt > 50) {
       continue;
     }
 
