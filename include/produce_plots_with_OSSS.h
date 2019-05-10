@@ -20,8 +20,6 @@ class Sample_Plots : public TemplateTool {
     void set_branches(std::shared_ptr<TTree>, std::string);
     void fill_histograms(std::shared_ptr<TTree>, std::string);
     std::string get_category(double);
-    void Fill_SS_iso(std::string, double, std::string, std::string);
-    void Fill_SS_anti(std::string, double, std::string, std::string);
     void write_histograms();
     void set_variable(std::shared_ptr<TTree>);
     Float_t get_var(std::string);
@@ -54,20 +52,22 @@ Sample_Plots::Sample_Plots(std::string channel_prefix, std::string year, std::st
     : TemplateTool(channel_prefix, year, suffix, output_file), sample_name(in_sample_name), acWeightVal(1.) {
     for (auto it = in_variables.begin(); it != in_variables.end(); it++) {
         for (auto cat : categories) {
-            fout->cd(("plots/" + it->first + "/" + cat).c_str());
-
-            // convert data name to be appropriate and do ff things
-            if (sample_name.find("Data") != std::string::npos || sample_name == "data_obs") {
+            if (sample_name.find("Data") != std::string::npos) {
                 sample_name = "data_obs";
-                SS_iso[cat] =
-                    new TH1F(("SS_iso_" + cat).c_str(), "SS_iso", it->second.at(0), it->second.at(1), it->second.at(2));
-                SS_anti[cat] = new TH1F(("SS_anti_" + cat).c_str(), "SS_anti", it->second.at(0), it->second.at(1),
-                                        it->second.at(2));
             }
 
             // create output histograms
+            fout->cd(("plots/" + it->first + "/" + cat).c_str());
             hists[cat] = new TH1F(sample_name.c_str(), sample_name.c_str(), it->second.at(0), it->second.at(1),
                                   it->second.at(2));
+
+            fout->cd(("plots/" + it->first + "/SS_iso_" + cat).c_str());
+            SS_iso[cat] =
+                new TH1F(("SS_iso_" + cat).c_str(), "SS_iso", it->second.at(0), it->second.at(1), it->second.at(2));
+
+            fout->cd(("plots/" + it->first + "/SS_anti_" + cat).c_str());
+            SS_anti[cat] =
+                new TH1F(("SS_anti_" + cat).c_str(), "SS_anti", it->second.at(0), it->second.at(1), it->second.at(2));
         }
         fout->cd();
         plot_variables.push_back(it->first);
@@ -146,60 +146,28 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
                 }
             } else if (is_signal && OS == 0) {
                 if (cat0) {
-                    // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
-                    Fill_SS_iso(channel_prefix + "_0jet", get_var(var), var, sample_name);  // 2d template
+                    all_SS_iso.at(var).at(channel_prefix + "_0jet")->Fill(get_var(var), weight);
                 } else if (cat1) {
-                    Fill_SS_iso(channel_prefix + "_boosted", get_var(var), var, sample_name);
+                    all_SS_iso.at(var).at(channel_prefix + "_boosted")->Fill(get_var(var), weight);
                 } else if (cat2) {
-                    Fill_SS_iso(channel_prefix + "_vbf", get_var(var), var, sample_name);
+                    all_SS_iso.at(var).at(channel_prefix + "_vbf")->Fill(get_var(var), weight);
                     if (ACcat != "skip") {
-                        Fill_SS_iso(ACcat, get_var(var), var, sample_name);
+                        all_SS_iso.at(var).at(ACcat)->Fill(get_var(var), weight);
                     }
                 }
             } else if (is_antiLepIso && OS == 0) {
                 if (cat0) {
-                    // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
-                    Fill_SS_anti(channel_prefix + "_0jet", get_var(var), var, sample_name);  // 2d template
+                    all_SS_anti.at(var).at(channel_prefix + "_0jet")->Fill(get_var(var), weight);
                 } else if (cat1) {
-                    Fill_SS_anti(channel_prefix + "_boosted", get_var(var), var, sample_name);
+                    all_SS_anti.at(var).at(channel_prefix + "_boosted")->Fill(get_var(var), weight);
                 } else if (cat2) {
-                    Fill_SS_anti(channel_prefix + "_vbf", get_var(var), var, sample_name);
+                    all_SS_anti.at(var).at(channel_prefix + "_vbf")->Fill(get_var(var), weight);
                     if (ACcat != "skip") {
-                        Fill_SS_anti(ACcat, get_var(var), var, sample_name);
+                        all_SS_anti.at(var).at(ACcat)->Fill(get_var(var), weight);
                     }
                 }
             }
         }
-    }
-}
-
-void Sample_Plots::Fill_SS_iso(std::string cat, double var, std::string j, std::string name) {
-    std::string get_cat = cat;
-    if (cat.find("vbf_ggHMELA") != std::string::npos) {
-        get_cat = channel_prefix + "_vbf";
-    }
-
-    fout->cd();
-    if (name == "Data") {
-        all_SS_iso.at(j).at(cat)->Fill(var, weight);
-    } else if (name == "ZL" || name == "ZJ" || name == "TTT" || name == "TTJ" || name == "W" || name == "VVT" ||
-               name == "VVJ" || name == "embedded") {
-        all_SS_iso.at(j).at(cat)->Fill(var, -1 * weight);
-    }
-}
-
-void Sample_Plots::Fill_SS_anti(std::string cat, double var, std::string j, std::string name) {
-    std::string get_cat = cat;
-    if (cat.find("vbf_ggHMELA") != std::string::npos) {
-        get_cat = channel_prefix + "_vbf";
-    }
-
-    fout->cd();
-    if (name == "Data") {
-        all_SS_anti.at(j).at(cat)->Fill(var, weight);
-    } else if (name == "ZL" || name == "ZJ" || name == "TTT" || name == "TTJ" || name == "W" || name == "VVT" ||
-               name == "VVJ" || name == "embedded") {
-        all_SS_anti.at(j).at(cat)->Fill(var, -1 * weight);
     }
 }
 
@@ -238,23 +206,10 @@ void Sample_Plots::write_histograms() {
         for (auto cat : categories) {
             fout->cd(("plots/" + var + "/" + cat).c_str());
             all_hists.at(var).at(cat)->Write();
-
-            if (cat.find("0jet") != std::string::npos) {
-                all_SS_anti.at(var).at(cat)->Scale(1.0 * all_SS_iso.at(var).at(cat)->Integral() /
-                                                   all_SS_anti.at(var).at(cat)->Integral());
-                all_SS_anti.at(var).at(cat)->SetName("QCD");
-                all_SS_anti.at(var).at(cat)->Write();
-            } else if (cat.find("boosted") != std::string::npos) {
-                all_SS_anti.at(var).at(cat)->Scale(1.28 * all_SS_iso.at(var).at(cat)->Integral() /
-                                                   all_SS_anti.at(var).at(cat)->Integral());
-                all_SS_anti.at(var).at(cat)->SetName("QCD");
-                all_SS_anti.at(var).at(cat)->Write();
-            } else if (cat.find("vbf") != std::string::npos) {
-                all_SS_anti.at(var).at(cat)->Scale(1.0 * all_SS_iso.at(var).at(cat)->Integral() /
-                                                   all_SS_anti.at(var).at(cat)->Integral());
-                all_SS_anti.at(var).at(cat)->SetName("QCD");
-                all_SS_anti.at(var).at(cat)->Write();
-            }
+            fout->cd(("plots/" + var + "/SS_iso_" + cat).c_str());
+            all_SS_iso.at(var).at(cat)->Write();
+            fout->cd(("plots/" + var + "/SS_anti_" + cat).c_str());
+            all_SS_anti.at(var).at(cat)->Write();
         }
         i++;
     }
