@@ -83,6 +83,8 @@ int main(int argc, char *argv[]) {
     fout->mkdir(("plots/" + it->first).c_str());
     for (auto cat : info->get_categories()) {
       fout->mkdir(("plots/" + it->first + "/" + cat).c_str());
+      fout->mkdir(("plots/" + it->first + "/SS_iso_" + cat).c_str());
+      fout->mkdir(("plots/" + it->first + "/SS_anti_" + cat).c_str());
     }
   }
   fout->cd();
