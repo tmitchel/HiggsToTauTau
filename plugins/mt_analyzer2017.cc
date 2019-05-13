@@ -448,7 +448,7 @@ int main(int argc, char* argv[]) {
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
     // only keep the regions we need
-    if (!signalRegion && !antiTauIsoRegion) {
+    if (!signalRegion && !antiTauIsoRegion && !antiIsoRegion) {
       continue;
     }
 

@@ -1,5 +1,6 @@
 import ROOT as r
 from glob import glob
+r.gROOT.SetBatch(True)
 
 def grab(fin, category, var, name, rebin=None):
     ihist = fin.Get('plots/{}/{}/{}'.format(var, category, name)).Clone()
@@ -7,19 +8,20 @@ def grab(fin, category, var, name, rebin=None):
         ihist.Rebin(rebin)
     return ihist
 
-def get_histos(fout, fileList, category, variable, rebin=None):
+def get_histos(fout, fname, category, variable, rebin=None):
     """Read all histograms from the input directory and pack
     them into a dictionary"""
 
     hists = {}
     ss_iso, ss_anti = {}, {}
-    for ifile in fileList:
-        fin = r.TFile(ifile, 'READ')
+    fin = r.TFile(fname, 'READ')
+    for sname in fin.Get('plots/{}/{}'.format(variable, category)).GetListOfKeys():
         fout.cd()
-        hists[ifile.split('/')[-1].replace('.root', '')] = grab(fin, category, variable, ifile, rebin)
-        ss_iso[ifile.split('/')[-1].replace('.root', '')] = grab(fin, 'SS_iso_{}'.format(category), 'SS_iso_{}'.format(variable), fin.GetName(), rebin)
-        ss_anti[ifile.split('/')[-1].replace('.root', '')] = grab(fin, 'SS_anti_{}'.format(category), 'SS_anti_{}'.format(variable), fin.GetName(), rebin)
-        fin.Close()
+        hists[sname.GetName()] = grab(fin, category, variable, sname.GetName(), rebin)
+        ss_iso['SS_iso_{}'.format(sname.GetName())] = grab(fin, 'SS_iso_{}'.format(category), variable, 'SS_iso_{}'.format(sname.GetName()), rebin)
+        ss_anti['SS_anti_{}'.format(sname.GetName())] = grab(fin, 'SS_anti_{}'.format(category), variable, 'SS_anti_{}'.format(sname.GetName()), rebin)
+
+    fin.Close()
     return hists, {
         'ss_iso': ss_iso,
         'ss_anti': ss_anti,
@@ -27,14 +29,14 @@ def get_histos(fout, fileList, category, variable, rebin=None):
 
 def build_qcd(cat, osss_histos):
     # copy the data histograms
-    ss_iso = osss_histos['ss_iso']['Data'].Clone()
-    ss_anti = osss_histos['ss_anti']['Data'].Clone()
+    ss_iso = osss_histos['ss_iso']['SS_iso_data_obs'].Clone()
+    ss_anti = osss_histos['ss_anti']['SS_anti_data_obs'].Clone()
 
     # do data - bkgs
     bkgs = ['ZJ', 'ZL', 'TTT', 'TTJ', 'VVT', 'VVJ', 'W', 'embedded']
     for bkg in bkgs:
-        ss_iso.Add(osss_histos['ss_iso'][bkg], -1)
-        ss_anti.Add(osss_histos['ss_anti'][bkg], -1)
+        ss_iso.Add(osss_histos['ss_iso']['SS_iso_' + bkg], -1)
+        ss_anti.Add(osss_histos['ss_anti']['SS_anti_' + bkg], -1)
 
     qcd = ss_anti.Clone()
     qcd.SetName('QCD')
@@ -80,6 +82,8 @@ def format_backgrounds(histos, legend):
     stat.SetName('stat')
     sorted_histos = sorted(histos.iteritems(), key=lambda kv: kv[1].Integral())
     for name, ihist in sorted_histos:
+        if 'ggh' in name.lower() or 'vbf' in name.lower() or 'wh' in name.lower() or 'zh' in name.lower() or 'qqh' in name.lower():
+          continue
         stack.Add(ihist)
         stat.Add(ihist)
         legend.AddEntry(ihist, name, 'f')
@@ -108,7 +112,7 @@ def createCanvas():
     pad1.SetPad(0, .3, 1, 1)
     pad1.SetTopMargin(.1)
     pad1.SetBottomMargin(0.02)
-#    pad1.SetLogy()
+    pad1.SetLogy()
     pad1.SetTickx(1)
     pad1.SetTicky(1)
 
@@ -208,19 +212,18 @@ def sigmaLines(data):
 
 def main(args):
     # get the input files
-    filelist = [ifile for ifile in glob('{}/*.root'.format(args.input_dir))]
     fout = r.TFile('out.root', 'RECREATE')
-    histos, osss_histos = get_histos(fout, filelist, args.car, args.var)
+    histos, osss_histos = get_histos(fout, args.input_dir, args.cat, args.var)
     histos['QCD'] = build_qcd(args.cat, osss_histos)
     # create the histogram legend
-    legend = r.TLegend(0.7, 0.7, 0.85, 0.85)
+    legend = r.TLegend(0.7, 0.65, 0.85, 0.85)
     legend.SetLineColor(0)
     legend.SetFillColor(0)
     legend.SetTextFont(61)
     legend.SetTextFont(42)
     legend.SetTextSize(0.03)
 
-    data = format_data(histos.pop('Data'), legend)
+    data = format_data(histos.pop('data_obs'), legend)
     stack, stat = format_backgrounds(histos, legend)
     formatStat(stat)
 
@@ -246,7 +249,7 @@ def main(args):
     line1.Draw()
     line2.Draw()
 
-    can.Print('file.pdf')
+    can.SaveAs('Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat, '2017'))
 
 
 if __name__ == "__main__":
@@ -258,4 +261,8 @@ if __name__ == "__main__":
                         dest='var', help='variable to plot')
     parser.add_argument('--cat', '-c', action='store',
                         dest='cat', help='category to plot')
+    parser.add_argument('--scale', '-s', action='store', default=1., type=float,
+                        dest='scale', help='category to plot')
+    parser.add_argument('--prefix', '-p', action='store',
+                        dest='prefix', help='prefix for file name')
     main(parser.parse_args())
