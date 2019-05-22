@@ -284,15 +284,15 @@ int main(int argc, char* argv[]) {
     double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getPx() + met_x, 2) - pow(electron.getPy() + met_y, 2));
     int evt_charge = tau.getCharge() + electron.getCharge();
 
-    // // now do mt selection
-    // if (mt > 50) {
-    //   continue;
-    // }
+    // now do mt selection
+    if (mt > 50) {
+      continue;
+    }
 
-    // // only opposite-sign
-    // if (evt_charge != 0) {
-    //   continue;
-    // }
+    // only opposite-sign
+    if (evt_charge != 0) {
+      continue;
+    }
 
     // apply all scale factors/corrections/etc.
     if (!isData && !isEmbed) {
@@ -470,13 +470,8 @@ int main(int argc, char* argv[]) {
     bool VHCat   = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
     // only keep the regions we need
-    if (!signalRegion && !antiTauIsoRegion && !antiIsoRegion) {
+    if (!signalRegion && !antiTauIsoRegion) {
       continue;
-    }
-
-    if (signalRegion && evt_charge == 0) {
-      histos->at("el_pt") -> Fill(electron.getPt(), evtwt);
-      histos->at("tau_pt") -> Fill(tau.getPt(), evtwt);
     }
 
     std::vector<std::string> tree_cat;
