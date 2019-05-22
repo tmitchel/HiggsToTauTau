@@ -337,20 +337,19 @@ Bool_t event_info::getPassIsoTkMu22eta2p1() {
 }
 
 Bool_t event_info::getPassMu20Tau27() {
-//   PassMu24 = mMatchesIsoMu20Tau27Path && mMatchesIsoMu20Tau27Filter && tMatchesIsoMu20Tau27Path && tMatchesIsoMu20Tau27Filter && Mu20Tau27Pass;
-  PassMu24 = mMatchesIsoMu20Tau27Path && tMatchesIsoMu20Tau27Path && tMatchesIsoMu20Tau27Filter && Mu20Tau27Pass;
-
-  return PassMu24;
+  // PassMu20Tau27 = mMatchesIsoMu20Tau27Path && mMatchesIsoMu20Tau27Filter && tMatchesIsoMu20Tau27Path && tMatchesIsoMu20Tau27Filter && Mu20Tau27Pass;
+  PassMu20Tau27 = mMatchesIsoMu20Tau27Path && tMatchesIsoMu20Tau27Path && tMatchesIsoMu20Tau27Filter && Mu20Tau27Pass;
+  return PassMu20Tau27;
 }
 
 Bool_t event_info::getPassMu24() {
-  PassMu27 = mMatchesIsoMu24Path && mMatchesIsoMu24Filter && IsoMu24Pass;
-  return PassMu27;
+  PassMu24 = mMatchesIsoMu24Path && mMatchesIsoMu24Filter && IsoMu24Pass;
+  return PassMu24;
 }
 
 Bool_t event_info::getPassMu27() {
-  PassMu20Tau27 = mMatchesIsoMu27Path && mMatchesIsoMu27Filter && IsoMu27Pass;
-  return PassMu20Tau27;
+  PassMu27 = mMatchesIsoMu27Path && mMatchesIsoMu27Filter && IsoMu27Pass;
+  return PassMu27;
 }
 
 Bool_t event_info::getPassDoubleTauCmbIso35() {
