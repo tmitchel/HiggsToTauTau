@@ -93,6 +93,7 @@ int main(int argc, char *argv[]) {
           continue;
         }
 
+        fractions->fillFraction(inclusive, name, vis_mass, njets, weight);
         if (cat0) {
           fractions->fillFraction(zeroJet, name, vis_mass, njets, weight);
         } else if (cat1) {
