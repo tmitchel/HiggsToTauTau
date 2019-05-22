@@ -136,6 +136,7 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
     for (auto var : plot_variables) {
       // fill histograms
       if (is_signal) {
+        all_hists.at(var).at(channel_prefix + "_inclusive")->Fill(get_var(var), weight);
         if (cat0) {
           all_hists.at(var).at(channel_prefix + "_0jet")->Fill(get_var(var), weight);
         } else if (cat1) {
@@ -147,6 +148,7 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
           }
         }
       } else if (is_antiTauIso && sample_name == "data_obs") {
+        convert_data_to_fake(channel_prefix + "_inclusive", get_var(var), var);
         if (cat0) {
           // category, name, var1, var2, vis_mass, njets, t1_pt, t1_decayMode, mt, lep_iso, evtwt
           convert_data_to_fake(channel_prefix + "_0jet", get_var(var), var);  // 2d template
@@ -325,7 +327,6 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
       {"higgs_m", 0},
       {"hjj_pT", 0},
       {"hjj_m", 0},
-      {"vis_mass", 0},
       {"dEtajj", 0},
       {"dPhijj", 0},
       {"MT_lepMET", 0},
@@ -409,7 +410,6 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
   tree->SetBranchAddress("higgs_m", &variables.at("higgs_m"));
   tree->SetBranchAddress("hjj_pT", &variables.at("hjj_pT"));
   tree->SetBranchAddress("hjj_m", &variables.at("hjj_m"));
-  tree->SetBranchAddress("vis_mass", &variables.at("vis_mass"));
   tree->SetBranchAddress("dEtajj", &variables.at("dEtajj"));
   tree->SetBranchAddress("dPhijj", &variables.at("dPhijj"));
   tree->SetBranchAddress("MT_lepMET", &variables.at("MT_lepMET"));
