@@ -4,7 +4,7 @@
 
 // user includes
 #include "../include/CLParser.h"
-#include "../include/produce_plots.h"
+#include "../include/produce_plots_with_OSSS.h"
 #include "TMath.h"
 #include "TStopwatch.h"
 
@@ -83,6 +83,8 @@ int main(int argc, char *argv[]) {
     fout->mkdir(("plots/" + it->first).c_str());
     for (auto cat : info->get_categories()) {
       fout->mkdir(("plots/" + it->first + "/" + cat).c_str());
+      fout->mkdir(("plots/" + it->first + "/SS_iso_" + cat).c_str());
+      fout->mkdir(("plots/" + it->first + "/SS_anti_" + cat).c_str());
     }
   }
   fout->cd();
@@ -99,7 +101,6 @@ int main(int argc, char *argv[]) {
     // run for nominal case first
     auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));    // open TTree
     auto sample = std::make_unique<Sample_Plots>(channel_prefix, year, name, suffix, fout, vars);  // create Sample_Plots
-    sample->load_fake_fractions(ff_name);                                                          // load fractions from input file
     sample->fill_histograms(tree);                                                                 // do event loop and fill histos
     sample->write_histograms();                                                                    // write all to the file
     sample->Close();                                                                               // delete the ff_weight pointer
@@ -111,7 +112,6 @@ int main(int argc, char *argv[]) {
         auto fin = std::unique_ptr<TFile>(TFile::Open((dir + "/" + ifile).c_str()));
         auto tree = std::shared_ptr<TTree>(reinterpret_cast<TTree *>(fin->Get(tree_name.c_str())));
         auto jhu_sample = std::make_unique<Sample_Plots>(channel_prefix, year, ac_weight.second, suffix, fout, vars);
-        jhu_sample->load_fake_fractions(ff_name);
         jhu_sample->fill_histograms(tree, ac_weight.first);
         jhu_sample->write_histograms();
         jhu_sample->Close();

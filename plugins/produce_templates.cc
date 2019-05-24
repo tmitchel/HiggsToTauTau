@@ -4,7 +4,7 @@
 
 // user includes
 #include "../include/CLParser.h"
-#include "../include/sample_template.h"
+#include "../include/produce_templates.h"
 #include "TMath.h"
 #include "TStopwatch.h"
 

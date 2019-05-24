@@ -400,13 +400,13 @@ int main(int argc, char* argv[]) {
       evtwt *= wEmbed->function("m_sel_trg_ratio")->getVal();
 
       // muon ID eff in selection
-      wEmbed->var("gt_pt")->setVal(muon.getPt());
-      wEmbed->var("gt_eta")->setVal(muon.getEta());
+      // wEmbed->var("gt_pt")->setVal(muon.getPt());
+      // wEmbed->var("gt_eta")->setVal(muon.getEta());
       evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
 
-      wEmbed->var("gt_pt")->setVal(tau.getPt());
-      wEmbed->var("gt_eta")->setVal(tau.getEta());
-      evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
+      // wEmbed->var("gt_pt")->setVal(tau.getPt());
+      // wEmbed->var("gt_eta")->setVal(tau.getEta());
+      // evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
 
       // muon ID SF
       evtwt *= wEmbed->function("m_id_embed_kit_ratio")->getVal();
@@ -450,11 +450,6 @@ int main(int argc, char* argv[]) {
     // only keep the regions we need
     if (!signalRegion && !antiTauIsoRegion) {
       continue;
-    }
-
-    if (signalRegion && evt_charge == 0) {
-      histos->at("el_pt") -> Fill(muon.getPt(), evtwt);
-      histos->at("tau_pt") -> Fill(tau.getPt(), evtwt);
     }
 
     std::vector<std::string> tree_cat;

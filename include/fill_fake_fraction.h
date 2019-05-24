@@ -10,7 +10,7 @@
 #include "TH2F.h"
 #include "TTree.h"
 
-enum Categories { zeroJet, boosted, vbf };
+enum Categories { inclusive, zeroJet, boosted, vbf };
 
 class FakeFractions {
  public:
@@ -31,6 +31,7 @@ FakeFractions::FakeFractions(std::string channel_prefix, std::string year, std::
       mvis_bins({0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000}),
       njets_bins({-0.5, 0.5, 1.5, 15}),
       categories{
+          channel_prefix + "_inclusive",
           channel_prefix + "_0jet",
           channel_prefix + "_boosted",
           channel_prefix + "_vbf"} {

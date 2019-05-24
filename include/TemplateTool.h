@@ -26,7 +26,8 @@
 #include "HTTutilities/Jet2TauFakes/interface/WrapperTH2F.h"
 #include "HTTutilities/Jet2TauFakes/interface/WrapperTH3D.h"
 
-enum Categories { zeroJet,
+enum Categories { inclusive,
+                  zeroJet,
                   boosted,
                   vbf,
                   vbf_ggHMELA_bin1,
@@ -90,6 +91,7 @@ TemplateTool::TemplateTool(std::string channel_prefix, std::string year, std::st
     : fout(output_file),
       channel_prefix(channel_prefix),
       categories{
+          channel_prefix + "_inclusive",
           channel_prefix + "_0jet",
           channel_prefix + "_boosted",
           channel_prefix + "_vbf",
@@ -222,6 +224,7 @@ TemplateTool::TemplateTool(std::string channel_prefix)
                std::make_pair("wt_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"),
            }}},
       categories{
+          channel_prefix + "_inclusive",
           channel_prefix + "_0jet",
           channel_prefix + "_boosted",
           channel_prefix + "_vbf",

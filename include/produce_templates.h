@@ -161,6 +161,7 @@ void Sample_Template::set_branches(std::shared_ptr<TTree> tree, std::string acWe
   tree->SetBranchAddress("OS", &OS);
   tree->SetBranchAddress("t1_pt", &t1_pt);
   tree->SetBranchAddress("VBF_MELA", &VBF_MELA);
+  // tree->SetBranchAddress("MELA_D2j", &VBF_MELA);
   tree->SetBranchAddress("j1_phi", &j1_phi);
   tree->SetBranchAddress("j2_phi", &j2_phi);
   tree->SetBranchAddress("NN_disc", &NN_disc);
@@ -309,6 +310,7 @@ void Sample_Template::load_fake_fractions(std::string file_name) {
     if (cat.find("vbf_ggHMELA") != std::string::npos) {
       continue;
     }
+
     fake_fractions[cat + "_data"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "data_" + cat).c_str())->Clone());
     fake_fractions[cat + "_frac_w"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_w_" + cat).c_str())->Clone());
     fake_fractions[cat + "_frac_tt"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_tt_" + cat).c_str())->Clone());
@@ -348,6 +350,9 @@ std::string Sample_Template::get_category(double vbf_var3) {
 // histograms in the same directory.
 void Sample_Template::write_histograms(bool doSyst = false, std::string newName = "") {
   for (auto cat : categories) {
+    if (cat.find("inclusive") != std::string::npos) {
+      continue;
+    }
     fout->cd(cat.c_str());
 
     // potentially change the name (for JHU)
