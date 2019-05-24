@@ -100,27 +100,21 @@ int main(int argc, char* argv[]) {
   fout->cd();
   slim_tree* st = new slim_tree("etau_tree"+systname, doAC);
 
-  if (sample.find("vbf_") != std::string::npos) {
-    sample = "VBF125";
-  } else if (sample.find("ggH_") != std::string::npos || sample.find("ggh_") != std::string::npos) {
-    sample = "ggH125";
-  } else if (sample.find("wh_") != std::string::npos) {
-    sample = "WMinusHTauTau125";
-  } else if (sample.find("zh_") != std::string::npos) {
-    sample = "ZH125";
+  if (sample.find("vbf125") != std::string::npos) {
+    sample = "vbf125";
+  } else if (sample.find("ggh125") != std::string::npos) {
+    sample = "ggh125";
+  } else if (sample.find("wminus125") != std::string::npos) {
+    sample = "wminus125";
+  } else if (sample.find("wplus125") != std::string::npos) {
+    sample = "wplus125";
+  } else if (sample.find("zh125") != std::string::npos) {
+    sample = "zh125";
   }
 
   // get normalization (lumi & xs are in util.h)
-  double norm;
-  if (isData) {
-    norm = 1.0;
-  } else if (isEmbed) {
-    if (sample.find("embed-H") != std::string::npos) {
-      norm = 1 / .99;
-    } else {
-      norm = 1 / .99;
-    }
-  } else {
+  double norm(1.);
+  if (!isData && !isEmbed) {
     norm = helper->getLuminosity2016() * helper->getCrossSection(sample) / gen_number;
   }
 
@@ -169,11 +163,11 @@ int main(int argc, char* argv[]) {
   auto histos_2d = helper->getHistos2D();
 
   // construct factories
-  event_info       event(ntuple, syst, "et");
-  electron_factory electrons(ntuple);
+  event_info       event(ntuple, lepton::ELECTRON, 2016, syst);
+  electron_factory electrons(ntuple, 2016);
   tau_factory      taus(ntuple, 2016);
-  jet_factory      jets(ntuple, syst);
-  met_factory      met(ntuple, syst);
+  jet_factory      jets(ntuple, 2016, syst);
+  met_factory      met(ntuple, 2016, syst);
 
   if (sample.find("ggHtoTauTau125") != std::string::npos) {
     event.setRivets(ntuple);
