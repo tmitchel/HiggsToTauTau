@@ -38,7 +38,7 @@ class jet_factory {
     Float_t bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1;
     Float_t bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2;
     Float_t topQuarkPt1, topQuarkPt2, temp_njets;
-    Int_t Nbtag, nbtag, njetspt20, njets;
+    Float_t Nbtag, nbtag, njetspt20, njets;
     std::vector<jet> plain_jets, btag_jets;
 
    public:
@@ -49,8 +49,8 @@ class jet_factory {
     double bTagEventWeight(int, int);
 
     // getters
-    Int_t getNbtag() { return Nbtag; }
-    Int_t getNjets() { return njets; }
+    Float_t getNbtag() { return Nbtag; }
+    Float_t getNjets() { return njets; }
     Int_t getNjetPt20() { return njetspt20; }
     Float_t getDijetMass() { return mjj; }
     Float_t getTopPt1() { return topQuarkPt1; }
@@ -103,12 +103,12 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst) {
     input->SetBranchAddress(("jb1pt_" + btag_string).c_str(), &bpt_1);
     input->SetBranchAddress(("jb1eta_" + btag_string).c_str(), &beta_1);
     input->SetBranchAddress(("jb1phi_" + btag_string).c_str(), &bphi_1);
-    input->SetBranchAddress(("jb1csv_" + btag_string).c_str(), &bcsv_1);
+    // input->SetBranchAddress(("jb1csv_" + btag_string).c_str(), &bcsv_1);
     input->SetBranchAddress(("jb1hadronflavor_" + btag_string).c_str(), &bflavor_1);
     input->SetBranchAddress(("jb2pt_" + btag_string).c_str(), &bpt_2);
     input->SetBranchAddress(("jb2eta_" + btag_string).c_str(), &beta_2);
     input->SetBranchAddress(("jb2phi_" + btag_string).c_str(), &bphi_2);
-    input->SetBranchAddress(("jb2csv_" + btag_string).c_str(), &bcsv_2);
+    // input->SetBranchAddress(("jb2csv_" + btag_string).c_str(), &bcsv_2);
     input->SetBranchAddress(("jb2hadronflavor_" + btag_string).c_str(), &bflavor_2);
     input->SetBranchAddress("topQuarkPt1", &topQuarkPt1);
     input->SetBranchAddress("topQuarkPt2", &topQuarkPt2);
