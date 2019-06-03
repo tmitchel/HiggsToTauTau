@@ -106,33 +106,21 @@ tau_factory::tau_factory(TTree* input, int era = 2017) {
     input->SetBranchAddress("tZTTGenPt", &tZTTGenPt);
     input->SetBranchAddress("tZTTGenEta", &tZTTGenEta);
     input->SetBranchAddress("tZTTGenPhi", &tZTTGenPhi);
-    input->SetBranchAddress("againstElectronTightMVA6_2", &againstElectronTightMVA6_2);
-    input->SetBranchAddress("againstElectronVLooseMVA6_2", &againstElectronVLooseMVA6_2);
-    input->SetBranchAddress("againstMuonTight3_2", &againstMuonTight3_2);
-    input->SetBranchAddress("againstMuonLoose3_2", &againstMuonLoose3_2);
-    input->SetBranchAddress("l2_decayMode", &l2_decayMode);
-    input->SetBranchAddress("decayModeFinding_2", &dmf);
-    input->SetBranchAddress("decayModeFindingNewDMs_2", &dmf_new);
+    input->SetBranchAddress("tAgainstElectronTightMVA6", &againstElectronTightMVA6_2);
+    input->SetBranchAddress("tAgainstElectronVLooseMVA6", &againstElectronVLooseMVA6_2);
+    input->SetBranchAddress("tAgainstMuonTight3", &againstMuonTight3_2);
+    input->SetBranchAddress("tAgainstMuonLoose3", &againstMuonLoose3_2);
+    input->SetBranchAddress("tDecayMode", &l2_decayMode);
+    input->SetBranchAddress("tDecayModeFinding", &dmf);
+    input->SetBranchAddress("tDecayModeFindingNewDMs", &dmf_new);
 
-    if (era == 2017) {
-        input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTraw", &iso_2);
-        input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVLoose", &byVLooseIsolationMVArun2v1DBoldDMwLT_2);
-        input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTLoose", &byLooseIsolationMVArun2v1DBoldDMwLT_2);
-        input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTMedium", &byMediumIsolationMVArun2v1DBoldDMwLT_2);
-        input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTTight", &byTightIsolationMVArun2v1DBoldDMwLT_2);
-        input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVTight", &byVTightIsolationMVArun2v1DBoldDMwLT_2);
-        input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVVTight", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
-    } else if (era == 2016) {
-        input->SetBranchAddress("iso_2", &iso_2);
-        input->SetBranchAddress("byVLooseIsolationMVArun2v1DBoldDMwLT_2", &byVLooseIsolationMVArun2v1DBoldDMwLT_2);
-        input->SetBranchAddress("byLooseIsolationMVArun2v1DBoldDMwLT_2", &byLooseIsolationMVArun2v1DBoldDMwLT_2);
-        input->SetBranchAddress("byMediumIsolationMVArun2v1DBoldDMwLT_2", &byMediumIsolationMVArun2v1DBoldDMwLT_2);
-        input->SetBranchAddress("byTightIsolationMVArun2v1DBoldDMwLT_2", &byTightIsolationMVArun2v1DBoldDMwLT_2);
-        input->SetBranchAddress("byVTightIsolationMVArun2v1DBoldDMwLT_2", &byVTightIsolationMVArun2v1DBoldDMwLT_2);
-        input->SetBranchAddress("byVVTightIsolationMVArun2v1DBoldDMwLT_2", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
-    } else {
-        std::cerr << "Bad year given to tau_factory" << std::endl;
-    }
+    input->SetBranchAddress("tByIsolationMVArun2v1DBoldDMwLTraw", &iso_2);
+    input->SetBranchAddress("tByVLooseIsolationMVArun2v1DBoldDMwLT", &byVLooseIsolationMVArun2v1DBoldDMwLT_2);
+    input->SetBranchAddress("tByLooseIsolationMVArun2v1DBoldDMwLT", &byLooseIsolationMVArun2v1DBoldDMwLT_2);
+    input->SetBranchAddress("tByMediumIsolationMVArun2v1DBoldDMwLT", &byMediumIsolationMVArun2v1DBoldDMwLT_2);
+    input->SetBranchAddress("tByTightIsolationMVArun2v1DBoldDMwLT", &byTightIsolationMVArun2v1DBoldDMwLT_2);
+    input->SetBranchAddress("tByVTightIsolationMVArun2v1DBoldDMwLT", &byVTightIsolationMVArun2v1DBoldDMwLT_2);
+    input->SetBranchAddress("tByVVTightIsolationMVArun2v1DBoldDMwLT", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
 }
 
 // create electron object and set member data

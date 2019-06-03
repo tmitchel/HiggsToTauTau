@@ -197,14 +197,14 @@ event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : is
     input->SetBranchAddress(ME_bkg2_name.c_str(), &ME_bkg2);
     input->SetBranchAddress("run", &run);
     input->SetBranchAddress("lumi", &lumi);
-    input->SetBranchAddress("npv", &npv);
-    input->SetBranchAddress("npu", &npu);
+    input->SetBranchAddress("nvtx", &npv);
+    input->SetBranchAddress("nTruePU", &npu);
     input->SetBranchAddress("genpX", &genpX);
     input->SetBranchAddress("genpY", &genpY);
     input->SetBranchAddress("genM", &genM);
     input->SetBranchAddress("genpT", &genpT);
     input->SetBranchAddress("numGenJets", &numGenJets);
-    input->SetBranchAddress("genweight", &genweight);
+    input->SetBranchAddress("GenWeight", &genweight);
     input->SetBranchAddress("Flag_BadChargedCandidateFilter", &Flag_BadChargedCandidateFilter);
     input->SetBranchAddress("Flag_BadPFMuonFilter", &Flag_BadPFMuonFilter);
     input->SetBranchAddress("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter);
@@ -238,10 +238,10 @@ event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : is
     } else if (lep == lepton::MUON) {
         input->SetBranchAddress("evt", &evt);
         input->SetBranchAddress("tZTTGenDR", &genDR);
-        input->SetBranchAddress("matchIsoMu19Tau20_1", &matchIsoMu19Tau20_1);
-        input->SetBranchAddress("matchIsoMu19Tau20_2", &matchIsoMu19Tau20_2);
-        input->SetBranchAddress("filterIsoMu19Tau20_1", &filterIsoMu19Tau20_1);
-        input->SetBranchAddress("filterIsoMu19Tau20_2", &filterIsoMu19Tau20_2);
+        input->SetBranchAddress("mMatchesIsoMu19Tau20Path", &matchIsoMu19Tau20_1);
+        input->SetBranchAddress("tMatchesIsoMu19Tau20Path", &matchIsoMu19Tau20_2);
+        input->SetBranchAddress("mMatchesIsoMu19Tau20Filter", &filterIsoMu19Tau20_1);
+        input->SetBranchAddress("tMatchesIsoMu19Tau20Filter", &filterIsoMu19Tau20_2);
         input->SetBranchAddress("passIsoMu19Tau20", &passIsoMu19Tau20);
         input->SetBranchAddress("matchIsoMu22_1", &matchIsoMu22_1);
         input->SetBranchAddress("filterIsoMu22_1", &filterIsoMu22_1);

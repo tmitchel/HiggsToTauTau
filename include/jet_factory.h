@@ -25,8 +25,7 @@ class jet {
 };
 
 // initialize member data and set TLorentzVector
-jet::jet(Float_t Pt, Float_t Eta, Float_t Phi, Float_t Csv, Float_t Flavor = -9999)
-    : pt(Pt), eta(Eta), phi(Phi), csv(Csv), flavor(Flavor) {
+jet::jet(Float_t Pt, Float_t Eta, Float_t Phi, Float_t Csv, Float_t Flavor = -9999) : pt(Pt), eta(Eta), phi(Phi), csv(Csv), flavor(Flavor) {
     p4.SetPtEtaPhiM(Pt, Eta, Phi, 0.);
 }
 
@@ -68,36 +67,49 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst) {
     if (syst.find("JetTotalUp") != std::string::npos || syst.find("JetTotalDown") != std::string::npos) {
         mjj_name += "_" + syst;
         njets_name = "jetVeto30_" + syst;
-        input->SetBranchAddress(njets_name.c_str(), &temp_njets);
+        // input->SetBranchAddress(njets_name.c_str(), &temp_njets);
         njets = temp_njets;
         doSyst = true;
     } else {
-        input->SetBranchAddress(njets_name.c_str(), &njets);
+        // input->SetBranchAddress(njets_name.c_str(), &njets);
         doSyst = false;
     }
 
     input->SetBranchAddress(mjj_name.c_str(), &mjj);
 
-    input->SetBranchAddress("nbtag", &nbtag);
-    input->SetBranchAddress("njetspt20", &njetspt20);
-    input->SetBranchAddress("jpt_1", &jpt_1);
-    input->SetBranchAddress("jeta_1", &jeta_1);
-    input->SetBranchAddress("jphi_1", &jphi_1);
-    input->SetBranchAddress("jcsv_1", &jcsv_1);
-    input->SetBranchAddress("jpt_2", &jpt_2);
-    input->SetBranchAddress("jeta_2", &jeta_2);
-    input->SetBranchAddress("jphi_2", &jphi_2);
-    input->SetBranchAddress("jcsv_2", &jcsv_2);
-    input->SetBranchAddress("bpt_1", &bpt_1);
-    input->SetBranchAddress("beta_1", &beta_1);
-    input->SetBranchAddress("bphi_1", &bphi_1);
-    input->SetBranchAddress("bcsv_1", &bcsv_1);
-    input->SetBranchAddress("bflavor_1", &bflavor_1);
-    input->SetBranchAddress("bpt_2", &bpt_2);
-    input->SetBranchAddress("beta_2", &beta_2);
-    input->SetBranchAddress("bphi_2", &bphi_2);
-    input->SetBranchAddress("bcsv_2", &bcsv_2);
-    input->SetBranchAddress("bflavor_2", &bflavor_2);
+    std::string btag_string = "2016";
+    if (era == 2016) {
+        btag_string = "2016";
+        input->SetBranchAddress("jetVeto30", &nbtag);
+        input->SetBranchAddress("jetVeto20", &njetspt20);
+    } else if (era == 2017) {
+        btag_string = "2017";
+        input->SetBranchAddress("jetVeto30WoNoisyJets", &nbtag);
+        input->SetBranchAddress("jetVeto32WoNoisyJets", &njetspt20);
+    } else if (era == 2018) {
+        btag_string = "2018";
+        input->SetBranchAddress("jetVeto30", &nbtag);
+        input->SetBranchAddress("jetVeto20", &njetspt20);
+    }
+
+    input->SetBranchAddress("j1pt", &jpt_1);
+    input->SetBranchAddress("j1eta", &jeta_1);
+    input->SetBranchAddress("j1phi", &jphi_1);
+    input->SetBranchAddress("j1csv", &jcsv_1);
+    input->SetBranchAddress("j2pt", &jpt_2);
+    input->SetBranchAddress("j2eta", &jeta_2);
+    input->SetBranchAddress("j2phi", &jphi_2);
+    input->SetBranchAddress("j2csv", &jcsv_2);
+    input->SetBranchAddress(("jb1pt_" + btag_string).c_str(), &bpt_1);
+    input->SetBranchAddress(("jb1eta_" + btag_string).c_str(), &beta_1);
+    input->SetBranchAddress(("jb1phi_" + btag_string).c_str(), &bphi_1);
+    input->SetBranchAddress(("jb1csv_" + btag_string).c_str(), &bcsv_1);
+    input->SetBranchAddress(("jb1hadronflavor_" + btag_string).c_str(), &bflavor_1);
+    input->SetBranchAddress(("jb2pt_" + btag_string).c_str(), &bpt_2);
+    input->SetBranchAddress(("jb2eta_" + btag_string).c_str(), &beta_2);
+    input->SetBranchAddress(("jb2phi_" + btag_string).c_str(), &bphi_2);
+    input->SetBranchAddress(("jb2csv_" + btag_string).c_str(), &bcsv_2);
+    input->SetBranchAddress(("jb2hadronflavor_" + btag_string).c_str(), &bflavor_2);
     input->SetBranchAddress("topQuarkPt1", &topQuarkPt1);
     input->SetBranchAddress("topQuarkPt2", &topQuarkPt2);
 }
@@ -202,8 +214,7 @@ double _bTagEventWeight(jet_factory *jets, int nBTags = 0, int syst = 0) {
       */
 
     auto bjets = jets->getBtagJets();
-    auto bjetpt_1(bjets.at(0).getPt()), bjetflavour_1(bjets.at(0).getFlavor()), bjetpt_2(bjets.at(1).getPt()),
-        bjetflavour_2(bjets.at(1).getFlavor());
+    auto bjetpt_1(bjets.at(0).getPt()), bjetflavour_1(bjets.at(0).getFlavor()), bjetpt_2(bjets.at(1).getPt()), bjetflavour_2(bjets.at(1).getFlavor());
     auto nBtaggedJets = jets->getNbtag();
 
     double weight(0.);
@@ -236,24 +247,21 @@ int _PromoteDemote(TH2F *h_btag_eff_b, TH2F *h_btag_eff_c, TH2F *h_btag_eff_oth,
     float beff = 1.0;
     if (bjet->getFlavor() == 5) {
         // b-jet
-        auto effective_pt = std::min(
-            bjet->getPt(), static_cast<Float_t>(h_btag_eff_b->GetXaxis()->GetBinLowEdge(h_btag_eff_b->GetNbinsX() + 1) -
-                                                1));  // get bjet pT or 1 lower than max bin edge
+        auto effective_pt = std::min(bjet->getPt(), static_cast<Float_t>(h_btag_eff_b->GetXaxis()->GetBinLowEdge(h_btag_eff_b->GetNbinsX() + 1) -
+                                                                         1));  // get bjet pT or 1 lower than max bin edge
         beff == h_btag_eff_b->GetBinContent(effective_pt, h_btag_eff_b->GetYaxis()->FindBin(fabs(bjet->getEta())));
 
     } else if (bjet->getFlavor() == 4) {
         // c-jet
-        auto effective_pt = std::min(
-            bjet->getPt(), static_cast<Float_t>(h_btag_eff_c->GetXaxis()->GetBinLowEdge(h_btag_eff_c->GetNbinsX() + 1) -
-                                                1));  // get bjet pT or 1 lower than max bin edge
+        auto effective_pt = std::min(bjet->getPt(), static_cast<Float_t>(h_btag_eff_c->GetXaxis()->GetBinLowEdge(h_btag_eff_c->GetNbinsX() + 1) -
+                                                                         1));  // get bjet pT or 1 lower than max bin edge
         beff == h_btag_eff_c->GetBinContent(effective_pt, h_btag_eff_c->GetYaxis()->FindBin(fabs(bjet->getEta())));
 
     } else {
         // light-jet
-        auto effective_pt =
-            std::min(bjet->getPt(),
-                     static_cast<Float_t>(h_btag_eff_oth->GetXaxis()->GetBinLowEdge(h_btag_eff_oth->GetNbinsX() + 1) -
-                                          1));  // get bjet pT or 1 lower than max bin edge
+        auto effective_pt = std::min(bjet->getPt(),
+                                     static_cast<Float_t>(h_btag_eff_oth->GetXaxis()->GetBinLowEdge(h_btag_eff_oth->GetNbinsX() + 1) -
+                                                          1));  // get bjet pT or 1 lower than max bin edge
         beff == h_btag_eff_oth->GetBinContent(effective_pt, h_btag_eff_oth->GetYaxis()->FindBin(fabs(bjet->getEta())));
     }
 
@@ -274,12 +282,9 @@ int _PromoteDemote(TH2F *h_btag_eff_b, TH2F *h_btag_eff_c, TH2F *h_btag_eff_oth,
 }  // namespace btagSF
 
 void jet_factory::promoteDemote(TH2F *h_btag_eff_b, TH2F *h_btag_eff_c, TH2F *h_btag_eff_oth, int syst = 0) {
-    Nbtag =
-        btagSF::_PromoteDemote(h_btag_eff_b, h_btag_eff_c, h_btag_eff_oth, &(this->btag_jets.at(0)), this->nbtag, syst);
+    Nbtag = btagSF::_PromoteDemote(h_btag_eff_b, h_btag_eff_c, h_btag_eff_oth, &(this->btag_jets.at(0)), this->nbtag, syst);
 }
 
-double jet_factory::bTagEventWeight(int nBTags = 0, int syst = 0) {
-    return btagSF::_bTagEventWeight(this, nBTags, syst);
-}
+double jet_factory::bTagEventWeight(int nBTags = 0, int syst = 0) { return btagSF::_bTagEventWeight(this, nBTags, syst); }
 
 #endif  // INCLUDE_JET_FACTORY_H_
