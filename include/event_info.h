@@ -220,8 +220,8 @@ event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : is
 
     if (lep == lepton::ELECTRON) {
         input->SetBranchAddress("evt", &evt);
-        input->SetBranchAddress("eMatchesSingleE25Tight", &matchEle25);
-        input->SetBranchAddress("eMatchesEle25TightFilter", &filterEle25);
+        input->SetBranchAddress("eMatchesEle25Path", &matchEle25);
+        input->SetBranchAddress("eMatchesEle25Filter", &filterEle25);
         input->SetBranchAddress("singleE25eta2p1TightPass", &passEle25);
         input->SetBranchAddress("eMatchesEle27Path", &matchEle27);
         input->SetBranchAddress("eMatchesEle27Filter", &filterEle27);
@@ -234,7 +234,7 @@ event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : is
         input->SetBranchAddress("Ele35WPTightPass", &passEle35);
         input->SetBranchAddress("eMatchesEle24Tau30Path", &matchEle24Tau30);
         input->SetBranchAddress("eMatchesEle24Tau30Filter", &filterEle24Tau30);
-        input->SetBranchAddress("Ele24Tau30Pass", &passEle24Tau30);
+        input->SetBranchAddress("Ele24LooseTau30Pass", &passEle24Tau30);
     } else if (lep == lepton::MUON) {
         input->SetBranchAddress("evt", &evt);
         input->SetBranchAddress("tZTTGenDR", &genDR);
