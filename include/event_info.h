@@ -242,7 +242,7 @@ event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : is
         input->SetBranchAddress("tMatchesIsoMu19Tau20Path", &matchIsoMu19Tau20_2);
         input->SetBranchAddress("mMatchesIsoMu19Tau20Filter", &filterIsoMu19Tau20_1);
         input->SetBranchAddress("tMatchesIsoMu19Tau20Filter", &filterIsoMu19Tau20_2);
-        input->SetBranchAddress("passIsoMu19Tau20", &passIsoMu19Tau20);
+        input->SetBranchAddress("singleMu19eta2p1LooseTau20Pass", &passIsoMu19Tau20);
         input->SetBranchAddress("mMatchesIsoMu22Path", &matchIsoMu22_1);
         input->SetBranchAddress("mMatchesIsoMu22Filter", &filterIsoMu22_1);
         input->SetBranchAddress("singleIsoMu22Pass", &passIsoMu22);
@@ -259,7 +259,7 @@ event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : is
         input->SetBranchAddress("mMatchesIsoMu20Tau27Filter", &mMatchesIsoMu20Tau27Filter);
         input->SetBranchAddress("tMatchesIsoMu20Tau27Path", &tMatchesIsoMu20Tau27Path);
         input->SetBranchAddress("tMatchesIsoMu20Tau27Filter", &tMatchesIsoMu20Tau27Filter);
-        input->SetBranchAddress("Mu20Tau27Pass", &Mu20Tau27Pass);
+        input->SetBranchAddress("Mu20LooseTau27Pass", &Mu20Tau27Pass);
         input->SetBranchAddress("mMatchesIsoMu24Path", &mMatchesIsoMu24Path);
         input->SetBranchAddress("mMatchesIsoMu24Filter", &mMatchesIsoMu24Filter);
         input->SetBranchAddress("IsoMu24Pass", &IsoMu24Pass);
