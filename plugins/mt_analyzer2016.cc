@@ -213,8 +213,8 @@ int main(int argc, char *argv[]) {
         auto tau = taus.run_factory();
         jets.run_factory();
 
-        // remove 2-prong taus
-        if (!tau.getDecayModeFinding() || tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
+        // remove 2-prong taus if they aren't already removed
+        if (tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
             continue;
         }
 
@@ -223,11 +223,11 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        if (fabs(muon.getEta()) > 2.1) {
+        if (fabs(muon.getPt() < 20) || muon.getEta() > 2.1) {
             continue;
         }
 
-        if (tau.getPt() < 30) {
+        if (tau.getPt() < 30 || fabs(tau.getEta()) < 2.3) {
             continue;
         }
 
@@ -315,20 +315,15 @@ int main(int argc, char *argv[]) {
                     evtwt *= 1.375;
             } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
                 if (fabs(tau.getEta()) < 0.4)
-                    evtwt *= 1.263;
+                    evtwt *= 1.47;
                 else if (fabs(tau.getEta()) < 0.8)
-                    evtwt *= 1.364;
+                    evtwt *= 1.55;
                 else if (fabs(tau.getEta()) < 1.2)
-                    evtwt *= 0.854;
+                    evtwt *= 1.33;
                 else if (fabs(tau.getEta()) < 1.7)
-                    evtwt *= 1.712;
+                    evtwt *= 1.72;
                 else
-                    evtwt *= 2.324;
-
-                if (name == "ZL" && tau.getL2DecayMode() == 0)
-                    evtwt *= 0.74;
-                else if (sample == "ZL" && tau.getL2DecayMode() == 1)
-                    evtwt *= 1.0;
+                    evtwt *= 2.50;
             }
 
             // Z-pT and Zmm Reweighting

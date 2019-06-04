@@ -227,7 +227,11 @@ int main(int argc, char *argv[]) {
         //   - Event: dR(tau,el) > 0.5                          //
         //////////////////////////////////////////////////////////
 
-        if (tau.getPt() < 30) {
+        if (electron.getPt() < 26 || fabs(electron.getEta()) > 2.1) {
+            continue;
+        }
+
+        if (tau.getPt() < 30 || fabs(tau.getEta()) < 2.3) {
             continue;
         }
 
@@ -295,22 +299,17 @@ int main(int argc, char *argv[]) {
                 } else if (fabs(tau.getEta()) > 1.558) {
                     evtwt *= 1.900;
                 }
-                if (name == "ZL" && tau.getL2DecayMode() == 0) {
-                    evtwt *= 0.98;
-                } else if (sample == "ZL" && tau.getL2DecayMode() == 1) {
-                    evtwt *= 1.20;
-                }
             } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
                 if (fabs(tau.getEta()) < 0.4) {
-                    evtwt *= 1.012;
+                    evtwt *= 1.22;
                 } else if (fabs(tau.getEta()) < 0.8) {
-                    evtwt *= 1.007;
+                    evtwt *= 1.12;
                 } else if (fabs(tau.getEta()) < 1.2) {
-                    evtwt *= 0.870;
+                    evtwt *= 1.26;
                 } else if (fabs(tau.getEta()) < 1.7) {
-                    evtwt *= 1.154;
+                    evtwt *= 1.22;
                 } else {
-                    evtwt *= 2.281;
+                    evtwt *= 2.39;
                 }
             }
 
