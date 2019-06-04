@@ -34,6 +34,7 @@
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
+#include "HTT-utilities/LepEffInterface/interface/ScaleFactor.h"
 
 typedef std::vector<double> NumV;
 
@@ -142,12 +143,11 @@ int main(int argc, char *argv[]) {
     embed_file.Close();
 
     // trigger and ID scale factors
-    auto myScaleFactor_trgEle25 = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_eff.root");
-    auto myScaleFactor_id = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_IsoLt0p1_eff.root");
-    auto myScaleFactor_trgEle25Anti =
-        new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_Ele25WPTight_antiisolated_Iso0p1to0p3_eff_rb.root");
-    auto myScaleFactor_idAnti =
-        new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Electron/Run2016BtoH/Electron_IdIso_antiisolated_Iso0p1to0p3_eff.root");
+    auto myScaleFactor_trgEle25 = new ScaleFactor();
+    myScaleFactor_trgEle25->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Electron/Run2016_legacy/Electron_Run2016_legacy_Ele25.root");
+
+    auto myScaleFactor_id = new ScaleFactor();
+    myScaleFactor_id->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Electron/Run2016_legacy/Electron_Run2016_legacy_IdIso.root");
 
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
@@ -267,10 +267,10 @@ int main(int argc, char *argv[]) {
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // Trigger SF
-            evtwt *= myScaleFactor_trgEle25->getSF(electron.getPt(), electron.getEta());
+            evtwt *= myScaleFactor_trgEle25->get_ScaleFactor(electron.getPt(), electron.getEta());
 
             // electron ID SF
-            evtwt *= myScaleFactor_id->getSF(electron.getPt(), electron.getEta());
+            evtwt *= myScaleFactor_id->get_ScaleFactor(electron.getPt(), electron.getEta());
 
             // Pileup Reweighting
             evtwt *= lumi_weights->weight(event.getNPU());

@@ -32,6 +32,7 @@
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
+#include "HTT-utilities/LepEffInterface/interface/ScaleFactor.h"
 
 typedef std::vector<double> NumV;
 
@@ -139,9 +140,15 @@ int main(int argc, char *argv[]) {
     embed_file.Close();
 
     // trigger and ID scale factors
-    auto myScaleFactor_trgMu19 = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Muon/Run2016BtoH/Muon_Mu19leg_2016BtoH_eff.root");
-    auto myScaleFactor_trgMu22 = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Muon/Run2016BtoH/Muon_Mu22OR_eta2p1_eff.root");
-    auto myScaleFactor_id = new SF_factory("$CMSSW_BASE/src/LeptonEfficiencies/Muon/Run2016BtoH/Muon_IdIso_IsoLt0p15_2016BtoH_eff.root");
+    // auto myScaleFactor_trgMu24 = new ScaleFactor();
+    // myScaleFactor_trgMu24->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon_Run2016_legacy_IsoMu24.root");
+
+    auto myScaleFactor_trgMu22 = new ScaleFactor();
+    myScaleFactor_trgMu22->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016_legacy/Muon_Run2016_legacy_IsoMu22.root");
+
+
+    auto myScaleFactor_id = new ScaleFactor();
+    myScaleFactor_id->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016_legacy/Muon_Run2016_legacy_IdIso.root");
 
     //////////////////////////////////////
     // Final setup:                     //
@@ -281,13 +288,13 @@ int main(int argc, char *argv[]) {
                 htt_sf->var("t_eta")->setVal(tau.getEta());
                 htt_sf->var("t_dm")->setVal(tau.getL2DecayMode());
                 evtwt *= htt_sf->function("t_genuine_TightIso_mt_ratio")->getVal();
-                evtwt *= myScaleFactor_trgMu19->getSF(muon.getPt(), muon.getEta());
+                // evtwt *= myScaleFactor_trgMu19->getSF(muon.getPt(), muon.getEta());
             } else {
-                evtwt *= myScaleFactor_trgMu22->getSF(muon.getPt(), muon.getEta());
+                evtwt *= myScaleFactor_trgMu22->get_ScaleFactor(muon.getPt(), muon.getEta());
             }
 
             // muon ID SF
-            evtwt *= myScaleFactor_id->getSF(muon.getPt(), muon.getEta());
+            evtwt *= myScaleFactor_id->get_ScaleFactor(muon.getPt(), muon.getEta());
 
             // Pileup Reweighting
             evtwt *= lumi_weights->weight(event.getNPU());
