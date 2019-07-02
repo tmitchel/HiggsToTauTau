@@ -316,7 +316,7 @@ int main(int argc, char *argv[]) {
 
             // pileup reweighting
             if (!doAC && !isMG) {
-                evtwt *= lumi_weights->weight(event.getNPV());
+                // evtwt *= lumi_weights->weight(event.getNPV());
             }
 
             // generator weights

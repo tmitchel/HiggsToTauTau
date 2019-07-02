@@ -71,7 +71,8 @@ void FakeFractions::fillFraction(int cat, std::string name, double var1, double 
     hist = frac_w.at(cat);
   } else if (name == "TTJ") {
     hist = frac_tt.at(cat);
-  } else if (name == "embedded" || name == "TTT" || name == "VVT") {
+//   } else if (name == "embedded" || name == "TTT" || name == "VVT") {
+  } else if (name == "ZTT" || name == "TTT" || name == "VVT") {
     hist = frac_real.at(cat);
   }
   hist->Fill(var1, var2, weight);

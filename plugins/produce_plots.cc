@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
   std::map<std::string, std::vector<float>> vars = {
       // {"trigger", {4, -0.5, 3.5}},
       {"t1_decayMode", {11, -0.5, 10.5}},
-      {"m_sv", {30, 50, 180}},
+      {"m_sv", {30, 0, 400}},
       {"t1_pt", {30, 30, 200}},
       {"el_pt", {30, 30, 200}},
       {"mu_pt", {30, 30, 200}},

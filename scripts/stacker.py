@@ -38,7 +38,7 @@ gROOT.SetBatch(kTRUE)
 def applyStyle(name, hist, leg):
     overlay = 0
     print name, hist.Integral()
-    if name == 'embedded':
+    if name == 'embedded' or name == 'ZTT':
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
         hist.SetName("embedded")
         hist.SetFillColor(TColor.GetColor("#f9cd66"))
@@ -89,7 +89,7 @@ def applyStyle(name, hist, leg):
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#0000FF'))
         overlay = 3
-    elif name == 'ggH125':
+    elif name == 'ggH125' or name == 'ggh125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#0000FF'))
@@ -217,6 +217,7 @@ def fillStackAndLegend(data, vbf, ggh, ggh_ps, ggh_int, holder, leg):
     leg.AddEntry(ggh_ps, 'ggH PS Higgs(125)x100', 'l')
     # leg.AddEntry(ggh_int, 'ggH INT Higgs(125)x50', 'l')
     leg.AddEntry(filter(lambda x: x.GetName() == 'embedded', holder)[0], 'ZTT', 'f')
+    # leg.AddEntry(filter(lambda x: x.GetName() == 'ZTT', holder)[0], 'ZTT', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'ZL', holder)[0], 'ZL', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'jet fakes', holder)[0], 'jetFakes', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'TTT', holder)[0], 'TTT', 'f')
@@ -239,8 +240,8 @@ def createLegend():
 
 def formatPull(pull):
     pull.SetTitle('')
-    pull.SetMaximum(2)
-    pull.SetMinimum(0)
+    pull.SetMaximum(2.)
+    pull.SetMinimum(0.)
     pull.GetXaxis().SetTitle(titles[args.var])
     pull.SetMarkerStyle(21)
     pull.GetXaxis().SetTitleSize(0.18)
@@ -366,12 +367,12 @@ def main():
     can = createCanvas()
     inStack = formatOther(other, inStack)
 
-    vbf.Scale(pw_vbf.Integral()/vbf.Integral())
-    ggh.Scale(pw_ggh.Integral()/ggh.Integral())
-    if ggh_ps.Integral() > 0:
-      ggh_ps.Scale(pw_ggh.Integral()/ggh_ps.Integral())
-    if ggh_int.Integral() > 0:
-      ggh_int.Scale(pw_ggh.Integral()/ggh_int.Integral())
+    # vbf.Scale(pw_vbf.Integral()/vbf.Integral())
+    # ggh.Scale(pw_ggh.Integral()/ggh.Integral())
+    # if ggh_ps.Integral() > 0:
+    #   ggh_ps.Scale(pw_ggh.Integral()/ggh_ps.Integral())
+    # if ggh_int.Integral() > 0:
+    #   ggh_int.Scale(pw_ggh.Integral()/ggh_int.Integral())
 
 
     stack, leg = fillStackAndLegend(data, vbf, ggh, ggh_ps, ggh_int, inStack, leg)
@@ -471,7 +472,7 @@ def main():
     line1.Draw()
     line2.Draw()
 
-    can.SaveAs('Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat, args.year))
+    can.SaveAs('Output/plots/log_{}_{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat, args.year))
 
 
 if __name__ == "__main__":

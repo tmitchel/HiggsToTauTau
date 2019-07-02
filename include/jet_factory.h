@@ -38,7 +38,8 @@ class jet_factory {
     Float_t bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1;
     Float_t bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2;
     Float_t topQuarkPt1, topQuarkPt2, temp_njets;
-    Float_t Nbtag, nbtag, njetspt20, njets;
+    Float_t Nbtag, njetspt20, njets;
+    Int_t nbtag;
     std::vector<jet> plain_jets, btag_jets;
 
    public:
@@ -80,18 +81,19 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst) {
     std::string btag_string = "2016";
     if (era == 2016) {
         btag_string = "2016";
-        input->SetBranchAddress("jetVeto30", &nbtag);
+        input->SetBranchAddress("jetVeto30", &njets);
         input->SetBranchAddress("jetVeto20", &njetspt20);
     } else if (era == 2017) {
         btag_string = "2017";
-        input->SetBranchAddress("jetVeto30WoNoisyJets", &nbtag);
+        input->SetBranchAddress("jetVeto30WoNoisyJets", &njets);
         input->SetBranchAddress("jetVeto32WoNoisyJets", &njetspt20);
     } else if (era == 2018) {
         btag_string = "2018";
-        input->SetBranchAddress("jetVeto30", &nbtag);
+        input->SetBranchAddress("jetVeto30", &njets);
         input->SetBranchAddress("jetVeto20", &njetspt20);
     }
 
+    input->SetBranchAddress("nbtag", &nbtag);
     input->SetBranchAddress("j1pt", &jpt_1);
     input->SetBranchAddress("j1eta", &jeta_1);
     input->SetBranchAddress("j1phi", &jphi_1);

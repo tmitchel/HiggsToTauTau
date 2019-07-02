@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
     // get variables from file
     Int_t is_antiTauIso, OS;
     Float_t vis_mass, mjj, m_sv, njets, nbjets, MT, weight;
+    Float_t higgs_pT, t1_pt;
 
     tree->SetBranchAddress("evtwt", &weight);
     tree->SetBranchAddress("vis_mass", &vis_mass);
@@ -64,6 +65,9 @@ int main(int argc, char *argv[]) {
     tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
     tree->SetBranchAddress("OS", &OS);
     tree->SetBranchAddress("mt", &MT);
+
+    tree->SetBranchAddress("higgs_pT", &higgs_pT);
+    tree->SetBranchAddress("t1_pt", &t1_pt);
 
     for (auto i = 0; i < tree->GetEntries(); i++) {
       tree->GetEntry(i);
@@ -77,18 +81,19 @@ int main(int argc, char *argv[]) {
         continue;
       }
 
-      // event selection
-      if (nbjets > 0) {
-        continue;
-      }
+      // // event selection
+      // if (nbjets > 0) {
+      //   continue;
+      // }
       cat0 = (njets == 0);
-      cat1 = (njets == 1 || (njets > 1 && (mjj < 300)));
-      cat2 = (njets > 1 && mjj > 300);
+      cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50 || t1_pt < 40)));
+      cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50 && t1_pt > 40);
 
       if (is_antiTauIso) {
         if (!(name == "W" || name == "ZJ" || name == "VVJ" ||
               name == "TTJ" ||
-              name == "embedded" || name == "TTT" || name == "VVT" ||
+//               name == "embedded" || name == "TTT" || name == "VVT" ||
+              name == "ZTT" || name == "TTT" || name == "VVT" ||
               name == "Data")) {
           continue;
         }

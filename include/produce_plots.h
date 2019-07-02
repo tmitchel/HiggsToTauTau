@@ -123,13 +123,13 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
       continue;
     }
 
-    // event selection
-    if (nbjets > 0) {
-      continue;
-    }
+    // // event selection
+    // if (nbjets > 0) {
+    //   continue;
+    // }
     cat0 = (njets == 0);
-    cat1 = (njets == 1 || (njets > 1 && (mjj < 300)));
-    cat2 = (njets > 1 && mjj > 300);
+    cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || get_var("higgs_pT") < 50 || get_var("t1_pt") < 40)));
+    cat2 = (njets > 1 && mjj > 300 && get_var("higgs_pT") > 50 && get_var("t1_pt") > 40);
 
     // find the correct MELA ggH/Higgs pT bin for this event
     auto ACcat = get_category(D0_ggH);

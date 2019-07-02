@@ -181,29 +181,29 @@ int main(int argc, char *argv[]) {
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 6.82;
+                evtwt = 6.829;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 2.099;
+                evtwt = 2.093;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 0.689;
+                evtwt = 0.687;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 0.690;
+                evtwt = 0.983;
             } else {
-                evtwt = 25.44;
+                evtwt = 25.413;
             }
         }
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.457;
+                evtwt = 0.486;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 0.467;
+                evtwt = 0.533;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 0.480;
+                evtwt = 0.492;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 0.393;
+                evtwt = 0.408;
             } else {
-                evtwt = 1.418;
+                evtwt = 1.470;
             }
         }
 
@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        if (tau.getPt() < 30 || fabs(tau.getEta()) < 2.3) {
+        if (tau.getPt() < 30 || fabs(tau.getEta()) > 2.3) {
             continue;
         }
 
@@ -413,10 +413,10 @@ int main(int argc, char *argv[]) {
 
         fout->cd();
 
-        // b-jet veto
-        if (jets.getNbtag() > 0) {
-            continue;
-        }
+        // // b-jet veto
+        // if (jets.getNbtag() > 0) {
+        //     continue;
+        // }
 
         // create regions
         bool signalRegion = (tau.getTightIsoMVA() && muon.getIso() < 0.15);
@@ -426,8 +426,8 @@ int main(int argc, char *argv[]) {
 
         // create categories
         bool zeroJet = (jets.getNjets() == 0);
-        bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300));
-        bool vbfCat = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
+        bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && (jets.getDijetMass() < 300 || Higgs.Pt() < 50 || event.getPtSV() < 40)));
+        bool vbfCat = (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() > 50 && event.getPtSV() > 40);
         bool VHCat = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
         // only keep the regions we need
