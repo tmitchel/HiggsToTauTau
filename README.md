@@ -2,7 +2,7 @@
 
 [![pipeline status](https://gitlab.cern.ch/KState-HEP-HTT/ltau_analyzers/badges/master/pipeline.svg)](https://gitlab.cern.ch/KState-HEP-HTT/ltau_analyzers/commits/master)
 
-This code is used for the study of a Higgs boson decaying to a pair of tau leptons. The repository includes four analyzers, corresponding to the four final states being studied: electron-tau (et), muon-tau (mt), tau-tau (tt), and electron-muon (emu).
+This code is used for the study of a Higgs boson decaying to a pair of tau leptons. The repository includes analyzers, corresponding to the final states being studied: electron-tau (et), muon-tau (mt), and electron-muon (emu).
 
 ##### Table of Contents
 [Organization](#organization) <br/>
@@ -25,7 +25,6 @@ This code is used for the study of a Higgs boson decaying to a pair of tau lepto
   - `plugins`: This directory contains all C++ plugins using the library. This is primarily the analyzers and template makers, but any code   drawing on the library can be placed here.
   - `scripts`: All short scripts are stored here. Plotting scripts and other small scripts can be stored in this directory.
   - `Output`: All outputs are stored in the directory. Outputs include plots, TTrees, and templates for Higgs Combine. These are all stored in subdirectories within the `Output` directory.
-  - `.travis`: Contains the script used for testing with Travis CI. Probably just don't touch this one unless you know what you're doing (I barely do..)
 - Spare Files
   - `build`: A simple bash script for compiling a plugin with the correct libraries (ROOT). The script takes two ordered arguments: the plugin to compile and the name of the output binary. The binary should be copied to your $HOME/bin directory
   - `automate_analysis.py`: Used for analyzing an entire directory. Explained more later
@@ -36,10 +35,10 @@ This code is used for the study of a Higgs boson decaying to a pair of tau lepto
 ## File Locations
 
 Here are the locations of all currently used files. Directory names should be obvious
-- /hdfs/store/user/tmitchel/etau2016_official_v3-mela/etau2016_official_v3-hadd/
-- /hdfs/store/user/tmitchel/etau2017_official_v3-mela/etau2017_official_v3-hadd/
-- /hdfs/store/user/tmitchel/mutau2016_official_v3-mela/mutau2016_official_v3-hadd/
-- /hdfs/store/user/tmitchel/mutau2017_official_v3-mela/mutau2017_official_v3-hadd/
+- /hdfs/store/user/tmitchel/etau2016_legacy-v1_mela/
+- /hdfs/store/user/tmitchel/etau2017_legacy-v1_mela/
+- /hdfs/store/user/tmitchel/mutau2016_legacy-v1_mela/
+- /hdfs/store/user/tmitchel/mutau2017_legacy-v1_mela/
 
 <a name="ofiles"/>
 
@@ -140,7 +139,7 @@ cmsrel CMSSW_9_4_0 && cd CMSSW_9_4_0/src && cmsenv
         ```
     - Produce the histograms
         ```
-        bin/produce-plots-v2 --suf Workshop_v1p9 -d /hdfs/store/user/tmitchel/etau2017_official_v1p9-analyzed -y 2017 -t etau_tree -f Output/fake_fractions/et2017_v1p9.root
+        bin/produce-plots --suf Workshop_v1p9 -d /hdfs/store/user/tmitchel/etau2017_official_v1p9-analyzed -y 2017 -t etau_tree -f Output/fake_fractions/et2017_v1p9.root
         ```
     This will create a root file named `Output/templates/et2017_Workshop_v1p9.root` containing the histograms. The root of this file will have a single directory named 'plots'. Inside the 'plots' directory, there will be a directory for each variable in the plot list. Inside each of these directories there will be a directory for each defined category (at least '0jet', 'boosted', 'vbf'). These directories contain the actual histograms. The arguments provided are `-d` to give the input directory, `-y` to provide the year, `-t` to give the treename, `--suf` to give a suffix to the output file name, and `-f` to provide the the root file containing the fake fractions.
 9. (Optional) Plot histograms from the previously created template
@@ -172,10 +171,12 @@ Each physics object has a module containing all relevant data. All modules are d
 
 The `plugins` directory contains many useful C++ plugins for analyzing data, making plotting templates, or making Combine templates. These plugins are all compiled using the `build` script discussed in the "Compiling Plugins" section. A list of currently maintained plugins is shown below:
 
-- `et_analyzer2016.cc`: Used to analyze the 2016 etau channel and produce slimmed trees. Has the capability to do anomolous couplings. Partial systematics included. 
-- `et_analyzer2017.cc`: Used to analyze the 2017 etau channel and produce slimmed trees. AC capability is not yet implemented. Partail systematics included.
-- `mt_analyzer2016.cc`: Used to analyze the 2016 mutau channel and produce slimmed trees. AC capability is not yet implemented. Partial systematics included. 
-- `mt_analyzer2017.cc`: Used to analyze the 2017 mutau channel and produce slimmed trees. AC capability is not yet implemented. Partail systematics included.
+- `et_analyzer2016.cc`: Used to analyze the 2016 etau channel and produce slimmed trees. Partial systematics included. 
+- `et_analyzer2017.cc`: Used to analyze the 2017 etau channel and produce slimmed trees. Partail systematics included.
+- `et_analyzer2018.cc`: Used to analyze the 2018 etau channel and produce slimmed trees. Partail systematics included.
+- `mt_analyzer2016.cc`: Used to analyze the 2016 mutau channel and produce slimmed trees. Partial systematics included. 
+- `mt_analyzer2017.cc`: Used to analyze the 2017 mutau channel and produce slimmed trees. Partail systematics included.
+- `mt_analyzer2018.cc`: Used to analyze the 2018 mutau channel and produce slimmed trees. Partail systematics included.
 - `plugins/produce_plots.cc`: Produce templates for plotting with fake factor. No systematics incuded.
 - `plugins/produce_templates.cc`: Produce Combine templates using fake factor. Fake factor systematics are implemented. 
 
@@ -194,5 +195,5 @@ This example compiles the electron-tau channel analyzer to make an executable na
 <a name="roc"/>
 
 ## ROC curves
-ROC curves can easily be produced by changing the ROOT macro `plotRocCurves.c` and then running with CINT. 
+ROC curves can easily be produced by changing the ROOT macro `plotRocCurves.C` and then running with CINT. 
 
