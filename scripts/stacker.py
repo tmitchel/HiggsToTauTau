@@ -175,6 +175,8 @@ titles = {
     'hjj_pT': 'pT(Higgs,j1,j2) [GeV]',
     'higgs_pT': 'pT(Higgs) [GeV]',
     'VBF_MELA': 'D_{2jet}^{ggH}',
+    'MELA_D2j': 'D_{2jet}^{ggH}',
+    'D0_ggH': 'D_{0-}^{ggH}',
     'super': 'super',
     'dPhijj': 'dPhijj',
     'lt_dphi': 'lt_dphi',

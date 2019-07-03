@@ -20,6 +20,7 @@ class Sample_Template : public TemplateTool {
   void init_systematics();
   void fill_histograms(std::shared_ptr<TTree>, bool, std::string);
   std::string get_category(double);
+  std::string get_category(double, double);
   void convert_data_to_fake(std::string, double, double, int);
   void write_histograms(bool, std::string);
 
@@ -35,7 +36,7 @@ class Sample_Template : public TemplateTool {
   Float_t nbjets, njets, mjj;                                                                   // selection
   Float_t weight, acWeightVal;                                                                  // weights
   Float_t lep_iso, mt, t1_decayMode, vis_mass, t1_pt;                                           // for fake factor
-  Float_t higgs_pT, m_sv, NN_disc, D0_VBF, D0_ggH, DCP_VBF, DCP_ggH, VBF_MELA, j1_phi, j2_phi;  // observables
+  Float_t higgs_pT, m_sv, NN_disc, D0_VBF, D0_ggH, DCP_VBF, DCP_ggH, MELA_D2j, j1_phi, j2_phi, dPhijj;  // observables
 };
 
 // Sample_Template constructor. Loads all of the basic information from the parent TemplateTool class.
@@ -56,7 +57,7 @@ Sample_Template::Sample_Template(std::string channel_prefix, std::string year, s
       bins_l2{0, 1, 10, 11},
       bins_hpt{0, 100, 150, 200, 250, 300, 5000},
       // bins_vbf_var1{300, 500, 10000},  // real mjj
-      bins_vbf_var1{0, 0.25, 0.5, 0.75, 1.},  // actually VBF MELA
+      bins_vbf_var1{0., 0.5, 1.},  // actually VBF MELA
 
       // y-axis
       bins_lpt{0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400},
@@ -66,7 +67,7 @@ Sample_Template::Sample_Template(std::string channel_prefix, std::string year, s
       // bins_vbf_var2{0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5,  0.6, 0.65, 0.7, 0.8},  // Perceptron
       // bins_vbf_var2{0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 1.},  // NN including m_sv et2016/mt2017
       // bins_vbf_var2{0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9, 0.95, 1.}, // mt2016
-      bins_vbf_var2{0, 0.25, 0.5, 0.75, 1.} {
+      bins_vbf_var2{0, 90., 140., 10000} {
   for (auto cat : categories) {
     fout->cd(cat.c_str());
 
@@ -160,7 +161,8 @@ void Sample_Template::set_branches(std::shared_ptr<TTree> tree, std::string acWe
   tree->SetBranchAddress("is_antiTauIso", &is_antiTauIso);
   tree->SetBranchAddress("OS", &OS);
   tree->SetBranchAddress("t1_pt", &t1_pt);
-  tree->SetBranchAddress("VBF_MELA", &VBF_MELA);
+  tree->SetBranchAddress("MELA_D2j", &MELA_D2j);
+  tree->SetBranchAddress("dPhijj", &dPhijj);
   tree->SetBranchAddress("j1_phi", &j1_phi);
   tree->SetBranchAddress("j2_phi", &j2_phi);
   tree->SetBranchAddress("NN_disc", &NN_disc);
@@ -195,10 +197,11 @@ void Sample_Template::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst =
     }
 
     // choose observables
-    vbf_var1 = VBF_MELA;
+    vbf_var1 = MELA_D2j;
     vbf_var2 = NN_disc;
     vbf_var3 = D0_ggH;
     // vbf_var1 = mjj;
+    vbf_var2 = m_sv;
     // vbf_var3 = dPhijj;
     // vbf_var3 = TMath::ACos(TMath::Cos(j1_phi - j2_phi));
 
@@ -211,7 +214,7 @@ void Sample_Template::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst =
     cat2 = (njets > 1 && mjj > 300);
 
     // find the correct MELA ggH/Higgs pT bin for this event
-    auto ACcat = get_category(vbf_var3);
+    auto ACcat = get_category(vbf_var3, higgs_pT);
 
     // fill histograms
     if (is_signal) {
@@ -325,20 +328,39 @@ void Sample_Template::load_fake_fractions(std::string file_name) {
 // caller.
 std::string Sample_Template::get_category(double vbf_var3) {
   double edge = 1. / 6.;
-  if (vbf_var3 >= 0 && vbf_var3 <= 1. * edge) {
+  if (vbf_var3 >= 0 && vbf_var3 <= .31) {
     return channel_prefix + "_vbf_ggHMELA_bin1";
-  } else if (vbf_var3 <= 2. * edge) {
+  } else if (vbf_var3 <= .62) {
     return channel_prefix + "_vbf_ggHMELA_bin2";
-  } else if (vbf_var3 <= 3. * edge) {
+  } else if (vbf_var3 <= 1.) {
     return channel_prefix + "_vbf_ggHMELA_bin3";
-  } else if (vbf_var3 <= 4. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin4";
-  } else if (vbf_var3 <= 5. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin5";
-  } else if (vbf_var3 <= 6. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin6";
   } else {
     return "skip";
+  }
+}
+
+std::string Sample_Template::get_category(double vbf_var3, double vbf_var4) {
+  double edge = 1. / 6.;
+  if (vbf_var4 <= 200) {
+    if (vbf_var3 >= 0 && vbf_var3 <= .31) {
+      return channel_prefix + "_vbf_ggHMELA_bin1";
+    } else if (vbf_var3 <= .62) {
+      return channel_prefix + "_vbf_ggHMELA_bin2";
+    } else if (vbf_var3 <= 1.) {
+      return channel_prefix + "_vbf_ggHMELA_bin3";
+    } else {
+      return "skip";
+    }
+  } else {
+    if (vbf_var3 >= 0 && vbf_var3 <= .31) {
+      return channel_prefix + "_vbf_ggHMELA_bin4";
+    } else if (vbf_var3 <= .62) {
+      return channel_prefix + "_vbf_ggHMELA_bin5";
+    } else if (vbf_var3 <= 1.) {
+      return channel_prefix + "_vbf_ggHMELA_bin6";
+    } else {
+      return "skip";
+    }
   }
 }
 
