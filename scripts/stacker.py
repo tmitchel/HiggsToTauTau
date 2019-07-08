@@ -70,10 +70,11 @@ def applyStyle(name, hist, leg):
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#FF0000'))
         overlay = 2
-    elif name == 'GGH2Jets_pseudoscalar_M125':
+    elif name == 'GGH2Jets_pseudoscalar_M125' or name == 'ggh_madgraph_PS_twojet':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
-        hist.SetLineColor(TColor.GetColor('#00FF00'))
+        hist.SetLineColor(TColor.GetColor('#0000FF'))
+        hist.SetLineStyle(7)
         overlay = 9
     elif name == 'VBF125':
         overlay = -2
@@ -108,7 +109,7 @@ def createCanvas():
     pad1.SetPad(0, .3, 1, 1)
     pad1.SetTopMargin(.1)
     pad1.SetBottomMargin(0.02)
-#    pad1.SetLogy()
+    # pad1.SetLogy()
     pad1.SetTickx(1)
     pad1.SetTicky(1)
 
@@ -210,7 +211,7 @@ def fillStackAndLegend(data, vbf, ggh, ggh_ps, ggh_int, holder, leg):
     leg.AddEntry(data, 'Data', 'lep')
     leg.AddEntry(vbf, 'VBF Higgs(125)x100', 'l')
     leg.AddEntry(ggh, 'ggH Higgs(125)x100', 'l')
-    # leg.AddEntry(ggh_ps, 'ggH PS Higgs(125)x50', 'l')
+    leg.AddEntry(ggh_ps, 'ggH PS Higgs(125)x50', 'l')
     # leg.AddEntry(ggh_int, 'ggH INT Higgs(125)x50', 'l')
     leg.AddEntry(filter(lambda x: x.GetName() == 'embedded', holder)[0], 'ZTT', 'f')
     leg.AddEntry(filter(lambda x: x.GetName() == 'ZL', holder)[0], 'ZL', 'f')
@@ -387,8 +388,8 @@ def main():
     ggh.Draw('same hist e')
     # ggh_int.Scale(50)
     # ggh_int.Draw('same hist e')
-    # ggh_ps.Scale(50)
-    # ggh_ps.Draw('same hist e')
+    ggh_ps.Scale(50)
+    ggh_ps.Draw('same hist e')
     leg.Draw()
 
     ll = TLatex()
