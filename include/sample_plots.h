@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include "./TemplateTool.h"
+#include "TMath.h"
 
 // Sample_Plots inherits from the TemplateTool, which contains basic information like
 // ff systematic names, the acWeight map, and the names of the categories for
@@ -91,6 +92,21 @@ Float_t Sample_Plots::get_var(std::string var) {
     return D0_ggH;
   } else if (var == "t1_pt") {
     return t1_pt;
+  } else if (var == "dPhijj") {
+   double dPhijj(0.);
+   if (variables.at("j1_eta") > variables.at("j2_eta")) {
+     dPhijj = variables.at("j1_phi") - variables.at("j2_phi");
+   } else {
+     dPhijj = variables.at("j2_phi") - variables.at("j1_phi");
+   }
+
+   if (dPhijj > TMath::Pi()) {
+     dPhijj -= 2 * TMath::Pi();
+   } else if (dPhijj < -1 * TMath::Pi()) {
+     dPhijj += 2 * TMath::Pi();
+   }
+
+    return fabs(dPhijj);
   } else {
     return variables.at(var);
   }
