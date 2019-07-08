@@ -86,7 +86,7 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst) {
     } else if (era == 2017) {
         btag_string = "2017";
         input->SetBranchAddress("jetVeto30WoNoisyJets", &njets);
-        input->SetBranchAddress("jetVeto32WoNoisyJets", &njetspt20);
+        input->SetBranchAddress("jetVeto20WoNoisyJets", &njetspt20);
     } else if (era == 2018) {
         btag_string = "2018";
         input->SetBranchAddress("jetVeto30", &njets);
