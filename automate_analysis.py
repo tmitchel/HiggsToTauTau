@@ -141,7 +141,7 @@ for ifile in fileList:
     elif 'ZH' in sample:
         mass = sample.split('ZH')[-1]
         names = ['ZH'+mass]
-    elif 'ttH' in sample:
+    elif 'ttH' in sample or 'tth' in sample:
         mass = sample.split('ttH')[-1]
         names = ['ttH'+mass]
     elif 'embed' in sample:
@@ -160,7 +160,7 @@ for ifile in fileList:
         names = ['ZH125']
         options.ACsample = True
     else: 
-        names = ['VVJ', 'VVT', 'VVL']
+        names = ['VVJ', 'VVT']
 
     callstring = './%s -p %s -s %s -d %s ' % (options.exe, tosample, sample, options.output_dir)
     if options.ACsample:
