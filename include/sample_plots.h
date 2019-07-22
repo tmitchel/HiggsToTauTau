@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include "./TemplateTool.h"
+#include "TMath.h"
 
 // Sample_Plots inherits from the TemplateTool, which contains basic information like
 // ff systematic names, the acWeight map, and the names of the categories for
@@ -91,6 +92,21 @@ Float_t Sample_Plots::get_var(std::string var) {
     return D0_ggH;
   } else if (var == "t1_pt") {
     return t1_pt;
+  } else if (var == "dPhijj") {
+   double dPhijj(0.);
+   if (variables.at("j1_eta") > variables.at("j2_eta")) {
+     dPhijj = variables.at("j1_phi") - variables.at("j2_phi");
+   } else {
+     dPhijj = variables.at("j2_phi") - variables.at("j1_phi");
+   }
+
+   if (dPhijj > TMath::Pi()) {
+     dPhijj -= 2 * TMath::Pi();
+   } else if (dPhijj < -1 * TMath::Pi()) {
+     dPhijj += 2 * TMath::Pi();
+   }
+
+    return fabs(dPhijj);
   } else {
     return variables.at(var);
   }
@@ -165,14 +181,20 @@ void Sample_Plots::fill_histograms(std::shared_ptr<TTree> tree, std::string acWe
 // are used with the input variables to fill the fake histogram with the correct weight. If
 // the "syst" parameter is passed, read the weight for the provided systematic shift.
 void Sample_Plots::convert_data_to_fake(std::string cat, double var1, std::string j) {
+  // fake fractions only for 0jet, boosted, VBF
+  std::string get_cat = cat;
+  if (cat.find("vbf_ggHMELA") != std::string::npos) {
+    get_cat = channel_prefix + "_vbf";
+  }
+
   fout->cd();
-  auto bin_x = fake_fractions.at(cat + "_data")->GetXaxis()->FindBin(vis_mass);
-  auto bin_y = fake_fractions.at(cat + "_data")->GetYaxis()->FindBin(njets);
+  auto bin_x = fake_fractions.at(get_cat + "_data")->GetXaxis()->FindBin(vis_mass);
+  auto bin_y = fake_fractions.at(get_cat + "_data")->GetYaxis()->FindBin(njets);
   double fakeweight;
   fakeweight = ff_weight->value({t1_pt, t1_decayMode, njets, vis_mass, mt, lep_iso,
-                                 fake_fractions.at(cat + "_frac_w")->GetBinContent(bin_x, bin_y),
-                                 fake_fractions.at(cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
-                                 fake_fractions.at(cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)});
+                                 fake_fractions.at(get_cat + "_frac_w")->GetBinContent(bin_x, bin_y),
+                                 fake_fractions.at(get_cat + "_frac_tt")->GetBinContent(bin_x, bin_y),
+                                 fake_fractions.at(get_cat + "_frac_qcd")->GetBinContent(bin_x, bin_y)});
   all_fakes.at(j).at(cat)->Fill(var1, weight * fakeweight);
 }
 
@@ -189,6 +211,11 @@ void Sample_Plots::load_fake_fractions(std::string file_name) {
   auto ifile = new TFile(file_name.c_str(), "READ");
   fout->cd();
   for (auto cat : categories) {
+    // fake fractions only for 0jet, boosted, VBF
+    if (cat.find("vbf_ggHMELA") != std::string::npos) {
+      continue;
+    }
+
     fake_fractions[cat + "_data"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "data_" + cat).c_str())->Clone());
     fake_fractions[cat + "_frac_w"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_w_" + cat).c_str())->Clone());
     fake_fractions[cat + "_frac_tt"] = reinterpret_cast<TH2F *>(ifile->Get((cat + "/" + "frac_tt_" + cat).c_str())->Clone());
@@ -206,17 +233,17 @@ void Sample_Plots::load_fake_fractions(std::string file_name) {
 std::string Sample_Plots::get_category(double vbf_var3) {
   double edge = 1. / 6.;
   if (vbf_var3 >= 0 && vbf_var3 <= 1. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin1_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin1";
   } else if (vbf_var3 <= 2. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin2_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin1";
   } else if (vbf_var3 <= 3. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin3_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin1";
   } else if (vbf_var3 <= 4. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin4_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin1";
   } else if (vbf_var3 <= 5. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin5_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin1";
   } else if (vbf_var3 <= 6. * edge) {
-    return channel_prefix + "_vbf_ggHMELA_bin6_NN_bin1";
+    return channel_prefix + "_vbf_ggHMELA_bin1";
   } else {
     return "skip";
   }
@@ -321,6 +348,7 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
       {"ME_bkg1", 0},
       {"ME_bkg2", 0},
       {"VBF_MELA", 0},
+      {"MELA_D2j", 0},
       {"higgs_pT", 0},
       {"higgs_m", 0},
       {"hjj_pT", 0},
@@ -386,7 +414,6 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
   tree->SetBranchAddress("Dbkg_ggH", &variables.at("Dbkg_ggH"));
   tree->SetBranchAddress("D0_VBF", &variables.at("D0_VBF"));
   tree->SetBranchAddress("DCP_VBF", &variables.at("DCP_VBF"));
-  tree->SetBranchAddress("D0_ggH", &variables.at("D0_ggH"));
   tree->SetBranchAddress("DCP_ggH", &variables.at("DCP_ggH"));
   tree->SetBranchAddress("Phi", &variables.at("Phi"));
   tree->SetBranchAddress("Phi1", &variables.at("Phi1"));
@@ -403,6 +430,7 @@ void Sample_Plots::set_branches(std::shared_ptr<TTree> tree, std::string acWeigh
   tree->SetBranchAddress("ME_bkg1", &variables.at("ME_bkg1"));
   tree->SetBranchAddress("ME_bkg2", &variables.at("ME_bkg2"));
   tree->SetBranchAddress("VBF_MELA", &variables.at("VBF_MELA"));
+  tree->SetBranchAddress("MELA_D2j", &variables.at("MELA_D2j"));
   tree->SetBranchAddress("higgs_pT", &variables.at("higgs_pT"));
   tree->SetBranchAddress("higgs_m", &variables.at("higgs_m"));
   tree->SetBranchAddress("hjj_pT", &variables.at("hjj_pT"));
