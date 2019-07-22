@@ -123,6 +123,9 @@ TemplateTool::TemplateTool(std::string channel_prefix, std::string year, std::st
     ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ");
   } else if (year == "2016") {
     ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2016/SM2016_ML/tight/" + channel_prefix + "/fakeFactors_tight.root").c_str(), "READ");
+  } else if (year == "2018") {
+    // data2018/SM2018/tight/vloose/mt/fakeFactors.root
+    ff_file = new TFile(("${CMSSW_BASE}/src/HTTutilities/Jet2TauFakes/data2018/SM2018/tight/vloose/" + channel_prefix + "/fakeFactors.root").c_str(), "READ");
   } else {
     std::cerr << "Bad year" << std::endl;
   }
