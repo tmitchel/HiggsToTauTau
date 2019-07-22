@@ -81,13 +81,13 @@ int main(int argc, char *argv[]) {
         continue;
       }
 
-      // // event selection
-      // if (nbjets > 0) {
-      //   continue;
-      // }
+      // event selection
+      if (nbjets > 0) {
+        continue;
+      }
       cat0 = (njets == 0);
-      cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50 || t1_pt < 40)));
-      cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50 && t1_pt > 40);
+      cat1 = (njets == 1 || (njets > 1 && (mjj < 300)));
+      cat2 = (njets > 1 && mjj > 300);
 
       if (is_antiTauIso) {
         if (!(name == "W" || name == "ZJ" || name == "VVJ" ||

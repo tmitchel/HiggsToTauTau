@@ -205,13 +205,15 @@ void Sample_Template::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst =
     vbf_var1 = mjj;
     vbf_var2 = m_sv;
 
-    // // event selection
-    // if (nbjets > 0) {
-    //   continue;
-    // }
+    // event selection
+    if (nbjets > 0) {
+      continue;
+    }
     cat0 = (njets == 0);
-    cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50 || t1_pt < 40)));
-    cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50 && t1_pt > 40);
+//     cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50 || t1_pt < 40)));
+//     cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50 && t1_pt > 40);
+    cat1 = (njets == 1 || (njets > 1 && (mjj < 300)));
+    cat2 = (njets > 1 && mjj > 300);
 
     // find the correct MELA ggH/Higgs pT bin for this event
     auto ACcat = get_category(vbf_var3);
