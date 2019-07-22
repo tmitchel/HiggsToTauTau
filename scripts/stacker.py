@@ -77,14 +77,12 @@ def applyStyle(name, hist, leg):
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#00AAFF'))
         overlay = 9
-    elif name == 'VBF125':
-        overlay = -2
-    elif (name == 'GGH2Jets_sm_M125' or name == 'ggh_madgraph_twojet') and 'vbf' in args.cat:
+    elif name.lower() == 'vbf125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
-        hist.SetLineColor(TColor.GetColor('#0000FF'))
-        overlay = 3
-    elif (name == 'ggh_madgraph' or name == 'JHU_GGH2Jets_sm_M125') and not 'vbf' in args.cat:
+        hist.SetLineColor(TColor.GetColor('#FF0000'))
+        overlay = -2
+    elif (name == 'GGH2Jets_sm_M125' or name == 'ggh_madgraph_twojet' or name == 'ggh125_madgraph_twojet_nominal_ggH125_output' or name == 'ggh125_madgraph_twojet_nominal_v1_ggH125_output'):
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
         hist.SetLineColor(TColor.GetColor('#0000FF'))
@@ -109,7 +107,7 @@ def createCanvas():
     pad1.SetPad(0, .3, 1, 1)
     pad1.SetTopMargin(.1)
     pad1.SetBottomMargin(0.02)
-    pad1.SetLogy()
+#    pad1.SetLogy()
     pad1.SetTickx(1)
     pad1.SetTicky(1)
 
@@ -214,7 +212,7 @@ def fillStackAndLegend(data, vbf, ggh, ggh_ps, ggh_int, holder, leg):
     leg.AddEntry(data, 'Data', 'lep')
     leg.AddEntry(vbf, 'VBF Higgs(125)x100', 'l')
     leg.AddEntry(ggh, 'ggH Higgs(125)x100', 'l')
-    leg.AddEntry(ggh_ps, 'ggH PS Higgs(125)x100', 'l')
+    # leg.AddEntry(ggh_ps, 'ggH PS Higgs(125)x100', 'l')
     # leg.AddEntry(ggh_int, 'ggH INT Higgs(125)x50', 'l')
     leg.AddEntry(filter(lambda x: x.GetName() == 'embedded', holder)[0], 'ZTT', 'f')
     # leg.AddEntry(filter(lambda x: x.GetName() == 'ZTT', holder)[0], 'ZTT', 'f')
@@ -240,8 +238,8 @@ def createLegend():
 
 def formatPull(pull):
     pull.SetTitle('')
-    pull.SetMaximum(2.)
-    pull.SetMinimum(0.)
+    pull.SetMaximum(1.5)
+    pull.SetMinimum(0.5)
     pull.GetXaxis().SetTitle(titles[args.var])
     pull.SetMarkerStyle(21)
     pull.GetXaxis().SetTitleSize(0.18)
@@ -290,13 +288,13 @@ def sigmaLines(data):
         data.GetBinWidth(data.GetNbinsX())
 
     ## high line
-    line1 = TLine(low, 1.5, high, 1.5)
+    line1 = TLine(low, 1.2, high, 1.2)
     line1.SetLineWidth(1)
     line1.SetLineStyle(3)
     line1.SetLineColor(kBlack)
 
     ## low line
-    line2 = TLine(low, 0.5, high, 0.5)
+    line2 = TLine(low, 0.8, high, 0.8)
     line2.SetLineWidth(1)
     line2.SetLineStyle(3)
     line2.SetLineColor(kBlack)
@@ -331,7 +329,7 @@ def main():
     ggh = vbf.Clone()
     ggh_ps = vbf.Clone()
     ggh_int = vbf.Clone()
-    ph_vbf = vbf.Clone()
+    pw_vbf = vbf.Clone()
     ph_ggh = vbf.Clone()
     allSig = vbf.Clone()
     stat = vbf.Clone()
@@ -368,12 +366,11 @@ def main():
     inStack = formatOther(other, inStack)
 
     # vbf.Scale(pw_vbf.Integral()/vbf.Integral())
-    # ggh.Scale(pw_ggh.Integral()/ggh.Integral())
-    # if ggh_ps.Integral() > 0:
-    #   ggh_ps.Scale(pw_ggh.Integral()/ggh_ps.Integral())
+    ggh.Scale(pw_ggh.Integral()/ggh.Integral())
+    if ggh_ps.Integral() > 0:
+      ggh_ps.Scale(pw_ggh.Integral()/ggh_ps.Integral())
     # if ggh_int.Integral() > 0:
     #   ggh_int.Scale(pw_ggh.Integral()/ggh_int.Integral())
-
 
     stack, leg = fillStackAndLegend(data, vbf, ggh, ggh_ps, ggh_int, inStack, leg)
     stat = formatStat(stat)
@@ -387,8 +384,10 @@ def main():
     formatStack(stack)
     data.Draw('same lep')
     stat.Draw('same e2')
-    vbf.Scale(100)
-    vbf.Draw('same hist e')
+    # vbf.Scale(100)
+    # vbf.Draw('same hist e')
+    pw_vbf.Scale(100)
+    pw_vbf.Draw('same hist e')
     ggh.Scale(100)
     ggh.Draw('same hist e')
     # ggh_int.Scale(50)
@@ -472,7 +471,8 @@ def main():
     line1.Draw()
     line2.Draw()
 
-    can.SaveAs('Output/plots/log_{}_{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat, args.year))
+#    can.SaveAs('Output/plots/{}_{}_{}_{}_LOG.pdf'.format(args.prefix, args.var, args.cat, args.year))
+    can.SaveAs('Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.var, args.cat, args.year))
 
 
 if __name__ == "__main__":
