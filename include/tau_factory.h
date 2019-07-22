@@ -114,13 +114,13 @@ tau_factory::tau_factory(TTree* input, int era = 2017) {
     input->SetBranchAddress("tDecayModeFinding", &dmf);
     input->SetBranchAddress("tDecayModeFindingNewDMs", &dmf_new);
 
-    input->SetBranchAddress("tByIsolationMVArun2v1DBoldDMwLTraw", &iso_2);
-    input->SetBranchAddress("tByVLooseIsolationMVArun2v1DBoldDMwLT", &byVLooseIsolationMVArun2v1DBoldDMwLT_2);
-    input->SetBranchAddress("tByLooseIsolationMVArun2v1DBoldDMwLT", &byLooseIsolationMVArun2v1DBoldDMwLT_2);
-    input->SetBranchAddress("tByMediumIsolationMVArun2v1DBoldDMwLT", &byMediumIsolationMVArun2v1DBoldDMwLT_2);
+    input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTraw", &iso_2);
+    input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVLoose", &byVLooseIsolationMVArun2v1DBoldDMwLT_2);
+    input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTLoose", &byLooseIsolationMVArun2v1DBoldDMwLT_2);
+    input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTMedium", &byMediumIsolationMVArun2v1DBoldDMwLT_2);
     input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTTight", &byTightIsolationMVArun2v1DBoldDMwLT_2);
-    input->SetBranchAddress("tByVTightIsolationMVArun2v1DBoldDMwLT", &byVTightIsolationMVArun2v1DBoldDMwLT_2);
-    input->SetBranchAddress("tByVVTightIsolationMVArun2v1DBoldDMwLT", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
+    input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVTight", &byVTightIsolationMVArun2v1DBoldDMwLT_2);
+    input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVVTight", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
 }
 
 // create electron object and set member data
