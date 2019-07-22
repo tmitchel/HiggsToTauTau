@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
 
     // open input file
     std::cout << "Opening file... " << sample << std::endl;
+    std::cout << "with name...... " << name << std::endl;
     auto fin = TFile::Open(fname.c_str());
     std::cout << "Loading Ntuple..." << std::endl;
     auto ntuple = reinterpret_cast<TTree *>(fin->Get("mutau_tree"));
@@ -139,13 +140,11 @@ int main(int argc, char *argv[]) {
     RooWorkspace *wEmbed = reinterpret_cast<RooWorkspace *>(embed_file.Get("w"));
     embed_file.Close();
 
-    // trigger and ID scale factors
-    // auto myScaleFactor_trgMu24 = new ScaleFactor();
-    // myScaleFactor_trgMu24->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon_Run2016_legacy_IsoMu24.root");
-
     auto myScaleFactor_trgMu22 = new ScaleFactor();
     myScaleFactor_trgMu22->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016_legacy/Muon_Run2016_legacy_IsoMu22.root");
 
+    auto myScaleFactor_trgCross = new ScaleFactor();
+    myScaleFactor_trgCross->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016BtoH/Muon_Mu19leg_2016BtoH_eff.root");
 
     auto myScaleFactor_id = new ScaleFactor();
     myScaleFactor_id->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016_legacy/Muon_Run2016_legacy_IdIso.root");
@@ -173,9 +172,13 @@ int main(int argc, char *argv[]) {
 
     // begin the event loop
     Int_t nevts = ntuple->GetEntries();
+    int progress(0), fraction((nevts - 1) / 10);
     for (Int_t i = 0; i < nevts; i++) {
         ntuple->GetEntry(i);
-        if (i % 100000 == 0) std::cout << "Processing event: " << i << " out of " << nevts << std::endl;
+        if (i == progress * fraction) {
+            std::cout << "\tProcessing: " << progress * 10 << "% complete.\r" << std::flush;
+            progress++;
+        }
 
         // find the event weight (not lumi*xs if looking at W or Drell-Yan)
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
@@ -217,19 +220,23 @@ int main(int argc, char *argv[]) {
         if (tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
             continue;
         }
+        histos->at("cutflow")->Fill(2., 1.);
 
         // apply special ID for data
         if (isData && !muon.getMediumID()) {
             continue;
         }
+        histos->at("cutflow")->Fill(3., 1.);
 
-        if (fabs(muon.getPt() < 20) || muon.getEta() > 2.1) {
+        if (muon.getPt() < 20 || fabs(muon.getEta()) > 2.1) {
             continue;
         }
+        histos->at("cutflow")->Fill(4., 1.);
 
         if (tau.getPt() < 30 || fabs(tau.getEta()) > 2.3) {
             continue;
         }
+        histos->at("cutflow")->Fill(5., 1.);
 
         if (isEmbed) {
             event.setEmbed();
@@ -246,6 +253,7 @@ int main(int argc, char *argv[]) {
             // if it's embedded samples, don't apply trigger
             continue;
         }
+        histos->at("cutflow")->Fill(6., 1.);
 
         // Separate Drell-Yan
         if (name == "ZL" && tau.getGenMatch() > 4) {
@@ -274,11 +282,13 @@ int main(int argc, char *argv[]) {
         if (mt > 50) {
             continue;
         }
+        histos->at("cutflow")->Fill(8., 1.);
 
         // only opposite-sign
         if (evt_charge != 0) {
             continue;
         }
+        histos->at("cutflow")->Fill(9., 1.);
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
@@ -287,32 +297,37 @@ int main(int argc, char *argv[]) {
                 htt_sf->var("t_pt")->setVal(tau.getPt());
                 htt_sf->var("t_eta")->setVal(tau.getEta());
                 htt_sf->var("t_dm")->setVal(tau.getL2DecayMode());
-                evtwt *= htt_sf->function("t_genuine_TightIso_mt_ratio")->getVal();
+                // evtwt *= htt_sf->function("t_genuine_TightIso_mt_ratio")->getVal();
                 // evtwt *= myScaleFactor_trgMu19->getSF(muon.getPt(), muon.getEta());
             } else {
                 evtwt *= myScaleFactor_trgMu22->get_ScaleFactor(muon.getPt(), muon.getEta());
+                // std::cout << "trigger sf " << myScaleFactor_trgMu22->get_ScaleFactor(muon.getPt(), muon.getEta()) << std::endl;
             }
 
             // muon ID SF
             evtwt *= myScaleFactor_id->get_ScaleFactor(muon.getPt(), muon.getEta());
+                // std::cout << "muon id sf " << myScaleFactor_id->get_ScaleFactor(muon.getPt(), muon.getEta()) << std::endl;
 
             // Pileup Reweighting
             evtwt *= lumi_weights->weight(event.getNPU());
+            // std::cout << "pu reweighting " << lumi_weights->weight(event.getNPU()) << std::endl;
 
             // Apply generator weights
             evtwt *= event.getGenWeight();
+            // std::cout << "generator weight " << event.getGenWeight() << std::endl;
 
             // tau ID efficiency SF
             if (tau.getGenMatch() == 5) {
                 evtwt *= 0.95;
             }
+            double me = evtwt;
 
-            // // anti-lepton discriminator SFs
+            // anti-lepton discriminator SFs
             if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {  // Yiwen
                 if (fabs(tau.getEta()) < 1.460)
-                    evtwt *= 1.213;
+                    evtwt *= 1.21;
                 else if (fabs(tau.getEta()) > 1.558)
-                    evtwt *= 1.375;
+                    evtwt *= 1.38;
             } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
                 if (fabs(tau.getEta()) < 0.4)
                     evtwt *= 1.47;
@@ -325,6 +340,7 @@ int main(int argc, char *argv[]) {
                 else
                     evtwt *= 2.50;
             }
+            // std::cout << "anti-lepton eta  " << fabs(tau.getEta()) << " "  << evtwt/me << std::endl;
 
             // Z-pT and Zmm Reweighting
             if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
@@ -337,6 +353,7 @@ int main(int argc, char *argv[]) {
                     nom_zpt_weight = 0.9 * nom_zpt_weight + 0.1;
                 }
                 evtwt *= nom_zpt_weight;
+                // std::cout << "zpt " << nom_zpt_weight << std::endl;
 
                 // Zmumu SF
                 if (syst == "zmumuShape_Up") {
@@ -346,6 +363,7 @@ int main(int argc, char *argv[]) {
                 } else {
                     evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
                 }
+                // std::cout << "zmumu " << GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 1) << std::endl;
             }
 
             // top-pT Reweighting
@@ -373,7 +391,7 @@ int main(int argc, char *argv[]) {
                     evtwt *= (1 + (0.2 * temp_tau_pt / 100));
                 }
             }
-
+            // std::cout << "----END WEIGHITNG----\n\n\n" << std::endl;
         } else if (!isData && isEmbed) {
             float Stitching_Weight = 1.0;
             if (event.getRun() >= 272007 && event.getRun() < 275657) {
@@ -489,5 +507,6 @@ int main(int argc, char *argv[]) {
     fout->Write(0, TObject::kOverwrite);
     // fout->Write();
     fout->Close();
+    std::cout << std::endl;
     return 0;
 }

@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     // get normalization (lumi & xs are in util.h)
     double norm(1.);
     if (!isData && !isEmbed) {
-        norm = helper->getLuminosity2016() * helper->getCrossSection(sample) / gen_number;
+        norm = helper->getLuminosity2017() * helper->getCrossSection(sample) / gen_number;
     }
 
     ///////////////////////////////////////////////
@@ -134,8 +134,8 @@ int main(int argc, char *argv[]) {
             return 2;
         }
         std::replace(datasetName.begin(), datasetName.end(), '/', '#');
-        lumi_weights =
-            new reweight::LumiReWeighting("data/pudistributions_mc_2017.root", "data/pudistributions_data_2017.root", ("#" + datasetName).c_str(), "pileup");
+//        lumi_weights =
+//            new reweight::LumiReWeighting("data/pudistributions_mc_2017.root", "data/pudistributions_data_2017.root", ("#" + datasetName).c_str(), "pileup");
         std::cout << datasetName << std::endl;
     }
 
@@ -191,29 +191,29 @@ int main(int argc, char *argv[]) {
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 6.963;
+                evtwt = 3.417;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 16.376;
+                evtwt = 3.315;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 2.533;
+                evtwt = 2.415;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 2.419;
+                evtwt = 2.358;
             } else {
-                evtwt = 61.983;
+                evtwt = 27.830;
             }
         }
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.502938039;
+                evtwt = 0.805;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 1.042256272;
+                evtwt = 1.044;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 0.656337234;
+                evtwt = 1.871;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 0.458531131;
+                evtwt = 0.249;
             } else {
-                evtwt = 2.873324952;
+                evtwt = 2.924;
             }
         }
 
@@ -227,10 +227,12 @@ int main(int argc, char *argv[]) {
         if (!tau.getDecayModeFinding() || tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
             continue;
         }
+        histos->at("cutflow")->Fill(2., 1.);
 
         if (!event.getPassFlags(isData)) {
             continue;
         }
+        histos->at("cutflow")->Fill(3., 1.);
 
         bool fireSingle(false), fireCross(false);
         Float_t trigger(0.);
@@ -248,10 +250,18 @@ int main(int argc, char *argv[]) {
         } else {
             continue;
         }
+        histos->at("cutflow")->Fill(4., 1.);
 
         if (muon.getP4().DeltaR(tau.getP4()) < 0.5) {
             continue;
         }
+        histos->at("cutflow")->Fill(5., 1.);
+
+        if (tau.getPt() < 30) {
+          continue;
+        }
+        histos->at("cutflow")->Fill(6., 1.);
+
 
         // Separate Drell-Yan
         if ((name == "ZL" || name == "TTL" || name == "VVL") && tau.getGenMatch() > 4) {
@@ -280,11 +290,13 @@ int main(int argc, char *argv[]) {
         if (mt > 50) {
             continue;
         }
+        histos->at("cutflow")->Fill(8., 1.);
 
         // only opposite-sign
         if (evt_charge != 0) {
             continue;
         }
+        histos->at("cutflow")->Fill(9., 1.);
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
@@ -433,6 +445,7 @@ int main(int argc, char *argv[]) {
         if (jets.getNbtag() > 0) {
             continue;
         }
+        histos->at("cutflow")->Fill(10., 1.);
 
         // create regions
         bool signalRegion = (tau.getTightIsoMVA() && muon.getIso() < 0.15);

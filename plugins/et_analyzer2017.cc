@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
   // get normalization (lumi & xs are in util.h)
   double norm(1.);
   if (!isData && !isEmbed) {
-    norm = helper->getLuminosity2016() * helper->getCrossSection(sample) / gen_number;
+    norm = helper->getLuminosity2017() * helper->getCrossSection(sample) / gen_number;
   }
 
   ///////////////////////////////////////////////
@@ -134,8 +134,8 @@ int main(int argc, char* argv[]) {
       fout->Close();
       return 2;
     }
-    std::replace(datasetName.begin(), datasetName.end(), '/', '#');
-    lumi_weights = new reweight::LumiReWeighting("data/pudistributions_mc_2017.root", "data/pudistributions_data_2017.root", ("#" + datasetName).c_str(), "pileup");
+    // std::replace(datasetName.begin(), datasetName.end(), '/', '#');
+    // lumi_weights = new reweight::LumiReWeighting("data/pudistributions_mc_2017.root", "data/pudistributions_data_2017.root", ("#" + datasetName).c_str(), "pileup");
   }
 
   // H->tau tau scale factors
@@ -189,31 +189,31 @@ int main(int argc, char* argv[]) {
     // find the event weight (not lumi*xs if looking at W or Drell-Yan)
     Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
     if (name == "W") {
-      if (event.getNumGenJets() == 1) {
-        evtwt = 6.963;
-      } else if (event.getNumGenJets() == 2) {
-        evtwt = 16.376;
-      } else if (event.getNumGenJets() == 3) {
-        evtwt = 2.533;
-      } else if (event.getNumGenJets() == 4) {
-        evtwt = 2.419;
-      } else {
-        evtwt = 61.983;
-      }
+        if (event.getNumGenJets() == 1) {
+            evtwt = 3.417;
+        } else if (event.getNumGenJets() == 2) {
+            evtwt = 3.315;
+        } else if (event.getNumGenJets() == 3) {
+            evtwt = 2.415;
+        } else if (event.getNumGenJets() == 4) {
+            evtwt = 2.358;
+        } else {
+            evtwt = 27.830;
+        }
     }
 
     if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
-      if (event.getNumGenJets() == 1) {
-        evtwt = 0.502938039;
-      } else if (event.getNumGenJets() == 2) {
-        evtwt = 1.042256272;
-      } else if (event.getNumGenJets() == 3) {
-        evtwt = 0.656337234;
-      } else if (event.getNumGenJets() == 4) {
-        evtwt = 0.458531131;
-      } else {
-        evtwt = 2.873324952;
-      }
+        if (event.getNumGenJets() == 1) {
+            evtwt = 0.805;
+        } else if (event.getNumGenJets() == 2) {
+            evtwt = 1.044;
+        } else if (event.getNumGenJets() == 3) {
+            evtwt = 1.871;
+        } else if (event.getNumGenJets() == 4) {
+            evtwt = 0.249;
+        } else {
+            evtwt = 2.924;
+        }
     }
 
     histos->at("cutflow") -> Fill(1., 1.);
@@ -325,7 +325,7 @@ int main(int argc, char* argv[]) {
 
       // pileup reweighting
       if (!doAC && !isMG) {
-        evtwt *= lumi_weights->weight(event.getNPV());
+        // evtwt *= lumi_weights->weight(event.getNPV());
       }
 
       // generator weights

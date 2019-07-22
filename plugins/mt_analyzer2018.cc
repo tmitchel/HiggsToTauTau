@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     // get normalization (lumi & xs are in util.h)
     double norm(1.);
     if (!isData && !isEmbed) {
-        norm = helper->getLuminosity2016() * helper->getCrossSection(sample) / gen_number;
+        norm = helper->getLuminosity2018() * helper->getCrossSection(sample) / gen_number;
     }
 
     ///////////////////////////////////////////////
@@ -178,29 +178,29 @@ int main(int argc, char *argv[]) {
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 6.963;
+                evtwt = 11.738;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 16.376;
+                evtwt = 5.278;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 2.533;
+                evtwt = 3.498;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 2.419;
+                evtwt = 3.663;
             } else {
-                evtwt = 61.983;
+                evtwt = 0.;
             }
         }
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.502938039;
+                evtwt = 0.688;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 1.042256272;
+                evtwt = 0.603;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 0.656337234;
+                evtwt = 0.655;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 0.458531131;
+                evtwt = 0.917;
             } else {
-                evtwt = 2.873324952;
+                evtwt = 3.959;
             }
         }
 

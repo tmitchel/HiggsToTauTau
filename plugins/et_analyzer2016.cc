@@ -294,9 +294,9 @@ int main(int argc, char *argv[]) {
             // anti-lepton discriminator SFs
             if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {  // Yiwen
                 if (fabs(tau.getEta()) < 1.460) {
-                    evtwt *= 1.402;
+                    evtwt *= 1.40;
                 } else if (fabs(tau.getEta()) > 1.558) {
-                    evtwt *= 1.900;
+                    evtwt *= 1.90;
                 }
             } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
                 if (fabs(tau.getEta()) < 0.4) {
