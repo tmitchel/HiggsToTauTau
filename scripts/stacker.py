@@ -189,7 +189,6 @@ titles = {
     "D0_VBF": "D_{0-}^{VBF}",
     "t1_decayMode": "t1_decayMode",
     "trigger": "trigger"
-
 }
 
 def formatStack(stack):
