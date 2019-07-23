@@ -14,7 +14,7 @@
 // the analysis. This is mainly used just to keep all of the long lists out of
 // this file so it is easier to read.
 class Sample_Plots : public TemplateTool {
-   public:
+ public:
     Sample_Plots(std::string, std::string, std::string, std::string, std::shared_ptr<TFile>,
                  std::map<std::string, std::vector<float>>);
     void set_branches(std::shared_ptr<TTree>, std::string);
@@ -24,7 +24,7 @@ class Sample_Plots : public TemplateTool {
     void set_variable(std::shared_ptr<TTree>);
     Float_t get_var(std::string);
 
-   private:
+ private:
     std::string sample_name, in_var_name;
     std::map<std::string, TH1F *> SS_iso, SS_anti, hists;
     std::vector<std::string> plot_variables;

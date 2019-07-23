@@ -1,3 +1,5 @@
+// Copyright [2018] Tyler Mitchell
+
 #ifndef INCLUDE_MET_FACTORY_H_
 #define INCLUDE_MET_FACTORY_H_
 
@@ -5,12 +7,12 @@
 #include "TTree.h"
 
 class met_factory {
-   private:
+ private:
     Float_t met, metphi, met_py, met_px;
     Float_t metSig, metcov00, metcov10, metcov11, metcov01;
     TLorentzVector p4;
 
-   public:
+ public:
     met_factory(TTree*, int, std::string);
     virtual ~met_factory() {}
 

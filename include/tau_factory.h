@@ -1,5 +1,7 @@
-#ifndef TAU_FACTORY_H
-#define TAU_FACTORY_H
+// Copyright [2018] Tyler Mitchell
+
+#ifndef INCLUDE_TAU_FACTORY_H_
+#define INCLUDE_TAU_FACTORY_H_
 
 #include <cmath>
 #include <iostream>
@@ -16,15 +18,15 @@ class tau_factory;
 class tau {
     friend tau_factory;
 
-   private:
+ private:
     std::string name = "tau";
     Int_t gen_match;
-    Float_t pt, eta, phi, mass, charge, px, py, pz, l2_decayMode, dmf, dmf_new, iso, gen_pt, gen_eta, gen_phi;
+    Float_t pt, eta, phi, mass, charge, px, py, pz, decayMode, dmf, dmf_new, iso, gen_pt, gen_eta, gen_phi;
     Bool_t AgainstTightElectron, AgainstVLooseElectron, AgainstTightMuon, AgainstLooseMuon;
     Float_t VLooseIsoMVA, LooseIsoMVA, MediumIsoMVA, TightIsoMVA, VTightIsoMVA, VVTightIsoMVA;
     TLorentzVector p4;
 
-   public:
+ public:
     tau(Float_t, Float_t, Float_t, Float_t, Float_t);
     ~tau() {}
 
@@ -51,7 +53,7 @@ class tau {
     Float_t getTightIsoMVA() { return TightIsoMVA; }
     Float_t getVTightIsoMVA() { return VTightIsoMVA; }
     Float_t getVVTightIsoMVA() { return VVTightIsoMVA; }
-    Float_t getL2DecayMode() { return l2_decayMode; }
+    Float_t getDecayMode() { return decayMode; }
     Float_t getDecayModeFinding() { return dmf; }
     Float_t getDecayModeFindingNew() { return dmf_new; }
     Bool_t getAgainstTightElectron() { return AgainstTightElectron; }
@@ -66,8 +68,7 @@ class tau {
 };
 
 // initialize member data and set TLorentzVector
-tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge)
-    : pt(Pt), eta(Eta), phi(Phi), mass(M), charge(Charge) {
+tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) : pt(Pt), eta(Eta), phi(Phi), mass(M), charge(Charge) {
     p4.SetPtEtaPhiM(pt, eta, phi, mass);
 }
 
@@ -76,16 +77,14 @@ tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge)
 // from the ntuple                             //
 /////////////////////////////////////////////////
 class tau_factory {
-   private:
+ private:
     Int_t gen_match_2;
     Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, tZTTGenPt, tZTTGenEta, tZTTGenPhi;
-    Float_t againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2,
-        l2_decayMode, dmf, dmf_new;
-    Float_t byVLooseIsolationMVArun2v1DBoldDMwLT_2, byLooseIsolationMVArun2v1DBoldDMwLT_2,
-        byMediumIsolationMVArun2v1DBoldDMwLT_2, byTightIsolationMVArun2v1DBoldDMwLT_2,
-        byVTightIsolationMVArun2v1DBoldDMwLT_2, byVVTightIsolationMVArun2v1DBoldDMwLT_2;
+    Float_t againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2, decayMode, dmf, dmf_new;
+    Float_t byVLooseIsolationMVArun2v1DBoldDMwLT_2, byLooseIsolationMVArun2v1DBoldDMwLT_2, byMediumIsolationMVArun2v1DBoldDMwLT_2,
+        byTightIsolationMVArun2v1DBoldDMwLT_2, byVTightIsolationMVArun2v1DBoldDMwLT_2, byVVTightIsolationMVArun2v1DBoldDMwLT_2;
 
-   public:
+ public:
     tau_factory(TTree*, int);
     virtual ~tau_factory() {}
     tau run_factory();
@@ -110,7 +109,7 @@ tau_factory::tau_factory(TTree* input, int era = 2017) {
     input->SetBranchAddress("tAgainstElectronVLooseMVA6", &againstElectronVLooseMVA6_2);
     input->SetBranchAddress("tAgainstMuonTight3", &againstMuonTight3_2);
     input->SetBranchAddress("tAgainstMuonLoose3", &againstMuonLoose3_2);
-    input->SetBranchAddress("tDecayMode", &l2_decayMode);
+    input->SetBranchAddress("tDecayMode", &decayMode);
     input->SetBranchAddress("tDecayModeFinding", &dmf);
     input->SetBranchAddress("tDecayModeFindingNewDMs", &dmf_new);
 
@@ -135,7 +134,7 @@ tau tau_factory::run_factory() {
     t.AgainstVLooseElectron = againstElectronVLooseMVA6_2;
     t.AgainstTightMuon = againstMuonTight3_2;
     t.AgainstLooseMuon = againstMuonLoose3_2;
-    t.l2_decayMode = l2_decayMode;
+    t.decayMode = decayMode;
     t.VLooseIsoMVA = byVLooseIsolationMVArun2v1DBoldDMwLT_2;
     t.LooseIsoMVA = byLooseIsolationMVArun2v1DBoldDMwLT_2;
     t.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_2;
@@ -151,4 +150,4 @@ tau tau_factory::run_factory() {
     return t;
 }
 
-#endif
+#endif  // INCLUDE_TAU_FACTORY_H_

@@ -16,14 +16,14 @@
 enum lepton { ELECTRON, MUON, DITAU, EMU };
 
 class Helper {
-   private:
+ private:
     double luminosity2016, luminosity2017, luminosity2018;
     std::map<std::string, double> cross_sections;
     std::unordered_map<std::string, TH1F *> histos_1d;
     std::unordered_map<std::string, TH2F *> histos_2d;
     std::map<std::string, std::string> systematics;
 
-   public:
+ public:
     Helper(TFile *, std::string, std::string);
     ~Helper() {}
     double getCrossSection(std::string sample) { return cross_sections[sample]; }
@@ -33,23 +33,17 @@ class Helper {
     std::unordered_map<std::string, TH1F *> *getHistos1D() { return &histos_1d; }
     std::unordered_map<std::string, TH2F *> *getHistos2D() { return &histos_2d; }
 
-    Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) {
-        return sqrt(pow(eta1 - eta2, 2) + pow(phi1 - phi2, 2));
-    }
+    Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) { return sqrt(pow(eta1 - eta2, 2) + pow(phi1 - phi2, 2)); }
 };
 
 Helper::Helper(TFile *fout, std::string name, std::string syst)
     : luminosity2016(35900.),
       luminosity2017(41500.),
       luminosity2018(63670.),
-      systematics{{"met_UESDown", "_CMS_scale_met_unclustered_13TeVDown"},
-                  {"met_UESUp", "_CMS_scale_met_unclustered_13TeVUp"},
-                  {"met_JESDown", "_CMS_scale_met_clustered_13TeVDown"},
-                  {"met_JESUp", "_CMS_scale_met_clustered_13TeVUp"},
-                  {"metphi_UESDown", "_CMS_scale_metphi_unclustered_13TeVDown"},
-                  {"metphi_UESUp", "_CMS_scale_metphi_unclustered_13TeVUp"},
-                  {"metphi_JESDown", "_CMS_scale_metphi_clustered_13TeVDown"},
-                  {"metphi_JESUp", "_CMS_scale_metphi_clustered_13TeVUp"}},
+      systematics{{"met_UESDown", "_CMS_scale_met_unclustered_13TeVDown"},       {"met_UESUp", "_CMS_scale_met_unclustered_13TeVUp"},
+                  {"met_JESDown", "_CMS_scale_met_clustered_13TeVDown"},         {"met_JESUp", "_CMS_scale_met_clustered_13TeVUp"},
+                  {"metphi_UESDown", "_CMS_scale_metphi_unclustered_13TeVDown"}, {"metphi_UESUp", "_CMS_scale_metphi_unclustered_13TeVUp"},
+                  {"metphi_JESDown", "_CMS_scale_metphi_clustered_13TeVDown"},   {"metphi_JESUp", "_CMS_scale_metphi_clustered_13TeVUp"}},
       cross_sections{{"DYJets1", 6225.42},
                      {"DYJets2", 6225.42},
                      {"DYJets2_lowM", 6225.42},

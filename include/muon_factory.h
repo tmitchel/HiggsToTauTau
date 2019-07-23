@@ -1,5 +1,7 @@
-#ifndef MUON_FACTORY_H
-#define MUON_FACTORY_H
+// Copyright [2018] Tyler Mitchell
+
+#ifndef INCLUDE_MUON_FACTORY_H_
+#define INCLUDE_MUON_FACTORY_H_
 
 #include <cmath>
 #include <string>
@@ -15,12 +17,12 @@ class muon_factory;  // forward declare so it can befriend muons
 class muon {
     friend muon_factory;
 
-   private:
+ private:
     std::string name = "muon";
     Float_t pt, eta, phi, mass, charge, px, py, pz, iso, gen_match, mediumID, gen_pt, gen_eta, gen_phi, gen_energy;
     TLorentzVector p4;
 
-   public:
+ public:
     muon(Float_t, Float_t, Float_t, Float_t, Float_t);
     ~muon() {}
 
@@ -55,12 +57,12 @@ muon::muon(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge)
 // from the ntuple                         //
 /////////////////////////////////////////////
 class muon_factory {
-   private:
+ private:
     Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, mediumID, mGenPt, mGenEta, mGenPhi,
         mGenEnergy;
     Int_t gen_match_1;
 
-   public:
+ public:
     muon_factory(TTree*, int);
     virtual ~muon_factory() {}
     muon run_factory();
@@ -101,4 +103,4 @@ muon muon_factory::run_factory() {
     return mu;
 }
 
-#endif
+#endif  // INCLUDE_MUON_FACTORY_H_

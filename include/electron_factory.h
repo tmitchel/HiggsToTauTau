@@ -1,5 +1,7 @@
-#ifndef ELECTRON_FACTORY_H
-#define ELECTRON_FACTORY_H
+// Copyright [2019] Tyler Mitchell
+
+#ifndef INCLUDE_ELECTRON_FACTORY_H_
+#define INCLUDE_ELECTRON_FACTORY_H_
 
 #include <cmath>
 #include <string>
@@ -15,13 +17,13 @@ class electron_factory;  // forward declare so it can befriend electrons
 class electron {
     friend electron_factory;
 
-   private:
+ private:
     std::string name = "electron";
     Int_t gen_match;
     Float_t pt, eta, phi, mass, charge, px, py, pz, iso, gen_pt, gen_eta, gen_phi, gen_energy;
     TLorentzVector p4;
 
-   public:
+ public:
     electron(Float_t, Float_t, Float_t, Float_t, Float_t);
     ~electron() {}
 
@@ -55,11 +57,11 @@ electron::electron(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Char
 // from the ntuple                             //
 /////////////////////////////////////////////////
 class electron_factory {
-   private:
+ private:
     Int_t gen_match_1;
     Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, eGenPt, eGenEta, eGenPhi, eGenEnergy;
 
-   public:
+ public:
     electron_factory(TTree*, int);
     virtual ~electron_factory() {}
     electron run_factory();
@@ -99,4 +101,4 @@ electron electron_factory::run_factory() {
     return el;
 }
 
-#endif
+#endif  // INCLUDE_ELECTRON_FACTORY_H_

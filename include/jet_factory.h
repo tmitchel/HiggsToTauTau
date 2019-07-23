@@ -1,3 +1,5 @@
+// Copyright [2019] Tyler Mitchell
+
 #ifndef INCLUDE_JET_FACTORY_H_
 #define INCLUDE_JET_FACTORY_H_
 
@@ -8,11 +10,11 @@
 #include "TTree.h"
 
 class jet {
-   private:
+ private:
     Float_t pt, eta, phi, csv, flavor;
     TLorentzVector p4;
 
-   public:
+ public:
     jet(Float_t, Float_t, Float_t, Float_t, Float_t);
     virtual ~jet() {}
 
@@ -30,7 +32,7 @@ jet::jet(Float_t Pt, Float_t Eta, Float_t Phi, Float_t Csv, Float_t Flavor = -99
 }
 
 class jet_factory {
-   private:
+ private:
     Bool_t doSyst;
     Float_t mjj;
     Float_t jpt_1, jeta_1, jphi_1, jcsv_1;
@@ -39,11 +41,10 @@ class jet_factory {
     Float_t bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2;
     Float_t topQuarkPt1, topQuarkPt2, temp_njets;
     Float_t Nbtag, njetspt20, njets;
-    Int_t njets_adapter, njetspt20_adapter;
     Int_t nbtag;
     std::vector<jet> plain_jets, btag_jets;
 
-   public:
+ public:
     jet_factory(TTree *, int, std::string);
     virtual ~jet_factory() {}
     void run_factory();
@@ -80,16 +81,14 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst) {
     input->SetBranchAddress(mjj_name.c_str(), &mjj);
 
     std::string btag_string = "2016";
-    if (era == 2016) {
+    if (era == 2016 || era == 2018) {
         btag_string = "2016";
         input->SetBranchAddress("jetVeto30", &njets);
         input->SetBranchAddress("jetVeto20", &njetspt20);
     } else if (era == 2017) {
         btag_string = "2017";
-        input->SetBranchAddress("njets", &njets_adapter);
-        input->SetBranchAddress("njetspt20", &njetspt20_adapter);
-        njets = static_cast<Float_t>(njets_adapter);
-        njetspt20 = static_cast<Float_t>(njetspt20_adapter);
+        input->SetBranchAddress("jetVeto30WoNoisyJets", &njets);
+        input->SetBranchAddress("jetVeto20WoNoisyJets", &njetspt20);
     } else if (era == 2018) {
         btag_string = "2018";
         input->SetBranchAddress("jetVeto30", &njets);
@@ -134,18 +133,10 @@ void jet_factory::run_factory() {
     jet j2(jpt_2, jeta_2, jphi_2, jcsv_2);
     jet b1(bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1);
     jet b2(bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2);
-    // if (jpt_1 > 0) {
     plain_jets.push_back(j1);
-    // }
-    // if (jpt_2 > 0) {
     plain_jets.push_back(j2);
-    // }
-    // if (bpt_1 > 0) {
     btag_jets.push_back(b1);
-    // }
-    // if (bpt_2 > 0) {
     btag_jets.push_back(b2);
-    // }
 }
 
 namespace btagSF {
@@ -271,7 +262,7 @@ int _PromoteDemote(TH2F *h_btag_eff_b, TH2F *h_btag_eff_c, TH2F *h_btag_eff_oth,
     }
 
     TRandom3 *rand = new TRandom3();
-    rand->SetSeed((int)((bjet->getEta() + 5) * 100000));
+    rand->SetSeed(static_cast<int>((bjet->getEta() + 5) * 100000));
     float myrand = rand->Rndm();
 
     if (SF < 1 && myrand < (1 - SF) && nbtag > 0) {
