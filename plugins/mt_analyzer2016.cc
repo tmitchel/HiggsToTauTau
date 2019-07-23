@@ -140,14 +140,15 @@ int main(int argc, char *argv[]) {
     RooWorkspace *wEmbed = reinterpret_cast<RooWorkspace *>(embed_file.Get("w"));
     embed_file.Close();
 
-    auto myScaleFactor_trgMu22 = new ScaleFactor();
-    myScaleFactor_trgMu22->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016_legacy/Muon_Run2016_legacy_IsoMu22.root");
+    auto Mu22_trg_sf = new ScaleFactor();
+    Mu22_trg_sf->init_ScaleFactor(
+        "${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016_legacy/Muon_Run2016_legacy_IsoMu22.root");
 
-    auto myScaleFactor_trgCross = new ScaleFactor();
-    myScaleFactor_trgCross->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016BtoH/Muon_Mu19leg_2016BtoH_eff.root");
+    auto Cross_trg_sf = new ScaleFactor();
+    Cross_trg_sf->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016BtoH/Muon_Mu19leg_2016BtoH_eff.root");
 
-    auto myScaleFactor_id = new ScaleFactor();
-    myScaleFactor_id->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016_legacy/Muon_Run2016_legacy_IdIso.root");
+    auto mu_id_sf = new ScaleFactor();
+    mu_id_sf->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016_legacy/Muon_Run2016_legacy_IdIso.root");
 
     //////////////////////////////////////
     // Final setup:                     //
@@ -217,26 +218,30 @@ int main(int argc, char *argv[]) {
         jets.run_factory();
 
         // remove 2-prong taus if they aren't already removed
-        if (tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
+        if (tau.getDecayModeFinding() && tau.getDecayMode() != 5 && tau.getDecayMode() != 6) {
+            histos->at("cutflow")->Fill(2., 1.);
+        } else {
             continue;
         }
-        histos->at("cutflow")->Fill(2., 1.);
 
         // apply special ID for data
-        if (isData && !muon.getMediumID()) {
+        if (!isData || muon.getMediumID()) {
+            histos->at("cutflow")->Fill(3., 1.);
+        } else {
             continue;
         }
-        histos->at("cutflow")->Fill(3., 1.);
 
-        if (muon.getPt() < 20 || fabs(muon.getEta()) > 2.1) {
+        if (muon.getPt() > 20 && fabs(muon.getEta()) < 2.1) {
+            histos->at("cutflow")->Fill(4., 1.);
+        } else {
             continue;
         }
-        histos->at("cutflow")->Fill(4., 1.);
 
-        if (tau.getPt() < 30 || fabs(tau.getEta()) > 2.3) {
+        if (tau.getPt() > 30 && fabs(tau.getEta()) < 2.3) {
+            histos->at("cutflow")->Fill(5., 1.);
+        } else {
             continue;
         }
-        histos->at("cutflow")->Fill(5., 1.);
 
         if (isEmbed) {
             event.setEmbed();
@@ -264,9 +269,9 @@ int main(int argc, char *argv[]) {
             continue;
         } else if (name == "ZJ" && tau.getGenMatch() != 6) {
             continue;
+        } else {
+            histos->at("cutflow")->Fill(7., 1.);
         }
-
-        histos->at("cutflow")->Fill(7., 1.);
 
         // build Higgs
         TLorentzVector Higgs = muon.getP4() + tau.getP4() + met.getP4();
@@ -279,16 +284,18 @@ int main(int argc, char *argv[]) {
         int evt_charge = tau.getCharge() + muon.getCharge();
 
         // now do mt selection
-        if (mt > 50) {
+        if (mt < 50) {
+            histos->at("cutflow")->Fill(8., 1.);
+        } else {
             continue;
         }
-        histos->at("cutflow")->Fill(8., 1.);
 
         // only opposite-sign
-        if (evt_charge != 0) {
+        if (evt_charge == 0) {
+            histos->at("cutflow")->Fill(9., 1.);
+        } else {
             continue;
         }
-        histos->at("cutflow")->Fill(9., 1.);
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
@@ -296,25 +303,21 @@ int main(int argc, char *argv[]) {
             if (muon.getPt() < 23) {
                 htt_sf->var("t_pt")->setVal(tau.getPt());
                 htt_sf->var("t_eta")->setVal(tau.getEta());
-                htt_sf->var("t_dm")->setVal(tau.getL2DecayMode());
+                htt_sf->var("t_dm")->setVal(tau.getDecayMode());
                 // evtwt *= htt_sf->function("t_genuine_TightIso_mt_ratio")->getVal();
                 // evtwt *= myScaleFactor_trgMu19->getSF(muon.getPt(), muon.getEta());
             } else {
-                evtwt *= myScaleFactor_trgMu22->get_ScaleFactor(muon.getPt(), muon.getEta());
-                // std::cout << "trigger sf " << myScaleFactor_trgMu22->get_ScaleFactor(muon.getPt(), muon.getEta()) << std::endl;
+                evtwt *= Mu22_trg_sf->get_ScaleFactor(muon.getPt(), muon.getEta());
             }
 
             // muon ID SF
-            evtwt *= myScaleFactor_id->get_ScaleFactor(muon.getPt(), muon.getEta());
-                // std::cout << "muon id sf " << myScaleFactor_id->get_ScaleFactor(muon.getPt(), muon.getEta()) << std::endl;
+            evtwt *= mu_id_sf->get_ScaleFactor(muon.getPt(), muon.getEta());
 
             // Pileup Reweighting
             evtwt *= lumi_weights->weight(event.getNPU());
-            // std::cout << "pu reweighting " << lumi_weights->weight(event.getNPU()) << std::endl;
 
             // Apply generator weights
             evtwt *= event.getGenWeight();
-            // std::cout << "generator weight " << event.getGenWeight() << std::endl;
 
             // tau ID efficiency SF
             if (tau.getGenMatch() == 5) {
@@ -340,7 +343,6 @@ int main(int argc, char *argv[]) {
                 else
                     evtwt *= 2.50;
             }
-            // std::cout << "anti-lepton eta  " << fabs(tau.getEta()) << " "  << evtwt/me << std::endl;
 
             // Z-pT and Zmm Reweighting
             if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
@@ -353,7 +355,6 @@ int main(int argc, char *argv[]) {
                     nom_zpt_weight = 0.9 * nom_zpt_weight + 0.1;
                 }
                 evtwt *= nom_zpt_weight;
-                // std::cout << "zpt " << nom_zpt_weight << std::endl;
 
                 // Zmumu SF
                 if (syst == "zmumuShape_Up") {
@@ -363,7 +364,6 @@ int main(int argc, char *argv[]) {
                 } else {
                     evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
                 }
-                // std::cout << "zmumu " << GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 1) << std::endl;
             }
 
             // top-pT Reweighting
@@ -391,7 +391,6 @@ int main(int argc, char *argv[]) {
                     evtwt *= (1 + (0.2 * temp_tau_pt / 100));
                 }
             }
-            // std::cout << "----END WEIGHITNG----\n\n\n" << std::endl;
         } else if (!isData && isEmbed) {
             float Stitching_Weight = 1.0;
             if (event.getRun() >= 272007 && event.getRun() < 275657) {
@@ -431,10 +430,12 @@ int main(int argc, char *argv[]) {
 
         fout->cd();
 
-        // // b-jet veto
-        // if (jets.getNbtag() > 0) {
-        //     continue;
-        // }
+        // b-jet veto
+        if (jets.getNbtag() == 0) {
+            histos->at("cutflow")->Fill(10., 1.);
+        } else {
+            continue;
+        }
 
         // create regions
         bool signalRegion = (tau.getTightIsoMVA() && muon.getIso() < 0.15);
@@ -444,18 +445,15 @@ int main(int argc, char *argv[]) {
 
         // create categories
         bool zeroJet = (jets.getNjets() == 0);
-        bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && (jets.getDijetMass() < 300 || Higgs.Pt() < 50 || event.getPtSV() < 40)));
-        bool vbfCat = (jets.getNjets() > 1 && jets.getDijetMass() > 300 && Higgs.Pt() > 50 && event.getPtSV() > 40);
+        bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300));
+        bool vbfCat = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
         bool VHCat = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
         // only keep the regions we need
-        if (!signalRegion && !antiTauIsoRegion) {
+        if (signalRegion || antiTauIsoRegion) {
+            histos->at("cutflow")->Fill(11., 1.);
+        } else {
             continue;
-        }
-
-        if (signalRegion && evt_charge == 0) {
-            histos->at("el_pt")->Fill(muon.getPt(), evtwt);
-            histos->at("tau_pt")->Fill(tau.getPt(), evtwt);
         }
 
         std::vector<std::string> tree_cat;
