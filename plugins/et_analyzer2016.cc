@@ -1,4 +1,4 @@
-// Copyright 2018 Tyler Mitchell
+// Copyright [2018] Tyler Mitchell
 
 // system includes
 #include <algorithm>
@@ -143,11 +143,13 @@ int main(int argc, char *argv[]) {
     embed_file.Close();
 
     // trigger and ID scale factors
-    auto myScaleFactor_trgEle25 = new ScaleFactor();
-    myScaleFactor_trgEle25->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Electron/Run2016_legacy/Electron_Run2016_legacy_Ele25.root");
+    auto Ele25_trg_sf = new ScaleFactor();
+    Ele25_trg_sf->init_ScaleFactor(
+        "${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Electron/Run2016_legacy/Electron_Run2016_legacy_Ele25.root");
 
-    auto myScaleFactor_id = new ScaleFactor();
-    myScaleFactor_id->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Electron/Run2016_legacy/Electron_Run2016_legacy_IdIso.root");
+    auto ele_id_sf = new ScaleFactor();
+    ele_id_sf->init_ScaleFactor(
+        "${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Electron/Run2016_legacy/Electron_Run2016_legacy_IdIso.root");
 
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
@@ -226,11 +228,15 @@ int main(int argc, char *argv[]) {
         //   - Event: dR(tau,el) > 0.5                          //
         //////////////////////////////////////////////////////////
 
-        if (electron.getPt() < 26 || fabs(electron.getEta()) > 2.1) {
+        if (electron.getPt() > 26 || fabs(electron.getEta()) < 2.1) {
+            histos->at("cutflow")->Fill(2., 1.);
+        } else {
             continue;
         }
 
-        if (tau.getPt() < 30 || fabs(tau.getEta()) > 2.3) {
+        if (tau.getPt() > 30 || fabs(tau.getEta()) < 2.3) {
+            histos->at("cutflow")->Fill(3., 1.);
+        } else {
             continue;
         }
 
@@ -243,9 +249,9 @@ int main(int argc, char *argv[]) {
             continue;
         } else if (name == "ZJ" && tau.getGenMatch() != 6) {
             continue;
+        } else {
+            histos->at("cutflow")->Fill(4., 1.);
         }
-
-        histos->at("cutflow")->Fill(7., 1.);
 
         // build Higgs
         TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
@@ -258,22 +264,26 @@ int main(int argc, char *argv[]) {
         int evt_charge = tau.getCharge() + electron.getCharge();
 
         // now do mt selection
-        if (mt > 50) {
+        if (mt < 50) {
+            histos->at("cutflow")->Fill(5., 1.);
+        } else {
             continue;
         }
 
         // only opposite-sign
-        if (evt_charge != 0) {
+        if (evt_charge == 0) {
+            histos->at("cutflow")->Fill(6., 1.);
+        } else {
             continue;
         }
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // Trigger SF
-            evtwt *= myScaleFactor_trgEle25->get_ScaleFactor(electron.getPt(), electron.getEta());
+            evtwt *= Ele25_trg_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
 
             // electron ID SF
-            evtwt *= myScaleFactor_id->get_ScaleFactor(electron.getPt(), electron.getEta());
+            evtwt *= ele_id_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
 
             // Pileup Reweighting
             evtwt *= lumi_weights->weight(event.getNPU());
@@ -292,7 +302,7 @@ int main(int argc, char *argv[]) {
             evtwt *= htt_sf->function("e_trk_ratio")->getVal();
 
             // anti-lepton discriminator SFs
-            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {  // Yiwen
+            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
                 if (fabs(tau.getEta()) < 1.460) {
                     evtwt *= 1.40;
                 } else if (fabs(tau.getEta()) > 1.558) {
@@ -352,10 +362,10 @@ int main(int argc, char *argv[]) {
 
             // NNLOPS ggH reweighting
             if (sample.find("ggHtoTauTau125") != std::string::npos) {
-                if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
-                if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
-                if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
-                if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
+                if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
+                if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
+                if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
+                if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
             }
             // NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
 
@@ -410,9 +420,11 @@ int main(int argc, char *argv[]) {
         fout->cd();
 
         // // b-jet veto
-        // if (jets.getNbtag() > 0) {
-        //     continue;
-        // }
+        if (jets.getNbtag() == 0) {
+            histos->at("cutflow")->Fill(7., 1.);
+        } else {
+            continue;
+        }
 
         // create regions
         bool signalRegion = (tau.getTightIsoMVA() && electron.getIso() < 0.10);
@@ -422,18 +434,15 @@ int main(int argc, char *argv[]) {
 
         // create categories
         bool zeroJet = (jets.getNjets() == 0);
-        bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && (jets.getDijetMass() < 300 || Higgs.Pt() < 50)));
-        bool vbfCat = (jets.getNjets() > 1 && (jets.getDijetMass() > 300 || Higgs.Pt() > 50));
+        bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300));
+        bool vbfCat = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
         bool VHCat = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
         // only keep the regions we need
-        if (!signalRegion && !antiTauIsoRegion) {
+        if (signalRegion || antiTauIsoRegion)  {
+            histos->at("cutflow")->Fill(8., 1.);
+        } else {
             continue;
-        }
-
-        if (signalRegion && evt_charge == 0) {
-            histos->at("el_pt")->Fill(electron.getPt(), evtwt);
-            histos->at("tau_pt")->Fill(tau.getPt(), evtwt);
         }
 
         std::vector<std::string> tree_cat;

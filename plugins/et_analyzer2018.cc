@@ -142,7 +142,8 @@ int main(int argc, char* argv[]) {
     TH2F* btag_eff_c = reinterpret_cast<TH2F*>(bTag_eff_file.Get("btag_eff_c")->Clone());
     TH2F* btag_eff_oth = reinterpret_cast<TH2F*>(bTag_eff_file.Get("btag_eff_oth")->Clone());
 
-    TauTriggerSFs2017* eh = new TauTriggerSFs2017("data/tauTriggerEfficiencies2017_New.root", "data/tauTriggerEfficiencies2017.root", "tight", "MVA");
+    TauTriggerSFs2017* tau_trigger_sf =
+        new TauTriggerSFs2017("data/tauTriggerEfficiencies2017_New.root", "data/tauTriggerEfficiencies2017.root", "tight", "MVA");
 
     //////////////////////////////////////
     // Final setup:                     //
@@ -205,7 +206,6 @@ int main(int argc, char* argv[]) {
             }
         }
 
-
         histos->at("cutflow")->Fill(1., 1.);
 
         auto electron = electrons.run_factory();
@@ -222,7 +222,9 @@ int main(int argc, char* argv[]) {
         //////////////////////////////////////////////////////////
 
         // remove 2-prong taus
-        if (!tau.getDecayModeFinding() || tau.getL2DecayMode() == 5 || tau.getL2DecayMode() == 6) {
+        if (tau.getDecayModeFinding() && tau.getDecayMode() != 5 && tau.getDecayMode() != 6) {
+            histos->at("cutflow")->Fill(2., 1.);
+        } else {
             continue;
         }
 
@@ -240,16 +242,23 @@ int main(int argc, char* argv[]) {
         } else if (!isEmbed) {  // embedded trigger has some weirdness dealt with later
             continue;
         }
+        histos->at("cutflow")->Fill(3., 1.);
 
-        if (electron.getP4().DeltaR(tau.getP4()) < 0.5) {
+        if (electron.getP4().DeltaR(tau.getP4()) > 0.5) {
+            histos->at("cutflow")->Fill(4., 1.);
+        } else {
             continue;
         }
 
-        if (!event.getPassFlags(isData)) {
+        if (event.getPassFlags(isData)) {
+            histos->at("cutflow")->Fill(5., 1.);
+        } else {
             continue;
         }
 
-        if (tau.getPt() < 30) {
+        if (tau.getPt() > 30) {
+            histos->at("cutflow")->Fill(6., 1.);
+        } else {
             continue;
         }
 
@@ -263,7 +272,6 @@ int main(int argc, char* argv[]) {
         } else if (name == "ZJ" && tau.getGenMatch() != 6) {
             continue;
         }
-
         histos->at("cutflow")->Fill(7., 1.);
 
         // build Higgs
@@ -277,12 +285,16 @@ int main(int argc, char* argv[]) {
         int evt_charge = tau.getCharge() + electron.getCharge();
 
         // now do mt selection
-        if (mt > 50) {
+        if (mt < 50) {
+            histos->at("cutflow")->Fill(7., 1.);
+        } else {
             continue;
         }
 
         // only opposite-sign
-        if (evt_charge != 0) {
+        if (evt_charge == 0) {
+            histos->at("cutflow")->Fill(8., 1.);
+        } else {
             continue;
         }
 
@@ -349,7 +361,7 @@ int main(int argc, char* argv[]) {
             auto el_cross_eff = el_cross_data_eff / el_cross_mc_eff;
             double tau_cross_eff(1.);
             if (fireCross) {
-                tau_cross_eff = eh->getETauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
+                tau_cross_eff = tau_trigger_sf->getETauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
             }
 
             evtwt *= (single_eff * fireSingle + el_cross_eff * tau_cross_eff * fireCross);
@@ -429,7 +441,7 @@ int main(int argc, char* argv[]) {
                 single_eff = wEmbed->function("e_trg27_trg32_trg35_kit_data")->getVal();
                 el_leg_eff = wEmbed->function("e_trg_EleTau_Ele24Leg_desy_data")->getVal();
                 if (fabs(tau.getEta()) < 2.1) {
-                    tau_leg_eff = eh->getETauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
+                    tau_leg_eff = tau_trigger_sf->getETauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
                 }
                 evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
             }
@@ -444,7 +456,9 @@ int main(int argc, char* argv[]) {
         fout->cd();
 
         // b-jet veto
-        if (jets.getNbtag() > 0) {
+        if (jets.getNbtag() == 0) {
+            histos->at("cutflow")->Fill(9., 1.);
+        } else {
             continue;
         }
 
@@ -461,18 +475,10 @@ int main(int argc, char* argv[]) {
         bool VHCat = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
         // only keep the regions we need
-        if (!signalRegion && !antiTauIsoRegion) {
+        if (signalRegion || antiTauIsoRegion) {
+            histos->at("cutflow")->Fill(10., 1.);
+        } else {
             continue;
-        }
-
-        // now do mt selection
-        if (tau.getPt() < 30 || mt > 50) {
-            continue;
-        }
-
-        if (signalRegion && evt_charge == 0) {
-            histos->at("el_pt")->Fill(electron.getPt(), evtwt);
-            histos->at("tau_pt")->Fill(tau.getPt(), evtwt);
         }
 
         std::vector<std::string> tree_cat;
