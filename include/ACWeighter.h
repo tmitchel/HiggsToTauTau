@@ -98,11 +98,11 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
     std::transform(sample.begin(), sample.end(), sample.begin(), ::tolower);
 
     if (isggHAC || isWHAC || isZHAC || isVBFAC) {
-        if (original.find("a3int") != string::npos) {
+        if (original.find("a3int-prod") != string::npos || original.find("maxmix_prod") != string::npos) {
             fileName += stype_dir + ac_prefix + "a3int.root";
-        } else if (original.find("a3") != string::npos) {
+        } else if (original.find("a3-prod") != string::npos || original.find("ps_decay") != string::npos) {
             fileName += stype_dir + ac_prefix + "a3.root";
-        } else if (original.find("a1") != string::npos) {
+        } else if (original.find("a1-prod") != string::npos || original.find("nominal") != string::npos) {
             fileName += stype_dir + ac_prefix + "a1.root";
         }
         // loop isn't needed until we add more coupling scenarios
