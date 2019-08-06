@@ -16,10 +16,6 @@ parser.add_option('--data', '-d', action='store_true',
                   default=False, dest='isData',
                   help='run on data or MC'
                   )
-parser.add_option('--acSample', '-a', action='store_true',
-                  default=False, dest='ACsample',
-                  help='is an anomolous coupling sample'
-                  )
 parser.add_option('--exe', '-e', action='store',
                   default='Analyze', dest='exe',
                   help='name of executable'
@@ -116,56 +112,39 @@ for ifile in fileList:
         names = ['ZL', 'ZJ', 'ZTT']
     elif 'TT' in sample:
         names = ['TTT', 'TTJ', 'TTL']
-    elif 'WJets' in sample or 'EWKW' in sample:
+    elif 'WJets' in sample:
         names = ['W']
-    elif 'data' in sample.lower():
+    elif 'EWKW' in sample:
+        names = ['EWK_W']
+    elif 'data' in sample:
         names = ['data_obs']
-    elif 'ggHtoTauTau' in sample:
-        mass = sample.split('ggHtoTauTau')[-1]
-        names = ['ggH'+mass]
     elif 'ggH125' in sample:
-        mass = sample.split('ggH')[-1]
-        names = ['ggH'+mass]
-    elif 'VBFHtoTauTau' in sample:
-        mass = sample.split('VBFHtoTauTau')[-1]
-        names = ['VBF'+mass]
+        names = ['ggH125']
     elif 'VBF' in sample:
-        mass = sample.split('VBF')[-1]
-        names = ['VBF'+mass]
+        names = ['VBF125']
     elif 'WPlus' in sample or 'WMinus' in sample:
-        mass = sample.split('HTauTau')[-1]
-        names = ['WH'+mass]
-    elif 'ZHTauTau' in sample:
-        mass = sample.split('ZHTauTau')[-1]
-        names = ['ZH'+mass]
-    elif 'ZH' in sample:
-        mass = sample.split('ZH')[-1]
-        names = ['ZH'+mass]
+        names = ['WH125']
+    elif 'ZH125' in sample:
+        names = ['ZH125']
     elif 'ttH' in sample or 'tth' in sample:
-        mass = sample.split('ttH')[-1]
-        names = ['ttH'+mass]
+        names = ['ttH125']
     elif 'embed' in sample:
         names = ['embed']
-    elif 'vbf' in sample:
-        names = ['VBF125']
-        options.ACsample = True
-    elif 'ggH' in sample or 'ggh' in sample:
-        names = ['ggH125']
-        if not 'madgraph' in sample:
-            options.ACsample = True
-    elif 'wh' in sample:
-        names = ['WH125']
-        options.ACsample = True
-    elif 'zh' in sample:
-        names = ['ZH125']
-        options.ACsample = True
     else: 
         names = ['VVJ', 'VVT']
 
-    callstring = './%s -p %s -s %s -d %s ' % (options.exe, tosample, sample, options.output_dir)
-    if options.ACsample:
-      callstring += ' -a '
+    signal_type = 'None'
+    if 'JHU' in sample:
+        signal_type = 'JHU'
+    elif 'madgraph' in sample:
+        signal_type = 'madgraph'
+    elif 'minlo' in sample:
+        signal_type = 'minlo'
+    elif 'powheg' in sample:
+        signal_type = 'powheg'
 
+    callstring = './{} -p {} -s {} -d {} --stype {} '.format(options.exe, tosample, sample, options.output_dir, signal_type)
+    
     if get_systs != None and not 'Data' in sample.lower():
         for name in names:
             for isyst in get_systs(name):
