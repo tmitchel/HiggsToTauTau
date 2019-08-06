@@ -173,19 +173,19 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
 
     // include weights for anomolous coupling
     if (isAC) {
-        otree->Branch("wt_a1", &wt_a1);
-        otree->Branch("wt_a2", &wt_a2);
-        otree->Branch("wt_a3", &wt_a3);
-        otree->Branch("wt_L1", &wt_L1);
-        otree->Branch("wt_L1Zg", &wt_L1Zg);
-        otree->Branch("wt_a2int", &wt_a2int);
-        otree->Branch("wt_a3int", &wt_a3int);
-        otree->Branch("wt_L1int", &wt_L1int);
-        otree->Branch("wt_L1Zgint", &wt_L1Zgint);
+        otree->Branch("wt_vbf_a1", &wt_a1);
+        otree->Branch("wt_vbf_a2", &wt_a2);
+        otree->Branch("wt_vbf_a3", &wt_a3);
+        otree->Branch("wt_vbf_L1", &wt_L1);
+        otree->Branch("wt_vbf_L1Zg", &wt_L1Zg);
+        otree->Branch("wt_vbf_a2int", &wt_a2int);
+        otree->Branch("wt_vbf_a3int", &wt_a3int);
+        otree->Branch("wt_vbf_L1int", &wt_L1int);
+        otree->Branch("wt_vbf_L1Zgint", &wt_L1Zgint);
 
-        otree->Branch("wt_ggH_a1", &wt_ggH_a1);
-        otree->Branch("wt_ggH_a3", &wt_ggH_a3);
-        otree->Branch("wt_ggH_a3int", &wt_ggH_a3int);
+        otree->Branch("wt_ggh_a1", &wt_ggH_a1);
+        otree->Branch("wt_ggh_a3", &wt_ggH_a3);
+        otree->Branch("wt_ggh_a3int", &wt_ggH_a3int);
 
         otree->Branch("wt_wh_a1", &wt_wh_a1);
         otree->Branch("wt_wh_a2", &wt_wh_a2);
