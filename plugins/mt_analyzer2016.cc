@@ -43,7 +43,6 @@ int main(int argc, char *argv[]) {
     ////////////////////////////////////////////////
 
     CLParser parser(argc, argv);
-    bool doAC = parser.Flag("-a");
     std::string name = parser.Option("-n");
     std::string path = parser.Option("-p");
     std::string syst = parser.Option("-u");
@@ -53,6 +52,7 @@ int main(int argc, char *argv[]) {
     std::string fname = path + sample + ".root";
     bool isData = sample.find("data") != std::string::npos;
     bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
+    bool doAC = signal_type != "None";
 
     std::string systname = "";
     if (!syst.empty()) {
@@ -96,18 +96,23 @@ int main(int argc, char *argv[]) {
     fout->cd();
     slim_tree *st = new slim_tree("mutau_tree" + systname, doAC);
 
+    std::string original = sample;
     if (name == "VBF125") {
+        original = sample;
         sample = "vbf125";
     } else if (name == "ggH125") {
+        original = sample;
         sample = "ggh125";
     } else if (name == "WH125") {
+        original = sample;
         sample = sample.find("plus") == std::string::npos ? "wplus125" : "wminus125";
     } else if (name == "ZH125") {
+        original = sample;
         sample = "zh125";
     }
 
     // reweighter for anomolous coupling samples
-    ACWeighter ac_weights = ACWeighter(sample, signal_type, "2016");
+    ACWeighter ac_weights = ACWeighter(original, sample, signal_type, "2016");
     ac_weights.fillWeightMap();
 
     // get normalization (lumi & xs are in util.h)

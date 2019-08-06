@@ -24,7 +24,7 @@ using std::string;
 ///////////////////////////////////////////////
 class ACWeighter {
  public:
-    explicit ACWeighter(string, string, string);
+    explicit ACWeighter(string, string, string, string);
     ~ACWeighter();
 
     void fillWeightMap();
@@ -48,8 +48,8 @@ class ACWeighter {
     Double_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint;
 };
 
-ACWeighter::ACWeighter(string sample, string _signal_type, string year)
-    : notSignal(true),
+ACWeighter::ACWeighter(string original, string sample, string _signal_type, string year)
+    : notSignal(false),
       foundEvents(0),
       crapEvents(0),
       numWeightFiles(7),
@@ -98,11 +98,11 @@ ACWeighter::ACWeighter(string sample, string _signal_type, string year)
     std::transform(sample.begin(), sample.end(), sample.begin(), ::tolower);
 
     if (isggHAC || isWHAC || isZHAC || isVBFAC) {
-        if (sample.find("a3int") != string::npos) {
+        if (original.find("a3int") != string::npos) {
             fileName += stype_dir + ac_prefix + "a3int.root";
-        } else if (sample.find("a3") != string::npos) {
+        } else if (original.find("a3") != string::npos) {
             fileName += stype_dir + ac_prefix + "a3.root";
-        } else if (sample.find("a1") != string::npos) {
+        } else if (original.find("a1") != string::npos) {
             fileName += stype_dir + ac_prefix + "a1.root";
         }
         // loop isn't needed until we add more coupling scenarios

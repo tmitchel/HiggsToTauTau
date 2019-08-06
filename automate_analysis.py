@@ -118,9 +118,9 @@ for ifile in fileList:
         names = ['EWK_W']
     elif 'data' in sample:
         names = ['data_obs']
-    elif 'ggH125' in sample:
+    elif 'ggh125' in sample.lower():
         names = ['ggH125']
-    elif 'VBF' in sample:
+    elif 'vbf125' in sample.lower():
         names = ['VBF125']
     elif 'WPlus' in sample or 'WMinus' in sample:
         names = ['WH125']
