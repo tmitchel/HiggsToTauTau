@@ -426,7 +426,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     t1_phi = t->getPhi();
     t1_mass = t->getMass();
     t1_charge = t->getCharge();
-    t1_decayMode = t->getL2DecayMode();
+    t1_decayMode = t->getDecayMode();
     t1_iso = t->getIso();
     t1_iso_VL = t->getVLooseIsoMVA();
     t1_iso_L = t->getLooseIsoMVA();
@@ -465,7 +465,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     t1_phi = t->getPhi();
     t1_mass = t->getMass();
     t1_charge = t->getCharge();
-    t1_decayMode = t->getL2DecayMode();
+    t1_decayMode = t->getDecayMode();
     t1_iso = t->getIso();
     t1_iso_VL = t->getVLooseIsoMVA();
     t1_iso_L = t->getLooseIsoMVA();
