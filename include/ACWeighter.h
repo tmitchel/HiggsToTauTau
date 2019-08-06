@@ -4,11 +4,14 @@
 #define INCLUDE_ACWEIGHTER_H_
 
 #include <algorithm>
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
 #include "TFile.h"
 #include "TTree.h"
+
+using std::string;
 
 ///////////////////////////////////////////////
 // YM AC reweighing                          //
@@ -21,34 +24,54 @@
 ///////////////////////////////////////////////
 class ACWeighter {
  public:
-    explicit ACWeighter(std::string, std::string);
+    explicit ACWeighter(string, string, string);
     ~ACWeighter();
 
     void fillWeightMap();
     std::vector<double> getWeights(Long64_t);
 
  private:
+    bool notSignal;
     Long64_t eventID;
     TTree *weightTree;
     TFile *weightTreeFile;
-    std::string ac_prefix;
-    std::string fileName = "";
+    string ac_prefix;
+    string fileName = "/hdfs/store/user/doyeong/HTT_AC_weights/";
+    string signal_type;
     unsigned int numWeightFiles;
     int foundEvents, crapEvents;  // hehe
     bool isVBFAC, isggHAC, isWHAC, isZHAC;
-    std::vector<std::string> weightNames;
+    std::vector<string> weightNames;
     std::map<Long64_t, std::vector<double>> acWeights;
 
     // variables with weights (for ggH only a1 (SM), a3 (CP-odd), and maxmix (int) is used
     Double_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint;
 };
 
-ACWeighter::ACWeighter(std::string sample, std::string year)
-    : foundEvents(0), crapEvents(0), numWeightFiles(7), weightNames{"a1", "a3", "a3int", "a2", "a2int", "l1", "l1int"} {
-    isVBFAC = sample.find("vbf215_JHU") != std::string::npos;
-    isggHAC = sample.find("ggh125_JHU") != std::string::npos;
-    isWHAC = sample.find("wh125_JHU") != std::string::npos;
-    isZHAC = sample.find("zh125_JHU") != std::string::npos;
+ACWeighter::ACWeighter(string sample, string _signal_type, string year)
+    : notSignal(true),
+      foundEvents(0),
+      crapEvents(0),
+      numWeightFiles(7),
+      weightNames{"a1", "a3", "a3int", "a2", "a2int", "l1", "l1int"},
+      signal_type(_signal_type) {
+    isVBFAC = sample == "vbf125";
+    isggHAC = sample == "ggh125";
+    isWHAC = sample == "wplus125" || "wminus125";
+    isZHAC = sample == "zh125";
+
+    string stype_dir = "";
+    if (signal_type == "madgraph" && year == "2016") {
+        stype_dir = "/MG2016_X10/";
+    } else if (signal_type == "madgraph" && year == "2017") {
+        stype_dir = "/MG2017_X10/";
+    } else if (signal_type == "JHU" && year == "2016") {
+        stype_dir = "/JHU2016/";
+    } else if (signal_type == "JHU" && year == "2017") {
+        stype_dir = "/JHU2017/";
+    } else {
+        notSignal = true;
+    }
 
     // get the correct prefix
     if (isVBFAC) {
@@ -63,81 +86,61 @@ ACWeighter::ACWeighter(std::string sample, std::string year)
 
     // ggH AC only has 3 files
     if (isggHAC) {
-        numWeightFiles = 3;
+        weightNames = {"a1", "a3", "a3int"};
     }
 
+    // 2017 has extra weights
     if (year == "2017" && isVBFAC) {
         weightNames.push_back("l1zg");
         weightNames.push_back("l1zgint");
-        numWeightFiles = 9;
     }
 
     std::transform(sample.begin(), sample.end(), sample.begin(), ::tolower);
 
     if (isggHAC || isWHAC || isZHAC || isVBFAC) {
-        for (unsigned int ifile = 0; ifile != numWeightFiles; ++ifile) {
-            // is it interference sample? if yes, skip the weightsNames that do not have int in them
-
-            if (sample.find("int") != std::string::npos && weightNames.at(ifile).find("int") == std::string::npos) {
-                continue;
-            }
-
-            // if it is not an interference sample, skip weightsNames that have int in them
-            if (sample.find("int") == std::string::npos && weightNames.at(ifile).find("int") != std::string::npos) {
-                continue;
-            }
-
-            std::string substring = sample.substr(sample.find("_") + 1);
-            if (substring == weightNames.at(ifile)) {
-                fileName = "data/AC_weights/" + year + "/" + ac_prefix + weightNames[ifile] + ".root";
-                break;
-            }
+        if (sample.find("a3int") != string::npos) {
+            fileName += stype_dir + ac_prefix + "a3int.root";
+        } else if (sample.find("a3") != string::npos) {
+            fileName += stype_dir + ac_prefix + "a3.root";
+        } else if (sample.find("a1") != string::npos) {
+            fileName += stype_dir + ac_prefix + "a1.root";
         }
-    }
+        // loop isn't needed until we add more coupling scenarios
+        // for (auto weightName : weightNames) {
+        //     // is it interference sample? if yes, skip the weightsNames that do not have int in them
+        //     if (sample.find("int") != string::npos && weightName.find("int") == string::npos) {
+        //         continue;
+        //     }
 
+        //     // if it is not an interference sample, skip weightsNames that have int in them
+        //     if (sample.find("int") == string::npos && weightName.find("int") != string::npos) {
+        //         continue;
+        //     }
+
+        //     string substring = sample.substr(sample.find("_") + 1);
+        //     if (substring == weightName) {
+        //         fileName = "data/AC_weights/" + year + "/" + ac_prefix + weightName + ".root";
+        //         break;
+        //     }
+        // }
+    }
     std::cout << "fileName: " << fileName << std::endl;
 
     // set the branches
-    if (fileName != "") {
+    if (!notSignal) {
         weightTreeFile = TFile::Open(fileName.c_str());
         weightTree = reinterpret_cast<TTree *>(weightTreeFile->Get("weights"));
-        weightTree->SetBranchAddress("eventID", &eventID);
 
-        if (year == "2017" && isWHAC) {
-            weightTree->SetBranchAddress("wt_wh_a1", &wt_a1);
-            weightTree->SetBranchAddress("wt_wh_a3", &wt_a3);
-            weightTree->SetBranchAddress("wt_wh_a3int", &wt_a3int);
-            weightTree->SetBranchAddress("wt_wh_a2", &wt_a2);
-            weightTree->SetBranchAddress("wt_wh_a2int", &wt_a2int);
-            weightTree->SetBranchAddress("wt_wh_L1", &wt_L1);
-            weightTree->SetBranchAddress("wt_wh_L1int", &wt_L1int);
-            weightTree->SetBranchAddress("wt_wh_L1Zg", &wt_L1Zg);
-            weightTree->SetBranchAddress("wt_wh_L1Zgint", &wt_L1Zgint);
-        } else if (year == "2017" && isZHAC) {
-            weightTree->SetBranchAddress("wt_zh_a1", &wt_a1);
-            weightTree->SetBranchAddress("wt_zh_a3", &wt_a3);
-            weightTree->SetBranchAddress("wt_zh_a3int", &wt_a3int);
-            weightTree->SetBranchAddress("wt_zh_a2", &wt_a2);
-            weightTree->SetBranchAddress("wt_zh_a2int", &wt_a2int);
-            weightTree->SetBranchAddress("wt_zh_L1", &wt_L1);
-            weightTree->SetBranchAddress("wt_zh_L1int", &wt_L1int);
-            weightTree->SetBranchAddress("wt_zh_L1Zg", &wt_L1Zg);
-            weightTree->SetBranchAddress("wt_zh_L1Zgint", &wt_L1Zgint);
-        } else {
-            if (isggHAC || isVBFAC || isWHAC || isZHAC) {
-                weightTree->SetBranchAddress("wt_a1", &wt_a1);
-                weightTree->SetBranchAddress("wt_a3", &wt_a3);
-                weightTree->SetBranchAddress("wt_a3int", &wt_a3int);
-                if (isVBFAC || isWHAC || isZHAC) {
-                    weightTree->SetBranchAddress("wt_a2", &wt_a2);
-                    weightTree->SetBranchAddress("wt_a2int", &wt_a2int);
-                    weightTree->SetBranchAddress("wt_L1", &wt_L1);
-                    weightTree->SetBranchAddress("wt_L1int", &wt_L1int);
-                    weightTree->SetBranchAddress("wt_L1Zg", &wt_L1Zg);
-                    weightTree->SetBranchAddress("wt_L1Zgint", &wt_L1Zgint);
-                }
-            }
-        }
+        weightTree->SetBranchAddress("eventID", &eventID);
+        weightTree->SetBranchAddress("wt_a1", &wt_a1);
+        weightTree->SetBranchAddress("wt_a2", &wt_a2);
+        weightTree->SetBranchAddress("wt_a3", &wt_a3);
+        weightTree->SetBranchAddress("wt_L1", &wt_L1);
+        weightTree->SetBranchAddress("wt_L1Zg", &wt_L1Zg);
+        weightTree->SetBranchAddress("wt_a2int", &wt_a2int);
+        weightTree->SetBranchAddress("wt_a3int", &wt_a3int);
+        weightTree->SetBranchAddress("wt_L1int", &wt_L1int);
+        weightTree->SetBranchAddress("wt_L1Zgint", &wt_L1Zgint);
     }
 }
 
