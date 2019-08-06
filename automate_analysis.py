@@ -122,7 +122,9 @@ for ifile in fileList:
         names = ['ggH125']
     elif 'vbf125' in sample.lower():
         names = ['VBF125']
-    elif 'WPlus' in sample or 'WMinus' in sample:
+    elif 'wplus' in sample or 'wminus' in sample:
+        names = ['WHsigned125']
+    elif 'WH' in sample:
         names = ['WH125']
     elif 'ZH125' in sample:
         names = ['ZH125']
