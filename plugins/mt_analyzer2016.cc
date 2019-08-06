@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
         sample = "vbf125";
     } else if (name == "ggH125") {
         sample = "ggh125";
-    } else if(name == "WH125"){
+    } else if (name == "WH125") {
         sample = "wh125";
     } else if (name == "WHsigned125") {
         sample = sample.find("plus") == std::string::npos ? "wplus125" : "wminus125";
