@@ -98,16 +98,14 @@ int main(int argc, char *argv[]) {
 
     std::string original = sample;
     if (name == "VBF125") {
-        original = sample;
         sample = "vbf125";
     } else if (name == "ggH125") {
-        original = sample;
         sample = "ggh125";
-    } else if (name == "WH125") {
-        original = sample;
+    } else if(name == "WH125"){
+        sample = "wh125";
+    } else if (name == "WHsigned125") {
         sample = sample.find("plus") == std::string::npos ? "wplus125" : "wminus125";
     } else if (name == "ZH125") {
-        original = sample;
         sample = "zh125";
     }
 
