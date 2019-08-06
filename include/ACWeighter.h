@@ -50,6 +50,10 @@ class ACWeighter {
 
 ACWeighter::ACWeighter(string original, string sample, string _signal_type, string year)
     : notSignal(false),
+      isVBFAC(false),
+      isggHAC(false),
+      isWHAC(false),
+      isZHAC(false),
       foundEvents(0),
       crapEvents(0),
       numWeightFiles(7),
@@ -57,7 +61,7 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
       signal_type(_signal_type) {
     isVBFAC = sample == "vbf125";
     isggHAC = sample == "ggh125";
-    isWHAC = sample == "wplus125" || "wminus125";
+    isWHAC = sample == "wplus125" || sample == "wminus125";
     isZHAC = sample == "zh125";
 
     string stype_dir = "";
@@ -123,8 +127,8 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
         //         break;
         //     }
         // }
+        std::cout << "fileName: " << fileName << std::endl;
     }
-    std::cout << "fileName: " << fileName << std::endl;
 
     // set the branches
     if (!notSignal) {
