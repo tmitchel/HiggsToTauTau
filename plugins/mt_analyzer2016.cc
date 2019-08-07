@@ -52,11 +52,11 @@ int main(int argc, char *argv[]) {
     std::string fname = path + sample + ".root";
     bool isData = sample.find("data") != std::string::npos;
     bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
-    bool doAC = signal_type != "None";
+    bool doAC = signal_type == "JHU" || signal_type == "madgraph";
 
     std::string systname = "";
     if (!syst.empty()) {
-        systname = "_" + syst;
+        systname = "_SYST_" + syst;
     }
 
     // open input file
