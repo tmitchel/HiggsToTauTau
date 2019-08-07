@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 
     std::string systname = "";
     if (!syst.empty()) {
-        systname = "_" + syst;
+        systname = "_SYST_" + syst;
     }
 
     // open input file
