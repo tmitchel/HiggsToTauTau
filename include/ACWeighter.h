@@ -108,6 +108,8 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
             fileName += stype_dir + ac_prefix + "a3.root";
         } else if (original.find("a1-prod") != string::npos || original.find("nominal") != string::npos) {
             fileName += stype_dir + ac_prefix + "a1.root";
+        } else {
+            notSignal = true;
         }
         // loop isn't needed until we add more coupling scenarios
         // for (auto weightName : weightNames) {
