@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
     TH2F *btag_eff_oth = reinterpret_cast<TH2F *>(bTag_eff_file.Get("btag_eff_oth")->Clone());
 
     TauTriggerSFs2017 *tau_trigger_sf =
-        new TauTriggerSFs2017("data/tauTriggerEfficiencies2017_New.root", "mutau", "2017", "tight", "MVA");
+        new TauTriggerSFs2017("$CMSSW_BASE/src/TauAnalysisTools/TauTriggerSFs/data/tauTriggerEfficiencies2017.root", "mutau", "2017", "tight", "MVAv2");
 
     //////////////////////////////////////
     // Final setup:                     //
