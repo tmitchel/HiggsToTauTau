@@ -112,14 +112,14 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
             fileName += stype_dir + ac_prefix + "a2.root";
         } else if (original.find("a2int-prod") != string::npos) {
             fileName += stype_dir + ac_prefix + "a2int.root";
-        } else if (original.find("L1-prod") != string::npos && !isggHAC) {
-            fileName += stype_dir + ac_prefix + "l1.root";
-        } else if (original.find("L1int-prod") != string::npos && !isggHAC) {
-            fileName += stype_dir + ac_prefix + "l1int.root";
-        } else if (original.find("L1Zg-prod") != string::npos && !isggHAC) {
-            fileName += stype_dir + ac_prefix + "l1zg.root";
-        } else if (original.find("L1Zgint-prod") != string::npos && !isggHAC) {
-            fileName += stype_dir + ac_prefix + "l1zgint.root";
+        } else if (original.find("l1-prod") != string::npos && !isggHAC) {
+            fileName += stype_dir + ac_prefix + "L1.root";
+        } else if (original.find("l1int-prod") != string::npos && !isggHAC) {
+            fileName += stype_dir + ac_prefix + "L1int.root";
+        } else if (original.find("l1zg-prod") != string::npos && !isggHAC) {
+            fileName += stype_dir + ac_prefix + "L1Zg.root";
+        } else if (original.find("l1zgint-prod") != string::npos && !isggHAC) {
+            fileName += stype_dir + ac_prefix + "L1Zgint.root";
         } else {
             notSignal = true;
         }
