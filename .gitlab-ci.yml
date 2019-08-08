@@ -26,7 +26,6 @@ job1:
   - mkdir TauAnalysisTools
   - git clone -b final_2017_MCv2 https://github.com/cms-tau-pog/TauTriggerSFs $CMSSW_BASE/src/TauAnalysisTools/TauTriggerSFs
   - scram b
-  - cd ..
   - git clone https://github.com/CMS-HTT/Jet2TauFakes.git HTTutilities/Jet2TauFakes
   - cd HTTutilities/Jet2TauFakes
   - git checkout v0.2.2
