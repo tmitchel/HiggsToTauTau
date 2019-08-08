@@ -23,14 +23,14 @@ using std::string;
 // int - interference term (f05)             //
 ///////////////////////////////////////////////
 class ACWeighter {
- public:
+   public:
     explicit ACWeighter(string, string, string, string);
     ~ACWeighter();
 
     void fillWeightMap();
     std::vector<double> getWeights(Long64_t);
 
- private:
+   private:
     bool notSignal;
     Long64_t eventID;
     TTree *weightTree;
@@ -102,34 +102,28 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
     std::transform(sample.begin(), sample.end(), sample.begin(), ::tolower);
 
     if (isggHAC || isWHAC || isZHAC || isVBFAC) {
-        if (original.find("a3int-prod") != string::npos || original.find("maxmix_prod") != string::npos) {
-            fileName += stype_dir + ac_prefix + "a3int.root";
+        if (original.find("a1-prod") != string::npos || original.find("nominal") != string::npos) {
+            fileName += stype_dir + ac_prefix + "a1.root";
         } else if (original.find("a3-prod") != string::npos || original.find("ps_decay") != string::npos) {
             fileName += stype_dir + ac_prefix + "a3.root";
-        } else if (original.find("a1-prod") != string::npos || original.find("nominal") != string::npos) {
-            fileName += stype_dir + ac_prefix + "a1.root";
+        } else if (original.find("a3int-prod") != string::npos || original.find("maxmix_prod") != string::npos) {
+            fileName += stype_dir + ac_prefix + "a3int.root";
+        } else if (original.find("a2-prod") != string::npos && !isggHAC) {
+            fileName += stype_dir + ac_prefix + "a2.root";
+        } else if (original.find("a2int-prod") != string::npos) {
+            fileName += stype_dir + ac_prefix + "a2int.root";
+        } else if (original.find("l1-prod") != string::npos && !isggHAC) {
+            fileName += stype_dir + ac_prefix + "l1.root";
+        } else if (original.find("l1int-prod") != string::npos && !isggHAC) {
+            fileName += stype_dir + ac_prefix + "l1int.root";
+        } else if (original.find("l1zg-prod") != string::npos && !isggHAC) {
+            fileName += stype_dir + ac_prefix + "l1zg.root";
+        } else if (original.find("l1zgint-prod") != string::npos && !isggHAC) {
+            fileName += stype_dir + ac_prefix + "l1zgint.root";
         } else {
             notSignal = true;
         }
-        // loop isn't needed until we add more coupling scenarios
-        // for (auto weightName : weightNames) {
-        //     // is it interference sample? if yes, skip the weightsNames that do not have int in them
-        //     if (sample.find("int") != string::npos && weightName.find("int") == string::npos) {
-        //         continue;
-        //     }
-
-        //     // if it is not an interference sample, skip weightsNames that have int in them
-        //     if (sample.find("int") == string::npos && weightName.find("int") != string::npos) {
-        //         continue;
-        //     }
-
-        //     string substring = sample.substr(sample.find("_") + 1);
-        //     if (substring == weightName) {
-        //         fileName = "data/AC_weights/" + year + "/" + ac_prefix + weightName + ".root";
-        //         break;
-        //     }
-        // }
-        std::cout << "fileName: " << fileName << std::endl;
+        std::cout << "AC reweighting file name: " << fileName << std::endl;
     }
 
     // set the branches
