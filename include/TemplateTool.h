@@ -203,8 +203,8 @@ std::string TemplateTool::get_extension(std::string name) { return extension_map
 TemplateTool::TemplateTool(std::string channel_prefix)
     : channel_prefix(channel_prefix),
       acNameMap{{"ggh",
-                 {std::make_pair("wt_ggH_a1", "JHU_GGH2Jets_sm_M125"), std::make_pair("wt_ggH_a3", "JHU_GGH2Jets_pseudoscalar_M125"),
-                  std::make_pair("wt_ggH_a3int", "JHU_GGH2Jets_pseudoscalar_Mf05ph0125")}},
+                 {std::make_pair("wt_ggh_a1", "JHU_GGH2Jets_sm_M125"), std::make_pair("wt_ggh_a3", "JHU_GGH2Jets_pseudoscalar_M125"),
+                  std::make_pair("wt_ggh_a3int", "JHU_GGH2Jets_pseudoscalar_Mf05ph0125")}},
                 {"wh",
                  {std::make_pair("wt_wh_a1", "reweighted_WH_htt_0PM125"), std::make_pair("wt_wh_a2", "reweighted_WH_htt_0PH125"),
                   std::make_pair("wt_wh_a2int", "reweighted_WH_htt_0PHf05ph0125"), std::make_pair("wt_wh_a3", "reweighted_WH_htt_0M125"),
