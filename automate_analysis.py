@@ -111,7 +111,7 @@ for ifile in fileList:
     if 'DYJets' in sample:
         names = ['ZL', 'ZJ', 'ZTT']
     elif 'TT' in sample:
-        names = ['TTT', 'TTJ', 'TTL']
+        names = ['TTT', 'TTJ']
     elif 'WJets' in sample:
         names = ['W']
     elif 'EWKW' in sample:
@@ -122,11 +122,11 @@ for ifile in fileList:
         names = ['ggH125']
     elif 'vbf125' in sample.lower():
         names = ['VBF125']
-    elif 'wplus' in sample or 'wminus' in sample:
+    elif 'wplus' in sample.lower() or 'wminus' in sample.lower():
         names = ['WHsigned125']
-    elif 'WH' in sample:
+    elif 'wh125' in sample.lower():
         names = ['WH125']
-    elif 'ZH125' in sample:
+    elif 'zh125' in sample.lower():
         names = ['ZH125']
     elif 'ttH' in sample or 'tth' in sample:
         names = ['ttH125']
