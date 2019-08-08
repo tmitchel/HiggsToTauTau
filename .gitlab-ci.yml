@@ -35,6 +35,7 @@ job1:
   script:
   - echo "start"
   - echo `ls`
+  - echo `ls $CMSSW_BASE/lib/$SCRAM_ARCH/`
   - ./build plugins/et_analyzer2016.cc test
   - ./build plugins/et_analyzer2017.cc test
   - ./build plugins/mt_analyzer2016.cc test
