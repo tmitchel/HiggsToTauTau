@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 
     // cd to root of output file and create tree
     fout->cd();
-    slim_tree *st = new slim_tree("mutau_tree" + systname, doAC);
+    slim_tree *st = new slim_tree("mt_tree" + systname, doAC);
 
     std::string original = sample;
     if (name == "VBF125") {

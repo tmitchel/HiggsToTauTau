@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
 
     // cd to root of output file and create tree
     fout->cd();
-    slim_tree* st = new slim_tree("etau_tree", doAC);
+    slim_tree* st = new slim_tree("et_tree", doAC);
 
     if (sample.find("vbf125") != std::string::npos) {
         sample = "vbf125";
