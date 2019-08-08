@@ -61,7 +61,7 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
       signal_type(_signal_type) {
     isVBFAC = sample == "vbf125";
     isggHAC = sample == "ggh125";
-    isWHAC = sample == "wplus125" || sample == "wminus125";
+    isWHAC = (sample == "wplus125" || sample == "wminus125" || sample == "wh125");
     isZHAC = sample == "zh125";
 
     string stype_dir = "";
