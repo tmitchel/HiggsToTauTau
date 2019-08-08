@@ -153,13 +153,13 @@ TemplateTool::TemplateTool(std::string channel_prefix, std::string year, std::st
 // a JHU sample for reweighting, then returns the vector of
 // pairs that has the weight name and the new sample name.
 std::vector<std::pair<std::string, std::string>> TemplateTool::get_AC_weights(std::string name) {
-    if (name.find("ggh_inc") != std::string::npos) {
+    if (name.find("ggh125_JHU") != std::string::npos) {
         return acNameMap.at("ggh");
-    } else if (name.find("vbf_inc") != std::string::npos) {
+    } else if (name.find("vbf125_JHU") != std::string::npos) {
         return acNameMap.at("vbf");
-    } else if (name.find("wh_inc") != std::string::npos) {
+    } else if (name.find("wh125_JHU") != std::string::npos) {
         return acNameMap.at("wh");
-    } else if (name.find("zh_inc") != std::string::npos) {
+    } else if (name.find("zh125_JHU") != std::string::npos) {
         return acNameMap.at("zh");
     }
 }
@@ -219,15 +219,15 @@ TemplateTool::TemplateTool(std::string channel_prefix)
                   std::make_pair("wt_zh_L1Zgint", "reweighted_ZH_htt_0L1Zgf05ph0125")}},
                 {"vbf",
                  {
-                     std::make_pair("wt_a1", "reweighted_qqH_htt_0PM125"),
-                     std::make_pair("wt_a2", "reweighted_qqH_htt_0PH125"),
-                     std::make_pair("wt_a2int", "reweighted_qqH_htt_0PHf05ph0125"),
-                     std::make_pair("wt_a3", "reweighted_qqH_htt_0M125"),
-                     std::make_pair("wt_a3int", "reweighted_qqH_htt_0Mf05ph0125"),
-                     std::make_pair("wt_L1", "reweighted_qqH_htt_0L1125"),
-                     std::make_pair("wt_L1int", "reweighted_qqH_htt_0L1f05ph0125"),
-                     std::make_pair("wt_L1Zg", "reweighted_qqH_htt_0L1Zg125"),
-                     std::make_pair("wt_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"),
+                     std::make_pair("wt_vbf_a1", "reweighted_qqH_htt_0PM125"),
+                     std::make_pair("wt_vbf_a2", "reweighted_qqH_htt_0PH125"),
+                     std::make_pair("wt_vbf_a2int", "reweighted_qqH_htt_0PHf05ph0125"),
+                     std::make_pair("wt_vbf_a3", "reweighted_qqH_htt_0M125"),
+                     std::make_pair("wt_vbf_a3int", "reweighted_qqH_htt_0Mf05ph0125"),
+                     std::make_pair("wt_vbf_L1", "reweighted_qqH_htt_0L1125"),
+                     std::make_pair("wt_vbf_L1int", "reweighted_qqH_htt_0L1f05ph0125"),
+                     std::make_pair("wt_vbf_L1Zg", "reweighted_qqH_htt_0L1Zg125"),
+                     std::make_pair("wt_vbf_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"),
                  }}},
       categories{channel_prefix + "_inclusive",         channel_prefix + "_0jet",
                  channel_prefix + "_boosted",           channel_prefix + "_vbf",
