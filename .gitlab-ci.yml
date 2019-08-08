@@ -24,6 +24,7 @@ job1:
   - eval `scramv1 runtime -sh`
   - cd $CMSSW_BASE/src
   - git clone https://github.com/CMS-HTT/LeptonEfficiencies
+  - git clone git@github.com:CMS-HTT/LeptonEff-interface.git $CMSSW_BASE/src/HTT-utilities/LepEffInterface
   - mkdir TauAnalysisTools
   - git clone -b final_2017_MCv2 https://github.com/cms-tau-pog/TauTriggerSFs $CMSSW_BASE/src/TauAnalysisTools/TauTriggerSFs
   - scram b
