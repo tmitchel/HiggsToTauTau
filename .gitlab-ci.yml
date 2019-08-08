@@ -23,11 +23,12 @@ job1:
   - tar xzf repo.tar.gz
   - eval `scramv1 runtime -sh`
   - cd $CMSSW_BASE/src
-  - git clone https://github.com/CMS-HTT/LeptonEfficiencies
-  - git clone https://github.com/CMS-HTT/LeptonEff-interface.git $CMSSW_BASE/src/HTT-utilities/LepEffInterface
+  - git clone https://github.com/CMS-HTT/LeptonEff-interface.git $CMSSW_BASE/src/HTT-utilities
+  - cd HTT-utilities/LepEffInterface/
+  - git clone https://github.com/CMS-HTT/LeptonEfficiencies data
+  - cd ${CMSSW_BASE}/src
   - mkdir TauAnalysisTools
   - git clone -b final_2017_MCv2 https://github.com/cms-tau-pog/TauTriggerSFs $CMSSW_BASE/src/TauAnalysisTools/TauTriggerSFs
-  - scram b
   - git clone https://github.com/CMS-HTT/Jet2TauFakes.git HTTutilities/Jet2TauFakes
   - cd HTTutilities/Jet2TauFakes
   - git checkout v0.2.2
