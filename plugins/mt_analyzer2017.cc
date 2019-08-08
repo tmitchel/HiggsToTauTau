@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
     TH2F *btag_eff_oth = reinterpret_cast<TH2F *>(bTag_eff_file.Get("btag_eff_oth")->Clone());
 
     TauTriggerSFs2017 *tau_trigger_sf =
-        new TauTriggerSFs2017("data/tauTriggerEfficiencies2017_New.root", "data/tauTriggerEfficiencies2017.root", "tight", "MVA");
+        new TauTriggerSFs2017("data/tauTriggerEfficiencies2017_New.root", "mutau", "2017", "tight", "MVA");
 
     //////////////////////////////////////
     // Final setup:                     //
@@ -363,7 +363,7 @@ int main(int argc, char *argv[]) {
             auto mu_cross_eff = mu_cross_data_eff / mu_cross_mc_eff;
             double tau_cross_eff(1.);
             if (fireCross) {
-                tau_cross_eff = tau_trigger_sf->getMuTauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
+                tau_cross_eff = tau_trigger_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
             }
 
             evtwt *= (single_eff * fireSingle + mu_cross_eff * tau_cross_eff * fireCross);
