@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
     // get CLI arguments
     CLParser parser(argc, argv);
     bool doSyst = parser.Flag("-s");
+    bool embed = parser.Flag("-e");
     string dir = parser.Option("-d");
     string year = parser.Option("-y");
     string suffix = parser.Option("--suf");
@@ -34,8 +35,6 @@ int main(int argc, char *argv[]) {
         channel_prefix = "et";
     } else if (tree_name.find("mutau_tree") != string::npos) {
         channel_prefix = "mt";
-    } else if (tree_name.find("tautau_tree") != string::npos) {
-        channel_prefix = "tt";
     } else {
         std::cerr << "Um. I don't know that tree. Sorry...";
         return -1;
@@ -45,8 +44,20 @@ int main(int argc, char *argv[]) {
     vector<string> files;
     read_directory(dir, &files);
 
+    // get correct naming scheme
+    string ztt_name("_ztt");
+    if (embed) {
+        ztt_name = "_emb";
+    }
+
+    string syst_name("_noSys");
+    if (doSyst) {
+        syst_name = "_Sys";
+    }
+
     // make output file and TemplateTool containing useful information
-    auto fout = std::make_shared<TFile>(("Output/templates/" + channel_prefix + year + "_" + suffix + ".root").c_str(), "recreate");
+    auto fout = std::make_shared<TFile>(
+        ("Output/templates/htt_" + channel_prefix + ztt_name + syst_name + "_fa3_" + year + "_" + suffix + ".root").c_str(), "recreate");
     auto info = std::make_unique<TemplateTool>(channel_prefix);
     auto map_prefix = "";
     if (channel_prefix == "mt") {
@@ -98,7 +109,7 @@ int main(int argc, char *argv[]) {
         }
 
         // AC reweighting for JHU samples only
-        if (ifile.find("_inc.root") != std::string::npos) {
+        if (ifile.find("_JHU") != std::string::npos) {
             auto ac_weights = info->get_AC_weights(ifile);
             for (auto ac_weight : ac_weights) {
                 auto fin = std::unique_ptr<TFile>(TFile::Open((dir + "/" + ifile).c_str()));

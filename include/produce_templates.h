@@ -179,6 +179,8 @@ void Sample_Template::set_branches(std::shared_ptr<TTree> tree, std::string acWe
 
     if (acWeight != "None") {
         tree->SetBranchAddress(acWeight.c_str(), &acWeightVal);
+    } else {
+        acWeightVal = 1.;
     }
 }
 
@@ -217,8 +219,6 @@ void Sample_Template::fill_histograms(std::shared_ptr<TTree> tree, bool doSyst =
         vbf_var2 = m_sv;
 
         cat0 = (njets == 0);
-        //     cat1 = (njets == 1 || (njets > 1 && (mjj < 300 || higgs_pT < 50 || t1_pt < 40)));
-        //     cat2 = (njets > 1 && mjj > 300 && higgs_pT > 50 && t1_pt > 40);
         cat1 = (njets == 1 || (njets > 1 && (mjj < 300)));
         cat2 = (njets > 1 && mjj > 300);
 

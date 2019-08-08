@@ -23,14 +23,14 @@ using std::string;
 // int - interference term (f05)             //
 ///////////////////////////////////////////////
 class ACWeighter {
-   public:
+ public:
     explicit ACWeighter(string, string, string, string);
     ~ACWeighter();
 
     void fillWeightMap();
     std::vector<double> getWeights(Long64_t);
 
-   private:
+ private:
     bool notSignal;
     Long64_t eventID;
     TTree *weightTree;
