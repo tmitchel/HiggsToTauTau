@@ -139,14 +139,16 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
 
         weightTree->SetBranchAddress("eventID", &eventID);
         weightTree->SetBranchAddress("wt_a1", &wt_a1);
-        weightTree->SetBranchAddress("wt_a2", &wt_a2);
         weightTree->SetBranchAddress("wt_a3", &wt_a3);
-        weightTree->SetBranchAddress("wt_L1", &wt_L1);
-        weightTree->SetBranchAddress("wt_L1Zg", &wt_L1Zg);
-        weightTree->SetBranchAddress("wt_a2int", &wt_a2int);
         weightTree->SetBranchAddress("wt_a3int", &wt_a3int);
-        weightTree->SetBranchAddress("wt_L1int", &wt_L1int);
-        weightTree->SetBranchAddress("wt_L1Zgint", &wt_L1Zgint);
+        if (!isggHAC) {
+            weightTree->SetBranchAddress("wt_L1", &wt_L1);
+            weightTree->SetBranchAddress("wt_L1Zg", &wt_L1Zg);
+            weightTree->SetBranchAddress("wt_a2", &wt_a2);
+            weightTree->SetBranchAddress("wt_a2int", &wt_a2int);
+            weightTree->SetBranchAddress("wt_L1int", &wt_L1int);
+            weightTree->SetBranchAddress("wt_L1Zgint", &wt_L1Zgint);
+        }
     }
 }
 

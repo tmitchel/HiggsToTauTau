@@ -25,6 +25,7 @@ job1:
   - cd $CMSSW_BASE/src
   - git clone https://github.com/CMS-HTT/LeptonEff-interface.git $CMSSW_BASE/src/HTT-utilities
   - cd HTT-utilities/LepEffInterface/
+  - rm -r data
   - git clone https://github.com/CMS-HTT/LeptonEfficiencies data
   - cd ${CMSSW_BASE}/src
   - mkdir TauAnalysisTools
