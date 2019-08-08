@@ -151,7 +151,7 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
 }
 
 void ACWeighter::fillWeightMap() {
-    if (isVBFAC || isggHAC || isWHAC || isZHAC) {
+    if ((isVBFAC || isggHAC || isWHAC || isZHAC) && !notSignal) {
         for (auto i = 0; i < weightTree->GetEntries(); ++i) {
             weightTree->GetEntry(i);
             std::vector<double> w;
