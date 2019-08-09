@@ -245,9 +245,9 @@ def main(args):
                  if 'tree' in ikey] if args.syst else [args.tree_name]
         for itree in trees:
             if itree != args.tree_name:
-                name = ifile.replace('.root', '') + syst_name_map[itree.replace(args.tree_name, '')]
+                name = ifile.replace('.root', '').split('/')[-1] + syst_name_map[itree.replace(args.tree_name, '')]
             else:
-                name = ifile.replace('.root', '')
+                name = ifile.replace('.root', '').split('/')[-1]
 
             events = input_file[itree].arrays([
                 'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',
@@ -271,24 +271,24 @@ def main(args):
 
             # start with 0-jet category
             output_file.cd('{}_0jet'.format(channel_prefix))
-            zero_jet_hist = build_histogram(name.split('/')[-1], decay_mode_bins, vis_mass_bins)
+            zero_jet_hist = build_histogram(name, decay_mode_bins, vis_mass_bins)
             fill_hist(zero_jet_events, 't1_decayMode', 'vis_mass', zero_jet_hist)
 
             # now boosted category
             output_file.cd('{}_boosted'.format(channel_prefix))
-            boost_hist = build_histogram(name.split('/')[-1], higgs_pT_bins_boost, m_sv_bins_boost)
+            boost_hist = build_histogram(name, higgs_pT_bins_boost, m_sv_bins_boost)
             fill_hist(boosted_events, 'higgs_pT', 'm_sv', boost_hist)
 
             # vbf category is last
             output_file.cd('{}_vbf'.format(channel_prefix))
-            vbf_hist = build_histogram(name.split('/')[-1], mjj_bins, m_sv_bins_vbf)
+            vbf_hist = build_histogram(name, mjj_bins, m_sv_bins_vbf)
             fill_hist(vbf_events, 'mjj', 'm_sv', vbf_hist)
 
             # vbf sub-categories event after normal vbf categories
             vbf_cat_hists = []
             for cat in vbf_sub_cats:
                 output_file.cd('{}_{}'.format(channel_prefix, cat))
-                vbf_cat_hists.append(build_histogram(name.split('/')[-1], mjj_bins, m_sv_bins_vbf))
+                vbf_cat_hists.append(build_histogram(name, mjj_bins, m_sv_bins_vbf))
             fill_vbf_subcat_hists(vbf_events, 'mjj', 'm_sv', 'D0_ggH', vbf_cat_hists)
 
             # write then reset histograms
@@ -319,8 +319,8 @@ def main(args):
                         output_file.cd('{}_{}'.format(channel_prefix, cat))
                         vbf_cat_hists.append(build_histogram(weight[1], mjj_bins, m_sv_bins_vbf))
                     fill_vbf_subcat_hists(vbf_events, 'mjj', 'm_sv', 'D0_ggH', vbf_cat_hists, weight[0])
-                output_file.Write()
-                
+                    output_file.Write()
+
             # do anti-iso categorization for fake-factor using data
             if 'data' in ifile.lower():
                 print 'making fake factor hists'
