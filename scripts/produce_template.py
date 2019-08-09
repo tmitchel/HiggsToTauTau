@@ -244,6 +244,13 @@ def main(args):
     #                                                                               ztt_name, syst_name, args.date, '_'+args.suffix))
 
     for ifile in files:
+
+        # handle ZTT vs embedded
+        if args.embed and 'ZTT' in ifile:
+            continue
+        elif not args.embed and 'embed' in ifile:
+            continue
+
         name = ifile.replace('.root', '').split('/')[-1]
         print name
         input_file = uproot.open(ifile)
@@ -254,6 +261,10 @@ def main(args):
                 name = ifile.replace('.root', '').split('/')[-1] + syst_name_map[itree.replace(args.tree_name, '')]
             else:
                 name = ifile.replace('.root', '').split('/')[-1]
+
+            # handle MC vs embedded name
+            if 'embed' in ifile:
+                name = name.replace('embedded', 'ZTT')
 
             events = input_file[itree].arrays([
                 'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',
@@ -374,7 +385,8 @@ def main(args):
                         output_file.Write()
 
     output_file.Close()
-    fake_weights.Delete()
+    if not args.local:
+        fake_weights.Delete()
     print 'Finished in {} seconds'.format(time.time() - start)
 
 
