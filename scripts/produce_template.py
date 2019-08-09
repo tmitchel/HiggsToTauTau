@@ -126,18 +126,18 @@ def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=No
             if njets[i] < bin[1] and njets[i] > bin[0]:
                 ybin = y
                 break
-
+        
         # make fake-weight input
         inputs = [
             t1_pt[i], t1_decayMode[i], njets[i], vis_mass[i], mt[i], iso[i],
-            frac_qcd.values[xbin][ybin],
-            frac_w.values[xbin][ybin],
-            frac_tt.values[xbin][ybin]
+            frac_qcd.values[ybin][xbin],
+            frac_w.values[ybin][xbin],
+            frac_tt.values[ybin][xbin]
         ]
-        fake_weights = 1.  # for testing the rest
-        fake_weights = fake_weights.value(
+        fake_weight = 1.  # for testing the rest
+        fake_weight = fake_weights.value(
             9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
-        hist.Fill(xvar[i], yvar[i], evtwt[i] * fake_weights)
+        hist.Fill(xvar[i], yvar[i], evtwt[i] * fake_weight)
     return hist
 
 
@@ -185,8 +185,6 @@ def main(args):
 
     for ifile in files:
         name = ifile.replace('.root', '').split('/')[-1]
-        if 'data' not in name.lower():
-            continue
         print name
         input_file = uproot.open(ifile)
         trees = [ikey.replace(';1', '') for ikey in input_file.keys()
@@ -290,6 +288,7 @@ def main(args):
                         output_file.Write()
 
     output_file.Close()
+    fake_weights.Delete()
     print 'Finished in {} seconds'.format(time.time() - start)
 
 
