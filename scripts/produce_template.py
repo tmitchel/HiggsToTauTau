@@ -146,23 +146,23 @@ def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=No
         xbin, ybin = -1, -1
         for x, bin in enumerate(frac_data.bins[0]):
             if vis_mass[i] < bin[1] and vis_mass[i] > bin[0]:
-                print 'found {} at {} between {} and {}'.format(vis_mass[i], x, bin[0], bin[1])
                 xbin = x
                 break
         for y, bin in enumerate(frac_data.bins[1]):
             if njets[i] < bin[1] and njets[i] > bin[0]:
-                print 'found {} at {} between {} and {}'.format(njets[i], y, bin[0], bin[1])
                 ybin = y
                 break
 
-        print xbin, ybin
-        print frac_qcd.values
+        # I guess local and Wisc have different versions of uproot?
+        if not local:
+            xbins, ybins = ybins, xbins
+
         # make fake-weight input
         inputs = [
             t1_pt[i], t1_decayMode[i], njets[i], vis_mass[i], mt[i], iso[i],
-            frac_qcd.values[ybin][xbin],
-            frac_w.values[ybin][xbin],
-            frac_tt.values[ybin][xbin]
+            frac_qcd.values[xbin][ybin],
+            frac_w.values[xbin][ybin],
+            frac_tt.values[xbin][ybin]
         ]
 
         if local:
