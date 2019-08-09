@@ -7,6 +7,16 @@ from glob import glob
 from array import array
 from pprint import pprint
 
+import signal
+import sys
+fake_weights = None
+def signal_handler(sig, frame):
+        print('Trying to close {}'.format(fake_weights))
+        if fake_weights != None:
+            fake_weights.Delete()
+        sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler)
+
 fake_factor_systematics = [
     "ff_qcd_syst_up", "ff_qcd_syst_down", "ff_qcd_dm0_njet0_stat_up", "ff_qcd_dm0_njet0_stat_down",
     "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down", "ff_qcd_dm1_njet0_stat_up", "ff_qcd_dm1_njet0_stat_down",
@@ -99,13 +109,22 @@ syst_name_map = {
     "": ""
 }
 
+def get_ac_weights(name):
+    if 'ggh' in name.lower():
+        return ac_reweighting_map['ggh']
+    elif 'vbf' in name.lower():
+        return ac_reweighting_map['vbf']
+    elif 'wh' in name.lower():
+        return ac_reweighting_map['wh']
+    elif 'zh' in name.lower():
+        return ac_reweighting_map['zh']
 
 def build_histogram(name, x_bins, y_bins):
     return ROOT.TH2F(name, name, len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins))
 
 
-def fill_hist(data, xvar, yvar, hist):
-    evtwt = data['evtwt'].values
+def fill_hist(data, xvar, yvar, hist, ac_weight=None):
+    evtwt = data['evtwt'].values if ac_weight == None else (data['evtwt'] * data[ac_weight]).values
     xvar = data[xvar].values
     yvar = data[yvar].values
     for i in xrange(len(data.index)):
@@ -113,8 +132,8 @@ def fill_hist(data, xvar, yvar, hist):
     return hist
 
 
-def fill_vbf_subcat_hists(data, xvar, yvar, zvar, hists):
-    evtwt = data['evtwt'].values
+def fill_vbf_subcat_hists(data, xvar, yvar, zvar, hists, ac_weight=None):
+    evtwt = data['evtwt'].values if ac_weight == None else (data['evtwt'] * data[ac_weight]).values
     xvar = data[xvar].values
     yvar = data[yvar].values
     zvar = data[zvar].values
@@ -275,9 +294,33 @@ def main(args):
             # write then reset histograms
             output_file.Write()
 
-            if '_JHU' in ifile:
-                print ifile
+            if '_JHU' in name:
+                print 'AC sample {}'.format(name)
+                ac_weight_list = get_ac_weights(name)
+                for weight in ac_weight_list:
+                    # start with 0-jet category
+                    output_file.cd('{}_0jet'.format(channel_prefix))
+                    zero_jet_hist = build_histogram(weight[1], decay_mode_bins, vis_mass_bins)
+                    fill_hist(zero_jet_events, 't1_decayMode', 'vis_mass', zero_jet_hist, weight[0])
 
+                    # now boosted category
+                    output_file.cd('{}_boosted'.format(channel_prefix))
+                    boost_hist = build_histogram(weight[1], higgs_pT_bins_boost, m_sv_bins_boost,)
+                    fill_hist(boosted_events, 'higgs_pT', 'm_sv', boost_hist, weight[0])
+
+                    # vbf category is last
+                    output_file.cd('{}_vbf'.format(channel_prefix))
+                    vbf_hist = build_histogram(weight[1], mjj_bins, m_sv_bins_vbf)
+                    fill_hist(vbf_events, 'mjj', 'm_sv', vbf_hist, weight[0])
+
+                    # vbf sub-categories event after normal vbf categories
+                    vbf_cat_hists = []
+                    for cat in vbf_sub_cats:
+                        output_file.cd('{}_{}'.format(channel_prefix, cat))
+                        vbf_cat_hists.append(build_histogram(weight[1], mjj_bins, m_sv_bins_vbf))
+                    fill_vbf_subcat_hists(vbf_events, 'mjj', 'm_sv', 'D0_ggH', vbf_cat_hists, weight[0])
+                output_file.Write()
+                
             # do anti-iso categorization for fake-factor using data
             if 'data' in ifile.lower():
                 print 'making fake factor hists'
