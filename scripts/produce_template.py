@@ -155,7 +155,7 @@ def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=No
 
         # I guess local and Wisc have different versions of uproot?
         if not local:
-            xbins, ybins = ybins, xbins
+            xbin, ybin = ybin, xbin
 
         # make fake-weight input
         inputs = [
