@@ -108,6 +108,7 @@ def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=No
     t1_pt, t1_decayMode, njets = columns[:, 3], columns[:, 4], columns[:, 5]
     vis_mass, mt, iso = columns[:, 6], columns[:, 7], columns[:, 8]
 
+    
     # get fake fractions
     frac_data = fake_fractions[0]
     frac_qcd = fake_fractions[1]
@@ -116,19 +117,27 @@ def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=No
     frac_w = fake_fractions[4]
 
     for i in xrange(len(data.index)):
+        xbin, ybin = -1, -1
+        for x, bin in enumerate(frac_data.bins[0]):
+            if vis_mass[i] < bin[1] and vis_mass[i] > bin[0]:
+                xbin = x
+                break
+        for y, bin in enumerate(frac_data.bins[1]):
+            if njets[i] < bin[1] and njets[i] > bin[0]:
+                ybin = y
+                break
+
         # make fake-weight input
-        xbin = frac_data.GetXaxis().FindBin(vis_mass[i])
-        ybin = frac_data.GetYaxis().FindBin(njets[i])
         inputs = [
             t1_pt[i], t1_decayMode[i], njets[i], vis_mass[i], mt[i], iso[i],
-            frac_qcd.GetBinContent(xbin, ybin),
-            frac_wGetBinContent(xbin, ybin),
-            frac_ttGetBinContent(xbin, ybin)
+            frac_qcd.values[xbin][ybin],
+            frac_w.values[xbin][ybin],
+            frac_tt.values[xbin][ybin]
         ]
+        fake_weights = 1.  # for testing the rest
         fake_weights = fake_weights.value(
             9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
-        # fake_weight = 1.  # for testing the rest
-        hist.Fill(xvar[i], yvar[i], evtwt[i] * fake_weight)
+        hist.Fill(xvar[i], yvar[i], evtwt[i] * fake_weights)
     return hist
 
 
@@ -166,9 +175,9 @@ def main(args):
     # Preload the fake fractions and fake factor weights.
     fake_fractions = load_fake_fractions(args.fake_file)
     # pprint(fake_fractions)
+    fake_weights = None
     fake_weights = load_fake_factor_weights(
         '../HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/mt/fakeFactors.root')
-    # fake_weights = None
 
     # use this once uproot supports sub-directories inside root files
     # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
@@ -176,6 +185,8 @@ def main(args):
 
     for ifile in files:
         name = ifile.replace('.root', '').split('/')[-1]
+        if 'data' not in name.lower():
+            continue
         print name
         input_file = uproot.open(ifile)
         trees = [ikey.replace(';1', '') for ikey in input_file.keys()
