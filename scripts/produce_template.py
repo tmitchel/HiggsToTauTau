@@ -118,8 +118,8 @@ def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=No
     for i in xrange(len(data.index)):
         # make fake-weight input
         inputs = [t1_pt[i], t1_decayMode[i], njets[i], vis_mass[i], mt[i], iso[i], frac_qcd, frac_w, frac_tt]
-        # fake_weights = fake_weights.value(9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
-        fake_weight = 1.  # for testing the rest
+        fake_weights = fake_weights.value(9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
+        # fake_weight = 1.  # for testing the rest
         hist.Fill(xvar[i], yvar[i], evtwt[i] * fake_weight)
     return hist
 
@@ -158,8 +158,8 @@ def main(args):
     # Preload the fake fractions and fake factor weights.
     fake_fractions = load_fake_fractions(args.fake_file)
     # pprint(fake_fractions)
-    # fake_weights = load_fake_factor_weights(name)
-    fake_weights = None
+    fake_weights = load_fake_factor_weights('../HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/mt/fakeFactors.root')
+    # fake_weights = None
 
     # use this once uproot supports sub-directories inside root files
     # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
@@ -173,14 +173,15 @@ def main(args):
         for itree in trees:
             if itree != args.tree_name:
                 name = ifile.replace('.root', '') + syst_name_map[itree.replace(args.tree_name, '')]
-                events = input_file[itree].arrays([
-                    'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',
-                    'mu_iso', 'el_iso', 't1_decayMode', 'vis_mass', 't1_pt', 'higgs_pT', 'm_sv',
-                    'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt', 'mu_pt', 'el_pt'
-                    ], outputtype=pandas.DataFrame)
             else:
                 name = ifile.replace('.root', '')
-
+            
+            events = input_file[itree].arrays([
+                'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',
+                'mu_iso', 'el_iso', 't1_decayMode', 'vis_mass', 't1_pt', 'higgs_pT', 'm_sv',
+                'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt', 'mu_pt', 'el_pt'
+                ], outputtype=pandas.DataFrame)
+            
             general_selection = events[
                 (events['mt'] < 50) & (events['nbjets'] == 0)
             ]
