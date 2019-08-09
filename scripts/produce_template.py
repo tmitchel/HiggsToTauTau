@@ -117,8 +117,16 @@ def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=No
 
     for i in xrange(len(data.index)):
         # make fake-weight input
-        inputs = [t1_pt[i], t1_decayMode[i], njets[i], vis_mass[i], mt[i], iso[i], frac_qcd, frac_w, frac_tt]
-        fake_weights = fake_weights.value(9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
+        xbin = frac_data.GetXaxis().FindBin(vis_mass[i])
+        ybin = frac_data.GetYaxis().FindBin(njets[i])
+        inputs = [
+            t1_pt[i], t1_decayMode[i], njets[i], vis_mass[i], mt[i], iso[i],
+            frac_qcd.GetBinContent(xbin, ybin),
+            frac_wGetBinContent(xbin, ybin),
+            frac_ttGetBinContent(xbin, ybin)
+        ]
+        fake_weights = fake_weights.value(
+            9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
         # fake_weight = 1.  # for testing the rest
         hist.Fill(xvar[i], yvar[i], evtwt[i] * fake_weight)
     return hist
@@ -158,7 +166,8 @@ def main(args):
     # Preload the fake fractions and fake factor weights.
     fake_fractions = load_fake_fractions(args.fake_file)
     # pprint(fake_fractions)
-    fake_weights = load_fake_factor_weights('../HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/mt/fakeFactors.root')
+    fake_weights = load_fake_factor_weights(
+        '../HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/mt/fakeFactors.root')
     # fake_weights = None
 
     # use this once uproot supports sub-directories inside root files
@@ -169,19 +178,20 @@ def main(args):
         name = ifile.replace('.root', '').split('/')[-1]
         print name
         input_file = uproot.open(ifile)
-        trees = [ikey.replace(';1', '') for ikey in input_file.keys() if 'tree' in ikey] if args.syst else [args.tree_name]
+        trees = [ikey.replace(';1', '') for ikey in input_file.keys()
+                 if 'tree' in ikey] if args.syst else [args.tree_name]
         for itree in trees:
             if itree != args.tree_name:
                 name = ifile.replace('.root', '') + syst_name_map[itree.replace(args.tree_name, '')]
             else:
                 name = ifile.replace('.root', '')
-            
+
             events = input_file[itree].arrays([
                 'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',
                 'mu_iso', 'el_iso', 't1_decayMode', 'vis_mass', 't1_pt', 'higgs_pT', 'm_sv',
                 'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt', 'mu_pt', 'el_pt'
-                ], outputtype=pandas.DataFrame)
-            
+            ], outputtype=pandas.DataFrame)
+
             general_selection = events[
                 (events['mt'] < 50) & (events['nbjets'] == 0)
             ]
@@ -195,7 +205,7 @@ def main(args):
                 ((signal_events['njets'] > 1) & signal_events['mjj'] < 300)
             ]
             vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
-            
+
             # start with 0-jet category
             output_file.cd('{}_0jet'.format(channel_prefix))
             zero_jet_hist = build_histogram(name.split('/')[-1], decay_mode_bins, vis_mass_bins)
@@ -235,17 +245,17 @@ def main(args):
                 output_file.cd('{}_0jet'.format(channel_prefix))
                 zero_jet_hist = build_histogram('jetFakes', decay_mode_bins, vis_mass_bins)
                 zero_jet_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
-                                                    'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights)
+                                               'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights)
 
                 output_file.cd('{}_boosted'.format(channel_prefix))
                 boost_hist = build_histogram('jetFakes', higgs_pT_bins_boost, m_sv_bins_boost)
                 boost_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
-                                                 'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights)
+                                            'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights)
 
                 output_file.cd('{}_vbf'.format(channel_prefix))
                 vbf_hist = build_histogram('jetFakes', mjj_bins, m_sv_bins_vbf)
                 vbf_hist = fill_fake_hist(fake_vbf_events, 'mjj', 'm_sv',
-                                               vbf_hist, fake_fractions['mt_vbf'], fake_weights)
+                                          vbf_hist, fake_fractions['mt_vbf'], fake_weights)
                 output_file.Write()
 
                 if args.syst:
@@ -254,18 +264,18 @@ def main(args):
                         zero_jet_hist = build_histogram(
                             'jetFakes_CMS_htt_{}'.format(syst), decay_mode_bins, vis_mass_bins)
                         zero_jet_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
-                                                            'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, syst)
+                                                       'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, syst)
 
                         output_file.cd('{}_boosted'.format(channel_prefix))
                         boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
-                                                          higgs_pT_bins_boost, m_sv_bins_boost)
+                                                     higgs_pT_bins_boost, m_sv_bins_boost)
                         boost_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
-                                                         'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights, syst)
+                                                    'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights, syst)
 
                         output_file.cd('{}_vbf'.format(channel_prefix))
                         vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), mjj_bins, m_sv_bins_vbf)
                         vbf_hist = fill_fake_hist(fake_vbf_events, 'mjj', 'm_sv',
-                                                       vbf_hist, fake_fractions['mt_vbf'], fake_weights, syst)
+                                                  vbf_hist, fake_fractions['mt_vbf'], fake_weights, syst)
                         output_file.Write()
 
     output_file.Close()
