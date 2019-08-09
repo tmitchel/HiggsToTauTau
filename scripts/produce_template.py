@@ -370,7 +370,7 @@ def main(args):
                         zero_jet_hist = build_histogram(
                             'jetFakes_CMS_htt_{}'.format(syst), decay_mode_bins, vis_mass_bins)
                         zero_jet_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
-                                                       'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, syst, local=rgs.local)
+                                                       'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, syst, local=args.local)
 
                         output_file.cd('{}_boosted'.format(channel_prefix))
                         boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
