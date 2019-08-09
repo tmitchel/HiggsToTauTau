@@ -34,6 +34,33 @@ vbf_sub_cats = [
     "vbf_ggHMELA_bin5",  "vbf_ggHMELA_bin6",
 ]
 
+ac_reweighting_map = {
+    "ggh": [
+        ("wt_ggh_a1", "JHU_GGH2Jets_sm_M125"), ("wt_ggh_a3", "JHU_GGH2Jets_pseudoscalar_M125"),
+        ("wt_ggh_a3int", "JHU_GGH2Jets_pseudoscalar_Mf05ph0125")
+    ],
+    "wh": [
+        ("wt_wh_a1", "reweighted_WH_htt_0PM125"), ("wt_wh_a2", "reweighted_WH_htt_0PH125"),
+        ("wt_wh_a2int", "reweighted_WH_htt_0PHf05ph0125"), ("wt_wh_a3", "reweighted_WH_htt_0M125"),
+        ("wt_wh_a3int", "reweighted_WH_htt_0Mf05ph0125"), ("wt_wh_L1", "reweighted_WH_htt_0L1125"),
+        ("wt_wh_L1int", "reweighted_WH_htt_0L1f05ph0125"), ("wt_wh_L1Zg", "reweighted_WH_htt_0L1Zg125"),
+        ("wt_wh_L1Zgint", "reweighted_WH_htt_0L1Zgf05ph0125")
+    ],
+    "zh": [
+        ("wt_zh_a1", "reweighted_ZH_htt_0PM125"), ("wt_zh_a2", "reweighted_ZH_htt_0PH125"),
+        ("wt_zh_a2int", "reweighted_ZH_htt_0PHf05ph0125"), ("wt_zh_a3", "reweighted_ZH_htt_0M125"),
+        ("wt_zh_a3int", "reweighted_ZH_htt_0Mf05ph0125"), ("wt_zh_L1", "reweighted_ZH_htt_0L1125"),
+        ("wt_zh_L1int", "reweighted_ZH_htt_0L1f05ph0125"), ("wt_zh_L1Zg", "reweighted_ZH_htt_0L1Zg125"),
+        ("wt_zh_L1Zgint", "reweighted_ZH_htt_0L1Zgf05ph0125")],
+    "vbf": [
+        ("wt_vbf_a1", "reweighted_qqH_htt_0PM125"), ("wt_vbf_a2", "reweighted_qqH_htt_0PH125"),
+        ("wt_vbf_a2int", "reweighted_qqH_htt_0PHf05ph0125"), ("wt_vbf_a3", "reweighted_qqH_htt_0M125"),
+        ("wt_vbf_a3int", "reweighted_qqH_htt_0Mf05ph0125"), ("wt_vbf_L1", "reweighted_qqH_htt_0L1125"),
+        ("wt_vbf_L1int", "reweighted_qqH_htt_0L1f05ph0125"), ("wt_vbf_L1Zg", "reweighted_qqH_htt_0L1Zg125"),
+        ("wt_vbf_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"),
+    ]
+}
+
 decay_mode_bins = [0, 1, 10, 11]
 higgs_pT_bins_boost = [0, 100, 150, 200, 250, 300, 5000]
 mjj_bins = [300, 500, 10000]
@@ -101,14 +128,13 @@ def fill_vbf_subcat_hists(data, xvar, yvar, zvar, hists):
     return hists
 
 
-def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=None):
+def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=None, local=False):
     # get event data
     columns = data[['evtwt', xvar, yvar, 't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_iso']].values
     evtwt, xvar, yvar = columns[:, 0], columns[:, 1], columns[:, 2]
     t1_pt, t1_decayMode, njets = columns[:, 3], columns[:, 4], columns[:, 5]
     vis_mass, mt, iso = columns[:, 6], columns[:, 7], columns[:, 8]
 
-    
     # get fake fractions
     frac_data = fake_fractions[0]
     frac_qcd = fake_fractions[1]
@@ -126,7 +152,7 @@ def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=No
             if njets[i] < bin[1] and njets[i] > bin[0]:
                 ybin = y
                 break
-        
+
         # make fake-weight input
         inputs = [
             t1_pt[i], t1_decayMode[i], njets[i], vis_mass[i], mt[i], iso[i],
@@ -134,9 +160,12 @@ def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=No
             frac_w.values[ybin][xbin],
             frac_tt.values[ybin][xbin]
         ]
-        fake_weight = 1.  # for testing the rest
-        fake_weight = fake_weights.value(
-            9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
+
+        if local:
+            fake_weight = 1.  # for testing the rest
+        else:
+            fake_weight = fake_weights.value(
+                9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
         hist.Fill(xvar[i], yvar[i], evtwt[i] * fake_weight)
     return hist
 
@@ -175,9 +204,11 @@ def main(args):
     # Preload the fake fractions and fake factor weights.
     fake_fractions = load_fake_fractions(args.fake_file)
     # pprint(fake_fractions)
-    fake_weights = None
-    fake_weights = load_fake_factor_weights(
-        '../HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/mt/fakeFactors.root')
+    if args.local:
+        fake_weights = None
+    else:
+        fake_weights = load_fake_factor_weights(
+            '../HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/mt/fakeFactors.root')
 
     # use this once uproot supports sub-directories inside root files
     # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
@@ -240,6 +271,9 @@ def main(args):
             # write then reset histograms
             output_file.Write()
 
+            if '_JHU' in ifile:
+                print ifile
+
             # do anti-iso categorization for fake-factor using data
             if 'data' in ifile.lower():
                 print 'making fake factor hists'
@@ -254,17 +288,17 @@ def main(args):
                 output_file.cd('{}_0jet'.format(channel_prefix))
                 zero_jet_hist = build_histogram('jetFakes', decay_mode_bins, vis_mass_bins)
                 zero_jet_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
-                                               'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights)
+                                               'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, local=args.local)
 
                 output_file.cd('{}_boosted'.format(channel_prefix))
                 boost_hist = build_histogram('jetFakes', higgs_pT_bins_boost, m_sv_bins_boost)
                 boost_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
-                                            'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights)
+                                            'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights, local=args.local)
 
                 output_file.cd('{}_vbf'.format(channel_prefix))
                 vbf_hist = build_histogram('jetFakes', mjj_bins, m_sv_bins_vbf)
                 vbf_hist = fill_fake_hist(fake_vbf_events, 'mjj', 'm_sv',
-                                          vbf_hist, fake_fractions['mt_vbf'], fake_weights)
+                                          vbf_hist, fake_fractions['mt_vbf'], fake_weights, local=args.local)
                 output_file.Write()
 
                 if args.syst:
@@ -273,18 +307,18 @@ def main(args):
                         zero_jet_hist = build_histogram(
                             'jetFakes_CMS_htt_{}'.format(syst), decay_mode_bins, vis_mass_bins)
                         zero_jet_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
-                                                       'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, syst)
+                                                       'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, syst, local=rgs.local)
 
                         output_file.cd('{}_boosted'.format(channel_prefix))
                         boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
                                                      higgs_pT_bins_boost, m_sv_bins_boost)
                         boost_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
-                                                    'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights, syst)
+                                                    'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights, syst, local=args.local)
 
                         output_file.cd('{}_vbf'.format(channel_prefix))
                         vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), mjj_bins, m_sv_bins_vbf)
                         vbf_hist = fill_fake_hist(fake_vbf_events, 'mjj', 'm_sv',
-                                                  vbf_hist, fake_fractions['mt_vbf'], fake_weights, syst)
+                                                  vbf_hist, fake_fractions['mt_vbf'], fake_weights, syst, local=args.local)
                         output_file.Write()
 
     output_file.Close()
@@ -297,6 +331,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--syst', '-s', action='store_true', help='run with systematics')
     parser.add_argument('--embed', '-e', action='store_true', help='use embedded instead of MC')
+    parser.add_argument('--local', '-l', action='store_true', help='running locally')
     parser.add_argument('--year', '-y', required=True, action='store', help='year being processed')
     parser.add_argument('--input-dir', '-i', required=True, action='store', dest='input_dir', help='path to files')
     parser.add_argument('--tree-name', '-t', required=True, action='store', dest='tree_name', help='name of input tree')
