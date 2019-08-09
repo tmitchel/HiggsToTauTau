@@ -5,6 +5,7 @@ import pandas
 import uproot
 from glob import glob
 from array import array
+from pprint import pprint
 
 treename_conversion = {
     "_tree_UncMet_Up": "_CMS_scale_met_unclustered_13TeVUp",
@@ -44,6 +45,12 @@ categories = [
     "vbf_ggHMELA_bin11", "vbf_ggHMELA_bin12"
 ]
 
+vbf_sub_cats = [
+    "vbf_ggHMELA_bin1",  "vbf_ggHMELA_bin2",
+    "vbf_ggHMELA_bin3",  "vbf_ggHMELA_bin4",
+    "vbf_ggHMELA_bin5",  "vbf_ggHMELA_bin6",
+]
+
 decay_mode_bins = [0, 1, 10, 11]
 higgs_pT_bins_boost = [0, 100, 150, 200, 250, 300, 5000]
 mjj_bins = [300, 500, 10000]
@@ -56,15 +63,60 @@ def build_histogram(name, x_bins, y_bins):
     return ROOT.TH2F(name, name, len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins))
 
 
-def fill_fake_background(events, fake_file):
+def fill_hist(data, xvar, yvar, hist):
+    evtwt = data['evtwt'].values
+    xvar = data[xvar].values
+    yvar = data[yvar].values
+    for i in xrange(len(data.index)):
+        hist.Fill(xvar[i], yvar[i], evtwt[i])
+    return hist
+
+def fill_vbf_subcat_hists(data, xvar, yvar, zvar, hists):
+    evtwt = data['evtwt'].values
+    xvar = data[xvar].values
+    yvar = data[yvar].values
+    zvar = data[zvar].values
+    edges = [i/6. for i in range(1, 7)]
+    for i in xrange(len(data.index)):
+        for j, edge in enumerate(edges):
+            if zvar[i] < edge:
+                hists[j-1].Fill(xvar[i], yvar[i], evtwt[i])
+                break
+
+    return hists
+
+
+def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights):
+    # get event data
+    columns = data[['evtwt', xvar, yvar, 't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_iso']].values
+    evtwt, xvar, yvar = columns[:, 0], columns[:, 1], columns[:, 2]
+    t1_pt, t1_decayMode, njets = columns[:, 3], columns[:, 4], columns[:, 5]
+    vis_mass, mt, iso = columns[:, 6], columns[:, 7], columns[:, 8]
+
+    # get fake fractions
+    frac_data = fake_fractions[0]
+    frac_qcd = fake_fractions[1]
+    # frac_real = fake_fractions[2]
+    frac_tt = fake_fractions[3]
+    frac_w = fake_fractions[4]
+
+    for i in xrange(len(data.index)):
+        # make fake-weight input
+        inputs = [t1_pt[i], t1_decayMode[i], njets[i], vis_mass[i], mt[i], iso[i], frac_qcd, frac_w, frac_tt]
+        # fake_weight = fake_weights.value(9, array('d', inputs))
+        fake_weight = 1.  # for testing the rest
+        hist.Fill(xvar[i], yvar[i], evtwt[i] * fake_weight)
+    return hist
+
+
+def load_fake_factor_weights(fake_file):
     ff_file = ROOT.TFile(fake_file, 'READ')
-    ff = ff_file.Get('ff_comb')
-    zero_jet_events = events[events['njets'] == 0]
-    boosted_events = events[
-        (events['njets'] == 1) |
-        ((events['njets'] > 1) & events['mjj'] < 300)
-    ]
-    vbf_events = events[(events['njets'] > 1) & (events['mjj'] > 300)]
+    return ff_file.Get('ff_comb')
+
+
+def load_fake_fractions(input_file):
+    ifile = uproot.open(input_file)
+    return {cat.replace(';1', ''): [ifile[cat][ihist] for ihist in sorted(ifile[cat].keys())] for cat in ifile.keys()}
 
 
 def main(args):
@@ -88,58 +140,88 @@ def main(args):
         output_file.mkdir('{}_{}'.format(channel_prefix, cat))
     output_file.cd()
 
+    # Preload the fake fractions and fake factor weights.
+    fake_fractions = load_fake_fractions(args.fake_file)
+    # pprint(fake_fractions)
+    # fake_weights = load_fake_factor_weights(name)
+    fake_weights = None
+
+    # use this once uproot supports sub-directories inside root files
     # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
     #                                                                               ztt_name, syst_name, args.date, '_'+args.suffix))
 
     for ifile in files:
-        name=ifile.replace('.root', '')
+        name = ifile.replace('.root', '')
         print name
-        events=uproot.open(ifile)[args.tree_name].arrays([
+        events = uproot.open(ifile)[args.tree_name].arrays([
             'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',
             'mu_iso', 'el_iso', 't1_decayMode', 'vis_mass', 't1_pt', 'higgs_pT', 'm_sv',
-            'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt'
+            'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt', 'mu_pt', 'el_pt'
         ], outputtype=pandas.DataFrame)
 
-        general_selection=events[
+        general_selection = events[
             (events['mt'] < 50) & (events['nbjets'] == 0)
         ]
 
         # do signal categorization
-        signal_events=general_selection[general_selection['is_signal'] > 0]
+        signal_events = general_selection[general_selection['is_signal'] > 0]
 
-        zero_jet_events=signal_events[signal_events['njets'] == 0]
-        boosted_events=signal_events[
+        zero_jet_events = signal_events[signal_events['njets'] == 0]
+        boosted_events = signal_events[
             (signal_events['njets'] == 1) |
             ((signal_events['njets'] > 1) & signal_events['mjj'] < 300)
         ]
-        vbf_events=signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
-
-        # do anti-iso categorization for fake-factor for data
-
-        antiIso_events=general_selection[general_selection['is_antiTauIso'] > 0]
-        # fill_fake_background(antiIso_events, args.fake_file)
-
-        # uproot can't handle subdirectories yet, so I'll use plain old pyroot
+        vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
 
         # start with 0-jet category
         output_file.cd('{}_0jet'.format(channel_prefix))
-        zero_jet_hist=build_histogram(name.split('/')[-1], decay_mode_bins, vis_mass_bins)
-        for i in xrange(len(zero_jet_events.index)):
-            zero_jet_hist.Fill(zero_jet_events['t1_decayMode'].values[i],
-                               zero_jet_events['vis_mass'].values[i], zero_jet_events['evtwt'].values[i])
+        zero_jet_hist = build_histogram(name.split('/')[-1], decay_mode_bins, vis_mass_bins)
+        zero_jet_hist = fill_hist(zero_jet_events, 't1_decayMode', 'vis_mass', zero_jet_hist)
 
         # now boosted category
         output_file.cd('{}_boosted'.format(channel_prefix))
-        boost_hist=build_histogram(name.split('/')[-1], higgs_pT_bins_boost, m_sv_bins_boost)
-        for i in xrange(len(boosted_events.index)):
-            boost_hist.Fill(boosted_events['higgs_pT'].values[i],
-                            boosted_events['m_sv'].values[i], boosted_events['evtwt'].values[i])
+        boost_hist = build_histogram(name.split('/')[-1], higgs_pT_bins_boost, m_sv_bins_boost)
+        boost_hist = fill_hist(boosted_events, 'higgs_pT', 'm_sv', boost_hist)
 
         # vbf category is last
         output_file.cd('{}_vbf'.format(channel_prefix))
-        vbf_hist=build_histogram(name.split('/')[-1], mjj_bins, m_sv_bins_vbf)
-        for i in xrange(len(vbf_events.index)):
-            vbf_hist.Fill(vbf_events['mjj'].values[i], vbf_events['m_sv'].values[i], vbf_events['evtwt'].values[i])
+        vbf_hist = build_histogram(name.split('/')[-1], mjj_bins, m_sv_bins_vbf)
+        vbf_hist = fill_hist(vbf_events, 'mjj', 'm_sv', vbf_hist)
+
+
+        # vbf sub-categories event after normal vbf categories
+        vbf_cat_hists = []
+        for cat in vbf_sub_cats:
+            output_file.cd('{}_{}'.format(channel_prefix, cat))
+            vbf_cat_hists.append(build_histogram(name.split('/')[-1], mjj_bins, m_sv_bins_vbf))
+    
+        vbf_cat_hists = fill_vbf_subcat_hists(vbf_events, 'mjj', 'm_sv', 'D0_ggH', vbf_cat_hists)
+
+        # do anti-iso categorization for fake-factor using data
+        if 'data' in ifile.lower():
+            print 'making fake factor hists'
+            antiIso_events = general_selection[general_selection['is_antiTauIso'] > 0]
+            fake_zero_jet_events = antiIso_events[antiIso_events['njets'] == 0]
+            fake_boosted_events = antiIso_events[
+                (antiIso_events['njets'] == 1) |
+                ((antiIso_events['njets'] > 1) & antiIso_events['mjj'] < 300)
+            ]
+            fake_vbf_events = antiIso_events[(antiIso_events['njets'] > 1) & (antiIso_events['mjj'] > 300)]
+
+            output_file.cd('{}_0jet'.format(channel_prefix))
+            zero_jet_fake_hist = build_histogram('jetFakes', decay_mode_bins, vis_mass_bins)
+            zero_jet_fake_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
+                                                'vis_mass', zero_jet_fake_hist, fake_fractions['mt_0jet'], fake_weights)
+
+            output_file.cd('{}_boosted'.format(channel_prefix))
+            boost_fake_hist = build_histogram('jetFakes', higgs_pT_bins_boost, m_sv_bins_boost)
+            boost_fake_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
+                                             'm_sv', boost_fake_hist, fake_fractions['mt_boosted'], fake_weights)
+
+            output_file.cd('{}_vbf'.format(channel_prefix))
+            vbf_fake_hist = build_histogram('jetFakes', mjj_bins, m_sv_bins_vbf)
+            vbf_fake_hist = fill_fake_hist(fake_vbf_events, 'mjj', 'm_sv',
+                                           vbf_fake_hist, fake_fractions['mt_vbf'], fake_weights)
 
         output_file.Write()
 
@@ -149,7 +231,7 @@ def main(args):
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
-    parser=ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument('--syst', '-s', action='store_true', help='run with systematics')
     parser.add_argument('--embed', '-e', action='store_true', help='use embedded instead of MC')
     parser.add_argument('--year', '-y', required=True, action='store', help='year being processed')
