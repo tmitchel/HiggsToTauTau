@@ -298,6 +298,7 @@ def main(args):
                 print 'AC sample {}'.format(name)
                 ac_weight_list = get_ac_weights(name)
                 for weight in ac_weight_list:
+                    print 'Reweighting sample {} to {}'.format(name, weight[1])
                     # start with 0-jet category
                     output_file.cd('{}_0jet'.format(channel_prefix))
                     zero_jet_hist = build_histogram(weight[1], decay_mode_bins, vis_mass_bins)
