@@ -7,32 +7,15 @@ from glob import glob
 from array import array
 from pprint import pprint
 
-treename_conversion = {
-    "_tree_UncMet_Up": "_CMS_scale_met_unclustered_13TeVUp",
-    "_tree_UncMet_Down": "_CMS_scale_met_unclustered_13TeVDown",
-    "_tree_ClusteredMet_Up": "_CMS_scale_met_clustered_13TeVUp",
-    "_tree_ClusteredMet_Down": "_CMS_scale_met_clustered_13TeVDown",
-    "_tree_vbfMass_JetTotalUp": "_CMS_scale_jm_13TeVUp",
-    "_tree_jetVeto30_JetTotalUp": "_CMS_scale_jn_13TeVUp",
-    "_tree_vbfMass_JetTotalDown": "_CMS_scale_jm_13TeVDown",
-    "_tree_jetVeto30_JetTotalDown": "_CMS_scale_jn_13TeVDown",
-    "_tree_ttbarShape_Up": "_CMS_htt_ttbarShape_13TeVUp",
-    "_tree_ttbarShape_Down": "_CMS_htt_ttbarShape_13TeVDown",
-    "_tree_Up": "_CMS_scale_t_allprong_13TeVUp",
-    "_tree_Down": "_CMS_scale_t_allprong_13TeVDown",
-    "_tree_DM0_Up": "_CMS_scale_t_1prong_13TeVUp",
-    "_tree_DM0_Down": "_CMS_scale_t_1prong_13TeVDown",
-    "_tree_DM1_Up": "_CMS_scale_t_1prong1pizero_13TeVUp",
-    "_tree_DM1_Down": "_CMS_scale_t_1prong1pizero_13TeVDown",
-    "_tree_DM10_Up": "_CMS_scale_t_3prong_13TeVUp",
-    "_tree_DM10_Down": "_CMS_scale_t_3prong_13TeVDown",
-    "_tree_jetToTauFake_Up": "_CMS_htt_jetToTauFake_13TeVUp",
-    "_tree_jetToTauFake_Down": "_CMS_htt_jetToTauFake_13TeVDown",
-    "_tree_dyShape_Up": "_CMS_htt_dyShape_13TeVUp",
-    "_tree_dyShape_Down": "_CMS_htt_dyShape_13TeVDown",
-    "_tree_zmumuShape_Up": "_CMS_htt_zmumuShape_VBF_13TeVUp",
-    "_tree_zmumuShape_Down": "_CMS_htt_zmumuShape_VBF_13TeVDown"
-}
+fake_factor_systematics = [
+    "ff_qcd_syst_up", "ff_qcd_syst_down", "ff_qcd_dm0_njet0_stat_up", "ff_qcd_dm0_njet0_stat_down",
+    "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down", "ff_qcd_dm1_njet0_stat_up", "ff_qcd_dm1_njet0_stat_down",
+    "ff_qcd_dm1_njet1_stat_up", "ff_qcd_dm1_njet1_stat_down", "ff_w_syst_up", "ff_w_syst_down",
+    "ff_w_dm0_njet0_stat_up", "ff_w_dm0_njet0_stat_down", "ff_w_dm0_njet1_stat_up", "ff_w_dm0_njet1_stat_down",
+    "ff_w_dm1_njet0_stat_up", "ff_w_dm1_njet0_stat_down", "ff_w_dm1_njet1_stat_up", "ff_w_dm1_njet1_stat_down",
+    "ff_tt_syst_up", "ff_tt_syst_down", "ff_tt_dm0_njet0_stat_up", "ff_tt_dm0_njet0_stat_down",
+    "ff_tt_dm0_njet1_stat_up",  "ff_tt_dm0_njet1_stat_down", "ff_tt_dm1_njet0_stat_up",  "ff_tt_dm1_njet0_stat_down",
+    "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"]
 
 categories = [
     "inclusive",         "0jet",
@@ -59,6 +42,37 @@ m_sv_bins_boost = [0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300]
 m_sv_bins_vbf = [0, 80, 100, 115, 130, 150, 1000]
 
 
+syst_name_map = {
+    "_UncMet_Up": "_CMS_scale_met_unclustered_13TeVUp",
+    "_UncMet_Down": "_CMS_scale_met_unclustered_13TeVDown",
+    "_ClusteredMet_Up": "_CMS_scale_met_clustered_13TeVUp",
+    "_ClusteredMet_Down": "_CMS_scale_met_clustered_13TeVDown",
+    "_vbfMass_JetTotalUp": "_CMS_scale_jm_13TeVUp",
+    "_jetVeto30_JetTotalUp": "_CMS_scale_jn_13TeVUp",
+    "_vbfMass_JetTotalDown": "_CMS_scale_jm_13TeVDown",
+    "_jetVeto30_JetTotalDown": "_CMS_scale_jn_13TeVDown",
+    "_ttbarShape_Up": "_CMS_htt_ttbarShape_13TeVUp",
+    "_ttbarShape_Down": "_CMS_htt_ttbarShape_13TeVDown",
+    "_Up": "_CMS_scale_t_allprong_13TeVUp",
+    "_Down": "_CMS_scale_t_allprong_13TeVDown",
+    "_DM0_Up": "_CMS_scale_t_1prong_13TeVUp",
+    "_DM0_Down": "_CMS_scale_t_1prong_13TeVDown",
+    "_DM1_Up": "_CMS_scale_t_1prong1pizero_13TeVUp",
+    "_DM1_Down": "_CMS_scale_t_1prong1pizero_13TeVDown",
+    "_DM10_Up": "_CMS_scale_t_3prong_13TeVUp",
+    "_DM10_Down": "_CMS_scale_t_3prong_13TeVDown",
+    "_jetToTauFake_Up": "_CMS_htt_jetToTauFake_13TeVUp",
+    "_jetToTauFake_Down": "_CMS_htt_jetToTauFake_13TeVDown",
+    "_dyShape_Up": "_CMS_htt_dyShape_13TeVUp",
+    "_dyShape_Down": "_CMS_htt_dyShape_13TeVDown",
+    "_zmumuShape_Up": "_CMS_htt_zmumuShape_VBF_13TeVUp",
+    "_zmumuShape_Down": "_CMS_htt_zmumuShape_VBF_13TeVDown",
+    "_JetTotalDown": "_CMS_htt_tempjetotaldown_VBF_13TeVDown",
+    "_JetTotalUp": "_CMS_htt_tempjetotalup_VBF_13TeVDown",
+    "": ""
+}
+
+
 def build_histogram(name, x_bins, y_bins):
     return ROOT.TH2F(name, name, len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins))
 
@@ -70,6 +84,7 @@ def fill_hist(data, xvar, yvar, hist):
     for i in xrange(len(data.index)):
         hist.Fill(xvar[i], yvar[i], evtwt[i])
     return hist
+
 
 def fill_vbf_subcat_hists(data, xvar, yvar, zvar, hists):
     evtwt = data['evtwt'].values
@@ -86,7 +101,7 @@ def fill_vbf_subcat_hists(data, xvar, yvar, zvar, hists):
     return hists
 
 
-def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights):
+def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=None):
     # get event data
     columns = data[['evtwt', xvar, yvar, 't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_iso']].values
     evtwt, xvar, yvar = columns[:, 0], columns[:, 1], columns[:, 2]
@@ -103,7 +118,7 @@ def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights):
     for i in xrange(len(data.index)):
         # make fake-weight input
         inputs = [t1_pt[i], t1_decayMode[i], njets[i], vis_mass[i], mt[i], iso[i], frac_qcd, frac_w, frac_tt]
-        # fake_weight = fake_weights.value(9, array('d', inputs))
+        # fake_weights = fake_weights.value(9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
         fake_weight = 1.  # for testing the rest
         hist.Fill(xvar[i], yvar[i], evtwt[i] * fake_weight)
     return hist
@@ -151,79 +166,106 @@ def main(args):
     #                                                                               ztt_name, syst_name, args.date, '_'+args.suffix))
 
     for ifile in files:
-        name = ifile.replace('.root', '')
+        name = ifile.replace('.root', '').split('/')[-1]
         print name
-        events = uproot.open(ifile)[args.tree_name].arrays([
-            'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',
-            'mu_iso', 'el_iso', 't1_decayMode', 'vis_mass', 't1_pt', 'higgs_pT', 'm_sv',
-            'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt', 'mu_pt', 'el_pt'
-        ], outputtype=pandas.DataFrame)
+        input_file = uproot.open(ifile)
+        trees = [ikey.replace(';1', '') for ikey in input_file.keys() if 'tree' in ikey] if args.syst else [args.tree_name]
+        for itree in trees:
+            if itree != args.tree_name:
+                name = ifile.replace('.root', '') + syst_name_map[itree.replace(args.tree_name, '')]
+                events = input_file[itree].arrays([
+                    'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',
+                    'mu_iso', 'el_iso', 't1_decayMode', 'vis_mass', 't1_pt', 'higgs_pT', 'm_sv',
+                    'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt', 'mu_pt', 'el_pt'
+                    ], outputtype=pandas.DataFrame)
+            else:
+                name = ifile.replace('.root', '')
 
-        general_selection = events[
-            (events['mt'] < 50) & (events['nbjets'] == 0)
-        ]
-
-        # do signal categorization
-        signal_events = general_selection[general_selection['is_signal'] > 0]
-
-        zero_jet_events = signal_events[signal_events['njets'] == 0]
-        boosted_events = signal_events[
-            (signal_events['njets'] == 1) |
-            ((signal_events['njets'] > 1) & signal_events['mjj'] < 300)
-        ]
-        vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
-
-        # start with 0-jet category
-        output_file.cd('{}_0jet'.format(channel_prefix))
-        zero_jet_hist = build_histogram(name.split('/')[-1], decay_mode_bins, vis_mass_bins)
-        zero_jet_hist = fill_hist(zero_jet_events, 't1_decayMode', 'vis_mass', zero_jet_hist)
-
-        # now boosted category
-        output_file.cd('{}_boosted'.format(channel_prefix))
-        boost_hist = build_histogram(name.split('/')[-1], higgs_pT_bins_boost, m_sv_bins_boost)
-        boost_hist = fill_hist(boosted_events, 'higgs_pT', 'm_sv', boost_hist)
-
-        # vbf category is last
-        output_file.cd('{}_vbf'.format(channel_prefix))
-        vbf_hist = build_histogram(name.split('/')[-1], mjj_bins, m_sv_bins_vbf)
-        vbf_hist = fill_hist(vbf_events, 'mjj', 'm_sv', vbf_hist)
-
-
-        # vbf sub-categories event after normal vbf categories
-        vbf_cat_hists = []
-        for cat in vbf_sub_cats:
-            output_file.cd('{}_{}'.format(channel_prefix, cat))
-            vbf_cat_hists.append(build_histogram(name.split('/')[-1], mjj_bins, m_sv_bins_vbf))
-    
-        vbf_cat_hists = fill_vbf_subcat_hists(vbf_events, 'mjj', 'm_sv', 'D0_ggH', vbf_cat_hists)
-
-        # do anti-iso categorization for fake-factor using data
-        if 'data' in ifile.lower():
-            print 'making fake factor hists'
-            antiIso_events = general_selection[general_selection['is_antiTauIso'] > 0]
-            fake_zero_jet_events = antiIso_events[antiIso_events['njets'] == 0]
-            fake_boosted_events = antiIso_events[
-                (antiIso_events['njets'] == 1) |
-                ((antiIso_events['njets'] > 1) & antiIso_events['mjj'] < 300)
+            general_selection = events[
+                (events['mt'] < 50) & (events['nbjets'] == 0)
             ]
-            fake_vbf_events = antiIso_events[(antiIso_events['njets'] > 1) & (antiIso_events['mjj'] > 300)]
 
+            # do signal categorization
+            signal_events = general_selection[general_selection['is_signal'] > 0]
+
+            zero_jet_events = signal_events[signal_events['njets'] == 0]
+            boosted_events = signal_events[
+                (signal_events['njets'] == 1) |
+                ((signal_events['njets'] > 1) & signal_events['mjj'] < 300)
+            ]
+            vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
+            
+            # start with 0-jet category
             output_file.cd('{}_0jet'.format(channel_prefix))
-            zero_jet_fake_hist = build_histogram('jetFakes', decay_mode_bins, vis_mass_bins)
-            zero_jet_fake_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
-                                                'vis_mass', zero_jet_fake_hist, fake_fractions['mt_0jet'], fake_weights)
+            zero_jet_hist = build_histogram(name.split('/')[-1], decay_mode_bins, vis_mass_bins)
+            fill_hist(zero_jet_events, 't1_decayMode', 'vis_mass', zero_jet_hist)
 
+            # now boosted category
             output_file.cd('{}_boosted'.format(channel_prefix))
-            boost_fake_hist = build_histogram('jetFakes', higgs_pT_bins_boost, m_sv_bins_boost)
-            boost_fake_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
-                                             'm_sv', boost_fake_hist, fake_fractions['mt_boosted'], fake_weights)
+            boost_hist = build_histogram(name.split('/')[-1], higgs_pT_bins_boost, m_sv_bins_boost)
+            fill_hist(boosted_events, 'higgs_pT', 'm_sv', boost_hist)
 
+            # vbf category is last
             output_file.cd('{}_vbf'.format(channel_prefix))
-            vbf_fake_hist = build_histogram('jetFakes', mjj_bins, m_sv_bins_vbf)
-            vbf_fake_hist = fill_fake_hist(fake_vbf_events, 'mjj', 'm_sv',
-                                           vbf_fake_hist, fake_fractions['mt_vbf'], fake_weights)
+            vbf_hist = build_histogram(name.split('/')[-1], mjj_bins, m_sv_bins_vbf)
+            fill_hist(vbf_events, 'mjj', 'm_sv', vbf_hist)
 
-        output_file.Write()
+            # vbf sub-categories event after normal vbf categories
+            vbf_cat_hists = []
+            for cat in vbf_sub_cats:
+                output_file.cd('{}_{}'.format(channel_prefix, cat))
+                vbf_cat_hists.append(build_histogram(name.split('/')[-1], mjj_bins, m_sv_bins_vbf))
+            fill_vbf_subcat_hists(vbf_events, 'mjj', 'm_sv', 'D0_ggH', vbf_cat_hists)
+
+            # write then reset histograms
+            output_file.Write()
+
+            # do anti-iso categorization for fake-factor using data
+            if 'data' in ifile.lower():
+                print 'making fake factor hists'
+                antiIso_events = general_selection[general_selection['is_antiTauIso'] > 0]
+                fake_zero_jet_events = antiIso_events[antiIso_events['njets'] == 0]
+                fake_boosted_events = antiIso_events[
+                    (antiIso_events['njets'] == 1) |
+                    ((antiIso_events['njets'] > 1) & antiIso_events['mjj'] < 300)
+                ]
+                fake_vbf_events = antiIso_events[(antiIso_events['njets'] > 1) & (antiIso_events['mjj'] > 300)]
+
+                output_file.cd('{}_0jet'.format(channel_prefix))
+                zero_jet_hist = build_histogram('jetFakes', decay_mode_bins, vis_mass_bins)
+                zero_jet_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
+                                                    'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights)
+
+                output_file.cd('{}_boosted'.format(channel_prefix))
+                boost_hist = build_histogram('jetFakes', higgs_pT_bins_boost, m_sv_bins_boost)
+                boost_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
+                                                 'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights)
+
+                output_file.cd('{}_vbf'.format(channel_prefix))
+                vbf_hist = build_histogram('jetFakes', mjj_bins, m_sv_bins_vbf)
+                vbf_hist = fill_fake_hist(fake_vbf_events, 'mjj', 'm_sv',
+                                               vbf_hist, fake_fractions['mt_vbf'], fake_weights)
+                output_file.Write()
+
+                if args.syst:
+                    for syst in fake_factor_systematics:
+                        output_file.cd('{}_0jet'.format(channel_prefix))
+                        zero_jet_hist = build_histogram(
+                            'jetFakes_CMS_htt_{}'.format(syst), decay_mode_bins, vis_mass_bins)
+                        zero_jet_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
+                                                            'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, syst)
+
+                        output_file.cd('{}_boosted'.format(channel_prefix))
+                        boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
+                                                          higgs_pT_bins_boost, m_sv_bins_boost)
+                        boost_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
+                                                         'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights, syst)
+
+                        output_file.cd('{}_vbf'.format(channel_prefix))
+                        vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), mjj_bins, m_sv_bins_vbf)
+                        vbf_hist = fill_fake_hist(fake_vbf_events, 'mjj', 'm_sv',
+                                                       vbf_hist, fake_fractions['mt_vbf'], fake_weights, syst)
+                        output_file.Write()
 
     output_file.Close()
     print 'Finished in {} seconds'.format(time.time() - start)
