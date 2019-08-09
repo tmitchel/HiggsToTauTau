@@ -10,11 +10,15 @@ from pprint import pprint
 import signal
 import sys
 fake_weights = None
+
+
 def signal_handler(sig, frame):
-        print('Trying to close {}'.format(fake_weights))
-        if fake_weights != None:
-            fake_weights.Delete()
-        sys.exit(0)
+    print('Trying to close {}'.format(fake_weights))
+    if fake_weights != None:
+        fake_weights.Delete()
+    sys.exit(0)
+
+
 signal.signal(signal.SIGINT, signal_handler)
 
 fake_factor_systematics = [
@@ -109,6 +113,7 @@ syst_name_map = {
     "": ""
 }
 
+
 def get_ac_weights(name):
     if 'ggh' in name.lower():
         return ac_reweighting_map['ggh']
@@ -118,6 +123,7 @@ def get_ac_weights(name):
         return ac_reweighting_map['wh']
     elif 'zh' in name.lower():
         return ac_reweighting_map['zh']
+
 
 def build_histogram(name, x_bins, y_bins):
     return ROOT.TH2F(name, name, len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins))
@@ -295,9 +301,7 @@ def main(args):
             output_file.Write()
 
             if '_JHU' in name:
-                print 'AC sample {}'.format(name)
-                ac_weight_list = get_ac_weights(name)
-                for weight in ac_weight_list:
+                for weight in get_ac_weights(name):
                     print 'Reweighting sample {} to {}'.format(name, weight[1])
                     # start with 0-jet category
                     output_file.cd('{}_0jet'.format(channel_prefix))
