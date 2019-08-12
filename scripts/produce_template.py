@@ -286,6 +286,11 @@ def main(args):
             ]
             vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
 
+            # I'm thinking the following part can be made parallel. So filling the 3+ histograms can happen in
+            # in parallel. I think that would speed things up tremendously. Especially, if I apply the same thing
+            # to reweighting to different scenarios in parallel and doing fake factor systematics in parallel. In
+            # general, I like this approach much more than the C++ one I had. AND! It's faster than the C++ version.
+
             # start with 0-jet category
             output_file.cd('{}_0jet'.format(channel_prefix))
             zero_jet_hist = build_histogram(name, decay_mode_bins, vis_mass_bins)
