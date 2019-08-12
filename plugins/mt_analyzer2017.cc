@@ -174,7 +174,11 @@ int main(int argc, char *argv[]) {
     event_info event(ntuple, lepton::MUON, 2017, syst);
     muon_factory muons(ntuple, 2017);
     tau_factory taus(ntuple, 2017);
-    jet_factory jets(ntuple, 2017, syst);
+    int temp = 2017;
+    if (doAC) {
+      temp = 20172;
+    }
+    jet_factory jets(ntuple, temp, syst);
     met_factory met(ntuple, 2017, syst);
 
     if (sample.find("ggHtoTauTau125") != std::string::npos) {
