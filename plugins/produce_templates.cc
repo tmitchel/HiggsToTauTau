@@ -59,13 +59,7 @@ int main(int argc, char *argv[]) {
     auto fout = std::make_shared<TFile>(
         ("Output/templates/htt_" + channel_prefix + ztt_name + syst_name + "_fa3_" + year + "_" + suffix + ".root").c_str(), "recreate");
     auto info = std::make_unique<TemplateTool>(channel_prefix);
-    auto map_prefix = "";
-    if (channel_prefix == "mt") {
-        map_prefix = "mut";
-    } else if (channel_prefix == "et") {
-        map_prefix = "et";
-    }
-    info->make_extension_map(map_prefix);
+    info->make_extension_map(channel_prefix);
 
     // make all of the TDirectoryFiles we need
     for (auto cat : info->get_categories()) {
