@@ -53,7 +53,7 @@ def fill_vbf_subcat_hists(data, xvar, yvar, zvar, hists, edges, ac_weight=None):
     yvar = data[yvar].values
     zvar = data[zvar].values
     for i in xrange(len(data.index)):
-        for j, edge in enumerate(edges[1:]): # remove lowest left edge
+        for j, edge in enumerate(edges[1:]):  # remove lowest left edge
             if zvar[i] < edge:
                 hists[j].Fill(xvar[i], yvar[i], evtwt[i])
                 break
@@ -161,7 +161,7 @@ def main(args):
         fake_weights = None
     else:
         fake_weights = load_fake_factor_weights(
-            '../HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/mt/fakeFactors.root')
+            '../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors.root'.format(args.year, args.year, channel_prefix))
 
     # use this once uproot supports sub-directories inside root files
     # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
@@ -240,7 +240,8 @@ def main(args):
             for cat in boilerplate['vbf_sub_cats']:
                 output_file.cd('{}_{}'.format(channel_prefix, cat))
                 vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins))
-            fill_vbf_subcat_hists(vbf_events, vbf_cat_x_var, vbf_cat_y_var, vbf_cat_edge_var, vbf_cat_hists, vbf_cat_edges)
+            fill_vbf_subcat_hists(vbf_events, vbf_cat_x_var, vbf_cat_y_var,
+                                  vbf_cat_edge_var, vbf_cat_hists, vbf_cat_edges)
 
             # write then reset histograms
             output_file.Write()
@@ -268,7 +269,8 @@ def main(args):
                     for cat in boilerplate['vbf_sub_cats']:
                         output_file.cd('{}_{}'.format(channel_prefix, cat))
                         vbf_cat_hists.append(build_histogram(weight[1], vbf_cat_x_bins, vbf_cat_y_bins))
-                    fill_vbf_subcat_hists(vbf_events, vbf_cat_x_var, vbf_cat_y_var, vbf_cat_edge_var, vbf_cat_hists, vbf_cat_edges, weight[0])
+                    fill_vbf_subcat_hists(vbf_events, vbf_cat_x_var, vbf_cat_y_var,
+                                          vbf_cat_edge_var, vbf_cat_hists, vbf_cat_edges, weight[0])
                     output_file.Write()
 
             # do anti-iso categorization for fake-factor using data
