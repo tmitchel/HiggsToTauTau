@@ -28,28 +28,28 @@
     ],
     "ac_reweighting_map": {
         "ggh": [
-            ["wt_ggh_a1", "reweighted_ggh125_a1_JHU"], ["wt_ggh_a3", "reweighted_ggh125_a3_JHU"],
-            ["wt_ggh_a3int", "reweighted_ggh125_a3int_JHU"]
+            ["wt_ggh_a1", "JHU__GGH2Jets_sm_M125"], ["wt_ggh_a3", "JHU__GGH2Jets_pseudoscalar_M125"],
+            ["wt_ggh_a3int", "JHU__GGH2Jets_pseudoscalar_Mf05ph0125"]
         ],
         "wh": [
-            ["wt_wh_a1", "reweighted_wh125_a1_JHU"], ["wt_wh_a2", "reweighted_wh125_a2_JHU"],
-            ["wt_wh_a2int", "reweighted_wh125_a2int_JHU"], ["wt_wh_a3", "reweighted_wh125_a3_JHU"],
-            ["wt_wh_a3int", "reweighted_wh125_a3int_JHU"], ["wt_wh_L1", "reweighted_wh125_l1_JHU"],
-            ["wt_wh_L1int", "reweighted_wh125_l1int_JHU"], ["wt_wh_L1Zg", "reweighted_wh125_l1zg_JHU"],
-            ["wt_wh_L1Zgint", "reweighted_wh125_l1zgint_JHU"]
+            ["wt_wh_a1", "JHU__reweighted_WH_htt_0PM125"], ["wt_wh_a2", "JHU__reweighted_WH_htt_0PH125"],
+            ["wt_wh_a2int", "JHU__reweighted_WH_htt_0PHf05ph0125"], ["wt_wh_a3", "JHU__reweighted_WH_htt_0M125"],
+            ["wt_wh_a3int", "JHU__reweighted_WH_htt_0Mf05ph0125"], ["wt_wh_L1", "JHU__reweighted_WH_htt_0L1125"],
+            ["wt_wh_L1int", "JHU__reweighted_WH_htt_0L1f05ph0125"], ["wt_wh_L1Zg", "JHU__reweighted_WH_htt_0L1Zg125"],
+            ["wt_wh_L1Zgint", "JHU__reweighted_WH_htt_0L1Zgf05ph0125"]
         ],
         "zh": [
-            ["wt_zh_a1", "reweighted_zh125_a1_JHU"], ["wt_zh_a2", "reweighted_zh125_a2_JHU"],
-            ["wt_zh_a2int", "reweighted_zh125_a2int_JHU"], ["wt_zh_a3", "reweighted_zh125_a3_JHU"],
-            ["wt_zh_a3int", "reweighted_zh125_a3int_JHU"], ["wt_zh_L1", "reweighted_zh125_l1_JHU"],
-            ["wt_zh_L1int", "reweighted_zh125_l1int_JHU"], ["wt_zh_L1Zg", "reweighted_zh125_l1zg_JHU"],
-            ["wt_zh_L1Zgint", "reweighted_zh125_l1zgint_JHU"]],
+            ["wt_zh_a1", "JHU__reweighted_ZH_htt_0PM125"], ["wt_zh_a2", "JHU__reweighted_ZH_htt_0PH125"],
+            ["wt_zh_a2int", "JHU__reweighted_ZH_htt_0PHf05ph0125"], ["wt_zh_a3", "JHU__reweighted_ZH_htt_0M125"],
+            ["wt_zh_a3int", "JHU__reweighted_ZH_htt_0Mf05ph0125"], ["wt_zh_L1", "JHU__reweighted_ZH_htt_0L1125"],
+            ["wt_zh_L1int", "JHU__reweighted_ZH_htt_0L1f05ph0125"], ["wt_zh_L1Zg", "JHU__reweighted_ZH_htt_0L1Zg125"],
+            ["wt_zh_L1Zgint", "JHU__reweighted_ZH_htt_0L1Zgf05ph0125"]],
         "vbf": [
-            ["wt_vbf_a1", "reweighted_vbf125_a1_JHU"], ["wt_vbf_a2", "reweighted_vbf125_a2_JHU"],
-            ["wt_vbf_a2int", "reweighted_vbf125_a2int_JHU"], ["wt_vbf_a3", "reweighted_vbf125_a3_JHU"],
-            ["wt_vbf_a3int", "reweighted_vbf125_a3int_JHU"], ["wt_vbf_L1", "reweighted_vbf125_l1_JHU"],
-            ["wt_vbf_L1int", "reweighted_vbf125_l1int_JHU"], ["wt_vbf_L1Zg", "reweighted_vbf125_l1zg_JHU"],
-            ["wt_vbf_L1Zgint", "reweighted_vbf125_l1zgint_JHU"]
+            ["wt_vbf_a1", "JHU__reweighted_qqH_htt_0PM125"], ["wt_vbf_a2", "JHU__reweighted_qqH_htt_0PH125"],
+            ["wt_vbf_a2int", "JHU__reweighted_qqH_htt_0PHf05ph0125"], ["wt_vbf_a3", "JHU__reweighted_qqH_htt_0M125"],
+            ["wt_vbf_a3int", "JHU__reweighted_qqH_htt_0Mf05ph0125"], ["wt_vbf_L1", "JHU__reweighted_qqH_htt_0L1125"],
+            ["wt_vbf_L1int", "JHU__reweighted_qqH_htt_0L1f05ph0125"], ["wt_vbf_L1Zg", "JHU__reweighted_qqH_htt_0L1Zg125"],
+            ["wt_vbf_L1Zgint", "JHU__reweighted_qqH_htt_0L1Zgf05ph0125"]
         ]
     },
     "syst_name_map": {
