@@ -196,7 +196,7 @@ def main(args):
     ztt_name = 'emb' if args.embed else 'ztt'
     syst_name = 'Sys' if args.syst else 'noSys'
 
-    output_file = ROOT.TFile('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
+    output_file = ROOT.TFile('Output/templates/2D_htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
                                                                                   ztt_name, syst_name, args.date, args.suffix), 'RECREATE')
 
     # create structure within output file
