@@ -24,15 +24,15 @@ def main(args):
                     error = hist.GetBinError(binx, biny)
                     unrolled.SetBinContent(binx*biny, content)
                     unrolled.SetBinError(binx*biny, error)
-            # temporary thing until i fix WH
-            if 'WH' in hname:
-                continue
-            elif 'ZH' in hname:
-                fout.cd(cat)
-                unrolled.Write()
-                unrolled.SetName(unrolled.GetName().replace('ZH', 'WH'))
-                unrolled.Write()
-                continue
+            # # temporary thing until i fix WH
+            # if 'WH' in hname:
+            #     continue
+            # elif 'ZH' in hname:
+            #     fout.cd(cat)
+            #     unrolled.Write()
+            #     unrolled.SetName(unrolled.GetName().replace('ZH', 'WH'))
+            #     unrolled.Write()
+            #     continue
             fout.cd(cat)
             unrolled.Write()
     fout.Close()
