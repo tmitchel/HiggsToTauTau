@@ -136,17 +136,17 @@ def main(args):
         vbf_cat_edge_var, vbf_cat_edges = config['vbf_cat_edges']
 
     # channel_prefix = args.tree_name.replace('_tree', '')  # need prefix for things later
-    channel_prefix = args.tree_name.replace('mutau_tree', 'mt')
-    channel_prefix = channel_prefix.replace('etau_tree', 'et')
+    channel_prefix = args.tree_name.replace('mt_tree', 'mt')
+    channel_prefix = channel_prefix.replace('et_tree', 'et')
     assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
     files = [ifile for ifile in glob('{}/*.root'.format(args.input_dir))]  # get files to process
 
     # get things for output file name
-    ztt_name = '_emb' if args.embed else '_ztt'
-    syst_name = '_Sys' if args.syst else '_noSys'
+    ztt_name = 'emb' if args.embed else 'ztt'
+    syst_name = 'Sys' if args.syst else 'noSys'
 
     output_file = ROOT.TFile('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
-                                                                                  ztt_name, syst_name, args.date, '_'+args.suffix), 'RECREATE')
+                                                                                  ztt_name, syst_name, args.date, args.suffix), 'RECREATE')
 
     # create structure within output file
     for cat in boilerplate['categories']:
@@ -195,11 +195,14 @@ def main(args):
             if 'embed' in ifile:
                 name = name.replace('embedded', 'ZTT')
 
-            events = input_file[itree].arrays([
+            variables = set([
                 'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',
                 'mu_iso', 'el_iso', 't1_decayMode', 'vis_mass', 't1_pt', 'higgs_pT', 'm_sv',
-                'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt', 'mu_pt', 'el_pt'
-            ], outputtype=pandas.DataFrame)
+                'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt', 'mu_pt', 'el_pt',
+                vbf_cat_x_var, vbf_cat_y_var, vbf_cat_edge_var
+            ])
+
+            events = input_file[itree].arrays(list(variables), outputtype=pandas.DataFrame)
 
             general_selection = events[
                 (events['mt'] < 50) & (events['nbjets'] == 0)
@@ -287,17 +290,17 @@ def main(args):
                 output_file.cd('{}_0jet'.format(channel_prefix))
                 zero_jet_hist = build_histogram('jetFakes', decay_mode_bins, vis_mass_bins)
                 zero_jet_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
-                                               'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, local=args.local)
+                                               'vis_mass', zero_jet_hist, fake_fractions['{}_0jet'.format(channel_prefix)], fake_weights, local=args.local)
 
                 output_file.cd('{}_boosted'.format(channel_prefix))
                 boost_hist = build_histogram('jetFakes', higgs_pT_bins_boost, m_sv_bins_boost)
                 boost_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
-                                            'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights, local=args.local)
+                                            'm_sv', boost_hist, fake_fractions['{}_boosted'.format(channel_prefix)], fake_weights, local=args.local)
 
                 output_file.cd('{}_vbf'.format(channel_prefix))
                 vbf_hist = build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins)
                 vbf_hist = fill_fake_hist(fake_vbf_events, vbf_cat_x_var, vbf_cat_y_var,
-                                          vbf_hist, fake_fractions['mt_vbf'], fake_weights, local=args.local)
+                                          vbf_hist, fake_fractions['{}_vbf'.format(channel_prefix)], fake_weights, local=args.local)
                 output_file.Write()
 
                 if args.syst:
@@ -306,18 +309,18 @@ def main(args):
                         zero_jet_hist = build_histogram(
                             'jetFakes_CMS_htt_{}'.format(syst), decay_mode_bins, vis_mass_bins)
                         zero_jet_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
-                                                       'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, syst, local=args.local)
+                                                       'vis_mass', zero_jet_hist, fake_fractions['{}_0jet'.format(channel_prefix)], fake_weights, syst, local=args.local)
 
                         output_file.cd('{}_boosted'.format(channel_prefix))
                         boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
                                                      higgs_pT_bins_boost, m_sv_bins_boost)
                         boost_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
-                                                    'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights, syst, local=args.local)
+                                                    'm_sv', boost_hist, fake_fractions['{}_boosted'.format(channel_prefix)], fake_weights, syst, local=args.local)
 
                         output_file.cd('{}_vbf'.format(channel_prefix))
                         vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), vbf_cat_x_bins, vbf_cat_y_bins)
                         vbf_hist = fill_fake_hist(fake_vbf_events, vbf_cat_x_var, vbf_cat_y_var,
-                                                  vbf_hist, fake_fractions['mt_vbf'], fake_weights, syst, local=args.local)
+                                                  vbf_hist, fake_fractions['{}_vbf'.format(channel_prefix)], fake_weights, syst, local=args.local)
                         output_file.Write()
 
     output_file.Close()
