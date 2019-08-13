@@ -84,6 +84,7 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
                      {"vbf125", 3.782 * 0.0627},
                      {"ggh125", 48.58 * 0.0627},
                      {"tth125", 0.5071 * 0.0627},
+                     {"wh125", 0.6864 * 0.0627},  // took the average of W+ and W-. Not important because for JHU it's reweighted to Powheg anyways
                      {"wminus125", 0.5328 * 0.0627},
                      {"wplus125", 0.840 * 0.0627},
                      {"zh125", 0.8839 * 0.062}},
