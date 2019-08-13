@@ -60,6 +60,57 @@ def fill_vbf_subcat_hists(data, xvar, yvar, zvar, hists, edges, ac_weight=None):
 
     return hists
 
+# dirty fix for now. Refactor later
+def fill_fake_hist_with_vbf_cat(data, xvar, yvar, zvar, hist, edges, fake_fractions, fake_weights, syst=None, local=False):
+    # get event data
+    columns = data[['evtwt', xvar, yvar, 't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_iso', zvar]].values
+    evtwt, xvar, yvar = columns[:, 0], columns[:, 1], columns[:, 2]
+    t1_pt, t1_decayMode, njets = columns[:, 3], columns[:, 4], columns[:, 5]
+    vis_mass, mt, iso = columns[:, 6], columns[:, 7], columns[:, 8]
+    zvar = columns[:, 9]
+
+    # get fake fractions
+    frac_data = fake_fractions[0]
+    frac_qcd = fake_fractions[1]
+    # frac_real = fake_fractions[2]
+    frac_tt = fake_fractions[3]
+    frac_w = fake_fractions[4]
+
+    for i in xrange(len(data.index)):
+        xbin, ybin = -1, -1
+        for x, bin in enumerate(frac_data.bins[0]):
+            if vis_mass[i] < bin[1] and vis_mass[i] > bin[0]:
+                xbin = x
+                break
+        for y, bin in enumerate(frac_data.bins[1]):
+            if njets[i] < bin[1] and njets[i] > bin[0]:
+                ybin = y
+                break
+
+        # I guess local and Wisc have different versions of uproot?
+        if not local:
+            xbin, ybin = ybin, xbin
+
+        # make fake-weight input
+        inputs = [
+            t1_pt[i], t1_decayMode[i], njets[i], vis_mass[i], mt[i], iso[i],
+            frac_qcd.values[xbin][ybin],
+            frac_w.values[xbin][ybin],
+            frac_tt.values[xbin][ybin]
+        ]
+
+        if local:
+            fake_weight = 1.  # for testing the rest
+        else:
+            fake_weight = fake_weights.value(
+                9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
+        
+        for j, edge in enumerate(edges[1:]):  # remove lowest left edge
+            if zvar[i] < edge:
+                hist[j].Fill(xvar[i], yvar[i], evtwt[i] * fake_weight)
+                break
+        # hist.Fill(xvar[i], yvar[i], evtwt[i] * fake_weight)
+    return hist
 
 def fill_fake_hist(data, xvar, yvar, hist, fake_fractions, fake_weights, syst=None, local=False):
     # get event data
@@ -301,6 +352,15 @@ def main(args):
                 vbf_hist = build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins)
                 vbf_hist = fill_fake_hist(fake_vbf_events, vbf_cat_x_var, vbf_cat_y_var,
                                           vbf_hist, fake_fractions['{}_vbf'.format(channel_prefix)], fake_weights, local=args.local)
+                
+                # vbf sub-categories event after normal vbf categories
+                vbf_cat_hists = []
+                for cat in boilerplate['vbf_sub_cats']:
+                    output_file.cd('{}_{}'.format(channel_prefix, cat))
+                    vbf_cat_hists.append(build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins))
+                fill_fake_hist_with_vbf_cat(fake_vbf_events, vbf_cat_x_var, vbf_cat_y_var, vbf_cat_edge_var, vbf_cat_hists,
+                                    vbf_cat_edges, fake_fractions['{}_vbf'.format(channel_prefix)], fake_weights, local=args.local)
+                
                 output_file.Write()
 
                 if args.syst:
@@ -321,6 +381,14 @@ def main(args):
                         vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), vbf_cat_x_bins, vbf_cat_y_bins)
                         vbf_hist = fill_fake_hist(fake_vbf_events, vbf_cat_x_var, vbf_cat_y_var,
                                                   vbf_hist, fake_fractions['{}_vbf'.format(channel_prefix)], fake_weights, syst, local=args.local)
+
+                        # vbf sub-categories event after normal vbf categories
+                        vbf_cat_hists = []
+                        for cat in boilerplate['vbf_sub_cats']:
+                            output_file.cd('{}_{}'.format(channel_prefix, cat))
+                            vbf_cat_hists.append(build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins))
+                        fill_fake_hist_with_vbf_cat(fake_vbf_events, vbf_cat_x_var, vbf_cat_y_var, vbf_cat_edge_var, vbf_cat_hists,
+                                            vbf_cat_edges, fake_fractions['{}_vbf'.format(channel_prefix)], fake_weights, syst=syst, local=args.local)
                         output_file.Write()
 
     output_file.Close()
