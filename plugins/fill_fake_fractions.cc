@@ -29,12 +29,10 @@ int main(int argc, char *argv[]) {
 
     // get channel info
     string channel_prefix, lep_charge;
-    if (tree_name.find("etau_tree") != string::npos) {
+    if (tree_name.find("et_tree") != string::npos) {
         channel_prefix = "et";
-    } else if (tree_name.find("mutau_tree") != string::npos) {
+    } else if (tree_name.find("mt_tree") != string::npos) {
         channel_prefix = "mt";
-    } else if (tree_name.find("tautau_tree") != string::npos) {
-        channel_prefix = "tt";
     } else {
         std::cerr << "Um. I don't know that tree. Sorry...";
         return -1;

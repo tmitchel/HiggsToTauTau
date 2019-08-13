@@ -1,3 +1,4 @@
+import json
 import ROOT
 import time
 import numpy
@@ -21,100 +22,8 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-fake_factor_systematics = [
-    "ff_qcd_syst_up", "ff_qcd_syst_down", "ff_qcd_dm0_njet0_stat_up", "ff_qcd_dm0_njet0_stat_down",
-    "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down", "ff_qcd_dm1_njet0_stat_up", "ff_qcd_dm1_njet0_stat_down",
-    "ff_qcd_dm1_njet1_stat_up", "ff_qcd_dm1_njet1_stat_down", "ff_w_syst_up", "ff_w_syst_down",
-    "ff_w_dm0_njet0_stat_up", "ff_w_dm0_njet0_stat_down", "ff_w_dm0_njet1_stat_up", "ff_w_dm0_njet1_stat_down",
-    "ff_w_dm1_njet0_stat_up", "ff_w_dm1_njet0_stat_down", "ff_w_dm1_njet1_stat_up", "ff_w_dm1_njet1_stat_down",
-    "ff_tt_syst_up", "ff_tt_syst_down", "ff_tt_dm0_njet0_stat_up", "ff_tt_dm0_njet0_stat_down",
-    "ff_tt_dm0_njet1_stat_up",  "ff_tt_dm0_njet1_stat_down", "ff_tt_dm1_njet0_stat_up",  "ff_tt_dm1_njet0_stat_down",
-    "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"]
 
-categories = [
-    "inclusive",         "0jet",
-    "boosted",           "vbf",
-    "vbf_ggHMELA_bin1",  "vbf_ggHMELA_bin2",
-    "vbf_ggHMELA_bin3",  "vbf_ggHMELA_bin4",
-    "vbf_ggHMELA_bin5",  "vbf_ggHMELA_bin6",
-    "vbf_ggHMELA_bin7",  "vbf_ggHMELA_bin8",
-    "vbf_ggHMELA_bin9",  "vbf_ggHMELA_bin10",
-    "vbf_ggHMELA_bin11", "vbf_ggHMELA_bin12"
-]
-
-vbf_sub_cats = [
-    "vbf_ggHMELA_bin1",  "vbf_ggHMELA_bin2",
-    "vbf_ggHMELA_bin3",  "vbf_ggHMELA_bin4",
-    "vbf_ggHMELA_bin5",  "vbf_ggHMELA_bin6",
-]
-
-ac_reweighting_map = {
-    "ggh": [
-        ("wt_ggh_a1", "JHU_GGH2Jets_sm_M125"), ("wt_ggh_a3", "JHU_GGH2Jets_pseudoscalar_M125"),
-        ("wt_ggh_a3int", "JHU_GGH2Jets_pseudoscalar_Mf05ph0125")
-    ],
-    "wh": [
-        ("wt_wh_a1", "reweighted_WH_htt_0PM125"), ("wt_wh_a2", "reweighted_WH_htt_0PH125"),
-        ("wt_wh_a2int", "reweighted_WH_htt_0PHf05ph0125"), ("wt_wh_a3", "reweighted_WH_htt_0M125"),
-        ("wt_wh_a3int", "reweighted_WH_htt_0Mf05ph0125"), ("wt_wh_L1", "reweighted_WH_htt_0L1125"),
-        ("wt_wh_L1int", "reweighted_WH_htt_0L1f05ph0125"), ("wt_wh_L1Zg", "reweighted_WH_htt_0L1Zg125"),
-        ("wt_wh_L1Zgint", "reweighted_WH_htt_0L1Zgf05ph0125")
-    ],
-    "zh": [
-        ("wt_zh_a1", "reweighted_ZH_htt_0PM125"), ("wt_zh_a2", "reweighted_ZH_htt_0PH125"),
-        ("wt_zh_a2int", "reweighted_ZH_htt_0PHf05ph0125"), ("wt_zh_a3", "reweighted_ZH_htt_0M125"),
-        ("wt_zh_a3int", "reweighted_ZH_htt_0Mf05ph0125"), ("wt_zh_L1", "reweighted_ZH_htt_0L1125"),
-        ("wt_zh_L1int", "reweighted_ZH_htt_0L1f05ph0125"), ("wt_zh_L1Zg", "reweighted_ZH_htt_0L1Zg125"),
-        ("wt_zh_L1Zgint", "reweighted_ZH_htt_0L1Zgf05ph0125")],
-    "vbf": [
-        ("wt_vbf_a1", "reweighted_qqH_htt_0PM125"), ("wt_vbf_a2", "reweighted_qqH_htt_0PH125"),
-        ("wt_vbf_a2int", "reweighted_qqH_htt_0PHf05ph0125"), ("wt_vbf_a3", "reweighted_qqH_htt_0M125"),
-        ("wt_vbf_a3int", "reweighted_qqH_htt_0Mf05ph0125"), ("wt_vbf_L1", "reweighted_qqH_htt_0L1125"),
-        ("wt_vbf_L1int", "reweighted_qqH_htt_0L1f05ph0125"), ("wt_vbf_L1Zg", "reweighted_qqH_htt_0L1Zg125"),
-        ("wt_vbf_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"),
-    ]
-}
-
-decay_mode_bins = [0, 1, 10, 11]
-higgs_pT_bins_boost = [0, 100, 150, 200, 250, 300, 5000]
-mjj_bins = [300, 500, 10000]
-vis_mass_bins = [0, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 400]
-m_sv_bins_boost = [0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300]
-m_sv_bins_vbf = [0, 80, 100, 115, 130, 150, 1000]
-
-
-syst_name_map = {
-    "_UncMet_Up": "_CMS_scale_met_unclustered_13TeVUp",
-    "_UncMet_Down": "_CMS_scale_met_unclustered_13TeVDown",
-    "_ClusteredMet_Up": "_CMS_scale_met_clustered_13TeVUp",
-    "_ClusteredMet_Down": "_CMS_scale_met_clustered_13TeVDown",
-    "_vbfMass_JetTotalUp": "_CMS_scale_jm_13TeVUp",
-    "_jetVeto30_JetTotalUp": "_CMS_scale_jn_13TeVUp",
-    "_vbfMass_JetTotalDown": "_CMS_scale_jm_13TeVDown",
-    "_jetVeto30_JetTotalDown": "_CMS_scale_jn_13TeVDown",
-    "_ttbarShape_Up": "_CMS_htt_ttbarShape_13TeVUp",
-    "_ttbarShape_Down": "_CMS_htt_ttbarShape_13TeVDown",
-    "_Up": "_CMS_scale_t_allprong_13TeVUp",
-    "_Down": "_CMS_scale_t_allprong_13TeVDown",
-    "_DM0_Up": "_CMS_scale_t_1prong_13TeVUp",
-    "_DM0_Down": "_CMS_scale_t_1prong_13TeVDown",
-    "_DM1_Up": "_CMS_scale_t_1prong1pizero_13TeVUp",
-    "_DM1_Down": "_CMS_scale_t_1prong1pizero_13TeVDown",
-    "_DM10_Up": "_CMS_scale_t_3prong_13TeVUp",
-    "_DM10_Down": "_CMS_scale_t_3prong_13TeVDown",
-    "_jetToTauFake_Up": "_CMS_htt_jetToTauFake_13TeVUp",
-    "_jetToTauFake_Down": "_CMS_htt_jetToTauFake_13TeVDown",
-    "_dyShape_Up": "_CMS_htt_dyShape_13TeVUp",
-    "_dyShape_Down": "_CMS_htt_dyShape_13TeVDown",
-    "_zmumuShape_Up": "_CMS_htt_zmumuShape_VBF_13TeVUp",
-    "_zmumuShape_Down": "_CMS_htt_zmumuShape_VBF_13TeVDown",
-    "_JetTotalDown": "_CMS_htt_tempjetotaldown_VBF_13TeVDown",
-    "_JetTotalUp": "_CMS_htt_tempjetotalup_VBF_13TeVDown",
-    "": ""
-}
-
-
-def get_ac_weights(name):
+def get_ac_weights(name, ac_reweighting_map):
     if 'ggh' in name.lower():
         return ac_reweighting_map['ggh']
     elif 'vbf' in name.lower():
@@ -138,16 +47,15 @@ def fill_hist(data, xvar, yvar, hist, ac_weight=None):
     return hist
 
 
-def fill_vbf_subcat_hists(data, xvar, yvar, zvar, hists, ac_weight=None):
+def fill_vbf_subcat_hists(data, xvar, yvar, zvar, hists, edges, ac_weight=None):
     evtwt = data['evtwt'].values if ac_weight == None else (data['evtwt'] * data[ac_weight]).values
     xvar = data[xvar].values
     yvar = data[yvar].values
     zvar = data[zvar].values
-    edges = [i/6. for i in range(1, 7)]
     for i in xrange(len(data.index)):
-        for j, edge in enumerate(edges):
+        for j, edge in enumerate(edges[1:]):  # remove lowest left edge
             if zvar[i] < edge:
-                hists[j-1].Fill(xvar[i], yvar[i], evtwt[i])
+                hists[j].Fill(xvar[i], yvar[i], evtwt[i])
                 break
 
     return hists
@@ -211,21 +119,37 @@ def load_fake_fractions(input_file):
 
 def main(args):
     start = time.time()
+    config = {}
+    boilerplate = {}
+    with open('scripts/boilerplate.json', 'r') as config_file:
+        boilerplate = json.load(config_file)
+
+    with open('scripts/binning.json', 'r') as config_file:
+        config = json.load(config_file)
+        config = config[args.config]
+        decay_mode_bins = config['decay_mode_bins']
+        vis_mass_bins = config['vis_mass_bins']
+        higgs_pT_bins_boost = config['higgs_pT_bins_boost']
+        m_sv_bins_boost = config['m_sv_bins_boost']
+        vbf_cat_x_var, vbf_cat_x_bins = config['vbf_cat_x_bins']
+        vbf_cat_y_var, vbf_cat_y_bins = config['vbf_cat_y_bins']
+        vbf_cat_edge_var, vbf_cat_edges = config['vbf_cat_edges']
+
     # channel_prefix = args.tree_name.replace('_tree', '')  # need prefix for things later
-    channel_prefix = args.tree_name.replace('mutau_tree', 'mt')
-    channel_prefix = channel_prefix.replace('etau_tree', 'et')
+    channel_prefix = args.tree_name.replace('mt_tree', 'mt')
+    channel_prefix = channel_prefix.replace('et_tree', 'et')
     assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
     files = [ifile for ifile in glob('{}/*.root'.format(args.input_dir))]  # get files to process
 
     # get things for output file name
-    ztt_name = '_emb' if args.embed else '_ztt'
-    syst_name = '_Sys' if args.syst else '_noSys'
+    ztt_name = 'emb' if args.embed else 'ztt'
+    syst_name = 'Sys' if args.syst else 'noSys'
 
     output_file = ROOT.TFile('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
-                                                                                  ztt_name, syst_name, args.date, '_'+args.suffix), 'RECREATE')
+                                                                                  ztt_name, syst_name, args.date, args.suffix), 'RECREATE')
 
     # create structure within output file
-    for cat in categories:
+    for cat in boilerplate['categories']:
         output_file.cd()
         output_file.mkdir('{}_{}'.format(channel_prefix, cat))
     output_file.cd()
@@ -237,7 +161,7 @@ def main(args):
         fake_weights = None
     else:
         fake_weights = load_fake_factor_weights(
-            '../HTTutilities/Jet2TauFakes/data2017/SM2017/tight/vloose/mt/fakeFactors.root')
+            '../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors.root'.format(args.year, args.year, channel_prefix))
 
     # use this once uproot supports sub-directories inside root files
     # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
@@ -258,19 +182,27 @@ def main(args):
                  if 'tree' in ikey] if args.syst else [args.tree_name]
         for itree in trees:
             if itree != args.tree_name:
-                name = ifile.replace('.root', '').split('/')[-1] + syst_name_map[itree.replace(args.tree_name, '')]
+                name = ifile.replace('.root', '').split(
+                    '/')[-1] + boilerplate['syst_name_map'][itree.replace(args.tree_name, '')]
             else:
                 name = ifile.replace('.root', '').split('/')[-1]
+
+            # get data naming correct
+            if 'Data' in name:
+                name = 'data_obs'
 
             # handle MC vs embedded name
             if 'embed' in ifile:
                 name = name.replace('embedded', 'ZTT')
 
-            events = input_file[itree].arrays([
+            variables = set([
                 'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',
                 'mu_iso', 'el_iso', 't1_decayMode', 'vis_mass', 't1_pt', 'higgs_pT', 'm_sv',
-                'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt', 'mu_pt', 'el_pt'
-            ], outputtype=pandas.DataFrame)
+                'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt', 'mu_pt', 'el_pt',
+                vbf_cat_x_var, vbf_cat_y_var, vbf_cat_edge_var
+            ])
+
+            events = input_file[itree].arrays(list(variables), outputtype=pandas.DataFrame)
 
             general_selection = events[
                 (events['mt'] < 50) & (events['nbjets'] == 0)
@@ -303,21 +235,22 @@ def main(args):
 
             # vbf category is last
             output_file.cd('{}_vbf'.format(channel_prefix))
-            vbf_hist = build_histogram(name, mjj_bins, m_sv_bins_vbf)
-            fill_hist(vbf_events, 'mjj', 'm_sv', vbf_hist)
+            vbf_hist = build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins)
+            fill_hist(vbf_events, vbf_cat_x_var, vbf_cat_y_var, vbf_hist)
 
             # vbf sub-categories event after normal vbf categories
             vbf_cat_hists = []
-            for cat in vbf_sub_cats:
+            for cat in boilerplate['vbf_sub_cats']:
                 output_file.cd('{}_{}'.format(channel_prefix, cat))
-                vbf_cat_hists.append(build_histogram(name, mjj_bins, m_sv_bins_vbf))
-            fill_vbf_subcat_hists(vbf_events, 'mjj', 'm_sv', 'D0_ggH', vbf_cat_hists)
+                vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins))
+            fill_vbf_subcat_hists(vbf_events, vbf_cat_x_var, vbf_cat_y_var,
+                                  vbf_cat_edge_var, vbf_cat_hists, vbf_cat_edges)
 
             # write then reset histograms
             output_file.Write()
 
             if '_JHU' in name:
-                for weight in get_ac_weights(name):
+                for weight in get_ac_weights(name, boilerplate['ac_reweighting_map']):
                     print 'Reweighting sample {} to {}'.format(name, weight[1])
                     # start with 0-jet category
                     output_file.cd('{}_0jet'.format(channel_prefix))
@@ -331,15 +264,16 @@ def main(args):
 
                     # vbf category is last
                     output_file.cd('{}_vbf'.format(channel_prefix))
-                    vbf_hist = build_histogram(weight[1], mjj_bins, m_sv_bins_vbf)
-                    fill_hist(vbf_events, 'mjj', 'm_sv', vbf_hist, weight[0])
+                    vbf_hist = build_histogram(weight[1], vbf_cat_x_bins, vbf_cat_y_bins)
+                    fill_hist(vbf_events, vbf_cat_x_var, vbf_cat_y_var, vbf_hist, weight[0])
 
                     # vbf sub-categories event after normal vbf categories
                     vbf_cat_hists = []
-                    for cat in vbf_sub_cats:
+                    for cat in boilerplate['vbf_sub_cats']:
                         output_file.cd('{}_{}'.format(channel_prefix, cat))
-                        vbf_cat_hists.append(build_histogram(weight[1], mjj_bins, m_sv_bins_vbf))
-                    fill_vbf_subcat_hists(vbf_events, 'mjj', 'm_sv', 'D0_ggH', vbf_cat_hists, weight[0])
+                        vbf_cat_hists.append(build_histogram(weight[1], vbf_cat_x_bins, vbf_cat_y_bins))
+                    fill_vbf_subcat_hists(vbf_events, vbf_cat_x_var, vbf_cat_y_var,
+                                          vbf_cat_edge_var, vbf_cat_hists, vbf_cat_edges, weight[0])
                     output_file.Write()
 
             # do anti-iso categorization for fake-factor using data
@@ -356,37 +290,37 @@ def main(args):
                 output_file.cd('{}_0jet'.format(channel_prefix))
                 zero_jet_hist = build_histogram('jetFakes', decay_mode_bins, vis_mass_bins)
                 zero_jet_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
-                                               'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, local=args.local)
+                                               'vis_mass', zero_jet_hist, fake_fractions['{}_0jet'.format(channel_prefix)], fake_weights, local=args.local)
 
                 output_file.cd('{}_boosted'.format(channel_prefix))
                 boost_hist = build_histogram('jetFakes', higgs_pT_bins_boost, m_sv_bins_boost)
                 boost_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
-                                            'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights, local=args.local)
+                                            'm_sv', boost_hist, fake_fractions['{}_boosted'.format(channel_prefix)], fake_weights, local=args.local)
 
                 output_file.cd('{}_vbf'.format(channel_prefix))
-                vbf_hist = build_histogram('jetFakes', mjj_bins, m_sv_bins_vbf)
-                vbf_hist = fill_fake_hist(fake_vbf_events, 'mjj', 'm_sv',
-                                          vbf_hist, fake_fractions['mt_vbf'], fake_weights, local=args.local)
+                vbf_hist = build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins)
+                vbf_hist = fill_fake_hist(fake_vbf_events, vbf_cat_x_var, vbf_cat_y_var,
+                                          vbf_hist, fake_fractions['{}_vbf'.format(channel_prefix)], fake_weights, local=args.local)
                 output_file.Write()
 
                 if args.syst:
-                    for syst in fake_factor_systematics:
+                    for syst in boilerplate['fake_factor_systematics']:
                         output_file.cd('{}_0jet'.format(channel_prefix))
                         zero_jet_hist = build_histogram(
                             'jetFakes_CMS_htt_{}'.format(syst), decay_mode_bins, vis_mass_bins)
                         zero_jet_hist = fill_fake_hist(fake_zero_jet_events, 't1_decayMode',
-                                                       'vis_mass', zero_jet_hist, fake_fractions['mt_0jet'], fake_weights, syst, local=args.local)
+                                                       'vis_mass', zero_jet_hist, fake_fractions['{}_0jet'.format(channel_prefix)], fake_weights, syst, local=args.local)
 
                         output_file.cd('{}_boosted'.format(channel_prefix))
                         boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
                                                      higgs_pT_bins_boost, m_sv_bins_boost)
                         boost_hist = fill_fake_hist(fake_boosted_events, 'higgs_pT',
-                                                    'm_sv', boost_hist, fake_fractions['mt_boosted'], fake_weights, syst, local=args.local)
+                                                    'm_sv', boost_hist, fake_fractions['{}_boosted'.format(channel_prefix)], fake_weights, syst, local=args.local)
 
                         output_file.cd('{}_vbf'.format(channel_prefix))
-                        vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), mjj_bins, m_sv_bins_vbf)
-                        vbf_hist = fill_fake_hist(fake_vbf_events, 'mjj', 'm_sv',
-                                                  vbf_hist, fake_fractions['mt_vbf'], fake_weights, syst, local=args.local)
+                        vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), vbf_cat_x_bins, vbf_cat_y_bins)
+                        vbf_hist = fill_fake_hist(fake_vbf_events, vbf_cat_x_var, vbf_cat_y_var,
+                                                  vbf_hist, fake_fractions['{}_vbf'.format(channel_prefix)], fake_weights, syst, local=args.local)
                         output_file.Write()
 
     output_file.Close()
@@ -408,4 +342,5 @@ if __name__ == "__main__":
                         help='name of file containing fake fractions')
     parser.add_argument('--date', '-d', required=True, action='store', help='today\'s date for output name')
     parser.add_argument('--suffix', action='store', default='', help='suffix for filename')
+    parser.add_argument('--config', '-c', action='store', default=None, required=True, help='config for binning, etc.')
     main(parser.parse_args())
