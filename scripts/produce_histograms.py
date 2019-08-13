@@ -226,7 +226,7 @@ def main(args):
                 # vbf sub-categories event after normal vbf categories
                 vbf_cat_hists = []
                 for cat in boilerplate['vbf_sub_cats']:
-                    output_file.cd('{}_{}'.format(channel_prefix, cat))
+                    output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
                     vbf_cat_hists.append(build_histogram(name, bins))
                 fill_histograms(data=vbf_events, hists=vbf_cat_hists, xvar_name=variable, zvar_name=zvars[0], edges=zvars[1])
 
@@ -254,7 +254,7 @@ def main(args):
                         # vbf sub-categories event after normal vbf categories
                         vbf_cat_hists = []
                         for cat in boilerplate['vbf_sub_cats']:
-                            output_file.cd('{}_{}'.format(channel_prefix, cat))
+                            output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
                             vbf_cat_hists.append(build_histogram(weight[1], bins))
                         fill_histograms(data=vbf_events, hists=vbf_cat_hists, xvar_name=variable, zvar_name=zvars[0], edges=zvars[1], ac_weights=weight[0])
 
