@@ -151,14 +151,15 @@ for ifile in fileList:
         for name in names:
             for isyst in get_systs(name):
                 tocall = callstring + ' -n %s -u %s' % (name, isyst)
+                print tocall
                 call(tocall, shell=True)
     else:
         for name in names:
-            tocall = callstring + ' -n %s ' % name 
+            tocall = callstring + ' -n %s ' % name
+            print tocall
             call(tocall, shell=True)
 
 
-    print tocall
 
 end = time.time()
 print 'Processing completed in', end-start, 'seconds.'
