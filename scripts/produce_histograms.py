@@ -236,7 +236,6 @@ def main(args):
 
                 if '_JHU' in name:
                     for weight in get_ac_weights(name, boilerplate['ac_reweighting_map']):
-                        print 'Reweighting sample {} to {} for variable {}'.format(name, weight[1], variable)
                         # start with 0-jet category
                         output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
                         zero_jet_hist = build_histogram(weight[1], bins)

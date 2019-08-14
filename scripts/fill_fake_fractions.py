@@ -89,10 +89,21 @@ def main(args):
             for i in xrange(len(vbf_events.index)):
                 fractions[frac]['{}_vbf'.format(channel_prefix)].Fill(vis_mass[i], njets[i], evtwt[i])
 
-        for cat, fraction in fractions[frac].iteritems():
-            fout.cd(cat)
-            fraction.Write()
-            fout.cd()
+    for cat in categories:
+        fractions['frac_qcd'][cat] = fractions['frac_data'][cat].Clone()
+        fractions['frac_qcd'][cat].Add(fractions['frac_w'][cat], -1)
+        fractions['frac_qcd'][cat].Add(fractions['frac_tt'][cat], -1)
+        fractions['frac_qcd'][cat].Add(fractions['frac_real'][cat], -1)
+
+        fractions['frac_w'][cat].Divide(fractions['frac_data'][cat])
+        fractions['frac_tt'][cat].Divide(fractions['frac_data'][cat])
+        fractions['frac_real'][cat].Divide(fractions['frac_data'][cat])
+        fractions['frac_qcd'][cat].Divide(fractions['frac_data'][cat])
+
+    for frac_name, categories in fractions.iteritems():
+        for cat_name, ihist in categories.iteritems():
+            fout.cd(cat_name)
+            ihist.Write(frac_name)
 
     fout.Close()
 
