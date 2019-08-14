@@ -223,12 +223,13 @@ def main(args):
                 vbf_hist = build_histogram(name, bins)
                 fill_histograms(data=vbf_events, hists=vbf_hist, xvar_name=variable)
 
-                # vbf sub-categories event after normal vbf categories
-                vbf_cat_hists = []
-                for cat in boilerplate['vbf_sub_cats']:
-                    output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
-                    vbf_cat_hists.append(build_histogram(name, bins))
-                fill_histograms(data=vbf_events, hists=vbf_cat_hists, xvar_name=variable, zvar_name=zvars[0], edges=zvars[1])
+                if args.do_subcat:
+                    # vbf sub-categories event after normal vbf categories
+                    vbf_cat_hists = []
+                    for cat in boilerplate['vbf_sub_cats']:
+                        output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
+                        vbf_cat_hists.append(build_histogram(name, bins))
+                    fill_histograms(data=vbf_events, hists=vbf_cat_hists, xvar_name=variable, zvar_name=zvars[0], edges=zvars[1])
 
                 # write then reset histograms
                 output_file.Write()
@@ -251,12 +252,13 @@ def main(args):
                         vbf_hist = build_histogram(weight[1], bins)
                         fill_histograms(data=vbf_events, hists=vbf_hist, xvar_name=variable, ac_weights=weight[0])
 
-                        # vbf sub-categories event after normal vbf categories
-                        vbf_cat_hists = []
-                        for cat in boilerplate['vbf_sub_cats']:
-                            output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
-                            vbf_cat_hists.append(build_histogram(weight[1], bins))
-                        fill_histograms(data=vbf_events, hists=vbf_cat_hists, xvar_name=variable, zvar_name=zvars[0], edges=zvars[1], ac_weights=weight[0])
+                        if args.do_subcat:
+                            # vbf sub-categories event after normal vbf categories
+                            vbf_cat_hists = []
+                            for cat in boilerplate['vbf_sub_cats']:
+                                output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
+                                vbf_cat_hists.append(build_histogram(weight[1], bins))
+                            fill_histograms(data=vbf_events, hists=vbf_cat_hists, xvar_name=variable, zvar_name=zvars[0], edges=zvars[1], ac_weights=weight[0])
 
                         output_file.Write()
 
@@ -291,15 +293,16 @@ def main(args):
                                     fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
                                     fake_weights=fake_weights, local=args.local)
 
-                    # vbf sub-categories event after normal vbf categories
-                    vbf_cat_hists = []
-                    for cat in boilerplate['vbf_sub_cats']:
-                        output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
-                        vbf_cat_hists.append(build_histogram('jetFakes', bins))
-                    fill_histograms(data=fake_vbf_events, hists=vbf_cat_hists, xvar_name=variable,
-                        zvar_name=zvars[0], edges=zvars[1],
-                        fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
-                        fake_weights=fake_weights, local=args.local)
+                    if args.do_subcat:
+                        # vbf sub-categories event after normal vbf categories
+                        vbf_cat_hists = []
+                        for cat in boilerplate['vbf_sub_cats']:
+                            output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
+                            vbf_cat_hists.append(build_histogram('jetFakes', bins))
+                        fill_histograms(data=fake_vbf_events, hists=vbf_cat_hists, xvar_name=variable,
+                            zvar_name=zvars[0], edges=zvars[1],
+                            fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
+                            fake_weights=fake_weights, local=args.local)
                         
                     output_file.Write()
 
@@ -326,14 +329,15 @@ def main(args):
                                             fake_weights=fake_weights, local=args.local, syst=syst)
 
                             # vbf sub-categories event after normal vbf categories
-                            vbf_cat_hists = []
-                            for cat in boilerplate['vbf_sub_cats']:
-                                output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
-                                vbf_cat_hists.append(build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins))
-                            fill_histograms(data=fake_vbf_events, hists=vbf_cat_hists, xvar_name=variable,
-                                zvar_name=zvars[0], edges=zvars[1],
-                                fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
-                                fake_weights=fake_weights, local=args.local, syst=syst)
+                            if args.do_subcat:
+                                vbf_cat_hists = []
+                                for cat in boilerplate['vbf_sub_cats']:
+                                    output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
+                                    vbf_cat_hists.append(build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins))
+                                fill_histograms(data=fake_vbf_events, hists=vbf_cat_hists, xvar_name=variable,
+                                    zvar_name=zvars[0], edges=zvars[1],
+                                    fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
+                                    fake_weights=fake_weights, local=args.local, syst=syst)
 
                             output_file.Write()
 
@@ -357,4 +361,5 @@ if __name__ == "__main__":
     parser.add_argument('--date', '-d', required=True, action='store', help='today\'s date for output name')
     parser.add_argument('--suffix', action='store', default='', help='suffix for filename')
     parser.add_argument('--config', '-c', action='store', default=None, required=True, help='config for binning, etc.')
+    parser.add_argument('--do-subcat', action='store_true', dest='do_subcat', help='fill histograms in vbf subcategories')
     main(parser.parse_args())
