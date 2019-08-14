@@ -7,28 +7,30 @@ ROOT.gStyle.SetOptStat(0)
 
 # short-hand
 GetColor = ROOT.TColor.GetColor
+black = ROOT.kBlack
+no_color = 0
 
 style_map_tuple = namedtuple('style_map_tuple', [
     'fill_color', 'line_color', 'line_style', 'line_width', 'marker_style'
 ])
 style_map = {
-    "data_obs": style_map_tuple(0, 1, 1, 1, 8),
+    "data_obs": style_map_tuple(no_color, black, 1, 1, 8),
     "backgrounds": {
-        "embedded": style_map_tuple(GetColor("#f9cd66"), GetColor("#f9cd66"), 1, 0, 1),
-        "ZTT": style_map_tuple(GetColor("#f9cd66"), GetColor("#f9cd66"), 1, 0, 1),
-        "jetFakes": style_map_tuple(GetColor("#ffccff"), GetColor("#ffccff"), 1, 0, 1),
-        "TTT": style_map_tuple(GetColor("#cfe87f"), GetColor("#cfe87f"), 1, 0, 1),
-        "ZL": style_map_tuple(GetColor("#de5a6a"), GetColor("#de5a6a"), 1, 0, 1),
-        "VVT": style_map_tuple(GetColor("#9feff2"), GetColor("#9feff2"), 1, 0, 1),
+        "embedded": style_map_tuple(GetColor("#f9cd66"), black, 1, 1, 1),
+        "ZTT": style_map_tuple(GetColor("#f9cd66"), black, 1, 1, 1),
+        "jetFakes": style_map_tuple(GetColor("#ffccff"), black, 1, 1, 1),
+        "TTT": style_map_tuple(GetColor("#cfe87f"), black, 1, 1, 1),
+        "ZL": style_map_tuple(GetColor("#de5a6a"), black, 1, 1, 1),
+        "VVT": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
     },
     "signals": {
-        "ggh125_powheg": style_map_tuple(0, 0, 0, 0, 1),  # don't show powheg
-        "JHU__GGH2Jets_sm_M125": style_map_tuple(0, GetColor("#0000FF"), 1, 3, 1),
-        "JHU__GGH2Jets_pseudoscalar_M125": style_map_tuple(0, GetColor("#00AAFF"), 1, 3, 1),
+        "ggh125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
+        "JHU__GGH2Jets_sm_M125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
+        "JHU__GGH2Jets_pseudoscalar_M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
 
-        "vbf125_powheg": style_map_tuple(0, 0, 0, 0, 1),  # don't show powheg
-        "JHU__reweighted_qqH_htt_0PM125": style_map_tuple(0, GetColor("#FF0000"), 1, 3, 1),
-        "JHU__reweighted_qqH_htt_0M125": style_map_tuple(0, GetColor("#FFAA00"), 1, 3, 1),
+        "vbf125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
+        "JHU__reweighted_qqH_htt_0PM125": style_map_tuple(no_color, GetColor("#FF0000"), 1, 3, 1),
+        "JHU__reweighted_qqH_htt_0M125": style_map_tuple(no_color, GetColor("#FFAA00"), 1, 3, 1),
     }
 }
 
@@ -287,17 +289,18 @@ def main(args):
     line2.Draw()
 
     # save the pdf
-    can.SaveAs('Output/plots/{}.pdf'.format(args.output))
+    can.SaveAs('Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.variable, args.category, args.year))
+
 
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--input', '-i', required=True, action='store', help='input file')
-    parser.add_argument('--output', '-o', required=True, action='store', help='output file name')
     parser.add_argument('--year', '-y', required=True, action='store', help='year to plot')
     parser.add_argument('--category', '-c', required=True, action='store', help='category to plot')
     parser.add_argument('--variable', '-v', required=True, action='store', help='variable to plot')
     parser.add_argument('--label', '-l', required=True, action='store', help='label for plot')
+    parser.add_argument('--prefix', '-p', action='store', help='prefix for output name')
     parser.add_argument('--scale', '-s', default=1.2, type=float, action='store', help='scale max by x')
     main(parser.parse_args())
