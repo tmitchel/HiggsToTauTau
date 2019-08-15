@@ -133,8 +133,8 @@ def main(args):
     ztt_name = 'emb' if args.embed else 'ztt'
     syst_name = 'Sys' if args.syst else 'noSys'
 
-    output_file = ROOT.TFile('Output/histograms/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
-                                                                                   ztt_name, syst_name, args.date, args.suffix), 'RECREATE')
+    output_file = ROOT.TFile('Output/histograms/htt_{}_{}_{}_fa3_{}_{}{}.root'.format(channel_prefix,
+                                                                                   ztt_name, syst_name, args.year, args.date, args.suffix), 'RECREATE')
 
     # create structure within output file
     for cat in boilerplate['categories']:
@@ -150,8 +150,9 @@ def main(args):
     if args.local:
         fake_weights = None
     else:
+        random_ext = '_tight' if channel_prefix == 'et' and args.year == "2016" else ''
         fake_weights = load_fake_factor_weights(
-            '../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors.root'.format(args.year, args.year, channel_prefix))
+            '../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors{}.root'.format(args.year, args.year, channel_prefix, random_ext))
 
     # use this once uproot supports sub-directories inside root files
     # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
