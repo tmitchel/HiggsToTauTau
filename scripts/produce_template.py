@@ -227,16 +227,20 @@ def main(args):
             continue
 
         name = ifile.replace('.root', '').split('/')[-1]
+        stable_name = name
         print name
         input_file = uproot.open(ifile)
         trees = [ikey.replace(';1', '') for ikey in input_file.keys()
                  if 'tree' in ikey] if args.syst else [args.tree_name]
         for itree in trees:
             if itree != args.tree_name:
-                name = ifile.replace('.root', '').split(
-                    '/')[-1] + boilerplate['syst_name_map'][itree.replace(args.tree_name, '')]
+                name = stable_name + boilerplate['syst_name_map'][itree.replace(args.tree_name, '')]
             else:
-                name = ifile.replace('.root', '').split('/')[-1]
+                name = stable_name
+
+            # adjust madgraph naming for later
+            if '_madgraph' in name:
+                name = name.replace(stable_name, boilerplate['noweighting_name_map'])
 
             # get data naming correct
             if 'Data' in name:
