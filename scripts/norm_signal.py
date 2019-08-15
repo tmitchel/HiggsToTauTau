@@ -25,9 +25,6 @@ def main(args):
     signal_yields = {}
     for sig in zip(powheg_sm_processes, reweight_sm_processes):
         key = join(sig[1].split('_')[:-1]).replace(' ', '_')
-        print sig
-        print vbf_inclusive_cat.Get(sig[0]).Integral()
-        print vbf_inclusive_cat.Get(sig[1]).Integral()
         if vbf_inclusive_cat.Get(sig[1]).Integral() > 0:
             signal_yields[key] = vbf_inclusive_cat.Get(sig[0]).Integral() / vbf_inclusive_cat.Get(sig[1]).Integral()
         else:
@@ -65,6 +62,8 @@ def main(args):
                 hist.Scale(signal_yields[scale_key])
                 hist.Write(hname.replace('MG__', ''))
             elif 'vbf' in cat and 'JHU__' in hname:
+                if '__GGH' in hname and args.signal == 'MG':
+                  continue
                 scale_key = join(hname.split('_')[:-1]).replace(' ', '_')
                 scale_key = scale_key.replace('pseudoscalar', 'sm')
                 hist.Scale(signal_yields[scale_key])

@@ -3,7 +3,7 @@ def main(args):
     import uproot
     from string import join
     fin = ROOT.TFile(args.input, 'read')
-    fout = ROOT.TFile(args.input.replace('2D_norm_', ''), 'recreate')
+    fout = ROOT.TFile(args.input.replace('norm_2D_', ''), 'recreate')
 
     for idir in fin.GetListOfKeys():
         cat = idir.GetName()
