@@ -7,7 +7,7 @@ def desired_names(process):
     return 'reweighted_{}_htt_0PM125'.format(process), 'reweighted_{}_htt_0M125'.format(process), 'reweighted_{}_htt_0Mf05ph0125'.format(process)
 
 
-powheg_sm_processes = ['ggh125_powheg', 'vbf125_powheg', 'wh125_powheg', 'zh125_powheg']
+powheg_sm_processes = ['ggh125_powheg', 'ggh125_powheg', 'vbf125_powheg', 'wh125_powheg', 'zh125_powheg']
 reweight_sm_processes = [
     'MG__GGH2Jets_sm_M125',
     'JHU__GGH2Jets_sm_M125', 'JHU__reweighted_qqH_htt_0PM125',
