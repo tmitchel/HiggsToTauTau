@@ -59,16 +59,18 @@ def main(args):
                 hist.Write(sm)
                 hist.Write(ps)
                 hist.Write(inter)
-            elif 'vbf' in cat and 'JHU__' in hname and args.signal == 'JHU':
+            elif 'vbf' in cat and 'JHU__' in hname:
                 scale_key = join(hname.split('_')[:-1]).replace(' ', '_')
                 scale_key = scale_key.replace('pseudoscalar', 'sm')
                 hist.Scale(signal_yields[scale_key])
-                hist.Write(hname.replace('JHU__', ''))
+                if 'GG2' in hname and args.signal == 'JHU':
+                    hist.Write(hname.replace('JHU__', ''))
             elif 'vbf' in cat and 'MG__' in hname and args.signal == 'MG':
                 scale_key = join(hname.split('_')[:-1]).replace(' ', '_')
                 scale_key = scale_key.replace('pseudoscalar', 'sm')
                 hist.Scale(signal_yields[scale_key])
-                hist.Write(hname.replace('MG__', ''))
+                if 'GG2' in hname and args.signal == 'MG':
+                    hist.Write(hname.replace('JHU__', ''))
             elif 'JHU' in hname or 'madgraph' in hname:
                 continue
             else:
@@ -81,5 +83,5 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--input', '-i', action='store', help='name of input file')
     parser.add_argument('--channel', '-c', action='store', help='lepton channel')
-    parser.add_argument('--signal', '-s', action='store', help='signal type (MG or JHU)')
+    parser.add_argument('--signal', '-s', action='store', help='signal type for ggH (MG or JHU)')
     main(parser.parse_args())
