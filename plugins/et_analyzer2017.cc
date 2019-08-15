@@ -65,7 +65,6 @@ int main(int argc, char* argv[]) {
     std::cout << "Opening file... " << sample << std::endl;
     std::cout << "with name...... " << name << std::endl;
     auto fin = TFile::Open(fname.c_str());
-    std::cout << "Loading Ntuple..." << std::endl;
     auto ntuple = reinterpret_cast<TTree*>(fin->Get("etau_tree"));
 
     // get number of generated events
@@ -333,8 +332,6 @@ int main(int argc, char* argv[]) {
                     evtwt *= 1.80;
                 else if (fabs(tau.getEta()) > 1.558)
                     evtwt *= 1.53;
-                //  if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
-                //  else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
             } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
                 if (fabs(tau.getEta()) < 0.4)
                     evtwt *= 1.17;

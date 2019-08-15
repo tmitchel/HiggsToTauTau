@@ -123,7 +123,9 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
         } else {
             notSignal = true;
         }
-        std::cout << "AC reweighting file name: " << fileName << std::endl;
+        if (!notSignal) {
+          std::cout << "AC reweighting file name: " << fileName << std::endl;
+        }
     }
 
     // set the branches

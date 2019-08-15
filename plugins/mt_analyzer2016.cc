@@ -63,7 +63,6 @@ int main(int argc, char *argv[]) {
     std::cout << "Opening file... " << sample << std::endl;
     std::cout << "with name...... " << name << std::endl;
     auto fin = TFile::Open(fname.c_str());
-    std::cout << "Loading Ntuple..." << std::endl;
     auto ntuple = reinterpret_cast<TTree *>(fin->Get("mutau_tree"));
 
     // get number of generated events
