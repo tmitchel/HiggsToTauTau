@@ -7,7 +7,7 @@ import uproot
 from glob import glob
 from array import array
 from pprint import pprint
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 
 
 import signal
@@ -40,7 +40,7 @@ def build_histogram(name, bins):
     return ROOT.TH1F(name, name, bins[0], bins[1], bins[2])
 
 
-def fill_histograms(data, hists, xvar_name, zvar_name=None, edges=None, ac_weights=None, fake_fractions=None, fake_weights=None, syst=None, local=None):
+def fill_histograms(queue, data, hists, xvar_name, zvar_name=None, edges=None, ac_weights=None, fake_fractions=None, fake_weights=None, syst=None, local=None):
     # get common variables
     evtwt = data['evtwt'].values if ac_weights == None else (data['evtwt'] * data[ac_weights]).values
     xvar = data[xvar_name].values
@@ -96,6 +96,8 @@ def fill_histograms(data, hists, xvar_name, zvar_name=None, edges=None, ac_weigh
                     break
         else:
             hists.Fill(xvar[i], evtwt[i]*fake_weight)
+
+    queue.put(hists)
 
 
 def load_fake_factor_weights(fake_file):
@@ -210,77 +212,28 @@ def main(args):
 
             for variable, bins in config_variables.iteritems():
 
+                # handle just 0jet category first so we aren't moving around a ton of TDirectory's
+
                 # build the histograms
                 output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
-                zero_jet_hist = build_histogram(name, bins)
-                output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
-                boost_hist = build_histogram(name, bins)
-                output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
-                vbf_hist = build_histogram(name, bins)
-
-                processes = [
-                    Process(target=fill_histograms, args=proc_args) for proc_args in [
-                        (zero_jet_events, zero_jet_hist, variable), (boosted_events, boost_hist, variable), (vbf_events, vbf_hist, variable)
-                    ]
-                ]
-                for proc in processes:
-                    proc.start()
-                # fill_histograms(data=zero_jet_events, hists=zero_jet_hist, xvar_name=variable)
-                # fill_histograms(data=boosted_events, hists=boost_hist, xvar_name=variable)
-                # fill_histograms(data=vbf_events, hists=vbf_hist, xvar_name=variable)
-
-                if args.do_subcat:
-                    # vbf sub-categories event after normal vbf categories
-                    vbf_cat_hists = []
-                    for cat in boilerplate['vbf_sub_cats']:
-                        output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
-                        vbf_cat_hists.append(build_histogram(name, bins))
-                    fill_histograms(data=vbf_events, hists=vbf_cat_hists, xvar_name=variable, zvar_name=zvars[0], edges=zvars[1])
-                    
-                for proc in processes:
-                    proc.join()
-                # write then reset histograms
-                output_file.Write()
-
+                zero_jet_hists = {}
+                zero_jet_hists['nominal'] = {
+                    'data': zero_jet_events,
+                    'hists': build_histogram(name, bins),
+                    'xvar_name': variable,
+                    'queue': Queue()
+                }
                 if '_JHU' in name:
                     for weight in get_ac_weights(name, boilerplate['ac_reweighting_map']):
-                        # start with 0-jet category
                         output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
-                        zero_jet_hist = build_histogram(weight[1], bins)
-
-                        # now boosted category
-                        output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
-                        boost_hist = build_histogram(weight[1], bins)
-
-                        # vbf category is last
-                        output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
-                        vbf_hist = build_histogram(weight[1], bins)
-
-                        if args.do_subcat:
-                            # vbf sub-categories event after normal vbf categories
-                            vbf_cat_hists = []
-                            for cat in boilerplate['vbf_sub_cats']:
-                                output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
-                                vbf_cat_hists.append(build_histogram(weight[1], bins))
-                            fill_histograms(data=vbf_events, hists=vbf_cat_hists, xvar_name=variable, zvar_name=zvars[0], edges=zvars[1], ac_weights=weight[0])
-                    processes = [
-                        Process(target=fill_histograms, kwargs=proc_args) for weight in get_ac_weights(name, boilerplate['ac_reweighting_map']) for proc_args in [
-                            {'data': zero_jet_events, 'hists': zero_jet_hist, 'xvar_name': variable, 'ac_weights': weight[0]},
-                            {'data': boosted_events, 'hists': boost_hist, 'xvar_name': variable, 'ac_weights': weight[0]},
-                            {'data': vbf_events, 'hists': vbf_hist, 'xvar_name': variable, 'ac_weights': weight[0]},
-                        ]
-                    ]
-                    for proc in processes:
-                        proc.start()
-                    # fill_histograms(data=boosted_events, hists=boost_hist, xvar_name=variable, ac_weights=weight[0])
-                    # fill_histograms(data=zero_jet_events, hists=zero_jet_hist, xvar_name=variable, ac_weights=weight[0])
-                    # fill_histograms(data=vbf_events, hists=vbf_hist, xvar_name=variable, ac_weights=weight[0])
-                    for proc in processes:
-                        proc.join()
-                    output_file.Write()
-
-                # do anti-iso categorization for fake-factor using data
-                if 'data' in ifile.lower():
+                        zero_jet_hists[weight[1]] = {
+                            'data': zero_jet_events,
+                            'hists': build_histogram(weight[1], bins),
+                            'xvar_name': variable,
+                            'ac_weights': weight[0],
+                            'queue': Queue()
+                        }
+                elif 'data' in ifile.lower():
                     print 'making fake factor hists'
                     antiIso_events = general_selection[general_selection['is_antiTauIso'] > 0]
                     fake_zero_jet_events = antiIso_events[antiIso_events['njets'] == 0]
@@ -290,88 +243,74 @@ def main(args):
                     ]
                     fake_vbf_events = antiIso_events[(antiIso_events['njets'] > 1) & (antiIso_events['mjj'] > 300)]
 
-                    # start with 0-jet category
-                    output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
-                    zero_jet_hist = build_histogram('jetFakes', bins)
-                    output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
-                    boost_hist = build_histogram('jetFakes', bins)
-                    output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
-                    vbf_hist = build_histogram('jetFakes', bins)
-
-                    processes = [
-                        Process(target=fill_histograms, kwargs=proc_args) for proc_args in [
-                            {'data': fake_zero_jet_events, 'hists': zero_jet_hist, 'xvar_name': variable, 'fake_fractions': fake_fractions['{}_0jet'.format(channel_prefix)], 'fake_weights': fake_weights, 'local': args.local},
-                            {'data': fake_boosted_events, 'hists': boost_hist, 'xvar_name': variable, 'fake_fractions': fake_fractions['{}_boosted'.format(channel_prefix)], 'fake_weights': fake_weights, 'local': args.local},
-                            {'data': fake_vbf_events, 'hists': vbf_hist, 'xvar_name': variable, 'fake_fractions': fake_fractions['{}_vbf'.format(channel_prefix)], 'fake_weights': fake_weights, 'local': args.local},
-                        ]
-                    ]
-                    for proc in processes:
-                        proc.start()
-
-                    for proc in processes:
-                        proc.join()
-
-                    # fill_histograms(data=fake_zero_jet_events, hists=zero_jet_hist, xvar_name=variable,
-                    #                 fake_fractions=fake_fractions['{}_0jet'.format(channel_prefix)],
-                    #                 fake_weights=fake_weights, local=args.local)
-
-                    # # now boosted category
-                    # fill_histograms(data=fake_boosted_events, hists=boost_hist, xvar_name=variable,
-                    #                 fake_fractions=fake_fractions['{}_boosted'.format(channel_prefix)],
-                    #                 fake_weights=fake_weights, local=args.local)
-                    # # vbf category is last
-                    # fill_histograms(data=fake_vbf_events, hists=vbf_hist, xvar_name=variable,
-                    #                 fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
-                    #                 fake_weights=fake_weights, local=args.local)
-
-                    if args.do_subcat:
-                        # vbf sub-categories event after normal vbf categories
-                        vbf_cat_hists = []
-                        for cat in boilerplate['vbf_sub_cats']:
-                            output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
-                            vbf_cat_hists.append(build_histogram('jetFakes', bins))
-                        fill_histograms(data=fake_vbf_events, hists=vbf_cat_hists, xvar_name=variable,
-                            zvar_name=zvars[0], edges=zvars[1],
-                            fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
-                            fake_weights=fake_weights, local=args.local)
-                        
-                    output_file.Write()
-
+                    zero_jet_hists['jetFakes'] = {
+                        'data': fake_zero_jet_events,
+                        'hists': build_histogram('jetFakes', bins),
+                        'xvar_name': variable,
+                        'fake_fractions': fake_fractions['{}_0jet'.format(channel_prefix)],
+                        'fake_weights': fake_weights,
+                        'local': args.local,
+                        'queue': Queue()
+                    }
                     if args.syst:
                         for syst in boilerplate['fake_factor_systematics']:
-                            # start with 0-jet category
-                            output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
-                            zero_jet_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins)
-                            fill_histograms(data=fake_zero_jet_events, hists=zero_jet_hist, xvar_name=variable,
-                                            fake_fractions=fake_fractions['{}_0jet'.format(channel_prefix)],
-                                            fake_weights=fake_weights, local=args.local, syst=syst)
+                            zero_jet_hists['jetFakes_CMS_htt_{}'.format(syst)] = {
+                                'data': fake_zero_jet_events,
+                                'hists': build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins),
+                                'xvar_name': variable,
+                                'fake_fractions': fake_fractions['{}_vbf'.format(channel_prefix)],
+                                'fake_weights': fake_weights,
+                                'syst': args.syst,
+                                'local': args.local,
+                                'queue': Queue()
+                            }
 
-                            # now boosted category
-                            output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
-                            boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins)
-                            fill_histograms(data=fake_boosted_events, hists=boost_hist, xvar_name=variable,
-                                            fake_fractions=fake_fractions['{}_boosted'.format(channel_prefix)],
-                                            fake_weights=fake_weights, local=args.local, syst=syst)
-                            # vbf category is last
-                            output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
-                            vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins)
-                            fill_histograms(data=fake_vbf_events, hists=vbf_hist, xvar_name=variable,
-                                            fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
-                                            fake_weights=fake_weights, local=args.local, syst=syst)
+                processes = [
+                    Process(target=fill_histograms, kwargs=proc_args, name=proc_name) for proc_name, proc_args in zero_jet_hists.iteritems()
+                ]
+                import random
+                for proc in processes:
+                    proc.start()
+                for proc in processes:
+                    proc.join()
+                # write then reset histograms
+                output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
+                for obj in zero_jet_hists.itervalues():
+                    obj['queue'].get().Write()
+                # output_file.Write()
 
-                            # vbf sub-categories event after normal vbf categories
-                            if args.do_subcat:
-                                vbf_cat_hists = []
-                                for cat in boilerplate['vbf_sub_cats']:
-                                    output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
-                                    vbf_cat_hists.append(build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins))
-                                fill_histograms(data=fake_vbf_events, hists=vbf_cat_hists, xvar_name=variable,
-                                    zvar_name=zvars[0], edges=zvars[1],
-                                    fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
-                                    fake_weights=fake_weights, local=args.local, syst=syst)
+                # if args.do_subcat:
+                #     # vbf sub-categories event after normal vbf categories
+                #     vbf_cat_hists = []
+                #     for cat in boilerplate['vbf_sub_cats']:
+                #         output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
+                #         vbf_cat_hists.append(build_histogram(name, bins))
+                #     fill_histograms(data=vbf_events, hists=vbf_cat_hists, xvar_name=variable, zvar_name=zvars[0], edges=zvars[1])
 
-                            output_file.Write()
+                # if args.do_subcat:
+                #     # vbf sub-categories event after normal vbf categories
+                #     vbf_cat_hists = []
+                #     for cat in boilerplate['vbf_sub_cats']:
+                #         output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
+                #         vbf_cat_hists.append(build_histogram('jetFakes', bins))
+                #     fill_histograms(data=fake_vbf_events, hists=vbf_cat_hists, xvar_name=variable,
+                #         zvar_name=zvars[0], edges=zvars[1],
+                #         fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
+                #         fake_weights=fake_weights, local=args.local)
 
+                # vbf sub-categories event after normal vbf categories
+                # if args.do_subcat:
+                #     vbf_cat_hists = []
+                #     for cat in boilerplate['vbf_sub_cats']:
+                #         output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
+                #         vbf_cat_hists.append(build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins))
+                #     fill_histograms(data=fake_vbf_events, hists=vbf_cat_hists, xvar_name=variable,
+                #         zvar_name=zvars[0], edges=zvars[1],
+                #         fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
+                #         fake_weights=fake_weights, local=args.local, syst=syst)
+
+                # output_file.Write()
+        # break
     output_file.Close()
     if not args.local:
         fake_weights.Delete()
@@ -392,5 +331,6 @@ if __name__ == "__main__":
     parser.add_argument('--date', '-d', required=True, action='store', help='today\'s date for output name')
     parser.add_argument('--suffix', action='store', default='', help='suffix for filename')
     parser.add_argument('--config', '-c', action='store', default=None, required=True, help='config for binning, etc.')
-    parser.add_argument('--do-subcat', action='store_true', dest='do_subcat', help='fill histograms in vbf subcategories')
+    parser.add_argument('--do-subcat', action='store_true', dest='do_subcat',
+                        help='fill histograms in vbf subcategories')
     main(parser.parse_args())
