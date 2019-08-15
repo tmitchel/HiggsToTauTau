@@ -300,9 +300,9 @@ def main(args):
 
                     processes = [
                         Process(target=fill_histograms, kwargs=proc_args) for proc_args in [
-                            {'data': fake_zero_jet_events, 'hists': zero_jet_hist, 'xvar_name': variable, 'fake_fractions': fake_fractions['{}_0jet'.format(channel_prefix)], 'fake_weights': fake_weights, local: args.local},
-                            {'data': fake_boosted_events, 'hists': boost_hist, 'xvar_name': variable, 'fake_fractions': fake_fractions['{}_boosted'.format(channel_prefix)], 'fake_weights': fake_weights, local: args.local},
-                            {'data': fake_vbf_events, 'hists': vbf_hist, 'xvar_name': variable, 'fake_fractions': fake_fractions['{}_vbf'.format(channel_prefix)], 'fake_weights': fake_weights, local: args.local},
+                            {'data': fake_zero_jet_events, 'hists': zero_jet_hist, 'xvar_name': variable, 'fake_fractions': fake_fractions['{}_0jet'.format(channel_prefix)], 'fake_weights': fake_weights, 'local': args.local},
+                            {'data': fake_boosted_events, 'hists': boost_hist, 'xvar_name': variable, 'fake_fractions': fake_fractions['{}_boosted'.format(channel_prefix)], 'fake_weights': fake_weights, 'local': args.local},
+                            {'data': fake_vbf_events, 'hists': vbf_hist, 'xvar_name': variable, 'fake_fractions': fake_fractions['{}_vbf'.format(channel_prefix)], 'fake_weights': fake_weights, 'local': args.local},
                         ]
                     ]
                     for proc in processes:
