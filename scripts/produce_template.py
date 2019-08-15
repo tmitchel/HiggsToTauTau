@@ -241,7 +241,7 @@ def main(args):
 
             # adjust madgraph naming for later
             if '_madgraph' in name:
-                name = name.replace(stable_name, boilerplate['noweighting_name_map'])
+                name = name.replace(stable_name, boilerplate['noweighting_name_map'][stable_name])
 
             # get data naming correct
             if 'Data' in name:
