@@ -29,9 +29,9 @@ int main(int argc, char *argv[]) {
 
     // get channel info
     string channel_prefix, lep_charge;
-    if (tree_name.find("etau_tree") != string::npos) {
+    if (tree_name.find("et_tree") != string::npos) {
         channel_prefix = "et";
-    } else if (tree_name.find("mutau_tree") != string::npos) {
+    } else if (tree_name.find("mt_tree") != string::npos) {
         channel_prefix = "mt";
     } else if (tree_name.find("tautau_tree") != string::npos) {
         channel_prefix = "tt";
@@ -43,19 +43,24 @@ int main(int argc, char *argv[]) {
     // variables to plot
     std::map<std::string, std::vector<float>> vars = {// {"trigger", {4, -0.5, 3.5}},
                                                       {"t1_decayMode", {11, -0.5, 10.5}},
-                                                      {"m_sv", {30, 0, 400}},
-                                                      {"t1_pt", {30, 30, 200}},
-                                                      {"t1_eta", {30, -4, 4}},
+                                                      {"m_sv", {30, 0, 200}},
+                                                      {"t1_pt", {30, 0, 300}},
+                                                      {"t1_eta", {30, -2.4, 2.4}},
                                                       {"el_pt", {30, 30, 200}},
-                                                      {"mu_pt", {30, 30, 200}},
-                                                      {"mu_eta", {30, -2.3, 2.3}},
+                                                      {"mu_pt", {30, 30, 3000}},
+                                                      {"mu_eta", {30, -2.1, 2.1}},
                                                       {"j1_pt", {30, 30, 200}},
                                                       {"j2_pt", {30, 30, 200}},
                                                       {"njets", {10, -0.5, 9.5}},
                                                       {"met", {30, 0, 500}},
                                                       {"higgs_pT", {30, 0, 300}},
-                                                      // {"NN_disc", {25, 0, 1}},
-                                                      {"mjj", {25, 300, 1000}}};
+                                                      {"NN_disc", {2, 0, 1}},
+                                                      {"mjj", {25, 0, 1000}},
+                                                      {"D0_VBF", {20, 0, 1}},
+                                                      {"MELA_D2j", {20, 0, 1}},
+                                                      {"dPhijj", {15, 0, 3.15}}
+
+                                                      };
     // {"D0_ggH", {25, 0, 1}},
     // {"D0_VBF", {25, 0, 1}},
     // {"MELA_D2j", {25, 0, 1}},
