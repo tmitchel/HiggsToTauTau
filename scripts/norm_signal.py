@@ -59,18 +59,16 @@ def main(args):
                 hist.Write(sm)
                 hist.Write(ps)
                 hist.Write(inter)
+            elif 'vbf' in cat and 'MG__GGH' in hname and args.signal == 'MG':
+                scale_key = join(hname.split('_')[:-1]).replace(' ', '_')
+                scale_key = scale_key.replace('pseudoscalar', 'sm')
+                hist.Scale(signal_yields[scale_key])
+                hist.Write(hname.replace('MG__', ''))
             elif 'vbf' in cat and 'JHU__' in hname:
                 scale_key = join(hname.split('_')[:-1]).replace(' ', '_')
                 scale_key = scale_key.replace('pseudoscalar', 'sm')
                 hist.Scale(signal_yields[scale_key])
-                if 'GG2' in hname and args.signal == 'JHU':
-                    hist.Write(hname.replace('JHU__', ''))
-            elif 'vbf' in cat and 'MG__' in hname and args.signal == 'MG':
-                scale_key = join(hname.split('_')[:-1]).replace(' ', '_')
-                scale_key = scale_key.replace('pseudoscalar', 'sm')
-                hist.Scale(signal_yields[scale_key])
-                if 'GG2' in hname and args.signal == 'MG':
-                    hist.Write(hname.replace('JHU__', ''))
+                hist.Write(hname.replace('JHU__', ''))
             elif 'JHU' in hname or 'madgraph' in hname:
                 continue
             else:
