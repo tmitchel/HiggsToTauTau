@@ -7,6 +7,8 @@ import uproot
 from glob import glob
 from array import array
 from pprint import pprint
+from multiprocessing import Process
+
 
 import signal
 import sys
@@ -208,20 +210,24 @@ def main(args):
 
             for variable, bins in config_variables.iteritems():
 
-                # start with 0-jet category
+                # build the histograms
                 output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
                 zero_jet_hist = build_histogram(name, bins)
-                fill_histograms(data=zero_jet_events, hists=zero_jet_hist, xvar_name=variable)
-
-                # now boosted category
                 output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
                 boost_hist = build_histogram(name, bins)
-                fill_histograms(data=boosted_events, hists=boost_hist, xvar_name=variable)
-
-                # vbf category is last
                 output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
                 vbf_hist = build_histogram(name, bins)
-                fill_histograms(data=vbf_events, hists=vbf_hist, xvar_name=variable)
+
+                processes = [
+                    Process(target=fill_histograms, args=proc_args) for proc_args in [
+                        (zero_jet_events, zero_jet_hist, variable), (boosted_events, boost_hist, variable), (vbf_events, vbf_hist, variable)
+                    ]
+                ]
+                for proc in processes:
+                    proc.start()
+                # fill_histograms(data=zero_jet_events, hists=zero_jet_hist, xvar_name=variable)
+                # fill_histograms(data=boosted_events, hists=boost_hist, xvar_name=variable)
+                # fill_histograms(data=vbf_events, hists=vbf_hist, xvar_name=variable)
 
                 if args.do_subcat:
                     # vbf sub-categories event after normal vbf categories
@@ -239,17 +245,14 @@ def main(args):
                         # start with 0-jet category
                         output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
                         zero_jet_hist = build_histogram(weight[1], bins)
-                        fill_histograms(data=zero_jet_events, hists=zero_jet_hist, xvar_name=variable, ac_weights=weight[0])
 
                         # now boosted category
                         output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
                         boost_hist = build_histogram(weight[1], bins)
-                        fill_histograms(data=boosted_events, hists=boost_hist, xvar_name=variable, ac_weights=weight[0])
 
                         # vbf category is last
                         output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
                         vbf_hist = build_histogram(weight[1], bins)
-                        fill_histograms(data=vbf_events, hists=vbf_hist, xvar_name=variable, ac_weights=weight[0])
 
                         if args.do_subcat:
                             # vbf sub-categories event after normal vbf categories
@@ -258,8 +261,19 @@ def main(args):
                                 output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
                                 vbf_cat_hists.append(build_histogram(weight[1], bins))
                             fill_histograms(data=vbf_events, hists=vbf_cat_hists, xvar_name=variable, zvar_name=zvars[0], edges=zvars[1], ac_weights=weight[0])
-
-                        output_file.Write()
+                    processes = [
+                        Process(target=fill_histograms, kwargs=proc_args) for weight in get_ac_weights(name, boilerplate['ac_reweighting_map']) for proc_args in [
+                            {'data': zero_jet_events, 'hists': zero_jet_hist, 'xvar_name': variable, 'ac_weights': weight[0]},
+                            {'data': boosted_events, 'hists': boost_hist, 'xvar_name': variable, 'ac_weights': weight[0]},
+                            {'data': vbf_events, 'hists': vbf_hist, 'xvar_name': variable, 'ac_weights': weight[0]},
+                        ]
+                    ]
+                    for proc in processes:
+                        proc.start()
+                    # fill_histograms(data=boosted_events, hists=boost_hist, xvar_name=variable, ac_weights=weight[0])
+                    # fill_histograms(data=zero_jet_events, hists=zero_jet_hist, xvar_name=variable, ac_weights=weight[0])
+                    # fill_histograms(data=vbf_events, hists=vbf_hist, xvar_name=variable, ac_weights=weight[0])
+                    output_file.Write()
 
                 # do anti-iso categorization for fake-factor using data
                 if 'data' in ifile.lower():
