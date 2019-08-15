@@ -202,7 +202,7 @@ def main(args):
             zero_jet_events = signal_events[signal_events['njets'] == 0]
             boosted_events = signal_events[
                 (signal_events['njets'] == 1) |
-                ((signal_events['njets'] > 1) & signal_events['mjj'] < 300)
+                ((signal_events['njets'] > 1) & (signal_events['mjj'] < 300))
             ]
             vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
 
@@ -291,7 +291,7 @@ def main(args):
                     fake_boosted_events = general_selection[
                         (general_selection['is_antiTauIso'] > 0) &
                         ((general_selection['njets'] == 1) |
-                        ((general_selection['njets'] > 1) & general_selection['mjj'] < 300))
+                        ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300)))
                     ]
 
                     boosted_hists['jetFakes'] = {

@@ -270,7 +270,7 @@ def main(args):
             zero_jet_events = signal_events[signal_events['njets'] == 0]
             boosted_events = signal_events[
                 (signal_events['njets'] == 1) |
-                ((signal_events['njets'] > 1) & signal_events['mjj'] < 300)
+                ((signal_events['njets'] > 1) & (signal_events['mjj'] < 300))
             ]
             vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
 
@@ -339,7 +339,7 @@ def main(args):
                 fake_zero_jet_events = antiIso_events[antiIso_events['njets'] == 0]
                 fake_boosted_events = antiIso_events[
                     (antiIso_events['njets'] == 1) |
-                    ((antiIso_events['njets'] > 1) & antiIso_events['mjj'] < 300)
+                    ((antiIso_events['njets'] > 1) & (antiIso_events['mjj'] < 300))
                 ]
                 fake_vbf_events = antiIso_events[(antiIso_events['njets'] > 1) & (antiIso_events['mjj'] > 300)]
 
