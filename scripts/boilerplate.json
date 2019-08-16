@@ -52,6 +52,11 @@
             ["wt_vbf_L1Zgint", "JHU__reweighted_qqH_htt_0L1Zgf05ph0125"]
         ]
     },
+    "noweighting_name_map": {
+        "ggh125_madgraph_nominal": "MG__GGH2Jets_sm_M125",
+        "ggh125_madgraph_pseudo": "MG__GGH2Jets_pseudoscalar_M125",
+        "ggh125_madgraph_maxmix": "MG__GGH2Jets_pseudoscalar_Mf05ph0125"
+    },
     "syst_name_map": {
         "_UncMet_Up": "_CMS_scale_met_unclustered_13TeVUp",
         "_UncMet_Down": "_CMS_scale_met_unclustered_13TeVDown",

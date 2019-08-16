@@ -3,7 +3,7 @@ def main(args):
     import uproot
     from string import join
     fin = ROOT.TFile(args.input, 'read')
-    fout = ROOT.TFile(args.output, 'recreate')
+    fout = ROOT.TFile(args.input.replace('norm_2D_', ''), 'recreate')
 
     for idir in fin.GetListOfKeys():
         cat = idir.GetName()
@@ -24,15 +24,6 @@ def main(args):
                     error = hist.GetBinError(binx, biny)
                     unrolled.SetBinContent(binx*biny, content)
                     unrolled.SetBinError(binx*biny, error)
-            # # temporary thing until i fix WH
-            # if 'WH' in hname:
-            #     continue
-            # elif 'ZH' in hname:
-            #     fout.cd(cat)
-            #     unrolled.Write()
-            #     unrolled.SetName(unrolled.GetName().replace('ZH', 'WH'))
-            #     unrolled.Write()
-            #     continue
             fout.cd(cat)
             unrolled.Write()
     fout.Close()
@@ -42,6 +33,5 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--input', '-i', action='store', help='name of input file')
-    parser.add_argument('--output', '-o', action='store', help='name of output file')
     parser.add_argument('--channel', '-c', action='store', help='lepton channel')
     main(parser.parse_args())

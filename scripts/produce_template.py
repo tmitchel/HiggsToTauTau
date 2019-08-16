@@ -196,8 +196,8 @@ def main(args):
     ztt_name = 'emb' if args.embed else 'ztt'
     syst_name = 'Sys' if args.syst else 'noSys'
 
-    output_file = ROOT.TFile('Output/templates/2D_htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
-                                                                                  ztt_name, syst_name, args.date, args.suffix), 'RECREATE')
+    output_file = ROOT.TFile('Output/templates/2D_htt_{}_{}_{}_fa3_{}_{}{}.root'.format(channel_prefix,
+                                                                                  ztt_name, syst_name, args.year, args.date, args.suffix), 'RECREATE')
 
     # create structure within output file
     for cat in boilerplate['categories']:
@@ -211,8 +211,9 @@ def main(args):
     if args.local:
         fake_weights = None
     else:
+        random_ext = '_tight' if channel_prefix == 'et' and args.year == "2016" else ''
         fake_weights = load_fake_factor_weights(
-            '../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors.root'.format(args.year, args.year, channel_prefix))
+            '../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors{}.root'.format(args.year, args.year, channel_prefix, random_ext))
 
     # use this once uproot supports sub-directories inside root files
     # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
@@ -227,16 +228,20 @@ def main(args):
             continue
 
         name = ifile.replace('.root', '').split('/')[-1]
+        stable_name = name
         print name
         input_file = uproot.open(ifile)
         trees = [ikey.replace(';1', '') for ikey in input_file.keys()
                  if 'tree' in ikey] if args.syst else [args.tree_name]
         for itree in trees:
             if itree != args.tree_name:
-                name = ifile.replace('.root', '').split(
-                    '/')[-1] + boilerplate['syst_name_map'][itree.replace(args.tree_name, '')]
+                name = stable_name + boilerplate['syst_name_map'][itree.replace(args.tree_name, '')]
             else:
-                name = ifile.replace('.root', '').split('/')[-1]
+                name = stable_name
+
+            # adjust madgraph naming for later
+            if '_madgraph' in name:
+                name = name.replace(stable_name, boilerplate['noweighting_name_map'][stable_name])
 
             # get data naming correct
             if 'Data' in name:
@@ -265,7 +270,7 @@ def main(args):
             zero_jet_events = signal_events[signal_events['njets'] == 0]
             boosted_events = signal_events[
                 (signal_events['njets'] == 1) |
-                ((signal_events['njets'] > 1) & signal_events['mjj'] < 300)
+                ((signal_events['njets'] > 1) & (signal_events['mjj'] < 300))
             ]
             vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
 
@@ -334,7 +339,7 @@ def main(args):
                 fake_zero_jet_events = antiIso_events[antiIso_events['njets'] == 0]
                 fake_boosted_events = antiIso_events[
                     (antiIso_events['njets'] == 1) |
-                    ((antiIso_events['njets'] > 1) & antiIso_events['mjj'] < 300)
+                    ((antiIso_events['njets'] > 1) & (antiIso_events['mjj'] < 300))
                 ]
                 fake_vbf_events = antiIso_events[(antiIso_events['njets'] > 1) & (antiIso_events['mjj'] > 300)]
 
