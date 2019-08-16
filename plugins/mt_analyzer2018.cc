@@ -1,4 +1,4 @@
-// Copyright 2019 Tyler Mitchell
+// Copyright [2019] Tyler Mitchell
 
 // system includes
 #include <algorithm>
@@ -32,7 +32,7 @@
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
-#include "TauTriggerSFs2017/TauTriggerSFs2017/interface/TauTriggerSFs2017.h"
+#include "TauAnalysisTools/TauTriggerSFs/interface/TauTriggerSFs2017.h"
 
 typedef std::vector<double> NumV;
 
@@ -43,16 +43,17 @@ int main(int argc, char *argv[]) {
     ////////////////////////////////////////////////
 
     CLParser parser(argc, argv);
-    bool doAC = parser.Flag("-a");
     std::string name = parser.Option("-n");
     std::string path = parser.Option("-p");
     std::string syst = parser.Option("-u");
     std::string sample = parser.Option("-s");
     std::string output_dir = parser.Option("-d");
+    std::string signal_type = parser.Option("--stype");
     std::string fname = path + sample + ".root";
     bool isData = sample.find("data") != std::string::npos;
     bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
     bool isMG = sample.find("madgraph") != std::string::npos;
+    bool doAC = signal_type != "None";
 
     std::string systname = "";
     if (!syst.empty()) {
@@ -68,10 +69,6 @@ int main(int argc, char *argv[]) {
     // get number of generated events
     auto counts = reinterpret_cast<TH1D *>(fin->Get("nevents"));
     auto gen_number = counts->GetBinContent(2);
-
-    // reweighter for anomolous coupling samples
-    ACWeighter ac_weights = ACWeighter(sample, "2018");
-    ac_weights.fillWeightMap();
 
     // create output file
     auto suffix = "_output.root";
@@ -99,17 +96,22 @@ int main(int argc, char *argv[]) {
     fout->cd();
     slim_tree *st = new slim_tree("mt_tree", doAC);
 
-    if (sample.find("vbf125") != std::string::npos) {
+    std::string original = sample;
+    if (name == "VBF125") {
         sample = "vbf125";
-    } else if (sample.find("ggh125") != std::string::npos) {
+    } else if (name == "ggH125") {
         sample = "ggh125";
-    } else if (sample.find("wminus125") != std::string::npos) {
-        sample = "wminus125";
-    } else if (sample.find("wplus125") != std::string::npos) {
-        sample = "wplus125";
-    } else if (sample.find("zh125") != std::string::npos) {
+    } else if (name == "WH125") {
+        sample = "wh125";
+    } else if (name == "WHsigned125") {
+        sample = sample.find("plus") == std::string::npos ? "wplus125" : "wminus125";
+    } else if (name == "ZH125") {
         sample = "zh125";
     }
+
+    // reweighter for anomolous coupling samples
+    ACWeighter ac_weights = ACWeighter(original, sample, signal_type, "2018");
+    ac_weights.fillWeightMap();
 
     // get normalization (lumi & xs are in util.h)
     double norm(1.);
@@ -141,7 +143,7 @@ int main(int argc, char *argv[]) {
     TH2F *btag_eff_oth = reinterpret_cast<TH2F *>(bTag_eff_file.Get("btag_eff_oth")->Clone());
 
     TauTriggerSFs2017 *tau_trigger_sf =
-        new TauTriggerSFs2017("data/tauTriggerEfficiencies2017_New.root", "data/tauTriggerEfficiencies2017.root", "tight", "MVA");
+        new TauTriggerSFs2017("$CMSSW_BASE/src/TauAnalysisTools/TauTriggerSFs/data/tauTriggerEfficiencies2017.root", "mutau", "2017", "tight", "MVAv2");
 
     //////////////////////////////////////
     // Final setup:                     //
@@ -336,7 +338,7 @@ int main(int argc, char *argv[]) {
             auto mu_cross_eff = mu_cross_data_eff / mu_cross_mc_eff;
             double tau_cross_eff(1.);
             if (fireCross) {
-                tau_cross_eff = tau_trigger_sf->getMuTauScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), TauTriggerSFs2017::kCentral);
+                tau_cross_eff = tau_trigger_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
             }
 
             evtwt *= (single_eff * fireSingle + mu_cross_eff * tau_cross_eff * fireCross);
