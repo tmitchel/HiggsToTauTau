@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 
     std::string systname = "";
     if (!syst.empty()) {
-        systname = "_" + syst;
+        systname = "_SYST_" + syst;
     }
 
     // open input file
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 
     // create output file
     auto suffix = "_output.root";
-    auto prefix = "Output/trees/" + output_dir + "/";
+    auto prefix = "Output/trees/" + output_dir + "/" + systname + "/";
     std::string filename;
     if (name == sample) {
         filename = prefix + name + systname + suffix;
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 
     // cd to root of output file and create tree
     fout->cd();
-    slim_tree *st = new slim_tree("et_tree" + systname, doAC);
+    slim_tree *st = new slim_tree("et_tree", doAC);
 
     std::string original = sample;
     if (name == "VBF125") {

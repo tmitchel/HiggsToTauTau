@@ -5,7 +5,7 @@
 ## a directory.                                           ##
 ############################################################
 
-from os import popen, makedirs
+from os import popen, makedirs, path
 from subprocess import call
 from optparse import OptionParser
 import time
@@ -150,6 +150,9 @@ for ifile in fileList:
     if get_systs != None and not 'Data' in sample.lower():
         for name in names:
             for isyst in get_systs(name):
+                if not path.exists('Output/trees/{}/{}'.format(options.output_dir, isyst)):
+                    makedirs('Output/trees/{}/{}'.format(options.output_dir, isyst))
+
                 tocall = callstring + ' -n %s -u %s' % (name, isyst)
                 print tocall
                 call(tocall, shell=True)
