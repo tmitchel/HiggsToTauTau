@@ -114,10 +114,10 @@ def main(args):
     start = time.time()
     config = {}
     boilerplate = {}
-    with open('scripts/boilerplate.json', 'r') as config_file:
+    with open('configs/boilerplate.json', 'r') as config_file:
         boilerplate = json.load(config_file)
 
-    with open('scripts/plotting.json', 'r') as config_file:
+    with open('configs/plotting.json', 'r') as config_file:
         config = json.load(config_file)
         config = config[args.config]
         config_variables = config['variables']

@@ -172,10 +172,10 @@ def main(args):
     start = time.time()
     config = {}
     boilerplate = {}
-    with open('scripts/boilerplate.json', 'r') as config_file:
+    with open('configs/boilerplate.json', 'r') as config_file:
         boilerplate = json.load(config_file)
 
-    with open('scripts/binning.json', 'r') as config_file:
+    with open('configs/binning.json', 'r') as config_file:
         config = json.load(config_file)
         config = config[args.config]
         decay_mode_bins = config['decay_mode_bins']
