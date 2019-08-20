@@ -92,6 +92,7 @@ def getSyst2017(name):
     return systs
 
 def run_process(proc):
+    print proc
     return call(proc, shell=True)
 
 

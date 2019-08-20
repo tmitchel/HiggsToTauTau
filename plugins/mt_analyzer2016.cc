@@ -67,10 +67,10 @@ int main(int argc, char *argv[]) {
     std::string filename, logname;
     if (name == sample) {
         filename = prefix + name + systname + suffix;
-        logname = "Output/tree/" + output_dir + "/logs/" + name + systname + ".txt.";
+        logname = "Output/tree/" + output_dir + "/logs/" + name + systname + ".txt";
     } else {
         filename = prefix + sample + std::string("_") + name + "_" + systname + suffix;
-        logname = "Output/tree/" + output_dir + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt.";
+        logname = "Output/tree/" + output_dir + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
     }
 
     // create the log file
