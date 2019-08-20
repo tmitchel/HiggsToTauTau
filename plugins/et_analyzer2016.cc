@@ -500,5 +500,6 @@ int main(int argc, char *argv[]) {
     fout->cd();
     fout->Write();
     fout->Close();
+    std::cout << std::endl;
     return 0;
 }
