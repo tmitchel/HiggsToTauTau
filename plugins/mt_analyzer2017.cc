@@ -3,6 +3,7 @@
 // system includes
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 #include <iostream>
 #include <unordered_map>
 
@@ -60,12 +61,35 @@ int main(int argc, char *argv[]) {
         systname = "SYST_" + syst;
     }
 
-    // open input file
-    std::cout << "Opening file... " << sample << std::endl;
-    std::cout << "With name...... " << name << std::endl;
-    if (!syst.empty()) {
-        std::cout << "And running systematic " << systname << std::endl;
+    // create output path
+    auto suffix = "_output.root";
     auto prefix = "Output/trees/" + output_dir + "/" + systname + "/";
+    std::string filename, logname;
+    if (name == sample) {
+        filename = prefix + name + systname + suffix;
+        logname = "Output/trees/" + output_dir + "/logs/" + name + systname + ".txt";
+    } else {
+        filename = prefix + sample + std::string("_") + name + "_" + systname + suffix;
+        logname = "Output/trees/" + output_dir + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
+    }
+
+    // create the log file
+    std::ofstream logfile;
+    logfile.open(logname, std::ios::out | std::ios::trunc);
+
+    // open log file and log some things
+    logfile << "Opening file... " << sample << std::endl;
+    logfile << "With name...... " << name << std::endl;
+    logfile << "And running systematic " << systname << std::endl;
+    logfile << "Using options: " << std::endl;
+    logfile << "\t name: " << name << std::endl;
+    logfile << "\t path: " << path << std::endl;
+    logfile << "\t syst: " << syst << std::endl;
+    logfile << "\t sample: " << sample << std::endl;
+    logfile << "\t output_dir: " << output_dir << std::endl;
+    logfile << "\t signal_type: " << signal_type << std::endl;
+    logfile << "\t isData: " << isData << " isEmbed: " << isEmbed << " doAC: " << doAC << std::endl;
+
     auto fin = TFile::Open(fname.c_str());
     auto ntuple = reinterpret_cast<TTree *>(fin->Get("mutau_tree"));
 
@@ -73,15 +97,6 @@ int main(int argc, char *argv[]) {
     auto counts = reinterpret_cast<TH1D *>(fin->Get("nevents"));
     auto gen_number = counts->GetBinContent(2);
 
-    // create output file
-    auto suffix = "_output.root";
-    auto prefix = "Output/trees/" + output_dir + "/";
-    std::string filename;
-    if (name == sample) {
-        filename = prefix + name + systname + suffix;
-    } else {
-        filename = prefix + sample + std::string("_") + name + "_" + systname + suffix;
-    }
     auto fout = new TFile(filename.c_str(), "RECREATE");
     counts->Write();
     fout->mkdir("grabbag");
@@ -141,7 +156,7 @@ int main(int argc, char *argv[]) {
         //        lumi_weights =
         //            new reweight::LumiReWeighting("data/pudistributions_mc_2017.root", "data/pudistributions_data_2017.root", ("#" +
         //            datasetName).c_str(), "pileup");
-        std::cout << datasetName << std::endl;
+        logfile << "using PU dataset name: " << datasetName << std::endl;
     }
 
     // H->tau tau scale factors
@@ -193,7 +208,8 @@ int main(int argc, char *argv[]) {
     for (Int_t i = 0; i < nevts; i++) {
         ntuple->GetEntry(i);
         if (i == progress * fraction) {
-            std::cout << "\tProcessing: " << progress * 10 << "% complete.\r" << std::flush;
+            // std::cout << "\tProcessing: " << progress * 10 << "% complete.\r" << std::flush;
+            logfile << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
             progress++;
         }
 
@@ -528,6 +544,7 @@ int main(int argc, char *argv[]) {
     fout->cd();
     fout->Write();
     fout->Close();
-    std::cout << std::endl;
+    logfile << "Finished processing " << sample << std::endl;
+    logfile.close();
     return 0;
 }
