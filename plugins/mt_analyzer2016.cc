@@ -180,10 +180,10 @@ int main(int argc, char *argv[]) {
     int progress(0), fraction((nevts - 1) / 10);
     for (Int_t i = 0; i < nevts; i++) {
         ntuple->GetEntry(i);
-        if (i == progress * fraction) {
-            std::cout << "\tProcessing: " << progress * 10 << "% complete.\r" << std::flush;
-            progress++;
-        }
+        // if (i == progress * fraction) {
+        //     std::cout << "\tProcessing: " << progress * 10 << "% complete.\r" << std::flush;
+        //     progress++;
+        // }
 
         // find the event weight (not lumi*xs if looking at W or Drell-Yan)
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
@@ -509,6 +509,6 @@ int main(int argc, char *argv[]) {
     fout->Write(0, TObject::kOverwrite);
     // fout->Write();
     fout->Close();
-    std::cout << std::endl;
+    std::cout << "Finished processing " << sample << std::endl;
     return 0;
 }
