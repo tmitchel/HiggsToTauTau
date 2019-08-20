@@ -157,16 +157,16 @@ def sigmaLines(data):
     return line1, line2
 
 def blindData(data, signal, background):
-    # for ibin in range(data.GetNbinsX()+1):
-    #     sig = signal.GetBinContent(ibin)
-    #     bkg = background.GetBinContent(ibin)
-    #     if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
-    #         data.SetBinContent(ibin, 0)
+    for ibin in range(data.GetNbinsX()+1):
+        sig = signal.GetBinContent(ibin)
+        bkg = background.GetBinContent(ibin)
+        if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
+            data.SetBinContent(ibin, 0)
 
-    # if args.var == 'NN_disc':
-    #     middleBin = data.FindBin(0.5)
-    #     for ibin in range(middleBin, data.GetNbinsX()+1):
-    #         data.SetBinContent(ibin, 0)
+    if args.var == 'NN_disc':
+        middleBin = data.FindBin(0.5)
+        for ibin in range(middleBin, data.GetNbinsX()+1):
+            data.SetBinContent(ibin, 0)
 
     return data
 
