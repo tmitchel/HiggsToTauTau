@@ -37,7 +37,7 @@ parser.add_option('--output-dir', action='store',
 suffix = '.root'
 
 try:
-    makedirs('Output/trees/{}'.format(options.output_dir))
+    makedirs('Output/trees/{}/logs'.format(options.output_dir))
 except:
     pass
 
