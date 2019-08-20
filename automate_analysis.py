@@ -167,7 +167,7 @@ for ifile in fileList:
             # call(tocall, shell=True)
 
 pprint(processes)
-if args.parallel:
+if options.parallel:
         # Use 5 cores if the machine has more than 10 total cores.
       # Otherwise, use half the available cores.
       n_processes = min(5, multiprocessing.cpu_count() / 2)
