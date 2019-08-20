@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
     bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
     bool doAC = signal_type != "None";
 
-    std::string systname = "";
+    std::string systname = "NOMINAL";
     if (!syst.empty()) {
         systname = "SYST_" + syst;
     }
