@@ -73,24 +73,22 @@ int main(int argc, char *argv[]) {
         logname = "Output/trees/" + output_dir + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
     }
 
-    std::cout << logname << std::endl;
-
     // create the log file
     std::ofstream logfile;
     logfile.open(logname, std::ios::out | std::ios::trunc);
 
     // open log file and log some things
-    logfile << "Opening file... " << sample << "\n";
-    logfile << "With name...... " << name << "\n";
-    logfile << "And running systematic " << systname << "\n";
-    logfile << "Using options: " << "\n";
-    logfile << "\t name: " << name << "\n";
-    logfile << "\t path: " << path << "\n";
-    logfile << "\t syst: " << syst << "\n";
-    logfile << "\t sample: " << sample << "\n";
-    logfile << "\t output_dir: " << output_dir << "\n";
-    logfile << "\t signal_type: " << signal_type << "\n";
-    logfile << "\t isData: " << isData << " isEmbed: " << isEmbed << " doAC: " << doAC << "\n";
+    logfile << "Opening file... " << sample << std::endl;
+    logfile << "With name...... " << name << std::endl;
+    logfile << "And running systematic " << systname << std::endl;
+    logfile << "Using options: " << std::endl;
+    logfile << "\t name: " << name << std::endl;
+    logfile << "\t path: " << path << std::endl;
+    logfile << "\t syst: " << syst << std::endl;
+    logfile << "\t sample: " << sample << std::endl;
+    logfile << "\t output_dir: " << output_dir << std::endl;
+    logfile << "\t signal_type: " << signal_type << std::endl;
+    logfile << "\t isData: " << isData << " isEmbed: " << isEmbed << " doAC: " << doAC << std::endl;
 
     // open input file
     auto fin = TFile::Open(fname.c_str());
@@ -202,7 +200,7 @@ int main(int argc, char *argv[]) {
         ntuple->GetEntry(i);
         if (i == progress * fraction) {
             // std::cout << "\tProcessing: " << progress * 10 << "% complete.\r" << std::flush;
-            logfile << "LOG: Processing: " << progress * 10 << "% complete.\n";
+            logfile << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
             progress++;
         }
 
@@ -530,7 +528,7 @@ int main(int argc, char *argv[]) {
     fout->Write(0, TObject::kOverwrite);
     // fout->Write();
     fout->Close();
-    logfile << "Finished processing " << sample << "\n";
+    logfile << "Finished processing " << sample << std::endl;
     logfile.close();
     return 0;
 }
