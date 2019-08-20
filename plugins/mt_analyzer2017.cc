@@ -55,14 +55,17 @@ int main(int argc, char *argv[]) {
     bool isMG = sample.find("madgraph") != std::string::npos;
     bool doAC = signal_type != "None";
 
-    std::string systname = "";
+    std::string systname = "NOMINAL";
     if (!syst.empty()) {
-        systname = "_SYST_" + syst;
+        systname = "SYST_" + syst;
     }
 
     // open input file
     std::cout << "Opening file... " << sample << std::endl;
-    std::cout << "with name...... " << name << std::endl;
+    std::cout << "With name...... " << name << std::endl;
+    if (!syst.empty()) {
+        std::cout << "And running systematic " << systname << std::endl;
+    auto prefix = "Output/trees/" + output_dir + "/" + systname + "/";
     auto fin = TFile::Open(fname.c_str());
     auto ntuple = reinterpret_cast<TTree *>(fin->Get("mutau_tree"));
 
@@ -77,7 +80,7 @@ int main(int argc, char *argv[]) {
     if (name == sample) {
         filename = prefix + name + systname + suffix;
     } else {
-        filename = prefix + sample + std::string("_") + name + systname + suffix;
+        filename = prefix + sample + std::string("_") + name + "_" + systname + suffix;
     }
     auto fout = new TFile(filename.c_str(), "RECREATE");
     counts->Write();
@@ -94,7 +97,7 @@ int main(int argc, char *argv[]) {
 
     // cd to root of output file and create tree
     fout->cd();
-    slim_tree *st = new slim_tree("mt_tree" + systname, doAC);
+    slim_tree *st = new slim_tree("mt_tree", doAC);
 
     std::string original = sample;
     if (name == "VBF125") {
