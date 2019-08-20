@@ -151,7 +151,7 @@ for ifile in fileList:
         for name in names:
             for isyst in get_systs(name):
                 if not path.exists('Output/trees/{}/{}'.format(options.output_dir, isyst)):
-                    makedirs('Output/trees/{}/{}'.format(options.output_dir, isyst))
+                    makedirs('Output/trees/{}/SYST_{}'.format(options.output_dir, isyst))
 
                 tocall = callstring + ' -n %s -u %s' % (name, isyst)
                 print tocall

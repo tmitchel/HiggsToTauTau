@@ -58,12 +58,15 @@ int main(int argc, char *argv[]) {
 
     std::string systname = "";
     if (!syst.empty()) {
-        systname = "_SYST_" + syst;
+        systname = "SYST_" + syst;
     }
 
     // open input file
     std::cout << "Opening file... " << sample << std::endl;
     std::cout << "With name...... " << name << std::endl;
+    if (!syst.empty()) {
+        std::cout << "And running systematic " << systname << std::endl;
+    }
     auto fin = TFile::Open(fname.c_str());
     auto ntuple = reinterpret_cast<TTree *>(fin->Get("etau_tree"));
 
