@@ -67,15 +67,17 @@ int main(int argc, char *argv[]) {
     std::string filename, logname;
     if (name == sample) {
         filename = prefix + name + systname + suffix;
-        logname = "Output/tree/" + output_dir + "/logs/" + name + systname + ".txt";
+        logname = "Output/trees/" + output_dir + "/logs/" + name + systname + ".txt";
     } else {
         filename = prefix + sample + std::string("_") + name + "_" + systname + suffix;
-        logname = "Output/tree/" + output_dir + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
+        logname = "Output/trees/" + output_dir + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
     }
+
+    std::cout << logname << std::endl;
 
     // create the log file
     std::ofstream logfile;
-    logfile.open(logname);
+    logfile.open(logname, std::ios::out | std::ios::trunc);
 
     // open log file and log some things
     logfile << "Opening file... " << sample << "\n";
