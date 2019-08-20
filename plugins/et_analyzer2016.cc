@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
     if (name == sample) {
         filename = prefix + name + systname + suffix;
     } else {
-        filename = prefix + sample + std::string("_") + name + systname + suffix;
+        filename = prefix + sample + std::string("_") + name + "_" + systname + suffix;
     }
     auto fout = new TFile(filename.c_str(), "RECREATE");
     counts->Write();

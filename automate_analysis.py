@@ -150,7 +150,9 @@ for ifile in fileList:
     if get_systs != None and not 'Data' in sample.lower():
         for name in names:
             for isyst in get_systs(name):
-                if not path.exists('Output/trees/{}/SYST_{}'.format(options.output_dir, isyst)):
+                if isyst == "" and not path.exists('Output/trees/{}/NOMINAL'.format(options.output_dir)):
+                    makedirs('Output/trees/{}/NOMINAL'.format(options.output_dir))
+                if isyst != "" and not path.exists('Output/trees/{}/SYST_{}'.format(options.output_dir, isyst)):
                     makedirs('Output/trees/{}/SYST_{}'.format(options.output_dir, isyst))
 
                 tocall = callstring + ' -n %s -u %s' % (name, isyst)
