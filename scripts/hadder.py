@@ -25,18 +25,9 @@ def main(args):
         'ZJ', 'ZL', 'ZTT', 'embed', 'data_obs', 'VVJ', 'VVT', 'TTT', 'TTJ', 'W',
     ]
     signals = [
-        'ggh125_JHU_a1-prod', 'ggh125_JHU_a3-prod', 'ggh125_JHU_a3int-prod',
-        'vbf125_JHU_a1-prod', 'vbf125_JHU_a2-prod', 'vbf125_JHU_a2int-prod',
-        'vbf125_JHU_a3-prod', 'vbf125_JHU_a3int-prod', 'vbf125_JHU_l1-prod',
-        'vbf125_JHU_l1int-prod', 'vbf125_JHU_l1zg-prod', 'vbf125_JHU_l1zgint-prod',
-        'wh125_JHU_a1-prod', 'wh125_JHU_a2-prod', 'wh125_JHU_a2int-prod', 'wh125_JHU_a3-prod',
-        'wh125_JHU_a3int-prod', 'wh125_JHU_l1-prod', 'wh125_JHU_l1int-prod',
-        'wh125_JHU_l1zg-prod', 'wh125_JHU_l1zgint-prod',
-        'zh125_JHU_a1-prod', 'zh125_JHU_a2-prod', 'zh125_JHU_a2int-prod', 'zh125_JHU_a3-prod',
-        'zh125_JHU_a3int-prod', 'zh125_JHU_l1-prod', 'zh125_JHU_l1int-prod',
-        'zh125_JHU_l1zg-prod', 'zh125_JHU_l1zgint-prod',
+        'ggh125_JHU_', 'vbf125_JHU_', 'wh125_JHU_', 'zh125_JHU_',
 
-        'ggh125_madgraph_two_a1-prod', 'ggh125_madgraph_two_a3-prod', 'ggh125_madgraph_two_a3int-prod',
+        'ggh125_madgraph_two', 'ggh125_madgraph_two', 'ggh125_madgraph_two',
         'vbf125_madgraph',
         'ggh125_powheg', 'vbf125_powheg', 'zh125_powheg'
     ]
@@ -50,7 +41,7 @@ def main(args):
     sig_hadd_list= {
         idir: {
             sample: [
-                ifile for ifile in glob('{}/{}*.root'.format(args.path + '/' +idir, sample)) if not 'EWK_W' in ifile
+                ifile for ifile in glob('{}/{}*.root'.format(args.path + '/' +idir, sample))
             ] for sample in signals
         } for idir in os.listdir(args.path) if os.path.isdir(args.path + '/' + idir) and not 'logs' in idir
     }
