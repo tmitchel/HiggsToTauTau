@@ -34,7 +34,7 @@ def main(args):
     bkg_hadd_list = {
         idir: {
             sample: [
-                ifile for ifile in glob('{}/*_{}_*.root'.format(args.path + '/' +idir, sample)) if not 'EWK_W' in ifile
+                ifile for ifile in glob('{}/*_{}_*.root'.format(args.path + '/' +idir, sample)) if not 'EWK_W' in ifile or 'EWKZ' in ifile
             ] for sample in bkgs
         } for idir in os.listdir(args.path) if os.path.isdir(args.path + '/' + idir) and not 'logs' in idir
     }
