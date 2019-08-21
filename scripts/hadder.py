@@ -5,9 +5,10 @@ from pprint import pprint
 
 
 def main(args):
-    samples = [
+    bkgs = [
         'ZJ', 'ZL', 'ZTT', 'embed', 'data_obs', 'VVJ', 'VVT', 'TTT', 'TTJ', 'W',
-
+    ]
+    signals = [
         'ggh125_JHU_a1-prod', 'ggh125_JHU_a3-prod', 'ggh125_JHU_a3int-prod',
         'vbf125_JHU_a1-prod', 'vbf125_JHU_a2-prod', 'vbf125_JHU_a2int-prod',
         'vbf125_JHU_a3-prod', 'vbf125_JHU_a3int-prod', 'vbf125_JHU_l1-prod',
@@ -27,7 +28,10 @@ def main(args):
         idir: {
             sample: [
                 ifile for ifile in glob('{}/*_{}_*.root'.format(args.path + '/' +idir, sample)) if not 'EWK_W' in ifile
-            ] for sample in samples
+            ] for sample in bkgs,
+            sample: [
+                ifile for ifile in glob('{}/{}*.root'.format(args.path + '/' +idir, sample)) if not 'EWK_W' in ifile
+            ] for sample in signals
         } for idir in os.listdir(args.path) if os.path.isdir(args.path + '/' + idir) and not 'logs' in idir
     }
     for idir, isample in hadd_list.items():
@@ -38,7 +42,8 @@ def main(args):
     pprint(hadd_list)
 
     for idir, isamples in hadd_list.items():
-        os.mkdir(args.path + '/' + idir + '/merged')
+        if not os.path.exists(args.path + '/' + idir + '/merged'):
+            os.mkdir(args.path + '/' + idir + '/merged')
         for sample, files in isamples.items():
             os.system('hadd {}/{}.root {}'.format(idir + '/merged', sample, ' '.join(files)))    
 
