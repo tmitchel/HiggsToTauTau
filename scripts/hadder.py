@@ -4,6 +4,22 @@ from glob import glob
 from pprint import pprint
 
 
+def clean(hadd_list):
+    for idir, isample in hadd_list.items():
+        for sample, files in isample.items():
+            if len(files) == 0:
+                del hadd_list[idir][sample]
+    print 'About to add with the following file setup...'
+    pprint(hadd_list)
+    return hadd_list
+
+def do_hadd(hadd_list, path):
+    for idir, isamples in hadd_list.items():
+        if not os.path.exists(path + '/' + idir + '/merged'):
+            os.mkdir(path + '/' + idir + '/merged')
+        for sample, files in isamples.items():
+            os.system('hadd {}/{}.root {}'.format(idir + '/merged', sample, ' '.join(files)))    
+
 def main(args):
     bkgs = [
         'ZJ', 'ZL', 'ZTT', 'embed', 'data_obs', 'VVJ', 'VVT', 'TTT', 'TTJ', 'W',
@@ -24,32 +40,28 @@ def main(args):
         'vbf125_madgraph',
         'ggh125_powheg', 'vbf125_powheg', 'zh125_powheg'
     ]
-    hadd_list = {
+    bkg_hadd_list = {
         idir: {
             sample: [
                 ifile for ifile in glob('{}/*_{}_*.root'.format(args.path + '/' +idir, sample)) if not 'EWK_W' in ifile
             ] for sample in bkgs
         } for idir in os.listdir(args.path) if os.path.isdir(args.path + '/' + idir) and not 'logs' in idir
     }
-    hadd_list.update({
+    sig_hadd_list= {
         idir: {
             sample: [
                 ifile for ifile in glob('{}/{}*.root'.format(args.path + '/' +idir, sample)) if not 'EWK_W' in ifile
             ] for sample in signals
         } for idir in os.listdir(args.path) if os.path.isdir(args.path + '/' + idir) and not 'logs' in idir
-    })
-    for idir, isample in hadd_list.items():
-        for sample, files in isample.items():
-            if len(files) == 0:
-                del hadd_list[idir][sample]
-    print 'About to add with the following file setup...'
-    pprint(hadd_list)
+    }
 
-    for idir, isamples in hadd_list.items():
-        if not os.path.exists(args.path + '/' + idir + '/merged'):
-            os.mkdir(args.path + '/' + idir + '/merged')
-        for sample, files in isamples.items():
-            os.system('hadd {}/{}.root {}'.format(idir + '/merged', sample, ' '.join(files)))    
+    bkg_hadd_list = clean(bkg_hadd_list)
+    do_hadd(bkg_hadd_list, args.path)
+
+    sig_hadd_list = clean(sig_hadd_list)
+    do_hadd(sig_hadd_list, args.path)
+
+
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
