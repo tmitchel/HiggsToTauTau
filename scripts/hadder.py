@@ -18,7 +18,7 @@ def do_hadd(hadd_list, path):
         if not os.path.exists(path + '/' + idir + '/merged'):
             os.mkdir(path + '/' + idir + '/merged')
         for sample, files in isamples.items():
-            os.system('hadd {}/{}.root {}'.format(idir + '/merged', sample, ' '.join(files)))    
+            os.system('hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files)))    
 
 def main(args):
     bkgs = [
