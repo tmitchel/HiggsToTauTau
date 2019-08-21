@@ -28,12 +28,16 @@ def main(args):
         idir: {
             sample: [
                 ifile for ifile in glob('{}/*_{}_*.root'.format(args.path + '/' +idir, sample)) if not 'EWK_W' in ifile
-            ] for sample in bkgs,
+            ] for sample in bkgs
+        } for idir in os.listdir(args.path) if os.path.isdir(args.path + '/' + idir) and not 'logs' in idir
+    }
+    hadd_list.update({
+        idir: {
             sample: [
                 ifile for ifile in glob('{}/{}*.root'.format(args.path + '/' +idir, sample)) if not 'EWK_W' in ifile
             ] for sample in signals
         } for idir in os.listdir(args.path) if os.path.isdir(args.path + '/' + idir) and not 'logs' in idir
-    }
+    })
     for idir, isample in hadd_list.items():
         for sample, files in isample.items():
             if len(files) == 0:
