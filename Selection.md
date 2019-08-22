@@ -92,10 +92,10 @@ https://github.com/CMS-HTT/LeptonEfficiencies
 Single Lepton and Electron/Muon Leg of Cross Triggers here:
 https://github.com/CMS-HTT/LeptonEfficiencies
 
-Tau Leg of Cross Triggers:
-2016 - https://github.com/rmanzoni/triggerSF/tree/moriond17
-2017 - https://github.com/cms-tau-pog/TauTriggerSFs/tree/final_2017_MCv2/data
-2018 - https://github.com/cms-tau-pog/TauTriggerSFs/tree/final_2017_MCv2/data
+Tau Leg of Cross Triggers: <br/>
+2016 - https://github.com/rmanzoni/triggerSF/tree/moriond17 <br/>
+2017 - https://github.com/cms-tau-pog/TauTriggerSFs/tree/final_2017_MCv2/data <br/>
+2018 - https://github.com/cms-tau-pog/TauTriggerSFs/tree/final_2017_MCv2/data <br/>
 
 | Single Trigger  | 2016 File                         | 2017 File                  | 2018 File                         |
 |:---------------:|:---------------------------------:|:--------------------------:|:---------------------------------:|
