@@ -57,7 +57,7 @@ def getSyst2016(name):
     if name == 'TTT' or name == 'TTJ':
         systs += ['ttbarShape_Up', 'ttbarShape_Down']
 
-    if name == 'TTT' or name == 'VTT' or name == 'embed':
+    if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
         #    systs += ['Up', 'Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
         systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
 
@@ -82,7 +82,7 @@ def getSyst2017(name):
     if name == 'TTT' or name == 'TTJ':
         systs += ['ttbarShape_Up', 'ttbarShape_Down']
 
-    if name == 'TTT' or name == 'VTT' or name == 'embed':
+    if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
         #    systs += ['Up', 'Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
         systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
 
@@ -162,6 +162,8 @@ for ifile in fileList:
                 # call(tocall, shell=True)
     else:
         for name in names:
+            if not path.exists('Output/trees/{}/NOMINAL'.format(options.output_dir)):
+                makedirs('Output/trees/{}/NOMINAL'.format(options.output_dir))
             tocall = callstring + ' -n %s ' % name
             # print tocall
             processes.append(tocall)
