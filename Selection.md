@@ -89,7 +89,7 @@ https://github.com/CMS-HTT/LeptonEfficiencies
 
 ### Muon And Electron Trigger Efficiency
 
-Single Lepton and Electron/Muon Leg of Cross Triggers here:
+Single Lepton and Electron/Muon Leg of Cross Triggers here: <br/>
 https://github.com/CMS-HTT/LeptonEfficiencies
 
 Tau Leg of Cross Triggers: <br/>
@@ -137,21 +137,144 @@ Check with Cecile
 
 ### Top quark pT Reweighting
 
-Analytic function applied to ttbar background
+Analytic function applied to ttbar background <br/>
 sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2))
 
 ### Generator Weights
 
 Generator weights are stored in FSA ntuples and applied per event.
 
-# Event Selections for each channel
+---
 
-## Mu-Tau Channel - 2016
+# Triggers
+
+### E-Tau Channel - 2016
+
+| Trigger                       | pT      | filter    |
+|:-----------------------------:|:-------:|:---------:|
+|HLT_Ele25_eta2p1_WPTight_Gsf_v | pT > 26 | e matches |
+
+### E-Tau Channel - 2017
+
+| Trigger (OR of all)                                                  | Lepton pT    | Tau pT     | abs(tau eta) | filter     |
+|:--------------------------------------------------------------------:|:------------:|:----------:|:------------:|:----------:|
+|HLT_Ele32_WPTight_Gsf_v                                               | pT > 33      | None       | None         | e matches  |
+|HLT_Ele35_WPTight_Gsf_v                                               | pT > 36      | None       | None         | e matches  |
+|HLT_Ele24_eta2p1_WPTight_Gsf_Loose_ChargedIsoPFTau30_eta2p1_CrossL1_v | 25 < pT < 33 | pT > 32    | 2.1          | both match |
+
+### E-Tau Channel - 2018
+
+| Trigger (OR of all)                                                               | Lepton pT    | Tau pT     | abs(tau eta) | filter     |
+|:---------------------------------------------------------------------------------:|:------------:|:----------:|:------------:|:----------:|
+|HLT_Ele32_WPTight_Gsf_v                                                            | pT > 33      | None       | None         | e matches  |
+|HLT_Ele35_WPTight_Gsf_v                                                            | pT > 36      | None       | None         | e matches  |
+|HLT_Ele24_eta2p1_WPTight_Gsf_LooseChargedIsoPFTauHPS30_eta2p1_CrossL1_v**          | 21 < pT < 25 | pT > 31    | 2.1          | both match |
+|HLT_Ele24_eta2p1_WPTight_Gsf_LooseChargedIsoPFTauHPS30_eta2p1_TightID_CrossL1_v*** | 21 < pT < 25 | pT > 31    | 2.1          | both match |
+
+** Only data run < 317509
+*** MC and data run > 317509
+
+### Mu-Tau Channel - 2016
+
+| Trigger (OR of all)                          | abs(eta) | pT           | filter     |
+|:--------------------------------------------:|:--------:|:------------:|:----------:|
+|HLT_IsoMu22_v                                 | 2.1      | pT > 23      | mu matches |
+|HLT_IsoMu22_eta2p1_v                          | 2.1      | pT > 23      | mu matches |
+|HLT_IsoTkMu22_v                               | 2.1      | pT > 23      | mu matches |
+|HLT_IsoTkMu22_eta2p1                          | 2.1      | pT > 23      | mu matches |
+|HLT_IsoMu19_eta2p1_LooseIsoPFTau20_v          | none     | 21 < pT < 23 | both match |
+|HLT_IsoMu19_eta2p1_LooseIsoPFTau20_SingleL1_v | none     | 21 < pT < 23 | both match |
+
+### Mu-Tau Channel - 2017
+
+| Trigger (OR of all)                                        | abs(lep eta) | Lepton pT    | Tau pT     | abs(tau eta) | filter     |
+|:----------------------------------------------------------:|:------------:|:------------:|:----------:|:------------:|:----------:|
+|HLT_IsoMu24_v                                               | 2.1          | pT > 28      | None       | None         | mu matches |
+|HLT_IsoMu27_v                                               | 2.1          | pT > 25      | None       | None         | mu matches |
+|HLT_IsoMu20_eta2p1_LooseChargedIso_PFTau27_eta2p1_CrossL1_v | none         | 21 < pT < 25 | pT > 31    | 2.1          | both match |
+
+
+### Mu-Tau Channel - 2018
+
+| Trigger (OR of all)                                                      | abs(lep eta) | Lepton pT    | Tau pT     | abs(tau eta) | filter     |
+|:------------------------------------------------------------------------:|:------------:|:------------:|:----------:|:------------:|:----------:|
+|HLT_IsoMu24_v                                                             | 2.1          | pT > 28      | None       | None         | mu matches |
+|HLT_IsoMu27_v                                                             | 2.1          | pT > 25      | None       | None         | mu matches |
+|HLT_IsoMu20_eta2p1_LooseChargedIsoPFTauHPS27_eta2p1_CrossL1_v1**          | none         | 21 < pT < 25 | pT > 31    | 2.1          | both match |
+|HLT_IsoMu20_eta2p1_LooseChargedIsoPFTauHPS27_eta2p1_TightID_CrossL1_v1*** | none         | 21 < pT < 25 | pT > 31    | 2.1          | both match |
+
+** Only data run < 317509
+*** MC and data run > 317509
 
 ---
 
-## Mu-Tau Channel - 2017
----
+# Event Selection
+
+### Common Selection
+
+- Each trigger needs to be matched with deltaR < 0.5 of the trigger objects and must match the trigger path.
+- MET Filters
+    - primary vertex filter
+    - beam halo filter
+    - HBHE noise filter
+    - HBHEiso noise filter
+    - eebadSC noise filter (data only)
+    - ECAL TP filter
+    - badMuon filter
+    - badCharged hadron filter
+    - ECAL bad calibration filter (only 2017)
+- b-Jet Veto
+    - Discard events with at least one b-jet (pT > 20 GeV && |eta| < 2.1 && medium DeepCSV)
+- Extra Lepton Veto
+    - Veto events with a third lepton (first two are muon/electron and tau)
+- deltaR(tau, lep) > 0.5
+- MT(lep, MET) < 50
+- Pass trigger with associated criteria
+
+### E-Tau Selection
+
+Electron Selection
+- trigger associated criteria
+- pT > 25
+- |eta| < 2.4
+- d<sub>xy</sub> < 0.045
+- d<sub>z</sub> < 0.2
+- MVA ID without Isolation at WP80
+- Relative Isolation < 0.10
+
+Tau Selection
+- pT > 30
+- |eta| < 2.3
+- Tight MVA ID (byTightIsolationMVArun2017v2DBoldDMwLT2017)
+- old decay mode finding (decay != 5 && decay != 6)
+- d<sub>z</sub> < 0.2
+- Interger charge (+/-1)
+- Tight MVA anti-electron discriminator (againstElectronTightMVA6)
+- Loose MVA anti-muon discriminator (againstMuonLooseMVA3)
+
+### Mu-Tau Selection
+
+Muon Selection
+- trigger associated criteria
+- pT > 20
+- |eta| < 2.4
+- d<sub>xy</sub> < 0.045
+- d<sub>z</sub> < 0.2
+- Medium ID
+- Relative Isolation < 0.15
+
+Tau Selection
+- pT > 30
+- |eta| < 2.3
+- Tight MVA ID (byTightIsolationMVArun2017v2DBoldDMwLT2017)
+- old decay mode finding (decay != 5 && decay != 6)
+- d<sub>z</sub> < 0.2
+- Interger charge (+/-1)
+- VLoose MVA anti-electron discriminator (againstElectronVLooseMVA6)
+- Tight MVA anti-muon discriminator (againstMuonTightMVA3)
+
+# Deprecated
+
 
 ### Skim Level Selection
  - Mu24 || Mu27 || Mu20Tau27
