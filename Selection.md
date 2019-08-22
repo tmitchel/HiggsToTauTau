@@ -190,8 +190,8 @@ Generator weights are stored in FSA ntuples and applied per event.
 
 | Trigger (OR of all)                                        | abs(lep eta) | Lepton pT    | Tau pT     | abs(tau eta) | filter     |
 |:----------------------------------------------------------:|:------------:|:------------:|:----------:|:------------:|:----------:|
-|HLT_IsoMu24_v                                               | 2.1          | pT > 28      | None       | None         | mu matches |
-|HLT_IsoMu27_v                                               | 2.1          | pT > 25      | None       | None         | mu matches |
+|HLT_IsoMu24_v                                               | 2.1          | pT > 25      | None       | None         | mu matches |
+|HLT_IsoMu27_v                                               | 2.1          | pT > 28      | None       | None         | mu matches |
 |HLT_IsoMu20_eta2p1_LooseChargedIso_PFTau27_eta2p1_CrossL1_v | none         | 21 < pT < 25 | pT > 31    | 2.1          | both match |
 
 
@@ -199,8 +199,8 @@ Generator weights are stored in FSA ntuples and applied per event.
 
 | Trigger (OR of all)                                                      | abs(lep eta) | Lepton pT    | Tau pT     | abs(tau eta) | filter     |
 |:------------------------------------------------------------------------:|:------------:|:------------:|:----------:|:------------:|:----------:|
-|HLT_IsoMu24_v                                                             | 2.1          | pT > 28      | None       | None         | mu matches |
-|HLT_IsoMu27_v                                                             | 2.1          | pT > 25      | None       | None         | mu matches |
+|HLT_IsoMu24_v                                                             | 2.1          | pT > 25      | None       | None         | mu matches |
+|HLT_IsoMu27_v                                                             | 2.1          | pT > 28      | None       | None         | mu matches |
 |HLT_IsoMu20_eta2p1_LooseChargedIsoPFTauHPS27_eta2p1_CrossL1_v1**          | none         | 21 < pT < 25 | pT > 31    | 2.1          | both match |
 |HLT_IsoMu20_eta2p1_LooseChargedIsoPFTauHPS27_eta2p1_TightID_CrossL1_v1*** | none         | 21 < pT < 25 | pT > 31    | 2.1          | both match |
 
