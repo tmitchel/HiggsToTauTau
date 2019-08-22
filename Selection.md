@@ -172,6 +172,7 @@ Generator weights are stored in FSA ntuples and applied per event.
 |HLT_Ele24_eta2p1_WPTight_Gsf_LooseChargedIsoPFTauHPS30_eta2p1_TightID_CrossL1_v*** | 21 < pT < 25 | pT > 31    | 2.1          | both match |
 
 ** Only data run < 317509
+
 *** MC and data run > 317509
 
 ### Mu-Tau Channel - 2016
@@ -204,6 +205,7 @@ Generator weights are stored in FSA ntuples and applied per event.
 |HLT_IsoMu20_eta2p1_LooseChargedIsoPFTauHPS27_eta2p1_TightID_CrossL1_v1*** | none         | 21 < pT < 25 | pT > 31    | 2.1          | both match |
 
 ** Only data run < 317509
+
 *** MC and data run > 317509
 
 ---
