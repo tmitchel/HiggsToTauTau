@@ -71,9 +71,9 @@ def createCanvas():
 
 def formatStat(stat):
     stat.SetMarkerStyle(0)
-    stat.SetLineWidth(2)
+    stat.SetLineWidth(0)
     stat.SetLineColor(0)
-    stat.SetFillStyle(3004)
+    stat.SetFillStyle(3001)
     stat.SetFillColor(ROOT.kBlack)
     return stat
 
@@ -84,6 +84,8 @@ def formatStack(stack):
     stack.GetYaxis().SetTitleSize(.05)
     stack.GetYaxis().SetTitleOffset(1.2)
     stack.SetTitle('')
+    stack.GetXaxis().SetNdivisions(505)
+
 
 def fillLegend(data, backgrounds, signals, stat):
     leg = ROOT.TLegend(0.5, 0.45, 0.85, 0.85)
@@ -116,8 +118,8 @@ def fillLegend(data, backgrounds, signals, stat):
 
 def formatPull(pull, title):
     pull.SetTitle('')
-    pull.SetMaximum(1.5)
-    pull.SetMinimum(0.5)
+    pull.SetMaximum(2.)
+    pull.SetMinimum(0.)
     pull.GetXaxis().SetTitle(title)
     pull.SetMarkerStyle(21)
     pull.GetXaxis().SetTitleSize(0.18)
@@ -143,13 +145,13 @@ def sigmaLines(data):
         data.GetBinWidth(data.GetNbinsX())
 
     ## high line
-    line1 = ROOT.TLine(low, 1.2, high, 1.2)
+    line1 = ROOT.TLine(low, 1.5, high, 1.5)
     line1.SetLineWidth(1)
     line1.SetLineStyle(3)
     line1.SetLineColor(ROOT.kBlack)
 
     ## low line
-    line2 = ROOT.TLine(low, 0.8, high, 0.8)
+    line2 = ROOT.TLine(low, 0.5, high, 0.5)
     line2.SetLineWidth(1)
     line2.SetLineStyle(3)
     line2.SetLineColor(ROOT.kBlack)
@@ -160,13 +162,16 @@ def blindData(data, signal, background):
     for ibin in range(data.GetNbinsX()+1):
         sig = signal.GetBinContent(ibin)
         bkg = background.GetBinContent(ibin)
-        if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
-            data.SetBinContent(ibin, 0)
+        print sig, bkg
+        if bkg > 0 and sig / ROOT.TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
+            err = data.GetBinError(ibin)
+            data.SetBinContent(ibin, -1)
+            data.SetBinError(ibin, err)
 
-    if args.var == 'NN_disc':
-        middleBin = data.FindBin(0.5)
-        for ibin in range(middleBin, data.GetNbinsX()+1):
-            data.SetBinContent(ibin, 0)
+    # if args.var == 'NN_disc':
+    #     middleBin = data.FindBin(0.5)
+    #     for ibin in range(middleBin, data.GetNbinsX()+1):
+    #         data.SetBinContent(ibin, 0)
 
     return data
 
@@ -209,6 +214,10 @@ def main(args):
     stack.Draw('hist')
     formatStack(stack)
 
+    combo_signal = signals['ggh125_powheg'].Clone()
+    combo_signal.Add(signals['vbf125_powheg'])
+    data_hist = blindData(data_hist, combo_signal, stat)
+
     # draw the plots
     data_hist.Draw('same lep')
     stat.Draw('same e2')
@@ -237,7 +246,7 @@ def main(args):
     elif args.year == '2017':
         lumi = "41.5 fb^{-1}"
 
-    ll.DrawLatex(0.42, 0.92, "{} {}, {} (13 TeV)".format(lepLabel, args.year, lumi))
+    ll.DrawLatex(0.42, 0.94, "{} {}, {} (13 TeV)".format(lepLabel, args.year, lumi))
 
     cms = ROOT.TLatex()
     cms.SetNDC(ROOT.kTRUE)
@@ -258,7 +267,7 @@ def main(args):
     elif args.category == 'et_boosted' or args.category == 'mt_boosted':
         catName = 'Boosted'
     elif args.category == 'et_vbf' or args.category == 'mt_vbf':
-        catName = 'VBF enriched'
+        catName = 'VBF Category'
     else:
         catName = ''
 
@@ -280,7 +289,8 @@ def main(args):
     rat_unc.SetMarkerSize(0)
     rat_unc.SetMarkerStyle(8)
 
-    rat_unc.SetFillColor(ROOT.kGray)
+    rat_unc.SetFillColor(ROOT.kBlack)
+    rat_unc.SetFillStyle(3001)
     rat_unc.Draw('same e2')
     ratio.Draw('same lep')
 

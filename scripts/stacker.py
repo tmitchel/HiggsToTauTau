@@ -28,69 +28,67 @@ parser.add_argument('--scale', '-s', action='store', type=float,
                     )
 args = parser.parse_args()
 
-from ROOT import TFile, TLegend, TH1F, TCanvas, THStack, kBlack, TColor, TLatex, kTRUE, TMath, TLine, gStyle
+import ROOT
 from glob import glob
-gStyle.SetOptStat(0)
-
-from ROOT import gROOT, kTRUE
-gROOT.SetBatch(kTRUE)
+ROOT.gStyle.SetOptStat(0)
+ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 def applyStyle(name, hist, leg):
     overlay = 0
     print name, hist.Integral()
     if name == 'embedded' or name == 'ZTT':
-        hist.SetFillColor(TColor.GetColor("#f9cd66"))
+        hist.SetFillColor(ROOT.TColor.GetColor("#f9cd66"))
         hist.SetName("embedded")
-        hist.SetFillColor(TColor.GetColor("#f9cd66"))
+        hist.SetFillColor(ROOT.TColor.GetColor("#f9cd66"))
         hist.SetName("embedded")
     elif name == 'TTT':
-        hist.SetFillColor(TColor.GetColor("#cfe87f"))
+        hist.SetFillColor(ROOT.TColor.GetColor("#cfe87f"))
         hist.SetName('TTT')
     elif name == 'VVT' or name == 'EWKZ':
-        hist.SetFillColor(TColor.GetColor("#9feff2"))
+        hist.SetFillColor(ROOT.TColor.GetColor("#9feff2"))
         overlay = 4
     elif name == 'ZL' or name == 'VVL' or name == 'TTL':
-        hist.SetFillColor(TColor.GetColor("#de5a6a"))
+        hist.SetFillColor(ROOT.TColor.GetColor("#de5a6a"))
         hist.SetName('ZL')
     elif name == 'QCD':
-        hist.SetFillColor(TColor.GetColor("#ffccff"))
+        hist.SetFillColor(ROOT.TColor.GetColor("#ffccff"))
         hist.SetName('QCD')
     elif name == 'jetFakes':
-        hist.SetFillColor(TColor.GetColor("#ffccff"))
+        hist.SetFillColor(ROOT.TColor.GetColor("#ffccff"))
         hist.SetName('jet fakes')
     elif name == 'Data' or name == 'data_obs':
-        hist.SetLineColor(kBlack)
+        hist.SetLineColor(ROOT.kBlack)
         hist.SetMarkerStyle(8)
         overlay = 1
     elif name == 'GGH2Jets_pseudoscalar_Mf05ph0125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
-        hist.SetLineColor(TColor.GetColor('#F0F000'))
+        hist.SetLineColor(ROOT.TColor.GetColor('#F0F000'))
         overlay = 8
     elif name == 'reweighted_qqH_htt_0PM125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
-        hist.SetLineColor(TColor.GetColor('#FF0000'))
+        hist.SetLineColor(ROOT.TColor.GetColor('#FF0000'))
         overlay = 2
     elif name == 'GGH2Jets_pseudoscalar_M125' or name == 'ggh_madgraph_PS_twojet':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
-        hist.SetLineColor(TColor.GetColor('#00AAFF'))
+        hist.SetLineColor(ROOT.TColor.GetColor('#00AAFF'))
         overlay = 9
     elif name.lower() == 'vbf125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
-        hist.SetLineColor(TColor.GetColor('#FF0000'))
+        hist.SetLineColor(ROOT.TColor.GetColor('#FF0000'))
         overlay = -2
     elif (name == 'GGH2Jets_sm_M125' or name == 'ggh_madgraph_twojet' or name == 'ggh125_madgraph_twojet_nominal_ggH125_output' or name == 'ggh125_madgraph_twojet_nominal_v1_ggH125_output'):
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
-        hist.SetLineColor(TColor.GetColor('#0000FF'))
+        hist.SetLineColor(ROOT.TColor.GetColor('#0000FF'))
         overlay = 3
     elif name == 'ggH125' or name == 'ggh125':
         hist.SetFillColor(0)
         hist.SetLineWidth(3)
-        hist.SetLineColor(TColor.GetColor('#0000FF'))
+        hist.SetLineColor(ROOT.TColor.GetColor('#0000FF'))
         overlay = -3
     else:
         return None, -1, leg
@@ -98,7 +96,7 @@ def applyStyle(name, hist, leg):
 
 
 def createCanvas():
-    can = TCanvas('can', 'can', 432, 451)
+    can = ROOT.TCanvas('can', 'can', 432, 451)
     can.Divide(2, 1)
 
     pad1 = can.cd(1)
@@ -129,7 +127,7 @@ def formatStat(stat):
     stat.SetLineWidth(2)
     stat.SetLineColor(0)
     stat.SetFillStyle(3004)
-    stat.SetFillColor(kBlack)
+    stat.SetFillColor(ROOT.kBlack)
     return stat
 
 
@@ -200,14 +198,14 @@ def formatStack(stack):
     stack.SetTitle('')
 
 def formatOther(other, holder):
-    other.SetFillColor(TColor.GetColor("#9feff2"))
+    other.SetFillColor(ROOT.TColor.GetColor("#9feff2"))
     other.SetName('Other')
     holder.append(other.Clone())
     return holder
 
 
 def fillStackAndLegend(data, vbf, ggh, ggh_ps, ggh_int, holder, leg):
-    stack = THStack()
+    stack = ROOT.THStack()
     leg.AddEntry(data, 'Data', 'lep')
     leg.AddEntry(vbf, 'VBF Higgs(125)x100', 'l')
     leg.AddEntry(ggh, 'ggH Higgs(125)x100', 'l')
@@ -226,7 +224,7 @@ def fillStackAndLegend(data, vbf, ggh, ggh_ps, ggh_int, holder, leg):
     return stack, leg
 
 def createLegend():
-    leg = TLegend(0.5, 0.45, 0.85, 0.85)
+    leg = ROOT.TLegend(0.5, 0.45, 0.85, 0.85)
     leg.SetLineColor(0)
     leg.SetFillColor(0)
     leg.SetTextFont(61)
@@ -262,8 +260,8 @@ def formatPull(pull):
 #     pull.SetTitle('')
 #     pull.SetMaximum(2.8)
 #     pull.SetMinimum(-2.8)
-#     pull.SetFillColor(TColor.GetColor('#bbbbbb'))
-#     pull.SetLineColor(TColor.GetColor('#bbbbbb'))
+#     pull.SetFillColor(ROOT.TColor.GetColor('#bbbbbb'))
+#     pull.SetLineColor(ROOT.TColor.GetColor('#bbbbbb'))
 #     pull.GetXaxis().SetTitle(titles[args.var])
 #     pull.GetXaxis().SetTitleSize(0.18)
 #     pull.GetXaxis().SetTitleOffset(0.8)
@@ -287,16 +285,16 @@ def sigmaLines(data):
         data.GetBinWidth(data.GetNbinsX())
 
     ## high line
-    line1 = TLine(low, 1.2, high, 1.2)
+    line1 = ROOT.TLine(low, 1.2, high, 1.2)
     line1.SetLineWidth(1)
     line1.SetLineStyle(3)
-    line1.SetLineColor(kBlack)
+    line1.SetLineColor(ROOT.kBlack)
 
     ## low line
-    line2 = TLine(low, 0.8, high, 0.8)
+    line2 = ROOT.TLine(low, 0.8, high, 0.8)
     line2.SetLineWidth(1)
     line2.SetLineStyle(3)
-    line2.SetLineColor(kBlack)
+    line2.SetLineColor(ROOT.kBlack)
 
     return line1, line2
 
@@ -305,7 +303,7 @@ def blindData(data, signal, background):
     # for ibin in range(data.GetNbinsX()+1):
     #     sig = signal.GetBinContent(ibin)
     #     bkg = background.GetBinContent(ibin)
-    #     if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
+    #     if bkg > 0 and sig / ROOT.TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
     #         data.SetBinContent(ibin, 0)
 
     # if args.var == 'NN_disc':
@@ -316,7 +314,7 @@ def blindData(data, signal, background):
     return data
 
 def main():
-    fin = TFile(args.input, 'read')
+    fin = ROOT.TFile(args.input, 'read')
     
     idir = fin.Get('plots/{}/{}'.format(args.var, args.cat))
     # idir = fin.Get('grabbag/triggers')
@@ -395,8 +393,8 @@ def main():
     ggh_ps.Draw('same hist e')
     leg.Draw()
 
-    ll = TLatex()
-    ll.SetNDC(kTRUE)
+    ll = ROOT.TLatex()
+    ll.SetNDC(ROOT.kTRUE)
     ll.SetTextSize(0.06)
     ll.SetTextFont(42)
     if 'et_' in args.cat:
@@ -410,14 +408,14 @@ def main():
     
     ll.DrawLatex(0.42, 0.92, "{} {}, {} (13 TeV)".format(lepLabel, args.year, lumi))
 
-    cms = TLatex()
-    cms.SetNDC(kTRUE)
+    cms = ROOT.TLatex()
+    cms.SetNDC(ROOT.kTRUE)
     cms.SetTextFont(61)
     cms.SetTextSize(0.09)
     cms.DrawLatex(0.16, 0.8, "CMS")
 
-    prel = TLatex()
-    prel.SetNDC(kTRUE)
+    prel = ROOT.TLatex()
+    prel.SetNDC(ROOT.kTRUE)
     prel.SetTextFont(52)
     prel.SetTextSize(0.06)
     prel.DrawLatex(0.16, 0.74, "Preliminary")
@@ -433,8 +431,8 @@ def main():
     else:
       catName = ''
 
-    lcat = TLatex()
-    lcat.SetNDC(kTRUE)
+    lcat = ROOT.TLatex()
+    lcat.SetNDC(ROOT.kTRUE)
     lcat.SetTextFont(42)
     lcat.SetTextSize(0.06)
     lcat.DrawLatex(0.16, 0.68, catName)
@@ -447,7 +445,7 @@ def main():
     # pull.Add(stat, -1)
     # for ibin in range(pull.GetNbinsX()+1):
     #     pullContent = pull.GetBinContent(ibin)
-    #     uncertainty = TMath.Sqrt(pow(stat.GetBinErrorUp(ibin), 2)+pow(data.GetBinErrorUp(ibin), 2))
+    #     uncertainty = ROOT.TMath.Sqrt(pow(stat.GetBinErrorUp(ibin), 2)+pow(data.GetBinErrorUp(ibin), 2))
     #     if uncertainty > 0:
     #         pull.SetBinContent(ibin, pullContent / uncertainty)
     #     else:
@@ -461,8 +459,7 @@ def main():
         rat_unc.SetBinError(ibin, ratio.GetBinError(ibin))
     rat_unc.SetMarkerSize(0)
     rat_unc.SetMarkerStyle(8)
-    from ROOT import kGray
-    rat_unc.SetFillColor(kGray)
+    rat_unc.SetFillColor(ROOT.kGray)
     rat_unc.Draw('same e2')
     ratio.Draw('same lep')
 
