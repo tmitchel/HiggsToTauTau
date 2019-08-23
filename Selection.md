@@ -107,12 +107,12 @@ Tau Leg of Cross Triggers: <br/>
 | Single Electron |Electron_Run2016_legacy_Ele25.root | Electron_Ele32orEle35.root |Electron_Run2018_Ele32orEle35.root |
 | Single Muon     |Muon_Run2016_legacy_IsoMu22.root   | Muon_IsoMu24orIsoMu27.root |Muon_Run2018_IsoMu24orIsoMu27.root |
 
-| Cross Trigger      | 2016 File               | 2017 File                      | 2018 File                      |
-|:------------------:|:-----------------------:|:------------------------------:|:------------------------------:|
-| Electron - El Leg  |No Cross Trigger         |Electron_EleTau_Ele24.root      |Electron_Run2018_Ele24.root     |
-| Muon - Mu Leg      |None - Check with Cecile |Muon_MuTau_IsoMu20.root         |Muon_Run2018_IsoMu20.root       |
-| Electron - Tau Leg |No Cross Trigger         |tauTriggerEfficiencies2017.root |tauTriggerEfficiencies2017.root |
-| Muon - Tau Leg     |trigger_sf_mt.root       |tauTriggerEfficiencies2017.root |tauTriggerEfficiencies2017.root |
+| Cross Trigger      | 2016 File                                              | 2017 File                      | 2018 File                      |
+|:------------------:|:------------------------------------------------------:|:------------------------------:|:------------------------------:|
+| Electron - El Leg  |No Cross Trigger                                        |Electron_EleTau_Ele24.root      |Electron_Run2018_Ele24.root     |
+| Electron - Tau Leg |No Cross Trigger                                        |tauTriggerEfficiencies2017.root |tauTriggerEfficiencies2017.root |
+| Muon - Mu Leg      |Run2016BtoH/Muon_Mu19leg_2016BtoH_eff.root - temporary  |Muon_MuTau_IsoMu20.root         |Muon_Run2018_IsoMu20.root       |
+| Muon - Tau Leg     |trigger_sf_mt.root - temporary                          |tauTriggerEfficiencies2017.root |tauTriggerEfficiencies2017.root |
 
 ### b-Tag Efficiency
 
