@@ -143,7 +143,9 @@ Need to understand better, but based on number of jets from Rivet and only appli
 ### Top quark pT Reweighting
 
 Analytic function applied to ttbar background <br/>
+```
 sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2))
+```
 
 ### Generator Weights
 
