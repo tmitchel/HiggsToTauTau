@@ -155,8 +155,8 @@ int main(int argc, char* argv[]) {
             return 2;
         }
         std::replace(datasetName.begin(), datasetName.end(), '/', '#');
-        // lumi_weights = new reweight::LumiReWeighting("data/pudistributions_mc_2017.root", "data/pudistributions_data_2017.root", ("#" +
-        // datasetName).c_str(), "pileup");
+        lumi_weights = new reweight::LumiReWeighting("~/public/pu_distributions_mc_2017.root", "~/public/pu_distributions_data_2017.root", ("pua/#" +
+        datasetName).c_str(), "pileup");
         logfile << "using PU dataset name: " << datasetName << std::endl;
     }
 
@@ -367,7 +367,7 @@ int main(int argc, char* argv[]) {
 
             // pileup reweighting
             if (!doAC && !isMG) {
-                // evtwt *= lumi_weights->weight(event.getNPV());
+                evtwt *= lumi_weights->weight(event.getNPV());
             }
 
             // generator weights
