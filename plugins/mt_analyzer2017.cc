@@ -506,7 +506,7 @@ int main(int argc, char *argv[]) {
         }
 
         // fill the tree
-        st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, mt, evtwt, weights, trigger);
+        st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, mt, evtwt, weights);
     }  // close event loop
 
     fin->Close();

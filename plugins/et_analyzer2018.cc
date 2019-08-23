@@ -418,7 +418,7 @@ int main(int argc, char* argv[]) {
                 single_eff = wEmbed->function("e_trg27_trg32_trg35_kit_data")->getVal();
                 el_leg_eff = wEmbed->function("e_trg_EleTau_Ele24Leg_desy_data")->getVal();
                 if (fabs(tau.getEta()) < 2.1) {
-                    tau_leg_eff = tau_trigger_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
+                    tau_leg_eff = tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
                 }
                 evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
             }
