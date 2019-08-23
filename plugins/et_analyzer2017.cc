@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
     el_leg_cross_trg_sf->init_ScaleFactor(
         "${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Electron/Run2017/Electron_EleTau_Ele24.root");
 
-    TauTriggerSFs2017 *tau_trigger_sf =
+    TauTriggerSFs2017 *tau_leg_cross_trg_sf =
         new TauTriggerSFs2017("$CMSSW_BASE/src/TauAnalysisTools/TauTriggerSFs/data/tauTriggerEfficiencies2017.root", "etau", "2017", "tight", "MVAv2");
 
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
@@ -423,7 +423,7 @@ int main(int argc, char* argv[]) {
                 single_eff = wEmbed->function("e_trg27_trg32_trg35_kit_data")->getVal();
                 el_leg_eff = wEmbed->function("e_trg_EleTau_Ele24Leg_desy_data")->getVal();
                 if (fabs(tau.getEta()) < 2.1) {
-                    tau_leg_eff = tau_trigger_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
+                    tau_leg_eff = tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
                 }
                 evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
             }

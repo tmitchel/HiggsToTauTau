@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
     mu_leg_cross_trg_sf->init_ScaleFactor(
         "${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2018/Muon_Run2018_IsoMu20.root");
 
-    TauTriggerSFs2017 *tau_trigger_sf =
+    TauTriggerSFs2017 *tau_leg_cross_trg_sf =
         new TauTriggerSFs2017("$CMSSW_BASE/src/TauAnalysisTools/TauTriggerSFs/data/tauTriggerEfficiencies2017.root", "mutau", "2017", "tight", "MVAv2");
 
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
