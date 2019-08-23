@@ -26,7 +26,6 @@
 #include "../include/EmbedWeight.h"
 #include "../include/LumiReweightingStandAlone.h"
 #include "../include/SF_factory.h"
-#include "../include/ZmmSF.h"
 #include "../include/electron_factory.h"
 #include "../include/event_info.h"
 #include "../include/jet_factory.h"
@@ -105,12 +104,7 @@ int main(int argc, char *argv[]) {
     fout->cd("grabbag");
 
     // initialize Helper class
-    Helper *helper;
-    if (isEmbed) {
-        helper = new Helper(fout, "ZTT", syst);
-    } else {
-        helper = new Helper(fout, name, syst);
-    }
+    Helper *helper = new Helper(fout, name, syst);
 
     // cd to root of output file and create tree
     fout->cd();
@@ -152,19 +146,14 @@ int main(int argc, char *argv[]) {
     TFile *zpt_file = new TFile("data/zpt_weights_2016_BtoH.root");
     auto zpt_hist = reinterpret_cast<TH2F *>(zpt_file->Get("zptmass_histo"));
 
-    // H->tau tau scale factors
-    TFile htt_sf_file("data/htt_scalefactors_v16_3.root");
-    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
-    htt_sf_file.Close();
-
     // embedded sample weights
     TFile embed_file("data/htt_scalefactors_v16_9_embedded.root", "READ");
     RooWorkspace *wEmbed = reinterpret_cast<RooWorkspace *>(embed_file.Get("w"));
     embed_file.Close();
 
     // trigger and ID scale factors
-    auto Ele25_trg_sf = new ScaleFactor();
-    Ele25_trg_sf->init_ScaleFactor(
+    auto ele25_trg_sf = new ScaleFactor();
+    ele25_trg_sf->init_ScaleFactor(
         "${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Electron/Run2016_legacy/Electron_Run2016_legacy_Ele25.root");
 
     auto ele_id_sf = new ScaleFactor();
@@ -185,7 +174,6 @@ int main(int argc, char *argv[]) {
     // declare histograms (histogram initializer functions in util.h)
     fout->cd("grabbag");
     auto histos = helper->getHistos1D();
-    auto histos_2d = helper->getHistos2D();
 
     // construct factories
     event_info event(ntuple, lepton::ELECTRON, 2016, syst);
@@ -242,27 +230,6 @@ int main(int argc, char *argv[]) {
         auto tau = taus.run_factory();
         jets.run_factory();
 
-        //////////////////////////////////////////////////////////
-        // Event Selection in skimmer:                          //
-        //   - Trigger: Ele25eta2p1Tight -> pass, match, filter //
-        //   - Electron: pT > 26, |eta| < 2.1                   //
-        //   - Tau: pt > 27 || 29.5, |eta| < 2.3, lepton vetos, //
-        //          VLoose Isolation, against leptons           //
-        //   - Event: dR(tau,el) > 0.5                          //
-        //////////////////////////////////////////////////////////
-
-        if (electron.getPt() > 26 || fabs(electron.getEta()) < 2.1) {
-            histos->at("cutflow")->Fill(2., 1.);
-        } else {
-            continue;
-        }
-
-        if (tau.getPt() > 30 || fabs(tau.getEta()) < 2.3) {
-            histos->at("cutflow")->Fill(3., 1.);
-        } else {
-            continue;
-        }
-
         // Separate Drell-Yan
         if (name == "ZL" && tau.getGenMatch() > 4) {
             continue;
@@ -273,7 +240,7 @@ int main(int argc, char *argv[]) {
         } else if (name == "ZJ" && tau.getGenMatch() != 6) {
             continue;
         } else {
-            histos->at("cutflow")->Fill(4., 1.);
+            histos->at("cutflow")->Fill(2., 1.);
         }
 
         // build Higgs
@@ -288,41 +255,24 @@ int main(int argc, char *argv[]) {
 
         // now do mt selection
         if (mt < 50) {
-            histos->at("cutflow")->Fill(5., 1.);
+            histos->at("cutflow")->Fill(3., 1.);
         } else {
             continue;
         }
 
         // only opposite-sign
         if (evt_charge == 0) {
-            histos->at("cutflow")->Fill(6., 1.);
+            histos->at("cutflow")->Fill(4., 1.);
         } else {
             continue;
         }
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
-            // Trigger SF
-            evtwt *= Ele25_trg_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
-
-            // electron ID SF
-            evtwt *= ele_id_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
-
-            // Pileup Reweighting
-            evtwt *= lumi_weights->weight(event.getNPU());
-
-            // Apply generator weights
-            evtwt *= event.getGenWeight();
-
             // tau ID efficiency SF
             if (tau.getGenMatch() == 5) {
-                evtwt *= 0.95;
+                evtwt *= 0.87;
             }
-
-            // tracking SF
-            htt_sf->var("e_pt")->setVal(electron.getPt());
-            htt_sf->var("e_eta")->setVal(electron.getEta());
-            evtwt *= htt_sf->function("e_trk_ratio")->getVal();
 
             // anti-lepton discriminator SFs
             if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
@@ -345,6 +295,27 @@ int main(int argc, char *argv[]) {
                 }
             }
 
+            // electron ID SF
+            evtwt *= ele_id_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
+
+            // Trigger SF
+            evtwt *= ele25_trg_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
+
+            // b-tagging scale factor goes here
+            // evtwt *= btagsf;
+
+            // Pileup Reweighting
+            evtwt *= lumi_weights->weight(event.getNPU());
+
+            // NNLOPS ggH reweighting
+            if (sample.find("ggH125") != std::string::npos) {
+                if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
+                if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
+                if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
+                if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
+            }
+            // NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
+
             // Z-pT and Zmm Reweighting
             if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
                 // Z-pT Reweighting
@@ -356,15 +327,6 @@ int main(int argc, char *argv[]) {
                     nom_zpt_weight = 0.9 * nom_zpt_weight + 0.1;
                 }
                 evtwt *= nom_zpt_weight;
-
-                // Zmumu SF
-                if (syst == "zmumuShape_Up") {
-                    evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 1);
-                } else if (syst == "zmumuShape_Down") {
-                    evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), -1);
-                } else {
-                    evtwt *= GetZmmSF(jets.getNjets(), jets.getDijetMass(), Higgs.Pt(), tau.getPt(), 0);
-                }
             }
 
             // top-pT Reweighting
@@ -380,19 +342,10 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            // b-tagging SF - no systematic and want 0 jets
-            float weight_btag(jets.bTagEventWeight());
+            // Apply generator weights
+            evtwt *= event.getGenWeight();
 
-            // NNLOPS ggH reweighting
-            if (sample.find("ggHtoTauTau125") != std::string::npos) {
-                if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
-                if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
-                if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
-                if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
-            }
-            // NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
-
-            // jet to tau fake rate
+            // jet to tau fake rate systematic
             if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W" || name == "VVJ") {
                 auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
                 if (syst == "jetToTauFake_Up") {
@@ -444,7 +397,7 @@ int main(int argc, char *argv[]) {
 
         // // b-jet veto
         if (jets.getNbtag() == 0) {
-            histos->at("cutflow")->Fill(7., 1.);
+            histos->at("cutflow")->Fill(5., 1.);
         } else {
             continue;
         }
@@ -463,7 +416,7 @@ int main(int argc, char *argv[]) {
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion)  {
-            histos->at("cutflow")->Fill(8., 1.);
+            histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
