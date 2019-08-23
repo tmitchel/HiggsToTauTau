@@ -398,6 +398,8 @@ int main(int argc, char *argv[]) {
             auto mu_cross_eff = wEmbed->function("m_trg_MuTau_Mu20Leg_kit_ratio_embed")->getVal();
             auto tau_cross_eff = wEmbed->function("mt_emb_LooseChargedIsoPFTau27_kit_ratio")->getVal();  // TODO(tmitchel): currently being measured.
 
+            bool fireSingle = muon.getPt() > 25;
+            bool fireCross = muon.getPt() < 25;
             evtwt *= (single_eff * fireSingle + mu_cross_eff * tau_cross_eff * fireCross);
 
             auto genweight(event.getGenWeight());

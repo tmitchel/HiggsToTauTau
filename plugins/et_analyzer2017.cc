@@ -406,6 +406,8 @@ int main(int argc, char* argv[]) {
             evtwt *= wEmbed->function("e_iso_kit_ratio")->getVal();
 
             // apply trigger SF's
+            bool fireSingle = electron.getPt() > 33;
+            bool fireCross = electron.getPt() < 33;
             auto single_eff(1.), el_leg_eff(1.), tau_leg_eff(1.);
             if (fabs(electron.getEta()) < 1.479) {
                 // apply trigger now
