@@ -6,7 +6,6 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <unordered_map>
 
 // ROOT includes
 #include "RooFunctor.h"
@@ -16,7 +15,6 @@
 #include "TFile.h"
 #include "TGraphAsymmErrors.h"
 #include "TH1D.h"
-#include "TH1F.h"
 #include "TH2F.h"
 #include "TTree.h"
 
@@ -25,7 +23,6 @@
 #include "../include/CLParser.h"
 #include "../include/EmbedWeight.h"
 #include "../include/LumiReweightingStandAlone.h"
-#include "../include/SF_factory.h"
 #include "../include/electron_factory.h"
 #include "../include/event_info.h"
 #include "../include/jet_factory.h"
