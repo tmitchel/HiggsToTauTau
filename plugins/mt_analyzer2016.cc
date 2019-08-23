@@ -163,6 +163,12 @@ int main(int argc, char *argv[]) {
     auto mu_id_sf = new ScaleFactor();
     mu_id_sf->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Muon/Run2016_legacy/Muon_Run2016_legacy_IdIso.root");
 
+    TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
+    TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
+    TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
+    TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));
+    TGraph *g_NNLOPS_3jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_3jet"));
+
     //////////////////////////////////////
     // Final setup:                     //
     // Declare histograms and factories //
@@ -254,6 +260,14 @@ int main(int argc, char *argv[]) {
             histos->at("cutflow")->Fill(3., 1.);
         }
 
+        // only opposite-sign
+        int evt_charge = tau.getCharge() + muon.getCharge();
+        if (evt_charge == 0) {
+            histos->at("cutflow")->Fill(4., 1.);
+        } else {
+            continue;
+        }
+
         // build Higgs
         TLorentzVector Higgs = muon.getP4() + tau.getP4() + met.getP4();
 
@@ -262,17 +276,9 @@ int main(int argc, char *argv[]) {
         double met_y = met.getMet() * sin(met.getMetPhi());
         double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
         double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getPx() + met_x, 2) - pow(muon.getPy() + met_y, 2));
-        int evt_charge = tau.getCharge() + muon.getCharge();
 
         // now do mt selection
         if (mt < 50) {
-            histos->at("cutflow")->Fill(4., 1.);
-        } else {
-            continue;
-        }
-
-        // only opposite-sign
-        if (evt_charge == 0) {
             histos->at("cutflow")->Fill(5., 1.);
         } else {
             continue;
@@ -321,9 +327,14 @@ int main(int argc, char *argv[]) {
             // Pileup Reweighting
             evtwt *= lumi_weights->weight(event.getNPU());
 
-            // higgs pT reweighting applied to ggH here
-            // if ggh
-            // evtwt *= higgs pT sf;
+            // NNLOPS ggH reweighting
+            if (sample.find("ggH125") != std::string::npos) {
+                if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
+                if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
+                if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
+                if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
+            }
+            // NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
 
             // Z-pT and Zmm Reweighting
             if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {

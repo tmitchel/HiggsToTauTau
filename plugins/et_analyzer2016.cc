@@ -243,6 +243,14 @@ int main(int argc, char *argv[]) {
             histos->at("cutflow")->Fill(2., 1.);
         }
 
+        // only opposite-sign
+        int evt_charge = tau.getCharge() + electron.getCharge();
+        if (evt_charge == 0) {
+            histos->at("cutflow")->Fill(3., 1.);
+        } else {
+            continue;
+        }
+
         // build Higgs
         TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
 
@@ -251,17 +259,9 @@ int main(int argc, char *argv[]) {
         double met_y = met.getMet() * sin(met.getMetPhi());
         double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
         double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getPx() + met_x, 2) - pow(electron.getPy() + met_y, 2));
-        int evt_charge = tau.getCharge() + electron.getCharge();
 
         // now do mt selection
         if (mt < 50) {
-            histos->at("cutflow")->Fill(3., 1.);
-        } else {
-            continue;
-        }
-
-        // only opposite-sign
-        if (evt_charge == 0) {
             histos->at("cutflow")->Fill(4., 1.);
         } else {
             continue;
