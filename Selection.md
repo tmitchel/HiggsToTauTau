@@ -75,7 +75,12 @@ https://github.com/CMS-HTT/RecoilCorrections
 
 ### Electron Energy Scale
 
-Possibly done in FSA already? Check with Cecile.
+At skim level, apply the correction to the electron p4.
+```
+TLorentzVector electron;
+electron.SetPtEtaPhiM(ePt, eEta, ePhi, eMass);
+electron *= eCorrectedEt / electron.Energy();
+```
 
 ### Muon And Electron ID/Iso Efficiency
 
@@ -126,7 +131,7 @@ To be done...
 
 ### Higgs pT Reweighting
 
-Check with Cecile
+Need to understand better, but based on number of jets from Rivet and only applied to ggH.
 
 ### Z pT/mass Reweighting
 
