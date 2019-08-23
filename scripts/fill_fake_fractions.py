@@ -28,7 +28,7 @@ def main(args):
     inputs = {
         'frac_w': ['W', 'ZJ', 'VVJ'],
         'frac_tt': ['TTJ'],
-        'frac_data': ['Data'],
+        'frac_data': ['data_obs'],
         'frac_real': ['ZTT', 'TTT', 'VVT'],
     }
 

@@ -183,7 +183,7 @@ def main(args):
 
             # handle MC vs embedded name
             if 'embed' in ifile:
-                name = name.replace('embedded', 'ZTT')
+                name = name.replace('embed', 'ZTT')
 
             variables = set([
                 'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',

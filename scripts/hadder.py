@@ -50,7 +50,7 @@ def main(args):
         'ZJ', 'ZL', 'ZTT', 'embed', 'data_obs', 'VVJ', 'VVT', 'TTT', 'TTJ', 'W',
     ]
     signals = [
-        'ggh125_JHU_', 'vbf125_JHU_', 'wh125_JHU_', 'zh125_JHU_',
+        'ggh125_JHU', 'vbf125_JHU', 'wh125_JHU', 'zh125_JHU',
 
         'ggh125_madgraph', 'ggh125_madgraph', 'ggh125_madgraph',
         'vbf125_madgraph',
