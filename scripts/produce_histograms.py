@@ -225,7 +225,17 @@ def main(args):
                     'queue': Queue()
                 }
                 if '_JHU' in name:
-                    for weight in get_ac_weights(name, boilerplate['ac_reweighting_map']):
+                    for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
+                        output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
+                        zero_jet_hists[weight[1]] = {
+                            'data': zero_jet_events,
+                            'hists': build_histogram(weight[1], bins),
+                            'xvar_name': variable,
+                            'ac_weights': weight[0],
+                            'queue': Queue()
+                        }
+                elif '_madgraph' in name:
+                    for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
                         output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
                         zero_jet_hists[weight[1]] = {
                             'data': zero_jet_events,
@@ -277,7 +287,17 @@ def main(args):
                     'queue': Queue()
                 }
                 if '_JHU' in name:
-                    for weight in get_ac_weights(name, boilerplate['ac_reweighting_map']):
+                    for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
+                        output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
+                        boosted_hists[weight[1]] = {
+                            'data': boosted_events,
+                            'hists': build_histogram(weight[1], bins),
+                            'xvar_name': variable,
+                            'ac_weights': weight[0],
+                            'queue': Queue()
+                        }
+                elif '_madgraph' in name:
+                    for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
                         output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
                         boosted_hists[weight[1]] = {
                             'data': boosted_events,
@@ -330,7 +350,17 @@ def main(args):
                     'queue': Queue()
                 }
                 if '_JHU' in name:
-                    for weight in get_ac_weights(name, boilerplate['ac_reweighting_map']):
+                    for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
+                        output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
+                        vbf_hists[weight[1]] = {
+                            'data': vbf_events,
+                            'hists': build_histogram(weight[1], bins),
+                            'xvar_name': variable,
+                            'ac_weights': weight[0],
+                            'queue': Queue()
+                        }
+                elif '_madgraph' in name:
+                    for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
                         output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
                         vbf_hists[weight[1]] = {
                             'data': vbf_events,
