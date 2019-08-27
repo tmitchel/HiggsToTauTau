@@ -28,11 +28,43 @@ Applied directly to tau four-momentum at skim level
 | 0          | 2 or 4       |1.000              |0.998              |0.998              |
 | 1          | 2 or 4       |0.995              |0.992              |0.990              |
 
+### MET Recoil Corrections
+
+Applied to MET at skim level to DY+Jets, W+Jets, and Higgs Production
+https://github.com/CMS-HTT/RecoilCorrections
+
+### Electron Energy Scale
+
+At skim level, apply the correction to the electron p4.
+```
+TLorentzVector electron;
+electron.SetPtEtaPhiM(ePt, eEta, ePhi, eMass);
+electron *= eCorrectedEt / electron.Energy();
+```
+
 ### Tau ID Efficiency Scale Factor
 
-| Scale Factor 2016 | Scale Factor 2017 | Scale Factor 2018 |
-|:-----------------:|:-----------------:|:-----------------:|
-|0.87               |0.89               |0.90               |
+Tau ID Scale Factors are stored here [1] based on the recommendation here [2]
+[1] https://github.com/cms-tau-pog/TauIDSFs/tree/master/data
+[2] https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV#Tau_ID_MVA2017v2_efficiency_scal
+
+Example Usage:
+```
+#include "TauPOG/TauIDSFs/interface/TauIDSFTool.h"
+...
+  // tau ID efficiency
+  TauIDSFTool *tau_id_eff_sf = new TauIDSFTool(2016);
+...
+    if (tau.getGenMatch() == 5) {
+        evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt());
+    }
+...
+```
+
+| 2016                                | 2017                                 | 2018                                 |
+|:-----------------------------------:|:------------------------------------:|:------------------------------------:|
+|TauID_SF_pt_MVAoldDM2017v2_2016.root | TauID_SF_pt_MVAoldDM2017v2_2017.root | TauID_SF_pt_MVAoldDM2017v2_2018.root |
+
 
 ### VLoose Electron to Tau Mis-ID Rate
 
@@ -68,19 +100,6 @@ Applied directly to tau four-momentum at skim level
 | abs(eta) < 1.7   |1.72               |0.93               |None yet           |
 | abs(eta) < 2.3   |2.50               |1.61               |None yet           |
 
-### MET Recoil Corrections
-
-Applied to MET at skim level to DY+Jets, W+Jets, and Higgs Production
-https://github.com/CMS-HTT/RecoilCorrections
-
-### Electron Energy Scale
-
-At skim level, apply the correction to the electron p4.
-```
-TLorentzVector electron;
-electron.SetPtEtaPhiM(ePt, eEta, ePhi, eMass);
-electron *= eCorrectedEt / electron.Energy();
-```
 
 ### Muon And Electron ID/Iso Efficiency
 

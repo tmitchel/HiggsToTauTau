@@ -30,6 +30,7 @@
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
 #include "HTT-utilities/LepEffInterface/interface/ScaleFactor.h"
+#include "TauPOG/TauIDSFs/interface/TauIDSFTool.h"
 
 typedef std::vector<double> NumV;
 
@@ -142,6 +143,9 @@ int main(int argc, char *argv[]) {
     // Z-pT reweighting
     TFile *zpt_file = new TFile("data/zpt_weights_2016_BtoH.root");
     auto zpt_hist = reinterpret_cast<TH2F *>(zpt_file->Get("zptmass_histo"));
+
+    // tau ID efficiency
+    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool(2016);
 
     // embedded sample weights
     TFile embed_file("data/htt_scalefactors_v16_9_embedded.root", "READ");
@@ -285,7 +289,7 @@ int main(int argc, char *argv[]) {
         if (!isData && !isEmbed) {
             // tau ID efficiency SF
             if (tau.getGenMatch() == 5) {
-                evtwt *= 0.87;
+                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt());
             }
 
             // anti-lepton discriminator SFs
