@@ -83,6 +83,11 @@ cmsrel CMSSW_CMSSW_10_4_0 && cd CMSSW_10_4_0/src && cmsenv
         git checkout v0.2.2
         git clone -b 2017 ssh://git@gitlab.cern.ch:7999/cms-htt/Jet2TauFakesFiles.git data2017 // 2016 and 2018 as well
         ```
+    - setup tau ID efficiency helper
+        ```
+        cd $CMSSW_BASE/src
+        git clone https://github.com/cms-tau-pog/TauIDSFs TauPOG/TauIDSFs
+        ```
     - Compile all repos
         ```
         cd $CMSSW_BASE/src
@@ -90,7 +95,7 @@ cmsrel CMSSW_CMSSW_10_4_0 && cd CMSSW_10_4_0/src && cmsenv
         ```
     - Get the tarball full of missing files
         ```
-        cd ltau_analyzers
+        cd ${CMSSW_BASE}/src/ltau_analyzers
         cp /afs/hep.wisc.edu/home/tmitchel/public/ltau_analyzer_data.tar.gz .
         tar xzvf ltau_analyzer_data.tar.gz
         ```

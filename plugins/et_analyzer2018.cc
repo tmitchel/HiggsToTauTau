@@ -32,6 +32,7 @@
 #include "../include/tau_factory.h"
 #include "TauAnalysisTools/TauTriggerSFs/interface/TauTriggerSFs2017.h"
 #include "HTT-utilities/LepEffInterface/interface/ScaleFactor.h"
+#include "TauPOG/TauIDSFs/interface/TauIDSFTool.h"
 
 typedef std::vector<double> NumV;
 
@@ -143,6 +144,9 @@ int main(int argc, char* argv[]) {
     TFile htt_sf_file("data/htt_scalefactors_2017_v2.root");
     RooWorkspace* htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
+
+    // tau ID efficiency
+    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool(2018);
 
     // embedded sample weights
     TFile embed_file("data/htt_scalefactors_v17_6.root", "READ");
@@ -289,7 +293,7 @@ int main(int argc, char* argv[]) {
         if (!isData && !isEmbed) {
             // tau ID efficiency SF
             if (tau.getGenMatch() == 5) {
-                evtwt *= 0.90;
+                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt());
             }
 
             // anti-lepton discriminator SFs
@@ -321,6 +325,14 @@ int main(int argc, char* argv[]) {
             } else {
                 evtwt *= el32_el35_trg_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
             }
+
+            // Z-Vtx HLT Correction
+            evtwt *= 0.991;
+
+            // electron track reco SF
+            htt_sf->var("e_pt")->setVal(electron.getPt());
+            htt_sf->var("e_eta")->setVal(electron.getEta());
+            evtwt *= htt_sf->function("e_trk_ratio")->getVal();
 
             // use promote-demote method to correct nbtag with no systematics
             jets.promoteDemote(btag_eff_oth, btag_eff_oth, btag_eff_oth);
