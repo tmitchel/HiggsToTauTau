@@ -24,6 +24,7 @@ set -e
 
 doFF="${CMSSW_BASE}/lib/${SCRAM_ARCH}/libHTTutilitiesJet2TauFakes.so"
 lep2016="${CMSSW_BASE}/lib/${SCRAM_ARCH}/libHTT-utilitiesLepEffInterface.so"
+tauID="${CMSSW_BASE}/lib/${SCRAM_ARCH}/libTauIDSFTool.so"
 
 # this is the important part for compiling
 g++ -O3 $1 `root-config --cflags --glibs` ${CMSSW_BASE}/lib/${SCRAM_ARCH}/libTauAnalysisToolsTauTriggerSFs.so $lep2016 $doFF -lRooFit -lRooFitCore -I ${CMSSW_BASE}/src -I ${CMSSW_BASE}/src/ltau_analyzers/include -I include -o $2
