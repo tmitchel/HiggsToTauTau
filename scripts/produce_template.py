@@ -239,10 +239,6 @@ def main(args):
             else:
                 name = stable_name
 
-            # adjust madgraph naming for later
-            if '_madgraph' in name:
-                name = name.replace(stable_name, boilerplate['noweighting_name_map'][stable_name])
-
             # get data naming correct
             if 'Data' in name:
                 name = 'data_obs'
@@ -306,7 +302,33 @@ def main(args):
             output_file.Write()
 
             if '_JHU' in name:
-                for weight in get_ac_weights(name, boilerplate['ac_reweighting_map']):
+                for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
+                    print 'Reweighting sample {} to {}'.format(name, weight[1])
+                    # start with 0-jet category
+                    output_file.cd('{}_0jet'.format(channel_prefix))
+                    zero_jet_hist = build_histogram(weight[1], decay_mode_bins, vis_mass_bins)
+                    fill_hist(zero_jet_events, 't1_decayMode', 'vis_mass', zero_jet_hist, weight[0])
+
+                    # now boosted category
+                    output_file.cd('{}_boosted'.format(channel_prefix))
+                    boost_hist = build_histogram(weight[1], higgs_pT_bins_boost, m_sv_bins_boost,)
+                    fill_hist(boosted_events, 'higgs_pT', 'm_sv', boost_hist, weight[0])
+
+                    # vbf category is last
+                    output_file.cd('{}_vbf'.format(channel_prefix))
+                    vbf_hist = build_histogram(weight[1], vbf_cat_x_bins, vbf_cat_y_bins)
+                    fill_hist(vbf_events, vbf_cat_x_var, vbf_cat_y_var, vbf_hist, weight[0])
+
+                    # vbf sub-categories event after normal vbf categories
+                    vbf_cat_hists = []
+                    for cat in boilerplate['vbf_sub_cats']:
+                        output_file.cd('{}_{}'.format(channel_prefix, cat))
+                        vbf_cat_hists.append(build_histogram(weight[1], vbf_cat_x_bins, vbf_cat_y_bins))
+                    fill_vbf_subcat_hists(vbf_events, vbf_cat_x_var, vbf_cat_y_var,
+                                          vbf_cat_edge_var, vbf_cat_hists, vbf_cat_edges, weight[0])
+                    output_file.Write()
+            elif '_madgraph' in name:
+                for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
                     print 'Reweighting sample {} to {}'.format(name, weight[1])
                     # start with 0-jet category
                     output_file.cd('{}_0jet'.format(channel_prefix))

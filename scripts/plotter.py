@@ -30,7 +30,7 @@ style_map = {
 
         "vbf125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
         "JHU__reweighted_qqH_htt_0PM125": style_map_tuple(no_color, GetColor("#FF0000"), 1, 3, 1),
-        "JHU__reweighted_qqH_htt_0M125": style_map_tuple(no_color, GetColor("#FFAA00"), 1, 3, 1),
+        "JHU__reweighted_qqH_htt_0M125": style_map_tuple(no_color, GetColor("#ff5e00"), 1, 3, 1),
     }
 }
 
@@ -71,9 +71,9 @@ def createCanvas():
 
 def formatStat(stat):
     stat.SetMarkerStyle(0)
-    stat.SetLineWidth(0)
+    stat.SetLineWidth(2)
     stat.SetLineColor(0)
-    stat.SetFillStyle(3001)
+    stat.SetFillStyle(3004)
     stat.SetFillColor(ROOT.kBlack)
     return stat
 
@@ -131,7 +131,7 @@ def formatPull(pull, title):
     # pull.GetXaxis().SetLabelSize(0)
     # pull.GetXaxis().SetTitleSize(0)
 
-    pull.GetYaxis().SetTitle('Data / MC')
+    pull.GetYaxis().SetTitle('Obs. / Exp.')
     pull.GetYaxis().SetTitleSize(0.12)
     pull.GetYaxis().SetTitleFont(42)
     pull.GetYaxis().SetTitleOffset(.475)
@@ -162,8 +162,7 @@ def blindData(data, signal, background):
     for ibin in range(data.GetNbinsX()+1):
         sig = signal.GetBinContent(ibin)
         bkg = background.GetBinContent(ibin)
-        print sig, bkg
-        if bkg > 0 and sig / ROOT.TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
+        if bkg > 0 and sig / ROOT.TMath.Sqrt(bkg + pow(0.09*bkg, 2)) >= 0.5:
             err = data.GetBinError(ibin)
             data.SetBinContent(ibin, -1)
             data.SetBinError(ibin, err)
@@ -214,7 +213,8 @@ def main(args):
     stack.Draw('hist')
     formatStack(stack)
 
-    combo_signal = signals['ggh125_powheg'].Clone()
+    combo_signal = signals['JHU__GGH2Jets_pseudoscalar_M125'].Clone()
+    combo_signal.Add(signals['ggh125_powheg'])
     combo_signal.Add(signals['vbf125_powheg'])
     data_hist = blindData(data_hist, combo_signal, stat)
 
@@ -286,11 +286,11 @@ def main(args):
     for ibin in range(1, rat_unc.GetNbinsX()+1):
         rat_unc.SetBinContent(ibin, 1)
         rat_unc.SetBinError(ibin, ratio.GetBinError(ibin))
-    rat_unc.SetMarkerSize(0)
-    rat_unc.SetMarkerStyle(8)
+    rat_unc = formatStat(rat_unc)
+    # rat_unc.SetMarkerSize(0)
+    # rat_unc.SetMarkerStyle(8)
 
-    rat_unc.SetFillColor(ROOT.kBlack)
-    rat_unc.SetFillStyle(3001)
+    # rat_unc.SetFillColor(ROOT.kGray)
     rat_unc.Draw('same e2')
     ratio.Draw('same lep')
 

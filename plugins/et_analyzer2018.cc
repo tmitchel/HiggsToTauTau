@@ -5,7 +5,6 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <unordered_map>
 
 // ROOT includes
 #include "RooFunctor.h"
@@ -15,16 +14,13 @@
 #include "TFile.h"
 #include "TGraphAsymmErrors.h"
 #include "TH1D.h"
-#include "TH1F.h"
 #include "TH2F.h"
 #include "TTree.h"
 
 // user includes
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
-#include "../include/EmbedWeight.h"
 #include "../include/LumiReweightingStandAlone.h"
-#include "../include/SF_factory.h"
 #include "../include/ZmmSF.h"
 #include "../include/electron_factory.h"
 #include "../include/event_info.h"
@@ -35,6 +31,8 @@
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
 #include "TauAnalysisTools/TauTriggerSFs/interface/TauTriggerSFs2017.h"
+#include "HTT-utilities/LepEffInterface/interface/ScaleFactor.h"
+#include "TauPOG/TauIDSFs/interface/TauIDSFTool.h"
 
 typedef std::vector<double> NumV;
 
@@ -105,12 +103,7 @@ int main(int argc, char* argv[]) {
     fout->cd("grabbag");
 
     // initialize Helper class
-    Helper* helper;
-    if (isEmbed) {
-        helper = new Helper(fout, "ZTT", syst);
-    } else {
-        helper = new Helper(fout, name, syst);
-    }
+    Helper* helper = new Helper(fout, name, syst);
 
     // cd to root of output file and create tree
     fout->cd();
@@ -152,6 +145,9 @@ int main(int argc, char* argv[]) {
     RooWorkspace* htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
+    // tau ID efficiency
+    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool(2018);
+
     // embedded sample weights
     TFile embed_file("data/htt_scalefactors_v17_6.root", "READ");
     RooWorkspace* wEmbed = reinterpret_cast<RooWorkspace*>(embed_file.Get("w"));
@@ -162,8 +158,26 @@ int main(int argc, char* argv[]) {
     TH2F* btag_eff_c = reinterpret_cast<TH2F*>(bTag_eff_file.Get("btag_eff_c")->Clone());
     TH2F* btag_eff_oth = reinterpret_cast<TH2F*>(bTag_eff_file.Get("btag_eff_oth")->Clone());
 
-    TauTriggerSFs2017 *tau_trigger_sf =
+    auto el_id_sf = new ScaleFactor();
+    el_id_sf->init_ScaleFactor("${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Electron/Run2018/Electron_Run2018_IdIso.root");
+
+    auto el32_el35_trg_sf = new ScaleFactor();
+    el32_el35_trg_sf->init_ScaleFactor(
+        "${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Electron/Run2018/Electron_Run2018_Ele32orEle35.root");
+
+    auto el_leg_cross_trg_sf = new ScaleFactor();
+    el_leg_cross_trg_sf->init_ScaleFactor(
+        "${CMSSW_BASE}/src/HTT-utilities/LepEffInterface/data/Electron/Run2018/Electron_Run2018_Ele24.root");
+
+    TauTriggerSFs2017 *tau_leg_cross_trg_sf =
         new TauTriggerSFs2017("$CMSSW_BASE/src/TauAnalysisTools/TauTriggerSFs/data/tauTriggerEfficiencies2017.root", "etau", "2017", "tight", "MVAv2");
+
+    TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
+    TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
+    TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
+    TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));
+    TGraph *g_NNLOPS_3jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_3jet"));
+
 
     //////////////////////////////////////
     // Final setup:                     //
@@ -173,7 +187,6 @@ int main(int argc, char* argv[]) {
     // declare histograms (histogram initializer functions in util.h)
     fout->cd("grabbag");
     auto histos = helper->getHistos1D();
-    auto histos_2d = helper->getHistos2D();
 
     // construct factories
     event_info event(ntuple, lepton::ELECTRON, 2018, syst);
@@ -232,55 +245,12 @@ int main(int argc, char* argv[]) {
         auto tau = taus.run_factory();
         jets.run_factory();
 
-        //////////////////////////////////////////////////////////
-        // Event Selection in skimmer:                          //
-        //   - Trigger: Ele25eta2p1Tight -> pass, match, filter //
-        //   - Electron: pT > 26, |eta| < 2.1                   //
-        //   - Tau: pt > 27 || 29.5, |eta| < 2.3, lepton vetos, //
-        //          VLoose Isolation, against leptons           //
-        //   - Event: dR(tau,el) > 0.5                          //
-        //////////////////////////////////////////////////////////
+        // if (event.getPassFlags(isData)) {
+        //     histos->at("cutflow")->Fill(5., 1.);
+        // } else {
+        //     continue;
+        // }
 
-        // remove 2-prong taus
-        if (tau.getDecayModeFinding() && tau.getDecayMode() != 5 && tau.getDecayMode() != 6) {
-            histos->at("cutflow")->Fill(2., 1.);
-        } else {
-            continue;
-        }
-
-        bool fireSingle(false), fireCross(false);
-
-        // apply correct lepton pT thresholds
-        if (electron.getPt() > 36 && event.getPassEle35()) {
-            fireSingle = true;
-        } else if (electron.getPt() > 33 && event.getPassEle32()) {
-            fireSingle = true;
-        } else if (electron.getPt() > 28 && event.getPassEle27()) {
-            fireSingle = true;
-        } else if (electron.getPt() > 25 && electron.getPt() < 28 && tau.getPt() > 35 && fabs(tau.getEta()) < 2.1 && event.getPassEle24Tau30()) {
-            fireCross = true;
-        } else if (!isEmbed) {  // embedded trigger has some weirdness dealt with later
-            continue;
-        }
-        histos->at("cutflow")->Fill(3., 1.);
-
-        if (electron.getP4().DeltaR(tau.getP4()) > 0.5) {
-            histos->at("cutflow")->Fill(4., 1.);
-        } else {
-            continue;
-        }
-
-        if (event.getPassFlags(isData)) {
-            histos->at("cutflow")->Fill(5., 1.);
-        } else {
-            continue;
-        }
-
-        if (tau.getPt() > 30) {
-            histos->at("cutflow")->Fill(6., 1.);
-        } else {
-            continue;
-        }
 
         // Separate Drell-Yan
         if (name == "ZL" && tau.getGenMatch() > 4) {
@@ -292,7 +262,15 @@ int main(int argc, char* argv[]) {
         } else if (name == "ZJ" && tau.getGenMatch() != 6) {
             continue;
         }
-        histos->at("cutflow")->Fill(7., 1.);
+        histos->at("cutflow")->Fill(2., 1.);
+
+        // only opposite-sign
+        int evt_charge = tau.getCharge() + electron.getCharge();
+        if (evt_charge == 0) {
+            histos->at("cutflow")->Fill(3., 1.);
+        } else {
+            continue;
+        }
 
         // build Higgs
         TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
@@ -302,93 +280,82 @@ int main(int argc, char* argv[]) {
         double met_y = met.getMet() * sin(met.getMetPhi());
         double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
         double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getPx() + met_x, 2) - pow(electron.getPy() + met_y, 2));
-        int evt_charge = tau.getCharge() + electron.getCharge();
 
         // now do mt selection
         if (mt < 50) {
-            histos->at("cutflow")->Fill(7., 1.);
+            histos->at("cutflow")->Fill(4., 1.);
         } else {
             continue;
         }
 
-        // only opposite-sign
-        if (evt_charge == 0) {
-            histos->at("cutflow")->Fill(8., 1.);
-        } else {
-            continue;
-        }
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // tau ID efficiency SF
             if (tau.getGenMatch() == 5) {
-                evtwt *= 0.89;
+                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt());
+            }
+
+            // anti-lepton discriminator SFs
+            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
+                if (fabs(tau.getEta()) < 1.460)
+                    evtwt *= 1.80;
+                else if (fabs(tau.getEta()) > 1.558)
+                    evtwt *= 1.53;
+            } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
+                if (fabs(tau.getEta()) < 0.4)
+                    evtwt *= 1.06;
+                else if (fabs(tau.getEta()) < 0.8)
+                    evtwt *= 1.02;
+                else if (fabs(tau.getEta()) < 1.2)
+                    evtwt *= 1.10;
+                else if (fabs(tau.getEta()) < 1.7)
+                    evtwt *= 1.03;
+                else
+                    evtwt *= 1.94;
+            }
+
+            // electron ID/Iso
+            evtwt *= el_id_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
+
+            // trigger scale factors
+            if (electron.getPt() < 33) {
+                evtwt *= el_leg_cross_trg_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
+                evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
+            } else {
+                evtwt *= el32_el35_trg_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
             }
 
             // Z-Vtx HLT Correction
             evtwt *= 0.991;
 
-            // anti-lepton discriminator SFs
-            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {  // Yiwen
-                if (fabs(tau.getEta()) < 1.460)
-                    evtwt *= 1.80;
-                else if (fabs(tau.getEta()) > 1.558)
-                    evtwt *= 1.53;
-                //  if (name == "ZL" && tau.getL2DecayMode() == 0) evtwt *= 0.98;
-                //  else if (sample == "ZL" && tau.getL2DecayMode() == 1) evtwt *= 1.20;
-            } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
-                if (fabs(tau.getEta()) < 0.4)
-                    evtwt *= 1.17;
-                else if (fabs(tau.getEta()) < 0.8)
-                    evtwt *= 1.29;
-                else if (fabs(tau.getEta()) < 1.2)
-                    evtwt *= 1.14;
-                else if (fabs(tau.getEta()) < 1.7)
-                    evtwt *= 0.93;
-                else
-                    evtwt *= 1.61;
-            }
+            // electron track reco SF
+            htt_sf->var("e_pt")->setVal(electron.getPt());
+            htt_sf->var("e_eta")->setVal(electron.getEta());
+            evtwt *= htt_sf->function("e_trk_ratio")->getVal();
+
+            // use promote-demote method to correct nbtag with no systematics
+            jets.promoteDemote(btag_eff_oth, btag_eff_oth, btag_eff_oth);
 
             // pileup reweighting
             if (!doAC && !isMG) {
                 evtwt *= lumi_weights->weight(event.getNPV());
             }
 
-            // generator weights
-            evtwt *= event.getGenWeight();
-
-            // give inputs to workspace
-            htt_sf->var("e_pt")->setVal(electron.getPt());
-            htt_sf->var("e_eta")->setVal(electron.getEta());
-            htt_sf->var("z_gen_mass")->setVal(event.getGenM());  // TODO(tmitchel): check if these are the right variables.
-            htt_sf->var("z_gen_pt")->setVal(event.getGenPt());   // TODO(tmitchel): check if these are the right variables.
-
-            // electron ID SF
-            evtwt *= htt_sf->function("e_id90_kit_ratio")->getVal();
-
-            // electron Iso SF
-            evtwt *= htt_sf->function("e_iso_kit_ratio")->getVal();
-
-            // electron track reco SF
-            evtwt *= htt_sf->function("e_trk_ratio")->getVal();
-
-            // apply trigger SF's
-            auto single_data_eff = htt_sf->function("e_trg27_trg32_trg35_kit_data")->getVal();
-            auto single_mc_eff = htt_sf->function("e_trg27_trg32_trg35_kit_mc")->getVal();
-            auto el_cross_data_eff = htt_sf->function("e_trg_EleTau_Ele24Leg_desy_data")->getVal();
-            auto el_cross_mc_eff = htt_sf->function("e_trg_EleTau_Ele24Leg_desy_mc")->getVal();
-            auto single_eff = single_data_eff / single_mc_eff;
-            auto el_cross_eff = el_cross_data_eff / el_cross_mc_eff;
-            double tau_cross_eff(1.);
-            if (fireCross) {
-              tau_cross_eff = tau_trigger_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
+            // NNLOPS ggH reweighting
+            if (sample.find("ggH125") != std::string::npos) {
+                if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
+                if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
+                if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
+                if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
             }
-
-            evtwt *= (single_eff * fireSingle + el_cross_eff * tau_cross_eff * fireCross);
+            // NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
 
             // Z-pT Reweighting
-            double zpt_sf(1.);
             if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
+                // give inputs to workspace
+                htt_sf->var("z_gen_mass")->setVal(event.getGenM());  // TODO(tmitchel): check if these are the right variables.
+                htt_sf->var("z_gen_pt")->setVal(event.getGenPt());   // TODO(tmitchel): check if these are the right variables.
                 evtwt *= htt_sf->function("zptmass_weight_nom")->getVal();
             }
 
@@ -405,10 +372,10 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            // use promote-demote method to correct nbtag with no systematics
-            jets.promoteDemote(btag_eff_oth, btag_eff_oth, btag_eff_oth);
+            // generator weights
+            evtwt *= event.getGenWeight();
 
-            // jet to tau fake rate
+            // jet to tau fake rate systematics
             if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W" || name == "VVJ") {
                 auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
                 if (syst == "jetToTauFake_Up") {
@@ -446,6 +413,8 @@ int main(int argc, char* argv[]) {
             evtwt *= wEmbed->function("e_iso_kit_ratio")->getVal();
 
             // apply trigger SF's
+            bool fireSingle = electron.getPt() > 33;
+            bool fireCross = electron.getPt() < 33;
             auto single_eff(1.), el_leg_eff(1.), tau_leg_eff(1.);
             if (fabs(electron.getEta()) < 1.479) {
                 // apply trigger now
@@ -461,7 +430,7 @@ int main(int argc, char* argv[]) {
                 single_eff = wEmbed->function("e_trg27_trg32_trg35_kit_data")->getVal();
                 el_leg_eff = wEmbed->function("e_trg_EleTau_Ele24Leg_desy_data")->getVal();
                 if (fabs(tau.getEta()) < 2.1) {
-                    tau_leg_eff = tau_trigger_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
+                    tau_leg_eff = tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
                 }
                 evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
             }
@@ -477,7 +446,7 @@ int main(int argc, char* argv[]) {
 
         // b-jet veto
         if (jets.getNbtag() == 0) {
-            histos->at("cutflow")->Fill(9., 1.);
+            histos->at("cutflow")->Fill(5., 1.);
         } else {
             continue;
         }
@@ -496,7 +465,7 @@ int main(int argc, char* argv[]) {
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion) {
-            histos->at("cutflow")->Fill(10., 1.);
+            histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
