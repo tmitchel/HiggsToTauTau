@@ -322,6 +322,14 @@ int main(int argc, char* argv[]) {
                 evtwt *= el32_el35_trg_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
             }
 
+            // Z-Vtx HLT Correction
+            evtwt *= 0.991;
+
+            // electron track reco SF
+            htt_sf->var("e_pt")->setVal(electron.getPt());
+            htt_sf->var("e_eta")->setVal(electron.getEta());
+            evtwt *= htt_sf->function("e_trk_ratio")->getVal();
+
             // use promote-demote method to correct nbtag with no systematics
             jets.promoteDemote(btag_eff_oth, btag_eff_oth, btag_eff_oth);
 

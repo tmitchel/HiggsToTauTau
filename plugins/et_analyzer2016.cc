@@ -143,6 +143,12 @@ int main(int argc, char *argv[]) {
     TFile *zpt_file = new TFile("data/zpt_weights_2016_BtoH.root");
     auto zpt_hist = reinterpret_cast<TH2F *>(zpt_file->Get("zptmass_histo"));
 
+    // electron tracking sf
+    TFile htt_sf_file("data/htt_scalefactors_v16_3.root");
+    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
+    htt_sf_file.Close();
+
+
     // embedded sample weights
     TFile embed_file("data/htt_scalefactors_v16_9_embedded.root", "READ");
     RooWorkspace *wEmbed = reinterpret_cast<RooWorkspace *>(embed_file.Get("w"));
@@ -297,6 +303,12 @@ int main(int argc, char *argv[]) {
 
             // Trigger SF
             evtwt *= ele25_trg_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
+
+            // tracking SF
+            htt_sf->var("e_pt")->setVal(electron.getPt());
+            htt_sf->var("e_eta")->setVal(electron.getEta());
+            evtwt *= htt_sf->function("e_trk_ratio")->getVal();
+
 
             // b-tagging scale factor goes here
             // evtwt *= btagsf;

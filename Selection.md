@@ -114,6 +114,15 @@ Tau Leg of Cross Triggers: <br/>
 | Muon - Mu Leg      |Run2016BtoH/Muon_Mu19leg_2016BtoH_eff.root - temporary  |Muon_MuTau_IsoMu20.root         |Muon_Run2018_IsoMu20.root       |
 | Muon - Tau Leg     |trigger_sf_mt.root - temporary                          |tauTriggerEfficiencies2017.root |tauTriggerEfficiencies2017.root |
 
+
+### Electron Tracking Corrections
+
+Tracking correction stored in `e_trk_ratio` dependent on `e_pt` and `e_eta`. 2017 and 2018 have additional factor `evtwt *= 0.991` for Z-Vtx HLT correction.
+
+| 2016                        | 2017                          | 2018                          |
+|:---------------------------:|:-----------------------------:|:-----------------------------:|
+| htt_scalefactors_v16_3.root | htt_scalefactors_2017_v2.root | htt_scalefactors_2017_v2.root |
+
 ### b-Tag Efficiency
 
 To be done...
