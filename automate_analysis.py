@@ -165,15 +165,13 @@ for ifile in fileList:
             if not path.exists('Output/trees/{}/NOMINAL'.format(options.output_dir)):
                 makedirs('Output/trees/{}/NOMINAL'.format(options.output_dir))
             tocall = callstring + ' -n %s ' % name
-            # print tocall
             processes.append(tocall)
-            # call(tocall, shell=True)
 
 pprint(processes)
 if options.parallel:
         # Use 5 cores if the machine has more than 10 total cores.
       # Otherwise, use half the available cores.
-      n_processes = min(5, multiprocessing.cpu_count() / 2)
+      n_processes = min(8, multiprocessing.cpu_count() / 2)
  
       pool = multiprocessing.Pool(processes=n_processes)
       r = pool.map_async(run_process, processes)
