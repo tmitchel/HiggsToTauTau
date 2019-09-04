@@ -162,7 +162,7 @@ def blindData(data, signal, background):
     for ibin in range(data.GetNbinsX()+1):
         sig = signal.GetBinContent(ibin)
         bkg = background.GetBinContent(ibin)
-        if bkg > 0 and sig / ROOT.TMath.Sqrt(bkg + pow(0.09*bkg, 2)) >= 0.5:
+        if bkg > 0 and sig / ROOT.TMath.Sqrt(bkg + pow(0.09*bkg, 2)) >= 0.3:
             err = data.GetBinError(ibin)
             data.SetBinContent(ibin, -1)
             data.SetBinError(ibin, err)
@@ -174,7 +174,7 @@ def blindData(data, signal, background):
 
     return data
 
-def main(args):
+def BuildPlot(args):
     ifile = ROOT.TFile(args.input)
     category = ifile.Get(args.category)
     variable = category.Get(args.variable)
@@ -245,6 +245,8 @@ def main(args):
         lumi = "35.9 fb^{-1}"
     elif args.year == '2017':
         lumi = "41.5 fb^{-1}"
+    elif args.year == '2018':
+        lumi = "59.7 fb^{-1}"
 
     ll.DrawLatex(0.42, 0.94, "{} {}, {} (13 TeV)".format(lepLabel, args.year, lumi))
 
@@ -313,4 +315,4 @@ if __name__ == "__main__":
     parser.add_argument('--label', '-l', required=True, action='store', help='label for plot')
     parser.add_argument('--prefix', '-p', action='store', help='prefix for output name')
     parser.add_argument('--scale', '-s', default=1.2, type=float, action='store', help='scale max by x')
-    main(parser.parse_args())
+    BuildPlot(parser.parse_args())
