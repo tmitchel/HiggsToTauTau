@@ -260,6 +260,12 @@ int main(int argc, char* argv[]) {
         auto tau = taus.run_factory();
         jets.run_factory();
 
+        if (fabs(electron.getEta()) < 2.1) {
+            histos->at("cutflow")->Fill(2., 1.);
+        } else {
+            continue;
+        }
+
         // if (event.getPassFlags(isData)) {
         //     histos->at("cutflow")->Fill(5., 1.);
         // } else {
@@ -276,13 +282,13 @@ int main(int argc, char* argv[]) {
         } else if (name == "ZJ" && tau.getGenMatch() != 6) {
             continue;
         } else {
-            histos->at("cutflow")->Fill(2., 1.);
+            histos->at("cutflow")->Fill(3., 1.);
         }
 
         // only opposite-sign
         int evt_charge = tau.getCharge() + electron.getCharge();
         if (evt_charge == 0) {
-            histos->at("cutflow")->Fill(3., 1.);
+            histos->at("cutflow")->Fill(4., 1.);
         } else {
             continue;
         }
@@ -298,7 +304,7 @@ int main(int argc, char* argv[]) {
 
         // now do mt selection
         if (mt < 50) {
-            histos->at("cutflow")->Fill(4., 1.);
+            histos->at("cutflow")->Fill(5., 1.);
         } else {
             continue;
         }
@@ -451,7 +457,7 @@ int main(int argc, char* argv[]) {
 
         // b-jet veto
         if (jets.getNbtag() == 0) {
-            histos->at("cutflow")->Fill(5., 1.);
+            histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
@@ -470,7 +476,7 @@ int main(int argc, char* argv[]) {
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion)  {
-            histos->at("cutflow")->Fill(6., 1.);
+            histos->at("cutflow")->Fill(7., 1.);
         } else {
             continue;
         }
