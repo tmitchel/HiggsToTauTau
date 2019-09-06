@@ -45,7 +45,9 @@ electron *= eCorrectedEt / electron.Energy();
 ### Tau ID Efficiency Scale Factor
 
 Tau ID Scale Factors are stored here [1] based on the recommendation here [2]
+
 [1] https://github.com/cms-tau-pog/TauIDSFs/tree/master/data
+
 [2] https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV#Tau_ID_MVA2017v2_efficiency_scal
 
 Example Usage:
@@ -273,7 +275,7 @@ Generator weights are stored in FSA ntuples and applied per event.
 Electron Selection
 - trigger associated criteria
 - pT > 25
-- |eta| < 2.4
+- |eta| < 2.5 (although from scale factors it appears to be < 2.1)
 - d<sub>xy</sub> < 0.045
 - d<sub>z</sub> < 0.2
 - MVA ID without Isolation at WP80
