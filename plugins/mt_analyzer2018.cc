@@ -313,6 +313,7 @@ int main(int argc, char *argv[]) {
 
             // trigger scale factors
             if (muon.getPt() < 25) {
+                if (fabs(tau.getEta()) > 2.1) continue;
                 evtwt *= mu_leg_cross_trg_sf->get_ScaleFactor(muon.getPt(), muon.getEta());
                 evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
             } else {

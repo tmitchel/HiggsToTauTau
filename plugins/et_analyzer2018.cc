@@ -325,6 +325,7 @@ int main(int argc, char* argv[]) {
 
             // trigger scale factors
             if (electron.getPt() < 33) {
+                if (fabs(tau.getEta()) > 2.1) continue;
                 evtwt *= el_leg_cross_trg_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
                 evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
             } else {
