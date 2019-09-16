@@ -44,10 +44,10 @@ class tau {
     // getters
     std::string getName() { return name; }
     TLorentzVector getP4() { return p4; }
-    Float_t getPt() { return pt; }
-    Float_t getEta() { return eta; }
-    Float_t getPhi() { return phi; }
-    Float_t getMass() { return mass; }
+    Float_t getPt() { return p4.Pt(); }
+    Float_t getEta() { return p4.Eta(); }
+    Float_t getPhi() { return p4.Phi(); }
+    Float_t getMass() { return p4.M(); }
     Float_t getIso() { return iso; }
     Float_t getVLooseIsoMVA() { return VLooseIsoMVA; }
     Float_t getLooseIsoMVA() { return LooseIsoMVA; }
