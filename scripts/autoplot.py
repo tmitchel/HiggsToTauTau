@@ -5,7 +5,7 @@ plots = [
     ('D0_ggH', 'D_{CP}^{ggH}', 2.2),
     ('DCP_VBF', 'D_{0-}^{VBF}', 2.2),
     ('DCP_ggH', 'D_{CP}^{ggH}', 2.2),
-    ('MELA_D2j', 'D_{2jet}^{VBF', 2.2),
+    ('MELA_D2j', 'D_{2jet}^{VBF}', 2.2),
     ('NN_disc', 'D_{NN}^{VBF}', 1.6),
     ('m_sv', 'm_{SVFit}', 2.2),
     ('higgs_pT', 'Higgs p_{T}', 1.4),
