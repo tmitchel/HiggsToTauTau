@@ -164,9 +164,9 @@ event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : is
     input->SetBranchAddress("ME_ps_ggH", &ME_ps_ggH);
     input->SetBranchAddress("ME_sm_WH", &ME_sm_WH);
     input->SetBranchAddress("ME_sm_ZH", &ME_sm_ZH);
-    input->SetBranchAddress("ME_bkg_name", &ME_bkg);
-    input->SetBranchAddress("ME_bkg1_name", &ME_bkg1);
-    input->SetBranchAddress("ME_bkg2_name", &ME_bkg2);
+    input->SetBranchAddress("ME_bkg", &ME_bkg);
+    input->SetBranchAddress("ME_bkg1", &ME_bkg1);
+    input->SetBranchAddress("ME_bkg2", &ME_bkg2);
     input->SetBranchAddress("evt", &evt);
     input->SetBranchAddress("run", &run);
     input->SetBranchAddress("lumi", &lumi);
