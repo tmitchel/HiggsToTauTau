@@ -442,8 +442,8 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     auto met_x = fmet->getMet() * cos(fmet->getMetPhi());
     auto met_y = fmet->getMet() * sin(fmet->getMetPhi());
     auto met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-    MT_lepMET = sqrt(pow(el->getPt() + met_pt, 2) - pow(el->getPx() + met_x, 2) - pow(el->getPy() + met_y, 2));
-    MT_t2MET = sqrt(pow(t->getPt() + met_pt, 2) - pow(t->getPx() + met_x, 2) - pow(t->getPy() + met_y, 2));
+    MT_lepMET = sqrt(pow(el->getPt() + met_pt, 2) - pow(el->getP4().Px() + met_x, 2) - pow(el->getP4().Py() + met_y, 2));
+    MT_t2MET = sqrt(pow(t->getPt() + met_pt, 2) - pow(t->getP4().Px() + met_x, 2) - pow(t->getP4().Py() + met_y, 2));
     lt_dphi = TMath::ACos(TMath::Cos(el->getPhi() - t->getPhi()));
 
     otree->Fill();
@@ -481,8 +481,8 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     auto met_x = fmet->getMet() * cos(fmet->getMetPhi());
     auto met_y = fmet->getMet() * sin(fmet->getMetPhi());
     auto met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-    MT_lepMET = sqrt(pow(mu->getPt() + met_pt, 2) - pow(mu->getPx() + met_x, 2) - pow(mu->getPy() + met_y, 2));
-    MT_t2MET = sqrt(pow(t->getPt() + met_pt, 2) - pow(t->getPx() + met_x, 2) - pow(t->getPy() + met_y, 2));
+    MT_lepMET = sqrt(pow(mu->getPt() + met_pt, 2) - pow(mu->getP4().Px() + met_x, 2) - pow(mu->getP4().Py() + met_y, 2));
+    MT_t2MET = sqrt(pow(t->getPt() + met_pt, 2) - pow(t->getP4().Px() + met_x, 2) - pow(t->getP4().Py() + met_y, 2));
     lt_dphi = TMath::ACos(TMath::Cos(mu->getPhi() - t->getPhi()));
 
     otree->Fill();
