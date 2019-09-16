@@ -233,7 +233,7 @@ int main(int argc, char *argv[]) {
         histos->at("cutflow")->Fill(1., 1.);
 
         auto electron = electrons.run_factory();
-        auto tau = taus.run_factory();
+        auto tau = taus.run_factory(syst);
         jets.run_factory();
 
         if (fabs(electron.getEta()) < 2.1) {
@@ -268,7 +268,7 @@ int main(int argc, char *argv[]) {
         double met_x = met.getMet() * cos(met.getMetPhi());
         double met_y = met.getMet() * sin(met.getMetPhi());
         double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-        double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getPx() + met_x, 2) - pow(electron.getPy() + met_y, 2));
+        double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getP4().Px() + met_x, 2) - pow(electron.getP4().Py() + met_y, 2));
 
         // now do mt selection
         if (mt < 50) {

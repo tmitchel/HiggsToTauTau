@@ -50,31 +50,29 @@ def getSyst2016(name):
 
     if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
         systs += ['tau_id_Up', 'tau_id_Down'] # names will probably be updated
+        systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
 
     if name == 'ZL' or name == 'W':
         systs += ['efaket_Up', 'efaket_Down', 'mfaket_Up', 'mfaket_Down']
+        systs += ['ltau_FES_DM0_Up', 'ltau_FES_DM0_Down', 'ltau_FES_DM1_Up', 'ltau_FES_DM1_Down']
 
+    if name != 'embed' and name != 'data_obs':
+        systs += ['UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down']
+        systs += [
+            'JetRelativeSampleUp', 'JetRelativeSampleDown',
+            'JetRelativeBalUp', 'JetRelativeBalDown',
+            'JetEta0to3Up', 'JetEta0to3Down', 'JetEta0to5Up', 'JetEta0to5Down',
+            'JetEta3to5Up', 'JetEta3to5Down', 'JetEC2Up', 'JetEC2Down'
+        ]
 
-    # if name != 'embed' and name != 'data_obs':
-    #     systs += [
-    #         'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down',
-    #         'JetTotalUp', 'JetTotalDown'
-    #     ]
+    if name == 'TTT' or name == 'TTJ':
+        systs += ['ttbarShape_Up', 'ttbarShape_Down']
 
-    # if name == 'TTT' or name == 'TTJ':
-    #     systs += ['ttbarShape_Up', 'ttbarShape_Down']
+    if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
+        systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
 
-    # if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
-    #     systs += [
-    #         'tau_id_Up', 'tau_id_Down', 'DM0_Up', 'DM0_Down',
-    #         'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down'
-    #     ]
-
-    # if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
-    #     systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
-
-    # if name == 'ZJ' or name == 'ZL':
-    #     systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
+    if name == 'ZJ' or name == 'ZL' or name == 'ZTT':
+        systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
 
     return systs
 

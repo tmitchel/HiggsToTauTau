@@ -127,71 +127,46 @@ class event_info {
 
 // read data from trees into member variables
 event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : isEmbed(false) {
-    std::string m_sv_name("m_sv"), pt_sv_name("pt_sv"), Dbkg_VBF_name("Dbkg_VBF"), Dbkg_ggH_name("Dbkg_ggH"), Dbkg_ZH_name("Dbkg_ZH"),
-        Dbkg_WH_name("Dbkg_WH"), D_PS_VBF_name("D_PS_VBF"), D_CP_VBF_name("D_CP_VBF"), D_PS_ggH_name("D_PS_ggH"), D_CP_ggH_name("D_CP_ggH"),
-        Phi_name("Phi"), Phi1_name("Phi1"), costheta1_name("costheta1"), costheta2_name("costheta2"), costhetastar_name("costhetastar"),
-        Q2V1_name("Q2V1"), Q2V2_name("Q2V2"), ME_sm_VBF_name("ME_sm_VBF"), ME_sm_ggH_name("ME_sm_ggH"), ME_sm_WH_name("ME_sm_WH"),
-        ME_sm_ZH_name("ME_sm_ZH"), ME_ps_VBF_name("ME_ps_VBF"), ME_ps_ggH_name("ME_ps_ggH"), ME_bkg1_name("ME_bkg1"), ME_bkg2_name("ME_bkg2"),
-        ME_bkg_name("ME_bkg"), ME_sm_ggH_qqInit_name("ME_sm_ggH_qqInit"), ME_ps_ggH_qqInit_name("ME_ps_ggH_qqInit");
-    if (syst.find("UncMet") != std::string::npos || syst.find("ClusteredMet") != std::string::npos || syst.find("DM") != std::string::npos ||
-        syst == "Up" || syst == "Down") {
+    std::string m_sv_name("m_sv"), pt_sv_name("pt_sv");
+    if (syst.find("DM0") != std::string::npos || syst.find("DM1") != std::string::npos) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-        // need to update MELA code to get these branches
-        // Dbkg_VBF_name += "_" + syst;
-        // Dbkg_ggH_name += "_" + syst;
-        // Dbkg_ZH_name += "_" + syst;
-        // Dbkg_WH_name += "_" + syst;
-        // D_PS_VBF_name += "_" + syst;
-        // D_CP_VBF_name += "_" + syst;
-        // D_PS_ggH_name += "_" + syst;
-        // D_CP_ggH_name += "_" + syst;
-        // Phi_name += "_" + syst;
-        // Phi1_name += "_" + syst;
-        // costheta1_name += "_" + syst;
-        // costheta2_name += "_" + syst;
-        // costhetastar_name += "_" + syst;
-        // Q2V1_name += "_" + syst;
-        // Q2V2_name += "_" + syst;
-        // ME_sm_VBF_name += "_" + syst;
-        // ME_sm_ggH_name += "_" + syst;
-        // ME_sm_WH_name += "_" + syst;
-        // ME_sm_ZH_name += "_" + syst;
-        // ME_ps_VBF_name += "_" + syst;
-        // ME_ps_ggH_name += "_" + syst;
-        // ME_bkg1_name += "_" + syst;
-        // ME_bkg2_name += "_" + syst;
-        // ME_bkg_name += "_" + syst;
+    } else if (syst.find("UncMet") != std::string::npos || syst.find("ClusteredMet") != std::string::npos) {
+        m_sv_name += "_" + syst;
+        pt_sv_name += "_" + syst;
+    } else if (syst.find("Jet") != std::string::npos) {
+        m_sv_name += "_" + syst;
+        pt_sv_name += "_" + syst;
     }
 
     input->SetBranchAddress(m_sv_name.c_str(), &m_sv);
     input->SetBranchAddress(pt_sv_name.c_str(), &pt_sv);
-    input->SetBranchAddress(Dbkg_VBF_name.c_str(), &Dbkg_VBF);
-    input->SetBranchAddress(Dbkg_ggH_name.c_str(), &Dbkg_ggH);
-    input->SetBranchAddress(Dbkg_ZH_name.c_str(), &Dbkg_ZH);
-    input->SetBranchAddress(Dbkg_WH_name.c_str(), &Dbkg_WH);
-    input->SetBranchAddress(D_PS_VBF_name.c_str(), &D0_VBF);
-    input->SetBranchAddress(D_CP_VBF_name.c_str(), &DCP_VBF);
-    input->SetBranchAddress(D_PS_ggH_name.c_str(), &D0_ggH);
-    input->SetBranchAddress(D_CP_ggH_name.c_str(), &DCP_ggH);
-    input->SetBranchAddress(Phi_name.c_str(), &Phi);
-    input->SetBranchAddress(Phi1_name.c_str(), &Phi1);
-    input->SetBranchAddress(costheta1_name.c_str(), &costheta1);
-    input->SetBranchAddress(costheta2_name.c_str(), &costheta2);
-    input->SetBranchAddress(costhetastar_name.c_str(), &costhetastar);
-    input->SetBranchAddress(Q2V1_name.c_str(), &Q2V1);
-    input->SetBranchAddress(Q2V2_name.c_str(), &Q2V2);
-    input->SetBranchAddress(ME_sm_ggH_qqInit_name.c_str(), &ME_sm_ggH_qqInit);
-    input->SetBranchAddress(ME_ps_ggH_qqInit_name.c_str(), &ME_ps_ggH_qqInit);
-    input->SetBranchAddress(ME_sm_VBF_name.c_str(), &ME_sm_VBF);
-    input->SetBranchAddress(ME_sm_ggH_name.c_str(), &ME_sm_ggH);
-    input->SetBranchAddress(ME_ps_VBF_name.c_str(), &ME_ps_VBF);
-    input->SetBranchAddress(ME_ps_ggH_name.c_str(), &ME_ps_ggH);
-    input->SetBranchAddress(ME_sm_WH_name.c_str(), &ME_sm_WH);
-    input->SetBranchAddress(ME_sm_ZH_name.c_str(), &ME_sm_ZH);
-    input->SetBranchAddress(ME_bkg_name.c_str(), &ME_bkg);
-    input->SetBranchAddress(ME_bkg1_name.c_str(), &ME_bkg1);
-    input->SetBranchAddress(ME_bkg2_name.c_str(), &ME_bkg2);
+    input->SetBranchAddress("Dbkg_VBF", &Dbkg_VBF);
+    input->SetBranchAddress("Dbkg_ggH", &Dbkg_ggH);
+    input->SetBranchAddress("Dbkg_ZH", &Dbkg_ZH);
+    input->SetBranchAddress("Dbkg_WH", &Dbkg_WH);
+    input->SetBranchAddress("D_PS_VBF", &D0_VBF);
+    input->SetBranchAddress("D_CP_VBF", &DCP_VBF);
+    input->SetBranchAddress("D_PS_ggH", &D0_ggH);
+    input->SetBranchAddress("D_CP_ggH", &DCP_ggH);
+    input->SetBranchAddress("Phi", &Phi);
+    input->SetBranchAddress("Phi1", &Phi1);
+    input->SetBranchAddress("costheta1", &costheta1);
+    input->SetBranchAddress("costheta2", &costheta2);
+    input->SetBranchAddress("costhetastar", &costhetastar);
+    input->SetBranchAddress("Q2V1", &Q2V1);
+    input->SetBranchAddress("Q2V2", &Q2V2);
+    input->SetBranchAddress("ME_sm_ggH_qqInit", &ME_sm_ggH_qqInit);
+    input->SetBranchAddress("ME_ps_ggH_qqInit", &ME_ps_ggH_qqInit);
+    input->SetBranchAddress("ME_sm_VBF", &ME_sm_VBF);
+    input->SetBranchAddress("ME_sm_ggH", &ME_sm_ggH);
+    input->SetBranchAddress("ME_ps_VBF", &ME_ps_VBF);
+    input->SetBranchAddress("ME_ps_ggH", &ME_ps_ggH);
+    input->SetBranchAddress("ME_sm_WH", &ME_sm_WH);
+    input->SetBranchAddress("ME_sm_ZH", &ME_sm_ZH);
+    input->SetBranchAddress("ME_bkg_name", &ME_bkg);
+    input->SetBranchAddress("ME_bkg1_name", &ME_bkg1);
+    input->SetBranchAddress("ME_bkg2_name", &ME_bkg2);
     input->SetBranchAddress("evt", &evt);
     input->SetBranchAddress("run", &run);
     input->SetBranchAddress("lumi", &lumi);
