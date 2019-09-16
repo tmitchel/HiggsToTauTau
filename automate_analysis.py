@@ -48,24 +48,33 @@ fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile]
 def getSyst2016(name):
     systs = ['']
 
-    if name != 'embed' and name != 'data_obs':
-        systs += [
-            'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down',
-            'JetTotalUp', 'JetTotalDown'
-        ]
-
-    if name == 'TTT' or name == 'TTJ':
-        systs += ['ttbarShape_Up', 'ttbarShape_Down']
-
     if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
-        #    systs += ['Up', 'Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
-        systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
+        systs += ['tau_id_Up', 'tau_id_Down'] # names will probably be updated
 
-    if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
-        systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
+    if name == 'ZL' or name == 'W':
+        systs += ['efaket_Up', 'efaket_Down', 'mfaket_Up', 'mfaket_Down']
 
-    if name == 'ZJ' or name == 'ZL':
-        systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
+
+    # if name != 'embed' and name != 'data_obs':
+    #     systs += [
+    #         'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down',
+    #         'JetTotalUp', 'JetTotalDown'
+    #     ]
+
+    # if name == 'TTT' or name == 'TTJ':
+    #     systs += ['ttbarShape_Up', 'ttbarShape_Down']
+
+    # if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
+    #     systs += [
+    #         'tau_id_Up', 'tau_id_Down', 'DM0_Up', 'DM0_Down',
+    #         'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down'
+    #     ]
+
+    # if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
+    #     systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
+
+    # if name == 'ZJ' or name == 'ZL':
+    #     systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
 
     return systs
 
@@ -90,6 +99,7 @@ def getSyst2017(name):
         systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
 
     return systs
+
 
 def run_process(proc):
     print proc
@@ -170,12 +180,12 @@ for ifile in fileList:
 pprint(processes)
 if options.parallel:
         # Use 5 cores if the machine has more than 10 total cores.
-      # Otherwise, use half the available cores.
-      n_processes = min(8, multiprocessing.cpu_count() / 2)
- 
-      pool = multiprocessing.Pool(processes=n_processes)
-      r = pool.map_async(run_process, processes)
-      r.wait()
+    # Otherwise, use half the available cores.
+    n_processes = min(8, multiprocessing.cpu_count() / 2)
+
+    pool = multiprocessing.Pool(processes=n_processes)
+    r = pool.map_async(run_process, processes)
+    r.wait()
 else:
     [run_process(proc) for proc in processes]
 

@@ -247,9 +247,7 @@ int main(int argc, char *argv[]) {
             continue;
         } else if ((name == "ZTT" || name == "TTT" || name == "VVT") && tau.getGenMatch() != 5) {
             continue;
-        } else if ((name == "ZLL" || name == "TTJ" || name == "VVJ") && tau.getGenMatch() == 5) {
-            continue;
-        } else if (name == "ZJ" && tau.getGenMatch() != 6) {
+        } else if (name == "ZJ" || name == "TTJ" || name == "VVJ" && tau.getGenMatch() != 6) {
             continue;
         } else {
             histos->at("cutflow")->Fill(3., 1.);
@@ -281,9 +279,13 @@ int main(int argc, char *argv[]) {
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
-            // tau ID efficiency SF
+            // tau ID efficiency SF and systematics
             if (tau.getGenMatch() == 5) {
-                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt());
+                std::string shift = "";  // nominal
+                if (syst.find("tau_id_") != std::string::npos) {
+                    shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
+                }
+                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), shift);
             }
 
             // anti-lepton discriminator SFs
@@ -307,6 +309,12 @@ int main(int argc, char *argv[]) {
                 }
             }
 
+            // electron mis-id systematics
+            if (syst.find("efaket_") != std::string::npos && (tau.getGenMatch() == 1 || tau.getGenMatch() == 3)) {
+                auto shift = syst.find("Up") != std::string::npos ? 1.15 : 0.85;
+                evtwt *= shift;
+            }
+
             // electron ID SF
             evtwt *= ele_id_sf->get_ScaleFactor(electron.getPt(), electron.getEta());
 
@@ -318,6 +326,11 @@ int main(int argc, char *argv[]) {
             htt_sf->var("e_eta")->setVal(electron.getEta());
             evtwt *= htt_sf->function("e_trk_ratio")->getVal();
 
+            // electron reco, eff, tracking systematic
+            if (syst.find("el_combo_") != std::string::npos) {
+                auto shift = syst.find("Up") != std::string::npos ? 1.01 : 0.99;
+                evtwt *= shift;
+            }
 
             // b-tagging scale factor goes here
             // evtwt *= btagsf;
