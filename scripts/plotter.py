@@ -30,7 +30,7 @@ style_map = {
 
         "vbf125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
         "JHU__reweighted_qqH_htt_0PM125": style_map_tuple(no_color, GetColor("#FF0000"), 1, 3, 1),
-        "JHU__reweighted_qqH_htt_0M125": style_map_tuple(no_color, GetColor("#FFAA00"), 1, 3, 1),
+        "JHU__reweighted_qqH_htt_0M125": style_map_tuple(no_color, GetColor("#ff5e00"), 1, 3, 1),
     }
 }
 
@@ -84,6 +84,8 @@ def formatStack(stack):
     stack.GetYaxis().SetTitleSize(.05)
     stack.GetYaxis().SetTitleOffset(1.2)
     stack.SetTitle('')
+    stack.GetXaxis().SetNdivisions(505)
+
 
 def fillLegend(data, backgrounds, signals, stat):
     leg = ROOT.TLegend(0.5, 0.45, 0.85, 0.85)
@@ -116,8 +118,8 @@ def fillLegend(data, backgrounds, signals, stat):
 
 def formatPull(pull, title):
     pull.SetTitle('')
-    pull.SetMaximum(1.5)
-    pull.SetMinimum(0.5)
+    pull.SetMaximum(2.)
+    pull.SetMinimum(0.)
     pull.GetXaxis().SetTitle(title)
     pull.SetMarkerStyle(21)
     pull.GetXaxis().SetTitleSize(0.18)
@@ -129,7 +131,7 @@ def formatPull(pull, title):
     # pull.GetXaxis().SetLabelSize(0)
     # pull.GetXaxis().SetTitleSize(0)
 
-    pull.GetYaxis().SetTitle('Data / MC')
+    pull.GetYaxis().SetTitle('Obs. / Exp.')
     pull.GetYaxis().SetTitleSize(0.12)
     pull.GetYaxis().SetTitleFont(42)
     pull.GetYaxis().SetTitleOffset(.475)
@@ -143,13 +145,13 @@ def sigmaLines(data):
         data.GetBinWidth(data.GetNbinsX())
 
     ## high line
-    line1 = ROOT.TLine(low, 1.2, high, 1.2)
+    line1 = ROOT.TLine(low, 1.5, high, 1.5)
     line1.SetLineWidth(1)
     line1.SetLineStyle(3)
     line1.SetLineColor(ROOT.kBlack)
 
     ## low line
-    line2 = ROOT.TLine(low, 0.8, high, 0.8)
+    line2 = ROOT.TLine(low, 0.5, high, 0.5)
     line2.SetLineWidth(1)
     line2.SetLineStyle(3)
     line2.SetLineColor(ROOT.kBlack)
@@ -160,17 +162,19 @@ def blindData(data, signal, background):
     for ibin in range(data.GetNbinsX()+1):
         sig = signal.GetBinContent(ibin)
         bkg = background.GetBinContent(ibin)
-        if bkg > 0 and sig / TMath.Sqrt(bkg + pow(0.09*bkg, 2)) > 0.5:
-            data.SetBinContent(ibin, 0)
+        if bkg > 0 and sig / ROOT.TMath.Sqrt(bkg + pow(0.09*bkg, 2)) >= 0.3:
+            err = data.GetBinError(ibin)
+            data.SetBinContent(ibin, -1)
+            data.SetBinError(ibin, err)
 
-    if args.var == 'NN_disc':
-        middleBin = data.FindBin(0.5)
-        for ibin in range(middleBin, data.GetNbinsX()+1):
-            data.SetBinContent(ibin, 0)
+    # if args.var == 'NN_disc':
+    #     middleBin = data.FindBin(0.5)
+    #     for ibin in range(middleBin, data.GetNbinsX()+1):
+    #         data.SetBinContent(ibin, 0)
 
     return data
 
-def main(args):
+def BuildPlot(args):
     ifile = ROOT.TFile(args.input)
     category = ifile.Get(args.category)
     variable = category.Get(args.variable)
@@ -209,6 +213,11 @@ def main(args):
     stack.Draw('hist')
     formatStack(stack)
 
+    combo_signal = signals['JHU__GGH2Jets_pseudoscalar_M125'].Clone()
+    combo_signal.Add(signals['ggh125_powheg'])
+    combo_signal.Add(signals['vbf125_powheg'])
+    data_hist = blindData(data_hist, combo_signal, stat)
+
     # draw the plots
     data_hist.Draw('same lep')
     stat.Draw('same e2')
@@ -236,8 +245,10 @@ def main(args):
         lumi = "35.9 fb^{-1}"
     elif args.year == '2017':
         lumi = "41.5 fb^{-1}"
+    elif args.year == '2018':
+        lumi = "59.7 fb^{-1}"
 
-    ll.DrawLatex(0.42, 0.92, "{} {}, {} (13 TeV)".format(lepLabel, args.year, lumi))
+    ll.DrawLatex(0.42, 0.94, "{} {}, {} (13 TeV)".format(lepLabel, args.year, lumi))
 
     cms = ROOT.TLatex()
     cms.SetNDC(ROOT.kTRUE)
@@ -258,7 +269,7 @@ def main(args):
     elif args.category == 'et_boosted' or args.category == 'mt_boosted':
         catName = 'Boosted'
     elif args.category == 'et_vbf' or args.category == 'mt_vbf':
-        catName = 'VBF enriched'
+        catName = 'VBF Category'
     else:
         catName = ''
 
@@ -277,10 +288,11 @@ def main(args):
     for ibin in range(1, rat_unc.GetNbinsX()+1):
         rat_unc.SetBinContent(ibin, 1)
         rat_unc.SetBinError(ibin, ratio.GetBinError(ibin))
-    rat_unc.SetMarkerSize(0)
-    rat_unc.SetMarkerStyle(8)
+    rat_unc = formatStat(rat_unc)
+    # rat_unc.SetMarkerSize(0)
+    # rat_unc.SetMarkerStyle(8)
 
-    rat_unc.SetFillColor(ROOT.kGray)
+    # rat_unc.SetFillColor(ROOT.kGray)
     rat_unc.Draw('same e2')
     ratio.Draw('same lep')
 
@@ -303,4 +315,4 @@ if __name__ == "__main__":
     parser.add_argument('--label', '-l', required=True, action='store', help='label for plot')
     parser.add_argument('--prefix', '-p', action='store', help='prefix for output name')
     parser.add_argument('--scale', '-s', default=1.2, type=float, action='store', help='scale max by x')
-    main(parser.parse_args())
+    BuildPlot(parser.parse_args())

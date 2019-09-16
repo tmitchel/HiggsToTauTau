@@ -5,6 +5,7 @@
 
 #include <string>
 #include "TTree.h"
+#include "TLorentzVector.h"
 
 class met_factory {
  private:
