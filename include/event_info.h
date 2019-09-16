@@ -128,7 +128,7 @@ class event_info {
 // read data from trees into member variables
 event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : isEmbed(false) {
     std::string m_sv_name("m_sv"), pt_sv_name("pt_sv");
-    if (syst.find("DM0") != std::string::npos || syst.find("DM1") != std::string::npos) {
+    if ((syst.find("DM0") != std::string::npos || syst.find("DM1") != std::string::npos) && syst.find("FES") == std::string::npos) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
     } else if (syst.find("UncMet") != std::string::npos || syst.find("ClusteredMet") != std::string::npos) {
