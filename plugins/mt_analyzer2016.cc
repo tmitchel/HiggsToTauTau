@@ -181,8 +181,8 @@ int main(int argc, char *argv[]) {
 
     // construct factories
     event_info event(ntuple, lepton::MUON, 2016, syst);
-    muon_factory muons(ntuple, 2016);
-    tau_factory taus(ntuple, 2016);
+    muon_factory muons(ntuple, 2016, syst);
+    tau_factory taus(ntuple, 2016, syst);
     jet_factory jets(ntuple, 2016, syst);
     met_factory met(ntuple, 2016, syst);
 
@@ -276,7 +276,7 @@ int main(int argc, char *argv[]) {
         double met_x = met.getMet() * cos(met.getMetPhi());
         double met_y = met.getMet() * sin(met.getMetPhi());
         double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-        double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getPx() + met_x, 2) - pow(muon.getPy() + met_y, 2));
+        double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getP4().Px() + met_x, 2) - pow(muon.getP4().Py() + met_y, 2));
 
         // now do mt selection
         if (mt < 50) {

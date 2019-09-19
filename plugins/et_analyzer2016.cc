@@ -183,8 +183,8 @@ int main(int argc, char *argv[]) {
 
     // construct factories
     event_info event(ntuple, lepton::ELECTRON, 2016, syst);
-    electron_factory electrons(ntuple, 2016);
-    tau_factory taus(ntuple, 2016);
+    electron_factory electrons(ntuple, 2016, syst);
+    tau_factory taus(ntuple, 2016, syst);
     jet_factory jets(ntuple, 2016, syst);
     met_factory met(ntuple, 2016, syst);
 
@@ -233,7 +233,7 @@ int main(int argc, char *argv[]) {
         histos->at("cutflow")->Fill(1., 1.);
 
         auto electron = electrons.run_factory();
-        auto tau = taus.run_factory(syst);
+        auto tau = taus.run_factory();
         jets.run_factory();
 
         if (fabs(electron.getEta()) < 2.1) {
