@@ -94,7 +94,7 @@ class tau_factory {
 };
 
 // read data from tree Int_to member variables
-tau_factory::tau_factory(TTree* input, int _era = 2017, std::string _syst) : era(_era), syst(_syst) {
+tau_factory::tau_factory(TTree* input, int _era, std::string _syst) : era(_era), syst(_syst) {
     input->SetBranchAddress("pt_2", &pt_2);
     input->SetBranchAddress("eta_2", &eta_2);
     input->SetBranchAddress("phi_2", &phi_2);
