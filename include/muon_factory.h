@@ -29,13 +29,10 @@ class muon {
     // getters
     std::string getName() { return name; }
     TLorentzVector getP4() { return p4; }
-    Float_t getPt() { return pt; }
-    Float_t getEta() { return eta; }
-    Float_t getPhi() { return phi; }
-    Float_t getMass() { return mass; }
-    Float_t getPx() { return px; }
-    Float_t getPy() { return py; }
-    Float_t getPz() { return pz; }
+    Float_t getPt() { return p4.Pt(); }
+    Float_t getEta() { return p4.Eta(); }
+    Float_t getPhi() { return p4.Phi(); }
+    Float_t getMass() { return p4.M(); }
     Float_t getIso() { return iso; }
     Float_t getGenMatch() { return gen_match; }
     Float_t getGenPt() { return gen_pt; }
@@ -58,18 +55,19 @@ muon::muon(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge)
 /////////////////////////////////////////////
 class muon_factory {
  private:
+    std::string syst;
     Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, mediumID, mGenPt, mGenEta, mGenPhi,
         mGenEnergy;
     Int_t gen_match_1;
 
  public:
-    muon_factory(TTree*, int);
+    muon_factory(TTree*, int, std::string);
     virtual ~muon_factory() {}
     muon run_factory();
 };
 
 // read data from tree into member variabl
-muon_factory::muon_factory(TTree* input, int era) {
+muon_factory::muon_factory(TTree* input, int era, std::string _syst) : syst(_syst) {
     input->SetBranchAddress("px_1", &px_1);
     input->SetBranchAddress("py_1", &py_1);
     input->SetBranchAddress("pz_1", &pz_1);
@@ -99,6 +97,25 @@ muon muon_factory::run_factory() {
     mu.gen_eta = mGenEta;
     mu.gen_phi = mGenPhi;
     mu.gen_energy = mGenEnergy;
+
+    // muon energy scale systematics
+    if (syst.find("MES") != std::string::npos) {
+        int dir(1);
+        if (syst == "MES_Down") {
+            dir = -1;
+        }
+        if (mu.getEta() < -2.1) {
+            mu.p4 *= dir * 1.027;
+        } else if (mu.getEta() < -1.2) {
+            mu.p4 *= dir * 1.009;
+        } else if (mu.getEta() < 1.2) {
+            mu.p4 *= dir * 1.004;
+        } else if (mu.getEta() < 2.1) {
+            mu.p4 *= dir * 1.009;
+        } else {
+            mu.p4 *= dir * 1.017;
+        }
+    }
 
     return mu;
 }

@@ -137,6 +137,9 @@ event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : is
     } else if (syst.find("Jet") != std::string::npos) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
+    } else if (syst.find("EES") != std::string::npos || syst.find("MES") != std::string::npos) {
+        m_sv_name += "_" + syst;
+        pt_sv_name += "_" + syst;
     }
 
     input->SetBranchAddress(m_sv_name.c_str(), &m_sv);
