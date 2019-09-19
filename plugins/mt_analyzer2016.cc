@@ -287,28 +287,40 @@ int main(int argc, char *argv[]) {
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
-            // tau ID efficiency SF
+            // tau ID efficiency SF and systematics
             if (tau.getGenMatch() == 5) {
-                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt());
-            }
+                std::string shift = "";  // nominal
+                if (syst.find("tau_id_") != std::string::npos) {
+                    shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
+                }
+                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), shift);
+                }
 
             // anti-lepton discriminator SFs
             if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
-                if (fabs(tau.getEta()) < 1.460)
+                if (fabs(tau.getEta()) < 1.460)  {
                     evtwt *= 1.21;
-                else if (fabs(tau.getEta()) > 1.558)
+                } else if (fabs(tau.getEta()) > 1.558) {
                     evtwt *= 1.38;
+                }
             } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
-                if (fabs(tau.getEta()) < 0.4)
+                if (fabs(tau.getEta()) < 0.4) {
                     evtwt *= 1.47;
-                else if (fabs(tau.getEta()) < 0.8)
+                } else if (fabs(tau.getEta()) < 0.8) {
                     evtwt *= 1.55;
-                else if (fabs(tau.getEta()) < 1.2)
+                } else if (fabs(tau.getEta()) < 1.2) {
                     evtwt *= 1.33;
-                else if (fabs(tau.getEta()) < 1.7)
+                } else if (fabs(tau.getEta()) < 1.7) {
                     evtwt *= 1.72;
-                else
+                } else {
                     evtwt *= 2.50;
+                }
+            }
+
+            // muom mis-id systematics
+            if (syst.find("mfaket_") != std::string::npos && (tau.getGenMatch() == 2 || tau.getGenMatch() == 4)) {
+                auto shift = syst.find("Up") != std::string::npos ? 1.20 : 0.80;
+                evtwt *= shift;
             }
 
             // muon ID SF
@@ -320,6 +332,12 @@ int main(int argc, char *argv[]) {
                 // evtwt *= tau_leg_cross_trg_sf->getityo();
             } else {
                 evtwt *= mu22_trg_sf->get_ScaleFactor(muon.getPt(), muon.getEta());
+            }
+
+            // muon reco, eff, tracking systematic
+            if (syst.find("mu_combo_") != std::string::npos) {
+                auto shift = syst.find("Up") != std::string::npos ? 1.01 : 0.99;
+                evtwt *= shift;
             }
 
             // b-tagging scale factor goes here
