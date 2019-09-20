@@ -18,7 +18,7 @@
 #include "TTree.h"
 
 // user includes
-#include "include/ComputeWG1Unc.h"
+#include "../include/ComputeWG1Unc.h"
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
 #include "../include/EmbedWeight.h"
