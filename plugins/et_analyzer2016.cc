@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
         auto tau = taus.run_factory(syst);
         jets.run_factory();
 
-        if (fabs(electron.getEta()) < 2.1) {
+        if (electron.getPt() > 26 && fabs(electron.getEta()) < 2.1) {
             histos->at("cutflow")->Fill(2., 1.);
         } else {
             continue;
