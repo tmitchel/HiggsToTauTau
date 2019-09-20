@@ -3,7 +3,9 @@
 #ifndef INCLUDE_EVENT_INFO_H_
 #define INCLUDE_EVENT_INFO_H_
 
+#include <unordered_map>
 #include <string>
+#include <vector>
 #include "./swiss_army_class.h"
 
 /////////////////////////////////////////
@@ -14,7 +16,7 @@ class event_info {
     ULong64_t evt;
     UInt_t run, lumi, convert_evt;
     Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR;  // gen
-    Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt;              // event
+    Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;              // event
 
     // triggers (passing, matching, filtering)
     Float_t PassEle24HPSTau30, PassEle24Tau30, PassEle25, PassEle27, PassEle32, PassEle35, PassIsoMu19Tau20, PassIsoMu19Tau20SingleL1,
@@ -48,6 +50,7 @@ class event_info {
         ME_sm_ggH_qqInit, ME_ps_ggH_qqInit;
 
     bool isEmbed;
+    std::unordered_map<std::string, int> unc_map;
 
  public:
     event_info(TTree*, lepton, int, std::string);
@@ -123,10 +126,21 @@ class event_info {
     // ggH NNLOPS Info
     Float_t getNjetsRivet() { return Rivet_nJets30; }
     Float_t getHiggsPtRivet() { return Rivet_higgsPt; }
+    Float_t getJetPtRivet() { return Rivet_stage1_cat_pTjet30GeV; }
+    Float_t getRivetUnc(std::vector<double>, std::string);
 };
 
 // read data from trees into member variables
-event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : isEmbed(false) {
+event_info::event_info(TTree* input, lepton lep, int era, std::string syst) :
+    isEmbed(false),
+    unc_map{
+        {"Rivet0_Up", 0}, {"Rivet0_Down", 0}, {"Rivet1_Up", 1}, {"Rivet1_Down", 1},
+        {"Rivet2_Up", 2}, {"Rivet2_Down", 2}, {"Rivet3_Up", 3}, {"Rivet3_Down", 3},
+        {"Rivet4_Up", 4}, {"Rivet4_Down", 4}, {"Rivet5_Up", 5}, {"Rivet5_Down", 5},
+        {"Rivet6_Up", 6}, {"Rivet6_Down", 6}, {"Rivet7_Up", 7}, {"Rivet7_Down", 7},
+        {"Rivet8_Up", 8}, {"Rivet8_Down", 8}
+    }
+     {
     std::string m_sv_name("m_sv"), pt_sv_name("pt_sv");
     if ((syst.find("DM0") != std::string::npos || syst.find("DM1") != std::string::npos) && syst.find("FES") == std::string::npos) {
         m_sv_name += "_" + syst;
@@ -274,6 +288,18 @@ event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : is
 void event_info::setRivets(TTree* input) {
     input->SetBranchAddress("Rivet_nJets30", &Rivet_nJets30);
     input->SetBranchAddress("Rivet_higgsPt", &Rivet_higgsPt);
+    input->SetBranchAddress("Rivet_stage1_cat_pTjet30GeV", &Rivet_stage1_cat_pTjet30GeV);
+}
+
+Float_t event_info::getRivetUnc(std::vector<double> uncs, std::string syst) {
+    if (syst.find("Rivet") != std::string::npos) {
+        int index = unc_map[syst];
+        if (syst.find("Up") != std::string::npos) {
+            return uncs.at(index);
+        } else {
+            return -1 * uncs.at(index);
+        }
+    }
 }
 
 Bool_t event_info::getPassFlags(bool is_data) {

@@ -19,6 +19,7 @@
 #include "TTree.h"
 
 // user includes
+#include "../include/ComputeWG1Unc.h"
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
 #include "../include/EmbedWeight.h"
@@ -344,8 +345,9 @@ int main(int argc, char *argv[]) {
                 if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
                 if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
                 if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
+                NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
+                evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
             }
-            // NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
 
             // Z-pT and Zmm Reweighting
             if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {

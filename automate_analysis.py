@@ -83,6 +83,14 @@ def getSyst2016(name, exe):
     elif name != 'data_obs' and '_mt' in args.exe:
         systs += ['MES_Up', 'MES_Down', 'mu_combo_Up', 'mu_combo_Down']
 
+    if name == 'ggH125':
+        systs += [
+            'Rivet0_Up', 'Rivet0_Down', 'Rivet1_Up', 'Rivet1_Down', 'Rivet2_Up', 'Rivet2_Down', 
+            'Rivet3_Up', 'Rivet3_Down', 'Rivet4_Up', 'Rivet4_Down', 'Rivet5_Up', 'Rivet5_Down', 
+            'Rivet6_Up', 'Rivet6_Down', 'Rivet7_Up', 'Rivet7_Down', 'Rivet8_Up', 'Rivet8_Down', 
+            'Rivet9_Up', 'Rivet9_Down', 
+        ]
+
     return systs
 
 
