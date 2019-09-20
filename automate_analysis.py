@@ -45,7 +45,7 @@ start = time.time()
 fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile]
 
 
-def getSyst2016(name):
+def getSyst2016(name, exe):
     systs = ['']
 
     if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
@@ -53,7 +53,11 @@ def getSyst2016(name):
         systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
 
     if name == 'ZL' or name == 'W':
-        systs += ['efaket_Up', 'efaket_Down', 'mfaket_Up', 'mfaket_Down']
+        if '_et' in args.exe:
+            systs += ['efaket_Up', 'efaket_Down']
+        elif '_mt' in args.exe:
+            systs += ['mfaket_Up', 'mfaket_Down']
+            
         systs += ['ltau_FES_DM0_Up', 'ltau_FES_DM0_Down', 'ltau_FES_DM1_Up', 'ltau_FES_DM1_Down']
 
     if name != 'embed' and name != 'data_obs':
@@ -73,6 +77,19 @@ def getSyst2016(name):
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT':
         systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
+
+    if name != 'data_obs' and '_et' in args.exe:
+        systs += ['EEScale_Up', 'EEScale_Down', 'EESigma_Up', 'EESigma_Down', 'el_combo_Up', 'el_combo_Down']
+    elif name != 'data_obs' and '_mt' in args.exe:
+        systs += ['MES_Up', 'MES_Down', 'mu_combo_Up', 'mu_combo_Down']
+
+    if name == 'ggH125':
+        systs += [
+            'Rivet0_Up', 'Rivet0_Down', 'Rivet1_Up', 'Rivet1_Down', 'Rivet2_Up', 'Rivet2_Down', 
+            'Rivet3_Up', 'Rivet3_Down', 'Rivet4_Up', 'Rivet4_Down', 'Rivet5_Up', 'Rivet5_Down', 
+            'Rivet6_Up', 'Rivet6_Down', 'Rivet7_Up', 'Rivet7_Down', 'Rivet8_Up', 'Rivet8_Down', 
+            'Rivet9_Up', 'Rivet9_Down', 
+        ]
 
     return systs
 
@@ -158,16 +175,14 @@ for ifile in fileList:
 
     if get_systs != None and not 'Data' in sample.lower():
         for name in names:
-            for isyst in get_systs(name):
+            for isyst in get_systs(name, args.exe):
                 if isyst == "" and not path.exists('Output/trees/{}/NOMINAL'.format(options.output_dir)):
                     makedirs('Output/trees/{}/NOMINAL'.format(options.output_dir))
                 if isyst != "" and not path.exists('Output/trees/{}/SYST_{}'.format(options.output_dir, isyst)):
                     makedirs('Output/trees/{}/SYST_{}'.format(options.output_dir, isyst))
 
                 tocall = callstring + ' -n %s -u %s' % (name, isyst)
-                # print tocall
                 processes.append(tocall)
-                # call(tocall, shell=True)
     else:
         for name in names:
             if not path.exists('Output/trees/{}/NOMINAL'.format(options.output_dir)):
@@ -177,7 +192,7 @@ for ifile in fileList:
 
 pprint(processes)
 if options.parallel:
-        # Use 5 cores if the machine has more than 10 total cores.
+    # Use 8 cores if the machine has more than 16 total cores.
     # Otherwise, use half the available cores.
     n_processes = min(8, multiprocessing.cpu_count() / 2)
 

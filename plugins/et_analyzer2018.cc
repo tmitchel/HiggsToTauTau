@@ -190,8 +190,8 @@ int main(int argc, char* argv[]) {
 
     // construct factories
     event_info event(ntuple, lepton::ELECTRON, 2018, syst);
-    electron_factory electrons(ntuple, 2018);
-    tau_factory taus(ntuple, 2018);
+    electron_factory electrons(ntuple, 2018, syst);
+    tau_factory taus(ntuple, 2018, syst);
     jet_factory jets(ntuple, 2018, syst);
     met_factory met(ntuple, 2018, syst);
 
@@ -284,7 +284,7 @@ int main(int argc, char* argv[]) {
         double met_x = met.getMet() * cos(met.getMetPhi());
         double met_y = met.getMet() * sin(met.getMetPhi());
         double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-        double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getPx() + met_x, 2) - pow(electron.getPy() + met_y, 2));
+        double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getP4().Px() + met_x, 2) - pow(electron.getP4().Py() + met_y, 2));
 
         // now do mt selection
         if (mt < 50) {

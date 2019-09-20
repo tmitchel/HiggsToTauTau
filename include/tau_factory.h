@@ -80,6 +80,7 @@ tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) : pt(P
 /////////////////////////////////////////////////
 class tau_factory {
  private:
+    std::string syst;
     Int_t gen_match_2, era;
     Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, tZTTGenPt, tZTTGenEta, tZTTGenPhi;
     Float_t againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2, decayMode, dmf, dmf_new;
@@ -87,13 +88,13 @@ class tau_factory {
         byTightIsolationMVArun2v1DBoldDMwLT_2, byVTightIsolationMVArun2v1DBoldDMwLT_2, byVVTightIsolationMVArun2v1DBoldDMwLT_2;
 
  public:
-    tau_factory(TTree*, int);
+    tau_factory(TTree*, int, std::string);
     virtual ~tau_factory() {}
-    tau run_factory(std::string);
+    tau run_factory();
 };
 
 // read data from tree Int_to member variables
-tau_factory::tau_factory(TTree* input, int era = 2017) : era(era) {
+tau_factory::tau_factory(TTree* input, int _era, std::string _syst) : era(_era), syst(_syst) {
     input->SetBranchAddress("pt_2", &pt_2);
     input->SetBranchAddress("eta_2", &eta_2);
     input->SetBranchAddress("phi_2", &phi_2);
@@ -111,7 +112,6 @@ tau_factory::tau_factory(TTree* input, int era = 2017) : era(era) {
     input->SetBranchAddress("tDecayMode", &decayMode);
     input->SetBranchAddress("tDecayModeFinding", &dmf);
     input->SetBranchAddress("tDecayModeFindingNewDMs", &dmf_new);
-
     input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTraw", &iso_2);
     input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVLoose", &byVLooseIsolationMVArun2v1DBoldDMwLT_2);
     input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTLoose", &byLooseIsolationMVArun2v1DBoldDMwLT_2);
@@ -122,7 +122,7 @@ tau_factory::tau_factory(TTree* input, int era = 2017) : era(era) {
 }
 
 // create electron object and set member data
-tau tau_factory::run_factory(std::string syst = "") {
+tau tau_factory::run_factory() {
     tau t(pt_2, eta_2, phi_2, m_2, q_2);
     t.iso = iso_2;
     t.gen_match = gen_match_2;

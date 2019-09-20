@@ -18,6 +18,7 @@
 #include "TTree.h"
 
 // user includes
+#include "include/ComputeWG1Unc.h"
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
 #include "../include/EmbedWeight.h"
@@ -181,8 +182,8 @@ int main(int argc, char *argv[]) {
 
     // construct factories
     event_info event(ntuple, lepton::MUON, 2016, syst);
-    muon_factory muons(ntuple, 2016);
-    tau_factory taus(ntuple, 2016);
+    muon_factory muons(ntuple, 2016, syst);
+    tau_factory taus(ntuple, 2016, syst);
     jet_factory jets(ntuple, 2016, syst);
     met_factory met(ntuple, 2016, syst);
 
@@ -276,7 +277,7 @@ int main(int argc, char *argv[]) {
         double met_x = met.getMet() * cos(met.getMetPhi());
         double met_y = met.getMet() * sin(met.getMetPhi());
         double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-        double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getPx() + met_x, 2) - pow(muon.getPy() + met_y, 2));
+        double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getP4().Px() + met_x, 2) - pow(muon.getP4().Py() + met_y, 2));
 
         // now do mt selection
         if (mt < 50) {
@@ -287,28 +288,40 @@ int main(int argc, char *argv[]) {
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
-            // tau ID efficiency SF
+            // tau ID efficiency SF and systematics
             if (tau.getGenMatch() == 5) {
-                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt());
-            }
+                std::string shift = "";  // nominal
+                if (syst.find("tau_id_") != std::string::npos) {
+                    shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
+                }
+                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), shift);
+                }
 
             // anti-lepton discriminator SFs
             if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
-                if (fabs(tau.getEta()) < 1.460)
+                if (fabs(tau.getEta()) < 1.460)  {
                     evtwt *= 1.21;
-                else if (fabs(tau.getEta()) > 1.558)
+                } else if (fabs(tau.getEta()) > 1.558) {
                     evtwt *= 1.38;
+                }
             } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
-                if (fabs(tau.getEta()) < 0.4)
+                if (fabs(tau.getEta()) < 0.4) {
                     evtwt *= 1.47;
-                else if (fabs(tau.getEta()) < 0.8)
+                } else if (fabs(tau.getEta()) < 0.8) {
                     evtwt *= 1.55;
-                else if (fabs(tau.getEta()) < 1.2)
+                } else if (fabs(tau.getEta()) < 1.2) {
                     evtwt *= 1.33;
-                else if (fabs(tau.getEta()) < 1.7)
+                } else if (fabs(tau.getEta()) < 1.7) {
                     evtwt *= 1.72;
-                else
+                } else {
                     evtwt *= 2.50;
+                }
+            }
+
+            // muom mis-id systematics
+            if (syst.find("mfaket_") != std::string::npos && (tau.getGenMatch() == 2 || tau.getGenMatch() == 4)) {
+                auto shift = syst.find("Up") != std::string::npos ? 1.20 : 0.80;
+                evtwt *= shift;
             }
 
             // muon ID SF
@@ -320,6 +333,12 @@ int main(int argc, char *argv[]) {
                 // evtwt *= tau_leg_cross_trg_sf->getityo();
             } else {
                 evtwt *= mu22_trg_sf->get_ScaleFactor(muon.getPt(), muon.getEta());
+            }
+
+            // muon reco, eff, tracking systematic
+            if (syst.find("mu_combo_") != std::string::npos) {
+                auto shift = syst.find("Up") != std::string::npos ? 1.01 : 0.99;
+                evtwt *= shift;
             }
 
             // b-tagging scale factor goes here
@@ -334,8 +353,9 @@ int main(int argc, char *argv[]) {
                 if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
                 if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
                 if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
+                NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
+                evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
             }
-            // NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
 
             // Z-pT and Zmm Reweighting
             if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
