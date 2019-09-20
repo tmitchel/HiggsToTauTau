@@ -336,6 +336,15 @@ int main(int argc, char *argv[]) {
             // b-tagging scale factor goes here
             // evtwt *= btagsf;
 
+            if (syst.find("bveto") != std::string::npos) {
+                double unc(0.);
+                int direction = syst == "bveto_Up" ? 1 : -1;
+                for (auto& jet : jets.getJets()) {
+                    unc = jet.getFlavor() > 3 ? 0.05 : 0.005;
+                    evtwt *= (1 + (direction * unc));
+                }
+            }
+
             // Pileup Reweighting
             evtwt *= lumi_weights->weight(event.getNPU());
 

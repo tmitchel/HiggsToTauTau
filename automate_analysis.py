@@ -91,6 +91,9 @@ def getSyst2016(name, exe):
             'Rivet9_Up', 'Rivet9_Down', 
         ]
 
+    if name != 'data_obs':
+        systs += ['bveto_Up', 'bveto_Down']
+
     return systs
 
 
