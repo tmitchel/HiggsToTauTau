@@ -334,7 +334,7 @@ int main(int argc, char *argv[]) {
             }
 
             // b-tagging scale factor goes here
-            // evtwt *= btagsf;
+            evtwt *= jets.getBWeight();
 
             // Pileup Reweighting
             evtwt *= lumi_weights->weight(event.getNPU());

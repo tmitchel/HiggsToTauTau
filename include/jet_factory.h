@@ -42,6 +42,7 @@ class jet_factory {
     Float_t topQuarkPt1, topQuarkPt2, temp_njets;
     Float_t Nbtag, njetspt20, njets;
     Int_t nbtag;
+    Float_t bweight;
     std::vector<jet> plain_jets, btag_jets;
 
  public:
@@ -58,6 +59,7 @@ class jet_factory {
     Float_t getDijetMass() { return mjj; }
     Float_t getTopPt1() { return topQuarkPt1; }
     Float_t getTopPt2() { return topQuarkPt2; }
+    Float_t getBWeight() { return bweight; }
     std::vector<jet> getJets() { return plain_jets; }
     std::vector<jet> getBtagJets() { return btag_jets; }
 };
@@ -77,18 +79,22 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst) {
     }
 
 
-    std::string btag_string = "2016";
+    std::string btag_string("2016"), bweight_string("bweight_");
     if (era == 2016) {
         btag_string = "2016";
+        bweight_string += "2016";
     } else if (era == 2017) {
         btag_string = "2017";
+        bweight_string += "2017";
     } else if (era == 2018) {
         btag_string = "2018";
+        bweight_string += "2018";
     }
 
     input->SetBranchAddress(mjj_name.c_str(), &mjj);
     input->SetBranchAddress(njets_name.c_str(), &njets);
     input->SetBranchAddress("nbtag", &nbtag);
+    input->SetBranchAddress(bweight_string.c_str(), &bweight);
     input->SetBranchAddress("j1pt", &jpt_1);
     input->SetBranchAddress("j1eta", &jeta_1);
     input->SetBranchAddress("j1phi", &jphi_1);
