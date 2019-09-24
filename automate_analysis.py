@@ -53,9 +53,9 @@ def getSyst2016(name, exe):
         systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
 
     if name == 'ZL' or name == 'W':
-        if '_et' in args.exe:
+        if '_et' in exe:
             systs += ['efaket_Up', 'efaket_Down']
-        elif '_mt' in args.exe:
+        elif '_mt' in exe:
             systs += ['mfaket_Up', 'mfaket_Down']
             
         systs += ['ltau_FES_DM0_Up', 'ltau_FES_DM0_Down', 'ltau_FES_DM1_Up', 'ltau_FES_DM1_Down']
@@ -78,9 +78,9 @@ def getSyst2016(name, exe):
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT':
         systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
 
-    if name != 'data_obs' and '_et' in args.exe:
+    if name != 'data_obs' and '_et' in exe:
         systs += ['EEScale_Up', 'EEScale_Down', 'EESigma_Up', 'EESigma_Down', 'el_combo_Up', 'el_combo_Down']
-    elif name != 'data_obs' and '_mt' in args.exe:
+    elif name != 'data_obs' and '_mt' in exe:
         systs += ['MES_Up', 'MES_Down', 'mu_combo_Up', 'mu_combo_Down']
 
     if name == 'ggH125':
@@ -178,7 +178,7 @@ for ifile in fileList:
 
     if get_systs != None and not 'Data' in sample.lower():
         for name in names:
-            for isyst in get_systs(name, args.exe):
+            for isyst in get_systs(name, options.exe):
                 if isyst == "" and not path.exists('Output/trees/{}/NOMINAL'.format(options.output_dir)):
                     makedirs('Output/trees/{}/NOMINAL'.format(options.output_dir))
                 if isyst != "" and not path.exists('Output/trees/{}/SYST_{}'.format(options.output_dir, isyst)):
@@ -197,7 +197,7 @@ pprint(processes)
 if options.parallel:
     # Use 8 cores if the machine has more than 16 total cores.
     # Otherwise, use half the available cores.
-    n_processes = min(8, multiprocessing.cpu_count() / 2)
+    n_processes = min(12, multiprocessing.cpu_count() / 2)
 
     pool = multiprocessing.Pool(processes=n_processes)
     r = pool.map_async(run_process, processes)
