@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
         } else if ((name == "TTJ" || name == "VVJ") && tau.getGenMatch() == 5) {
             continue;
         } else if (name == "ZJ" && tau.getGenMatch() != 6) {
-
+            continue;
         } else {
             histos->at("cutflow")->Fill(3., 1.);
         }
