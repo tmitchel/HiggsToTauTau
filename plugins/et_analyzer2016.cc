@@ -248,8 +248,10 @@ int main(int argc, char *argv[]) {
             continue;
         } else if ((name == "ZTT" || name == "TTT" || name == "VVT") && tau.getGenMatch() != 5) {
             continue;
-        } else if (name == "ZJ" || name == "TTJ" || name == "VVJ" && tau.getGenMatch() != 6) {
+        } else if ((name == "TTJ" || name == "VVJ") && tau.getGenMatch() == 5) {
             continue;
+        } else if (name == "ZJ" && tau.getGenMatch() != 6) {
+
         } else {
             histos->at("cutflow")->Fill(3., 1.);
         }
