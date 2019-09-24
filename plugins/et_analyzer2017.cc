@@ -18,6 +18,7 @@
 #include "TTree.h"
 
 // user includes
+#include "../include/ComputeWG1Unc.h"
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
 #include "../include/LumiReweightingStandAlone.h"
@@ -206,7 +207,7 @@ int main(int argc, char* argv[]) {
     jet_factory jets(ntuple, 2017, syst);
     met_factory met(ntuple, 2017, syst);
 
-    if (sample.find("ggHtoTauTau125") != std::string::npos) {
+    if (sample == "ggh125" && signal_type == "powheg") {
         event.setRivets(ntuple);
     }
 
@@ -307,9 +308,13 @@ int main(int argc, char* argv[]) {
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
-            // tau ID efficiency SF
+            // tau ID efficiency SF and systematics
             if (tau.getGenMatch() == 5) {
-                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt());
+                std::string shift = "";  // nominal
+                if (syst.find("tau_id_") != std::string::npos) {
+                    shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
+                }
+                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), shift);
             }
 
             // anti-lepton discriminator SFs
@@ -329,6 +334,12 @@ int main(int argc, char* argv[]) {
                     evtwt *= 1.03;
                 else
                     evtwt *= 1.94;
+            }
+
+            // electron mis-id systematics
+            if (syst.find("efaket_") != std::string::npos && (tau.getGenMatch() == 1 || tau.getGenMatch() == 3)) {
+                auto shift = syst.find("Up") != std::string::npos ? 1.15 : 0.85;
+                evtwt *= shift;
             }
 
             // electron ID/Iso
@@ -351,16 +362,31 @@ int main(int argc, char* argv[]) {
             htt_sf->var("e_eta")->setVal(electron.getEta());
             evtwt *= htt_sf->function("e_trk_ratio")->getVal();
 
-            // use promote-demote method to correct nbtag with no systematics
-            jets.promoteDemote(btag_eff_oth, btag_eff_oth, btag_eff_oth);
+            // electron reco, eff, tracking systematic
+            if (syst.find("el_combo_") != std::string::npos) {
+                auto shift = syst.find("Up") != std::string::npos ? 1.01 : 0.99;
+                evtwt *= shift;
+            }
+
+            // b-tagging scale factor goes here
+            evtwt *= jets.getBWeight();
 
             // pileup reweighting
             if (!doAC && !isMG) {
                 evtwt *= lumi_weights->weight(event.getNPV());
             }
+            // NNLOPS ggH reweighting
+            if (sample == "ggh125" && signal_type == "powheg") {
+                if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
+                if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
+                if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
+                if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
+                NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
+                evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
+            }
 
-            // Z-pT Reweighting
-            if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
+            // Z-pT Reweighting (TODO(tmitchel): check systematics for this)
+            if (name == "EWKZ2l" || name == "EWKZ2nu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
                 // give inputs to workspace
                 htt_sf->var("z_gen_mass")->setVal(event.getGenM());  // TODO(tmitchel): check if these are the right variables.
                 htt_sf->var("z_gen_pt")->setVal(event.getGenPt());   // TODO(tmitchel): check if these are the right variables.
