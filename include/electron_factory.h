@@ -82,6 +82,11 @@ electron_factory::electron_factory(TTree* input, int era, std::string _syst) : s
     input->SetBranchAddress("eGenEta", &eGenEta);
     input->SetBranchAddress("eGenPhi", &eGenPhi);
     input->SetBranchAddress("eGenEnergy", &eGenEnergy);
+    input->SetBranchAddress("eCorrectedEt", &eCorrectedEt);
+    input->SetBranchAddress("eEnergyScaleUp", &eEnergyScaleUp);
+    input->SetBranchAddress("eEnergyScaleDown", &eEnergyScaleDown);
+    input->SetBranchAddress("eEnergySigmaUp", &eEnergySigmaUp);
+    input->SetBranchAddress("eEnergySigmaDown", &eEnergySigmaDown);
 }
 
 // create electron object and set member data
