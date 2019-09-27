@@ -431,14 +431,14 @@ int main(int argc, char *argv[]) {
         fout->cd();
 
         // // b-jet veto
-        if (jets.getNbtag() == 0) {
+        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
             histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
 
         // create regions
-        bool signalRegion = (tau.getTightIsoMVA() && electron.getIso() < 0.10);
+        bool signalRegion = (tau.getTightIsoMVA() && electron.getIso() < 0.15);
         bool looseIsoRegion = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
         bool antiIsoRegion = (tau.getTightIsoMVA() && electron.getIso() > 0.10 && electron.getIso() < 0.30);
         bool antiTauIsoRegion = (tau.getTightIsoMVA() == 0 && electron.getIso() < 0.10);

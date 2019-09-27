@@ -40,7 +40,7 @@ class jet_factory {
     Float_t bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1;
     Float_t bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2;
     Float_t topQuarkPt1, topQuarkPt2, temp_njets;
-    Float_t Nbtag, njetspt20, njets;
+    Float_t Nbtag, njetspt20, njets, nbtag_loose, nbtag_medium;
     Int_t nbtag;
     Float_t bweight;
     std::vector<jet> plain_jets, btag_jets;
@@ -54,6 +54,8 @@ class jet_factory {
 
     // getters
     Float_t getNbtag() { return Nbtag; }
+    Float_t getNbtagLoose() { return nbtag_loose; }
+    Float_t getNbtagMedium() { return nbtag_medium; }
     Float_t getNjets() { return njets; }
     Int_t getNjetPt20() { return njetspt20; }
     Float_t getDijetMass() { return mjj; }
@@ -94,6 +96,8 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst) {
     input->SetBranchAddress(mjj_name.c_str(), &mjj);
     input->SetBranchAddress(njets_name.c_str(), &njets);
     input->SetBranchAddress("nbtag", &nbtag);
+    input->SetBranchAddress("bjetDeepCSVVeto20Loose_2016_DR0p5", &nbtag_loose);
+    input->SetBranchAddress("bjetDeepCSVVeto20Medium_2016_DR0p5", &nbtag_medium);
     input->SetBranchAddress(bweight_string.c_str(), &bweight);
     input->SetBranchAddress("j1pt", &jpt_1);
     input->SetBranchAddress("j1eta", &jeta_1);
