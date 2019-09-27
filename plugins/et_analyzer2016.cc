@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
     jet_factory jets(ntuple, 2016, syst);
     met_factory met(ntuple, 2016, syst);
 
-    if (sample.find("ggHtoTauTau125") != std::string::npos) {
+    if (sample == "ggh125" && signal_type == "powheg") {
         event.setRivets(ntuple);
     }
 
@@ -342,7 +342,7 @@ int main(int argc, char *argv[]) {
             evtwt *= lumi_weights->weight(event.getNPU());
 
             // NNLOPS ggH reweighting
-            if (sample.find("ggH125") != std::string::npos) {
+            if (sample == "ggh125" && signal_type == "powheg") {
                 if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
                 if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
                 if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
@@ -352,7 +352,7 @@ int main(int argc, char *argv[]) {
             }
 
             // Z-pT and Zmm Reweighting
-            if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
+            if (name == "EWKZ2l" || name == "EWKZ2nu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
                 // Z-pT Reweighting
                 auto nom_zpt_weight =
                     zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()), zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
