@@ -436,7 +436,7 @@ int main(int argc, char *argv[]) {
         fout->cd();
 
         // b-jet veto
-        if (jets.getNbtag() == 0) {
+        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
             histos->at("cutflow")->Fill(5., 1.);
         } else {
             continue;
