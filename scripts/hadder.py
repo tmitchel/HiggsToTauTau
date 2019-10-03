@@ -1,6 +1,7 @@
 
 import os
 import json
+import multiprocessing
 from glob import glob
 from pprint import pprint
 
@@ -17,8 +18,16 @@ def do_hadd(hadd_list, path):
     for idir, isamples in hadd_list.items():
         if not os.path.exists(path + '/' + idir + '/merged'):
             os.mkdir(path + '/' + idir + '/merged')
-        for sample, files in isamples.items():
-            os.system('hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files)))
+            
+        commands = ['hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
+                    for sample, files in isamples.items()]
+
+        n_processes = min(12, multiprocessing.cpu_count() / 2)
+        pool = multiprocessing.Pool(processes=n_processes)
+        r = pool.map_async(os.system, commands)
+        r.wait()
+        # for sample, files in isamples.items():
+        #     os.system('hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files)))
 
 
 def combine_wh(hadd_list, path):
