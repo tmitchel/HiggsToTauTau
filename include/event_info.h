@@ -72,7 +72,7 @@ class event_info {
     Bool_t getPassMu20Tau27();
     Bool_t getPassMu24();
     Bool_t getPassMu27();
-    Bool_t getPassFlags(Bool_t);
+    Bool_t getPassFlags();
 
     // Event Info
     Float_t getNPV() { return npv; }
@@ -302,16 +302,22 @@ Float_t event_info::getRivetUnc(std::vector<double> uncs, std::string syst) {
     }
 }
 
-Bool_t event_info::getPassFlags(bool is_data) {
-    if (Flag_goodVertices || Flag_globalTightHalo2016Filter || Flag_HBHENoiseFilter || Flag_HBHENoiseIsoFilter ||
-        Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter || Flag_BadChargedCandidateFilter) {
-        return false;
-    } else if (is_data && (Flag_eeBadScFilter || Flag_ecalBadCalibFilter)) {
-        return false;
+Bool_t event_info::getPassFlags() {
+    if (era == 2016) {
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseIsoFilter
+                || Flag_HBHENoiseFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter);
+
+    } else if (era == 2017) {
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
+                || Flag_HBHENoiseIsoFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
+                || Flag_BadChargedCandidateFilter || Flag_eeBadScFilter || Flag_ecalBadCalibFilter);
     } else {
-        return true;
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
+                || Flag_HBHENoiseIsoFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
+                || Flag_eeBadScFilter || Flag_ecalBadCalibFilter);
     }
 }
+
 
 Bool_t event_info::getPassEle25() {
     PassEle25 = singleE25eta2p1TightPass && eMatchesEle25Filter && eMatchesEle25Path;
