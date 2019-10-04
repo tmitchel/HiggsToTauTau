@@ -257,17 +257,11 @@ int main(int argc, char* argv[]) {
         auto tau = taus.run_factory();
         jets.run_factory();
 
-        if (fabs(electron.getEta()) < 2.1) {
+        if (event.getPassFlags()) {
             histos->at("cutflow")->Fill(2., 1.);
         } else {
             continue;
         }
-
-        // if (event.getPassFlags(isData)) {
-        //     histos->at("cutflow")->Fill(5., 1.);
-        // } else {
-        //     continue;
-        // }
 
         // Separate Drell-Yan
         if (name == "ZL" && tau.getGenMatch() > 4) {
@@ -369,7 +363,7 @@ int main(int argc, char* argv[]) {
             }
 
             // b-tagging scale factor goes here
-            evtwt *= jets.getBWeight();
+            // evtwt *= jets.getBWeight();
 
             // pileup reweighting
             if (!doAC && !isMG) {
