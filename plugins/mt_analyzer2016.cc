@@ -239,7 +239,7 @@ int main(int argc, char *argv[]) {
         jets.run_factory();
 
         // apply special ID for data
-        if (!isData || muon.getMediumID()) {
+        if (event.getPassFlags()) {
             histos->at("cutflow")->Fill(2., 1.);
         } else {
             continue;
@@ -342,7 +342,7 @@ int main(int argc, char *argv[]) {
             }
 
             // b-tagging scale factor goes here
-            evtwt *= jets.getBWeight();
+            // evtwt *= jets.getBWeight();
 
             // Pileup Reweighting
             evtwt *= lumi_weights->weight(event.getNPU());

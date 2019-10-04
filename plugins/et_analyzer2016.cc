@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
         auto tau = taus.run_factory();
         jets.run_factory();
 
-        if (electron.getPt() > 26 && fabs(electron.getEta()) < 2.1) {
+        if (event.getPassFlags()) {
             histos->at("cutflow")->Fill(2., 1.);
         } else {
             continue;
@@ -336,7 +336,7 @@ int main(int argc, char *argv[]) {
             }
 
             // b-tagging scale factor goes here
-            evtwt *= jets.getBWeight();
+            // evtwt *= jets.getBWeight();
 
             // Pileup Reweighting
             evtwt *= lumi_weights->weight(event.getNPU());
