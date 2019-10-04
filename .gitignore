@@ -16,3 +16,5 @@ Maker
 scripts/plot.sh
 .pyenv
 *.pyc
+etau2016_sel.md
+mtau2016_sel.md
