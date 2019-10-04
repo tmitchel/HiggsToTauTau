@@ -358,7 +358,7 @@ int main(int argc, char* argv[]) {
             }
 
             // b-tagging scale factor goes here
-            evtwt *= jets.getBWeight();
+            // evtwt *= jets.getBWeight();
 
             // pileup reweighting
             if (!doAC && !isMG) {
