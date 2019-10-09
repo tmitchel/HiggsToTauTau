@@ -263,6 +263,10 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
+        if (fabs(electron.getEta()) > 2.1) {
+          continue;
+        }
+
         // Separate Drell-Yan
         if (name == "ZL" && tau.getGenMatch() > 4) {
             continue;
@@ -376,7 +380,9 @@ int main(int argc, char* argv[]) {
                 if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
                 if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
                 NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
-                evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
+                if (syst.find("Rivet") != std::string::npos) {
+                  evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
+                }
             }
 
             // Z-pT Reweighting (TODO(tmitchel): check systematics for this)
