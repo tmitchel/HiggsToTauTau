@@ -20,7 +20,7 @@ def build_filelist(input_dir):
         if 'nominal' in fname:
             nominal['nominal'].append(fname)
         else:
-            keyname = fname.split('/')[0]
+            keyname = fname.split('/')[-2]
             systematics.setdefault(keyname, [])
             systematics[keyname].append(fname)
     pprint(nominal)
