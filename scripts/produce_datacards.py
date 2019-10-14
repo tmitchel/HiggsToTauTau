@@ -68,7 +68,7 @@ def get_syst_name(syst, syst_name_map):
     elif syst in syst_name_map.keys():
         return syst_name_map[syst]
     else:
-        print '{} is unknown. Skipping...'.format(syst)
+        print '[INFO]  {} is unknown. Skipping...'.format(syst)
         return 'unknown'
 
 def main(args):
