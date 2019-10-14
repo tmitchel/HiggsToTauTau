@@ -86,7 +86,7 @@ def main(args):
     channel_prefix = channel_prefix.replace('et_tree', 'et')
     assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
     files = [ifile for ifile in glob('{}/*.root'.format(args.input_dir))]  # get files to process
-    build_histogram(args.input_dir)
+    build_filelist(args.input_dir)
 
     # get things for output file name
     ztt_name = 'emb' if args.embed else 'ztt'
