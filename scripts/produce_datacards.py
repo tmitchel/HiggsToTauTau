@@ -116,6 +116,9 @@ def main(args):
         postfix = get_syst_name(syst, syst_name_map)
         if postfix == 'unknown':
             continue
+
+        postfix = postfix.replace('YEAR', args.year)
+
         for ifile in files:
 
                 # handle ZTT vs embedded
@@ -125,7 +128,7 @@ def main(args):
                 continue
 
             name = ifile.replace('.root', '').split('/')[-1]
-            print postfix + name
+            print name + postfix
             input_file = uproot.open(ifile)
             trees = [ikey.replace(';1', '') for ikey in input_file.keys()
                     if 'tree' in ikey] if args.syst else [args.tree_name]
