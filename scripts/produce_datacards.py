@@ -9,6 +9,24 @@ from array import array
 from pprint import pprint
 
 
+def build_filelist(input_dir):
+    files = [ifile for ifile in glob('{}/*/*.root'.format(input_dir))]
+
+    nominal = {'nominal': []}
+    systematics = {}
+    for fname in files:
+        ifile = uproot.open(fname)
+
+        if 'nominal' in fname:
+            nominal['nominal'].append(fname)
+        else:
+            keyname = fname.split('/')[0]
+            systematics.setdefault(keyname, [])
+            systematics[keyname].append(fname)
+    pprint(nominal)
+    pprint(systematics)
+    return nominal, systematics
+
 def get_ac_weights(name, ac_reweighting_map):
     if 'ggh' in name.lower():
         return ac_reweighting_map['ggh']
@@ -68,6 +86,7 @@ def main(args):
     channel_prefix = channel_prefix.replace('et_tree', 'et')
     assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
     files = [ifile for ifile in glob('{}/*.root'.format(args.input_dir))]  # get files to process
+    build_histogram(args.input_dir)
 
     # get things for output file name
     ztt_name = 'emb' if args.embed else 'ztt'
