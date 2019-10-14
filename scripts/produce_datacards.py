@@ -67,7 +67,7 @@ def get_syst_name(syst, syst_name_map):
     elif syst in syst_name_map.keys():
         return syst_name_map[syst]
     else:
-        raise Exception('I don\'t know how to name this systematic {}'.format(syst))
+        return 'unknown'
 
 def main(args):
     start = time.time()
@@ -92,7 +92,6 @@ def main(args):
     channel_prefix = args.tree_name.replace('mt_tree', 'mt')
     channel_prefix = channel_prefix.replace('et_tree', 'et')
     assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
-    # files = [ifile for ifile in glob('{}/*.root'.format(args.input_dir))]  # get files to process
     filelist = build_filelist(args.input_dir)
     build_filelist(args.input_dir)
 
@@ -115,6 +114,8 @@ def main(args):
 
     for syst, files in filelist.iteritems():
         postfix = get_syst_name(syst, syst_name_map)
+        if postfix == 'unknown':
+            continue
         for ifile in files:
 
                 # handle ZTT vs embedded
