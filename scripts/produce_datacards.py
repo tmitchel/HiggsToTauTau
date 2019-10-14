@@ -125,16 +125,13 @@ def main(args):
                 continue
 
             name = ifile.replace('.root', '').split('/')[-1]
-            stable_name = name
-            print name
+            print postfix + name
             input_file = uproot.open(ifile)
             trees = [ikey.replace(';1', '') for ikey in input_file.keys()
                     if 'tree' in ikey] if args.syst else [args.tree_name]
             for itree in trees:
-                if itree != args.tree_name:
-                    name = stable_name + boilerplate['syst_name_map'][itree.replace(args.tree_name, '')]
-                else:
-                    name = stable_name
+                if not 'tree' in itree:
+                    continue
 
                 # get data naming correct
                 if 'Data' in name:
@@ -157,7 +154,7 @@ def main(args):
                     if args.syst:
                         variables.add('ff_*')
 
-                name = syst + name
+                name = name + postfix
 
                 events = input_file[itree].arrays(list(variables), outputtype=pandas.DataFrame)
 
