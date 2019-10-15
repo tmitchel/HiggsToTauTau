@@ -119,10 +119,15 @@
         "Rivet7_Down": "_THU_ggH_PT120_13TeVDown",
         "Rivet8_Up": "_THU_ggH_qmtop_13TeVUp",
         "Rivet8_Down": "_THU_ggH_qmtop_13TeVDown",
-        "dyShape_Up": "_CMS_htt_dyShape_2016",
-        "dyShape_Down": "_CMS_htt_dyShape_2016",
+        "dyShape_Up": "_CMS_htt_dyShape_2016Up",
+        "dyShape_Down": "_CMS_htt_dyShape_2016Down",
     
         "tau_id_Up": "_CMS_scale_t_id_YEARUp",
-        "tau_id_Down": "_CMS_scale_t_id_YEARDown"
+        "tau_id_Down": "_CMS_scale_t_id_YEARDown",
+        "ttbarShape_Up": "_CMS_htt_ttbarShape_YEARUp",
+        "ttbarShape_Down": "_CMS_htt_ttbarShape_YEARDown",
+        "bveto_Up": "_CMS_htt_bveto_YEARUp",
+        "bveto_Down": "_CMS_htt_bveto_YEARDown"
+
     }
 }
