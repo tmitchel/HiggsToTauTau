@@ -15,8 +15,6 @@ def build_filelist(input_dir):
 
     filelist = {'nominal': []}
     for fname in files:
-        ifile = uproot.open(fname)
-
         if 'nominal' in fname:
             filelist['nominal'].append(fname)
         else:
@@ -42,7 +40,7 @@ def build_histogram(name, x_bins, y_bins):
 
 
 def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, ac_weight=None, fake_weight=None):
-    evtwt = data['evtwt'].values if ac_weight == None else (data['evtwt'] * data[ac_weight]).values
+    evtwt = data['evtwt'].to_numpy(copy=True) if ac_weight == None else (data['evtwt'] * data[ac_weight]).to_numpy(copy=True)
     xvar = data[xvar_name].values
     yvar = data[yvar_name].values
     zvar = data[zvar_name].values if zvar_name != None else None
@@ -68,7 +66,7 @@ def get_syst_name(syst, syst_name_map):
     elif syst in syst_name_map.keys():
         return syst_name_map[syst]
     else:
-        print '[INFO]  {} is unknown. Skipping...'.format(syst)
+        print '\t [INFO]  {} is unknown. Skipping...'.format(syst)
         return 'unknown'
 
 def main(args):
@@ -130,7 +128,7 @@ def main(args):
                 continue
 
             name = ifile.replace('.root', '').split('/')[-1]
-            print name + postfix
+            print 'Processing: {}'.format(name + postfix)
             input_file = uproot.open(ifile)
             trees = [args.tree_name]
 
