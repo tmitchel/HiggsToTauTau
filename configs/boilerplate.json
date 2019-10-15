@@ -127,7 +127,20 @@
         "ttbarShape_Up": "_CMS_htt_ttbarShape_YEARUp",
         "ttbarShape_Down": "_CMS_htt_ttbarShape_YEARDown",
         "bveto_Up": "_CMS_htt_bveto_YEARUp",
-        "bveto_Down": "_CMS_htt_bveto_YEARDown"
-
+        "bveto_Down": "_CMS_htt_bveto_YEARDown",
+        "jetToTauFake_Up": "_CMS_htt_jetToTauFake_YEARUp",
+        "jetToTauFake_Down": "_CMS_htt_jetToTauFake_YEARDown",
+        "recoil_reso_0jet_Up": "CMS_htt_boson_reso_met_0Jet_YEARUp",
+        "recoil_reso_0jet_Down": "CMS_htt_boson_reso_met_0Jet_YEARDown",
+        "recoil_reso_1jet_Up": "CMS_htt_boson_reso_met_1Jet_YEARUp",
+        "recoil_reso_1jet_Down": "CMS_htt_boson_reso_met_1Jet_YEARDown",
+        "recoil_reso_2jet_Up": "CMS_htt_boson_reso_met_2Jet_YEARUp",
+        "recoil_reso_2jet_Down": "CMS_htt_boson_reso_met_2Jet_YEARDown",
+        "recoil_resp_0jet_Up": "CMS_htt_boson_scale_met_0Jet_YEARUp",
+        "recoil_resp_0jet_Down": "CMS_htt_boson_scale_met_0Jet_YEARDown",
+        "recoil_resp_1jet_Up": "CMS_htt_boson_scale_met_1Jet_YEARUp",
+        "recoil_resp_1jet_Down": "CMS_htt_boson_scale_met_1Jet_YEARDown",
+        "recoil_resp_2jet_Up": "CMS_htt_boson_scale_met_2Jet_YEARUp",
+        "recoil_resp_2jet_Down": "CMS_htt_boson_scale_met_2Jet_YEARDown"
     }
 }
