@@ -403,7 +403,7 @@ int main(int argc, char *argv[]) {
                 evtwt *= 0.97;
             }
 
-            // set workspace variables
+            // // set workspace variables
             wEmbed->var("t_pt")->setVal(tau.getPt());
             wEmbed->var("m_pt")->setVal(muon.getPt());
             wEmbed->var("m_eta")->setVal(muon.getEta());
@@ -416,14 +416,21 @@ int main(int argc, char *argv[]) {
             // double muon trigger eff in selection
             evtwt *= wEmbed->function("m_sel_trg_ratio")->getVal();
 
-            // muon ID eff in selectionm
+            // muon ID eff in selection (leg 1)
+            wEmbed->var("gt_pt")->setVal(muon.getGenPt());
+            wEmbed->var("gt_eta")->setVal(muon.getGenEta());
             evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
 
-            // muon ID SF
-            evtwt *= wEmbed->function("m_id_embed_kit_ratio")->getVal();
+            // muon ID eff in selection (leg 1)
+            wEmbed->var("gt_pt")->setVal(tau.getGenPt());
+            wEmbed->var("gt_eta")->setVal(tau.getGenEta());
+            evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
 
             // muon iso SF
             evtwt *= wEmbed->function("m_iso_binned_embed_kit_ratio")->getVal();
+
+            // muon ID SF
+            evtwt *= wEmbed->function("m_id_embed_kit_ratio")->getVal();
 
             // apply trigger SF's
             auto single_eff = wEmbed->function("m_trg24_27_embed_kit_ratio")->getVal();
