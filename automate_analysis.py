@@ -58,7 +58,7 @@ def getSyst2016(name, exe):
         elif '_mt' in exe:
             systs += ['mfaket_Up', 'mfaket_Down']
             
-        systs += ['ltau_FES_DM0_Up', 'ltau_FES_DM0_Down', 'ltau_FES_DM1_Up', 'ltau_FES_DM1_Down']
+        # systs += ['ltau_FES_DM0_Up', 'ltau_FES_DM0_Down', 'ltau_FES_DM1_Up', 'ltau_FES_DM1_Down']
 
     if name != 'embed' and name != 'data_obs':
         systs += ['UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down']
