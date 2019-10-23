@@ -437,30 +437,32 @@ int main(int argc, char* argv[]) {
             // double muon trigger eff in selection
             evtwt *= wEmbed->function("m_sel_trg_ratio")->getVal();
 
-            // muon ID eff in selectionm
+            // muon ID eff in selection (leg 1)
+            wEmbed->var("gt_pt")->setVal(electron.getGenPt());
+            wEmbed->var("gt_eta")->setVal(electron.getGenEta());
+            evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
+
+            // muon ID eff in selection (leg 1)
+            wEmbed->var("gt_pt")->setVal(tau.getGenPt());
+            wEmbed->var("gt_eta")->setVal(tau.getGenEta());
             evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
 
             // electron ID SF
-            evtwt *= wEmbed->function("e_id90_kit_ratio")->getVal();
+            evtwt *= wEmbed->function("e_id90_embed_kit_ratio")->getVal();
 
             // electron iso SF
-            evtwt *= wEmbed->function("e_iso_kit_ratio")->getVal();
+            evtwt *= wEmbed->function("e_iso_binned_embed_kit_ratio")->getVal();
 
             // apply trigger SF's
             bool fireSingle = electron.getPt() > 33;
             bool fireCross = electron.getPt() < 33;
             auto single_eff(1.), el_leg_eff(1.), tau_leg_eff(1.);
             if (fabs(electron.getEta()) < 1.479) {
-                // apply trigger now
-                if (!fireSingle && !fireCross) {
-                    continue;
-                }
                 single_eff = wEmbed->function("e_trg27_trg32_trg35_embed_kit_ratio")->getVal();
                 el_leg_eff = wEmbed->function("e_trg_EleTau_Ele24Leg_kit_ratio_embed")->getVal();
                 tau_leg_eff = wEmbed->function("et_emb_LooseChargedIsoPFTau30_kit_ratio")->getVal();
                 evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
             } else {
-                // don't actually apply the trigger
                 single_eff = wEmbed->function("e_trg27_trg32_trg35_kit_data")->getVal();
                 el_leg_eff = wEmbed->function("e_trg_EleTau_Ele24Leg_desy_data")->getVal();
                 if (fabs(tau.getEta()) < 2.1) {
