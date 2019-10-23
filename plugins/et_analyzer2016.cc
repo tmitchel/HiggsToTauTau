@@ -202,33 +202,34 @@ int main(int argc, char *argv[]) {
             logfile << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
             progress++;
         }
+
         // find the event weight (not lumi*xs if looking at W or Drell-Yan)
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 7.236;
+                evtwt = 7.224577545;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 4.029;
+                evtwt = 4.046822405;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 1.079;
+                evtwt = 1.065041503;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 2.121;
+                evtwt = 2.1573657;
             } else {
-                evtwt = 28.84;
+                evtwt = 28.8408141;
             }
         }
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.486;
+                evtwt = 0.511697165;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 0.533;
+                evtwt = 0.564096329;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 0.492;
+                evtwt = 0.52024036;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 0.408;
+                evtwt = 0.428569007;
             } else {
-                evtwt = 1.470;
+                evtwt = 1.549875011;
             }
         }
         histos->at("cutflow")->Fill(1., 1.);
