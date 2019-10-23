@@ -228,15 +228,15 @@ int main(int argc, char *argv[]) {
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.688;
+                evtwt = 0.671;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 0.603;
+                evtwt = 0.588;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 0.655;
+                evtwt = 0.640;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 1.200;
+                evtwt = 1.172;
             } else {
-                evtwt = 3.959;
+                evtwt = 3.865;
             }
         }
 
