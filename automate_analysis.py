@@ -58,7 +58,7 @@ def getSyst2016(name, exe):
         elif '_mt' in exe:
             systs += ['mfaket_Up', 'mfaket_Down']
             
-        systs += ['ltau_FES_DM0_Up', 'ltau_FES_DM0_Down', 'ltau_FES_DM1_Up', 'ltau_FES_DM1_Down']
+        # systs += ['ltau_FES_DM0_Up', 'ltau_FES_DM0_Down', 'ltau_FES_DM1_Up', 'ltau_FES_DM1_Down']
 
     if name != 'embed' and name != 'data_obs':
         systs += ['UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down']
@@ -69,11 +69,11 @@ def getSyst2016(name, exe):
             'JetEta3to5_Up', 'JetEta3to5_Down', 'JetEC2_Up', 'JetEC2_Down'
         ]
 
-    if name == 'TTT' or name == 'TTJ':
-        systs += ['ttbarShape_Up', 'ttbarShape_Down']
+    # if name == 'TTT' or name == 'TTJ':
+    #     systs += ['ttbarShape_Up', 'ttbarShape_Down']
 
-    if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
-        systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
+    # if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
+    #     systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT':
         systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
@@ -88,11 +88,10 @@ def getSyst2016(name, exe):
             'Rivet0_Up', 'Rivet0_Down', 'Rivet1_Up', 'Rivet1_Down', 'Rivet2_Up', 'Rivet2_Down', 
             'Rivet3_Up', 'Rivet3_Down', 'Rivet4_Up', 'Rivet4_Down', 'Rivet5_Up', 'Rivet5_Down', 
             'Rivet6_Up', 'Rivet6_Down', 'Rivet7_Up', 'Rivet7_Down', 'Rivet8_Up', 'Rivet8_Down', 
-            'Rivet9_Up', 'Rivet9_Down', 
         ]
 
-    if name != 'data_obs':
-        systs += ['bveto_Up', 'bveto_Down']
+    # if name != 'data_obs':
+    #     systs += ['bveto_Up', 'bveto_Down']
 
     return systs
 

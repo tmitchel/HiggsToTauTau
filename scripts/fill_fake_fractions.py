@@ -1,11 +1,30 @@
 import ROOT
 import pandas
+import numpy
 import uproot
+from multiprocessing import Process, Queue
 from array import array
 from collections import defaultdict
 
 mvis_bins = [0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000]
 njets_bins = [-0.5, 0.5, 1.5, 15]
+systs = [
+    "ff_qcd_syst_up", "ff_qcd_syst_down",
+    "ff_qcd_dm0_njet0_stat_up", "ff_qcd_dm0_njet0_stat_down",
+    "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down",
+    "ff_qcd_dm1_njet0_stat_up", "ff_qcd_dm1_njet0_stat_down",
+    "ff_qcd_dm1_njet1_stat_up", "ff_qcd_dm1_njet1_stat_down",
+    "ff_w_syst_up", "ff_w_syst_down",
+    "ff_w_dm0_njet0_stat_up", "ff_w_dm0_njet0_stat_down",
+    "ff_w_dm0_njet1_stat_up", "ff_w_dm0_njet1_stat_down",
+    "ff_w_dm1_njet0_stat_up", "ff_w_dm1_njet0_stat_down",
+    "ff_w_dm1_njet1_stat_up", "ff_w_dm1_njet1_stat_down",
+    "ff_tt_syst_up", "ff_tt_syst_down",
+    "ff_tt_dm0_njet0_stat_up", "ff_tt_dm0_njet0_stat_down",
+    "ff_tt_dm0_njet1_stat_up", "ff_tt_dm0_njet1_stat_down",
+    "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down",
+    "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"
+]
 
 
 def get_categories(channel):
@@ -14,6 +33,44 @@ def get_categories(channel):
 
 def build_histogram(name):
     return ROOT.TH2F(name, name, len(mvis_bins) - 1, array('d', mvis_bins), len(njets_bins) - 1, array('d', njets_bins))
+
+
+def categorize(njets, mjj, channel):
+    if njets == 0:
+        return '{}_0jet'.format(channel)
+    elif njets == 1 or (njets > 1 and mjj < 300):
+        return '{}_boosted'.format(channel)
+    elif njets > 1 and mjj > 300:
+        return '{}_vbf'.format(channel)
+    else:
+        raise Exception('We missed something here...')
+
+
+def get_weight(df, fake_weights, fractions, channel, syst=None):
+    category = categorize(df['njets'], df['mjj'], channel)
+    if channel == 'et':
+        iso_name = 'el_iso'
+    else:
+        iso_name = 'mu_iso'
+
+    xbin = fractions['frac_data'][category].GetXaxis().FindBin(df['vis_mass'])
+    ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
+
+    inputs = [
+        df['t1_pt'], df['t1_decayMode'], df['njets'], df['vis_mass'], df['mt'], df[iso_name],
+        fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+        fractions['frac_w'][category].GetBinContent(xbin, ybin),
+        fractions['frac_tt'][category].GetBinContent(xbin, ybin)
+    ]
+
+    return fake_weights.value(
+        9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
+
+
+def parallel_weights(queue, df, fake_weighter, fractions, channel_prefix, syst):
+    print 'starting parallel weight {}'.format(syst)
+    weights = df.apply(lambda x: get_weight(x, fake_weighter, fractions, channel_prefix, syst=syst), axis=1).values
+    queue.put(weights)
 
 
 def main(args):
@@ -47,6 +104,7 @@ def main(args):
 
     for frac, samples in inputs.iteritems():
         for sample in samples:
+            print sample
             events = uproot.open('{}/{}.root'.format(args.input, sample)
                                  )[args.tree_name].arrays(list(variables), outputtype=pandas.DataFrame)
 
@@ -105,6 +163,41 @@ def main(args):
             fout.cd(cat_name)
             ihist.Write(frac_name)
 
+    if args.create_fakes:
+        open_file = uproot.open('{}/data_obs.root'.format(args.input))
+        oldtree = open_file[args.tree_name].arrays(['*'])
+        treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
+
+        events = open_file[args.tree_name].arrays([
+            't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_iso', 'el_iso', 'mjj', 'is_antiTauIso'
+        ], outputtype=pandas.DataFrame)
+
+        random_ext = '_tight' if channel_prefix == 'et' and args.year == "2016" else ''
+        ff_file = ROOT.TFile('../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors{}.root'.format(
+            args.year, args.year, channel_prefix, random_ext), 'READ')
+        fake_weighter = ff_file.Get('ff_comb')
+
+        treedict['fake_weight'] = numpy.float64
+        print 'getting fake weights...'
+        fake_weights = events.apply(lambda x: get_weight(x, fake_weighter, fractions, channel_prefix), axis=1).values
+
+        if args.syst:
+            syst_runner = []
+            syst_map = {}
+            for syst in systs:
+                print syst
+                treedict[syst] = numpy.float64
+                syst_map[syst] = events.apply(lambda x: get_weight(x, fake_weighter, fractions, channel_prefix, syst=syst), axis=1).values
+
+        with uproot.recreate('{}_jetFakes.root'.format(channel_prefix)) as f:
+            f[args.tree_name] = uproot.newtree(treedict)
+            oldtree['fake_weight'] = fake_weights.reshape(len(fake_weights))
+            if args.syst:
+              for syst in systs:
+                oldtree[syst] = syst_map[syst]
+            f[args.tree_name].extend(oldtree)
+
+    fake_weighter.Delete()
     fout.Close()
 
 
@@ -115,4 +208,7 @@ if __name__ == "__main__":
     parser.add_argument('--suffix', '-s', required=True, help='string to append to output file name')
     parser.add_argument('--year', '-y', required=True, help='year being processed')
     parser.add_argument('--tree-name', '-t', dest='tree_name', required=True, help='name of TTree to process')
+    parser.add_argument('--create-fakes', '-c', action='store_true',
+                        help='create root file with data and fake weights applied')
+    parser.add_argument('--syst', action='store_true', help='run fake factor systematics as well')
     main(parser.parse_args())
