@@ -396,40 +396,49 @@ int main(int argc, char *argv[]) {
                 }
             }
         } else if (!isData && isEmbed) {
-            float Stitching_Weight = 1.0;
-            if (event.getRun() >= 272007 && event.getRun() < 275657) {
-                Stitching_Weight = (1.0 / 0.899 * 1.02);
-            } else if (event.getRun() < 276315) {
-                Stitching_Weight = (1.0 / 0.881 * 1.02);
-            } else if (event.getRun() < 276831) {
-                Stitching_Weight = (1.0 / 0.877 * 1.02);
-            } else if (event.getRun() < 277772) {
-                Stitching_Weight = (1.0 / 0.939 * 1.02);
-            } else if (event.getRun() < 278820) {
-                Stitching_Weight = (1.0 / 0.936 * 1.02);
-            } else if (event.getRun() < 280919) {
-                Stitching_Weight = (1.0 / 0.908 * 1.02);
-            } else if (event.getRun() < 284045) {
-                Stitching_Weight = (1.0 / 0.962 * 1.02);
-            }
+            // set workspace variables
+            wEmbed->var("t_pt")->setVal(tau.getPt());
+            wEmbed->var("m_pt")->setVal(muon.getPt());
+            wEmbed->var("m_eta")->setVal(muon.getEta());
+            wEmbed->var("m_iso")->setVal(muon.getIso());
+            wEmbed->var("gt1_pt")->setVal(muon.getPt());
+            wEmbed->var("gt1_eta")->setVal(muon.getEta());
+            wEmbed->var("gt2_pt")->setVal(tau.getPt());
+            wEmbed->var("gt2_eta")->setVal(tau.getEta());
 
-            // get correction factor
-            std::vector<double> corrFactor = EmdWeight_Muon(wEmbed, muon.getPt(), muon.getEta(), muon.getIso());
-            double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]);  // id SF, iso SF, trg eff. SF
+            // double muon trigger eff in selection
+            evtwt *= wEmbed->function("m_sel_trg_ratio")->getVal();
 
-            // data to mc trigger ratio
-            double trg_ratio(m_sel_trg_ratio(wEmbed, muon.getPt(), muon.getEta(), tau.getPt(), tau.getEta()));
+            // muon ID eff in selection (leg 1)
+            wEmbed->var("gt_pt")->setVal(muon.getGenPt());
+            wEmbed->var("gt_eta")->setVal(muon.getGenEta());
+            evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
+
+            // muon ID eff in selection (leg 1)
+            wEmbed->var("gt_pt")->setVal(tau.getGenPt());
+            wEmbed->var("gt_eta")->setVal(tau.getGenEta());
+            evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
+
+            // muon ID SF
+            evtwt *= wEmbed->function("m_id_ratio")->getVal();
+
+            // muon iso SF
+            evtwt *= wEmbed->function("m_iso_ratio")->getVal();
+
+            // apply trigger SF's
+            auto single_eff = wEmbed->function("m_trg_ratio")->getVal();
+            auto mu_cross_eff = 0.;
+            auto tau_cross_eff = 0.;
+
+            bool fireSingle = muon.getPt() > 23;
+            bool fireCross = false;  // no sf so hard-code false for now
+            evtwt *= (single_eff * fireSingle + mu_cross_eff * tau_cross_eff * fireCross);
 
             auto genweight(event.getGenWeight());
             if (genweight > 1 || genweight < 0) {
                 genweight = 0;
             }
-            evtwt *= (Stitching_Weight * totEmbedWeight * trg_ratio * genweight);
-
-            // scale-up tau pT
-            if (tau.getGenMatch() == 5) {
-                tau.scalePt(1.02);
-            }
+            evtwt *= genweight;
         }
 
         fout->cd();
