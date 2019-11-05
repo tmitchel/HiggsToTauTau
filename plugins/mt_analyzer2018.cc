@@ -300,7 +300,7 @@ int main(int argc, char *argv[]) {
                 evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), shift);
             }
 
-            // // anti-lepton discriminator SFs (using 2017 b/c 2018 doesn't exist yet)
+            // anti-lepton discriminator SFs
             if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
                 if (fabs(tau.getEta()) < 1.460)
                     evtwt *= 1.09;
