@@ -58,7 +58,7 @@ def getSyst2016(name, exe):
         elif '_mt' in exe:
             systs += ['mfaket_Up', 'mfaket_Down']
             
-        # systs += ['ltau_FES_DM0_Up', 'ltau_FES_DM0_Down', 'ltau_FES_DM1_Up', 'ltau_FES_DM1_Down']
+        systs += ['LES_DM0_Up', 'LES_DM0_Down', 'LES_DM1_Up', 'LES_DM1_Down']
 
     if name != 'embed' and name != 'data_obs':
         systs += ['UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down']
@@ -69,11 +69,11 @@ def getSyst2016(name, exe):
             'JetEta3to5_Up', 'JetEta3to5_Down', 'JetEC2_Up', 'JetEC2_Down'
         ]
 
-    # if name == 'TTT' or name == 'TTJ':
-    #     systs += ['ttbarShape_Up', 'ttbarShape_Down']
+    if name == 'TTT' or name == 'TTJ':
+        systs += ['ttbarShape_Up', 'ttbarShape_Down']
 
-    # if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
-    #     systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
+    if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
+        systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT':
         systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
@@ -81,7 +81,12 @@ def getSyst2016(name, exe):
     if name != 'data_obs' and '_et' in exe:
         systs += ['EEScale_Up', 'EEScale_Down', 'EESigma_Up', 'EESigma_Down', 'el_combo_Up', 'el_combo_Down']
     elif name != 'data_obs' and '_mt' in exe:
-        systs += ['MES_Up', 'MES_Down', 'mu_combo_Up', 'mu_combo_Down']
+        systs += [
+            'MESbin1_Up', 'MESbin1_Down', 'MESbin2_Up', 'MESbin2_Down',
+            'MESbin3_Up', 'MESbin3_Down','MESbin4_Up', 'MESbin4_Down',
+            'MESbin5_Up', 'MESbin5_Down',
+            'mu_combo_Up', 'mu_combo_Down'
+         ]
 
     if name == 'ggH125':
         systs += [
@@ -90,8 +95,11 @@ def getSyst2016(name, exe):
             'Rivet6_Up', 'Rivet6_Down', 'Rivet7_Up', 'Rivet7_Down', 'Rivet8_Up', 'Rivet8_Down', 
         ]
 
-    # if name != 'data_obs':
-    #     systs += ['bveto_Up', 'bveto_Down']
+    if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
+        systs += ['RecoilReso_Up', 'RecoilReso_Down', 'RecoilResp_Up', 'RecoilResp_Down']
+
+    if name != 'data_obs':
+        systs += ['bveto_Up', 'bveto_Down']
 
     return systs
 

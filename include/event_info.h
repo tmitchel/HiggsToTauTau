@@ -143,17 +143,21 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string syst) :
         {"Rivet8_Up", 8}, {"Rivet8_Down", 8}
     }
      {
+    auto end = std::string::npos;
     std::string m_sv_name("m_sv"), pt_sv_name("pt_sv");
-    if ((syst.find("DM0") != std::string::npos || syst.find("DM1") != std::string::npos) && syst.find("FES") == std::string::npos) {
+    if ((syst.find("DM0") != end || syst.find("DM1") != end) && syst.find("FES") == end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-    } else if (syst.find("UncMet") != std::string::npos || syst.find("ClusteredMet") != std::string::npos) {
+    } else if (syst.find("UncMet") != end || syst.find("ClusteredMet") != end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
     } else if (syst.find("Jet") != std::string::npos) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-    } else if (syst.find("EES") != std::string::npos || syst.find("MES") != std::string::npos) {
+    } else if (syst.find("EES") != end || syst.find("MES") != end || syst.find("LES") != end) {
+        m_sv_name += "_" + syst;
+        pt_sv_name += "_" + syst;
+    } else if (syst.find("RecoilReso") != end || syst.find("RecoilResp") != end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
     }
