@@ -136,6 +136,8 @@ if options.syst == '2016':
     get_systs = getSyst2016
 elif options.syst == '2017':
     get_systs = getSyst2017
+elif options.syst == '2018':
+    get_systs = getSyst2016
 
 processes = []
 
