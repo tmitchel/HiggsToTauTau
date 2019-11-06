@@ -64,11 +64,10 @@ def get_syst_name(channel, syst, syst_name_map):
     if syst == 'nominal':
         return ''
     elif syst in syst_name_map.keys():
-        if 'LES_DM' in syst:
-            temp = syst.replace('LES_DM', 'efaket') if channel == 'et' else syst.replace('LES_DM', 'mfaket')
-            return syst_name_map[temp]
-        else:
-            return syst_name_map[syst]
+        return syst_name_map[syst]
+    elif 'LES_DM' in syst:
+        temp = syst.replace('LES_DM', 'efaket') if channel == 'et' else syst.replace('LES_DM', 'mfaket')
+        return syst_name_map[temp]
     else:
         print '\t [INFO]  {} is unknown. Skipping...'.format(syst)
         return 'unknown'
