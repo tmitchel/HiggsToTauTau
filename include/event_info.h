@@ -161,7 +161,7 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
         pt_sv_name += "_" + syst;
     } else if (syst.find("RecoilReso") != end || syst.find("RecoilResp") != end) {
         // account for not splitting based on jets at skim level (oops)
-        auto syst_name = syst.erase(9, 5);  // RecoilReso[_njet]_Up
+        auto syst_name = _syst.erase(10, 5);  // RecoilReso[_njet]_Up
         input->SetBranchAddress((m_sv_name + "_" + syst_name).c_str(), &recoil_m_sv);
         input->SetBranchAddress((pt_sv_name + "_" + syst_name).c_str(), &recoil_pt_sv);
     }
