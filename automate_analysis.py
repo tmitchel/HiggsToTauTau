@@ -52,12 +52,7 @@ def getSyst2016(name, exe):
         systs += ['tau_id_Up', 'tau_id_Down'] # names will probably be updated
         systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
 
-    if name == 'ZL' or name == 'W':
-        if '_et' in exe:
-            systs += ['efaket_Up', 'efaket_Down']
-        elif '_mt' in exe:
-            systs += ['mfaket_Up', 'mfaket_Down']
-            
+    if name == 'ZL' or name == 'W':            
         systs += ['LES_DM0_Up', 'LES_DM0_Down', 'LES_DM1_Up', 'LES_DM1_Down']
 
     if name != 'embed' and name != 'data_obs':
@@ -79,13 +74,12 @@ def getSyst2016(name, exe):
         systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
 
     if name != 'data_obs' and '_et' in exe:
-        systs += ['EEScale_Up', 'EEScale_Down', 'EESigma_Up', 'EESigma_Down', 'el_combo_Up', 'el_combo_Down']
+        systs += ['EEScale_Up', 'EEScale_Down', 'EESigma_Up', 'EESigma_Down']
     elif name != 'data_obs' and '_mt' in exe:
         systs += [
             'MESbin1_Up', 'MESbin1_Down', 'MESbin2_Up', 'MESbin2_Down',
             'MESbin3_Up', 'MESbin3_Down','MESbin4_Up', 'MESbin4_Down',
             'MESbin5_Up', 'MESbin5_Down',
-            'mu_combo_Up', 'mu_combo_Down'
          ]
 
     if name == 'ggH125':
