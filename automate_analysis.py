@@ -45,7 +45,7 @@ start = time.time()
 fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile]
 
 
-def getSyst2016(name, exe):
+def getSyst(name, signal_type, exe):
     systs = ['']
 
     if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
@@ -82,7 +82,7 @@ def getSyst2016(name, exe):
             'MESbin5_Up', 'MESbin5_Down',
          ]
 
-    if name == 'ggH125':
+    if name == 'ggH125' and signal_type == 'powheg':
         systs += [
             'Rivet0_Up', 'Rivet0_Down', 'Rivet1_Up', 'Rivet1_Down', 'Rivet2_Up', 'Rivet2_Down', 
             'Rivet3_Up', 'Rivet3_Down', 'Rivet4_Up', 'Rivet4_Down', 'Rivet5_Up', 'Rivet5_Down', 
@@ -102,28 +102,6 @@ def getSyst2016(name, exe):
     return systs
 
 
-def getSyst2017(name):
-    systs = ['']
-
-    if name != 'embed' and name != 'data_obs':
-        systs += [
-            'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down',
-            'JetTotalUp', 'JetTotalDown'
-        ]
-
-    if name == 'TTT' or name == 'TTJ':
-        systs += ['ttbarShape_Up', 'ttbarShape_Down']
-
-    if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
-        #    systs += ['Up', 'Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
-        systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
-
-    if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
-        systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
-
-    return systs
-
-
 def run_process(proc):
     print proc
     return call(proc, shell=True)
@@ -131,11 +109,11 @@ def run_process(proc):
 
 get_systs = None
 if options.syst == '2016':
-    get_systs = getSyst2016
+    get_systs = getSyst
 elif options.syst == '2017':
-    get_systs = getSyst2017
+    get_systs = getSyst
 elif options.syst == '2018':
-    get_systs = getSyst2016
+    get_systs = getSyst
 
 processes = []
 
@@ -185,7 +163,7 @@ for ifile in fileList:
 
     if get_systs != None and not 'Data' in sample.lower():
         for name in names:
-            for isyst in get_systs(name, options.exe):
+            for isyst in get_systs(name, signal_type, options.exe):
                 if isyst == "" and not path.exists('Output/trees/{}/NOMINAL'.format(options.output_dir)):
                     makedirs('Output/trees/{}/NOMINAL'.format(options.output_dir))
                 if isyst != "" and not path.exists('Output/trees/{}/SYST_{}'.format(options.output_dir, isyst)):
