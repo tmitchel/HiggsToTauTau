@@ -119,6 +119,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("dEtajj", &dEtajj, "dEtajj/F");
     otree->Branch("dPhijj", &dPhijj, "dPhijj/F");
 
+    otree->Branch("OS", &OS, "OS/F");
     otree->Branch("is_signal", &is_signal, "is_signal/I");
     otree->Branch("is_antiLepIso", &is_antiLepIso, "is_antiLepIso/I");
     otree->Branch("is_antiTauIso", &is_antiTauIso, "is_antiTauIso/I");
