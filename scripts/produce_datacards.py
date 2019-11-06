@@ -69,7 +69,7 @@ def get_syst_name(channel, syst, syst_name_map):
         temp = syst.replace('LES_DM', 'efaket') if channel == 'et' else syst.replace('LES_DM', 'mfaket')
         return syst_name_map[temp]
     else:
-        print '\t [INFO]  {} is unknown. Skipping...'.format(syst)
+        print '\t \033[91m[INFO]  {} is unknown. Skipping...\033[0m'.format(syst)
         return 'unknown'
 
 def main(args):
