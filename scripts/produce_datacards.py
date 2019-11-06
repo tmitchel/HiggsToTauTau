@@ -60,11 +60,15 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, ac
     return hists
 
 
-def get_syst_name(syst, syst_name_map):
+def get_syst_name(channel, syst, syst_name_map):
     if syst == 'nominal':
         return ''
     elif syst in syst_name_map.keys():
-        return syst_name_map[syst]
+        if 'LES_DM' in syst:
+            temp = syst.replace('LES_DM', 'efaket') if channel == 'et' else syst.replace('LES_DM', 'mfaket')
+            return syst_name_map[temp]
+        else:
+            return syst_name_map[syst]
     else:
         print '\t [INFO]  {} is unknown. Skipping...'.format(syst)
         return 'unknown'
@@ -114,7 +118,7 @@ def main(args):
     #                                                                               ztt_name, syst_name, args.date, '_'+args.suffix))
 
     for syst, files in filelist.iteritems():
-        postfix = get_syst_name(syst, syst_name_map)
+        postfix = get_syst_name(channel_prefix, syst, syst_name_map)
         if postfix == 'unknown': # skip unknown systematics
             continue
 
