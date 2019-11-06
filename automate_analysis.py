@@ -96,9 +96,6 @@ def getSyst(name, signal_type, exe):
             'RecoilReso_2jet_Up', 'RecoilReso_2jet_Down', 'RecoilResp_2jet_Up', 'RecoilResp_2jet_Down',
             ]
 
-    if name != 'data_obs':
-        systs += ['bveto_Up', 'bveto_Down']
-
     return systs
 
 
