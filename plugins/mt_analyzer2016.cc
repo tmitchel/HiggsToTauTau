@@ -235,6 +235,7 @@ int main(int argc, char *argv[]) {
         auto muon = muons.run_factory();
         auto tau = taus.run_factory();
         jets.run_factory();
+        event.setNjets(jets.getNjets());
 
         // apply special ID for data
         if (event.getPassFlags()) {

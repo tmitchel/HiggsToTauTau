@@ -237,6 +237,7 @@ int main(int argc, char *argv[]) {
         auto electron = electrons.run_factory();
         auto tau = taus.run_factory();
         jets.run_factory();
+        event.setNjets(jets.getNjets());
 
         if (event.getPassFlags()) {
             histos->at("cutflow")->Fill(2., 1.);
