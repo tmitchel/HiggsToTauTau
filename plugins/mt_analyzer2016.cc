@@ -205,13 +205,13 @@ int main(int argc, char *argv[]) {
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 7.224577545;
+                evtwt = 7.23554229;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 4.046822405;
+                evtwt = 4.028649233;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 1.065041503;
+                evtwt = 1.078641327;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 2.1573657;
+                evtwt = 2.120996132;
             } else {
                 evtwt = 28.8408141;
             }
@@ -219,13 +219,13 @@ int main(int argc, char *argv[]) {
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.511697165;
+                evtwt = 0.5116971648;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 0.564096329;
+                evtwt = 0.5620553804;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 0.52024036;
+                evtwt = 0.5185483697;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 0.428569007;
+                evtwt = 0.4301591422;
             } else {
                 evtwt = 1.549875011;
             }
@@ -235,6 +235,7 @@ int main(int argc, char *argv[]) {
         auto muon = muons.run_factory();
         auto tau = taus.run_factory();
         jets.run_factory();
+        event.setNjets(jets.getNjets());
 
         // apply special ID for data
         if (event.getPassFlags()) {

@@ -45,20 +45,15 @@ start = time.time()
 fileList = [ifile for ifile in glob(options.path+'/*') if '.root' in ifile]
 
 
-def getSyst2016(name, exe):
+def getSyst(name, signal_type, exe):
     systs = ['']
 
     if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
         systs += ['tau_id_Up', 'tau_id_Down'] # names will probably be updated
         systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
 
-    if name == 'ZL' or name == 'W':
-        if '_et' in exe:
-            systs += ['efaket_Up', 'efaket_Down']
-        elif '_mt' in exe:
-            systs += ['mfaket_Up', 'mfaket_Down']
-            
-        # systs += ['ltau_FES_DM0_Up', 'ltau_FES_DM0_Down', 'ltau_FES_DM1_Up', 'ltau_FES_DM1_Down']
+    if name == 'ZL' or name == 'W':            
+        systs += ['LES_DM0_Up', 'LES_DM0_Down', 'LES_DM1_Up', 'LES_DM1_Down']
 
     if name != 'embed' and name != 'data_obs':
         systs += ['UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down']
@@ -69,51 +64,37 @@ def getSyst2016(name, exe):
             'JetEta3to5_Up', 'JetEta3to5_Down', 'JetEC2_Up', 'JetEC2_Down'
         ]
 
-    # if name == 'TTT' or name == 'TTJ':
-    #     systs += ['ttbarShape_Up', 'ttbarShape_Down']
+    if name == 'TTT' or name == 'TTJ':
+        systs += ['ttbarShape_Up', 'ttbarShape_Down']
 
-    # if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
-    #     systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
+    if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
+        systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT':
         systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
 
     if name != 'data_obs' and '_et' in exe:
-        systs += ['EEScale_Up', 'EEScale_Down', 'EESigma_Up', 'EESigma_Down', 'el_combo_Up', 'el_combo_Down']
+        systs += ['EEScale_Up', 'EEScale_Down', 'EESigma_Up', 'EESigma_Down']
     elif name != 'data_obs' and '_mt' in exe:
-        systs += ['MES_Up', 'MES_Down', 'mu_combo_Up', 'mu_combo_Down']
+        systs += [
+            'MESbin1_Up', 'MESbin1_Down', 'MESbin2_Up', 'MESbin2_Down',
+            'MESbin3_Up', 'MESbin3_Down','MESbin4_Up', 'MESbin4_Down',
+            'MESbin5_Up', 'MESbin5_Down',
+         ]
 
-    if name == 'ggH125':
+    if name == 'ggH125' and signal_type == 'powheg':
         systs += [
             'Rivet0_Up', 'Rivet0_Down', 'Rivet1_Up', 'Rivet1_Down', 'Rivet2_Up', 'Rivet2_Down', 
             'Rivet3_Up', 'Rivet3_Down', 'Rivet4_Up', 'Rivet4_Down', 'Rivet5_Up', 'Rivet5_Down', 
             'Rivet6_Up', 'Rivet6_Down', 'Rivet7_Up', 'Rivet7_Down', 'Rivet8_Up', 'Rivet8_Down', 
         ]
 
-    # if name != 'data_obs':
-    #     systs += ['bveto_Up', 'bveto_Down']
-
-    return systs
-
-
-def getSyst2017(name):
-    systs = ['']
-
-    if name != 'embed' and name != 'data_obs':
+    if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
         systs += [
-            'UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down',
-            'JetTotalUp', 'JetTotalDown'
-        ]
-
-    if name == 'TTT' or name == 'TTJ':
-        systs += ['ttbarShape_Up', 'ttbarShape_Down']
-
-    if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
-        #    systs += ['Up', 'Down', 'DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
-        systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
-
-    if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
-        systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
+            'RecoilReso_0jet_Up', 'RecoilReso_0jet_Down', 'RecoilResp_0jet_Up', 'RecoilResp_0jet_Down',
+            'RecoilReso_1jet_Up', 'RecoilReso_1jet_Down', 'RecoilResp_1jet_Up', 'RecoilResp_1jet_Down',
+            'RecoilReso_2jet_Up', 'RecoilReso_2jet_Down', 'RecoilResp_2jet_Up', 'RecoilResp_2jet_Down',
+            ]
 
     return systs
 
@@ -125,9 +106,11 @@ def run_process(proc):
 
 get_systs = None
 if options.syst == '2016':
-    get_systs = getSyst2016
+    get_systs = getSyst
 elif options.syst == '2017':
-    get_systs = getSyst2017
+    get_systs = getSyst
+elif options.syst == '2018':
+    get_systs = getSyst
 
 processes = []
 
@@ -177,7 +160,7 @@ for ifile in fileList:
 
     if get_systs != None and not 'Data' in sample.lower():
         for name in names:
-            for isyst in get_systs(name, options.exe):
+            for isyst in get_systs(name, signal_type, options.exe):
                 if isyst == "" and not path.exists('Output/trees/{}/NOMINAL'.format(options.output_dir)):
                     makedirs('Output/trees/{}/NOMINAL'.format(options.output_dir))
                 if isyst != "" and not path.exists('Output/trees/{}/SYST_{}'.format(options.output_dir, isyst)):

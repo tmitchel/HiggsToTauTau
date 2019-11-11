@@ -48,6 +48,8 @@ class event_info {
     Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
     Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, ME_ps_VBF, ME_ps_ggH,
         ME_sm_ggH_qqInit, ME_ps_ggH_qqInit;
+    Float_t njets, recoil_m_sv, recoil_pt_sv;
+    std::string syst;
 
     bool isEmbed;
     int era;
@@ -57,7 +59,10 @@ class event_info {
     event_info(TTree*, lepton, int, std::string);
     virtual ~event_info() {}
     void setEmbed() { isEmbed = true; }
+    void setNjets(Float_t _njets) { njets = _njets; }  // must be set in event loop
     void setRivets(TTree*);
+    Float_t getMSV();
+    Float_t getPtSV();
 
     // tautau Trigger Info
     Bool_t getPassEle25();
@@ -91,10 +96,6 @@ class event_info {
     Float_t getNumGenJets() { return numGenJets; }
     Float_t getGenWeight() { return genweight; }
     Float_t getTauGenDR() { return genDR; }
-
-    // SVFit Info
-    Float_t getMSV() { return m_sv; }
-    Float_t getPtSV() { return pt_sv; }
 
     // MELA Info
     Float_t getDbkg_VBF() { return Dbkg_VBF; }
@@ -132,9 +133,10 @@ class event_info {
 };
 
 // read data from trees into member variables
-event_info::event_info(TTree* input, lepton lep, int _era, std::string syst) :
+event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
     isEmbed(false),
     era(_era),
+    syst(_syst),
     unc_map{
         {"Rivet0_Up", 0}, {"Rivet0_Down", 0}, {"Rivet1_Up", 1}, {"Rivet1_Down", 1},
         {"Rivet2_Up", 2}, {"Rivet2_Down", 2}, {"Rivet3_Up", 3}, {"Rivet3_Down", 3},
@@ -143,19 +145,25 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string syst) :
         {"Rivet8_Up", 8}, {"Rivet8_Down", 8}
     }
      {
+    auto end = std::string::npos;
     std::string m_sv_name("m_sv"), pt_sv_name("pt_sv");
-    if ((syst.find("DM0") != std::string::npos || syst.find("DM1") != std::string::npos) && syst.find("FES") == std::string::npos) {
+    if ((syst.find("DM0") != end || syst.find("DM1") != end) && syst.find("FES") == end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-    } else if (syst.find("UncMet") != std::string::npos || syst.find("ClusteredMet") != std::string::npos) {
+    } else if (syst.find("UncMet") != end || syst.find("ClusteredMet") != end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
     } else if (syst.find("Jet") != std::string::npos) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-    } else if (syst.find("EES") != std::string::npos || syst.find("MES") != std::string::npos) {
+    } else if (syst.find("EES") != end || syst.find("MES") != end || syst.find("LES") != end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
+    } else if (syst.find("RecoilReso") != end || syst.find("RecoilResp") != end) {
+        // account for not splitting based on jets at skim level (oops)
+        auto syst_name = _syst.erase(10, 5);  // RecoilReso[_njet]_Up
+        input->SetBranchAddress((m_sv_name + "_" + syst_name).c_str(), &recoil_m_sv);
+        input->SetBranchAddress((pt_sv_name + "_" + syst_name).c_str(), &recoil_pt_sv);
     }
 
     input->SetBranchAddress(m_sv_name.c_str(), &m_sv);
@@ -303,6 +311,32 @@ Float_t event_info::getRivetUnc(std::vector<double> uncs, std::string syst) {
         }
     }
 }
+
+Float_t event_info::getMSV() {
+    if (syst.find("0jet") != std::string::npos && njets == 0) {
+        return recoil_m_sv;
+    } else if (syst.find("1jet") != std::string::npos && njets == 1) {
+        return recoil_m_sv;
+    } else if (syst.find("2jet") != std::string::npos && njets > 1) {
+        return recoil_m_sv;
+    }
+
+    // return normal m_sv in any other case
+    return m_sv;
+}
+Float_t event_info::getPtSV() {
+    if (syst.find("0jet") != std::string::npos && njets == 0) {
+        return recoil_pt_sv;
+    } else if (syst.find("1jet") != std::string::npos && njets == 1) {
+        return recoil_pt_sv;
+    } else if (syst.find("2jet") != std::string::npos && njets > 1) {
+        return recoil_pt_sv;
+    }
+
+    // return normal pt_sv in any other case
+    return pt_sv;
+}
+
 
 Bool_t event_info::getPassFlags() {
     if (era == 2016) {

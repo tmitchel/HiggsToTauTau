@@ -86,7 +86,7 @@ def main(args):
         'frac_w': ['W', 'ZJ', 'VVJ'],
         'frac_tt': ['TTJ'],
         'frac_data': ['data_obs'],
-        'frac_real': ['ZTT', 'TTT', 'VVT'],
+        'frac_real': ['embed', 'TTT', 'VVT'],
     }
 
     fractions = {

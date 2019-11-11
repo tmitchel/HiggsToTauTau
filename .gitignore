@@ -18,3 +18,4 @@ scripts/plot.sh
 *.pyc
 etau2016_sel.md
 mtau2016_sel.md
+*.tar.gz

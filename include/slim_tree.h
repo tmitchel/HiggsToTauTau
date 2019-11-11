@@ -28,7 +28,6 @@ class slim_tree {
     Float_t evtwt, el_pt, el_eta, el_phi, el_mass, el_charge, el_iso, mu_pt, mu_eta, mu_phi, mu_mass, mu_charge, mu_iso, t1_pt, t1_eta, t1_phi,
         t1_mass, t1_charge, t1_iso, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode,
         t1_genMatch,  // t1 is used for et and mt, as well
-        t2_pt, t2_eta, t2_phi, t2_mass, t2_charge, t2_iso, t2_iso_VL, t2_iso_L, t2_iso_M, t2_iso_T, t2_iso_VT, t2_iso_VVT, t2_decayMode, t2_genMatch,
         njets, nbjets, j1_pt, j1_eta, j1_phi, j2_pt, j2_eta, j2_phi, b1_pt, b1_eta, b1_phi, b2_pt, b2_eta, b2_phi, met, metphi, mjj, numGenJets, mt,
         dmf, dmf_new, pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH, MELA_D2j, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2, ME_sm_ggH_qqInit,
         ME_ps_ggH_qqInit, ME_ps_ggH, ME_ps_VBF, ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH,
@@ -62,32 +61,10 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("t1_mass", &t1_mass, "t1_mass/F");
     otree->Branch("t1_charge", &t1_charge, "t1_charge/F");
     otree->Branch("t1_iso", &t1_iso, "t1_iso/F");
-    otree->Branch("t1_iso_VL", &t1_iso_VL, "t1_iso_VL/F");
-    otree->Branch("t1_iso_L", &t1_iso_L, "t1_iso_L/F");
-    otree->Branch("t1_iso_M", &t1_iso_M, "t1_iso_M/F");
-    otree->Branch("t1_iso_T", &t1_iso_T, "t1_iso_T/F");
-    otree->Branch("t1_iso_VT", &t1_iso_VT, "t1_iso_VT/F");
-    otree->Branch("t1_iso_VVT", &t1_iso_VVT, "t1_iso_VVT/F");
     otree->Branch("t1_decayMode", &t1_decayMode, "t1_decayMode/F");
     otree->Branch("t1_dmf", &dmf, "t1_dmf/F");
     otree->Branch("t1_dmf_new", &dmf_new, "t1_dmf_new/F");
     otree->Branch("t1_genMatch", &t1_genMatch, "t1_genMatch/F");
-    otree->Branch("t2_pt", &t2_pt, "t2_pt/F");
-    otree->Branch("t2_eta", &t2_eta, "t2_eta/F");
-    otree->Branch("t2_phi", &t2_phi, "t2_phi/F");
-    otree->Branch("t2_mass", &t2_mass, "t2_mass/F");
-    otree->Branch("t2_charge", &t2_charge, "t2_charge/F");
-    otree->Branch("t2_iso", &t2_iso, "t2_iso/F");
-    otree->Branch("t2_iso_VL", &t2_iso_VL, "t2_iso_VL/F");
-    otree->Branch("t2_iso_L", &t2_iso_L, "t2_iso_L/F");
-    otree->Branch("t2_iso_M", &t2_iso_M, "t2_iso_M/F");
-    otree->Branch("t2_iso_T", &t2_iso_T, "t2_iso_T/F");
-    otree->Branch("t2_iso_VT", &t2_iso_VT, "t2_iso_VT/F");
-    otree->Branch("t2_iso_VVT", &t2_iso_VVT, "t2_iso_VVT/F");
-    otree->Branch("t2_decayMode", &t2_decayMode, "t2_decayMode/F");
-    otree->Branch("t2_dmf", &dmf, "t2_dmf/F");
-    otree->Branch("t2_dmf_new", &dmf_new, "t2_dmf_new/F");
-    otree->Branch("t2_genMatch", &t2_genMatch, "t2_genMatch/F");
 
     otree->Branch("njets", &njets, "njets");
     otree->Branch("nbjets", &nbjets, "nbjets");
@@ -97,12 +74,6 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("j2_pt", &j2_pt, "j2_pt/F");
     otree->Branch("j2_eta", &j2_eta, "j2_eta/F");
     otree->Branch("j2_phi", &j2_phi, "j2_phi/F");
-    otree->Branch("b1_pt", &b1_pt, "b1_pt/F");
-    otree->Branch("b1_eta", &b1_eta, "b1_eta/F");
-    otree->Branch("b1_phi", &b1_phi, "b1_phi/F");
-    otree->Branch("b2_pt", &b2_pt, "b2_pt/F");
-    otree->Branch("b2_eta", &b2_eta, "b2_eta/F");
-    otree->Branch("b2_phi", &b2_phi, "b2_phi/F");
 
     otree->Branch("met", &met, "met/F");
     otree->Branch("metphi", &metphi, "metphi/F");
@@ -147,29 +118,14 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("vis_mass", &vis_mass, "vis_mass/F");
     otree->Branch("dEtajj", &dEtajj, "dEtajj/F");
     otree->Branch("dPhijj", &dPhijj, "dPhijj/F");
-    otree->Branch("MT_lepMET", &MT_lepMET, "MT_lepMET/F");
-    otree->Branch("MT_HiggsMET", &MT_HiggsMET, "MT_HiggsMET/F");
-    otree->Branch("hj_dphi", &hj_dphi, "hj_dphi/F");
-    otree->Branch("jmet_dphi", &jmet_dphi, "jmet_dphi/F");
-    otree->Branch("MT_t2MET", &MT_t2MET, "MT_t2MET/F");
-    otree->Branch("hj_deta", &hj_deta, "hj_deta/F");
-    otree->Branch("hmet_dphi", &hmet_dphi, "hmet_dphi/F");
-    otree->Branch("hj_dr", &hj_dr, "hj_dr/F");
-    otree->Branch("lt_dphi", &lt_dphi, "lt_dphi/F");
 
+    otree->Branch("OS", &OS, "OS/F");
     otree->Branch("is_signal", &is_signal, "is_signal/I");
     otree->Branch("is_antiLepIso", &is_antiLepIso, "is_antiLepIso/I");
     otree->Branch("is_antiTauIso", &is_antiTauIso, "is_antiTauIso/I");
-    otree->Branch("is_qcd", &is_qcd, "is_qcd/I");
-    otree->Branch("is_looseIso", &is_looseIso, "is_looseIso/I");
     otree->Branch("cat_0jet", &cat_0jet, "cat_0jet/I");
     otree->Branch("cat_boosted", &cat_boosted, "cat_boosted/I");
     otree->Branch("cat_vbf", &cat_vbf, "cat_vbf/I");
-    otree->Branch("cat_VH", &cat_VH, "cat_VH/I");
-    otree->Branch("OS", &OS, "OS/I");
-    otree->Branch("SS", &SS, "SS/I");
-
-    otree->Branch("trigger", &trigger, "trigger/F");
 
     // include weights for anomolous coupling
     if (isAC) {

@@ -60,13 +60,16 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, ac
     return hists
 
 
-def get_syst_name(syst, syst_name_map):
+def get_syst_name(channel, syst, syst_name_map):
     if syst == 'nominal':
         return ''
     elif syst in syst_name_map.keys():
         return syst_name_map[syst]
+    elif 'LES_DM' in syst:
+        temp = syst.replace('LES_DM', 'efaket') if channel == 'et' else syst.replace('LES_DM', 'mfaket')
+        return syst_name_map[temp]
     else:
-        print '\t [INFO]  {} is unknown. Skipping...'.format(syst)
+        print '\t \033[91m[INFO]  {} is unknown. Skipping...\033[0m'.format(syst)
         return 'unknown'
 
 def main(args):
@@ -114,7 +117,7 @@ def main(args):
     #                                                                               ztt_name, syst_name, args.date, '_'+args.suffix))
 
     for syst, files in filelist.iteritems():
-        postfix = get_syst_name(syst, syst_name_map)
+        postfix = get_syst_name(channel_prefix, syst, syst_name_map)
         if postfix == 'unknown': # skip unknown systematics
             continue
 
@@ -308,7 +311,7 @@ def main(args):
                         vbf_cat_hists = []
                         for cat in boilerplate['vbf_sub_cats']:
                             output_file.cd('{}_{}'.format(channel_prefix, cat))
-                            vbf_cat_hists.append(build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins))
+                            vbf_cat_hists.append(build_histogram('jetFakes_' + syst, vbf_cat_x_bins, vbf_cat_y_bins))
                         fill_hists(fake_vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
                                 edges=vbf_cat_edges, fake_weight=syst)
                         output_file.Write()

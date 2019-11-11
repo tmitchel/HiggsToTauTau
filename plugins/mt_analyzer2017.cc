@@ -225,13 +225,13 @@ int main(int argc, char *argv[]) {
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 3.417;
+                evtwt = 3.974;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 3.315;
+                evtwt = 3.677;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 2.415;
+                evtwt = 2.331;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 2.358;
+                evtwt = 2.123;
             } else {
                 evtwt = 27.830;
             }
@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
             } else if (event.getNumGenJets() == 4) {
                 evtwt = 0.249;
             } else {
-                evtwt = 0.243;
+                evtwt = 2.855;
             }
         }
 
