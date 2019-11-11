@@ -311,7 +311,7 @@ def main(args):
                         vbf_cat_hists = []
                         for cat in boilerplate['vbf_sub_cats']:
                             output_file.cd('{}_{}'.format(channel_prefix, cat))
-                            vbf_cat_hists.append(build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins))
+                            vbf_cat_hists.append(build_histogram('jetFakes_' + syst, vbf_cat_x_bins, vbf_cat_y_bins))
                         fill_hists(fake_vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
                                 edges=vbf_cat_edges, fake_weight=syst)
                         output_file.Write()
