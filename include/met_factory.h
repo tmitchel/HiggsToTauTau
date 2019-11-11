@@ -3,6 +3,7 @@
 #ifndef INCLUDE_MET_FACTORY_H_
 #define INCLUDE_MET_FACTORY_H_
 
+#include <algorithm>
 #include <string>
 #include "TTree.h"
 #include "TLorentzVector.h"
@@ -45,6 +46,10 @@ met_factory::met_factory(TTree* input, int era, std::string syst) {
     } else if (syst == "ClusteredMet_Down") {
         met_name += "_JESDown";
         metphi_name += "_JESDown";
+    } else if (syst.find("Jet") != std::string::npos && (syst.find("Up") != std::string::npos || syst.find("Down") != std::string::npos)) {
+        syst.erase(std::remove(syst.begin(), syst.end(), '_'), syst.end());
+        met_name += "_" + syst;
+        metphi_name += "_" + syst;
     }
 
     input->SetBranchAddress(met_name.c_str(), &met);

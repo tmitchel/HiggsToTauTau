@@ -19,6 +19,7 @@
 #include "TTree.h"
 
 // user includes
+#include "../include/ComputeWG1Unc.h"
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
 #include "../include/EmbedWeight.h"
@@ -183,12 +184,12 @@ int main(int argc, char *argv[]) {
 
     // construct factories
     event_info event(ntuple, lepton::ELECTRON, 2016, syst);
-    electron_factory electrons(ntuple, 2016);
-    tau_factory taus(ntuple, 2016);
+    electron_factory electrons(ntuple, 2016, syst);
+    tau_factory taus(ntuple, 2016, syst);
     jet_factory jets(ntuple, 2016, syst);
     met_factory met(ntuple, 2016, syst);
 
-    if (sample.find("ggHtoTauTau125") != std::string::npos) {
+    if (sample == "ggh125" && signal_type == "powheg") {
         event.setRivets(ntuple);
     }
 
@@ -201,33 +202,34 @@ int main(int argc, char *argv[]) {
             logfile << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
             progress++;
         }
+
         // find the event weight (not lumi*xs if looking at W or Drell-Yan)
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 7.236;
+                evtwt = 7.23554229;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 4.029;
+                evtwt = 4.028649233;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 1.079;
+                evtwt = 1.078641327;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 2.121;
+                evtwt = 2.120996132;
             } else {
-                evtwt = 28.84;
+                evtwt = 28.8408141;
             }
         }
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.486;
+                evtwt = 0.5116971648;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 0.533;
+                evtwt = 0.5620553804;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 0.492;
+                evtwt = 0.5185483697;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 0.408;
+                evtwt = 0.4301591422;
             } else {
-                evtwt = 1.470;
+                evtwt = 1.549875011;
             }
         }
         histos->at("cutflow")->Fill(1., 1.);
@@ -235,8 +237,9 @@ int main(int argc, char *argv[]) {
         auto electron = electrons.run_factory();
         auto tau = taus.run_factory();
         jets.run_factory();
+        event.setNjets(jets.getNjets());
 
-        if (fabs(electron.getEta()) < 2.1) {
+        if (event.getPassFlags()) {
             histos->at("cutflow")->Fill(2., 1.);
         } else {
             continue;
@@ -247,7 +250,9 @@ int main(int argc, char *argv[]) {
             continue;
         } else if ((name == "ZTT" || name == "TTT" || name == "VVT") && tau.getGenMatch() != 5) {
             continue;
-        } else if (name == "ZJ" || name == "TTJ" || name == "VVJ" && tau.getGenMatch() != 6) {
+        } else if ((name == "TTJ" || name == "VVJ") && tau.getGenMatch() == 5) {
+            continue;
+        } else if (name == "ZJ" && tau.getGenMatch() != 6) {
             continue;
         } else {
             histos->at("cutflow")->Fill(3., 1.);
@@ -268,7 +273,7 @@ int main(int argc, char *argv[]) {
         double met_x = met.getMet() * cos(met.getMetPhi());
         double met_y = met.getMet() * sin(met.getMetPhi());
         double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-        double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getPx() + met_x, 2) - pow(electron.getPy() + met_y, 2));
+        double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getP4().Px() + met_x, 2) - pow(electron.getP4().Py() + met_y, 2));
 
         // now do mt selection
         if (mt < 50) {
@@ -333,22 +338,25 @@ int main(int argc, char *argv[]) {
             }
 
             // b-tagging scale factor goes here
-            // evtwt *= btagsf;
+            // evtwt *= jets.getBWeight();
 
             // Pileup Reweighting
             evtwt *= lumi_weights->weight(event.getNPU());
 
             // NNLOPS ggH reweighting
-            if (sample.find("ggH125") != std::string::npos) {
+            if (sample == "ggh125" && signal_type == "powheg") {
                 if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
                 if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
                 if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
                 if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
+                NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
+                if (syst.find("Rivet") != std::string::npos) {
+                  evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
+                }
             }
-            // NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
 
             // Z-pT and Zmm Reweighting
-            if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
+            if (name == "EWKZ2l" || name == "EWKZ2nu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
                 // Z-pT Reweighting
                 auto nom_zpt_weight =
                     zpt_hist->GetBinContent(zpt_hist->GetXaxis()->FindBin(event.getGenM()), zpt_hist->GetYaxis()->FindBin(event.getGenPt()));
@@ -387,57 +395,65 @@ int main(int argc, char *argv[]) {
             }
 
         } else if (!isData && isEmbed) {
-            double Stitching_Weight(1.);
-            // get the stitching weight
-            if (event.getRun() >= 272007 && event.getRun() < 275657) {
-                Stitching_Weight = (1.0 / 0.902);
-            } else if (event.getRun() < 276315) {
-                Stitching_Weight = (1.0 / 0.910);
-            } else if (event.getRun() < 276831) {
-                Stitching_Weight = (1.0 / 0.945);
-            } else if (event.getRun() < 277772) {
-                Stitching_Weight = (1.0 / 0.945);
-            } else if (event.getRun() < 278820) {
-                Stitching_Weight = (1.0 / 0.915);
-            } else if (event.getRun() < 280919) {
-                Stitching_Weight = (1.0 / 0.903);
-            } else if (event.getRun() < 284045) {
-                Stitching_Weight = (1.0 / 0.933);
-            }
+            // set workspace variables
+            wEmbed->var("t_pt")->setVal(tau.getPt());
+            wEmbed->var("e_pt")->setVal(electron.getPt());
+            wEmbed->var("e_eta")->setVal(electron.getEta());
+            wEmbed->var("e_iso")->setVal(electron.getIso());
+            wEmbed->var("gt1_pt")->setVal(electron.getPt());
+            wEmbed->var("gt1_eta")->setVal(electron.getEta());
+            wEmbed->var("gt2_pt")->setVal(tau.getPt());
+            wEmbed->var("gt2_eta")->setVal(tau.getEta());
 
-            // get correction factor
-            std::vector<double> corrFactor = EmdWeight_Electron(wEmbed, electron.getPt(), electron.getEta(), electron.getIso());
-            double totEmbedWeight(corrFactor[2] * corrFactor[5] * corrFactor[6]);  // id SF, iso SF, trg eff. SF
+            // double muon trigger eff in selection
+            evtwt *= wEmbed->function("m_sel_trg_ratio")->getVal();
 
-            // data to mc trigger ratio
-            double trg_ratio(m_sel_trg_ratio(wEmbed, electron.getPt(), electron.getEta(), tau.getPt(), tau.getEta()));
+            // muon ID eff in selection (leg 1)
+            wEmbed->var("gt_pt")->setVal(electron.getGenPt());
+            wEmbed->var("gt_eta")->setVal(electron.getGenEta());
+            evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
+
+            // muon ID eff in selection (leg 1)
+            wEmbed->var("gt_pt")->setVal(tau.getGenPt());
+            wEmbed->var("gt_eta")->setVal(tau.getGenEta());
+            evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
+
+            // electron ID SF
+            evtwt *= wEmbed->function("e_id_ratio")->getVal();
+
+            // electron iso SF
+            evtwt *= wEmbed->function("e_iso_ratio")->getVal();
+
+            // apply trigger SF's
+            auto single_eff = wEmbed->function("e_trg_ratio")->getVal();
+            auto el_cross_eff = 0.;
+            auto tau_cross_eff = 0.;
+
+            bool fireSingle = electron.getPt() > 25;
+            bool fireCross = false;  // no cross trigger in 2016
+            evtwt *= (single_eff * fireSingle + el_cross_eff * tau_cross_eff * fireCross);
 
             auto genweight(event.getGenWeight());
             if (genweight > 1 || genweight < 0) {
                 genweight = 0;
             }
-            evtwt *= (Stitching_Weight * totEmbedWeight * trg_ratio * genweight);
-
-            // scale-up tau pT
-            if (tau.getGenMatch() == 5) {
-                tau.scalePt(1.02);
-            }
+            evtwt *= genweight;
         }
 
         fout->cd();
 
-        // // b-jet veto
-        if (jets.getNbtag() == 0) {
+        // b-jet veto
+        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
             histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
 
         // create regions
-        bool signalRegion = (tau.getTightIsoMVA() && electron.getIso() < 0.10);
+        bool signalRegion = (tau.getTightIsoMVA() && electron.getIso() < 0.15);
         bool looseIsoRegion = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
-        bool antiIsoRegion = (tau.getTightIsoMVA() && electron.getIso() > 0.10 && electron.getIso() < 0.30);
-        bool antiTauIsoRegion = (tau.getTightIsoMVA() == 0 && electron.getIso() < 0.10);
+        bool antiIsoRegion = (tau.getTightIsoMVA() && electron.getIso() > 0.15 && electron.getIso() < 0.30);
+        bool antiTauIsoRegion = (tau.getTightIsoMVA() == 0 && electron.getIso() < 0.15);
 
         // create categories
         bool zeroJet = (jets.getNjets() == 0);

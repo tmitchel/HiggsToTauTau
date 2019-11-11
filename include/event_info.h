@@ -3,7 +3,9 @@
 #ifndef INCLUDE_EVENT_INFO_H_
 #define INCLUDE_EVENT_INFO_H_
 
+#include <unordered_map>
 #include <string>
+#include <vector>
 #include "./swiss_army_class.h"
 
 /////////////////////////////////////////
@@ -14,7 +16,7 @@ class event_info {
     ULong64_t evt;
     UInt_t run, lumi, convert_evt;
     Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR;  // gen
-    Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt;              // event
+    Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;              // event
 
     // triggers (passing, matching, filtering)
     Float_t PassEle24HPSTau30, PassEle24Tau30, PassEle25, PassEle27, PassEle32, PassEle35, PassIsoMu19Tau20, PassIsoMu19Tau20SingleL1,
@@ -46,14 +48,21 @@ class event_info {
     Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
     Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, ME_ps_VBF, ME_ps_ggH,
         ME_sm_ggH_qqInit, ME_ps_ggH_qqInit;
+    Float_t njets, recoil_m_sv, recoil_pt_sv;
+    std::string syst;
 
     bool isEmbed;
+    int era;
+    std::unordered_map<std::string, int> unc_map;
 
  public:
     event_info(TTree*, lepton, int, std::string);
     virtual ~event_info() {}
     void setEmbed() { isEmbed = true; }
+    void setNjets(Float_t _njets) { njets = _njets; }  // must be set in event loop
     void setRivets(TTree*);
+    Float_t getMSV();
+    Float_t getPtSV();
 
     // tautau Trigger Info
     Bool_t getPassEle25();
@@ -69,7 +78,7 @@ class event_info {
     Bool_t getPassMu20Tau27();
     Bool_t getPassMu24();
     Bool_t getPassMu27();
-    Bool_t getPassFlags(Bool_t);
+    Bool_t getPassFlags();
 
     // Event Info
     Float_t getNPV() { return npv; }
@@ -87,10 +96,6 @@ class event_info {
     Float_t getNumGenJets() { return numGenJets; }
     Float_t getGenWeight() { return genweight; }
     Float_t getTauGenDR() { return genDR; }
-
-    // SVFit Info
-    Float_t getMSV() { return m_sv; }
-    Float_t getPtSV() { return pt_sv; }
 
     // MELA Info
     Float_t getDbkg_VBF() { return Dbkg_VBF; }
@@ -123,75 +128,72 @@ class event_info {
     // ggH NNLOPS Info
     Float_t getNjetsRivet() { return Rivet_nJets30; }
     Float_t getHiggsPtRivet() { return Rivet_higgsPt; }
+    Float_t getJetPtRivet() { return Rivet_stage1_cat_pTjet30GeV; }
+    Float_t getRivetUnc(std::vector<double>, std::string);
 };
 
 // read data from trees into member variables
-event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : isEmbed(false) {
-    std::string m_sv_name("m_sv"), pt_sv_name("pt_sv"), Dbkg_VBF_name("Dbkg_VBF"), Dbkg_ggH_name("Dbkg_ggH"), Dbkg_ZH_name("Dbkg_ZH"),
-        Dbkg_WH_name("Dbkg_WH"), D_PS_VBF_name("D_PS_VBF"), D_CP_VBF_name("D_CP_VBF"), D_PS_ggH_name("D_PS_ggH"), D_CP_ggH_name("D_CP_ggH"),
-        Phi_name("Phi"), Phi1_name("Phi1"), costheta1_name("costheta1"), costheta2_name("costheta2"), costhetastar_name("costhetastar"),
-        Q2V1_name("Q2V1"), Q2V2_name("Q2V2"), ME_sm_VBF_name("ME_sm_VBF"), ME_sm_ggH_name("ME_sm_ggH"), ME_sm_WH_name("ME_sm_WH"),
-        ME_sm_ZH_name("ME_sm_ZH"), ME_ps_VBF_name("ME_ps_VBF"), ME_ps_ggH_name("ME_ps_ggH"), ME_bkg1_name("ME_bkg1"), ME_bkg2_name("ME_bkg2"),
-        ME_bkg_name("ME_bkg"), ME_sm_ggH_qqInit_name("ME_sm_ggH_qqInit"), ME_ps_ggH_qqInit_name("ME_ps_ggH_qqInit");
-    if (syst.find("UncMet") != std::string::npos || syst.find("ClusteredMet") != std::string::npos || syst.find("DM") != std::string::npos ||
-        syst == "Up" || syst == "Down") {
+event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
+    isEmbed(false),
+    era(_era),
+    syst(_syst),
+    unc_map{
+        {"Rivet0_Up", 0}, {"Rivet0_Down", 0}, {"Rivet1_Up", 1}, {"Rivet1_Down", 1},
+        {"Rivet2_Up", 2}, {"Rivet2_Down", 2}, {"Rivet3_Up", 3}, {"Rivet3_Down", 3},
+        {"Rivet4_Up", 4}, {"Rivet4_Down", 4}, {"Rivet5_Up", 5}, {"Rivet5_Down", 5},
+        {"Rivet6_Up", 6}, {"Rivet6_Down", 6}, {"Rivet7_Up", 7}, {"Rivet7_Down", 7},
+        {"Rivet8_Up", 8}, {"Rivet8_Down", 8}
+    }
+     {
+    auto end = std::string::npos;
+    std::string m_sv_name("m_sv"), pt_sv_name("pt_sv");
+    if ((syst.find("DM0") != end || syst.find("DM1") != end) && syst.find("FES") == end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-        // need to update MELA code to get these branches
-        // Dbkg_VBF_name += "_" + syst;
-        // Dbkg_ggH_name += "_" + syst;
-        // Dbkg_ZH_name += "_" + syst;
-        // Dbkg_WH_name += "_" + syst;
-        // D_PS_VBF_name += "_" + syst;
-        // D_CP_VBF_name += "_" + syst;
-        // D_PS_ggH_name += "_" + syst;
-        // D_CP_ggH_name += "_" + syst;
-        // Phi_name += "_" + syst;
-        // Phi1_name += "_" + syst;
-        // costheta1_name += "_" + syst;
-        // costheta2_name += "_" + syst;
-        // costhetastar_name += "_" + syst;
-        // Q2V1_name += "_" + syst;
-        // Q2V2_name += "_" + syst;
-        // ME_sm_VBF_name += "_" + syst;
-        // ME_sm_ggH_name += "_" + syst;
-        // ME_sm_WH_name += "_" + syst;
-        // ME_sm_ZH_name += "_" + syst;
-        // ME_ps_VBF_name += "_" + syst;
-        // ME_ps_ggH_name += "_" + syst;
-        // ME_bkg1_name += "_" + syst;
-        // ME_bkg2_name += "_" + syst;
-        // ME_bkg_name += "_" + syst;
+    } else if (syst.find("UncMet") != end || syst.find("ClusteredMet") != end) {
+        m_sv_name += "_" + syst;
+        pt_sv_name += "_" + syst;
+    } else if (syst.find("Jet") != std::string::npos) {
+        m_sv_name += "_" + syst;
+        pt_sv_name += "_" + syst;
+    } else if (syst.find("EES") != end || syst.find("MES") != end || syst.find("LES") != end) {
+        m_sv_name += "_" + syst;
+        pt_sv_name += "_" + syst;
+    } else if (syst.find("RecoilReso") != end || syst.find("RecoilResp") != end) {
+        // account for not splitting based on jets at skim level (oops)
+        auto syst_name = _syst.erase(10, 5);  // RecoilReso[_njet]_Up
+        input->SetBranchAddress((m_sv_name + "_" + syst_name).c_str(), &recoil_m_sv);
+        input->SetBranchAddress((pt_sv_name + "_" + syst_name).c_str(), &recoil_pt_sv);
     }
 
     input->SetBranchAddress(m_sv_name.c_str(), &m_sv);
     input->SetBranchAddress(pt_sv_name.c_str(), &pt_sv);
-    input->SetBranchAddress(Dbkg_VBF_name.c_str(), &Dbkg_VBF);
-    input->SetBranchAddress(Dbkg_ggH_name.c_str(), &Dbkg_ggH);
-    input->SetBranchAddress(Dbkg_ZH_name.c_str(), &Dbkg_ZH);
-    input->SetBranchAddress(Dbkg_WH_name.c_str(), &Dbkg_WH);
-    input->SetBranchAddress(D_PS_VBF_name.c_str(), &D0_VBF);
-    input->SetBranchAddress(D_CP_VBF_name.c_str(), &DCP_VBF);
-    input->SetBranchAddress(D_PS_ggH_name.c_str(), &D0_ggH);
-    input->SetBranchAddress(D_CP_ggH_name.c_str(), &DCP_ggH);
-    input->SetBranchAddress(Phi_name.c_str(), &Phi);
-    input->SetBranchAddress(Phi1_name.c_str(), &Phi1);
-    input->SetBranchAddress(costheta1_name.c_str(), &costheta1);
-    input->SetBranchAddress(costheta2_name.c_str(), &costheta2);
-    input->SetBranchAddress(costhetastar_name.c_str(), &costhetastar);
-    input->SetBranchAddress(Q2V1_name.c_str(), &Q2V1);
-    input->SetBranchAddress(Q2V2_name.c_str(), &Q2V2);
-    input->SetBranchAddress(ME_sm_ggH_qqInit_name.c_str(), &ME_sm_ggH_qqInit);
-    input->SetBranchAddress(ME_ps_ggH_qqInit_name.c_str(), &ME_ps_ggH_qqInit);
-    input->SetBranchAddress(ME_sm_VBF_name.c_str(), &ME_sm_VBF);
-    input->SetBranchAddress(ME_sm_ggH_name.c_str(), &ME_sm_ggH);
-    input->SetBranchAddress(ME_ps_VBF_name.c_str(), &ME_ps_VBF);
-    input->SetBranchAddress(ME_ps_ggH_name.c_str(), &ME_ps_ggH);
-    input->SetBranchAddress(ME_sm_WH_name.c_str(), &ME_sm_WH);
-    input->SetBranchAddress(ME_sm_ZH_name.c_str(), &ME_sm_ZH);
-    input->SetBranchAddress(ME_bkg_name.c_str(), &ME_bkg);
-    input->SetBranchAddress(ME_bkg1_name.c_str(), &ME_bkg1);
-    input->SetBranchAddress(ME_bkg2_name.c_str(), &ME_bkg2);
+    input->SetBranchAddress("Dbkg_VBF", &Dbkg_VBF);
+    input->SetBranchAddress("Dbkg_ggH", &Dbkg_ggH);
+    input->SetBranchAddress("Dbkg_ZH", &Dbkg_ZH);
+    input->SetBranchAddress("Dbkg_WH", &Dbkg_WH);
+    input->SetBranchAddress("D_PS_VBF", &D0_VBF);
+    input->SetBranchAddress("D_CP_VBF", &DCP_VBF);
+    input->SetBranchAddress("D_PS_ggH", &D0_ggH);
+    input->SetBranchAddress("D_CP_ggH", &DCP_ggH);
+    input->SetBranchAddress("Phi", &Phi);
+    input->SetBranchAddress("Phi1", &Phi1);
+    input->SetBranchAddress("costheta1", &costheta1);
+    input->SetBranchAddress("costheta2", &costheta2);
+    input->SetBranchAddress("costhetastar", &costhetastar);
+    input->SetBranchAddress("Q2V1", &Q2V1);
+    input->SetBranchAddress("Q2V2", &Q2V2);
+    input->SetBranchAddress("ME_sm_ggH_qqInit", &ME_sm_ggH_qqInit);
+    input->SetBranchAddress("ME_ps_ggH_qqInit", &ME_ps_ggH_qqInit);
+    input->SetBranchAddress("ME_sm_VBF", &ME_sm_VBF);
+    input->SetBranchAddress("ME_sm_ggH", &ME_sm_ggH);
+    input->SetBranchAddress("ME_ps_VBF", &ME_ps_VBF);
+    input->SetBranchAddress("ME_ps_ggH", &ME_ps_ggH);
+    input->SetBranchAddress("ME_sm_WH", &ME_sm_WH);
+    input->SetBranchAddress("ME_sm_ZH", &ME_sm_ZH);
+    input->SetBranchAddress("ME_bkg", &ME_bkg);
+    input->SetBranchAddress("ME_bkg1", &ME_bkg1);
+    input->SetBranchAddress("ME_bkg2", &ME_bkg2);
     input->SetBranchAddress("evt", &evt);
     input->SetBranchAddress("run", &run);
     input->SetBranchAddress("lumi", &lumi);
@@ -296,18 +298,62 @@ event_info::event_info(TTree* input, lepton lep, int era, std::string syst) : is
 void event_info::setRivets(TTree* input) {
     input->SetBranchAddress("Rivet_nJets30", &Rivet_nJets30);
     input->SetBranchAddress("Rivet_higgsPt", &Rivet_higgsPt);
+    input->SetBranchAddress("Rivet_stage1_cat_pTjet30GeV", &Rivet_stage1_cat_pTjet30GeV);
 }
 
-Bool_t event_info::getPassFlags(bool is_data) {
-    if (Flag_goodVertices || Flag_globalTightHalo2016Filter || Flag_HBHENoiseFilter || Flag_HBHENoiseIsoFilter ||
-        Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter || Flag_BadChargedCandidateFilter) {
-        return false;
-    } else if (is_data && (Flag_eeBadScFilter || Flag_ecalBadCalibFilter)) {
-        return false;
-    } else {
-        return true;
+Float_t event_info::getRivetUnc(std::vector<double> uncs, std::string syst) {
+    if (syst.find("Rivet") != std::string::npos) {
+        int index = unc_map[syst];
+        if (syst.find("Up") != std::string::npos) {
+            return uncs.at(index);
+        } else {
+            return -1 * uncs.at(index);
+        }
     }
 }
+
+Float_t event_info::getMSV() {
+    if (syst.find("0jet") != std::string::npos && njets == 0) {
+        return recoil_m_sv;
+    } else if (syst.find("1jet") != std::string::npos && njets == 1) {
+        return recoil_m_sv;
+    } else if (syst.find("2jet") != std::string::npos && njets > 1) {
+        return recoil_m_sv;
+    }
+
+    // return normal m_sv in any other case
+    return m_sv;
+}
+Float_t event_info::getPtSV() {
+    if (syst.find("0jet") != std::string::npos && njets == 0) {
+        return recoil_pt_sv;
+    } else if (syst.find("1jet") != std::string::npos && njets == 1) {
+        return recoil_pt_sv;
+    } else if (syst.find("2jet") != std::string::npos && njets > 1) {
+        return recoil_pt_sv;
+    }
+
+    // return normal pt_sv in any other case
+    return pt_sv;
+}
+
+
+Bool_t event_info::getPassFlags() {
+    if (era == 2016) {
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseIsoFilter
+                || Flag_HBHENoiseFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter);
+
+    } else if (era == 2017) {
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
+                || Flag_HBHENoiseIsoFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
+                || Flag_BadChargedCandidateFilter || Flag_eeBadScFilter || Flag_ecalBadCalibFilter);
+    } else {
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
+                || Flag_HBHENoiseIsoFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
+                || Flag_eeBadScFilter || Flag_ecalBadCalibFilter);
+    }
+}
+
 
 Bool_t event_info::getPassEle25() {
     PassEle25 = singleE25eta2p1TightPass && eMatchesEle25Filter && eMatchesEle25Path;

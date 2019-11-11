@@ -30,13 +30,10 @@ class electron {
     // getters
     std::string getName() { return name; }
     TLorentzVector getP4() { return p4; }
-    Float_t getPt() { return pt; }
-    Float_t getEta() { return eta; }
-    Float_t getPhi() { return phi; }
-    Float_t getMass() { return mass; }
-    Float_t getPx() { return px; }
-    Float_t getPy() { return py; }
-    Float_t getPz() { return pz; }
+    Float_t getPt() { return p4.Pt(); }
+    Float_t getEta() { return p4.Eta(); }
+    Float_t getPhi() { return p4.Phi(); }
+    Float_t getMass() { return p4.M(); }
     Float_t getIso() { return iso; }
     Int_t getGenMatch() { return gen_match; }
     Float_t getGenPt() { return gen_pt; }
@@ -58,17 +55,19 @@ electron::electron(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Char
 /////////////////////////////////////////////////
 class electron_factory {
  private:
+    std::string syst;
     Int_t gen_match_1;
     Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, eGenPt, eGenEta, eGenPhi, eGenEnergy;
+    Float_t eCorrectedEt, eEnergyScaleUp, eEnergyScaleDown, eEnergySigmaUp, eEnergySigmaDown;
 
  public:
-    electron_factory(TTree*, int);
+    electron_factory(TTree*, int, std::string);
     virtual ~electron_factory() {}
     electron run_factory();
 };
 
 // read data from tree into member variables
-electron_factory::electron_factory(TTree* input, int era) {
+electron_factory::electron_factory(TTree* input, int era, std::string _syst) : syst(_syst) {
     input->SetBranchAddress("px_1", &px_1);
     input->SetBranchAddress("py_1", &py_1);
     input->SetBranchAddress("pz_1", &pz_1);
@@ -83,6 +82,11 @@ electron_factory::electron_factory(TTree* input, int era) {
     input->SetBranchAddress("eGenEta", &eGenEta);
     input->SetBranchAddress("eGenPhi", &eGenPhi);
     input->SetBranchAddress("eGenEnergy", &eGenEnergy);
+    input->SetBranchAddress("eCorrectedEt", &eCorrectedEt);
+    input->SetBranchAddress("eEnergyScaleUp", &eEnergyScaleUp);
+    input->SetBranchAddress("eEnergyScaleDown", &eEnergyScaleDown);
+    input->SetBranchAddress("eEnergySigmaUp", &eEnergySigmaUp);
+    input->SetBranchAddress("eEnergySigmaDown", &eEnergySigmaDown);
 }
 
 // create electron object and set member data
@@ -97,6 +101,17 @@ electron electron_factory::run_factory() {
     el.gen_eta = eGenEta;
     el.gen_phi = eGenPhi;
     el.gen_energy = eGenEnergy;
+
+    // Electron energy scale systematics (eCorrectedEt is already applied so divide it out)
+    if (syst == "EEScale_Up") {
+        el.p4 *= eEnergyScaleUp / eCorrectedEt;
+    } else if (syst == "EEScale_Down") {
+        el.p4 *= eEnergyScaleDown / eCorrectedEt;
+    } else if (syst == "EESigma_Up") {
+        el.p4 *= eEnergySigmaUp / eCorrectedEt;
+    } else if (syst == "EESigma_Down") {
+        el.p4 *= eEnergySigmaDown / eCorrectedEt;
+    }
 
     return el;
 }

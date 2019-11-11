@@ -10,21 +10,6 @@ from pprint import pprint
 from multiprocessing import Process, Queue
 
 
-import signal
-import sys
-fake_weights = None
-
-
-def signal_handler(sig, frame):
-    print('Trying to close {}'.format(fake_weights))
-    if fake_weights != None:
-        fake_weights.Delete()
-    sys.exit(0)
-
-
-signal.signal(signal.SIGINT, signal_handler)
-
-
 def get_ac_weights(name, ac_reweighting_map):
     if 'ggh' in name.lower():
         return ac_reweighting_map['ggh']
@@ -40,74 +25,27 @@ def build_histogram(name, bins):
     return ROOT.TH1F(name, name, bins[0], bins[1], bins[2])
 
 
-def fill_histograms(queue, data, hists, xvar_name, zvar_name=None, edges=None, ac_weights=None, fake_fractions=None, fake_weights=None, syst=None, local=None):
+def fill_histograms(queue, data, hists, xvar_name, zvar_name=None, edges=None, ac_weights=None, fake_weight=None):
     # get common variables
     evtwt = data['evtwt'].values if ac_weights == None else (data['evtwt'] * data[ac_weights]).values
     xvar = data[xvar_name].values
     zvar = data[zvar_name].values if zvar_name != None else None
 
-    # load fake weights/fractions if needed
-    if fake_fractions != None and fake_weights != None:
-        columns = data[['t1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_iso']].values
-        t1_pt, t1_decayMode, njets = columns[:, 0], columns[:, 1], columns[:, 2]
-        vis_mass, mt, iso = columns[:, 3], columns[:, 4], columns[:, 5]
-        # get fake fractions
-        frac_data = fake_fractions[0]
-        frac_qcd = fake_fractions[1]
-        frac_tt = fake_fractions[3]
-        frac_w = fake_fractions[4]
+    if fake_weight != None:
+        evtwt *= data[fake_weight].values
 
     # loop over all events
     for i in xrange(len(data.index)):
-        fake_weight = 1.
-        if fake_fractions != None and fake_weights != None:
-            xbin, ybin = -1, -1
-            for x, bin in enumerate(frac_data.bins[0]):
-                if vis_mass[i] < bin[1] and vis_mass[i] > bin[0]:
-                    xbin = x
-                    break
-            for y, bin in enumerate(frac_data.bins[1]):
-                if njets[i] < bin[1] and njets[i] > bin[0]:
-                    ybin = y
-                    break
-
-            # I guess local and Wisc have different versions of uproot?
-            if not local:
-                xbin, ybin = ybin, xbin
-
-            # make fake-weight input
-            inputs = [
-                t1_pt[i], t1_decayMode[i], njets[i], vis_mass[i], mt[i], iso[i],
-                frac_qcd.values[xbin][ybin],
-                frac_w.values[xbin][ybin],
-                frac_tt.values[xbin][ybin]
-            ]
-
-            if local:
-                fake_weight = 1.  # for testing the rest
-            else:
-                fake_weight = fake_weights.value(
-                    9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
         # do vbf sub-categorization if needed
         if zvar_name != None:
             for j, edge in enumerate(edges[1:]):  # remove lowest left edge
                 if zvar[i] < edge:
-                    hists[j].Fill(xvar[i], evtwt[i]*fake_weight)
+                    hists[j].Fill(xvar[i], evtwt[i])
                     break
         else:
-            hists.Fill(xvar[i], evtwt[i]*fake_weight)
+            hists.Fill(xvar[i], evtwt[i])
 
     queue.put(hists)
-
-
-def load_fake_factor_weights(fake_file):
-    ff_file = ROOT.TFile(fake_file, 'READ')
-    return ff_file.Get('ff_comb')
-
-
-def load_fake_fractions(input_file):
-    ifile = uproot.open(input_file)
-    return {cat.replace(';1', ''): [ifile[cat][ihist] for ihist in sorted(ifile[cat].keys())] for cat in ifile.keys()}
 
 
 def main(args):
@@ -134,7 +72,7 @@ def main(args):
     syst_name = 'Sys' if args.syst else 'noSys'
 
     output_file = ROOT.TFile('Output/histograms/htt_{}_{}_{}_fa3_{}_{}{}.root'.format(channel_prefix,
-                                                                                   ztt_name, syst_name, args.year, args.date, args.suffix), 'RECREATE')
+                                                                                      ztt_name, syst_name, args.year, args.date, args.suffix), 'RECREATE')
 
     # create structure within output file
     for cat in boilerplate['categories']:
@@ -143,16 +81,6 @@ def main(args):
         for variable in config_variables.iterkeys():
             output_file.mkdir('{}_{}/{}'.format(channel_prefix, cat, variable))
     output_file.cd()
-
-    # Preload the fake fractions and fake factor weights.
-    fake_fractions = load_fake_fractions(args.fake_file)
-
-    if args.local:
-        fake_weights = None
-    else:
-        random_ext = '_tight' if channel_prefix == 'et' and args.year == "2016" else ''
-        fake_weights = load_fake_factor_weights(
-            '../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors{}.root'.format(args.year, args.year, channel_prefix, random_ext))
 
     # use this once uproot supports sub-directories inside root files
     # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
@@ -190,6 +118,12 @@ def main(args):
                 'mu_iso', 'el_iso', 't1_decayMode', 'vis_mass', 't1_pt', 'higgs_pT', 'm_sv', 'mt'
             ] + config_variables.keys() + [zvars[0]])
 
+            # get fake factor weights if needed
+            if 'jetFakes' in ifile:
+                variables.add('fake_weight')
+                if args.syst:
+                    variables.add('ff_*')
+
             events = input_file[itree].arrays(list(variables), outputtype=pandas.DataFrame)
 
             general_selection = events[
@@ -218,34 +152,8 @@ def main(args):
                 # build the histograms
                 output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
                 zero_jet_hists = {}
-                zero_jet_hists['nominal'] = {
-                    'data': zero_jet_events,
-                    'hists': build_histogram(name, bins),
-                    'xvar_name': variable,
-                    'queue': Queue()
-                }
-                if '_JHU' in name:
-                    for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
-                        output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
-                        zero_jet_hists[weight[1]] = {
-                            'data': zero_jet_events,
-                            'hists': build_histogram(weight[1], bins),
-                            'xvar_name': variable,
-                            'ac_weights': weight[0],
-                            'queue': Queue()
-                        }
-                elif '_madgraph' in name:
-                    for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
-                        output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
-                        zero_jet_hists[weight[1]] = {
-                            'data': zero_jet_events,
-                            'hists': build_histogram(weight[1], bins),
-                            'xvar_name': variable,
-                            'ac_weights': weight[0],
-                            'queue': Queue()
-                        }
-                elif 'data' in ifile.lower():
-                    print 'making fake factor hists'
+                if 'jetFakes' in ifile:
+                    print 'making 0jet fake factor hists'
                     fake_zero_jet_events = general_selection[
                         (general_selection['is_antiTauIso'] > 0) &
                         (general_selection['njets'] == 0)
@@ -255,9 +163,7 @@ def main(args):
                         'data': fake_zero_jet_events,
                         'hists': build_histogram('jetFakes', bins),
                         'xvar_name': variable,
-                        'fake_fractions': fake_fractions['{}_0jet'.format(channel_prefix)],
-                        'fake_weights': fake_weights,
-                        'local': args.local,
+                        'fake_weight': 'fake_weight',
                         'queue': Queue()
                     }
                     if args.syst:
@@ -266,10 +172,34 @@ def main(args):
                                 'data': fake_zero_jet_events,
                                 'hists': build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins),
                                 'xvar_name': variable,
-                                'fake_fractions': fake_fractions['{}_0jet'.format(channel_prefix)],
-                                'fake_weights': fake_weights,
-                                'syst': args.syst,
-                                'local': args.local,
+                                'fake_weight': syst,
+                                'queue': Queue()
+                            }
+                else:
+                    zero_jet_hists['nominal'] = {
+                        'data': zero_jet_events,
+                        'hists': build_histogram(name, bins),
+                        'xvar_name': variable,
+                        'queue': Queue()
+                    }
+                    if '_JHU' in name:
+                        for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
+                            output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
+                            zero_jet_hists[weight[1]] = {
+                                'data': zero_jet_events,
+                                'hists': build_histogram(weight[1], bins),
+                                'xvar_name': variable,
+                                'ac_weights': weight[0],
+                                'queue': Queue()
+                            }
+                    elif '_madgraph' in name:
+                        for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
+                            output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
+                            zero_jet_hists[weight[1]] = {
+                                'data': zero_jet_events,
+                                'hists': build_histogram(weight[1], bins),
+                                'xvar_name': variable,
+                                'ac_weights': weight[0],
                                 'queue': Queue()
                             }
 
@@ -280,47 +210,19 @@ def main(args):
                 # build the histograms
                 output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
                 boosted_hists = {}
-                boosted_hists['nominal'] = {
-                    'data': boosted_events,
-                    'hists': build_histogram(name, bins),
-                    'xvar_name': variable,
-                    'queue': Queue()
-                }
-                if '_JHU' in name:
-                    for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
-                        output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
-                        boosted_hists[weight[1]] = {
-                            'data': boosted_events,
-                            'hists': build_histogram(weight[1], bins),
-                            'xvar_name': variable,
-                            'ac_weights': weight[0],
-                            'queue': Queue()
-                        }
-                elif '_madgraph' in name:
-                    for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
-                        output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
-                        boosted_hists[weight[1]] = {
-                            'data': boosted_events,
-                            'hists': build_histogram(weight[1], bins),
-                            'xvar_name': variable,
-                            'ac_weights': weight[0],
-                            'queue': Queue()
-                        }
-                elif 'data' in ifile.lower():
-                    print 'making fake factor hists'
+                if 'jetFakes' in ifile:
+                    print 'making boosted fake factor hists'
                     fake_boosted_events = general_selection[
                         (general_selection['is_antiTauIso'] > 0) &
                         ((general_selection['njets'] == 1) |
-                        ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300)))
+                         ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300)))
                     ]
 
                     boosted_hists['jetFakes'] = {
                         'data': fake_boosted_events,
                         'hists': build_histogram('jetFakes', bins),
                         'xvar_name': variable,
-                        'fake_fractions': fake_fractions['{}_boosted'.format(channel_prefix)],
-                        'fake_weights': fake_weights,
-                        'local': args.local,
+                        'fake_weight': 'fake_weight',
                         'queue': Queue()
                     }
                     if args.syst:
@@ -329,10 +231,34 @@ def main(args):
                                 'data': fake_boosted_events,
                                 'hists': build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins),
                                 'xvar_name': variable,
-                                'fake_fractions': fake_fractions['{}_boosted'.format(channel_prefix)],
-                                'fake_weights': fake_weights,
-                                'syst': args.syst,
-                                'local': args.local,
+                                'fake_weights': syst,
+                                'queue': Queue()
+                            }
+                else:
+                    boosted_hists['nominal'] = {
+                        'data': boosted_events,
+                        'hists': build_histogram(name, bins),
+                        'xvar_name': variable,
+                        'queue': Queue()
+                    }
+                    if '_JHU' in name:
+                        for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
+                            output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
+                            boosted_hists[weight[1]] = {
+                                'data': boosted_events,
+                                'hists': build_histogram(weight[1], bins),
+                                'xvar_name': variable,
+                                'ac_weights': weight[0],
+                                'queue': Queue()
+                            }
+                    elif '_madgraph' in name:
+                        for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
+                            output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
+                            boosted_hists[weight[1]] = {
+                                'data': boosted_events,
+                                'hists': build_histogram(weight[1], bins),
+                                'xvar_name': variable,
+                                'ac_weights': weight[0],
                                 'queue': Queue()
                             }
 
@@ -343,34 +269,8 @@ def main(args):
                 # build the histograms
                 output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
                 vbf_hists = {}
-                vbf_hists['nominal'] = {
-                    'data': vbf_events,
-                    'hists': build_histogram(name, bins),
-                    'xvar_name': variable,
-                    'queue': Queue()
-                }
-                if '_JHU' in name:
-                    for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
-                        output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
-                        vbf_hists[weight[1]] = {
-                            'data': vbf_events,
-                            'hists': build_histogram(weight[1], bins),
-                            'xvar_name': variable,
-                            'ac_weights': weight[0],
-                            'queue': Queue()
-                        }
-                elif '_madgraph' in name:
-                    for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
-                        output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
-                        vbf_hists[weight[1]] = {
-                            'data': vbf_events,
-                            'hists': build_histogram(weight[1], bins),
-                            'xvar_name': variable,
-                            'ac_weights': weight[0],
-                            'queue': Queue()
-                        }
-                elif 'data' in ifile.lower():
-                    print 'making fake factor hists'
+                if 'jetFakes' in ifile:
+                    print 'making vbf fake factor hists'
                     fake_vbf_events = general_selection[
                         (general_selection['is_antiTauIso'] > 0) &
                         (general_selection['njets'] > 1) &
@@ -381,9 +281,7 @@ def main(args):
                         'data': fake_vbf_events,
                         'hists': build_histogram('jetFakes', bins),
                         'xvar_name': variable,
-                        'fake_fractions': fake_fractions['{}_vbf'.format(channel_prefix)],
-                        'fake_weights': fake_weights,
-                        'local': args.local,
+                        'fake_weight': 'fake_weight',
                         'queue': Queue()
                     }
                     if args.syst:
@@ -392,10 +290,34 @@ def main(args):
                                 'data': fake_vbf_events,
                                 'hists': build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins),
                                 'xvar_name': variable,
-                                'fake_fractions': fake_fractions['{}_vbf'.format(channel_prefix)],
-                                'fake_weights': fake_weights,
-                                'syst': args.syst,
-                                'local': args.local,
+                                'fake_weight': syst,
+                                'queue': Queue()
+                            }
+                else:
+                    vbf_hists['nominal'] = {
+                        'data': vbf_events,
+                        'hists': build_histogram(name, bins),
+                        'xvar_name': variable,
+                        'queue': Queue()
+                    }
+                    if '_JHU' in name:
+                        for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
+                            output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
+                            vbf_hists[weight[1]] = {
+                                'data': vbf_events,
+                                'hists': build_histogram(weight[1], bins),
+                                'xvar_name': variable,
+                                'ac_weights': weight[0],
+                                'queue': Queue()
+                            }
+                    elif '_madgraph' in name:
+                        for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
+                            output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
+                            vbf_hists[weight[1]] = {
+                                'data': vbf_events,
+                                'hists': build_histogram(weight[1], bins),
+                                'xvar_name': variable,
+                                'ac_weights': weight[0],
                                 'queue': Queue()
                             }
 
@@ -407,7 +329,7 @@ def main(args):
                     proc.start()
                 for proc in zero_jet_processes + boosted_processes + vbf_processes:
                     proc.join()
-                
+
                 output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
                 for obj in zero_jet_hists.itervalues():
                     obj['queue'].get().Write()
@@ -420,41 +342,7 @@ def main(args):
                 for obj in vbf_hists.itervalues():
                     obj['queue'].get().Write()
 
-                # if args.do_subcat:
-                #     # vbf sub-categories event after normal vbf categories
-                #     vbf_cat_hists = []
-                #     for cat in boilerplate['vbf_sub_cats']:
-                #         output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
-                #         vbf_cat_hists.append(build_histogram(name, bins))
-                #     fill_histograms(data=vbf_events, hists=vbf_cat_hists, xvar_name=variable, zvar_name=zvars[0], edges=zvars[1])
-
-                # if args.do_subcat:
-                #     # vbf sub-categories event after normal vbf categories
-                #     vbf_cat_hists = []
-                #     for cat in boilerplate['vbf_sub_cats']:
-                #         output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
-                #         vbf_cat_hists.append(build_histogram('jetFakes', bins))
-                #     fill_histograms(data=fake_vbf_events, hists=vbf_cat_hists, xvar_name=variable,
-                #         zvar_name=zvars[0], edges=zvars[1],
-                #         fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
-                #         fake_weights=fake_weights, local=args.local)
-
-                # vbf sub-categories event after normal vbf categories
-                # if args.do_subcat:
-                #     vbf_cat_hists = []
-                #     for cat in boilerplate['vbf_sub_cats']:
-                #         output_file.cd('{}_{}/{}'.format(channel_prefix, cat, variable))
-                #         vbf_cat_hists.append(build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins))
-                #     fill_histograms(data=fake_vbf_events, hists=vbf_cat_hists, xvar_name=variable,
-                #         zvar_name=zvars[0], edges=zvars[1],
-                #         fake_fractions=fake_fractions['{}_vbf'.format(channel_prefix)],
-                #         fake_weights=fake_weights, local=args.local, syst=syst)
-
-                # output_file.Write()
-        # break
     output_file.Close()
-    if not args.local:
-        fake_weights.Delete()
     print 'Finished in {} seconds'.format(time.time() - start)
 
 

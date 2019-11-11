@@ -18,6 +18,7 @@
 #include "TTree.h"
 
 // user includes
+#include "../include/ComputeWG1Unc.h"
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
 #include "../include/LumiReweightingStandAlone.h"
@@ -189,12 +190,12 @@ int main(int argc, char *argv[]) {
 
     // construct factories
     event_info event(ntuple, lepton::MUON, 2018, syst);
-    muon_factory muons(ntuple, 2018);
-    tau_factory taus(ntuple, 2018);
+    muon_factory muons(ntuple, 2018, syst);
+    tau_factory taus(ntuple, 2018, syst);
     jet_factory jets(ntuple, 2018, syst);
     met_factory met(ntuple, 2018, syst);
 
-    if (sample.find("ggHtoTauTau125") != std::string::npos) {
+    if (sample == "ggh125" && signal_type == "powheg") {
         event.setRivets(ntuple);
     }
 
@@ -209,33 +210,33 @@ int main(int argc, char *argv[]) {
             progress++;
         }
 
-        // find the event weight (not lumi*xs if looking at W or Drell-Yan)
+       // find the event weight (not lumi*xs if looking at W or Drell-Yan)
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 11.738;
+                evtwt = 9.679;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 5.278;
+                evtwt = 4.808;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 3.498;
+                evtwt = 3.290;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 3.663;
+                evtwt = 3.435;
             } else {
-                evtwt = 0.;
+                evtwt = 55.160;
             }
         }
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.688;
+                evtwt = 0.671;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 0.603;
+                evtwt = 0.588;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 0.655;
+                evtwt = 0.640;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 0.917;
+                evtwt = 1.172;
             } else {
-                evtwt = 3.959;
+                evtwt = 3.865;
             }
         }
 
@@ -244,6 +245,12 @@ int main(int argc, char *argv[]) {
         auto muon = muons.run_factory();
         auto tau = taus.run_factory();
         jets.run_factory();
+
+        if (event.getPassFlags()) {
+            histos->at("cutflow")->Fill(2., 1.);
+        } else {
+            continue;
+        }
 
         // Separate Drell-Yan
         if (name == "ZL" && tau.getGenMatch() > 4) {
@@ -255,13 +262,13 @@ int main(int argc, char *argv[]) {
         } else if (name == "ZJ" && tau.getGenMatch() != 6) {
             continue;
         } else {
-            histos->at("cutflow")->Fill(2., 1.);
+            histos->at("cutflow")->Fill(3., 1.);
         }
 
         // only opposite-sign
         int evt_charge = tau.getCharge() + muon.getCharge();
         if (evt_charge == 0) {
-            histos->at("cutflow")->Fill(3., 1.);
+            histos->at("cutflow")->Fill(4., 1.);
         } else {
             continue;
         }
@@ -273,23 +280,27 @@ int main(int argc, char *argv[]) {
         double met_x = met.getMet() * cos(met.getMetPhi());
         double met_y = met.getMet() * sin(met.getMetPhi());
         double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-        double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getPx() + met_x, 2) - pow(muon.getPy() + met_y, 2));
+        double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getP4().Px() + met_x, 2) - pow(muon.getP4().Py() + met_y, 2));
 
         // now do mt selection
         if (mt < 50) {
-            histos->at("cutflow")->Fill(4., 1.);
+            histos->at("cutflow")->Fill(5., 1.);
         } else {
             continue;
         }
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
-            // tau ID efficiency SF
+            // tau ID efficiency SF and systematics
             if (tau.getGenMatch() == 5) {
-                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt());
+                std::string shift = "";  // nominal
+                if (syst.find("tau_id_") != std::string::npos) {
+                    shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
+                }
+                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), shift);
             }
 
-            // // anti-lepton discriminator SFs (using 2017 b/c 2018 doesn't exist yet)
+            // anti-lepton discriminator SFs
             if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
                 if (fabs(tau.getEta()) < 1.460)
                     evtwt *= 1.09;
@@ -308,6 +319,12 @@ int main(int argc, char *argv[]) {
                     evtwt *= 1.61;
             }
 
+            // muom mis-id systematics
+            if (syst.find("mfaket_") != std::string::npos && (tau.getGenMatch() == 2 || tau.getGenMatch() == 4)) {
+                auto shift = syst.find("Up") != std::string::npos ? 1.20 : 0.80;
+                evtwt *= shift;
+            }
+
             // Muon ID/Iso
             evtwt *= mu_id_sf->get_ScaleFactor(muon.getPt(), muon.getEta());
 
@@ -320,8 +337,14 @@ int main(int argc, char *argv[]) {
                 evtwt *= mu24_mu27_trg_sf->get_ScaleFactor(muon.getPt(), muon.getEta());
             }
 
-            // use promote-demote method to correct nbtag with no systematics
-            jets.promoteDemote(btag_eff_oth, btag_eff_oth, btag_eff_oth);
+            // muon reco, eff, tracking systematic
+            if (syst.find("mu_combo_") != std::string::npos) {
+                auto shift = syst.find("Up") != std::string::npos ? 1.01 : 0.99;
+                evtwt *= shift;
+            }
+
+            // b-tagging scale factor goes here
+            // evtwt *= jets.getBWeight();
 
             // pileup reweighting
             if (!doAC && !isMG) {
@@ -329,16 +352,19 @@ int main(int argc, char *argv[]) {
             }
 
             // NNLOPS ggH reweighting
-            if (sample.find("ggH125") != std::string::npos) {
+            if (sample == "ggh125" && signal_type == "powheg") {
                 if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
                 if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
                 if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
                 if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
+                NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
+                if (syst.find("Rivet") != std::string::npos) {
+                  evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
+                }
             }
-            // NumV WG1unc = qcd_ggF_uncert_2017(Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV);
 
             // Z-pT Reweighting
-            if (name == "EWKZLL" || name == "EWKZNuNu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
+            if (name == "EWKZ2l" || name == "EWKZ2nu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
                 // give inputs to workspace
                 htt_sf->var("z_gen_mass")->setVal(event.getGenM());  // TODO(tmitchel): check if these are the right variables.
                 htt_sf->var("z_gen_pt")->setVal(event.getGenPt());   // TODO(tmitchel): check if these are the right variables.
@@ -377,7 +403,7 @@ int main(int argc, char *argv[]) {
                 evtwt *= 0.97;
             }
 
-            // set workspace variables
+            // // set workspace variables
             wEmbed->var("t_pt")->setVal(tau.getPt());
             wEmbed->var("m_pt")->setVal(muon.getPt());
             wEmbed->var("m_eta")->setVal(muon.getEta());
@@ -390,14 +416,21 @@ int main(int argc, char *argv[]) {
             // double muon trigger eff in selection
             evtwt *= wEmbed->function("m_sel_trg_ratio")->getVal();
 
-            // muon ID eff in selectionm
+            // muon ID eff in selection (leg 1)
+            wEmbed->var("gt_pt")->setVal(muon.getGenPt());
+            wEmbed->var("gt_eta")->setVal(muon.getGenEta());
             evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
 
-            // muon ID SF
-            evtwt *= wEmbed->function("m_id_embed_kit_ratio")->getVal();
+            // muon ID eff in selection (leg 1)
+            wEmbed->var("gt_pt")->setVal(tau.getGenPt());
+            wEmbed->var("gt_eta")->setVal(tau.getGenEta());
+            evtwt *= wEmbed->function("m_sel_idEmb_ratio")->getVal();
 
             // muon iso SF
             evtwt *= wEmbed->function("m_iso_binned_embed_kit_ratio")->getVal();
+
+            // muon ID SF
+            evtwt *= wEmbed->function("m_id_embed_kit_ratio")->getVal();
 
             // apply trigger SF's
             auto single_eff = wEmbed->function("m_trg24_27_embed_kit_ratio")->getVal();
@@ -418,8 +451,8 @@ int main(int argc, char *argv[]) {
         fout->cd();
 
         // b-jet veto
-        if (jets.getNbtag() == 0) {
-            histos->at("cutflow")->Fill(5., 1.);
+        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
+            histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
@@ -438,7 +471,7 @@ int main(int argc, char *argv[]) {
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion) {
-            histos->at("cutflow")->Fill(6., 1.);
+            histos->at("cutflow")->Fill(7., 1.);
         } else {
             continue;
         }

@@ -34,15 +34,15 @@ jet::jet(Float_t Pt, Float_t Eta, Float_t Phi, Float_t Csv, Float_t Flavor = -99
 
 class jet_factory {
  private:
-    Bool_t doSyst;
     Float_t mjj;
     Float_t jpt_1, jeta_1, jphi_1, jcsv_1;
     Float_t jpt_2, jeta_2, jphi_2, jcsv_2;
     Float_t bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1;
     Float_t bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2;
     Float_t topQuarkPt1, topQuarkPt2, temp_njets;
-    Float_t Nbtag, njetspt20, njets;
+    Float_t Nbtag, njetspt20, njets, nbtag_loose, nbtag_medium;
     Int_t nbtag;
+    Float_t bweight;
     std::vector<jet> plain_jets, btag_jets;
 
  public:
@@ -54,53 +54,51 @@ class jet_factory {
 
     // getters
     Float_t getNbtag() { return Nbtag; }
+    Float_t getNbtagLoose() { return nbtag_loose; }
+    Float_t getNbtagMedium() { return nbtag_medium; }
     Float_t getNjets() { return njets; }
     Int_t getNjetPt20() { return njetspt20; }
     Float_t getDijetMass() { return mjj; }
     Float_t getTopPt1() { return topQuarkPt1; }
     Float_t getTopPt2() { return topQuarkPt2; }
+    Float_t getBWeight() { return bweight; }
     std::vector<jet> getJets() { return plain_jets; }
     std::vector<jet> getBtagJets() { return btag_jets; }
 };
 
 // read data from tree into member variables
 jet_factory::jet_factory(TTree *input, int era, std::string syst) {
-    std::string mjj_name("vbfMass"), njets_name("njets");
-    // auto mjj_name("vbfMassWoNoisyJets"), njets_name("njets");
+    std::string mjj_name("vbfMass"), njets_name("jetVeto30");
+    if (era == 2017) {
+        mjj_name += "WoNoisyJets";
+        njets_name += "WoNoisyJets";
+    }
 
-    if (syst.find("JetTotalUp") != std::string::npos || syst.find("JetTotalDown") != std::string::npos) {
+    if (syst.find("Jet") != std::string::npos && (syst.find("Up") != std::string::npos || syst.find("Down") != std::string::npos)) {
+        syst.erase(std::remove(syst.begin(), syst.end(), '_'), syst.end());
         mjj_name += "_" + syst;
-        njets_name = "jetVeto30_" + syst;
-        // input->SetBranchAddress(njets_name.c_str(), &temp_njets);
-        njets = temp_njets;
-        doSyst = true;
-    } else {
-        // input->SetBranchAddress(njets_name.c_str(), &njets);
-        doSyst = false;
+        njets_name += "_" + syst;
+    }
+
+
+    std::string btag_string("2016"), bweight_string("bweight_");
+    if (era == 2016) {
+        btag_string = "2016";
+        bweight_string += "2016";
+    } else if (era == 2017) {
+        btag_string = "2017";
+        bweight_string += "2017";
+    } else if (era == 2018) {
+        btag_string = "2018";
+        bweight_string += "2018";
     }
 
     input->SetBranchAddress(mjj_name.c_str(), &mjj);
-
-    std::string btag_string = "2016";
-    if (era == 2016 || era == 2018) {
-        btag_string = "2016";
-        input->SetBranchAddress("jetVeto30", &njets);
-        input->SetBranchAddress("jetVeto20", &njetspt20);
-    } else if (era == 20172) {
-      btag_string = "2017";
-        input->SetBranchAddress("jetVeto30_JetEC2Up", &njets);
-        input->SetBranchAddress("jetVeto20WoNoisyJets", &njetspt20);
-    }  else if (era == 2017) {
-        btag_string = "2017";
-        input->SetBranchAddress("jetVeto30WoNoisyJets", &njets);
-        input->SetBranchAddress("jetVeto20WoNoisyJets", &njetspt20);
-    } else if (era == 2018) {
-        btag_string = "2018";
-        input->SetBranchAddress("jetVeto30", &njets);
-        input->SetBranchAddress("jetVeto20", &njetspt20);
-    }
-
+    input->SetBranchAddress(njets_name.c_str(), &njets);
     input->SetBranchAddress("nbtag", &nbtag);
+    input->SetBranchAddress("bjetDeepCSVVeto20Loose_2016_DR0p5", &nbtag_loose);
+    input->SetBranchAddress("bjetDeepCSVVeto20Medium_2016_DR0p5", &nbtag_medium);
+    input->SetBranchAddress(bweight_string.c_str(), &bweight);
     input->SetBranchAddress("j1pt", &jpt_1);
     input->SetBranchAddress("j1eta", &jeta_1);
     input->SetBranchAddress("j1phi", &jphi_1);
@@ -129,10 +127,6 @@ void jet_factory::run_factory() {
     btag_jets.clear();
 
     Nbtag = nbtag;
-
-    if (doSyst) {
-        njets = temp_njets;
-    }
 
     jet j1(jpt_1, jeta_1, jphi_1, jcsv_1);
     jet j2(jpt_2, jeta_2, jphi_2, jcsv_2);
