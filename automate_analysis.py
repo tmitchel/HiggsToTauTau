@@ -191,7 +191,7 @@ def main(args):
         # Otherwise, use half the available cores.
         n_processes = min(10, multiprocessing.cpu_count() / 2)
         pool = multiprocessing.Pool(processes=n_processes)
-        watcher = pool.apply_async(listener, (q, '{}/logs/runninglog.txt'.format(args.output_dir)))
+        watcher = pool.apply_async(listener, (q, 'Output/trees/{}/logs/runninglog.txt'.format(args.output_dir)))
 
         jobs = []
         for command in processes:
@@ -205,7 +205,7 @@ def main(args):
         pool.close()
         pool.join()
     else:
-        with open('{}/logs/runninglog.txt'.format(args.output_dir), 'w') as ifile:
+        with open('Output/trees/{}/logs/runninglog.txt'.format(args.output_dir), 'w') as ifile:
             [run_command(command, ifile, False) for command in processes]
 
     end = time.time()
