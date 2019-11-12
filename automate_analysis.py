@@ -55,7 +55,7 @@ def getNames(sample):
 def getSyst(name, signal_type, exe):
     systs = ['']
 
-    if name == 'TTT' or name == 'VTT' or name == 'embed' or name == 'ZTT':
+    if name == 'TTT' or name == 'VVT' or name == 'embed' or name == 'ZTT' or signal_type != 'None':
         systs += ['tau_id_Up', 'tau_id_Down']  # names will probably be updated
         systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
 
