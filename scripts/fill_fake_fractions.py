@@ -168,9 +168,10 @@ def main(args):
         oldtree = open_file[args.tree_name].arrays(['*'])
         treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
 
-        events = open_file[args.tree_name].arrays([
+        all_events = open_file[args.tree_name].arrays([
             't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_iso', 'el_iso', 'mjj', 'is_antiTauIso'
         ], outputtype=pandas.DataFrame)
+        events = all_events[(all_events['is_antiTauIso'] > 0)]
 
         random_ext = '_tight' if channel_prefix == 'et' and args.year == "2016" else ''
         ff_file = ROOT.TFile('../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors{}.root'.format(
