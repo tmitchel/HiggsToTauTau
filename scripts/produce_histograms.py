@@ -192,7 +192,7 @@ def main(args):
                                 'ac_weights': weight[0],
                                 'queue': Queue()
                             }
-                    elif '_madgraph' in name:
+                    elif '_madgraph' in name and not 'vbf' in name:
                         for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
                             output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
                             zero_jet_hists[weight[1]] = {
@@ -251,7 +251,7 @@ def main(args):
                                 'ac_weights': weight[0],
                                 'queue': Queue()
                             }
-                    elif '_madgraph' in name:
+                    elif '_madgraph' in name and not 'vbf' in name:
                         for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
                             output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
                             boosted_hists[weight[1]] = {
@@ -310,7 +310,7 @@ def main(args):
                                 'ac_weights': weight[0],
                                 'queue': Queue()
                             }
-                    elif '_madgraph' in name:
+                    elif '_madgraph' in name and not 'vbf' in name:
                         for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
                             output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
                             vbf_hists[weight[1]] = {

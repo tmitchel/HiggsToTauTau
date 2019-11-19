@@ -121,6 +121,8 @@ def main(args):
     nsysts = len(filelist.keys())
     idx = -1
     for syst, files in filelist.iteritems():
+        if not args.syst and syst != 'nominal':
+          continue
         idx += 1
         print 'Processing syst {} ({} of {})'.format(syst, idx, nsysts)
         postfix = get_syst_name(channel_prefix, syst, syst_name_map)
@@ -233,7 +235,7 @@ def main(args):
                         fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var,
                                 zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, ac_weight=weight[0])
                         output_file.Write()
-                elif '_madgraph' in name:
+                elif '_madgraph' in name and not 'vbf' in name:
                     for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
                         logging.info('Reweighting sample {} to {}'.format(name, weight[1]+postfix))
                         # start with 0-jet category
