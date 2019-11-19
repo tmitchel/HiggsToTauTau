@@ -63,9 +63,12 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
         fractions['frac_tt'][category].GetBinContent(xbin, ybin)
     ]
 
-    return fake_weights.value(
+    weights = fake_weights.value(
         9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
-
+  
+    if weights > 100:
+      weights = fake_weights.value(9, array('d', inputs))
+    return weights
 
 def parallel_weights(queue, df, fake_weighter, fractions, channel_prefix, syst):
     print 'starting parallel weight {}'.format(syst)
@@ -87,6 +90,7 @@ def main(args):
         'frac_tt': ['TTJ'],
         'frac_data': ['data_obs'],
         'frac_real': ['embed', 'TTT', 'VVT'],
+        # 'frac_real': ['ZTT', 'TTT', 'VVT'],
     }
 
     fractions = {
@@ -168,10 +172,9 @@ def main(args):
         oldtree = open_file[args.tree_name].arrays(['*'])
         treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
 
-        all_events = open_file[args.tree_name].arrays([
+        events = open_file[args.tree_name].arrays([
             't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_iso', 'el_iso', 'mjj', 'is_antiTauIso'
         ], outputtype=pandas.DataFrame)
-        events = all_events[(all_events['is_antiTauIso'] > 0)]
 
         random_ext = '_tight' if channel_prefix == 'et' and args.year == "2016" else ''
         ff_file = ROOT.TFile('../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors{}.root'.format(
