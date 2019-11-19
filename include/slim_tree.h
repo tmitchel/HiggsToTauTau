@@ -25,6 +25,8 @@ class slim_tree {
     // member data
     TTree *otree;
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiLepIso, is_antiTauIso, is_qcd, is_looseIso, OS, SS;
+    ULong64_t evtno;
+    UInt_t run, lumi;
     Float_t evtwt, el_pt, el_eta, el_phi, el_mass, el_charge, el_iso, mu_pt, mu_eta, mu_phi, mu_mass, mu_charge, mu_iso, t1_pt, t1_eta, t1_phi,
         t1_mass, t1_charge, t1_iso, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode,
         t1_genMatch,  // t1 is used for et and mt, as well
@@ -42,6 +44,9 @@ class slim_tree {
 
 slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree(tree_name.c_str(), tree_name.c_str())) {
     otree->Branch("evtwt", &evtwt, "evtwt/F");
+    // otree->Branch("evt", &evtno);
+    // otree->Branch("run", &run);
+    // otree->Branch("lumi", &lumi);
 
     otree->Branch("el_pt", &el_pt, "el_pt/F");
     otree->Branch("el_eta", &el_eta, "el_eta/F");
@@ -175,6 +180,9 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
 
     // start filling branches
     evtwt = weight;
+    evtno = evt->getEvt();
+    run = evt->getRun();
+    lumi = evt->getLumi();
     higgs_pT = higgs.Pt();
     higgs_m = higgs.M();
 

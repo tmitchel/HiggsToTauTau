@@ -98,7 +98,10 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
     }
 
     // 2017 has extra weights
-    if (year == "2017" && isVBFAC) {
+    if ((year == "2018" || year == "2017") && isVBFAC) {
+        weightNames.push_back("l1zg");
+        weightNames.push_back("l1zgint");
+    } else if (year == "2018" && isZHAC) {
         weightNames.push_back("l1zg");
         weightNames.push_back("l1zgint");
     }
@@ -226,6 +229,13 @@ std::vector<double> ACWeighter::getWeights(Long64_t currentEventID) {
     auto it = acWeights.find(currentEventID);
     if (it != acWeights.end()) {
         weights = it->second;
+    } else if (notSignal || fileName == "/hdfs/store/user/tmitchel/HTT_AC_weights//JHU2018/vbf_ac_a2int.root" 
+              || fileName == "/hdfs/store/user/tmitchel/HTT_AC_weights//JHU2018/zh_ac_L1Zg.root"
+              || fileName == "/hdfs/store/user/tmitchel/HTT_AC_weights//JHU2018/ggh_ac_a3.root") {
+      return weights;
+    } else {
+      std::cerr << "Unable to find event " << currentEventID << std::endl;
+      throw;
     }
     return weights;
 }
