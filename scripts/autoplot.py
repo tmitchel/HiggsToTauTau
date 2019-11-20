@@ -11,8 +11,9 @@ plots = [
     ('higgs_pT', 'Higgs p_{T}', 1.4),
     ('mjj', 'm_{JJ}', 1.4),
     ('met', 'Missing E_{T}', 1.4),
+    ('njets', 'N(jets)', 1.4),
     ('t1_decayMode', 'Tau Decay Mode', 2.2),
-    # ('vis_mass', 'm_{Visible}', 2.2),
+    ('vis_mass', 'm_{Visible}', 2.2),
     ('t1_pt', 'Tau p_{T}', 1.4),
     ('t1_eta', 'Tau #eta', 2.2),
 

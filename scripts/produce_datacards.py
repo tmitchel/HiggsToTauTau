@@ -4,6 +4,7 @@ import time
 import numpy
 import pandas
 import uproot
+import logging
 import datetime
 from glob import glob
 from array import array
@@ -116,7 +117,14 @@ def main(args):
     # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
     #                                                                               ztt_name, syst_name, args.date, '_'+args.suffix))
 
+    logging.basicConfig(filename='logs/2D_htt_{}_{}_{}_fa3_{}_{}{}.log'.format(channel_prefix, ztt_name, syst_name, args.year, date, args.suffix))
+    nsysts = len(filelist.keys())
+    idx = -1
     for syst, files in filelist.iteritems():
+        if not args.syst and syst != 'nominal':
+          continue
+        idx += 1
+        print 'Processing syst {} ({} of {})'.format(syst, idx, nsysts)
         postfix = get_syst_name(channel_prefix, syst, syst_name_map)
         if postfix == 'unknown': # skip unknown systematics
             continue
@@ -131,9 +139,8 @@ def main(args):
                 continue
 
             name = ifile.replace('.root', '').split('/')[-1]
-            print 'Processing: {}'.format(name + postfix)
+            logging.info('Processing: {}'.format(name + postfix))
             input_file = uproot.open(ifile)
-            trees = [args.tree_name]
 
             # get data naming correct
             if 'Data' in name:
@@ -204,7 +211,7 @@ def main(args):
 
                 if '_JHU' in name:
                     for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
-                        print 'Reweighting sample {} to {}'.format(name, weight[1]+postfix)
+                        logging.info('Reweighting sample {} to {}'.format(name, weight[1]+postfix))
                         # start with 0-jet category
                         output_file.cd('{}_0jet'.format(channel_prefix))
                         zero_jet_hist = build_histogram(weight[1]+postfix, decay_mode_bins, vis_mass_bins)
@@ -228,9 +235,9 @@ def main(args):
                         fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var,
                                 zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, ac_weight=weight[0])
                         output_file.Write()
-                elif '_madgraph' in name:
+                elif '_madgraph' in name and not 'vbf' in name:
                     for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
-                        print 'Reweighting sample {} to {}'.format(name, weight[1]+postfix)
+                        logging.info('Reweighting sample {} to {}'.format(name, weight[1]+postfix))
                         # start with 0-jet category
                         output_file.cd('{}_0jet'.format(channel_prefix))
                         zero_jet_hist = build_histogram(weight[1]+postfix+postfix, decay_mode_bins, vis_mass_bins)
@@ -257,7 +264,7 @@ def main(args):
 
             # do anti-iso categorization for fake-factor using data
             else:
-                print 'making fake factor hists'
+                logging.info('making fake factor hists')
                 antiIso_events = general_selection[general_selection['is_antiTauIso'] > 0]
                 fake_zero_jet_events = antiIso_events[antiIso_events['njets'] == 0]
                 fake_boosted_events = antiIso_events[

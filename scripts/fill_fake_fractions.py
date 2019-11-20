@@ -63,9 +63,12 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
         fractions['frac_tt'][category].GetBinContent(xbin, ybin)
     ]
 
-    return fake_weights.value(
+    weights = fake_weights.value(
         9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
-
+  
+    if weights > 100:
+      weights = fake_weights.value(9, array('d', inputs))
+    return weights
 
 def parallel_weights(queue, df, fake_weighter, fractions, channel_prefix, syst):
     print 'starting parallel weight {}'.format(syst)
@@ -87,6 +90,7 @@ def main(args):
         'frac_tt': ['TTJ'],
         'frac_data': ['data_obs'],
         'frac_real': ['embed', 'TTT', 'VVT'],
+        # 'frac_real': ['ZTT', 'TTT', 'VVT'],
     }
 
     fractions = {
