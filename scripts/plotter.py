@@ -25,8 +25,11 @@ style_map = {
     },
     "signals": {
         "ggh125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
-        "MG__GGH2Jets_sm_M125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
-        "MG__GGH2Jets_pseudoscalar_M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
+        # "MG__GGH2Jets_sm_M125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
+        # "MG__GGH2Jets_pseudoscalar_M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
+        # use JHU for 2018 because MG isn't available
+        "JHU__GGH2Jets_sm_M125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
+        "JHU__GGH2Jets_pseudoscalar_M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
 
         "vbf125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
         "JHU__reweighted_qqH_htt_0PM125": style_map_tuple(no_color, GetColor("#FF0000"), 1, 3, 1),
@@ -99,8 +102,11 @@ def fillLegend(data, backgrounds, signals, stat):
     leg.AddEntry(data, 'Data', 'lep')
 
     # signals
-    leg.AddEntry(signals['MG__GGH2Jets_sm_M125'], 'ggH SM Higgs(125)x50', 'l')
-    leg.AddEntry(signals['MG__GGH2Jets_pseudoscalar_M125'], 'ggH PS Higgs(125)x50', 'l')
+    # leg.AddEntry(signals['MG__GGH2Jets_sm_M125'], 'ggH SM Higgs(125)x50', 'l')
+    # leg.AddEntry(signals['MG__GGH2Jets_pseudoscalar_M125'], 'ggH PS Higgs(125)x50', 'l')
+    leg.AddEntry(signals['JHU__GGH2Jets_sm_M125'], 'ggH SM Higgs(125)x50', 'l')
+    leg.AddEntry(signals['JHU__GGH2Jets_pseudoscalar_M125'], 'ggH PS Higgs(125)x50', 'l')
+
     leg.AddEntry(signals['JHU__reweighted_qqH_htt_0PM125'], 'VBF SM Higgs(125)x50', 'l')
     leg.AddEntry(signals['JHU__reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
     
@@ -118,8 +124,8 @@ def fillLegend(data, backgrounds, signals, stat):
 
 def formatPull(pull, title):
     pull.SetTitle('')
-    pull.SetMaximum(2.)
-    pull.SetMinimum(0.)
+    pull.SetMaximum(1.5)
+    pull.SetMinimum(0.5)
     pull.GetXaxis().SetTitle(title)
     pull.SetMarkerStyle(21)
     pull.GetXaxis().SetTitleSize(0.18)
@@ -145,13 +151,13 @@ def sigmaLines(data):
         data.GetBinWidth(data.GetNbinsX())
 
     ## high line
-    line1 = ROOT.TLine(low, 1.5, high, 1.5)
+    line1 = ROOT.TLine(low, 1.2, high, 1.2)
     line1.SetLineWidth(1)
     line1.SetLineStyle(3)
     line1.SetLineColor(ROOT.kBlack)
 
     ## low line
-    line2 = ROOT.TLine(low, 0.5, high, 0.5)
+    line2 = ROOT.TLine(low, 0.8, high, 0.8)
     line2.SetLineWidth(1)
     line2.SetLineStyle(3)
     line2.SetLineColor(ROOT.kBlack)
@@ -213,7 +219,8 @@ def BuildPlot(args):
     stack.Draw('hist')
     formatStack(stack)
 
-    combo_signal = signals['MG__GGH2Jets_pseudoscalar_M125'].Clone()
+    # combo_signal = signals['MG__GGH2Jets_pseudoscalar_M125'].Clone()
+    combo_signal = signals['JHU__GGH2Jets_pseudoscalar_M125'].Clone()
     combo_signal.Add(signals['ggh125_powheg'])
     combo_signal.Add(signals['vbf125_powheg'])
     data_hist = blindData(data_hist, combo_signal, stat)
