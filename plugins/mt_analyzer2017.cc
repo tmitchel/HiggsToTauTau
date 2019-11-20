@@ -225,29 +225,29 @@ int main(int argc, char *argv[]) {
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 3.974;
+                evtwt = 3.656;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 3.677;
+                evtwt = 3.383;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 2.331;
+                evtwt = 2.145;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 2.123;
+                evtwt = 1.954;
             } else {
-                evtwt = 27.830;
+                evtwt = 25.609;
             }
         }
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.785;
+                evtwt = 0.710;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 1.019;
+                evtwt = 0.921;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 1.827;
+                evtwt = 1.651;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 0.249;
+                evtwt = 0.220;
             } else {
-                evtwt = 2.855;
+                evtwt = 2.581;
             }
         }
 

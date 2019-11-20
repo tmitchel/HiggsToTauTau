@@ -155,6 +155,7 @@ int main(int argc, char* argv[]) {
 
     // H->tau tau scale factors
     TFile htt_sf_file("data/htt_scalefactors_2017_v2.root");
+//    TFile htt_sf_file("data/htt_scalefactors_legacy_2017.root");
     RooWorkspace* htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
@@ -225,29 +226,29 @@ int main(int argc, char* argv[]) {
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 3.974;
+                evtwt = 3.656;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 3.677;
+                evtwt = 3.383;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 2.331;
+                evtwt = 2.145;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 2.123;
+                evtwt = 1.954;
             } else {
-                evtwt = 27.830;
+                evtwt = 25.609;
             }
         }
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.785;
+                evtwt = 0.710;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 1.019;
+                evtwt = 0.921;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 1.827;
+                evtwt = 1.651;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 0.249;
+                evtwt = 0.220;
             } else {
-                evtwt = 2.855;
+                evtwt = 2.581;
             }
         }
 
@@ -367,12 +368,13 @@ int main(int argc, char* argv[]) {
             }
 
             // b-tagging scale factor goes here
-            // evtwt *= jets.getBWeight();
+            evtwt *= jets.getBWeight();
 
             // pileup reweighting
             if (!doAC && !isMG) {
                 evtwt *= lumi_weights->weight(event.getNPV());
             }
+
             // NNLOPS ggH reweighting
             if (sample == "ggh125" && signal_type == "powheg") {
                 if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
