@@ -44,13 +44,14 @@ def combine_wh(hadd_list, path):
 
 
 def rename_wh_zh(hadd_list, path):
-    if not 'wh125_JHU' in hadd_list or not 'zh125_JHU' in hadd_list:
-        raise Exception('attempting to rename_wh_zh with a list not containing wh or zh')
+    for idir, samples in hadd_list.iteritems():
+      if not 'wh125_JHU' in samples or not 'zh125_JHU' in samples:
+          raise Exception('attempting to rename_wh_zh with a list not containing wh or zh')
 
-    for ifile in hadd_list['wh125_JHU'] + hadd_list['zh125_JHU']:
-        new_name = ifile.replace('-prod_nom-decay_WH125_NOMINAL_output', '')
-        new_name = new_name.replace('-prod_nom-decay_ZH125_NOMINAL_output', '')
-        os.system('cp {} {}/{}'.format(ifile, path, new_name))
+      for ifile in samples['wh125_JHU'] + samples['zh125_JHU']:
+          new_name = ifile.split('/')[-1].replace('-prod_nom-decay_WH125_NOMINAL_output', '')
+          new_name = new_name.replace('-prod_nom-decay_ZH125_NOMINAL_output', '')
+          os.system('cp {} {}/{}/merged/{}'.format(ifile, path, idir, new_name))
     
 
 def good_bkg(ifile):
