@@ -95,6 +95,9 @@ int main(int argc, char* argv[]) {
     // get number of generated events
     auto counts = reinterpret_cast<TH1D*>(fin->Get("nevents"));
     auto gen_number = counts->GetBinContent(2);
+    if (signal_type == "JHU") {
+        gen_number = 1.;
+    }
 
     // create output file
     auto fout = new TFile(filename.c_str(), "RECREATE");
