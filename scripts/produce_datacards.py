@@ -183,7 +183,7 @@ def main(args):
                 ]
                 vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
 
-                if 'wh125_JHU' in name or 'zh125_JHU' in name:
+                if 'wh125_JHU_' in name or 'zh125_JHU_' in name:
                     name = boilerplate['wh_zh_name_map'][name]
 
                 # start with 0-jet category
