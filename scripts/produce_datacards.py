@@ -183,6 +183,9 @@ def main(args):
                 ]
                 vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
 
+                if 'wh125_JHU_' in name or 'zh125_JHU_' in name:
+                    name = boilerplate['wh_zh_name_map'][name]
+
                 # start with 0-jet category
                 output_file.cd('{}_0jet'.format(channel_prefix))
                 zero_jet_hist = build_histogram(name, decay_mode_bins, vis_mass_bins)
@@ -209,7 +212,7 @@ def main(args):
                 # write then reset histograms
                 output_file.Write()
 
-                if '_JHU' in name:
+                if 'vbf125_JHU' in name or 'ggh125_JHU' in name:
                     for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
                         logging.info('Reweighting sample {} to {}'.format(name, weight[1]+postfix))
                         # start with 0-jet category

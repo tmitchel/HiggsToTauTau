@@ -58,6 +58,26 @@
             ["wt_ggh_a3int", "MG__GGH2Jets_pseudoscalar_Mf05ph0125"]
         ]
     },
+    "wh_zh_name_map": {
+        "wh125_JHU_a1": "JHU__unweighted_WH_htt_0PM125",
+        "wh125_JHU_a2": "JHU__unweighted_WH_htt_0PH125",
+        "wh125_JHU_a2int": "JHU__unweighted_WH_htt_0PHf05ph0125",
+        "wh125_JHU_a3": "JHU__unweighted_WH_htt_0M125",
+        "wh125_JHU_a3int": "JHU__unweighted_WH_htt_0Mf05ph0125",
+        "wh125_JHU_l1": "JHU__unweighted_WH_htt_0L1125",
+        "wh125_JHU_l1int": "JHU__unweighted_WH_htt_0L1f05ph0125",
+        "wh125_JHU_l1zg": "JHU__unweighted_WH_htt_0L1Zg125",
+        "wh125_JHU_l1zgint": "JHU__unweighted_WH_htt_0L1Zgf05ph0125",
+        "zh125_JHU_a1": "JHU__unweighted_ZH_htt_0PM125",
+        "zh125_JHU_a2": "JHU__unweighted_ZH_htt_0PH125",
+        "zh125_JHU_a2int": "JHU__unweighted_ZH_htt_0PHf05ph0125",
+        "zh125_JHU_a3": "JHU__unweighted_ZH_htt_0M125",
+        "zh125_JHU_a3int": "JHU__unweighted_ZH_htt_0Mf05ph0125",
+        "zh125_JHU_l1": "JHU__unweighted_ZH_htt_0L1125",
+        "zh125_JHU_l1int": "JHU__unweighted_ZH_htt_0L1f05ph0125",
+        "zh125_JHU_l1zg": "JHU__unweighted_ZH_htt_0L1Zg125",
+        "zh125_JHU_l1zgint": "JHU__unweighted_ZH_htt_0L1Zgf05ph0125"
+    },
     "syst_name_map": {
         "JetEta0to3_Up": "_CMS_scale_jet_Eta0to3_YEARUp",
         "JetEta0to3_Down": "_CMS_scale_jet_Eta0to3_YEARDown",
