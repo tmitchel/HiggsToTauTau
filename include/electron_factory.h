@@ -76,7 +76,7 @@ electron_factory::electron_factory(TTree* input, int era, std::string _syst) : s
     input->SetBranchAddress("phi_1", &phi_1);
     input->SetBranchAddress("m_1", &m_1);
     input->SetBranchAddress("q_1", &q_1);
-    input->SetBranchAddress("eIsoDB03", &iso_1);
+    input->SetBranchAddress("eRelPFIsoRho", &iso_1);
     input->SetBranchAddress("gen_match_1", &gen_match_1);
     input->SetBranchAddress("eGenPt", &eGenPt);
     input->SetBranchAddress("eGenEta", &eGenEta);
