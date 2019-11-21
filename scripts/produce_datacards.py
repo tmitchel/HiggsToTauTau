@@ -183,6 +183,9 @@ def main(args):
                 ]
                 vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
 
+                if 'wh125_JHU' in name or 'zh125_JHU' in name:
+                    name = boilerplate['wh_zh_name_map'][name]
+
                 # start with 0-jet category
                 output_file.cd('{}_0jet'.format(channel_prefix))
                 zero_jet_hist = build_histogram(name, decay_mode_bins, vis_mass_bins)
