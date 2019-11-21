@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
             return 2;
         }
         std::replace(datasetName.begin(), datasetName.end(), '/', '#');
-        lumi_weights = new reweight::LumiReWeighting("~/public/pu_distributions_mc_2017.root", "~/public/pu_distributions_data_2017.root", ("pua/#" +
+        lumi_weights = new reweight::LumiReWeighting("data/pu_distributions_mc_2017.root", "data/pu_distributions_data_2017.root", ("pua/#" +
         datasetName).c_str(), "pileup");
         logfile << "using PU dataset name: " << datasetName << std::endl;
     }

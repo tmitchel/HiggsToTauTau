@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
     ///////////////////////////////////////////////
 
     auto lumi_weights =
-        new reweight::LumiReWeighting("data/MC_Moriond17_PU25ns_V1.root", "data/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
+        new reweight::LumiReWeighting("data/pu_distributions_mc_2018.root", "data/pu_distributions_data_2018.root", "pileup", "pileup");
 
     // H->tau tau scale factors
     TFile htt_sf_file("data/htt_scalefactors_2017_v2.root");
