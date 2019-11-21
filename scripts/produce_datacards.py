@@ -212,7 +212,7 @@ def main(args):
                 # write then reset histograms
                 output_file.Write()
 
-                if '_JHU' in name:
+                if 'vbf125_JHU' in name or 'ggh125_JHU' in name:
                     for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
                         logging.info('Reweighting sample {} to {}'.format(name, weight[1]+postfix))
                         # start with 0-jet category
