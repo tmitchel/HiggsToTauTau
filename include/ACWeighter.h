@@ -229,13 +229,11 @@ std::vector<double> ACWeighter::getWeights(Long64_t currentEventID) {
     auto it = acWeights.find(currentEventID);
     if (it != acWeights.end()) {
         weights = it->second;
-    } else if (notSignal || fileName == "/hdfs/store/user/tmitchel/HTT_AC_weights//JHU2018/vbf_ac_a2int.root" 
-              || fileName == "/hdfs/store/user/tmitchel/HTT_AC_weights//JHU2018/zh_ac_L1Zg.root"
-              || fileName == "/hdfs/store/user/tmitchel/HTT_AC_weights//JHU2018/ggh_ac_a3.root") {
+    } else if (notSignal || isWHAC || isZHAC) {
       return weights;
     } else {
-      std::cerr << "Unable to find event " << currentEventID << std::endl;
-      throw;
+      // std::cerr << "Unable to find event " << currentEventID << std::endl;
+      // throw;
     }
     return weights;
 }
