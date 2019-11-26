@@ -139,6 +139,9 @@ def main(args):
                 continue
 
             name = ifile.replace('.root', '').split('/')[-1]
+            if 'wh125_JHU_CMS' in name or 'zh125_JHU_CMS' in name or name == 'wh125_JHU' or name == 'zh125_JHU':
+              continue
+
             logging.info('Processing: {}'.format(name + postfix))
             input_file = uproot.open(ifile)
 
@@ -184,7 +187,12 @@ def main(args):
                 vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
 
                 if 'wh125_JHU_' in name or 'zh125_JHU_' in name:
-                    name = boilerplate['wh_zh_name_map'][name]
+                    if 'nominal' in ifile:
+                      name = boilerplate['wh_zh_name_map'][name]
+                    else:
+                      name, syst_suf = name.split('_CMS_')[0], name.split('_CMS_')[1]
+                      name = boilerplate['wh_zh_name_map'][name]
+                      name = name + '_CMS_' + syst_suf
 
                 # start with 0-jet category
                 output_file.cd('{}_0jet'.format(channel_prefix))
