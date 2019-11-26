@@ -95,9 +95,6 @@ int main(int argc, char* argv[]) {
     // get number of generated events
     auto counts = reinterpret_cast<TH1D*>(fin->Get("nevents"));
     auto gen_number = counts->GetBinContent(2);
-    if (signal_type == "JHU") {
-        gen_number = 1.;
-    }
 
     // create output file
     auto fout = new TFile(filename.c_str(), "RECREATE");
@@ -123,6 +120,10 @@ int main(int argc, char* argv[]) {
         sample = sample.find("plus") == std::string::npos ? "wplus125" : "wminus125";
     } else if (name == "ZH125") {
         sample = "zh125";
+    }
+
+    if (signal_type == "JHU" && (sample == "ggh125" || sample == "vbf125")) {
+        gen_number = 1.;
     }
 
     // reweighter for anomolous coupling samples
@@ -425,6 +426,11 @@ int main(int argc, char* argv[]) {
             }
 
         } else if (!isData && isEmbed) {
+          event.setEmbed();
+          if (electron.getPt() < 33 && !event.getPassEmbedCrossEl2018() && fabs(electron.getPt()) < 1.479) {
+          // if (electron.getPt() < 33 && !event.getPassEle24Tau30()) {
+            continue;
+          }
             // tau ID eff SF
             if (tau.getGenMatch() == 5) {
                 evtwt *= 0.97;
@@ -463,15 +469,15 @@ int main(int argc, char* argv[]) {
             bool fireCross = electron.getPt() < 33;
             auto single_eff(1.), el_leg_eff(1.), tau_leg_eff(1.);
             if (fabs(electron.getEta()) < 1.479) {
-                single_eff = wEmbed->function("e_trg27_trg32_trg35_embed_kit_ratio")->getVal();
+                single_eff = wEmbed->function("e_trg32_trg35_embed_kit_ratio")->getVal();
                 el_leg_eff = wEmbed->function("e_trg_EleTau_Ele24Leg_kit_ratio_embed")->getVal();
                 tau_leg_eff = wEmbed->function("et_emb_LooseChargedIsoPFTau30_kit_ratio")->getVal();
                 evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
             } else {
-                single_eff = wEmbed->function("e_trg27_trg32_trg35_kit_data")->getVal();
+                single_eff = wEmbed->function("e_trg32_trg35_kit_data")->getVal();
                 el_leg_eff = wEmbed->function("e_trg_EleTau_Ele24Leg_desy_data")->getVal();
                 if (fabs(tau.getEta()) < 2.1) {
-                    tau_leg_eff = tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
+                    tau_leg_eff = tau_leg_cross_trg_sf->getTriggerEfficiencyData(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
                 }
                 evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
             }

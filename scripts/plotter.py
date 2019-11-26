@@ -168,7 +168,7 @@ def blindData(data, signal, background):
     for ibin in range(data.GetNbinsX()+1):
         sig = signal.GetBinContent(ibin)
         bkg = background.GetBinContent(ibin)
-        if bkg > 0 and sig / ROOT.TMath.Sqrt(bkg + pow(0.09*bkg, 2)) >= 0.3:
+        if bkg > 0 and sig / ROOT.TMath.Sqrt(bkg + pow(0.09*bkg, 2)) >= .3:
             err = data.GetBinError(ibin)
             data.SetBinContent(ibin, -1)
             data.SetBinError(ibin, err)
@@ -221,6 +221,7 @@ def BuildPlot(args):
 
     # combo_signal = signals['MG__GGH2Jets_pseudoscalar_M125'].Clone()
     combo_signal = signals['JHU__GGH2Jets_pseudoscalar_M125'].Clone()
+    combo_signal.Reset()
     combo_signal.Add(signals['ggh125_powheg'])
     combo_signal.Add(signals['vbf125_powheg'])
     data_hist = blindData(data_hist, combo_signal, stat)
