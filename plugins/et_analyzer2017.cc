@@ -95,9 +95,6 @@ int main(int argc, char* argv[]) {
     // get number of generated events
     auto counts = reinterpret_cast<TH1D*>(fin->Get("nevents"));
     auto gen_number = counts->GetBinContent(2);
-    if (signal_type == "JHU") {
-        gen_number = 1.;
-    }
 
     // create output file
     auto fout = new TFile(filename.c_str(), "RECREATE");
@@ -123,6 +120,10 @@ int main(int argc, char* argv[]) {
         sample = sample.find("plus") == std::string::npos ? "wplus125" : "wminus125";
     } else if (name == "ZH125") {
         sample = "zh125";
+    }
+
+    if (signal_type == "JHU" && (sample == "ggh125" || sample == "vbf125")) {
+        gen_number = 1.;
     }
 
     // reweighter for anomolous coupling samples
@@ -425,7 +426,9 @@ int main(int argc, char* argv[]) {
             }
 
         } else if (!isData && isEmbed) {
-          if (electron.getPt() < 33 && !event.getPassEle24Tau30()) {
+          event.setEmbed();
+          if (electron.getPt() < 33 && !event.getPassEmbedCrossEl2018() && fabs(electron.getPt()) < 1.479) {
+          // if (electron.getPt() < 33 && !event.getPassEle24Tau30()) {
             continue;
           }
             // tau ID eff SF

@@ -94,9 +94,6 @@ int main(int argc, char *argv[]) {
     // get number of generated events
     auto counts = reinterpret_cast<TH1D *>(fin->Get("nevents"));
     auto gen_number = counts->GetBinContent(2);
-    if (signal_type == "JHU") {
-        gen_number = 1.;
-    }
 
     auto fout = new TFile(filename.c_str(), "RECREATE");
     counts->Write();
@@ -121,6 +118,10 @@ int main(int argc, char *argv[]) {
         sample = sample.find("plus") == std::string::npos ? "wplus125" : "wminus125";
     } else if (name == "ZH125") {
         sample = "zh125";
+    }
+
+    if (signal_type == "JHU" && (sample == "ggh125" || sample == "vbf125")) {
+        gen_number = 1.;
     }
 
     // reweighter for anomolous coupling samples
@@ -358,7 +359,7 @@ int main(int argc, char *argv[]) {
             }
 
             // b-tagging scale factor goes here
-            // evtwt *= jets.getBWeight();
+            evtwt *= jets.getBWeight();
 
             // pileup reweighting
             if (!doAC && !isMG) {
@@ -412,6 +413,10 @@ int main(int argc, char *argv[]) {
             }
 
         } else if (!isData && isEmbed) {
+            event.setEmbed();
+            if (muon.getPt() < 25 && !event.getPassEmbedCrossMu2017()) {
+              continue;
+            }
             // tau ID eff SF
             if (tau.getGenMatch() == 5) {
                 evtwt *= 0.97;
