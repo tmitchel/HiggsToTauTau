@@ -341,15 +341,6 @@ int main(int argc, char* argv[]) {
                 evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
             }
 
-            // trigger scale factors
-            if (electron.getPt() < 33) {
-                evtwt *= htt_sf->function("e_trg_24_ic_ratio")->getVal();
-                evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
-                // evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_ratio")->getVal(); (for DeepTau ID)
-            } else {
-                evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
-            }
-
             // Z-pT Reweighting
             if (name == "EWKZ2l" || name == "EWKZ2nu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
                 auto nom_zpt_weight = htt_sf->function("zptmass_weight_nom")->getVal();
