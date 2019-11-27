@@ -289,9 +289,6 @@ int main(int argc, char* argv[]) {
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
-            evtwt *= htt_sf->function("e_reco_ratio")->getVal();
-            evtwt *= htt_sf->function("e_trk_ratio")->getVal();
-
             // tau ID efficiency SF and systematics
             if (tau.getGenMatch() == 5) {
                 std::string shift = "";  // nominal
@@ -354,15 +351,6 @@ int main(int argc, char* argv[]) {
                 evtwt *= htt_sf->function("e_trg_24_ic_ratio")->getVal();
                 evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
                 // evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_ratio")->getVal(); (for DeepTau ID)
-            } else {
-                evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
-            }
-
-            // trigger scale factors
-            if (electron.getPt() < 33) {
-                evtwt *= htt_sf->function("e_trg_24_ic_ratio")->getVal();
-                evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
-                // evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_ratio")->getVal(); (for DeepTau ID)
             } else {
                 evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
             }
