@@ -40,11 +40,17 @@ def build_histogram(name, x_bins, y_bins):
     return ROOT.TH2F(name, name, len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins))
 
 
-def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, ac_weight=None, fake_weight=None):
+def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, ac_weight=None, fake_weight=None, DCP_idx=None):
     evtwt = data['evtwt'].to_numpy(copy=True) if ac_weight == None else (data['evtwt'] * data[ac_weight]).to_numpy(copy=True)
     xvar = data[xvar_name].values
     yvar = data[yvar_name].values
     zvar = data[zvar_name].values if zvar_name != None else None
+    if zvar_name == 'D0_ggH':
+        dcp = data['DCP_ggH'].values
+    elif zvar_name == 'D0_VBF':
+        dcp = data['DCP_VBF'].values
+    else:
+        raise Exception('Don\'t know how to handle DCP for provided zvar_name {}'.format(zvar_name))
 
     if fake_weight != None:
         evtwt *= data[fake_weight].values
@@ -53,7 +59,14 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, ac
         if zvar_name != None:
             for j, edge in enumerate(edges[1:]):  # remove lowest left edge
                 if zvar[i] < edge:
-                    hists[j].Fill(xvar[i], yvar[i], evtwt[i])
+                    if DCP_idx == None:
+                        hists[j].Fill(xvar[i], yvar[i], evtwt[i])
+                    else:
+                        if dcp[i] > 0:
+                            hists[j].Fill(xvar[i], yvar[i], evtwt[i])
+                        else:
+                            # DCP minus bins are offset by DCP_idx
+                            hists[j+DCP_idx].Fill(xvar[i], yvar[i], evtwt[i])
                     break
         else:
             hists.Fill(xvar[i], yvar[i], evtwt[i])
@@ -211,11 +224,11 @@ def main(args):
 
                 # vbf sub-categories event after normal vbf categories
                 vbf_cat_hists = []
-                for cat in boilerplate['vbf_sub_cats']:
+                for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
                     output_file.cd('{}_{}'.format(channel_prefix, cat))
                     vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins))
                 fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var,
-                        zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges)
+                        zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
 
                 # write then reset histograms
                 output_file.Write()
@@ -240,11 +253,12 @@ def main(args):
 
                         # vbf sub-categories event after normal vbf categories
                         vbf_cat_hists = []
-                        for cat in boilerplate['vbf_sub_cats']:
+                        for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
                             output_file.cd('{}_{}'.format(channel_prefix, cat))
                             vbf_cat_hists.append(build_histogram(weight[1]+postfix, vbf_cat_x_bins, vbf_cat_y_bins))
                         fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var,
-                                zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, ac_weight=weight[0])
+                                zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, ac_weight=weight[0],
+                                DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
                         output_file.Write()
                 elif '_madgraph' in name and not 'vbf' in name:
                     for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
@@ -266,11 +280,12 @@ def main(args):
 
                         # vbf sub-categories event after normal vbf categories
                         vbf_cat_hists = []
-                        for cat in boilerplate['vbf_sub_cats']:
+                        for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
                             output_file.cd('{}_{}'.format(channel_prefix, cat))
                             vbf_cat_hists.append(build_histogram(weight[1]+postfix, vbf_cat_x_bins, vbf_cat_y_bins))
                         fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var,
-                                zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, ac_weight=weight[0])
+                                zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, ac_weight=weight[0],
+                                DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
                         output_file.Write()
 
             # do anti-iso categorization for fake-factor using data
@@ -300,11 +315,11 @@ def main(args):
 
                 # vbf sub-categories event after normal vbf categories
                 vbf_cat_hists = []
-                for cat in boilerplate['vbf_sub_cats']:
+                for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
                     output_file.cd('{}_{}'.format(channel_prefix, cat))
                     vbf_cat_hists.append(build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins))
                 fill_hists(fake_vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
-                        edges=vbf_cat_edges, fake_weight='fake_weight')
+                        edges=vbf_cat_edges, fake_weight='fake_weight', DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
 
                 output_file.Write()
 
@@ -327,11 +342,11 @@ def main(args):
 
                         # vbf sub-categories event after normal vbf categories
                         vbf_cat_hists = []
-                        for cat in boilerplate['vbf_sub_cats']:
+                        for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
                             output_file.cd('{}_{}'.format(channel_prefix, cat))
                             vbf_cat_hists.append(build_histogram('jetFakes_' + syst, vbf_cat_x_bins, vbf_cat_y_bins))
                         fill_hists(fake_vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
-                                edges=vbf_cat_edges, fake_weight=syst)
+                                edges=vbf_cat_edges, fake_weight=syst, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
                         output_file.Write()
 
     output_file.Close()

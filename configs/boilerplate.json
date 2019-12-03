@@ -26,6 +26,22 @@
         "vbf_ggHMELA_bin9",  "vbf_ggHMELA_bin10",
         "vbf_ggHMELA_bin11", "vbf_ggHMELA_bin12"
     ],
+    "vbf_sub_cats_plus": [
+        "vbf_ggHMELA_bin1_DCPp",  "vbf_ggHMELA_bin2_DCPp",
+        "vbf_ggHMELA_bin3_DCPp",  "vbf_ggHMELA_bin4_DCPp",
+        "vbf_ggHMELA_bin5_DCPp",  "vbf_ggHMELA_bin6_DCPp",
+        "vbf_ggHMELA_bin7_DCPp",  "vbf_ggHMELA_bin8_DCPp",
+        "vbf_ggHMELA_bin9_DCPp",  "vbf_ggHMELA_bin10_DCPp",
+        "vbf_ggHMELA_bin11_DCPp", "vbf_ggHMELA_bin12_DCPp"
+    ],
+    "vbf_sub_cats_minus": [
+        "vbf_ggHMELA_bin1_DCPm",  "vbf_ggHMELA_bin2_DCPm",
+        "vbf_ggHMELA_bin3_DCPm",  "vbf_ggHMELA_bin4_DCPm",
+        "vbf_ggHMELA_bin5_DCPm",  "vbf_ggHMELA_bin6_DCPm",
+        "vbf_ggHMELA_bin7_DCPm",  "vbf_ggHMELA_bin8_DCPm",
+        "vbf_ggHMELA_bin9_DCPm",  "vbf_ggHMELA_bin10_DCPm",
+        "vbf_ggHMELA_bin11_DCPm", "vbf_ggHMELA_bin12_DCPm"
+    ],
     "jhu_ac_reweighting_map": {
         "ggh": [
             ["wt_ggh_a1", "JHU__GGH2Jets_sm_M125"], ["wt_ggh_a3", "JHU__GGH2Jets_pseudoscalar_M125"],
