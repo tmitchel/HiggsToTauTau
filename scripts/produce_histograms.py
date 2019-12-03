@@ -153,10 +153,7 @@ def main(args):
                 output_file.cd('{}_inclusive/{}'.format(channel_prefix, variable))
                 inclusive_hists = {}
                 if 'jetFakes' in ifile:
-                    print 'making 0jet fake factor hists'
-                    fake_events = fake_events[
-                        (general_selection['njets'] == 0)
-                    ]
+                    print 'making inclusive fake factor hists'
 
                     inclusive_hists['jetFakes'] = {
                         'data': fake_events,
@@ -183,7 +180,7 @@ def main(args):
                     }
                     if '_JHU' in name:
                         for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
-                            output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
+                            output_file.cd('{}_inclusive/{}'.format(channel_prefix, variable))
                             inclusive_hists[weight[1]] = {
                                 'data': signal_events,
                                 'hists': build_histogram(weight[1], bins),
@@ -193,7 +190,7 @@ def main(args):
                             }
                     elif '_madgraph' in name and not 'vbf' in name:
                         for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
-                            output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
+                            output_file.cd('{}_inclusive/{}'.format(channel_prefix, variable))
                             inclusive_hists[weight[1]] = {
                                 'data': signal_events,
                                 'hists': build_histogram(weight[1], bins),
@@ -212,7 +209,7 @@ def main(args):
                 if 'jetFakes' in ifile:
                     print 'making 0jet fake factor hists'
                     fake_zero_jet_events = fake_events[
-                        (general_selection['njets'] == 0)
+                        (fake_events['njets'] == 0)
                     ]
 
                     zero_jet_hists['jetFakes'] = {
@@ -268,9 +265,9 @@ def main(args):
                 boosted_hists = {}
                 if 'jetFakes' in ifile:
                     print 'making boosted fake factor hists'
-                    fake_boosted_events = general_selection[
-                        ((general_selection['njets'] == 1) |
-                         ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300)))
+                    fake_boosted_events = fake_events[
+                        ((fake_events['njets'] == 1) |
+                         ((fake_events['njets'] > 1) & (fake_events['mjj'] < 300)))
                     ]
 
                     boosted_hists['jetFakes'] = {
@@ -326,9 +323,9 @@ def main(args):
                 vbf_hists = {}
                 if 'jetFakes' in ifile:
                     print 'making vbf fake factor hists'
-                    fake_vbf_events = general_selection[
-                        (general_selection['njets'] > 1) &
-                        (general_selection['mjj'] > 300)
+                    fake_vbf_events = fake_events[
+                        (fake_events['njets'] > 1) &
+                        (fake_events['mjj'] > 300)
                     ]
 
                     vbf_hists['jetFakes'] = {
