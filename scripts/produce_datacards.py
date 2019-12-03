@@ -49,7 +49,7 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, ac
         dcp = data['DCP_ggH'].values
     elif zvar_name == 'D0_VBF':
         dcp = data['DCP_VBF'].values
-    else:
+    elif zvar_name != None:
         raise Exception('Don\'t know how to handle DCP for provided zvar_name {}'.format(zvar_name))
 
     if fake_weight != None:
