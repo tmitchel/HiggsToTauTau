@@ -10,13 +10,7 @@
         "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"],
     "categories": [
         "inclusive",         "0jet",
-        "boosted",           "vbf",
-        "vbf_ggHMELA_bin1",  "vbf_ggHMELA_bin2",
-        "vbf_ggHMELA_bin3",  "vbf_ggHMELA_bin4",
-        "vbf_ggHMELA_bin5",  "vbf_ggHMELA_bin6",
-        "vbf_ggHMELA_bin7",  "vbf_ggHMELA_bin8",
-        "vbf_ggHMELA_bin9",  "vbf_ggHMELA_bin10",
-        "vbf_ggHMELA_bin11", "vbf_ggHMELA_bin12"
+        "boosted",           "vbf"
     ],
     "vbf_sub_cats": [
         "vbf_ggHMELA_bin1",  "vbf_ggHMELA_bin2",
