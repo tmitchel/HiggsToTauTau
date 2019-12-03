@@ -150,7 +150,7 @@ def main(args):
 
                 # handle just inclusive category first so we aren't moving around a ton of TDirectory's
                 # build the histograms
-                output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
+                output_file.cd('{}_inclusive/{}'.format(channel_prefix, variable))
                 inclusive_hists = {}
                 if 'jetFakes' in ifile:
                     print 'making 0jet fake factor hists'
