@@ -161,7 +161,10 @@ int main(int argc, char *argv[]) {
     htt_sf_file.Close();
 
     // tau ID efficiency
-    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool(2017);
+    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool("2017ReReco");
+    TauIDSFTool *antiEl_eff_sf = new TauIDSFTool("2017ReReco", "antiEleMVA6", "VLoose");
+    TauIDSFTool *antiMu_eff_sf = new TauIDSFTool("2017ReReco", "antiMu3", "Tight");
+
 
     // tau trigger SF
     TauTriggerSFs2017 *tau_leg_cross_trg_sf =
@@ -286,33 +289,16 @@ int main(int argc, char *argv[]) {
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
-            // tau ID efficiency SF and systematics (MVA ID)
-            if (tau.getGenMatch() == 5) {
-                std::string shift = "";  // nominal
-                if (syst.find("tau_id_") != std::string::npos) {
-                    shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
-                }
-                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), shift);
+            // tau ID efficiency SF and systematics
+            std::string shift = "";  // nominal
+            if (syst.find("tau_id_") != std::string::npos) {
+                shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
             }
+            evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), shift);
 
-            // anti-lepton discriminator SFs
-            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
-                if (fabs(tau.getEta()) < 1.460)
-                    evtwt *= 1.09;
-                else if (fabs(tau.getEta()) > 1.558)
-                    evtwt *= 1.19;
-            } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
-                if (fabs(tau.getEta()) < 0.4)
-                    evtwt *= 1.17;
-                else if (fabs(tau.getEta()) < 0.8)
-                    evtwt *= 1.29;
-                else if (fabs(tau.getEta()) < 1.2)
-                    evtwt *= 1.14;
-                else if (fabs(tau.getEta()) < 1.7)
-                    evtwt *= 0.93;
-                else
-                    evtwt *= 1.61;
-            }
+            // anti-lepton discriminator sf's
+            evtwt *= antiEl_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
+            evtwt *= antiMu_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
 
             // pileup reweighting
             if (!doAC && !isMG) {

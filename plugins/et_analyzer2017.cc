@@ -163,7 +163,9 @@ int main(int argc, char* argv[]) {
     htt_sf_file.Close();
 
     // tau ID efficiency
-    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool(2017);
+    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool("2017ReReco");
+    TauIDSFTool *antiEl_eff_sf = new TauIDSFTool("2017ReReco", "antiEleMVA6", "Tight");
+    TauIDSFTool *antiMu_eff_sf = new TauIDSFTool("2017ReReco", "antiMu3", "Loose");
 
     TauTriggerSFs2017 *tau_leg_cross_trg_sf =
         new TauTriggerSFs2017("$CMSSW_BASE/src/TauAnalysisTools/TauTriggerSFs/data/tauTriggerEfficiencies2017.root", "etau", "2017", "tight", "MVAv2");
@@ -290,32 +292,15 @@ int main(int argc, char* argv[]) {
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // tau ID efficiency SF and systematics
-            if (tau.getGenMatch() == 5) {
-                std::string shift = "";  // nominal
-                if (syst.find("tau_id_") != std::string::npos) {
-                    shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
-                }
-                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), shift);
+            std::string shift = "";  // nominal
+            if (syst.find("tau_id_") != std::string::npos) {
+                shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
             }
+            evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), shift);
 
-            // anti-lepton discriminator SFs
-            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
-                if (fabs(tau.getEta()) < 1.460)
-                    evtwt *= 1.80;
-                else if (fabs(tau.getEta()) > 1.558)
-                    evtwt *= 1.53;
-            } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
-                if (fabs(tau.getEta()) < 0.4)
-                    evtwt *= 1.06;
-                else if (fabs(tau.getEta()) < 0.8)
-                    evtwt *= 1.02;
-                else if (fabs(tau.getEta()) < 1.2)
-                    evtwt *= 1.10;
-                else if (fabs(tau.getEta()) < 1.7)
-                    evtwt *= 1.03;
-                else
-                    evtwt *= 1.94;
-            }
+            // anti-lepton discriminator sf's
+            evtwt *= antiEl_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
+            evtwt *= antiMu_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
 
             // Z-Vtx HLT Correction
             evtwt *= 0.991;
