@@ -404,12 +404,12 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt2_eta")->setVal(tau.getGenEta());
 
             // start applying weights from workspace
-            evtwt *= htt_sf->function("e_trk_embed_ratio")->getVal();
+            evtwt *= htt_sf->function("e_trk_ratio")->getVal();
             evtwt *= htt_sf->function("e_idiso_ic_embed_ratio")->getVal();
             evtwt *= htt_sf->function("e_trg_ic_embed_ratio")->getVal();
 
             // double muon trigger eff in selection
-            evtwt *= htt_sf->function("m_sel_trg_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(electron.getGenPt());

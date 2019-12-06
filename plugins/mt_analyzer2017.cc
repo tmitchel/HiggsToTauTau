@@ -410,9 +410,9 @@ int main(int argc, char *argv[]) {
             }
         } else if (!isData && isEmbed) {
             event.setEmbed();
-            if (muon.getPt() < 25 && !event.getPassEmbedCrossMu2017()) {
-              continue;
-            }
+            // if (muon.getPt() < 25 && !event.getPassEmbedCrossMu2017()) {
+            //   continue;
+            // }
             // tau ID eff SF
             if (tau.getGenMatch() == 5) {
                 evtwt *= 0.97;
@@ -436,19 +436,19 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt2_pt")->setVal(tau.getGenPt());
             htt_sf->var("gt2_eta")->setVal(tau.getGenEta());
 
-            evtwt *= htt_sf->function("m_trk_embed_ratio")->getVal();
+            evtwt *= htt_sf->function("m_trk_ratio")->getVal();
             evtwt *= htt_sf->function("m_idiso_ic_embed_ratio")->getVal();
 
             if (muon.getPt() < 25) {
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
-                evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
+                // evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
                 // evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_ratio")->getVal(); (for DeepTau ID)
             } else {
-                evtwt *= htt_sf->function("m_trg_ic_ratio")->getVal();
+                evtwt *= htt_sf->function("m_trg_ic_embed_ratio")->getVal();
             }
 
             // double muon trigger eff in selection
-            evtwt *= htt_sf->function("m_sel_trg_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(muon.getGenPt());
