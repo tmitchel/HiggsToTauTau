@@ -378,18 +378,6 @@ int main(int argc, char* argv[]) {
 
             // begin systematics
 
-            // electron mis-id systematics
-            if (syst.find("efaket_") != std::string::npos && (tau.getGenMatch() == 1 || tau.getGenMatch() == 3)) {
-                auto shift = syst.find("Up") != std::string::npos ? 1.15 : 0.85;
-                evtwt *= shift;
-            }
-
-            // electron reco, eff, tracking systematic
-            if (syst.find("el_combo_") != std::string::npos) {
-                auto shift = syst.find("Up") != std::string::npos ? 1.01 : 0.99;
-                evtwt *= shift;
-            }
-
             // jet to tau fake rate systematic
             if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W" || name == "VVJ") {
                 auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));

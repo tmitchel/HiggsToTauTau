@@ -373,18 +373,6 @@ int main(int argc, char *argv[]) {
 
             // begin systematics
 
-            // muom mis-id systematics
-            if (syst.find("mfaket_") != std::string::npos && (tau.getGenMatch() == 2 || tau.getGenMatch() == 4)) {
-                auto shift = syst.find("Up") != std::string::npos ? 1.20 : 0.80;
-                evtwt *= shift;
-            }
-
-            // muon reco, eff, tracking systematic
-            if (syst.find("mu_combo_") != std::string::npos) {
-                auto shift = syst.find("Up") != std::string::npos ? 1.01 : 0.99;
-                evtwt *= shift;
-            }
-
             // jet to tau fake rate systematics
             if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W" || name == "VVJ") {
                 auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
