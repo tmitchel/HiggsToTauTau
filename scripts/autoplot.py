@@ -1,13 +1,13 @@
 import plotter
 
 plots = [
+    ('m_sv', 'm_{SVFit}', 2.2),
     ('D0_VBF', 'D_{0-}^{VBF}', 2.2),
     ('D0_ggH', 'D_{0-}^{ggH}', 2.2),
     ('DCP_VBF', 'D_{CP}^{VBF}', 2.2),
     ('DCP_ggH', 'D_{CP}^{ggH}', 2.2),
     ('MELA_D2j', 'D_{2jet}^{VBF}', 2.2),
     ('NN_disc', 'D_{NN}^{VBF}', 1.6),
-    ('m_sv', 'm_{SVFit}', 2.2),
     ('higgs_pT', 'Higgs p_{T}', 1.4),
     ('mjj', 'm_{JJ}', 1.4),
     ('met', 'Missing E_{T}', 1.4),
