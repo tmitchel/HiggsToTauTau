@@ -44,8 +44,10 @@ job1:
   - echo `ls $CMSSW_BASE/lib/$SCRAM_ARCH/`
   - ./build plugins/et_analyzer2016.cc test
   - ./build plugins/et_analyzer2017.cc test
+  - ./build plugins/et_analyzer2018.cc test
   - ./build plugins/mt_analyzer2016.cc test
   - ./build plugins/mt_analyzer2017.cc test
+  - ./build plugins/mt_analyzer2018.cc test
 
 #
 # Job: run CppLint
