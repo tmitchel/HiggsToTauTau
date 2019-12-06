@@ -377,7 +377,7 @@ int main(int argc, char* argv[]) {
 
         } else if (!isData && isEmbed) {
             event.setEmbed();
-            //Ele24LooseHPSTau30TightIDPass
+            // Ele24LooseHPSTau30TightIDPass
             if (electron.getPt() < 33 && !event.getPassEle24Tau30_2018() && fabs(electron.getEta()) < 1.479) {
             // if (electron.getPt() < 33 && !event.getPassEmbedCrossEl2018() && fabs(electron.getEta()) < 1.479) {
                 continue;
