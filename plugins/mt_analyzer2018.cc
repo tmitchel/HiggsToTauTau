@@ -294,7 +294,9 @@ int main(int argc, char *argv[]) {
             evtwt *= lumi_weights->weight(event.getNPV());
 
             // generator weights
-            evtwt *= event.getGenWeight();
+            if (signal_type == "madgraph") {
+                evtwt *= event.getGenWeight();
+            }
 
             // b-tagging scale factor goes here
             evtwt *= jets.getBWeight();
