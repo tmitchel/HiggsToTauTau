@@ -391,7 +391,6 @@ int main(int argc, char* argv[]) {
             }
         } else if (!isData && isEmbed) {
           event.setEmbed();
-          // if (electron.getPt() < 33 && !event.getPassEmbedCrossEl2018() && fabs(electron.getPt()) < 1.479) {
           if (electron.getPt() < 33 && !event.getPassEle24Tau30()) {
             continue;
           }
