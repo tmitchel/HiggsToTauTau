@@ -308,33 +308,15 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
         // regions
         if (cat == "signal") {
             is_signal = 1;
-        } else if (cat == "antiLepIso") {
-            is_antiLepIso = 1;
         } else if (cat == "antiTauIso") {
             is_antiTauIso = 1;
-        } else if (cat == "looseIso") {
-            is_looseIso = 1;
-        }
-
-        // categories
-        if (cat == "0jet") {
-            cat_0jet = 1;
-        } else if (cat == "boosted") {
-            cat_boosted = 1;
-        } else if (cat == "vbf") {
-            cat_vbf = 1;
-        } else if (cat == "VH") {
-            cat_VH = 1;
         }
 
         // event charge
         if (cat == "OS") {
             OS = 1;
-        } else if (cat == "SS") {
-            SS = 1;
         }
     }
-    is_qcd = is_looseIso;
 
     // anomolous coupling files
     if (ac_weights != nullptr) {
@@ -403,13 +385,6 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (el->getP4() + t->getP4()).M();
 
-    auto met_x = fmet->getMet() * cos(fmet->getMetPhi());
-    auto met_y = fmet->getMet() * sin(fmet->getMetPhi());
-    auto met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-    MT_lepMET = sqrt(pow(el->getPt() + met_pt, 2) - pow(el->getP4().Px() + met_x, 2) - pow(el->getP4().Py() + met_y, 2));
-    MT_t2MET = sqrt(pow(t->getPt() + met_pt, 2) - pow(t->getP4().Px() + met_x, 2) - pow(t->getP4().Py() + met_y, 2));
-    lt_dphi = TMath::ACos(TMath::Cos(el->getPhi() - t->getPhi()));
-
     otree->Fill();
 }
 
@@ -441,13 +416,6 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (mu->getP4() + t->getP4()).M();
-
-    auto met_x = fmet->getMet() * cos(fmet->getMetPhi());
-    auto met_y = fmet->getMet() * sin(fmet->getMetPhi());
-    auto met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-    MT_lepMET = sqrt(pow(mu->getPt() + met_pt, 2) - pow(mu->getP4().Px() + met_x, 2) - pow(mu->getP4().Py() + met_y, 2));
-    MT_t2MET = sqrt(pow(t->getPt() + met_pt, 2) - pow(t->getP4().Px() + met_x, 2) - pow(t->getP4().Py() + met_y, 2));
-    lt_dphi = TMath::ACos(TMath::Cos(mu->getPhi() - t->getPhi()));
 
     otree->Fill();
 }

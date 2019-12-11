@@ -280,8 +280,8 @@ int main(int argc, char *argv[]) {
             evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), shift);
 
             // anti-lepton discriminator sf's
-            evtwt *= antiEl_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
-            // evtwt *= antiMu_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
+            evtwt *= antiEl_eff_sf->getSFvsEta(fabs(tau.getEta()), tau.getGenMatch());
+            // evtwt *= antiMu_eff_sf->getSFvsEta(fabs(tau.getEta()), tau.getGenMatch());
 
             // anti-lepton discriminator SFs (placeholder in POG files)
             if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
@@ -302,7 +302,9 @@ int main(int argc, char *argv[]) {
             evtwt *= lumi_weights->weight(event.getNPV());
 
             // generator weights
-            evtwt *= event.getGenWeight();
+            if (signal_type == "madgraph") {
+                evtwt *= event.getGenWeight();
+            }
 
             // b-tagging scale factor goes here
             evtwt *= jets.getBWeight();
@@ -419,15 +421,7 @@ int main(int argc, char *argv[]) {
 
         // create regions
         bool signalRegion = (tau.getTightIsoMVA() && electron.getIso() < 0.15);
-        bool looseIsoRegion = (tau.getMediumIsoMVA() && electron.getIso() < 0.30);
-        bool antiIsoRegion = (tau.getTightIsoMVA() && electron.getIso() > 0.15 && electron.getIso() < 0.30);
         bool antiTauIsoRegion = (tau.getTightIsoMVA() == 0 && electron.getIso() < 0.15);
-
-        // create categories
-        bool zeroJet = (jets.getNjets() == 0);
-        bool boosted = (jets.getNjets() == 1 || (jets.getNjets() > 1 && jets.getDijetMass() < 300));
-        bool vbfCat = (jets.getNjets() > 1 && jets.getDijetMass() > 300);
-        bool VHCat = (jets.getNjets() > 1 && jets.getDijetMass() < 300);
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion)  {
@@ -441,32 +435,13 @@ int main(int argc, char *argv[]) {
         // regions
         if (signalRegion) {
             tree_cat.push_back("signal");
-        } else if (antiIsoRegion) {
-            tree_cat.push_back("antiLepIso");
         } else if (antiTauIsoRegion) {
             tree_cat.push_back("antiTauIso");
-        }
-
-        if (looseIsoRegion) {
-            tree_cat.push_back("looseIso");
-        }
-
-        // categorization
-        if (zeroJet) {
-            tree_cat.push_back("0jet");
-        } else if (boosted) {
-            tree_cat.push_back("boosted");
-        } else if (vbfCat) {
-            tree_cat.push_back("vbf");
-        } else if (VHCat) {
-            tree_cat.push_back("VH");
         }
 
         // event charge
         if (evt_charge == 0) {
             tree_cat.push_back("OS");
-        } else {
-            tree_cat.push_back("SS");
         }
 
         std::shared_ptr<std::vector<double>> weights(nullptr);
