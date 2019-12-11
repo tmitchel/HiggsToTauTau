@@ -150,7 +150,10 @@ int main(int argc, char *argv[]) {
     htt_sf_file.Close();
 
     // tau ID efficiency
-    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool(2016);
+    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool("2016Legacy");
+    TauIDSFTool *antiEl_eff_sf = new TauIDSFTool("2016Legacy", "antiEleMVA6", "VLoose");
+    TauIDSFTool *antiMu_eff_sf = new TauIDSFTool("2016Legacy", "antiMu3", "Tight");
+
 
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
@@ -275,22 +278,18 @@ int main(int argc, char *argv[]) {
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // tau ID efficiency SF and systematics
-            if (tau.getGenMatch() == 5) {
-                std::string shift = "";  // nominal
-                if (syst.find("tau_id_") != std::string::npos) {
-                    shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
-                }
-                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), shift);
+            std::string shift = "";  // nominal
+            if (syst.find("tau_id_") != std::string::npos) {
+                shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
             }
+            evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), shift);
 
-            // anti-lepton discriminator SFs
-            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
-                if (fabs(tau.getEta()) < 1.460)  {
-                    evtwt *= 1.21;
-                } else if (fabs(tau.getEta()) > 1.558) {
-                    evtwt *= 1.38;
-                }
-            } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
+            // anti-lepton discriminator sf's
+            evtwt *= antiEl_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
+            // evtwt *= antiMu_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
+
+            // anti-lepton discriminator SFs (placeholder in POG files)
+            if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
                 if (fabs(tau.getEta()) < 0.4) {
                     evtwt *= 1.47;
                 } else if (fabs(tau.getEta()) < 0.8) {
@@ -374,18 +373,6 @@ int main(int argc, char *argv[]) {
             }
 
             // begin systematics
-
-            // muom mis-id systematics
-            if (syst.find("mfaket_") != std::string::npos && (tau.getGenMatch() == 2 || tau.getGenMatch() == 4)) {
-                auto shift = syst.find("Up") != std::string::npos ? 1.20 : 0.80;
-                evtwt *= shift;
-            }
-
-            // muon reco, eff, tracking systematic
-            if (syst.find("mu_combo_") != std::string::npos) {
-                auto shift = syst.find("Up") != std::string::npos ? 1.01 : 0.99;
-                evtwt *= shift;
-            }
 
             // jet to tau fake rate systematic
             if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W" || name == "VVJ") {

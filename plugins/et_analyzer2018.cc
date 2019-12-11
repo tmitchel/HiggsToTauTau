@@ -151,7 +151,10 @@ int main(int argc, char* argv[]) {
     htt_sf_file.Close();
 
     // tau ID efficiency
-    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool(2018);
+    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool("2018ReReco");
+    TauIDSFTool *antiEl_eff_sf = new TauIDSFTool("2018ReReco", "antiEleMVA6", "Tight");
+    TauIDSFTool *antiMu_eff_sf = new TauIDSFTool("2018ReReco", "antiMu3", "Loose");
+
 
     TauTriggerSFs2017 *tau_leg_cross_trg_sf =
         new TauTriggerSFs2017("$CMSSW_BASE/src/TauAnalysisTools/TauTriggerSFs/data/tauTriggerEfficiencies2018.root", "etau", "2018", "tight", "MVAv2");
@@ -275,32 +278,15 @@ int main(int argc, char* argv[]) {
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // tau ID efficiency SF and systematics
-            if (tau.getGenMatch() == 5) {
-                std::string shift = "";  // nominal
-                if (syst.find("tau_id_") != std::string::npos) {
-                    shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
-                }
-                evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), shift);
+            std::string shift = "";  // nominal
+            if (syst.find("tau_id_") != std::string::npos) {
+                shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
             }
+            evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), shift);
 
-            // anti-lepton discriminator SFs
-            if (tau.getGenMatch() == 1 || tau.getGenMatch() == 3) {
-                if (fabs(tau.getEta()) < 1.460)
-                    evtwt *= 1.80;
-                else if (fabs(tau.getEta()) > 1.558)
-                    evtwt *= 1.53;
-            } else if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
-                if (fabs(tau.getEta()) < 0.4)
-                    evtwt *= 1.06;
-                else if (fabs(tau.getEta()) < 0.8)
-                    evtwt *= 1.02;
-                else if (fabs(tau.getEta()) < 1.2)
-                    evtwt *= 1.10;
-                else if (fabs(tau.getEta()) < 1.7)
-                    evtwt *= 1.03;
-                else
-                    evtwt *= 1.94;
-            }
+            // anti-lepton discriminator sf's
+            evtwt *= antiEl_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
+            evtwt *= antiMu_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
 
 
             // Z-Vtx HLT Correction
@@ -379,18 +365,6 @@ int main(int argc, char* argv[]) {
 
             // begin systematics
 
-            // electron mis-id systematics
-            if (syst.find("efaket_") != std::string::npos && (tau.getGenMatch() == 1 || tau.getGenMatch() == 3)) {
-                auto shift = syst.find("Up") != std::string::npos ? 1.15 : 0.85;
-                evtwt *= shift;
-            }
-
-            // electron reco, eff, tracking systematic
-            if (syst.find("el_combo_") != std::string::npos) {
-                auto shift = syst.find("Up") != std::string::npos ? 1.01 : 0.99;
-                evtwt *= shift;
-            }
-
             // jet to tau fake rate systematic
             if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W" || name == "VVJ") {
                 auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
@@ -403,7 +377,7 @@ int main(int argc, char* argv[]) {
 
         } else if (!isData && isEmbed) {
             event.setEmbed();
-            //Ele24LooseHPSTau30TightIDPass
+            // Ele24LooseHPSTau30TightIDPass
             if (electron.getPt() < 33 && !event.getPassEle24Tau30_2018() && fabs(electron.getEta()) < 1.479) {
             // if (electron.getPt() < 33 && !event.getPassEmbedCrossEl2018() && fabs(electron.getEta()) < 1.479) {
                 continue;
