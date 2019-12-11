@@ -70,6 +70,9 @@ def getSyst(name, signal_type, exe):
             'JetEta0to3_Up', 'JetEta0to3_Down', 'JetEta0to5_Up', 'JetEta0to5_Down',
             'JetEta3to5_Up', 'JetEta3to5_Down', 'JetEC2_Up', 'JetEC2_Down'
         ]
+        systs += [
+            'prefiring_weight_up', 'prefiring_weight_down'
+        ]
 
     if name == 'TTT' or name == 'TTJ':
         systs += ['ttbarShape_Up', 'ttbarShape_Down']
