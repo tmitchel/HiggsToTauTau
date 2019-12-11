@@ -32,7 +32,7 @@ plots = [
     ('mu_eta', 'Muon #eta', 2.2),
 ]
 
-categories = [ '_0jet', '_boosted', '_vbf']
+categories = [ '_0jet', '_boosted', '_vbf', '_inclusive']
 
 class PlotArgs():
     def __init__(self, input, year, category, variable, label, prefix, scale):

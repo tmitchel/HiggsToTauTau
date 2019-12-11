@@ -161,6 +161,9 @@ def main(args):
         sample = ifile.split('/')[-1].split(suffix)[0]
         tosample = ifile.replace(sample+suffix, '')
 
+        if 'vbf125_madgraph' in ifile:
+          continue
+
         names, signal_type = getNames(sample)
         callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                  tosample, sample, args.output_dir, signal_type)
