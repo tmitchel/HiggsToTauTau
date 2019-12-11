@@ -322,7 +322,13 @@ int main(int argc, char* argv[]) {
             // trigger scale factors
             if (electron.getPt() < 33) {
                 evtwt *= htt_sf->function("e_trg_24_ic_ratio")->getVal();
-                evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
+                if (syst == "trigger_up") {
+                    evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactorUncert(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode(), "Up");
+                } else if (syst == "trigger_down") {
+                    evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactorUncert(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode(), "Down");
+                } else {
+                    evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
+                }
                 // evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_ratio")->getVal(); (for DeepTau ID)
             } else {
                 evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
