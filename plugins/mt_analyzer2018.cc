@@ -374,9 +374,6 @@ int main(int argc, char *argv[]) {
             }
         } else if (!isData && isEmbed) {
             event.setEmbed();
-            // if (muon.getPt() < 25 && !event.getPassEmbedCrossMu2018()) {
-            //   continue;
-            // }
 
             // tau ID eff SF
             if (tau.getGenMatch() == 5) {
