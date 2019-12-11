@@ -70,12 +70,8 @@ def getSyst(name, signal_type, exe):
             'JetEta0to3_Up', 'JetEta0to3_Down', 'JetEta0to5_Up', 'JetEta0to5_Down',
             'JetEta3to5_Up', 'JetEta3to5_Down', 'JetEC2_Up', 'JetEC2_Down'
         ]
-        systs += [
-            'prefiring_weight_up', 'prefiring_weight_down'
-        ]
-        systs += [
-            'trigger_up', 'trigger_down'
-        ]
+        systs += ['prefiring_weight_up', 'prefiring_weight_down']
+        systs += ['trigger_up', 'trigger_down']
 
     if name == 'TTT' or name == 'TTJ':
         systs += ['ttbarShape_Up', 'ttbarShape_Down']
@@ -89,25 +85,17 @@ def getSyst(name, signal_type, exe):
     if name != 'data_obs' and '_et' in exe:
         systs += ['EEScale_Up', 'EEScale_Down', 'EESigma_Up', 'EESigma_Down']
     elif name != 'data_obs' and '_mt' in exe:
-        systs += [
-            'MESbin1_Up', 'MESbin1_Down', 'MESbin2_Up', 'MESbin2_Down',
-            'MESbin3_Up', 'MESbin3_Down', 'MESbin4_Up', 'MESbin4_Down',
-            'MESbin5_Up', 'MESbin5_Down',
-        ]
+        systs += ['MES_Up', 'MES_Down']
 
-    if name == 'ggH125' and signal_type == 'powheg':
-        systs += [
-            'Rivet0_Up', 'Rivet0_Down', 'Rivet1_Up', 'Rivet1_Down', 'Rivet2_Up', 'Rivet2_Down',
-            'Rivet3_Up', 'Rivet3_Down', 'Rivet4_Up', 'Rivet4_Down', 'Rivet5_Up', 'Rivet5_Down',
-            'Rivet6_Up', 'Rivet6_Down', 'Rivet7_Up', 'Rivet7_Down', 'Rivet8_Up', 'Rivet8_Down',
-        ]
+    # if name == 'ggH125' and signal_type == 'powheg':
+    #     systs += [
+    #         'Rivet0_Up', 'Rivet0_Down', 'Rivet1_Up', 'Rivet1_Down', 'Rivet2_Up', 'Rivet2_Down',
+    #         'Rivet3_Up', 'Rivet3_Down', 'Rivet4_Up', 'Rivet4_Down', 'Rivet5_Up', 'Rivet5_Down',
+    #         'Rivet6_Up', 'Rivet6_Down', 'Rivet7_Up', 'Rivet7_Down', 'Rivet8_Up', 'Rivet8_Down',
+    #     ]
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
-        systs += [
-            'RecoilReso_0jet_Up', 'RecoilReso_0jet_Down', 'RecoilResp_0jet_Up', 'RecoilResp_0jet_Down',
-            'RecoilReso_1jet_Up', 'RecoilReso_1jet_Down', 'RecoilResp_1jet_Up', 'RecoilResp_1jet_Down',
-            'RecoilReso_2jet_Up', 'RecoilReso_2jet_Down', 'RecoilResp_2jet_Up', 'RecoilResp_2jet_Down',
-        ]
+        systs += ['RecoilReso_Up', 'RecoilReso_Down', 'RecoilResp_Up', 'RecoilResp_Down']
 
     return systs
 
