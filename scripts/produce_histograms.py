@@ -131,7 +131,8 @@ def main(args):
             ]
 
             # do signal categorization
-            signal_events = general_selection[general_selection['is_signal'] > 0]
+            signal_events = general_selection[(general_selection['is_signal'] > 0)]
+            fake_events = general_selection[(general_selection['is_antiTauIso'] > 0)]
 
             zero_jet_events = signal_events[signal_events['njets'] == 0]
             boosted_events = signal_events[
@@ -147,16 +148,68 @@ def main(args):
 
             for variable, bins in config_variables.iteritems():
 
-                # handle just 0jet category first so we aren't moving around a ton of TDirectory's
+                # handle just inclusive category first so we aren't moving around a ton of TDirectory's
+                # build the histograms
+                output_file.cd('{}_inclusive/{}'.format(channel_prefix, variable))
+                inclusive_hists = {}
+                if 'jetFakes' in ifile:
+                    print 'making inclusive fake factor hists'
+
+                    inclusive_hists['jetFakes'] = {
+                        'data': fake_events,
+                        'hists': build_histogram('jetFakes', bins),
+                        'xvar_name': variable,
+                        'fake_weight': 'fake_weight',
+                        'queue': Queue()
+                    }
+                    if args.syst:
+                        for syst in boilerplate['fake_factor_systematics']:
+                            inclusive_hists['jetFakes_CMS_htt_{}'.format(syst)] = {
+                                'data': fake_events,
+                                'hists': build_histogram('jetFakes_CMS_htt_{}'.format(syst), bins),
+                                'xvar_name': variable,
+                                'fake_weight': syst,
+                                'queue': Queue()
+                            }
+                else:
+                    inclusive_hists['nominal'] = {
+                        'data': signal_events,
+                        'hists': build_histogram(name, bins),
+                        'xvar_name': variable,
+                        'queue': Queue()
+                    }
+                    if '_JHU' in name:
+                        for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
+                            output_file.cd('{}_inclusive/{}'.format(channel_prefix, variable))
+                            inclusive_hists[weight[1]] = {
+                                'data': signal_events,
+                                'hists': build_histogram(weight[1], bins),
+                                'xvar_name': variable,
+                                'ac_weights': weight[0],
+                                'queue': Queue()
+                            }
+                    elif '_madgraph' in name and not 'vbf' in name:
+                        for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
+                            output_file.cd('{}_inclusive/{}'.format(channel_prefix, variable))
+                            inclusive_hists[weight[1]] = {
+                                'data': signal_events,
+                                'hists': build_histogram(weight[1], bins),
+                                'xvar_name': variable,
+                                'ac_weights': weight[0],
+                                'queue': Queue()
+                            }
+
+                inclusive_processes = [
+                    Process(target=fill_histograms, kwargs=proc_args, name=proc_name) for proc_name, proc_args in inclusive_hists.iteritems()
+                ]
 
                 # build the histograms
                 output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
                 zero_jet_hists = {}
                 if 'jetFakes' in ifile:
                     print 'making 0jet fake factor hists'
-                    fake_zero_jet_events = general_selection[
-                        (general_selection['is_antiTauIso'] > 0) &
-                        (general_selection['njets'] == 0)
+                    fake_zero_jet_events = fake_events[
+                        (fake_events['njets'] == 0)
                     ]
 
                     zero_jet_hists['jetFakes'] = {
@@ -212,10 +265,9 @@ def main(args):
                 boosted_hists = {}
                 if 'jetFakes' in ifile:
                     print 'making boosted fake factor hists'
-                    fake_boosted_events = general_selection[
-                        (general_selection['is_antiTauIso'] > 0) &
-                        ((general_selection['njets'] == 1) |
-                         ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300)))
+                    fake_boosted_events = fake_events[
+                        ((fake_events['njets'] == 1) |
+                         ((fake_events['njets'] > 1) & (fake_events['mjj'] < 300)))
                     ]
 
                     boosted_hists['jetFakes'] = {
@@ -271,10 +323,9 @@ def main(args):
                 vbf_hists = {}
                 if 'jetFakes' in ifile:
                     print 'making vbf fake factor hists'
-                    fake_vbf_events = general_selection[
-                        (general_selection['is_antiTauIso'] > 0) &
-                        (general_selection['njets'] > 1) &
-                        (general_selection['mjj'] > 300)
+                    fake_vbf_events = fake_events[
+                        (fake_events['njets'] > 1) &
+                        (fake_events['mjj'] > 300)
                     ]
 
                     vbf_hists['jetFakes'] = {
@@ -325,10 +376,14 @@ def main(args):
                     Process(target=fill_histograms, kwargs=proc_args, name=proc_name) for proc_name, proc_args in vbf_hists.iteritems()
                 ]
 
-                for proc in zero_jet_processes + boosted_processes + vbf_processes:
+                for proc in inclusive_processes + zero_jet_processes + boosted_processes + vbf_processes:
                     proc.start()
-                for proc in zero_jet_processes + boosted_processes + vbf_processes:
+                for proc in inclusive_processes + zero_jet_processes + boosted_processes + vbf_processes:
                     proc.join()
+
+                output_file.cd('{}_inclusive/{}'.format(channel_prefix, variable))
+                for obj in inclusive_hists.itervalues():
+                    obj['queue'].get().Write()
 
                 output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
                 for obj in zero_jet_hists.itervalues():
