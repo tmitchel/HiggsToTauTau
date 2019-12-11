@@ -287,8 +287,8 @@ int main(int argc, char *argv[]) {
             evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), shift);
 
             // anti-lepton discriminator sf's
-            evtwt *= antiEl_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
-            evtwt *= antiMu_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
+            evtwt *= antiEl_eff_sf->getSFvsEta(fabs(tau.getEta()), tau.getGenMatch());
+            evtwt *= antiMu_eff_sf->getSFvsEta(fabs(tau.getEta()), tau.getGenMatch());
 
             // pileup reweighting
             evtwt *= lumi_weights->weight(event.getNPV());

@@ -285,9 +285,8 @@ int main(int argc, char* argv[]) {
             evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), shift);
 
             // anti-lepton discriminator sf's
-            evtwt *= antiEl_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
-            evtwt *= antiMu_eff_sf->getSFvsEta(tau.getEta(), tau.getGenMatch());
-
+            evtwt *= antiEl_eff_sf->getSFvsEta(fabs(tau.getEta()), tau.getGenMatch());
+            evtwt *= antiMu_eff_sf->getSFvsEta(fabs(tau.getEta()), tau.getGenMatch());
 
             // Z-Vtx HLT Correction
             evtwt *= 0.991;
