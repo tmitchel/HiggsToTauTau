@@ -193,7 +193,7 @@ def main(args):
                 treedict[syst] = numpy.float64
                 syst_map[syst] = events.apply(lambda x: get_weight(x, fake_weighter, fractions, channel_prefix, syst=syst), axis=1).values
 
-        with uproot.recreate('{}_jetFakes.root'.format(channel_prefix)) as f:
+        with uproot.recreate('{}/jetFakes.root'.format(args.input)) as f:
             f[args.tree_name] = uproot.newtree(treedict)
             oldtree['fake_weight'] = fake_weights.reshape(len(fake_weights))
             if args.syst:
