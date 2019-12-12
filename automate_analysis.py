@@ -81,8 +81,9 @@ def getSyst(name, signal_type, exe):
             'JetRes_Up', 'JetRes_Down',
             'JetUES_Up', 'JetUES_Down'
         ]
-        systs += ['prefiring_weight_up', 'prefiring_weight_down']
         systs += ['trigger_up', 'trigger_down']
+        if '2016' in exe or '2017' in exe:
+            systs += ['prefiring_up', 'prefiring_down']
 
     if name == 'TTT' or name == 'TTJ':
         systs += ['ttbarShape_Up', 'ttbarShape_Down']
