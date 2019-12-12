@@ -16,15 +16,15 @@ class slim_tree {
     // member functions
     // fill the tree for this event
     void fillTree(std::vector<std::string>, electron *, tau *, jet_factory *, met_factory *, event_info *, Float_t, Float_t,
-                  std::shared_ptr<std::vector<double>>, Float_t);
+                  std::shared_ptr<std::vector<double>>, std::string);
     void fillTree(std::vector<std::string>, muon *, tau *, jet_factory *, met_factory *, event_info *, Float_t, Float_t,
-                  std::shared_ptr<std::vector<double>>, Float_t);
+                  std::shared_ptr<std::vector<double>>, std::string);
     void generalFill(std::vector<std::string>, jet_factory *, met_factory *, event_info *, Float_t, TLorentzVector, Float_t,
-                     std::shared_ptr<std::vector<double>>, Float_t);
+                     std::shared_ptr<std::vector<double>>, std::string);
 
     // member data
     TTree *otree;
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiLepIso, is_antiTauIso, is_qcd, is_looseIso, OS, SS;
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiLepIso, is_antiTauIso, is_qcd, is_looseIso, OS, SS, contamination;
     ULong64_t evtno;
     UInt_t run, lumi;
     Float_t evtwt, el_pt, el_eta, el_phi, el_mass, el_charge, el_iso, el_genMatch, mu_pt, mu_eta, mu_phi, mu_mass, mu_charge, mu_iso, mu_genMatch,
@@ -34,7 +34,7 @@ class slim_tree {
         dmf, dmf_new, pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH, MELA_D2j, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2, ME_sm_ggH_qqInit,
         ME_ps_ggH_qqInit, ME_ps_ggH, ME_ps_VBF, ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH,
         higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, MT_lepMET, MT_t2MET, MT_HiggsMET, hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr,
-        lt_dphi, trigger;
+        lt_dphi;
 
     // Anomolous coupling branches
     Float_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint, wt_ggH_a1, wt_ggH_a3, wt_ggH_a3int, wt_wh_a1, wt_wh_a2,
@@ -133,6 +133,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("cat_0jet", &cat_0jet, "cat_0jet/I");
     otree->Branch("cat_boosted", &cat_boosted, "cat_boosted/I");
     otree->Branch("cat_vbf", &cat_vbf, "cat_vbf/I");
+    otree->Branch("contamination", &contamination, "contamination/I");
 
     // include weights for anomolous coupling
     if (isAC) {
@@ -173,12 +174,10 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
 }
 
 void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight,
-                            TLorentzVector higgs, Float_t Mt, std::shared_ptr<std::vector<double>> ac_weights = nullptr, Float_t trigger_ = 0) {
+                            TLorentzVector higgs, Float_t Mt, std::shared_ptr<std::vector<double>> ac_weights, std::string name) {
     // create things needed for later
     auto jets(fjets->getJets());
     auto btags(fjets->getBtagJets());
-
-    trigger = trigger_;
 
     // start filling branches
     evtwt = weight;
@@ -304,6 +303,7 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
     cat_VH = 0;
     OS = 0;
     SS = 0;
+    contamination = 0;
 
     // decide on which selections have been passed
     for (auto cat : cats) {
@@ -359,9 +359,9 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
 }
 
 void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t mt,
-                         Float_t weight, std::shared_ptr<std::vector<double>> ac_weights = nullptr, Float_t trigger_ = 0) {
+                         Float_t weight, std::shared_ptr<std::vector<double>> ac_weights, std::string name) {
     TLorentzVector higgs(el->getP4() + t->getP4() + fmet->getP4());
-    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, ac_weights, trigger_);
+    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, ac_weights, name);
 
     el_pt = el->getPt();
     el_eta = el->getEta();
@@ -387,14 +387,17 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (el->getP4() + t->getP4()).M();
+    if ((name == "VVT" || name == "TTT") && el->getGenMatch() > 2 && t->getGenMatch() == 5) {
+        contamination = 1;  // ttbar/diboson contaminating embedded samples
+    }
 
     otree->Fill();
 }
 
 void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t mt,
-                         Float_t weight, std::shared_ptr<std::vector<double>> ac_weights = nullptr, Float_t trigger_ = 0) {
+                         Float_t weight, std::shared_ptr<std::vector<double>> ac_weights, std::string name) {
     TLorentzVector higgs(mu->getP4() + t->getP4() + fmet->getP4());
-    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, ac_weights, trigger_);
+    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, ac_weights, name);
 
     mu_pt = mu->getPt();
     mu_eta = mu->getEta();
@@ -420,6 +423,9 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (mu->getP4() + t->getP4()).M();
+    if ((name == "VVT" || name == "TTT") && mu->getGenMatch() > 2 && t->getGenMatch() == 5) {
+        contamination = 1;  // ttbar/diboson contaminating embedded samples
+    }
 
     otree->Fill();
 }
