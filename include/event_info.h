@@ -120,6 +120,9 @@ class event_info {
     Float_t getHiggsPtRivet() { return Rivet_higgsPt; }
     Float_t getJetPtRivet() { return Rivet_stage1_cat_pTjet30GeV; }
     Float_t getRivetUnc(std::vector<double>, std::string);
+
+    // Prefiring Weight
+    Float_t getPrefiringWeight();
 };
 
 // read data from trees into member variables
@@ -223,6 +226,15 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
     } else {
         std::cerr << "HEY! THAT'S NOT AN ANALYZER. WAT U DOIN." << std::endl;
     }
+}
+
+Float_t event_info::getPrefiringWeight() {
+    if (syst == "prefiring_up") {
+        return prefiring_weight_up;
+    } else if (syst == "prefiring_down") {
+        return prefiring_weight_down;
+    }
+    return prefiring_weight;
 }
 
 void event_info::setRivets(TTree* input) {
