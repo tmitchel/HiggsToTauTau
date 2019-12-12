@@ -102,8 +102,8 @@ def main(args):
     }
 
     variables = set([
-        'evtwt', 'vis_mass', 'mjj', 'njets', 'nbjets',
-        'is_antiTauIso', 'OS', 'mt', 'higgs_pT', 't1_pt'
+        'evtwt', 'vis_mass', 'mjj', 'njets',
+        'is_antiTauIso', 'mt', 'higgs_pT', 't1_pt', 'contamination'
     ])
 
     for frac, samples in inputs.iteritems():
@@ -113,7 +113,7 @@ def main(args):
                                  )[args.tree_name].arrays(list(variables), outputtype=pandas.DataFrame)
 
             anti_iso_events = events[
-                (events['mt'] < 50) & (events['nbjets'] == 0) & (events['is_antiTauIso'] > 0)
+                (events['is_antiTauIso'] > 0) & (events['contamination'] == 0)
             ]
 
             zero_jet_events = anti_iso_events[anti_iso_events['njets'] == 0]
