@@ -27,8 +27,8 @@ class slim_tree {
     Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiLepIso, is_antiTauIso, is_qcd, is_looseIso, OS, SS;
     ULong64_t evtno;
     UInt_t run, lumi;
-    Float_t evtwt, el_pt, el_eta, el_phi, el_mass, el_charge, el_iso, mu_pt, mu_eta, mu_phi, mu_mass, mu_charge, mu_iso, t1_pt, t1_eta, t1_phi,
-        t1_mass, t1_charge, t1_iso, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode,
+    Float_t evtwt, el_pt, el_eta, el_phi, el_mass, el_charge, el_iso, el_genMatch, mu_pt, mu_eta, mu_phi, mu_mass, mu_charge, mu_iso, mu_genMatch,
+        t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode,
         t1_genMatch,  // t1 is used for et and mt, as well
         njets, nbjets, j1_pt, j1_eta, j1_phi, j2_pt, j2_eta, j2_phi, b1_pt, b1_eta, b1_phi, b2_pt, b2_eta, b2_phi, met, metphi, mjj, numGenJets, mt,
         dmf, dmf_new, pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH, MELA_D2j, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2, ME_sm_ggH_qqInit,
@@ -54,12 +54,14 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("el_mass", &el_mass, "el_mass/F");
     otree->Branch("el_charge", &el_charge, "el_charge/F");
     otree->Branch("el_iso", &el_iso, "el_iso/F");
+    otree->Branch("el_genMatch", &el_genMatch, "el_genMatch/F");
     otree->Branch("mu_pt", &mu_pt, "mu_pt/F");
     otree->Branch("mu_eta", &mu_eta, "mu_eta/F");
     otree->Branch("mu_phi", &mu_phi, "mu_phi/F");
     otree->Branch("mu_mass", &mu_mass, "mu_mass/F");
     otree->Branch("mu_charge", &mu_charge, "mu_charge/F");
     otree->Branch("mu_iso", &mu_iso, "mu_iso/F");
+    otree->Branch("mu_genMatch", &mu_genMatch, "mu_genMatch/F");
     otree->Branch("t1_pt", &t1_pt, "t1_pt/F");
     otree->Branch("t1_eta", &t1_eta, "t1_eta/F");
     otree->Branch("t1_phi", &t1_phi, "t1_phi/F");
@@ -367,6 +369,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     el_mass = el->getMass();
     el_charge = el->getCharge();
     el_iso = el->getIso();
+    el_genMatch = el->getGenMatch();
     t1_pt = t->getPt();
     t1_eta = t->getEta();
     t1_phi = t->getPhi();
@@ -399,6 +402,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     mu_mass = mu->getMass();
     mu_charge = mu->getCharge();
     mu_iso = mu->getIso();
+    mu_genMatch = mu->getGenMatch();
     t1_pt = t->getPt();
     t1_eta = t->getEta();
     t1_phi = t->getPhi();
