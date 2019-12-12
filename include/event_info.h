@@ -140,10 +140,7 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
     if ((syst.find("DM0") != end || syst.find("DM1") != end) && syst.find("FES") == end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-    } else if (syst.find("UncMet") != end || syst.find("ClusteredMet") != end) {
-        m_sv_name += "_" + syst;
-        pt_sv_name += "_" + syst;
-    } else if (syst.find("Jet") != std::string::npos) {
+    } else if (syst.find("Jet") != end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
     } else if (syst.find("EES") != end || syst.find("MES") != end || syst.find("LES") != end) {

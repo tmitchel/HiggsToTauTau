@@ -65,10 +65,21 @@ def getSyst(name, signal_type, exe):
     if name != 'embed' and name != 'data_obs':
         systs += ['UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down']
         systs += [
-            'JetRelativeSample_Up', 'JetRelativeSample_Down',
-            'JetRelativeBal_Up', 'JetRelativeBal_Down',
-            'JetEta0to3_Up', 'JetEta0to3_Down', 'JetEta0to5_Up', 'JetEta0to5_Down',
-            'JetEta3to5_Up', 'JetEta3to5_Down', 'JetEC2_Up', 'JetEC2_Down'
+            'JetJER_Up', 'JetJER_Down',
+            'JetAbsolute_Up', 'JetAbsolute_Down',
+            'JetAbsolute_Up', 'JetAbsolute_Down',
+            'JetAbsoluteyear_Up', 'JetAbsoluteyear_Down',
+            'JetBBEC1_Up', 'JetBBEC1_Down',
+            'JetBBEC1year_Up', 'JetBBEC1year_Down',
+            'JetEC2_Up', 'JetEC2_Down',
+            'JetEC2year_Up', 'JetEC2year_Down',
+            'JetFlavorQCD_Up', 'JetFlavorQCD_Down',
+            'JetHF_Up', 'JetHF_Down',
+            'JetHFyear_Up', 'JetHFyear_Down',
+            'JetRelBal_Up', 'JetRelBal_Down',
+            'JetRelSam_Up', 'JetRelSam_Down',
+            'JetRes_Up', 'JetRes_Down',
+            'JetUES_Up', 'JetUES_Down'
         ]
         systs += ['prefiring_weight_up', 'prefiring_weight_down']
         systs += ['trigger_up', 'trigger_down']
