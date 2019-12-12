@@ -429,14 +429,25 @@ int main(int argc, char* argv[]) {
             evtwt *= htt_sf->function("e_trk_embed_ratio")->getVal();
             evtwt *= htt_sf->function("e_idiso_ic_embed_ratio")->getVal();
 
-            if (electron.getPt() < 33) {
-                if (fabs(electron.getEta()) < 1.479) {
-                  evtwt *= htt_sf->function("e_trg_24_ic_embed_ratio")->getVal();
+            bool fireSingle = electron.getPt() > 33;
+            bool fireCross = electron.getPt() < 33;
+
+            auto single_eff(1.), el_leg_eff(1.), tau_leg_eff(1.);
+            if (fabs(electron.getEta()) < 1.479) {
+                single_eff = htt_sf->function("e_trg_ic_embed_ratio")->getVal();
+                el_leg_eff = htt_sf->function("e_trg_24_ic_embed_ratio")->getVal();
+                if (fabs(tau.getEta()) < 2.1) {
+                  tau_leg_eff *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
                 }
-                // evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
-                // evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_embed_ratio")->getVal(); (for DeepTau ID)
+                // tau_lef_eff *= htt_sf->function("t_trg_mediumDeepTau_etau_embed_ratio")->getVal(); (for DeepTau ID)
+                evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
             } else {
-                evtwt *= htt_sf->function("e_trg_ic_embed_ratio")->getVal();
+                single_eff = htt_sf->function("e_trg_ic_data")->getVal();
+                el_leg_eff = htt_sf->function("e_trg_24_ic_data")->getVal();
+                if (fabs(tau.getEta()) < 2.1) {
+                    tau_leg_eff = tau_leg_cross_trg_sf->getTriggerEfficiencyData(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
+                }
+                evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
             }
 
             // double muon trigger eff in selection

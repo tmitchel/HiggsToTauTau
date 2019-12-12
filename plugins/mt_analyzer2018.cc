@@ -411,7 +411,7 @@ int main(int argc, char *argv[]) {
 
             if (muon.getPt() < 25) {
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
-                // evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
+                evtwt *= tau_leg_cross_trg_sf->getTriggerScaleFactor(tau.getPt(), tau.getEta(), tau.getPhi(), tau.getDecayMode());
                 // evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_ratio")->getVal(); (for DeepTau ID)
             } else {
                 evtwt *= htt_sf->function("m_trg_ic_embed_ratio")->getVal();
