@@ -168,9 +168,9 @@ def main(args):
                 name = name.replace('embed', 'ZTT')
 
             variables = set([
-                'is_signal', 'is_antiTauIso', 'OS', 'nbjets', 'njets', 'mjj', 'evtwt', 'wt_*',
-                'mu_iso', 'el_iso', 't1_decayMode', 'vis_mass', 't1_pt', 'higgs_pT', 'm_sv',
-                'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH', 'j1_phi', 'j2_phi', 'mt', 'mu_pt', 'el_pt',
+                'is_signal', 'is_antiTauIso', 'contamination', 'njets', 'mjj', 'evtwt', 'wt_*',
+                't1_decayMode', 'vis_mass', 'higgs_pT', 'm_sv',
+                'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH',
                 vbf_cat_x_var, vbf_cat_y_var, vbf_cat_edge_var
             ])
 
@@ -184,20 +184,24 @@ def main(args):
 
             events = input_file[args.tree_name].arrays(list(variables), outputtype=pandas.DataFrame)
 
-            general_selection = events[
-                (events['mt'] < 50) & (events['nbjets'] == 0)
-            ]
+            if 'jetFakes' in name:
+                iso_branch = 'is_antiTauIso'
+            else:
+                iso_branch = 'is_signal'
+            general_selection = events[(events[iso_branch] > 0)]
+
+            # remove ttbar/diboson contamination to embedded sample
+            if args.embed:
+                general_selection = general_selection[(general_selection['contamination'] == 0)]
 
             if not 'jetFakes' in name:
                 # do signal categorization
-                signal_events = general_selection[general_selection['is_signal'] > 0]
-
-                zero_jet_events = signal_events[signal_events['njets'] == 0]
-                boosted_events = signal_events[
-                    (signal_events['njets'] == 1) |
-                    ((signal_events['njets'] > 1) & (signal_events['mjj'] < 300))
+                zero_jet_events = general_selection[general_selection['njets'] == 0]
+                boosted_events = general_selection[
+                    (general_selection['njets'] == 1) |
+                    ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300))
                 ]
-                vbf_events = signal_events[(signal_events['njets'] > 1) & (signal_events['mjj'] > 300)]
+                vbf_events = general_selection[(general_selection['njets'] > 1) & (general_selection['mjj'] > 300)]
 
                 if 'wh125_JHU_' in name or 'zh125_JHU_' in name:
                     if 'nominal' in ifile:
@@ -291,13 +295,12 @@ def main(args):
             # do anti-iso categorization for fake-factor using data
             else:
                 logging.info('making fake factor hists')
-                antiIso_events = general_selection[general_selection['is_antiTauIso'] > 0]
-                fake_zero_jet_events = antiIso_events[antiIso_events['njets'] == 0]
-                fake_boosted_events = antiIso_events[
-                    (antiIso_events['njets'] == 1) |
-                    ((antiIso_events['njets'] > 1) & (antiIso_events['mjj'] < 300))
+                fake_zero_jet_events = general_selection[general_selection['njets'] == 0]
+                fake_boosted_events = general_selection[
+                    (general_selection['njets'] == 1) |
+                    ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300))
                 ]
-                fake_vbf_events = antiIso_events[(antiIso_events['njets'] > 1) & (antiIso_events['mjj'] > 300)]
+                fake_vbf_events = general_selection[(general_selection['njets'] > 1) & (general_selection['mjj'] > 300)]
 
                 output_file.cd('{}_0jet'.format(channel_prefix))
                 zero_jet_hist = build_histogram('jetFakes', decay_mode_bins, vis_mass_bins)
