@@ -22,7 +22,6 @@
 #include "../include/ComputeWG1Unc.h"
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
-#include "../include/EmbedWeight.h"
 #include "../include/LumiReweightingStandAlone.h"
 #include "../include/electron_factory.h"
 #include "../include/event_info.h"

@@ -22,7 +22,6 @@
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
 #include "../include/LumiReweightingStandAlone.h"
-#include "../include/ZmmSF.h"
 #include "../include/event_info.h"
 #include "../include/jet_factory.h"
 #include "../include/met_factory.h"
