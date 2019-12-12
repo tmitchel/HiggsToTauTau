@@ -124,6 +124,8 @@ int main(int argc, char *argv[]) {
 
     if (signal_type == "JHU" && (sample == "ggh125" || sample == "vbf125")) {
         gen_number = 1.;
+    } else if (signal_type == "madgraph") {
+        gen_number = 1.;
     }
 
     // reweighter for anomolous coupling samples
@@ -281,7 +283,7 @@ int main(int argc, char *argv[]) {
 
             // anti-lepton discriminator sf's
             evtwt *= antiEl_eff_sf->getSFvsEta(fabs(tau.getEta()), tau.getGenMatch());
-            // evtwt *= antiMu_eff_sf->getSFvsEta(fabs(tau.getEta()), tau.getGenMatch());
+            evtwt *= antiMu_eff_sf->getSFvsEta(fabs(tau.getEta()), tau.getGenMatch());
 
             // anti-lepton discriminator SFs (placeholder in POG files)
             if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
@@ -392,7 +394,7 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt2_eta")->setVal(tau.getGenEta());
 
             // start applying weights from workspace
-            evtwt *= htt_sf->function("e_trk_ratio")->getVal();
+            evtwt *= htt_sf->function("e_trk_embed_ratio")->getVal();
             evtwt *= htt_sf->function("e_idiso_ic_embed_ratio")->getVal();
             evtwt *= htt_sf->function("e_trg_ic_embed_ratio")->getVal();
 

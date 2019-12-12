@@ -123,6 +123,8 @@ int main(int argc, char *argv[]) {
 
     if (signal_type == "JHU" && (sample == "ggh125" || sample == "vbf125")) {
         gen_number = 1.;
+    } else if (signal_type == "madgraph") {
+        gen_number = 1.;
     }
 
     // reweighter for anomolous coupling samples
