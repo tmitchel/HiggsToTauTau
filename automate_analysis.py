@@ -65,11 +65,25 @@ def getSyst(name, signal_type, exe):
     if name != 'embed' and name != 'data_obs':
         systs += ['UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down']
         systs += [
-            'JetRelativeSample_Up', 'JetRelativeSample_Down',
-            'JetRelativeBal_Up', 'JetRelativeBal_Down',
-            'JetEta0to3_Up', 'JetEta0to3_Down', 'JetEta0to5_Up', 'JetEta0to5_Down',
-            'JetEta3to5_Up', 'JetEta3to5_Down', 'JetEC2_Up', 'JetEC2_Down'
+            'JetJER_Up', 'JetJER_Down',
+            'JetAbsolute_Up', 'JetAbsolute_Down',
+            'JetAbsolute_Up', 'JetAbsolute_Down',
+            'JetAbsoluteyear_Up', 'JetAbsoluteyear_Down',
+            'JetBBEC1_Up', 'JetBBEC1_Down',
+            'JetBBEC1year_Up', 'JetBBEC1year_Down',
+            'JetEC2_Up', 'JetEC2_Down',
+            'JetEC2year_Up', 'JetEC2year_Down',
+            'JetFlavorQCD_Up', 'JetFlavorQCD_Down',
+            'JetHF_Up', 'JetHF_Down',
+            'JetHFyear_Up', 'JetHFyear_Down',
+            'JetRelBal_Up', 'JetRelBal_Down',
+            'JetRelSam_Up', 'JetRelSam_Down',
+            'JetRes_Up', 'JetRes_Down',
+            'JetUES_Up', 'JetUES_Down'
         ]
+        systs += ['trigger_up', 'trigger_down']
+        if '2016' in exe or '2017' in exe:
+            systs += ['prefiring_up', 'prefiring_down']
 
     if name == 'TTT' or name == 'TTJ':
         systs += ['ttbarShape_Up', 'ttbarShape_Down']
@@ -83,25 +97,17 @@ def getSyst(name, signal_type, exe):
     if name != 'data_obs' and '_et' in exe:
         systs += ['EEScale_Up', 'EEScale_Down', 'EESigma_Up', 'EESigma_Down']
     elif name != 'data_obs' and '_mt' in exe:
-        systs += [
-            'MESbin1_Up', 'MESbin1_Down', 'MESbin2_Up', 'MESbin2_Down',
-            'MESbin3_Up', 'MESbin3_Down', 'MESbin4_Up', 'MESbin4_Down',
-            'MESbin5_Up', 'MESbin5_Down',
-        ]
+        systs += ['MES_Up', 'MES_Down']
 
-    if name == 'ggH125' and signal_type == 'powheg':
-        systs += [
-            'Rivet0_Up', 'Rivet0_Down', 'Rivet1_Up', 'Rivet1_Down', 'Rivet2_Up', 'Rivet2_Down',
-            'Rivet3_Up', 'Rivet3_Down', 'Rivet4_Up', 'Rivet4_Down', 'Rivet5_Up', 'Rivet5_Down',
-            'Rivet6_Up', 'Rivet6_Down', 'Rivet7_Up', 'Rivet7_Down', 'Rivet8_Up', 'Rivet8_Down',
-        ]
+    # if name == 'ggH125' and signal_type == 'powheg':
+    #     systs += [
+    #         'Rivet0_Up', 'Rivet0_Down', 'Rivet1_Up', 'Rivet1_Down', 'Rivet2_Up', 'Rivet2_Down',
+    #         'Rivet3_Up', 'Rivet3_Down', 'Rivet4_Up', 'Rivet4_Down', 'Rivet5_Up', 'Rivet5_Down',
+    #         'Rivet6_Up', 'Rivet6_Down', 'Rivet7_Up', 'Rivet7_Down', 'Rivet8_Up', 'Rivet8_Down',
+    #     ]
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
-        systs += [
-            'RecoilReso_0jet_Up', 'RecoilReso_0jet_Down', 'RecoilResp_0jet_Up', 'RecoilResp_0jet_Down',
-            'RecoilReso_1jet_Up', 'RecoilReso_1jet_Down', 'RecoilResp_1jet_Up', 'RecoilResp_1jet_Down',
-            'RecoilReso_2jet_Up', 'RecoilReso_2jet_Down', 'RecoilResp_2jet_Up', 'RecoilResp_2jet_Down',
-        ]
+        systs += ['RecoilReso_Up', 'RecoilReso_Down', 'RecoilResp_Up', 'RecoilResp_Down']
 
     return systs
 

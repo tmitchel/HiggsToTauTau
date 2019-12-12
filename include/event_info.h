@@ -17,41 +17,24 @@ class event_info {
     UInt_t run, lumi, convert_evt;
     Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR;  // gen
     Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;              // event
+    Float_t prefiring_weight, prefiring_weight_up, prefiring_weight_down;
 
     // triggers (passing, matching, filtering)
-    Float_t PassEle24HPSTau30, PassEle24Tau30, PassEle25, PassEle27, PassEle32, PassEle35, PassIsoMu19Tau20, PassIsoMu19Tau20SingleL1,
-        PassIsoMu20HPSTau27, PassIsoMu20Tau27, PassIsoMu22, PassIsoMu22eta2p1, PassIsoMu24, PassIsoMu27, PassIsoTkMu22, PassIsoTkMu22eta2p1, PassEle24Tau30_2018;
-    Float_t eMatchesEle24HPSTau30Filter, eMatchesEle24Tau30Filter, eMatchesEle25Filter, eMatchesEle27Filter, eMatchesEle32Filter,
-        eMatchesEle35Filter;  // electron matches filter
-    Float_t mMatchesIsoMu19Tau20Filter, mMatchesIsoMu19Tau20SingleL1Filter, mMatchesIsoMu20HPSTau27Filter, mMatchesIsoMu20Tau27Filter,
-        mMatchesIsoMu22Filter, mMatchesIsoMu22eta2p1Filter, mMatchesIsoMu24Filter, mMatchesIsoMu27Filter, mMatchesIsoTkMu22Filter,
-        mMatchesIsoTkMu22eta2p1Filter;  // muon matches filter
-    Float_t tMatchesEle24HPSTau30Filter, tMatchesEle24Tau30Filter, tMatchesIsoMu19Tau20Filter, tMatchesIsoMu19Tau20SingleL1Filter,
-        tMatchesIsoMu20HPSTau27Filter, tMatchesIsoMu20Tau27Filter;  // tau matches filter
-    Float_t eMatchesEle24HPSTau30Path, eMatchesEle24Tau30Path, eMatchesEle25Path, eMatchesEle27Path, eMatchesEle32Path,
-        eMatchesEle35Path;  // electron matches path
-    Float_t mMatchesIsoMu19Tau20Path, mMatchesIsoMu19Tau20SingleL1Path, mMatchesIsoMu20HPSTau27Path, mMatchesIsoMu20Tau27Path, mMatchesIsoMu22Path,
-        mMatchesIsoMu22eta2p1Path, mMatchesIsoMu24Path, mMatchesIsoMu27Path, mMatchesIsoTkMu22Path,
-        mMatchesIsoTkMu22eta2p1Path;  // muon matches path
-    Float_t tMatchesEle24HPSTau30Path, tMatchesEle24Tau30Path, tMatchesIsoMu19Tau20Path, tMatchesIsoMu19Tau20SingleL1Path,
-        tMatchesIsoMu20HPSTau27Path, tMatchesIsoMu20Tau27Path;  // tau matches path
-    Float_t Ele24LooseHPSTau30Pass, Ele24LooseHPSTau30TightIDPass, Ele24LooseTau30Pass, Ele24LooseTau30TightIDPass, Ele27WPTightPass,
-        Ele32WPTightPass, Ele35WPTightPass, Ele38WPTightPass, Ele40WPTightPass, IsoMu24Pass, IsoMu27Pass, Mu20LooseHPSTau27Pass,
-        Mu20LooseHPSTau27TightIDPass, Mu20LooseTau27Pass, Mu20LooseTau27TightIDPass, Mu50Pass, singleE25eta2p1TightPass, singleIsoMu22Pass,
-        singleIsoMu22eta2p1Pass, singleIsoTkMu22Pass, singleIsoTkMu22eta2p1Pass, singleMu19eta2p1LooseTau20Pass,
-        singleMu19eta2p1LooseTau20singleL1Pass;
     Float_t Flag_BadChargedCandidateFilter, Flag_BadPFMuonFilter, Flag_EcalDeadCellTriggerPrimitiveFilter, Flag_HBHENoiseFilter,
         Flag_HBHENoiseIsoFilter, Flag_badMuons, Flag_duplicateMuons, Flag_ecalBadCalibFilter, Flag_eeBadScFilter, Flag_globalSuperTightHalo2016Filter,
         Flag_globalTightHalo2016Filter, Flag_goodVertices;
     Float_t eMatchEmbeddedFilterEle24Tau30, tMatchEmbeddedFilterEle24Tau30;
     Float_t mMatchEmbeddedFilterMu20Tau27_2018, mMatchEmbeddedFilterMu20Tau27_2017, tMatchEmbeddedFilterMu20HPSTau27;
-    // Float_t eMatchesEle24HPSTau30Filter, eMatchesEle24HPSTau30Path, tMatchesEle24HPSTau30Filter, tMatchesEle24HPSTau30Path, Ele24LooseHPSTau30TightIDPass;
+    Float_t Ele24LooseTau30Pass, eMatchesEle24Tau30Filter, eMatchesEle24Tau30Path, tMatchesEle24Tau30Filter, tMatchesEle24Tau30Path;
+    Float_t eMatchesEle24HPSTau30Filter, eMatchesEle24HPSTau30Path, tMatchesEle24HPSTau30Filter, tMatchesEle24HPSTau30Path;
+    Float_t Ele24LooseHPSTau30Pass, Ele24LooseHPSTau30TightIDPass;
+    Bool_t PassEle24Tau30_2018;
 
     Float_t m_sv, pt_sv;                                                                                      // SVFit
     Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
     Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, ME_ps_VBF, ME_ps_ggH,
         ME_sm_ggH_qqInit, ME_ps_ggH_qqInit;
-    Float_t njets, recoil_m_sv, recoil_pt_sv;
+    Float_t njets;
     std::string syst;
 
     bool isEmbed;
@@ -64,13 +47,13 @@ class event_info {
     void setEmbed() { isEmbed = true; }
     void setNjets(Float_t _njets) { njets = _njets; }  // must be set in event loop
     void setRivets(TTree*);
-    Float_t getMSV();
-    Float_t getPtSV();
+    Float_t getMSV() { return m_sv; }
+    Float_t getPtSV() { return pt_sv; }
 
     // tautau Trigger Info
-    Bool_t getPassEmbedCrossEl2018();
-    Bool_t getPassEmbedCrossMu2017();
-    Bool_t getPassEmbedCrossMu2018();
+    Bool_t getPassElEmbedCross();
+    Bool_t getPassMuEmbedCross2017();
+    Bool_t getPassMuEmbedCross2018();
     Bool_t getPassEle25();
     Bool_t getPassEle27();
     Bool_t getPassEle32();
@@ -137,6 +120,9 @@ class event_info {
     Float_t getHiggsPtRivet() { return Rivet_higgsPt; }
     Float_t getJetPtRivet() { return Rivet_stage1_cat_pTjet30GeV; }
     Float_t getRivetUnc(std::vector<double>, std::string);
+
+    // Prefiring Weight
+    Float_t getPrefiringWeight();
 };
 
 // read data from trees into member variables
@@ -157,20 +143,15 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
     if ((syst.find("DM0") != end || syst.find("DM1") != end) && syst.find("FES") == end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-    } else if (syst.find("UncMet") != end || syst.find("ClusteredMet") != end) {
-        m_sv_name += "_" + syst;
-        pt_sv_name += "_" + syst;
-    } else if (syst.find("Jet") != std::string::npos) {
+    } else if (syst.find("Jet") != end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
     } else if (syst.find("EES") != end || syst.find("MES") != end || syst.find("LES") != end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
     } else if (syst.find("RecoilReso") != end || syst.find("RecoilResp") != end) {
-        // account for not splitting based on jets at skim level (oops)
-        auto syst_name = _syst.erase(10, 5);  // RecoilReso[_njet]_Up
-        input->SetBranchAddress((m_sv_name + "_" + syst_name).c_str(), &recoil_m_sv);
-        input->SetBranchAddress((pt_sv_name + "_" + syst_name).c_str(), &recoil_pt_sv);
+        m_sv_name += "_" + syst;
+        pt_sv_name += "_" + syst;
     }
 
     input->SetBranchAddress(m_sv_name.c_str(), &m_sv);
@@ -213,6 +194,9 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
     input->SetBranchAddress("tZTTGenDR", &genDR);
     input->SetBranchAddress("numGenJets", &numGenJets);
     input->SetBranchAddress("GenWeight", &genweight);
+    input->SetBranchAddress("prefiring_weight", &prefiring_weight);
+    input->SetBranchAddress("prefiring_weight_up", &prefiring_weight_up);
+    input->SetBranchAddress("prefiring_weight_down", &prefiring_weight_down);
     input->SetBranchAddress("Flag_BadChargedCandidateFilter", &Flag_BadChargedCandidateFilter);
     input->SetBranchAddress("Flag_BadPFMuonFilter", &Flag_BadPFMuonFilter);
     input->SetBranchAddress("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter);
@@ -227,83 +211,11 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
     input->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices);
 
     if (lep == lepton::ELECTRON) {
-        input->SetBranchAddress("tMatchesEle24HPSTau30Filter", &tMatchesEle24HPSTau30Filter);
-        input->SetBranchAddress("tMatchesEle24Tau30Filter", &tMatchesEle24Tau30Filter);
-        input->SetBranchAddress("tMatchesIsoMu20Tau27Filter", &tMatchesIsoMu20Tau27Filter);
-        input->SetBranchAddress("tMatchesEle24HPSTau30Path", &tMatchesEle24HPSTau30Path);
-        input->SetBranchAddress("tMatchesEle24Tau30Path", &tMatchesEle24Tau30Path);
-        input->SetBranchAddress("singleE25eta2p1TightPass", &singleE25eta2p1TightPass);
-        input->SetBranchAddress("Ele24LooseHPSTau30Pass", &Ele24LooseHPSTau30Pass);
-        input->SetBranchAddress("Ele24LooseHPSTau30TightIDPass", &Ele24LooseHPSTau30TightIDPass);
-        input->SetBranchAddress("Ele24LooseTau30Pass", &Ele24LooseTau30Pass);
-        input->SetBranchAddress("Ele24LooseTau30TightIDPass", &Ele24LooseTau30TightIDPass);
-        input->SetBranchAddress("Ele27WPTightPass", &Ele27WPTightPass);
-        input->SetBranchAddress("Ele32WPTightPass", &Ele32WPTightPass);
-        input->SetBranchAddress("Ele35WPTightPass", &Ele35WPTightPass);
-        input->SetBranchAddress("Ele38WPTightPass", &Ele38WPTightPass);
-        input->SetBranchAddress("Ele40WPTightPass", &Ele40WPTightPass);
-        input->SetBranchAddress("eMatchesEle24HPSTau30Filter", &eMatchesEle24HPSTau30Filter);
-        input->SetBranchAddress("eMatchesEle24Tau30Filter", &eMatchesEle24Tau30Filter);
-        input->SetBranchAddress("eMatchesEle25Filter", &eMatchesEle25Filter);
-        input->SetBranchAddress("eMatchesEle27Filter", &eMatchesEle27Filter);
-        input->SetBranchAddress("eMatchesEle32Filter", &eMatchesEle32Filter);
-        input->SetBranchAddress("eMatchesEle35Filter", &eMatchesEle35Filter);
-        input->SetBranchAddress("eMatchesEle24HPSTau30Path", &eMatchesEle24HPSTau30Path);
-        input->SetBranchAddress("eMatchesEle24Tau30Path", &eMatchesEle24Tau30Path);
-        input->SetBranchAddress("eMatchesEle25Path", &eMatchesEle25Path);
-        input->SetBranchAddress("eMatchesEle27Path", &eMatchesEle27Path);
-        input->SetBranchAddress("eMatchesEle32Path", &eMatchesEle32Path);
-        input->SetBranchAddress("eMatchesEle35Path", &eMatchesEle35Path);
         if (isEmbed) {
           input->SetBranchAddress("eMatchEmbeddedFilterEle24Tau30", &eMatchEmbeddedFilterEle24Tau30);
           input->SetBranchAddress("tMatchEmbeddedFilterEle24Tau30", &tMatchEmbeddedFilterEle24Tau30);
         }
-        input->SetBranchAddress("eMatchesEle24HPSTau30Filter", &eMatchesEle24HPSTau30Filter);
-        input->SetBranchAddress("eMatchesEle24HPSTau30Path", &eMatchesEle24HPSTau30Path);
-        input->SetBranchAddress("tMatchesEle24HPSTau30Filter", &tMatchesEle24HPSTau30Filter);
-        input->SetBranchAddress("tMatchesEle24HPSTau30Path", &tMatchesEle24HPSTau30Path);
-        input->SetBranchAddress("Ele24LooseHPSTau30TightIDPass", &Ele24LooseHPSTau30TightIDPass);
     } else if (lep == lepton::MUON) {
-        input->SetBranchAddress("tMatchesIsoMu19Tau20Filter", &tMatchesIsoMu19Tau20Filter);
-        input->SetBranchAddress("tMatchesIsoMu19Tau20SingleL1Filter", &tMatchesIsoMu19Tau20SingleL1Filter);
-        input->SetBranchAddress("tMatchesIsoMu20HPSTau27Filter", &tMatchesIsoMu20HPSTau27Filter);
-        input->SetBranchAddress("tMatchesIsoMu19Tau20Path", &tMatchesIsoMu19Tau20Path);
-        input->SetBranchAddress("tMatchesIsoMu19Tau20SingleL1Path", &tMatchesIsoMu19Tau20SingleL1Path);
-        input->SetBranchAddress("tMatchesIsoMu20HPSTau27Path", &tMatchesIsoMu20HPSTau27Path);
-        input->SetBranchAddress("tMatchesIsoMu20Tau27Path", &tMatchesIsoMu20Tau27Path);
-        input->SetBranchAddress("IsoMu24Pass", &IsoMu24Pass);
-        input->SetBranchAddress("IsoMu27Pass", &IsoMu27Pass);
-        input->SetBranchAddress("Mu20LooseHPSTau27Pass", &Mu20LooseHPSTau27Pass);
-        input->SetBranchAddress("Mu20LooseHPSTau27TightIDPass", &Mu20LooseHPSTau27TightIDPass);
-        input->SetBranchAddress("Mu20LooseTau27Pass", &Mu20LooseTau27Pass);
-        input->SetBranchAddress("Mu20LooseTau27TightIDPass", &Mu20LooseTau27TightIDPass);
-        input->SetBranchAddress("Mu50Pass", &Mu50Pass);
-        input->SetBranchAddress("singleIsoMu22Pass", &singleIsoMu22Pass);
-        input->SetBranchAddress("singleIsoMu22eta2p1Pass", &singleIsoMu22eta2p1Pass);
-        input->SetBranchAddress("singleIsoTkMu22Pass", &singleIsoTkMu22Pass);
-        input->SetBranchAddress("singleIsoTkMu22eta2p1Pass", &singleIsoTkMu22eta2p1Pass);
-        input->SetBranchAddress("singleMu19eta2p1LooseTau20Pass", &singleMu19eta2p1LooseTau20Pass);
-        input->SetBranchAddress("singleMu19eta2p1LooseTau20singleL1Pass", &singleMu19eta2p1LooseTau20singleL1Pass);
-        input->SetBranchAddress("mMatchesIsoMu19Tau20Filter", &mMatchesIsoMu19Tau20Filter);
-        input->SetBranchAddress("mMatchesIsoMu19Tau20SingleL1Filter", &mMatchesIsoMu19Tau20SingleL1Filter);
-        input->SetBranchAddress("mMatchesIsoMu20HPSTau27Filter", &mMatchesIsoMu20HPSTau27Filter);
-        input->SetBranchAddress("mMatchesIsoMu20Tau27Filter", &mMatchesIsoMu20Tau27Filter);
-        input->SetBranchAddress("mMatchesIsoMu22Filter", &mMatchesIsoMu22Filter);
-        input->SetBranchAddress("mMatchesIsoMu22eta2p1Filter", &mMatchesIsoMu22eta2p1Filter);
-        input->SetBranchAddress("mMatchesIsoMu24Filter", &mMatchesIsoMu24Filter);
-        input->SetBranchAddress("mMatchesIsoMu27Filter", &mMatchesIsoMu27Filter);
-        input->SetBranchAddress("mMatchesIsoTkMu22Filter", &mMatchesIsoTkMu22Filter);
-        input->SetBranchAddress("mMatchesIsoTkMu22eta2p1Filter", &mMatchesIsoTkMu22eta2p1Filter);
-        input->SetBranchAddress("mMatchesIsoMu19Tau20Path", &mMatchesIsoMu19Tau20Path);
-        input->SetBranchAddress("mMatchesIsoMu19Tau20SingleL1Path", &mMatchesIsoMu19Tau20SingleL1Path);
-        input->SetBranchAddress("mMatchesIsoMu20HPSTau27Path", &mMatchesIsoMu20HPSTau27Path);
-        input->SetBranchAddress("mMatchesIsoMu20Tau27Path", &mMatchesIsoMu20Tau27Path);
-        input->SetBranchAddress("mMatchesIsoMu22Path", &mMatchesIsoMu22Path);
-        input->SetBranchAddress("mMatchesIsoMu22eta2p1Path", &mMatchesIsoMu22eta2p1Path);
-        input->SetBranchAddress("mMatchesIsoMu24Path", &mMatchesIsoMu24Path);
-        input->SetBranchAddress("mMatchesIsoMu27Path", &mMatchesIsoMu27Path);
-        input->SetBranchAddress("mMatchesIsoTkMu22Path", &mMatchesIsoTkMu22Path);
-        input->SetBranchAddress("mMatchesIsoTkMu22eta2p1Path", &mMatchesIsoTkMu22eta2p1Path);
         if (isEmbed) {
           input->SetBranchAddress("mMatchEmbeddedFilterMu20Tau27_2017", &mMatchEmbeddedFilterMu20Tau27_2017);
           input->SetBranchAddress("mMatchEmbeddedFilterMu20Tau27_2018", &mMatchEmbeddedFilterMu20Tau27_2018);
@@ -314,6 +226,15 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
     } else {
         std::cerr << "HEY! THAT'S NOT AN ANALYZER. WAT U DOIN." << std::endl;
     }
+}
+
+Float_t event_info::getPrefiringWeight() {
+    if (syst == "prefiring_up") {
+        return prefiring_weight_up;
+    } else if (syst == "prefiring_down") {
+        return prefiring_weight_down;
+    }
+    return prefiring_weight;
 }
 
 void event_info::setRivets(TTree* input) {
@@ -333,32 +254,6 @@ Float_t event_info::getRivetUnc(std::vector<double> uncs, std::string syst) {
     }
 }
 
-Float_t event_info::getMSV() {
-    if (syst.find("0jet") != std::string::npos && njets == 0) {
-        return recoil_m_sv;
-    } else if (syst.find("1jet") != std::string::npos && njets == 1) {
-        return recoil_m_sv;
-    } else if (syst.find("2jet") != std::string::npos && njets > 1) {
-        return recoil_m_sv;
-    }
-
-    // return normal m_sv in any other case
-    return m_sv;
-}
-Float_t event_info::getPtSV() {
-    if (syst.find("0jet") != std::string::npos && njets == 0) {
-        return recoil_pt_sv;
-    } else if (syst.find("1jet") != std::string::npos && njets == 1) {
-        return recoil_pt_sv;
-    } else if (syst.find("2jet") != std::string::npos && njets > 1) {
-        return recoil_pt_sv;
-    }
-
-    // return normal pt_sv in any other case
-    return pt_sv;
-}
-
-
 Bool_t event_info::getPassFlags() {
     if (era == 2016) {
         return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseIsoFilter
@@ -375,42 +270,8 @@ Bool_t event_info::getPassFlags() {
     }
 }
 
-Bool_t event_info::getPassEmbedCrossEl2018() {
-  return eMatchEmbeddedFilterEle24Tau30 && tMatchEmbeddedFilterEle24Tau30;
-}
-
-Bool_t event_info::getPassEmbedCrossMu2017() {
-  return mMatchEmbeddedFilterMu20Tau27_2017 && tMatchEmbeddedFilterMu20HPSTau27;
-}
-
-Bool_t event_info::getPassEmbedCrossMu2018() {
-  return mMatchEmbeddedFilterMu20Tau27_2018 && tMatchEmbeddedFilterMu20HPSTau27;
-}
-
-
-Bool_t event_info::getPassEle25() {
-    PassEle25 = singleE25eta2p1TightPass && eMatchesEle25Filter && eMatchesEle25Path;
-    return PassEle25;
-}
-
-Bool_t event_info::getPassEle27() {
-    PassEle27 = Ele27WPTightPass && eMatchesEle27Filter && eMatchesEle27Path;
-    return PassEle27;
-}
-
-Bool_t event_info::getPassEle32() {
-    PassEle32 = Ele32WPTightPass && eMatchesEle32Filter && eMatchesEle32Path;
-    return PassEle32;
-}
-
-Bool_t event_info::getPassEle35() {
-    PassEle35 = Ele35WPTightPass && eMatchesEle35Filter && eMatchesEle35Path;
-    return PassEle35;
-}
-
 Bool_t event_info::getPassEle24Tau30() {
-    PassEle24Tau30 = Ele24LooseTau30Pass && eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path;
-    return PassEle24Tau30;
+    return Ele24LooseTau30Pass && eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path;
 }
 
 Bool_t event_info::getPassEle24Tau30_2018() {
@@ -423,47 +284,17 @@ Bool_t event_info::getPassEle24Tau30_2018() {
     return false;
 }
 
-Bool_t event_info::getPassMu19Tau20() {
-    return PassIsoMu19Tau20 =
-               singleMu19eta2p1LooseTau20Pass && mMatchesIsoMu19Tau20Filter && mMatchesIsoMu19Tau20Path
-               && tMatchesIsoMu19Tau20Filter && tMatchesIsoMu19Tau20Path;
+
+Bool_t event_info::getPassElEmbedCross() {
+  return eMatchEmbeddedFilterEle24Tau30 && tMatchEmbeddedFilterEle24Tau30;
 }
 
-Bool_t event_info::getPassIsoMu22() {
-    PassIsoMu22 = singleIsoMu22Pass && mMatchesIsoMu22Filter && mMatchesIsoMu22Path;
-    return PassIsoMu22;
+Bool_t event_info::getPassMuEmbedCross2017() {
+  return mMatchEmbeddedFilterMu20Tau27_2017 && tMatchEmbeddedFilterMu20HPSTau27;
 }
 
-Bool_t event_info::getPassIsoTkMu22() {
-    PassIsoTkMu22 = singleIsoTkMu22Pass && mMatchesIsoTkMu22Filter && mMatchesIsoTkMu22Path;
-    return PassIsoTkMu22;
-}
-
-Bool_t event_info::getPassIsoMu22eta2p1() {
-    PassIsoMu22eta2p1 = singleIsoMu22eta2p1Pass && mMatchesIsoMu22eta2p1Filter && mMatchesIsoMu22eta2p1Path;
-    return PassIsoMu22eta2p1;
-}
-
-Bool_t event_info::getPassIsoTkMu22eta2p1() {
-    PassIsoTkMu22eta2p1 = singleIsoTkMu22eta2p1Pass && mMatchesIsoTkMu22eta2p1Filter && mMatchesIsoTkMu22eta2p1Path;
-    return PassIsoTkMu22eta2p1;
-}
-
-Bool_t event_info::getPassMu20Tau27() {
-    PassIsoMu20Tau27 =
-            singleMu19eta2p1LooseTau20Pass && mMatchesIsoMu19Tau20Filter && mMatchesIsoMu19Tau20Path
-            && tMatchesIsoMu19Tau20Filter && tMatchesIsoMu19Tau20Path;
-    return PassIsoMu20Tau27;
-}
-
-Bool_t event_info::getPassMu24() {
-    PassIsoMu24 = IsoMu24Pass && mMatchesIsoMu24Filter && mMatchesIsoMu24Path;
-    return PassIsoMu24;
-}
-
-Bool_t event_info::getPassMu27() {
-    PassIsoMu27 = IsoMu27Pass && mMatchesIsoMu27Filter && mMatchesIsoMu27Path;
-    return PassIsoMu27;
+Bool_t event_info::getPassMuEmbedCross2018() {
+  return mMatchEmbeddedFilterMu20Tau27_2018 && tMatchEmbeddedFilterMu20HPSTau27;
 }
 
 #endif  // INCLUDE_EVENT_INFO_H_
