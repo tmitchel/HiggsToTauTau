@@ -472,7 +472,7 @@ int main(int argc, char* argv[]) {
         }
 
         // fill the tree
-        st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, weights);
+        st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, weights, name);
     }  // close event loop
 
     fin->Close();
