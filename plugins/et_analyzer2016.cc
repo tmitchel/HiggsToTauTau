@@ -432,7 +432,7 @@ int main(int argc, char *argv[]) {
 
         // create regions
         bool signalRegion = (tau.getTightIsoMVA() && electron.getIso() < 0.15);
-        bool antiTauIsoRegion = (tau.getTightIsoMVA() == 0 && electron.getIso() < 0.15);
+        bool antiTauIsoRegion = (tau.getTightIsoMVA() == 0 && tau.getVLooseIsoMVA() > 0 && electron.getIso() < 0.15);
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion)  {
