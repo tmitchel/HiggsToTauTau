@@ -18,7 +18,7 @@ def do_hadd(hadd_list, path):
     for idir, isamples in hadd_list.items():
         if not os.path.exists(path + '/' + idir + '/merged'):
             os.mkdir(path + '/' + idir + '/merged')
-            
+
         commands = ['hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
                     for sample, files in isamples.items()]
 
@@ -45,23 +45,23 @@ def combine_wh(hadd_list, path):
 
 def rename_wh_zh(hadd_list, path):
     for idir, samples in hadd_list.iteritems():
-      if not 'wh125_JHU' in samples and not 'zh125_JHU' in samples:
-          print '\033[93m[WARNING] No wh or zh samples in {}\033[0m'.format(idir)
-          continue
+        if not 'wh125_JHU' in samples and not 'zh125_JHU' in samples:
+            print '\033[93m[WARNING] No wh or zh samples in {}\033[0m'.format(idir)
+            continue
 
-      if 'wh125_JHU' in samples:
-        for ifile in samples['wh125_JHU']:
-            new_name = ifile.split('/')[-1].split('-prod_nom-decay')[0] + '.root'  
-            os.system('cp {} {}/{}/merged/{}'.format(ifile, path, idir, new_name))
+        if 'wh125_JHU' in samples:
+            for ifile in samples['wh125_JHU']:
+                new_name = ifile.split('/')[-1].split('-prod_nom-decay')[0] + '.root'
+                os.system('cp {} {}/{}/merged/{}'.format(ifile, path, idir, new_name))
 
-      if 'zh125_JHU' in samples:
-        for ifile in samples['zh125_JHU']:
-            new_name = ifile.split('/')[-1].split('-prod_nom-decay')[0] + '.root'  
-            os.system('cp {} {}/{}/merged/{}'.format(ifile, path, idir, new_name))
-    
+        if 'zh125_JHU' in samples:
+            for ifile in samples['zh125_JHU']:
+                new_name = ifile.split('/')[-1].split('-prod_nom-decay')[0] + '.root'
+                os.system('cp {} {}/{}/merged/{}'.format(ifile, path, idir, new_name))
+
 
 def good_bkg(ifile):
-    if not 'EWK_W' in ifile and not 'EWKZ' in ifile:
+    if not 'EWK_W' in ifile and not 'EWKZ' in ifile and not 'WW_VV' in ifile and not 'WZ_VV' in ifile and not 'ZZ_VV' in ifile:
         return True
     return False
 
