@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
     htt_sf_file.Close();
 
     // tau ID efficiency
-    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool("2018ReReco", "DeepTau2017v2p1VSjet");
+    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool("2018ReReco", "DeepTau2017v2p1VSjet", "Medium");
 
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
