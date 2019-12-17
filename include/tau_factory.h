@@ -24,9 +24,9 @@ class tau {
     Int_t gen_match;
     Float_t pt, eta, phi, mass, charge, decayMode, dmf, dmf_new, iso, deepiso, gen_pt, gen_eta, gen_phi;
     Float_t VLooseIsoMVA, LooseIsoMVA, MediumIsoMVA, TightIsoMVA, VTightIsoMVA, VVTightIsoMVA;
-    Float_t VLooseIsoDeep, LooseIsoDeep, MediumIsoDeep, TightIsoDeep, VTightIsoDeep, VVTightIsoDeep;
+    Float_t VVVLooseIsoDeep, VLooseIsoDeep, LooseIsoDeep, MediumIsoDeep, TightIsoDeep, VTightIsoDeep, VVTightIsoDeep;
     Bool_t AgainstTightElectronMVA, AgainstVLooseElectronMVA, AgainstTightMuonMVA, AgainstLooseMuonMVA;
-    Bool_t AgainstTightElectronDeep, AgainstVLooseElectronDeep, AgainstTightMuonDeep, AgainstLooseMuonDeep;
+    Bool_t AgainstTightElectronDeep, AgainstVVVLooseElectronDeep, AgainstTightMuonDeep, AgainstVLooseMuonDeep;
 
     TLorentzVector p4;
 
@@ -59,6 +59,7 @@ class tau {
     Float_t getTightIsoMVA() { return TightIsoMVA; }
     Float_t getVTightIsoMVA() { return VTightIsoMVA; }
     Float_t getVVTightIsoMVA() { return VVTightIsoMVA; }
+    Float_t getVVVLooseIsoDeep() { return VVVLooseIsoDeep; }
     Float_t getVLooseIsoDeep() { return VLooseIsoDeep; }
     Float_t getLooseIsoDeep() { return LooseIsoDeep; }
     Float_t getMediumIsoDeep() { return MediumIsoDeep; }
@@ -73,9 +74,9 @@ class tau {
     Bool_t getAgainstTightMuonMVA() { return AgainstTightMuonMVA; }
     Bool_t getAgainstLooseMuonMVA() { return AgainstLooseMuonMVA; }
     Bool_t getAgainstTightElectronDeep() { return AgainstTightElectronDeep; }
-    Bool_t getAgainstVLooseElectronDeep() { return AgainstVLooseElectronDeep; }
+    Bool_t getAgainstVVVLooseElectronDeep() { return AgainstVVVLooseElectronDeep; }
     Bool_t getAgainstTightMuonDeep() { return AgainstTightMuonDeep; }
-    Bool_t getAgainstLooseMuonDeep() { return AgainstLooseMuonDeep; }
+    Bool_t getAgainstVLooseMuonDeep() { return AgainstVLooseMuonDeep; }
     Int_t getGenMatch() { return gen_match; }
     Float_t getGenPt() { return gen_pt; }
     Float_t getGenEta() { return gen_eta; }
@@ -100,9 +101,9 @@ class tau_factory {
     Float_t againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2, decayMode, dmf, dmf_new;
     Float_t byVLooseIsolationMVArun2v1DBoldDMwLT_2, byLooseIsolationMVArun2v1DBoldDMwLT_2, byMediumIsolationMVArun2v1DBoldDMwLT_2,
         byTightIsolationMVArun2v1DBoldDMwLT_2, byVTightIsolationMVArun2v1DBoldDMwLT_2, byVVTightIsolationMVArun2v1DBoldDMwLT_2;
-    Float_t tTightDeepTau2017v2p1VSe, tVLooseDeepTau2017v2p1VSe, tTightDeepTau2017v2p1VSmu, tLooseDeepTau2017v2p1VSmu;
-    Float_t tVLooseDeepTau2017v2p1VSjet, tLooseDeepTau2017v2p1VSjet, tMediumDeepTau2017v2p1VSjet, tTightDeepTau2017v2p1VSjet,
-            tVTightDeepTau2017v2p1VSjet, tVVTightDeepTau2017v2p1VSjet, deepiso_2;
+    Float_t tTightDeepTau2017v2p1VSe, tVVVLooseDeepTau2017v2p1VSe, tTightDeepTau2017v2p1VSmu, tVLooseDeepTau2017v2p1VSmu;
+    Float_t tVVVLooseDeepTau2017v2p1VSjet, tVLooseDeepTau2017v2p1VSjet, tLooseDeepTau2017v2p1VSjet, tMediumDeepTau2017v2p1VSjet,
+        tTightDeepTau2017v2p1VSjet, tVTightDeepTau2017v2p1VSjet, tVVTightDeepTau2017v2p1VSjet, deepiso_2;
 
  public:
     tau_factory(TTree*, int, std::string);
@@ -130,9 +131,9 @@ tau_factory::tau_factory(TTree* input, int _era, std::string _syst) : era(_era),
     input->SetBranchAddress("tAgainstMuonTight3", &againstMuonTight3_2);
     input->SetBranchAddress("tAgainstMuonLoose3", &againstMuonLoose3_2);
     input->SetBranchAddress("tTightDeepTau2017v2p1VSe", &tTightDeepTau2017v2p1VSe);
-    input->SetBranchAddress("tVLooseDeepTau2017v2p1VSe", &tVLooseDeepTau2017v2p1VSe);
+    input->SetBranchAddress("tVVVLooseDeepTau2017v2p1VSe", &tVVVLooseDeepTau2017v2p1VSe);
     input->SetBranchAddress("tTightDeepTau2017v2p1VSmu", &tTightDeepTau2017v2p1VSmu);
-    input->SetBranchAddress("tLooseDeepTau2017v2p1VSmu", &tLooseDeepTau2017v2p1VSmu);
+    input->SetBranchAddress("tVLooseDeepTau2017v2p1VSmu", &tVLooseDeepTau2017v2p1VSmu);
     input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTraw", &iso_2);
     input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVLoose", &byVLooseIsolationMVArun2v1DBoldDMwLT_2);
     input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTLoose", &byLooseIsolationMVArun2v1DBoldDMwLT_2);
@@ -141,6 +142,7 @@ tau_factory::tau_factory(TTree* input, int _era, std::string _syst) : era(_era),
     input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVTight", &byVTightIsolationMVArun2v1DBoldDMwLT_2);
     input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVVTight", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
     input->SetBranchAddress("tDeepTau2017v2p1VSjetraw", &deepiso_2);
+    input->SetBranchAddress("tVVVLooseDeepTau2017v2p1VSjet", &tVVVLooseDeepTau2017v2p1VSjet);
     input->SetBranchAddress("tVLooseDeepTau2017v2p1VSjet", &tVLooseDeepTau2017v2p1VSjet);
     input->SetBranchAddress("tLooseDeepTau2017v2p1VSjet", &tLooseDeepTau2017v2p1VSjet);
     input->SetBranchAddress("tMediumDeepTau2017v2p1VSjet", &tMediumDeepTau2017v2p1VSjet);
@@ -161,15 +163,16 @@ tau tau_factory::run_factory() {
     t.AgainstTightMuonMVA = againstMuonTight3_2;
     t.AgainstLooseMuonMVA = againstMuonLoose3_2;
     t.AgainstTightElectronDeep = tTightDeepTau2017v2p1VSe;
-    t.AgainstVLooseElectronDeep = tVLooseDeepTau2017v2p1VSe;
+    t.AgainstVVVLooseElectronDeep = tVVVLooseDeepTau2017v2p1VSe;
     t.AgainstTightMuonDeep = tTightDeepTau2017v2p1VSmu;
-    t.AgainstLooseMuonDeep = tLooseDeepTau2017v2p1VSmu;
+    t.AgainstVLooseMuonDeep = tVLooseDeepTau2017v2p1VSmu;
     t.VLooseIsoMVA = byVLooseIsolationMVArun2v1DBoldDMwLT_2;
     t.LooseIsoMVA = byLooseIsolationMVArun2v1DBoldDMwLT_2;
     t.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_2;
     t.TightIsoMVA = byTightIsolationMVArun2v1DBoldDMwLT_2;
     t.VTightIsoMVA = byVTightIsolationMVArun2v1DBoldDMwLT_2;
     t.VVTightIsoMVA = byVVTightIsolationMVArun2v1DBoldDMwLT_2;
+    t.VVVLooseIsoDeep = tVVVLooseDeepTau2017v2p1VSjet;
     t.VLooseIsoDeep = tVLooseDeepTau2017v2p1VSjet;
     t.LooseIsoDeep = tLooseDeepTau2017v2p1VSjet;
     t.MediumIsoDeep = tMediumDeepTau2017v2p1VSjet;
