@@ -401,7 +401,7 @@ int main(int argc, char *argv[]) {
             if (muon.getPt() < 25) {  // cross-trigger
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
                 if (syst == "trigger_up") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_rembed_atio_up")->getVal();
+                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_rembed_ratio_up")->getVal();
                 } else if (syst == "trigger_down") {
                     evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_embed_ratio_down")->getVal();
                 } else {

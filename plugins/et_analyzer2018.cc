@@ -331,9 +331,9 @@ int main(int argc, char* argv[]) {
             if (name == "EWKZ2l" || name == "EWKZ2nu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
                 auto nom_zpt_weight = htt_sf->function("zptmass_weight_nom")->getVal();
                 if (syst == "dyShape_Up") {
-                    nom_zpt_weight = 1.1 * nom_zpt_weight - 0.1;
+                    nom_zpt_weight = nom_zpt_weight + ((nom_zpt_weight - 1) * 0.1);
                 } else if (syst == "dyShape_Down") {
-                    nom_zpt_weight = 0.9 * nom_zpt_weight + 0.1;
+                    nom_zpt_weight = nom_zpt_weight -  ((nom_zpt_weight - 1) * 0.1);
                 }
                 evtwt *= nom_zpt_weight;
             }
@@ -404,30 +404,18 @@ int main(int argc, char* argv[]) {
             bool fireSingle = electron.getPt() > 33;
             bool fireCross = electron.getPt() < 33;
 
-            auto single_eff(1.), el_leg_eff(1.), tau_leg_eff(1.);
-            if (fabs(electron.getEta()) < 1.479) {
-                single_eff = htt_sf->function("e_trg_ic_embed_ratio")->getVal();
-                el_leg_eff = htt_sf->function("e_trg_24_ic_embed_ratio")->getVal();
-                if (syst == "trigger_up") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_ratio_up")->getVal();
-                } else if (syst == "trigger_down") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_ratio_down")->getVal();
-                } else {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_ratio")->getVal();
-                }
-                evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
-            } else {
-                single_eff = htt_sf->function("e_trg_ic_data")->getVal();
-                el_leg_eff = htt_sf->function("e_trg_24_ic_data")->getVal();
-                if (syst == "trigger_up") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_data_up")->getVal();
-                } else if (syst == "trigger_down") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_data_down")->getVal();
-                } else {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_data")->getVal();
-                }
-                evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
+            std::string single_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_ic_embed_ratio" : "e_trg_ic_data";
+            std::string el_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_24_ic_embed_ratio" : "e_trg_24_ic_data";
+            std::string tau_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "t_trg_mediumDeepTau_etau_ratio" : "t_trg_mediumDeepTau_etau_data";
+            if (syst == "trigger_up") {
+                tau_leg_eff_name += "_up";
+            } else if (syst == "trigger_down") {
+                tau_leg_eff_name += "_down";
             }
+            auto single_eff = htt_sf->function(single_eff_name.c_str())->getVal();
+            auto el_leg_eff = htt_sf->function(el_leg_eff_name.c_str())->getVal();
+            auto tau_leg_eff = htt_sf->function(tau_leg_eff_name.c_str())->getVal();
+            evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
 
             // double muon trigger eff in selection
             evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();

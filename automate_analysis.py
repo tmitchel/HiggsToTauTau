@@ -63,8 +63,8 @@ def getSyst(name, signal_type, exe):
         systs += ['LES_DM0_Up', 'LES_DM0_Down', 'LES_DM1_Up', 'LES_DM1_Down']
 
     if name != 'embed' and name != 'data_obs':
-        systs += ['UncMet_Up', 'UncMet_Down', 'ClusteredMet_Up', 'ClusteredMet_Down']
         systs += [
+            'UncMet_Up', 'UncMet_Down',
             'JetJER_Up', 'JetJER_Down',
             'JetAbsolute_Up', 'JetAbsolute_Down',
             'JetAbsolute_Up', 'JetAbsolute_Down',
