@@ -5,6 +5,7 @@ import uproot
 from multiprocessing import Process, Queue
 from array import array
 from collections import defaultdict
+from ApplyFF import FFApplicationTool
 
 mvis_bins = [0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000]
 njets_bins = [-0.5, 0.5, 1.5, 15]
@@ -56,19 +57,13 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     xbin = fractions['frac_data'][category].GetXaxis().FindBin(df['vis_mass'])
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
-    inputs = [
-        df['t1_pt'], df['t1_decayMode'], df['njets'], df['vis_mass'], df['mt'], df[iso_name],
-        fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
-        fractions['frac_w'][category].GetBinContent(xbin, ybin),
-        fractions['frac_tt'][category].GetBinContent(xbin, ybin)
-    ]
+    weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df['njets'],
+                                  fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+                                  fractions['frac_w'][category].GetBinContent(xbin, ybin),
+                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin))
 
-    weights = fake_weights.value(
-        9, array('d', inputs)) if syst == None else fake_weights.value(9, array('d', inputs), syst)
-  
-    if weights > 100:
-      weights = fake_weights.value(9, array('d', inputs))
     return weights
+
 
 def parallel_weights(queue, df, fake_weighter, fractions, channel_prefix, syst):
     print 'starting parallel weight {}'.format(syst)
@@ -80,6 +75,7 @@ def main(args):
     channel_prefix = args.tree_name[:2]
     fout = ROOT.TFile('Output/fake_fractions/{}{}_{}.root'.format(channel_prefix, args.year, args.suffix), 'recreate')
     categories = get_categories(channel_prefix)
+    ff_weighter = FFApplicationTool('/hdfs/store/user/tmitchel/fake-weights-cecile/', channel_prefix)
     for cat in categories:
         fout.cd()
         fout.mkdir(cat)
@@ -176,14 +172,14 @@ def main(args):
             't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_iso', 'el_iso', 'mjj', 'is_antiTauIso'
         ], outputtype=pandas.DataFrame)
 
-        random_ext = '_tight' if channel_prefix == 'et' and args.year == "2016" else ''
-        ff_file = ROOT.TFile('../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors{}.root'.format(
-            args.year, args.year, channel_prefix, random_ext), 'READ')
-        fake_weighter = ff_file.Get('ff_comb')
+        # random_ext = '_tight' if channel_prefix == 'et' and args.year == "2016" else ''
+        # ff_file = ROOT.TFile('../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors{}.root'.format(
+        #     args.year, args.year, channel_prefix, random_ext), 'READ')
+        # fake_weighter = ff_file.Get('ff_comb')
 
         treedict['fake_weight'] = numpy.float64
         print 'getting fake weights...'
-        fake_weights = events.apply(lambda x: get_weight(x, fake_weighter, fractions, channel_prefix), axis=1).values
+        fake_weights = events.apply(lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
 
         if args.syst:
             syst_runner = []
@@ -191,17 +187,17 @@ def main(args):
             for syst in systs:
                 print syst
                 treedict[syst] = numpy.float64
-                syst_map[syst] = events.apply(lambda x: get_weight(x, fake_weighter, fractions, channel_prefix, syst=syst), axis=1).values
+                syst_map[syst] = events.apply(lambda x: get_weight(
+                    x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
 
         with uproot.recreate('{}/jetFakes.root'.format(args.input)) as f:
             f[args.tree_name] = uproot.newtree(treedict)
             oldtree['fake_weight'] = fake_weights.reshape(len(fake_weights))
             if args.syst:
-              for syst in systs:
-                oldtree[syst] = syst_map[syst]
+                for syst in systs:
+                    oldtree[syst] = syst_map[syst]
             f[args.tree_name].extend(oldtree)
 
-    fake_weighter.Delete()
     fout.Close()
 
 
