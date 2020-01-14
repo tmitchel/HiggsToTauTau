@@ -18,6 +18,7 @@ class event_info {
     Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR;  // gen
     Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;              // event
     Float_t prefiring_weight, prefiring_weight_up, prefiring_weight_down;
+    Float_t muVetoZTTp001dxyzR0, eVetoZTTp001dxyzR0, dimuonVeto, dielectronVeto;
 
     // triggers (passing, matching, filtering)
     Float_t Flag_BadChargedCandidateFilter, Flag_BadPFMuonFilter, Flag_EcalDeadCellTriggerPrimitiveFilter, Flag_HBHENoiseFilter,
@@ -69,6 +70,12 @@ class event_info {
     Bool_t getPassMu24();
     Bool_t getPassMu27();
     Bool_t getPassFlags();
+
+    // Lepton vetos
+    Bool_t hasExtraMuon(lepton lep) { return lep == lepton::MUON ? muVetoZTTp001dxyzR0 > 1 : muVetoZTTp001dxyzR0 > 0; }
+    Bool_t hasExtraElectron(lepton lep) { return lep == lepton::ELECTRON ? eVetoZTTp001dxyzR0 > 1 : eVetoZTTp001dxyzR0 > 0; }
+    Bool_t hasDimuon() { return dimuonVeto > 0; }
+    Bool_t hasDielectron() { return dielectronVeto > 0; }
 
     // Event Info
     Float_t getNPV() { return npv; }
@@ -209,6 +216,10 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
     input->SetBranchAddress("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter);
     input->SetBranchAddress("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter);
     input->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices);
+    input->SetBranchAddress("muVetoZTTp001dxyzR0", &muVetoZTTp001dxyzR0);
+    input->SetBranchAddress("eVetoZTTp001dxyzR0", &eVetoZTTp001dxyzR0);
+    input->SetBranchAddress("dimuonVeto", &dimuonVeto);
+    input->SetBranchAddress("dielectronVeto", &dielectronVeto);
 
     if (lep == lepton::ELECTRON) {
         if (isEmbed) {
