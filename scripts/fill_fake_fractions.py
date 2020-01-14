@@ -75,7 +75,8 @@ def main(args):
     channel_prefix = args.tree_name[:2]
     fout = ROOT.TFile('Output/fake_fractions/{}{}_{}.root'.format(channel_prefix, args.year, args.suffix), 'recreate')
     categories = get_categories(channel_prefix)
-    ff_weighter = FFApplicationTool('/hdfs/store/user/tmitchel/fake-weights-cecile/', channel_prefix)
+    fake_file = '/hdfs/store/user/tmitchel/fake-weights-cecile/ff_files_{}_{}'.format(channel_prefix, args.year)
+    ff_weighter = FFApplicationTool(fake_file, channel_prefix)
     for cat in categories:
         fout.cd()
         fout.mkdir(cat)
@@ -171,11 +172,6 @@ def main(args):
         events = open_file[args.tree_name].arrays([
             't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_iso', 'el_iso', 'mjj', 'is_antiTauIso'
         ], outputtype=pandas.DataFrame)
-
-        # random_ext = '_tight' if channel_prefix == 'et' and args.year == "2016" else ''
-        # ff_file = ROOT.TFile('../HTTutilities/Jet2TauFakes/data{}/SM{}/tight/vloose/{}/fakeFactors{}.root'.format(
-        #     args.year, args.year, channel_prefix, random_ext), 'READ')
-        # fake_weighter = ff_file.Get('ff_comb')
 
         treedict['fake_weight'] = numpy.float64
         print 'getting fake weights...'
