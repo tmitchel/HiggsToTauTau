@@ -244,7 +244,8 @@ int main(int argc, char *argv[]) {
         }
 
         // anti-lepton discriminators
-        if (tau.getAgainstTightMuonDeep() > 0.5 && tau.getAgainstVVVLooseElectronDeep() > 0.5) {
+        if (tau.getAgainstTightMuonDeep() > 0.5 && tau.getAgainstVVVLooseElectronDeep() > 0.5
+            && tau.getDecayModeFindingNew() && tau.getDecayMode() != 11) {
             histos->at("cutflow")->Fill(4., 1.);
         } else {
             continue;
@@ -312,11 +313,11 @@ int main(int argc, char *argv[]) {
             if (muon.getPt() < 25) {  // cross-trigger
                 evtwt *= htt_sf->function("m_trg_20_ic_ratio")->getVal();
                 if (syst == "trigger_up") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_ratio_up")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_up")->getVal();
                 } else if (syst == "trigger_down") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_ratio_down")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_down")->getVal();
                 } else {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_ratio")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio")->getVal();
                 }
             } else {  // muon trigger
                 evtwt *= htt_sf->function("m_trg_ic_ratio")->getVal();
