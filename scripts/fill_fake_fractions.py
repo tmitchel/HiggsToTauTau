@@ -46,7 +46,6 @@ def categorize(njets, mjj, channel):
     else:
         raise Exception('We missed something here...')
 
-
 def get_weight(df, fake_weights, fractions, channel, syst=None):
     category = categorize(df['njets'], df['mjj'], channel)
     if channel == 'et':
@@ -58,9 +57,9 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
     weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df['njets'],
+                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin),
                                   fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_w'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin))
+                                  fractions['frac_w'][category].GetBinContent(xbin, ybin))
 
     return weights
 
@@ -75,7 +74,7 @@ def main(args):
     channel_prefix = args.tree_name[:2]
     fout = ROOT.TFile('Output/fake_fractions/{}{}_{}.root'.format(channel_prefix, args.year, args.suffix), 'recreate')
     categories = get_categories(channel_prefix)
-    fake_file = '/hdfs/store/user/tmitchel/fake-weights-cecile/ff_files_{}_{}'.format(channel_prefix, args.year)
+    fake_file = '/hdfs/store/user/tmitchel/fake-weights-cecile/ff_files_{}_{}/'.format(channel_prefix, args.year)
     ff_weighter = FFApplicationTool(fake_file, channel_prefix)
     for cat in categories:
         fout.cd()
