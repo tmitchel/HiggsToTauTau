@@ -163,7 +163,12 @@ int main(int argc, char* argv[]) {
     htt_sf_file.Close();
 
     // tau ID efficiency
-    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool("2017ReReco", "DeepTau2017v2p1VSjet", "Medium");
+    TauIDSFTool *tau_id_eff_sf;
+    if (isEmbed) {
+        tau_id_eff_sf = new TauIDSFTool("2017ReReco", "DeepTau2017v2p1VSjet", "Medium", false, true);
+    } else {
+        tau_id_eff_sf = new TauIDSFTool("2017ReReco", "DeepTau2017v2p1VSjet", "Medium", false, false);
+    }
 
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
@@ -394,9 +399,11 @@ int main(int argc, char* argv[]) {
           }
 
             // tau ID eff SF
-            if (tau.getGenMatch() == 5) {
-                evtwt *= 0.97;
+            std::string id_syst = "";
+            if (syst.find("tau_id_") != std::string::npos) {
+                id_syst = syst.find("Up") != std::string::npos ? "Up" : "Down";
             }
+            evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), id_syst);
 
             auto genweight(event.getGenWeight());
             if (genweight > 1 || genweight < 0) {
