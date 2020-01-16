@@ -244,9 +244,16 @@ int main(int argc, char* argv[]) {
             histos->at("cutflow")->Fill(3., 1.);
         }
 
-        // anti-lepton discriminators
-        if (tau.getAgainstVLooseMuonDeep() > 0.5 && tau.getAgainstTightElectronDeep() > 0.5) {
+        if (!event.hasDimuon() && !event.hasExtraElectron(lepton::MUON) && !event.hasExtraMuon(lepton::MUON)) {
             histos->at("cutflow")->Fill(4., 1.);
+        } else {
+            continue;
+        }
+
+        // anti-lepton discriminators
+        if (tau.getAgainstTightMuonDeep() > 0.5 && tau.getAgainstVVVLooseElectronDeep() > 0.5
+            && tau.getDecayModeFindingNew() && tau.getDecayMode() != 11) {
+            histos->at("cutflow")->Fill(5., 1.);
         } else {
             continue;
         }
@@ -254,7 +261,7 @@ int main(int argc, char* argv[]) {
         // only opposite-sign
         int evt_charge = tau.getCharge() + electron.getCharge();
         if (evt_charge == 0) {
-            histos->at("cutflow")->Fill(5., 1.);
+            histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
@@ -270,7 +277,7 @@ int main(int argc, char* argv[]) {
 
         // now do mt selection
         if (mt < 50) {
-            histos->at("cutflow")->Fill(6., 1.);
+            histos->at("cutflow")->Fill(7., 1.);
         } else {
             continue;
         }
@@ -317,11 +324,11 @@ int main(int argc, char* argv[]) {
             if (electron.getPt() < 33) {
                 evtwt *= htt_sf->function("e_trg_24_ic_ratio")->getVal();
                 if (syst == "trigger_up") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_ratio_up")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_etau_ratio_up")->getVal();
                 } else if (syst == "trigger_down") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_ratio_down")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_etau_ratio_down")->getVal();
                 } else {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_ratio")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_etau_ratio")->getVal();
                 }
             } else {
                 evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
@@ -406,7 +413,7 @@ int main(int argc, char* argv[]) {
 
             std::string single_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_ic_embed_ratio" : "e_trg_ic_data";
             std::string el_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_24_ic_embed_ratio" : "e_trg_24_ic_data";
-            std::string tau_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "t_trg_mediumDeepTau_etau_ratio" : "t_trg_mediumDeepTau_etau_data";
+            std::string tau_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "t_trg_pog_deeptau_medium_etau_ratio" : "t_trg_pog_deeptau_medium_etau_data";
             if (syst == "trigger_up") {
                 tau_leg_eff_name += "_up";
             } else if (syst == "trigger_down") {
@@ -435,7 +442,7 @@ int main(int argc, char* argv[]) {
 
         // b-jet veto
         if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
-            histos->at("cutflow")->Fill(7., 1.);
+            histos->at("cutflow")->Fill(8., 1.);
         } else {
             continue;
         }
@@ -446,7 +453,7 @@ int main(int argc, char* argv[]) {
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion) {
-            histos->at("cutflow")->Fill(8., 1.);
+            histos->at("cutflow")->Fill(9., 1.);
         } else {
             continue;
         }

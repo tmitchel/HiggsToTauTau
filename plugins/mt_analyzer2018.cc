@@ -408,11 +408,11 @@ int main(int argc, char *argv[]) {
             if (muon.getPt() < 25) {  // cross-trigger
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
                 if (syst == "trigger_up") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_rembed_ratio_up")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_up")->getVal();
                 } else if (syst == "trigger_down") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_embed_ratio_down")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_down")->getVal();
                 } else {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_embed_ratio")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio")->getVal();
                 }
             } else {  // muon trigger
                 evtwt *= htt_sf->function("m_trg_ic_embed_ratio")->getVal();
@@ -442,7 +442,7 @@ int main(int argc, char *argv[]) {
         }
 
         // create regions
-        bool signalRegion = (tau.getMediumIsoMVA() && muon.getIso() < 0.15);
+        bool signalRegion = (tau.getMediumIsoDeep() && muon.getIso() < 0.15);
         bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && muon.getIso() < 0.15);
 
         // only keep the regions we need
