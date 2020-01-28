@@ -17,14 +17,13 @@ class Config:
         self.data = data
         self.variable = variable
         self.bins = bins
+        self.queue = None
         self.fake_weight = None
         self.ac_weights = None
         self.hists = None
     def submit(self):
-        return {
-            'config': self,
-            'queue': Queue(),
-        }
+        self.queue = Queue()
+        return self
 
 def get_ac_weights(name, ac_reweighting_map):
     if 'ggh' in name.lower():
@@ -42,7 +41,7 @@ def build_histogram(name, bins, output_file, directory):
     return ROOT.TH1F(name, name, bins[0], bins[1], bins[2])
 
 
-def fill_histograms(config, queue):
+def fill_histograms(config):
     # get common variables
     evtwt = config.data['evtwt'].values if config.ac_weights == None else (
         config.data['evtwt'] * config.data[config.ac_weights]).values
@@ -55,7 +54,7 @@ def fill_histograms(config, queue):
     for i in xrange(len(config.data.index)):
         config.hists.Fill(xvar[i], evtwt[i])
 
-    queue.put(config.hists)
+    config.queue.put(config.hists)
 
 
 def fill_process_list(data, name, variable, bins, boilerplate, output_file, directory, year, doSyst=False):
