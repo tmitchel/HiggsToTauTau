@@ -174,7 +174,7 @@ int main(int argc, char* argv[]) {
     auto histos = helper->getHistos1D();
 
     // construct factories
-    event_info event(ntuple, lepton::ELECTRON, 2018, syst);
+    event_info event(ntuple, lepton::ELECTRON, isMG, 2018, syst);
     electron_factory electrons(ntuple, 2018, syst);
     tau_factory taus(ntuple, 2018, syst);
     jet_factory jets(ntuple, 2018, syst);

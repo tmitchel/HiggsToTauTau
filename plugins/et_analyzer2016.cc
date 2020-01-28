@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
     bool isData = sample.find("data") != std::string::npos;
     bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
     bool doAC = signal_type != "None";
+    bool isMG = sample.find("madgraph") != std::string::npos;
 
     std::string systname = "NOMINAL";
     if (!syst.empty()) {
@@ -169,7 +170,7 @@ int main(int argc, char *argv[]) {
     auto histos = helper->getHistos1D();
 
     // construct factories
-    event_info event(ntuple, lepton::ELECTRON, 2016, syst);
+    event_info event(ntuple, lepton::ELECTRON, isMG, 2016, syst);
     electron_factory electrons(ntuple, 2016, syst);
     tau_factory taus(ntuple, 2016, syst);
     jet_factory jets(ntuple, 2016, syst);
