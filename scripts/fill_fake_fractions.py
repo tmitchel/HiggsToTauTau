@@ -46,6 +46,15 @@ def categorize(njets, mjj, channel):
     else:
         raise Exception('We missed something here...')
 
+
+def fill_fraction(df, fraction):
+    vis_mass = df['vis_mass'].values
+    njets = df['njets'].values
+    evtwt = df['evtwt'].values
+    for i in xrange(len(df.index)):
+        fraction.Fill(vis_mass[i], njets[i], evtwt[i])   
+
+
 def get_weight(df, fake_weights, fractions, channel, syst=None):
     category = categorize(df['njets'], df['mjj'], channel)
     if channel == 'et':
@@ -57,24 +66,18 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
     weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df['njets'],
-                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin),
                                   fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_w'][category].GetBinContent(xbin, ybin))
+                                  fractions['frac_w'][category].GetBinContent(xbin, ybin),
+                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin))
 
     return weights
-
-
-def parallel_weights(queue, df, fake_weighter, fractions, channel_prefix, syst):
-    print 'starting parallel weight {}'.format(syst)
-    weights = df.apply(lambda x: get_weight(x, fake_weighter, fractions, channel_prefix, syst=syst), axis=1).values
-    queue.put(weights)
 
 
 def main(args):
     channel_prefix = args.tree_name[:2]
     fout = ROOT.TFile('Output/fake_fractions/{}{}_{}.root'.format(channel_prefix, args.year, args.suffix), 'recreate')
     categories = get_categories(channel_prefix)
-    fake_file = '/hdfs/store/user/tmitchel/fake-weights-cecile/ff_files_{}_{}/'.format(channel_prefix, args.year)
+    fake_file = '/hdfs/store/user/tmitchel/fake-weights-cecile/ff_files_{}_{}'.format(channel_prefix, args.year)
     ff_weighter = FFApplicationTool(fake_file, channel_prefix)
     for cat in categories:
         fout.cd()
@@ -120,32 +123,10 @@ def main(args):
             vbf_events = anti_iso_events[(anti_iso_events['njets'] > 1) & (anti_iso_events['mjj'] > 300)]
 
             # inclusive region
-            vis_mass = anti_iso_events['vis_mass'].values
-            njets = anti_iso_events['njets'].values
-            evtwt = anti_iso_events['evtwt'].values
-            for i in xrange(len(anti_iso_events.index)):
-                fractions[frac]['{}_inclusive'.format(channel_prefix)].Fill(vis_mass[i], njets[i], evtwt[i])
-
-            # 0jet region
-            vis_mass = zero_jet_events['vis_mass'].values
-            njets = zero_jet_events['njets'].values
-            evtwt = zero_jet_events['evtwt'].values
-            for i in xrange(len(zero_jet_events.index)):
-                fractions[frac]['{}_0jet'.format(channel_prefix)].Fill(vis_mass[i], njets[i], evtwt[i])
-
-            # boosted region
-            vis_mass = boosted_events['vis_mass'].values
-            njets = boosted_events['njets'].values
-            evtwt = boosted_events['evtwt'].values
-            for i in xrange(len(boosted_events.index)):
-                fractions[frac]['{}_boosted'.format(channel_prefix)].Fill(vis_mass[i], njets[i], evtwt[i])
-
-            # vbf region
-            vis_mass = vbf_events['vis_mass'].values
-            njets = vbf_events['njets'].values
-            evtwt = vbf_events['evtwt'].values
-            for i in xrange(len(vbf_events.index)):
-                fractions[frac]['{}_vbf'.format(channel_prefix)].Fill(vis_mass[i], njets[i], evtwt[i])
+            fill_fraction(anti_iso_events, fractions[frac]['{}_inclusive'.format(channel_prefix)])
+            fill_fraction(zero_jet_events, fractions[frac]['{}_0jet'.format(channel_prefix)])
+            fill_fraction(boosted_events, fractions[frac]['{}_boosted'.format(channel_prefix)])
+            fill_fraction(vbf_events, fractions[frac]['{}_vbf'.format(channel_prefix)])
 
     for cat in categories:
         fractions['frac_qcd'][cat] = fractions['frac_data'][cat].Clone()
@@ -177,7 +158,6 @@ def main(args):
         fake_weights = events.apply(lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
 
         if args.syst:
-            syst_runner = []
             syst_map = {}
             for syst in systs:
                 print syst
