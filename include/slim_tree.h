@@ -40,6 +40,7 @@ class slim_tree {
     Float_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint, wt_ggH_a1, wt_ggH_a3, wt_ggH_a3int, wt_wh_a1, wt_wh_a2,
         wt_wh_a3, wt_wh_L1, wt_wh_L1Zg, wt_wh_a2int, wt_wh_a3int, wt_wh_L1int, wt_wh_L1Zgint, wt_zh_a1, wt_zh_a2, wt_zh_a3, wt_zh_L1, wt_zh_L1Zg,
         wt_zh_a2int, wt_zh_a3int, wt_zh_L1int, wt_zh_L1Zgint;
+    Float_t sm_weight_nlo, mm_weight_nlo, ps_weight_nlo;
 };
 
 slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree(tree_name.c_str(), tree_name.c_str())) {
@@ -135,42 +136,75 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("cat_vbf", &cat_vbf, "cat_vbf/I");
     otree->Branch("contamination", &contamination, "contamination/I");
 
+    wt_a1 = 1.;
+    wt_a2 = 1.;
+    wt_a3 = 1.;
+    wt_L1 = 1.;
+    wt_L1Zg = 1.;
+    wt_a2int = 1.;
+    wt_a3int = 1.;
+    wt_L1int = 1.;
+    wt_L1Zgint = 1.;
+    wt_ggH_a1 = 1.;
+    wt_ggH_a3 = 1.;
+    wt_ggH_a3int = 1.;
+    wt_wh_a1 = 1.;
+    wt_wh_a2 = 1.;
+    wt_wh_a3 = 1.;
+    wt_wh_L1 = 1.;
+    wt_wh_L1Zg = 1.;
+    wt_wh_a2int = 1.;
+    wt_wh_a3int = 1.;
+    wt_wh_L1int = 1.;
+    wt_wh_L1Zgint = 1.;
+    wt_zh_a1 = 1.;
+    wt_zh_a2 = 1.;
+    wt_zh_a3 = 1.;
+    wt_zh_L1 = 1.;
+    wt_zh_L1Zg = 1.;
+    wt_zh_a2int = 1.;
+    wt_zh_a3int = 1.;
+    wt_zh_L1int = 1.;
+    wt_zh_L1Zgint = 1.;
+
     // include weights for anomolous coupling
-    if (isAC) {
-        otree->Branch("wt_vbf_a1", &wt_a1);
-        otree->Branch("wt_vbf_a2", &wt_a2);
-        otree->Branch("wt_vbf_a3", &wt_a3);
-        otree->Branch("wt_vbf_L1", &wt_L1);
-        otree->Branch("wt_vbf_L1Zg", &wt_L1Zg);
-        otree->Branch("wt_vbf_a2int", &wt_a2int);
-        otree->Branch("wt_vbf_a3int", &wt_a3int);
-        otree->Branch("wt_vbf_L1int", &wt_L1int);
-        otree->Branch("wt_vbf_L1Zgint", &wt_L1Zgint);
+    otree->Branch("wt_vbf_a1", &wt_a1);
+    otree->Branch("wt_vbf_a2", &wt_a2);
+    otree->Branch("wt_vbf_a3", &wt_a3);
+    otree->Branch("wt_vbf_L1", &wt_L1);
+    otree->Branch("wt_vbf_L1Zg", &wt_L1Zg);
+    otree->Branch("wt_vbf_a2int", &wt_a2int);
+    otree->Branch("wt_vbf_a3int", &wt_a3int);
+    otree->Branch("wt_vbf_L1int", &wt_L1int);
+    otree->Branch("wt_vbf_L1Zgint", &wt_L1Zgint);
 
-        otree->Branch("wt_ggh_a1", &wt_ggH_a1);
-        otree->Branch("wt_ggh_a3", &wt_ggH_a3);
-        otree->Branch("wt_ggh_a3int", &wt_ggH_a3int);
+    otree->Branch("wt_ggh_a1", &wt_ggH_a1);
+    otree->Branch("wt_ggh_a3", &wt_ggH_a3);
+    otree->Branch("wt_ggh_a3int", &wt_ggH_a3int);
 
-        otree->Branch("wt_wh_a1", &wt_wh_a1);
-        otree->Branch("wt_wh_a2", &wt_wh_a2);
-        otree->Branch("wt_wh_a3", &wt_wh_a3);
-        otree->Branch("wt_wh_L1", &wt_wh_L1);
-        otree->Branch("wt_wh_L1Zg", &wt_wh_L1Zg);
-        otree->Branch("wt_wh_a2int", &wt_wh_a2int);
-        otree->Branch("wt_wh_a3int", &wt_wh_a3int);
-        otree->Branch("wt_wh_L1int", &wt_wh_L1int);
-        otree->Branch("wt_wh_L1Zgint", &wt_wh_L1Zgint);
+    otree->Branch("wt_wh_a1", &wt_wh_a1);
+    otree->Branch("wt_wh_a2", &wt_wh_a2);
+    otree->Branch("wt_wh_a3", &wt_wh_a3);
+    otree->Branch("wt_wh_L1", &wt_wh_L1);
+    otree->Branch("wt_wh_L1Zg", &wt_wh_L1Zg);
+    otree->Branch("wt_wh_a2int", &wt_wh_a2int);
+    otree->Branch("wt_wh_a3int", &wt_wh_a3int);
+    otree->Branch("wt_wh_L1int", &wt_wh_L1int);
+    otree->Branch("wt_wh_L1Zgint", &wt_wh_L1Zgint);
 
-        otree->Branch("wt_zh_a1", &wt_zh_a1);
-        otree->Branch("wt_zh_a2", &wt_zh_a2);
-        otree->Branch("wt_zh_a3", &wt_zh_a3);
-        otree->Branch("wt_zh_L1", &wt_zh_L1);
-        otree->Branch("wt_zh_L1Zg", &wt_zh_L1Zg);
-        otree->Branch("wt_zh_a2int", &wt_zh_a2int);
-        otree->Branch("wt_zh_a3int", &wt_zh_a3int);
-        otree->Branch("wt_zh_L1int", &wt_zh_L1int);
-        otree->Branch("wt_zh_L1Zgint", &wt_zh_L1Zgint);
-    }
+    otree->Branch("wt_zh_a1", &wt_zh_a1);
+    otree->Branch("wt_zh_a2", &wt_zh_a2);
+    otree->Branch("wt_zh_a3", &wt_zh_a3);
+    otree->Branch("wt_zh_L1", &wt_zh_L1);
+    otree->Branch("wt_zh_L1Zg", &wt_zh_L1Zg);
+    otree->Branch("wt_zh_a2int", &wt_zh_a2int);
+    otree->Branch("wt_zh_a3int", &wt_zh_a3int);
+    otree->Branch("wt_zh_L1int", &wt_zh_L1int);
+    otree->Branch("wt_zh_L1Zgint", &wt_zh_L1Zgint);
+
+    otree->Branch("sm_weight_nlo", &sm_weight_nlo);
+    otree->Branch("mm_weight_nlo", &mm_weight_nlo);
+    otree->Branch("ps_weight_nlo", &ps_weight_nlo);
 }
 
 void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight,
@@ -319,6 +353,10 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
             OS = 1;
         }
     }
+
+    sm_weight_nlo = evt->getMadgraphSM();
+    mm_weight_nlo = evt->getMadgraphMM();
+    ps_weight_nlo = evt->getMadgraphPS();
 
     // anomolous coupling files
     if (ac_weights != nullptr) {

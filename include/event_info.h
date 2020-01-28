@@ -16,9 +16,10 @@ class event_info {
     ULong64_t evt;
     UInt_t run, lumi, convert_evt;
     Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR;  // gen
-    Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;              // event
-    Float_t prefiring_weight, prefiring_weight_up, prefiring_weight_down;
-    Float_t muVetoZTTp001dxyzR0, eVetoZTTp001dxyzR0, dimuonVeto, dielectronVeto;
+    Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;  // event
+    Float_t prefiring_weight, prefiring_weight_up, prefiring_weight_down;  // prefiring weights
+    Float_t muVetoZTTp001dxyzR0, eVetoZTTp001dxyzR0, dimuonVeto, dielectronVeto;  // lepton vetos
+    Float_t sm_weight_nlo, mm_weight_nlo, ps_weight_nlo;  // madgraph reweighting
 
     // triggers (passing, matching, filtering)
     Float_t Flag_BadChargedCandidateFilter, Flag_BadPFMuonFilter, Flag_EcalDeadCellTriggerPrimitiveFilter, Flag_HBHENoiseFilter,
@@ -43,7 +44,7 @@ class event_info {
     std::unordered_map<std::string, int> unc_map;
 
  public:
-    event_info(TTree*, lepton, int, std::string);
+    event_info(TTree*, lepton, int, bool, std::string);
     virtual ~event_info() {}
     void setEmbed() { isEmbed = true; }
     void setNjets(Float_t _njets) { njets = _njets; }  // must be set in event loop
@@ -130,10 +131,18 @@ class event_info {
 
     // Prefiring Weight
     Float_t getPrefiringWeight();
+
+    // Madgraph Reweighting
+    Float_t getMadgraphSM() { return sm_weight_nlo; }
+    Float_t getMadgraphMM() { return mm_weight_nlo; }
+    Float_t getMadgraphPS() { return ps_weight_nlo; }
 };
 
 // read data from trees into member variables
-event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
+event_info::event_info(TTree* input, lepton lep, int _era, bool isMadgraph, std::string _syst) :
+    sm_weight_nlo(1.),
+    mm_weight_nlo(1.),
+    ps_weight_nlo(1.),
     isEmbed(false),
     era(_era),
     syst(_syst),
@@ -220,6 +229,12 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
     input->SetBranchAddress("eVetoZTTp001dxyzR0", &eVetoZTTp001dxyzR0);
     input->SetBranchAddress("dimuonVeto", &dimuonVeto);
     input->SetBranchAddress("dielectronVeto", &dielectronVeto);
+
+    if (isMadgraph) {
+        input->SetBranchAddress("sm_weight_nlo", &sm_weight_nlo);
+        input->SetBranchAddress("mm_weight_nlo", &mm_weight_nlo);
+        input->SetBranchAddress("ps_weight_nlo", &ps_weight_nlo);
+    }
 
     if (lep == lepton::ELECTRON) {
         if (isEmbed) {
