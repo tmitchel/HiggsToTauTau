@@ -8,6 +8,7 @@ import uproot
 from glob import glob
 from array import array
 from pprint import pprint
+from copy import deepcopy
 from multiprocessing import Process, Queue
 
 
@@ -15,15 +16,24 @@ class Config:
     def __init__(self, name, data, variable, bins):
         self.name = name
         self.data = data
-        self.variable = variable
+        self.xvar_name = variable
         self.bins = bins
         self.queue = None
         self.fake_weight = None
         self.ac_weights = None
         self.hists = None
+
+    def __deepcopy__(self, memo):
+      cp = Config(deepcopy(self.name, memo), deepcopy(self.data, memo), deepcopy(self.xvar_name, memo), deepcopy(self.bins, memo))
+      cp.fake_weight = deepcopy(self.fake_weight, memo)
+      cp.ac_weights = deepcopy(self.ac_weights, memo)
+      cp.queue = None
+      cp.hists = deepcopy(self.hists, memo)
+      return cp
+
     def submit(self):
         self.queue = Queue()
-        return self
+        return {'config': self}
 
 def get_ac_weights(name, ac_reweighting_map):
     if 'ggh' in name.lower():
@@ -91,6 +101,7 @@ def fill_process_list(data, name, variable, bins, boilerplate, output_file, dire
                 ac_config.ac_weights = weight[0]
                 all_hists[weight[1]] = ac_config.submit()
 
+    print all_hists
     return [
         Process(target=fill_histograms, kwargs=proc_args, name=proc_name) for proc_name, proc_args in all_hists.iteritems()
     ], all_hists
@@ -202,7 +213,7 @@ def main(args):
                                                                          '{}_inclusive/{}'.format(channel_prefix, variable), args.syst)
 
                 zero_jet_processes, zero_jet_hists = fill_process_list(zero_jet_events, name, variable, bins, boilerplate, output_file,
-                                                                     '{}_inclusive/{}'.format(channel_prefix, variable), args.syst)
+                                                                     '{}_0jet/{}'.format(channel_prefix, variable), args.syst)
 
                 boosted_processes, boosted_hists = fill_process_list(boosted_events, name, variable, bins, boilerplate, output_file,
                                                                      '{}_boosted/{}'.format(channel_prefix, variable), args.syst)
@@ -217,19 +228,19 @@ def main(args):
 
                 output_file.cd('{}_inclusive/{}'.format(channel_prefix, variable))
                 for obj in inclusive_hists.itervalues():
-                    obj['queue'].get().Write()
+                    obj['config'].queue.get().Write()
 
                 output_file.cd('{}_0jet/{}'.format(channel_prefix, variable))
                 for obj in zero_jet_hists.itervalues():
-                    obj['queue'].get().Write()
+                    obj['config'].queue.get().Write()
 
                 output_file.cd('{}_boosted/{}'.format(channel_prefix, variable))
                 for obj in boosted_hists.itervalues():
-                    obj['queue'].get().Write()
+                    obj['config'].queue.get().Write()
 
                 output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
                 for obj in vbf_hists.itervalues():
-                    obj['queue'].get().Write()
+                    obj['config'].queue.get().Write()
 
     output_file.Close()
     print 'Finished in {} seconds'.format(time.time() - start)
