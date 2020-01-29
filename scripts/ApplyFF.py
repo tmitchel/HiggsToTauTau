@@ -53,7 +53,7 @@ class FFApplicationTool():
         if self.theFMvisFile.IsZombie():
             raise RuntimeError("Problem loading the files!")
         
-        #
+        #MVis closure
         self.mVisClosure_QCD_0jet = self.theFMvisFile.Get("closure_mvis_"+channel+"_0jet_qcd")
         self.mVisClosure_QCD_1jet = self.theFMvisFile.Get("closure_mvis_"+channel+"_1jet_qcd")
         self.mVisClosure_QCD_2jet = self.theFMvisFile.Get("closure_mvis_"+channel+"_2jet_qcd")
@@ -61,6 +61,12 @@ class FFApplicationTool():
         self.mVisClosure_W_1jet = self.theFMvisFile.Get("closure_mvis_"+channel+"_1jet_w")
         self.mVisClosure_W_2jet = self.theFMvisFile.Get("closure_mvis_"+channel+"_2jet_w")
         self.mVisClosure_TT = self.theFMvisFile.Get("closure_mvis_"+channel+"_ttmc")        
+        self.lptClosure_W = self.theFMvisFile.Get("closure_lpt_"+channel+"_0jet_w")
+        self.lptClosure_QCD = self.theFMvisFile.Get("closure_lpt_"+channel+"_0jet_qcd")
+        self.lptClosure_TT = self.theFMvisFile.Get("closure_lpt_"+channel+"_ttmc")
+        self.lptClosure_xtrg_W = self.theFMvisFile.Get("closure_lpt_xtrg_"+channel+"_0jet_w")
+        self.lptClosure_xtrg_QCD = self.theFMvisFile.Get("closure_lpt_xtrg_"+channel+"_0jet_qcd")
+        self.lptClosure_xtrg_TT = self.theFMvisFile.Get("closure_lpt_xtrg_"+channel+"_ttmc")
 
         #MT and OSSS closure
         self.theFOSSSClosureFile = ROOT.TFile(theFFDirectory+"FF_QCDcorrectionOSSS.root")
@@ -82,10 +88,8 @@ class FFApplicationTool():
     def get_raw_FF(self,pt,fct):
         ff=1.0
         ff=fct.Eval(pt)    
-        #if(pt>80):
-        #    ff=fct.Eval(80)
-        if pt > 100:
-            ff = fct.Eval(100)
+        if(pt>100):
+            ff=fct.Eval(100)
         return ff
 
     def get_mvis_closure(self,mvis,fct):
@@ -104,10 +108,18 @@ class FFApplicationTool():
         #    corr=fct.Eval(120)
         return corr
 
-    def get_ff(self, pt, mt, mvis, njets, frac_tt, frac_qcd, frac_w, unc='',upOrDown=''):
+    def get_lpt_closure(self,lpt,fct):
+        corr = 1.0
+        corr = fct.Eval(lpt)
+        if (lpt>150):
+            corr = fct.Eval(150)
+        return corr
+
+    def get_ff(self, pt, mt, mvis, lpt, njets, xtrg, frac_tt, frac_qcd, frac_w, unc='',upOrDown=''):
         ff_qcd = 1.0
         ff_w = 0
-        ff_tt = 1.0
+        ff_tt = 1.0    
+        
     
         #Raw ff
         if(njets==0):
@@ -193,6 +205,7 @@ class FFApplicationTool():
                 ff_tt=self.get_raw_FF(pt,self.ff_tt_0jet_unc2_down)
 
         #mvis closure
+        """
         if njets == 0:
             if unc == 'mvisclosure_qcd_0jet':
                 if upOrDown == 'up':
@@ -250,6 +263,51 @@ class FFApplicationTool():
                 ff_tt = ff_tt
         else:
             ff_tt = self.get_mvis_closure(mvis,self.mVisClosure_TT)
+        """
+        if (xtrg):
+            if unc == 'lptclosure_xtrg_qcd_0jet':
+                if upOrDown == 'up':
+                    ff_qcd = ff_qcd*(1+2*(self.get_lpt_closure(lpt,self.lptClosure_xtrg_QCD)-1))
+                elif upOrDown == 'down':
+                    ff_qcd = ff_qcd
+            else:
+                ff_qcd = ff_qcd*self.get_lpt_closure(lpt,self.lptClosure_xtrg_QCD)
+            if unc == 'lptclosure_xtrg_w_0jet':
+                if upOrDown == 'up':
+                    ff_w = ff_w*(1+2*(self.get_lpt_closure(lpt,self.lptClosure_xtrg_W)-1))
+                elif upOrDown == 'down':
+                    ff_w = ff_w
+            else:
+                ff_w = ff_w * self.get_lpt_closure(lpt,self.lptClosure_xtrg_W)
+            if unc == 'lptclosure_xtrg_tt':
+                if upOrDown == 'up':
+                    ff_tt = ff_tt*(1+2*(self.get_lpt_closure(lpt,self.lptClosure_xtrg_TT)-1))
+                elif upOrDown == 'down':
+                    ff_tt = ff_tt
+            else:
+                ff_tt = ff_tt* self.get_lpt_closure(lpt,self.lptClosure_xtrg_TT)
+        else:
+            if unc == 'lptclosure_qcd_0jet':
+                if upOrDown == 'up':
+                    ff_qcd = ff_qcd*(1+2*(self.get_lpt_closure(lpt,self.lptClosure_QCD)-1))
+                elif upOrDown == 'down':
+                    ff_qcd = ff_qcd
+            else:
+                ff_qcd = ff_qcd*self.get_lpt_closure(lpt,self.lptClosure_QCD)
+            if unc == 'lptclosure_w_0jet':
+                if upOrDown == 'up':
+                    ff_w = ff_w*(1+2*(self.get_lpt_closure(lpt,self.lptClosure_W)-1))
+                elif upOrDown == 'down':
+                    ff_w = ff_w
+            else:
+                ff_w = ff_w * self.get_lpt_closure(lpt,self.lptClosure_W)
+            if unc == 'lptclosure_tt':
+                if upOrDown == 'up':
+                    ff_tt = ff_tt*(1+2*(self.get_lpt_closure(lpt,self.lptClosure_TT)-1))
+                elif upOrDown == 'down':
+                    ff_tt = ff_tt
+            else:
+                ff_tt = ff_tt* self.get_lpt_closure(lpt,self.lptClosure_TT)
         
         #MT and OSSS corrections
         if unc == 'mtclosure_w_unc1':
