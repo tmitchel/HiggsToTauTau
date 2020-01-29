@@ -58,14 +58,14 @@ def fill_fraction(df, fraction):
 def get_weight(df, fake_weights, fractions, channel, syst=None):
     category = categorize(df['njets'], df['mjj'], channel)
     if channel == 'et':
-        iso_name = 'el_iso'
+        pt_name = 'el_pt'
     else:
-        iso_name = 'mu_iso'
+        pt_name = 'mu_pt'
 
     xbin = fractions['frac_data'][category].GetXaxis().FindBin(df['vis_mass'])
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
-    weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df['njets'],
+    weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
                                   fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
                                   fractions['frac_w'][category].GetBinContent(xbin, ybin),
                                   fractions['frac_tt'][category].GetBinContent(xbin, ybin))
@@ -150,7 +150,7 @@ def main(args):
         treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
 
         events = open_file[args.tree_name].arrays([
-            't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_iso', 'el_iso', 'mjj', 'is_antiTauIso'
+            't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_pt', 'el_pt', 'mjj', 'is_antiTauIso', 'cross_trigger'
         ], outputtype=pandas.DataFrame)
 
         treedict['fake_weight'] = numpy.float64
