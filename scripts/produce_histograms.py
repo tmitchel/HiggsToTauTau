@@ -101,7 +101,6 @@ def fill_process_list(data, name, variable, bins, boilerplate, output_file, dire
                 ac_config.ac_weights = weight[0]
                 all_hists[weight[1]] = ac_config.submit()
 
-    print all_hists
     return [
         Process(target=fill_histograms, kwargs=proc_args, name=proc_name) for proc_name, proc_args in all_hists.iteritems()
     ], all_hists

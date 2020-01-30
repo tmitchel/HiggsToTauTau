@@ -77,7 +77,7 @@ def main(args):
     channel_prefix = args.tree_name[:2]
     fout = ROOT.TFile('Output/fake_fractions/{}{}_{}.root'.format(channel_prefix, args.year, args.suffix), 'recreate')
     categories = get_categories(channel_prefix)
-    fake_file = '/hdfs/store/user/tmitchel/deep-tau-fake-factor/ff_files_{}_{}'.format(channel_prefix, args.year)
+    fake_file = '/hdfs/store/user/tmitchel/deep-tau-fake-factor/ff_files_{}_{}/'.format(channel_prefix, args.year)
     ff_weighter = FFApplicationTool(fake_file, channel_prefix)
     for cat in categories:
         fout.cd()
