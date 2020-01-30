@@ -305,7 +305,7 @@ int main(int argc, char *argv[]) {
             evtwt *= htt_sf->function(id_name.c_str())->getVal();
 
             // muon fake rate SF
-            evtwt *= htt_sf->function("t_id_vs_mu_eta_tight");
+            evtwt *= htt_sf->function("t_id_vs_mu_eta_tight")->getVal();
 
             // trigger scale factors
             if (muon.getPt() < 25) {  // cross-trigger
@@ -400,17 +400,17 @@ int main(int argc, char *argv[]) {
             if (syst.find("tau_id_") != std::string::npos) {
                 embed_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
             }
-            evtwt *= htt_sf->function(embed_id_name);
+            evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
 
             if (muon.getPt() < 25) {  // cross-trigger
                 // muon-leg
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
                 // tau-leg
-                std::string tau_leg_name("t_trg_pog_deeptau_medium_mutau_embed_ratio";
+                std::string tau_leg_name("t_trg_pog_deeptau_medium_mutau_embed_ratio");
                 if (syst.find("trigger") != std::string::npos) {
                   tau_leg_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
-                evtwt *= htt_sf->function(tau_leg_name);
+                evtwt *= htt_sf->function(tau_leg_name.c_str())->getVal();
             } else {  // muon trigger
                 evtwt *= htt_sf->function("m_trg_ic_embed_ratio")->getVal();
             }
