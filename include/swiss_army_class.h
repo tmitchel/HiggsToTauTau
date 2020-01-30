@@ -110,5 +110,6 @@ Float_t Helper::embed_tracking(Float_t decay_mode) {
     std::cerr << "Invalid decay mode " << decay_mode << std::endl;
     return 1;
   }
+}
 
 #endif  // INCLUDE_SWISS_ARMY_CLASS_H_
