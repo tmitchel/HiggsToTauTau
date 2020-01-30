@@ -16,8 +16,10 @@ class event_info {
     ULong64_t evt;
     UInt_t run, lumi, convert_evt;
     Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR;  // gen
-    Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;              // event
-    Float_t prefiring_weight, prefiring_weight_up, prefiring_weight_down;
+    Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;  // event
+    Float_t prefiring_weight, prefiring_weight_up, prefiring_weight_down;  // prefiring weights
+    Float_t muVetoZTTp001dxyzR0, eVetoZTTp001dxyzR0, dimuonVeto, dielectronVeto;  // lepton vetos
+    Float_t sm_weight_nlo, mm_weight_nlo, ps_weight_nlo;  // madgraph reweighting
 
     // triggers (passing, matching, filtering)
     Float_t Flag_BadChargedCandidateFilter, Flag_BadPFMuonFilter, Flag_EcalDeadCellTriggerPrimitiveFilter, Flag_HBHENoiseFilter,
@@ -39,10 +41,11 @@ class event_info {
 
     bool isEmbed;
     int era;
+    lepton lep;
     std::unordered_map<std::string, int> unc_map;
 
  public:
-    event_info(TTree*, lepton, int, std::string);
+    event_info(TTree*, lepton, int, bool, std::string);
     virtual ~event_info() {}
     void setEmbed() { isEmbed = true; }
     void setNjets(Float_t _njets) { njets = _njets; }  // must be set in event loop
@@ -69,6 +72,13 @@ class event_info {
     Bool_t getPassMu24();
     Bool_t getPassMu27();
     Bool_t getPassFlags();
+    Bool_t getPassCrossTrigger(Float_t);
+
+    // Lepton vetos
+    Bool_t hasExtraMuon(lepton lep) { return lep == lepton::MUON ? muVetoZTTp001dxyzR0 > 1 : muVetoZTTp001dxyzR0 > 0; }
+    Bool_t hasExtraElectron(lepton lep) { return lep == lepton::ELECTRON ? eVetoZTTp001dxyzR0 > 1 : eVetoZTTp001dxyzR0 > 0; }
+    Bool_t hasDimuon() { return dimuonVeto > 0; }
+    Bool_t hasDielectron() { return dielectronVeto > 0; }
 
     // Event Info
     Float_t getNPV() { return npv; }
@@ -123,13 +133,22 @@ class event_info {
 
     // Prefiring Weight
     Float_t getPrefiringWeight();
+
+    // Madgraph Reweighting
+    Float_t getMadgraphSM() { return sm_weight_nlo; }
+    Float_t getMadgraphMM() { return mm_weight_nlo; }
+    Float_t getMadgraphPS() { return ps_weight_nlo; }
 };
 
 // read data from trees into member variables
-event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
+event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std::string _syst) :
+    sm_weight_nlo(1.),
+    mm_weight_nlo(1.),
+    ps_weight_nlo(1.),
     isEmbed(false),
     era(_era),
     syst(_syst),
+    lep(_lep),
     unc_map{
         {"Rivet0_Up", 0}, {"Rivet0_Down", 0}, {"Rivet1_Up", 1}, {"Rivet1_Down", 1},
         {"Rivet2_Up", 2}, {"Rivet2_Down", 2}, {"Rivet3_Up", 3}, {"Rivet3_Down", 3},
@@ -209,6 +228,16 @@ event_info::event_info(TTree* input, lepton lep, int _era, std::string _syst) :
     input->SetBranchAddress("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter);
     input->SetBranchAddress("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter);
     input->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices);
+    input->SetBranchAddress("muVetoZTTp001dxyzR0", &muVetoZTTp001dxyzR0);
+    input->SetBranchAddress("eVetoZTTp001dxyzR0", &eVetoZTTp001dxyzR0);
+    input->SetBranchAddress("dimuonVeto", &dimuonVeto);
+    input->SetBranchAddress("dielectronVeto", &dielectronVeto);
+
+    if (isMadgraph) {
+        input->SetBranchAddress("sm_weight_nlo", &sm_weight_nlo);
+        input->SetBranchAddress("mm_weight_nlo", &mm_weight_nlo);
+        input->SetBranchAddress("ps_weight_nlo", &ps_weight_nlo);
+    }
 
     if (lep == lepton::ELECTRON) {
         if (isEmbed) {
@@ -295,6 +324,28 @@ Bool_t event_info::getPassMuEmbedCross2017() {
 
 Bool_t event_info::getPassMuEmbedCross2018() {
   return mMatchEmbeddedFilterMu20Tau27_2018 && tMatchEmbeddedFilterMu20HPSTau27;
+}
+
+Bool_t event_info::getPassCrossTrigger(Float_t pt) {
+    if (lep == lepton::ELECTRON) {
+        if (era == 2016) {
+            return false;
+        } else if (era == 2017) {
+            return pt < 28;
+        } else if (era == 2018) {
+            return pt < 33;
+        }
+    } else if (lep == lepton::MUON) {
+        if (era == 2016) {
+            return pt < 23;
+        } else if (era == 2017) {
+            return pt < 25;
+        } else if (era == 2018) {
+            return pt < 25;
+        }
+    } else {
+        std::cerr << "Event wasn't ELECTRON or MUON" << std::endl;
+    }
 }
 
 #endif  // INCLUDE_EVENT_INFO_H_

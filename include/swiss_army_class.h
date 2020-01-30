@@ -34,6 +34,7 @@ class Helper {
     std::unordered_map<std::string, TH2F *> *getHistos2D() { return &histos_2d; }
 
     Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) { return sqrt(pow(eta1 - eta2, 2) + pow(phi1 - phi2, 2)); }
+    Float_t embed_tracking(Float_t);
 };
 
 Helper::Helper(TFile *fout, std::string name, std::string syst)
@@ -94,5 +95,20 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
                 {"triggers", new TH1F("triggers", "triggers", 4, -0.5, 3.5)}} {
     std::string suffix = systematics[syst];
 }
+
+Float_t Helper::embed_tracking(Float_t decay_mode) {
+  Float_t sf(.99), prong(0.975), pizero(1.051);
+  if (decay_mode == 0) {
+    return sf * prong;
+  } else if (decay_mode == 1) {
+    return sf * prong * pizero;
+  } else if (decay_mode == 10) {
+    return sf * prong * prong * prong;
+  } else if (decay_mode == 11) {
+    return sf * prong * prong * prong * pizero;
+  } else {
+    std::cerr << "Invalid decay mode " << decay_mode << std::endl;
+    return 1;
+  }
 
 #endif  // INCLUDE_SWISS_ARMY_CLASS_H_

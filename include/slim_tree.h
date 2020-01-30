@@ -35,11 +35,13 @@ class slim_tree {
         ME_ps_ggH_qqInit, ME_ps_ggH, ME_ps_VBF, ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH,
         higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, MT_lepMET, MT_t2MET, MT_HiggsMET, hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr,
         lt_dphi;
+    Float_t cross_trigger;
 
     // Anomolous coupling branches
     Float_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint, wt_ggH_a1, wt_ggH_a3, wt_ggH_a3int, wt_wh_a1, wt_wh_a2,
         wt_wh_a3, wt_wh_L1, wt_wh_L1Zg, wt_wh_a2int, wt_wh_a3int, wt_wh_L1int, wt_wh_L1Zgint, wt_zh_a1, wt_zh_a2, wt_zh_a3, wt_zh_L1, wt_zh_L1Zg,
         wt_zh_a2int, wt_zh_a3int, wt_zh_L1int, wt_zh_L1Zgint;
+    Float_t sm_weight_nlo, mm_weight_nlo, ps_weight_nlo;
 };
 
 slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree(tree_name.c_str(), tree_name.c_str())) {
@@ -134,43 +136,77 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("cat_boosted", &cat_boosted, "cat_boosted/I");
     otree->Branch("cat_vbf", &cat_vbf, "cat_vbf/I");
     otree->Branch("contamination", &contamination, "contamination/I");
+    otree->Branch("cross_trigger", &cross_trigger, "cross_trigger/F");
+
+    wt_a1 = 1.;
+    wt_a2 = 1.;
+    wt_a3 = 1.;
+    wt_L1 = 1.;
+    wt_L1Zg = 1.;
+    wt_a2int = 1.;
+    wt_a3int = 1.;
+    wt_L1int = 1.;
+    wt_L1Zgint = 1.;
+    wt_ggH_a1 = 1.;
+    wt_ggH_a3 = 1.;
+    wt_ggH_a3int = 1.;
+    wt_wh_a1 = 1.;
+    wt_wh_a2 = 1.;
+    wt_wh_a3 = 1.;
+    wt_wh_L1 = 1.;
+    wt_wh_L1Zg = 1.;
+    wt_wh_a2int = 1.;
+    wt_wh_a3int = 1.;
+    wt_wh_L1int = 1.;
+    wt_wh_L1Zgint = 1.;
+    wt_zh_a1 = 1.;
+    wt_zh_a2 = 1.;
+    wt_zh_a3 = 1.;
+    wt_zh_L1 = 1.;
+    wt_zh_L1Zg = 1.;
+    wt_zh_a2int = 1.;
+    wt_zh_a3int = 1.;
+    wt_zh_L1int = 1.;
+    wt_zh_L1Zgint = 1.;
 
     // include weights for anomolous coupling
-    if (isAC) {
-        otree->Branch("wt_vbf_a1", &wt_a1);
-        otree->Branch("wt_vbf_a2", &wt_a2);
-        otree->Branch("wt_vbf_a3", &wt_a3);
-        otree->Branch("wt_vbf_L1", &wt_L1);
-        otree->Branch("wt_vbf_L1Zg", &wt_L1Zg);
-        otree->Branch("wt_vbf_a2int", &wt_a2int);
-        otree->Branch("wt_vbf_a3int", &wt_a3int);
-        otree->Branch("wt_vbf_L1int", &wt_L1int);
-        otree->Branch("wt_vbf_L1Zgint", &wt_L1Zgint);
+    otree->Branch("wt_vbf_a1", &wt_a1);
+    otree->Branch("wt_vbf_a2", &wt_a2);
+    otree->Branch("wt_vbf_a3", &wt_a3);
+    otree->Branch("wt_vbf_L1", &wt_L1);
+    otree->Branch("wt_vbf_L1Zg", &wt_L1Zg);
+    otree->Branch("wt_vbf_a2int", &wt_a2int);
+    otree->Branch("wt_vbf_a3int", &wt_a3int);
+    otree->Branch("wt_vbf_L1int", &wt_L1int);
+    otree->Branch("wt_vbf_L1Zgint", &wt_L1Zgint);
 
-        otree->Branch("wt_ggh_a1", &wt_ggH_a1);
-        otree->Branch("wt_ggh_a3", &wt_ggH_a3);
-        otree->Branch("wt_ggh_a3int", &wt_ggH_a3int);
+    otree->Branch("wt_ggh_a1", &wt_ggH_a1);
+    otree->Branch("wt_ggh_a3", &wt_ggH_a3);
+    otree->Branch("wt_ggh_a3int", &wt_ggH_a3int);
 
-        otree->Branch("wt_wh_a1", &wt_wh_a1);
-        otree->Branch("wt_wh_a2", &wt_wh_a2);
-        otree->Branch("wt_wh_a3", &wt_wh_a3);
-        otree->Branch("wt_wh_L1", &wt_wh_L1);
-        otree->Branch("wt_wh_L1Zg", &wt_wh_L1Zg);
-        otree->Branch("wt_wh_a2int", &wt_wh_a2int);
-        otree->Branch("wt_wh_a3int", &wt_wh_a3int);
-        otree->Branch("wt_wh_L1int", &wt_wh_L1int);
-        otree->Branch("wt_wh_L1Zgint", &wt_wh_L1Zgint);
+    otree->Branch("wt_wh_a1", &wt_wh_a1);
+    otree->Branch("wt_wh_a2", &wt_wh_a2);
+    otree->Branch("wt_wh_a3", &wt_wh_a3);
+    otree->Branch("wt_wh_L1", &wt_wh_L1);
+    otree->Branch("wt_wh_L1Zg", &wt_wh_L1Zg);
+    otree->Branch("wt_wh_a2int", &wt_wh_a2int);
+    otree->Branch("wt_wh_a3int", &wt_wh_a3int);
+    otree->Branch("wt_wh_L1int", &wt_wh_L1int);
+    otree->Branch("wt_wh_L1Zgint", &wt_wh_L1Zgint);
 
-        otree->Branch("wt_zh_a1", &wt_zh_a1);
-        otree->Branch("wt_zh_a2", &wt_zh_a2);
-        otree->Branch("wt_zh_a3", &wt_zh_a3);
-        otree->Branch("wt_zh_L1", &wt_zh_L1);
-        otree->Branch("wt_zh_L1Zg", &wt_zh_L1Zg);
-        otree->Branch("wt_zh_a2int", &wt_zh_a2int);
-        otree->Branch("wt_zh_a3int", &wt_zh_a3int);
-        otree->Branch("wt_zh_L1int", &wt_zh_L1int);
-        otree->Branch("wt_zh_L1Zgint", &wt_zh_L1Zgint);
-    }
+    otree->Branch("wt_zh_a1", &wt_zh_a1);
+    otree->Branch("wt_zh_a2", &wt_zh_a2);
+    otree->Branch("wt_zh_a3", &wt_zh_a3);
+    otree->Branch("wt_zh_L1", &wt_zh_L1);
+    otree->Branch("wt_zh_L1Zg", &wt_zh_L1Zg);
+    otree->Branch("wt_zh_a2int", &wt_zh_a2int);
+    otree->Branch("wt_zh_a3int", &wt_zh_a3int);
+    otree->Branch("wt_zh_L1int", &wt_zh_L1int);
+    otree->Branch("wt_zh_L1Zgint", &wt_zh_L1Zgint);
+
+    otree->Branch("sm_weight_nlo", &sm_weight_nlo);
+    otree->Branch("mm_weight_nlo", &mm_weight_nlo);
+    otree->Branch("ps_weight_nlo", &ps_weight_nlo);
 }
 
 void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight,
@@ -320,6 +356,10 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
         }
     }
 
+    sm_weight_nlo = evt->getMadgraphSM();
+    mm_weight_nlo = evt->getMadgraphMM();
+    ps_weight_nlo = evt->getMadgraphPS();
+
     // anomolous coupling files
     if (ac_weights != nullptr) {
         wt_a1 = ac_weights->at(0);
@@ -390,6 +430,8 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     if ((name == "VVT" || name == "TTT") && el->getGenMatch() > 2 && t->getGenMatch() == 5) {
         contamination = 1;  // ttbar/diboson contaminating embedded samples
     }
+    cross_trigger = evt->getPassCrossTrigger(el->getPt());
+
 
     otree->Fill();
 }
@@ -426,6 +468,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     if ((name == "VVT" || name == "TTT") && mu->getGenMatch() > 2 && t->getGenMatch() == 5) {
         contamination = 1;  // ttbar/diboson contaminating embedded samples
     }
+    cross_trigger = evt->getPassCrossTrigger(mu->getPt());
 
     otree->Fill();
 }

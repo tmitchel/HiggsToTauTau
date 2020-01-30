@@ -31,7 +31,6 @@
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
-#include "HTT-utilities/LepEffInterface/interface/ScaleFactor.h"
 #include "TauPOG/TauIDSFs/interface/TauIDSFTool.h"
 
 typedef std::vector<double> NumV;
@@ -53,6 +52,7 @@ int main(int argc, char *argv[]) {
     bool isData = sample.find("data") != std::string::npos;
     bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
     bool doAC = signal_type != "None";
+    bool isMG = sample.find("madgraph") != std::string::npos;
 
     std::string systname = "NOMINAL";
     if (!syst.empty()) {
@@ -152,9 +152,7 @@ int main(int argc, char *argv[]) {
     htt_sf_file.Close();
 
     // tau ID efficiency
-    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool("2016Legacy");
-    TauIDSFTool *antiEl_eff_sf = new TauIDSFTool("2016Legacy", "antiEleMVA6", "Tight");
-    TauIDSFTool *antiMu_eff_sf = new TauIDSFTool("2016Legacy", "antiMu3", "Loose");
+    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool("2016Legacy", "DeepTau2017v2p1VSjet", "Medium");
 
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
@@ -172,7 +170,7 @@ int main(int argc, char *argv[]) {
     auto histos = helper->getHistos1D();
 
     // construct factories
-    event_info event(ntuple, lepton::ELECTRON, 2016, syst);
+    event_info event(ntuple, lepton::ELECTRON, 2016, isMG, syst);
     electron_factory electrons(ntuple, 2016, syst);
     tau_factory taus(ntuple, 2016, syst);
     jet_factory jets(ntuple, 2016, syst);
@@ -248,7 +246,7 @@ int main(int argc, char *argv[]) {
         }
 
         // anti-lepton discriminators
-        if (tau.getAgainstLooseMuonMVA() > 0.5 && tau.getAgainstTightElectronMVA() > 0.5) {
+        if (tau.getAgainstVLooseMuonDeep() > 0.5 && tau.getAgainstTightElectronDeep() > 0.5) {
             histos->at("cutflow")->Fill(4., 1.);
         } else {
             continue;
@@ -280,32 +278,6 @@ int main(int argc, char *argv[]) {
 
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
-            // tau ID efficiency SF and systematics
-            std::string shift = "";  // nominal
-            if (syst.find("tau_id_") != std::string::npos) {
-                shift = syst.find("Up")  != std::string::npos ? "Up" : "Down";
-            }
-            evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), shift);
-
-            // anti-lepton discriminator sf's
-            evtwt *= antiEl_eff_sf->getSFvsEta(fabs(tau.getEta()), tau.getGenMatch());
-            evtwt *= antiMu_eff_sf->getSFvsEta(fabs(tau.getEta()), tau.getGenMatch());
-
-            // anti-lepton discriminator SFs (placeholder in POG files)
-            if (tau.getGenMatch() == 2 || tau.getGenMatch() == 4) {
-                if (fabs(tau.getEta()) < 0.4) {
-                    evtwt *= 1.22;
-                } else if (fabs(tau.getEta()) < 0.8) {
-                    evtwt *= 1.12;
-                } else if (fabs(tau.getEta()) < 1.2) {
-                    evtwt *= 1.26;
-                } else if (fabs(tau.getEta()) < 1.7) {
-                    evtwt *= 1.22;
-                } else {
-                    evtwt *= 2.39;
-                }
-            }
-
             // pileup reweighting
             evtwt *= lumi_weights->weight(event.getNPV());
 
@@ -333,16 +305,23 @@ int main(int argc, char *argv[]) {
             // start applying weights from workspace
             evtwt *= htt_sf->function("e_trk_ratio")->getVal();
             evtwt *= htt_sf->function("e_idiso_ic_ratio")->getVal();
-            // evtwt *= htt_sf->function("t_deeptauid_pt_tight")->getVal(); (for DeepTau ID)
+
+            // tau ID efficiency SF and systematics
+            std::string id_name = "t_deeptauid_pt_medium";  // nominal
+            if (syst.find("tau_id_") != std::string::npos) {
+                id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+            }
+            evtwt *= htt_sf->function(id_name.c_str())->getVal();
+
             evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
 
             // Z-pT Reweighting
             if (name == "EWKZ2l" || name == "EWKZ2nu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
                 auto nom_zpt_weight = htt_sf->function("zptmass_weight_nom")->getVal();
                 if (syst == "dyShape_Up") {
-                    nom_zpt_weight = 1.1 * nom_zpt_weight - 0.1;
+                    nom_zpt_weight = nom_zpt_weight + ((nom_zpt_weight - 1) * 0.1);
                 } else if (syst == "dyShape_Down") {
-                    nom_zpt_weight = 0.9 * nom_zpt_weight + 0.1;
+                    nom_zpt_weight = nom_zpt_weight -  ((nom_zpt_weight - 1) * 0.1);
                 }
                 evtwt *= nom_zpt_weight;
             }
@@ -431,8 +410,8 @@ int main(int argc, char *argv[]) {
         }
 
         // create regions
-        bool signalRegion = (tau.getTightIsoMVA() && electron.getIso() < 0.15);
-        bool antiTauIsoRegion = (tau.getTightIsoMVA() == 0 && tau.getVLooseIsoMVA() > 0 && electron.getIso() < 0.15);
+        bool signalRegion = (tau.getMediumIsoDeep() && electron.getIso() < 0.15);
+        bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && electron.getIso() < 0.15);
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion)  {
