@@ -41,6 +41,7 @@ class event_info {
 
     bool isEmbed;
     int era;
+    lepton lep;
     std::unordered_map<std::string, int> unc_map;
 
  public:
@@ -71,6 +72,7 @@ class event_info {
     Bool_t getPassMu24();
     Bool_t getPassMu27();
     Bool_t getPassFlags();
+    Bool_t getPassCrossTrigger(Float_t);
 
     // Lepton vetos
     Bool_t hasExtraMuon(lepton lep) { return lep == lepton::MUON ? muVetoZTTp001dxyzR0 > 1 : muVetoZTTp001dxyzR0 > 0; }
@@ -139,13 +141,14 @@ class event_info {
 };
 
 // read data from trees into member variables
-event_info::event_info(TTree* input, lepton lep, int _era, bool isMadgraph, std::string _syst) :
+event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std::string _syst) :
     sm_weight_nlo(1.),
     mm_weight_nlo(1.),
     ps_weight_nlo(1.),
     isEmbed(false),
     era(_era),
     syst(_syst),
+    lep(_lep),
     unc_map{
         {"Rivet0_Up", 0}, {"Rivet0_Down", 0}, {"Rivet1_Up", 1}, {"Rivet1_Down", 1},
         {"Rivet2_Up", 2}, {"Rivet2_Down", 2}, {"Rivet3_Up", 3}, {"Rivet3_Down", 3},
@@ -321,6 +324,28 @@ Bool_t event_info::getPassMuEmbedCross2017() {
 
 Bool_t event_info::getPassMuEmbedCross2018() {
   return mMatchEmbeddedFilterMu20Tau27_2018 && tMatchEmbeddedFilterMu20HPSTau27;
+}
+
+Bool_t event_info::getPassCrossTrigger(Float_t pt) {
+    if (lep == lepton::ELECTRON) {
+        if (era == 2016) {
+            return false;
+        } else if (era == 2017) {
+            return pt < 28;
+        } else if (era == 2018) {
+            return pt < 33;
+        }
+    } else if (lep == lepton::MUON) {
+        if (era == 2016) {
+            return pt < 23;
+        } else if (era == 2017) {
+            return pt < 25;
+        } else if (era == 2018) {
+            return pt < 25;
+        }
+    } else {
+        std::cerr << "Event wasn't ELECTRON or MUON" << std::endl;
+    }
 }
 
 #endif  // INCLUDE_EVENT_INFO_H_

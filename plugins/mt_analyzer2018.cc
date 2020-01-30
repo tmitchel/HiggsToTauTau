@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
     auto histos = helper->getHistos1D();
 
     // construct factories
-    event_info event(ntuple, lepton::MUON, isMG, 2018, syst);
+    event_info event(ntuple, lepton::MUON, 2018, isMG, syst);
     muon_factory muons(ntuple, 2018, syst);
     tau_factory taus(ntuple, 2018, syst);
     jet_factory jets(ntuple, 2018, syst);
@@ -248,15 +248,8 @@ int main(int argc, char *argv[]) {
             histos->at("cutflow")->Fill(3., 1.);
         }
 
-        if (!event.hasDimuon() && !event.hasExtraElectron(lepton::MUON) && !event.hasExtraMuon(lepton::MUON)) {
-            histos->at("cutflow")->Fill(4., 1.);
-        } else {
-            continue;
-        }
-
         // anti-lepton discriminators
-        if (tau.getAgainstTightMuonDeep() > 0.5 && tau.getAgainstVVVLooseElectronDeep() > 0.5
-            && tau.getDecayModeFindingNew() && tau.getDecayMode() != 11) {
+        if (tau.getDecayMode() != 11) {
             histos->at("cutflow")->Fill(5., 1.);
         } else {
             continue;
