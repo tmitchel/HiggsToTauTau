@@ -94,7 +94,7 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
                 {"tau_pt", new TH1F("tau_pt", "tau_pt", 12, 0, 300)},
                 {"triggers", new TH1F("triggers", "triggers", 4, -0.5, 3.5)}} {
     std::string suffix = systematics[syst];
-}
+};
 
 Float_t Helper::embed_tracking(Float_t decay_mode) {
   Float_t sf(.99), prong(0.975), pizero(1.051);
