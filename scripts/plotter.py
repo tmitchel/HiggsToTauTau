@@ -25,11 +25,11 @@ style_map = {
     },
     "signals": {
         "ggh125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
-        # "MG__GGH2Jets_sm_M125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
-        # "MG__GGH2Jets_pseudoscalar_M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
+        "MG__GGH2Jets_sm_M125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
+        "MG__GGH2Jets_pseudoscalar_M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
         # use JHU for 2018 because MG isn't available
-        "JHU__GGH2Jets_sm_M125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
-        "JHU__GGH2Jets_pseudoscalar_M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
+        # "JHU__GGH2Jets_sm_M125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
+        # "JHU__GGH2Jets_pseudoscalar_M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
 
         "vbf125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
         "JHU__reweighted_qqH_htt_0PM125": style_map_tuple(no_color, GetColor("#FF0000"), 1, 3, 1),
@@ -102,10 +102,10 @@ def fillLegend(data, backgrounds, signals, stat):
     leg.AddEntry(data, 'Data', 'lep')
 
     # signals
-    # leg.AddEntry(signals['MG__GGH2Jets_sm_M125'], 'ggH SM Higgs(125)x50', 'l')
-    # leg.AddEntry(signals['MG__GGH2Jets_pseudoscalar_M125'], 'ggH PS Higgs(125)x50', 'l')
-    leg.AddEntry(signals['JHU__GGH2Jets_sm_M125'], 'ggH SM Higgs(125)x50', 'l')
-    leg.AddEntry(signals['JHU__GGH2Jets_pseudoscalar_M125'], 'ggH PS Higgs(125)x50', 'l')
+    leg.AddEntry(signals['MG__GGH2Jets_sm_M125'], 'ggH SM Higgs(125)x50', 'l')
+    leg.AddEntry(signals['MG__GGH2Jets_pseudoscalar_M125'], 'ggH PS Higgs(125)x50', 'l')
+    # leg.AddEntry(signals['JHU__GGH2Jets_sm_M125'], 'ggH SM Higgs(125)x50', 'l')
+    # leg.AddEntry(signals['JHU__GGH2Jets_pseudoscalar_M125'], 'ggH PS Higgs(125)x50', 'l')
 
     leg.AddEntry(signals['JHU__reweighted_qqH_htt_0PM125'], 'VBF SM Higgs(125)x50', 'l')
     leg.AddEntry(signals['JHU__reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
@@ -220,7 +220,7 @@ def BuildPlot(args):
     formatStack(stack)
 
     # combo_signal = signals['MG__GGH2Jets_pseudoscalar_M125'].Clone()
-    combo_signal = signals['JHU__GGH2Jets_pseudoscalar_M125'].Clone()
+    combo_signal = signals['MG__GGH2Jets_pseudoscalar_M125'].Clone()
     combo_signal.Reset()
     combo_signal.Add(signals['ggh125_powheg'])
     combo_signal.Add(signals['vbf125_powheg'])
@@ -229,12 +229,12 @@ def BuildPlot(args):
     # draw the plots
     data_hist.Draw('same lep')
     stat.Draw('same e2')
-    for sig_name, sig_hist in signals.iteritems():
-        if 'GGH' in sig_name:
-            sig_hist.Scale(50*signals['ggh125_powheg'].Integral()/sig_hist.Integral())
-        if 'qqH' in sig_name:
-            sig_hist.Scale(50*signals['vbf125_powheg'].Integral()/sig_hist.Integral())
-        sig_hist.Draw('same hist')
+    # for sig_name, sig_hist in signals.iteritems():
+    #     if 'GGH' in sig_name:
+    #         sig_hist.Scale(50*signals['ggh125_powheg'].Integral()/sig_hist.Integral())
+    #     if 'qqH' in sig_name:
+    #         sig_hist.Scale(50*signals['vbf125_powheg'].Integral()/sig_hist.Integral())
+    #     sig_hist.Draw('same hist')
     
 
     legend = fillLegend(data_hist, backgrounds, signals, stat)

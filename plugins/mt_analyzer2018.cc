@@ -29,7 +29,6 @@
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
-#include "TauPOG/TauIDSFs/interface/TauIDSFTool.h"
 
 typedef std::vector<double> NumV;
 
@@ -147,14 +146,6 @@ int main(int argc, char *argv[]) {
     TFile htt_sf_file("data/htt_scalefactors_legacy_2018.root");
     RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
-
-    // tau ID efficiency
-    TauIDSFTool *tau_id_eff_sf;
-    if (isEmbed) {
-        tau_id_eff_sf = new TauIDSFTool("2018ReReco", "DeepTau2017v2p1VSjet", "Medium", false, true);
-    } else {
-        tau_id_eff_sf = new TauIDSFTool("2018ReReco", "DeepTau2017v2p1VSjet", "Medium", false, false);
-    }
 
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
@@ -285,9 +276,9 @@ int main(int argc, char *argv[]) {
             evtwt *= lumi_weights->weight(event.getNPV());
 
             // generator weights
-            if (signal_type == "madgraph") {
+            // if (signal_type == "madgraph") {
                 evtwt *= event.getGenWeight();
-            }
+            // }
 
             // b-tagging scale factor goes here
             evtwt *= jets.getBWeight();
@@ -312,6 +303,9 @@ int main(int argc, char *argv[]) {
                 id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
             }
             evtwt *= htt_sf->function(id_name.c_str())->getVal();
+
+            // muon fake rate SF
+            evtwt *= htt_sf->function("t_id_vs_mu_eta_tight");
 
             // trigger scale factors
             if (muon.getPt() < 25) {  // cross-trigger
@@ -377,18 +371,14 @@ int main(int argc, char *argv[]) {
         } else if (!isData && isEmbed) {
             event.setEmbed();
 
-            // tau ID eff SF
-            std::string id_syst = "";
-            if (syst.find("tau_id_") != std::string::npos) {
-                id_syst = syst.find("Up") != std::string::npos ? "Up" : "Down";
-            }
-            evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), id_syst);
-
             auto genweight(event.getGenWeight());
             if (genweight > 1 || genweight < 0) {
                 genweight = 0;
             }
             evtwt *= genweight;
+
+            // tracking sf
+            evtwt *= helper->embed_tracking(tau.getDecayMode());
 
             // set workspace variables
             htt_sf->var("m_pt")->setVal(muon.getPt());
@@ -405,15 +395,22 @@ int main(int argc, char *argv[]) {
             evtwt *= htt_sf->function("m_trk_ratio")->getVal();
             evtwt *= htt_sf->function("m_idiso_ic_embed_ratio")->getVal();
 
+            // tau ID eff SF
+            std::string embed_id_name = "t_deeptauid_pt_embed_medium";
+            if (syst.find("tau_id_") != std::string::npos) {
+                embed_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+            }
+            evtwt *= htt_sf->function(embed_id_name);
+
             if (muon.getPt() < 25) {  // cross-trigger
+                // muon-leg
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
-                if (syst == "trigger_up") {
-                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_up")->getVal();
-                } else if (syst == "trigger_down") {
-                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_down")->getVal();
-                } else {
-                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio")->getVal();
+                // tau-leg
+                std::string tau_leg_name("t_trg_pog_deeptau_medium_mutau_embed_ratio";
+                if (syst.find("trigger") != std::string::npos) {
+                  tau_leg_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
+                evtwt *= htt_sf->function(tau_leg_name);
             } else {  // muon trigger
                 evtwt *= htt_sf->function("m_trg_ic_embed_ratio")->getVal();
             }

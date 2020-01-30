@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
     bool isData = sample.find("data") != std::string::npos;
     bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
     bool isMG = sample.find("madgraph") != std::string::npos;
-    bool doAC = signal_type != "None";
+    bool doAC = signal_type != "None" && signal_type != "powheg";
 
     std::string systname = "NOMINAL";
     if (!syst.empty()) {
@@ -296,7 +296,9 @@ int main(int argc, char *argv[]) {
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // pileup reweighting
-            evtwt *= lumi_weights->weight(event.getNPV());
+            if (!doAC && !isMG) {
+              evtwt *= lumi_weights->weight(event.getNPV());
+            }
 
             // generator weights
             if (signal_type == "madgraph") {
