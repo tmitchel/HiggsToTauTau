@@ -35,6 +35,7 @@ class slim_tree {
         ME_ps_ggH_qqInit, ME_ps_ggH, ME_ps_VBF, ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH,
         higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, MT_lepMET, MT_t2MET, MT_HiggsMET, hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr,
         lt_dphi;
+    Float_t cross_trigger;
 
     // Anomolous coupling branches
     Float_t wt_a1, wt_a2, wt_a3, wt_L1, wt_L1Zg, wt_a2int, wt_a3int, wt_L1int, wt_L1Zgint, wt_ggH_a1, wt_ggH_a3, wt_ggH_a3int, wt_wh_a1, wt_wh_a2,
@@ -135,6 +136,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("cat_boosted", &cat_boosted, "cat_boosted/I");
     otree->Branch("cat_vbf", &cat_vbf, "cat_vbf/I");
     otree->Branch("contamination", &contamination, "contamination/I");
+    otree->Branch("cross_trigger", &cross_trigger, "cross_trigger/F");
 
     wt_a1 = 1.;
     wt_a2 = 1.;
@@ -428,6 +430,8 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     if ((name == "VVT" || name == "TTT") && el->getGenMatch() > 2 && t->getGenMatch() == 5) {
         contamination = 1;  // ttbar/diboson contaminating embedded samples
     }
+    cross_trigger = evt->getPassCrossTrigger(el->getPt());
+
 
     otree->Fill();
 }
@@ -464,6 +468,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     if ((name == "VVT" || name == "TTT") && mu->getGenMatch() > 2 && t->getGenMatch() == 5) {
         contamination = 1;  // ttbar/diboson contaminating embedded samples
     }
+    cross_trigger = evt->getPassCrossTrigger(mu->getPt());
 
     otree->Fill();
 }

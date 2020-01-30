@@ -332,7 +332,7 @@ int main(int argc, char* argv[]) {
             evtwt *= htt_sf->function(id_name.c_str())->getVal();
 
             // trigger scale factors
-            if (electron.getPt() < 33) {
+            if (electron.getPt() < 28) {
                 evtwt *= htt_sf->function("e_trg_24_ic_ratio")->getVal();
                 if (syst == "trigger_up") {
                     evtwt *= htt_sf->function("t_trg_mediumDeepTau_etau_ratio_up")->getVal();
@@ -394,7 +394,7 @@ int main(int argc, char* argv[]) {
             }
         } else if (!isData && isEmbed) {
           event.setEmbed();
-          if (electron.getPt() < 33 && !event.getPassEle24Tau30()) {
+          if (electron.getPt() < 28 && !event.getPassEle24Tau30()) {
             continue;
           }
 
@@ -426,8 +426,8 @@ int main(int argc, char* argv[]) {
             evtwt *= htt_sf->function("e_trk_embed_ratio")->getVal();
             evtwt *= htt_sf->function("e_idiso_ic_embed_ratio")->getVal();
 
-            bool fireSingle = electron.getPt() > 33;
-            bool fireCross = electron.getPt() < 33;
+            bool fireSingle = electron.getPt() > 28;
+            bool fireCross = electron.getPt() < 28;
 
             std::string single_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_ic_embed_ratio" : "e_trg_ic_data";
             std::string el_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_24_ic_embed_ratio" : "e_trg_24_ic_data";
