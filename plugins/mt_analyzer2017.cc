@@ -419,7 +419,7 @@ int main(int argc, char *argv[]) {
                 // muon-leg
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
                 // tau-leg
-                std::string tau_leg_name("t_trg_pt_mediumDeepTau_mutau_embed_ratio");
+                std::string tau_leg_name("t_trg_mediumDeepTau_mutau_embed_ratio");
                 if (syst.find("trigger") != std::string::npos) {
                   tau_leg_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
