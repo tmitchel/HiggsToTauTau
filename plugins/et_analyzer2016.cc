@@ -31,7 +31,6 @@
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
-#include "TauPOG/TauIDSFs/interface/TauIDSFTool.h"
 
 typedef std::vector<double> NumV;
 
@@ -151,9 +150,6 @@ int main(int argc, char *argv[]) {
     RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
-    // tau ID efficiency
-    TauIDSFTool *tau_id_eff_sf = new TauIDSFTool("2016Legacy", "DeepTau2017v2p1VSjet", "Medium");
-
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
@@ -245,17 +241,10 @@ int main(int argc, char *argv[]) {
             histos->at("cutflow")->Fill(3., 1.);
         }
 
-        // anti-lepton discriminators
-        if (tau.getAgainstVLooseMuonDeep() > 0.5 && tau.getAgainstTightElectronDeep() > 0.5) {
-            histos->at("cutflow")->Fill(4., 1.);
-        } else {
-            continue;
-        }
-
         // only opposite-sign
         int evt_charge = tau.getCharge() + electron.getCharge();
         if (evt_charge == 0) {
-            histos->at("cutflow")->Fill(5., 1.);
+            histos->at("cutflow")->Fill(4., 1.);
         } else {
             continue;
         }
@@ -271,7 +260,7 @@ int main(int argc, char *argv[]) {
 
         // now do mt selection
         if (mt < 50) {
-            histos->at("cutflow")->Fill(6., 1.);
+            histos->at("cutflow")->Fill(5., 1.);
         } else {
             continue;
         }
@@ -282,9 +271,7 @@ int main(int argc, char *argv[]) {
             evtwt *= lumi_weights->weight(event.getNPV());
 
             // generator weights
-            if (signal_type == "madgraph") {
-                evtwt *= event.getGenWeight();
-            }
+            evtwt *= event.getGenWeight();
 
             // prefiring weight
             evtwt *= event.getPrefiringWeight();
@@ -312,6 +299,11 @@ int main(int argc, char *argv[]) {
                 id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
             }
             evtwt *= htt_sf->function(id_name.c_str())->getVal();
+
+            // electron fake rate SF
+            if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
+              evtwt *= htt_sf->function("t_id_vs_e_eta_tight")->getVal();
+            }
 
             evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
 
@@ -369,6 +361,9 @@ int main(int argc, char *argv[]) {
             }
             evtwt *= genweight;
 
+            // tracking sf
+            evtwt *= helper->embed_tracking(tau.getDecayMode());
+
             // set workspace variables
             htt_sf->var("e_pt")->setVal(electron.getPt());
             htt_sf->var("e_eta")->setVal(electron.getEta());
@@ -384,10 +379,23 @@ int main(int argc, char *argv[]) {
             // start applying weights from workspace
             evtwt *= htt_sf->function("e_trk_embed_ratio")->getVal();
             evtwt *= htt_sf->function("e_idiso_ic_embed_ratio")->getVal();
+
+            // tau ID eff SF
+            std::string embed_id_name = "t_deeptauid_pt_tightvse_embed_medium";
+            if (syst.find("tau_id_") != std::string::npos) {
+                embed_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+            }
+            evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
+
             evtwt *= htt_sf->function("e_trg_ic_embed_ratio")->getVal();
 
+            // electron fake rate SF
+            if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
+              evtwt *= htt_sf->function("t_id_vs_e_eta_tight")->getVal();
+            }
+
             // double muon trigger eff in selection
-            evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_trg_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(electron.getGenPt());
@@ -404,7 +412,7 @@ int main(int argc, char *argv[]) {
 
         // b-jet veto
         if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
-            histos->at("cutflow")->Fill(7., 1.);
+            histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
@@ -415,7 +423,7 @@ int main(int argc, char *argv[]) {
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion)  {
-            histos->at("cutflow")->Fill(8., 1.);
+            histos->at("cutflow")->Fill(7., 1.);
         } else {
             continue;
         }
