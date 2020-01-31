@@ -29,7 +29,6 @@
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
-#include "TauPOG/TauIDSFs/interface/TauIDSFTool.h"
 
 typedef std::vector<double> NumV;
 
@@ -316,7 +315,7 @@ int main(int argc, char *argv[]) {
             evtwt *= htt_sf->function(id_name.c_str())->getVal();
 
             // muon fake rate SF
-            if (tau.getDecayMode() < 5) {
+            if (tau.getDecayMode() == 2 || tau.getDecayMode() == 4) {
               evtwt *= htt_sf->function("t_id_vs_mu_eta_tight")->getVal();
             }
 
@@ -429,7 +428,7 @@ int main(int argc, char *argv[]) {
             }
 
             // muon fake rate SF
-            if (tau.getDecayMode() < 5) {
+            if (tau.getDecayMode() == 2 || tau.getDecayMode() == 4) {
               evtwt *= htt_sf->function("t_id_vs_mu_eta_tight")->getVal();
             }
 
