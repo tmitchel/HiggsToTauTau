@@ -277,7 +277,7 @@ int main(int argc, char *argv[]) {
 
             // generator weights
             // if (signal_type == "madgraph") {
-                evtwt *= event.getGenWeight();
+            evtwt *= event.getGenWeight();
             // }
 
             // b-tagging scale factor goes here
@@ -304,8 +304,8 @@ int main(int argc, char *argv[]) {
             }
             evtwt *= htt_sf->function(id_name.c_str())->getVal();
 
-            // muon fake rate SF
-            evtwt *= htt_sf->function("t_id_vs_mu_eta_tight")->getVal();
+            // // muon fake rate SF
+            // evtwt *= htt_sf->function("t_id_vs_mu_eta_tight")->getVal();
 
             // trigger scale factors
             if (muon.getPt() < 25) {  // cross-trigger
@@ -406,15 +406,7 @@ int main(int argc, char *argv[]) {
                 // muon-leg
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
                 // tau-leg
-                std::string tau_dm = "0";
-                if (tau.getDecayMode() == 1) {
-                  tau_dm = "1";
-                } else if (tau.getDecayMode() == 10) {
-                  tau_dm = "10";
-                } else if (tau.getDecayMode() == 11) {
-                  tau_dm = "11";
-                }
-                std::string tau_leg_name("t_trg_pt_mediumDeepTau_mutau_dm" + tau_dm + "_embed");
+                std::string tau_leg_name("t_trg_pt_mediumDeepTau_mutau_embed_ratio");
                 if (syst.find("trigger") != std::string::npos) {
                   tau_leg_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
@@ -424,7 +416,7 @@ int main(int argc, char *argv[]) {
             }
 
             // double muon trigger eff in selection
-            evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_trg_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(muon.getGenPt());
