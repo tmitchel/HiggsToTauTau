@@ -226,13 +226,14 @@ int main(int argc, char* argv[]) {
                 evtwt = 2.581;
             }
         }
-
         histos->at("cutflow")->Fill(1., 1.);
 
+        // run factories
         auto electron = electrons.run_factory();
         auto tau = taus.run_factory();
         jets.run_factory();
 
+        // pass event flags
         if (event.getPassFlags()) {
             histos->at("cutflow")->Fill(2., 1.);
         } else {
@@ -281,6 +282,7 @@ int main(int argc, char* argv[]) {
             // pileup reweighting
             evtwt *= lumi_weights->weight(event.getNPV());
 
+            // generator weights
             evtwt *= event.getGenWeight();
 
             // prefiring weight
@@ -382,10 +384,12 @@ int main(int argc, char* argv[]) {
             }
         } else if (!isData && isEmbed) {
             event.setEmbed();
+            // embedded cross-triggers not applied in skimmer
             if (electron.getPt() < 28 && !event.getPassEle24Tau30()) {
                 continue;
             }
 
+            // embedded generator weights
             auto genweight(event.getGenWeight());
             if (genweight > 1 || genweight < 0) {
                 genweight = 0;
@@ -417,9 +421,9 @@ int main(int argc, char* argv[]) {
             }
             evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
 
+            // trigger scale factors
             bool fireSingle = electron.getPt() > 28;
             bool fireCross = electron.getPt() < 28;
-
             std::string single_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_ic_embed_ratio" : "e_trg_ic_data";
             std::string el_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_24_ic_embed_ratio" : "e_trg_24_ic_data";
             std::string tau_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "t_trg_mediumDeepTau_etau_embed_ratio" : "t_trg_mediumDeepTau_etau_data";
@@ -451,7 +455,6 @@ int main(int argc, char* argv[]) {
             htt_sf->var("gt_eta")->setVal(tau.getGenEta());
             evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
         }
-
         fout->cd();
 
         // b-jet veto

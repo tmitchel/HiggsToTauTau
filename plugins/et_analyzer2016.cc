@@ -217,11 +217,13 @@ int main(int argc, char *argv[]) {
         }
         histos->at("cutflow")->Fill(1., 1.);
 
+        // run factories
         auto electron = electrons.run_factory();
         auto tau = taus.run_factory();
         jets.run_factory();
         event.setNjets(jets.getNjets());
 
+        // pass event flags
         if (event.getPassFlags()) {
             histos->at("cutflow")->Fill(2., 1.);
         } else {
@@ -355,6 +357,7 @@ int main(int argc, char *argv[]) {
                 }
             }
         } else if (!isData && isEmbed) {
+            // embedded generator weights
             auto genweight(event.getGenWeight());
             if (genweight > 1 || genweight < 0) {
                 genweight = 0;
@@ -387,6 +390,7 @@ int main(int argc, char *argv[]) {
             }
             evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
 
+            // trigger scale factor
             evtwt *= htt_sf->function("e_trg_ic_embed_ratio")->getVal();
 
             // electron fake rate SF
@@ -407,7 +411,6 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt_eta")->setVal(tau.getGenEta());
             evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
         }
-
         fout->cd();
 
         // b-jet veto

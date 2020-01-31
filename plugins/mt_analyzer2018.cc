@@ -179,7 +179,6 @@ int main(int argc, char *argv[]) {
     for (Int_t i = 0; i < nevts; i++) {
         ntuple->GetEntry(i);
         if (i == progress * fraction) {
-            // std::cout << "\tProcessing: " << progress * 10 << "% complete.\r" << std::flush;
             logfile << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
             progress++;
         }
@@ -213,13 +212,14 @@ int main(int argc, char *argv[]) {
                 evtwt = 3.865;
             }
         }
-
         histos->at("cutflow")->Fill(1., 1.);
 
+        // run factories
         auto muon = muons.run_factory();
         auto tau = taus.run_factory();
         jets.run_factory();
 
+        // event flags
         if (event.getPassFlags()) {
             histos->at("cutflow")->Fill(2., 1.);
         } else {
@@ -269,9 +269,7 @@ int main(int argc, char *argv[]) {
             evtwt *= lumi_weights->weight(event.getNPV());
 
             // generator weights
-            // if (signal_type == "madgraph") {
             evtwt *= event.getGenWeight();
-            // }
 
             // b-tagging scale factor goes here
             evtwt *= jets.getBWeight();
@@ -366,6 +364,7 @@ int main(int argc, char *argv[]) {
         } else if (!isData && isEmbed) {
             event.setEmbed();
 
+            // embedded generator weights
             auto genweight(event.getGenWeight());
             if (genweight > 1 || genweight < 0) {
                 genweight = 0;
@@ -387,6 +386,7 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt2_pt")->setVal(tau.getGenPt());
             htt_sf->var("gt2_eta")->setVal(tau.getGenEta());
 
+            // start applying weights from workspace
             evtwt *= htt_sf->function("m_trk_ratio")->getVal();
             evtwt *= htt_sf->function("m_idiso_ic_embed_ratio")->getVal();
 
@@ -397,6 +397,7 @@ int main(int argc, char *argv[]) {
             }
             evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
 
+            // trigger scale factors
             if (muon.getPt() < 25) {  // cross-trigger
                 // muon-leg
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
@@ -428,7 +429,6 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt_eta")->setVal(tau.getGenEta());
             evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
         }
-
         fout->cd();
 
         // b-jet veto

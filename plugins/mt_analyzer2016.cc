@@ -217,6 +217,7 @@ int main(int argc, char *argv[]) {
         }
         histos->at("cutflow")->Fill(1., 1.);
 
+        // run factories
         auto muon = muons.run_factory();
         auto tau = taus.run_factory();
         jets.run_factory();
@@ -370,6 +371,7 @@ int main(int argc, char *argv[]) {
         } else if (!isData && isEmbed) {
             event.setEmbed();
 
+            // embedded generator weights
             auto genweight(event.getGenWeight());
             if (genweight > 1 || genweight < 0) {
                 genweight = 0;
@@ -401,6 +403,7 @@ int main(int argc, char *argv[]) {
             }
             evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
 
+            // trigger scale factors
             if (muon.getPt() < 23) {
                 // muon-leg
                 evtwt *= htt_sf->function("m_trg_19_ic_embed_ratio")->getVal();
@@ -432,7 +435,6 @@ int main(int argc, char *argv[]) {
             htt_sf->var("gt_eta")->setVal(tau.getGenEta());
             evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
         }
-
         fout->cd();
 
         // b-jet veto
@@ -481,7 +483,6 @@ int main(int argc, char *argv[]) {
     fin->Close();
     fout->cd();
     fout->Write(0, TObject::kOverwrite);
-    // fout->Write();
     fout->Close();
     logfile << "Finished processing " << sample << std::endl;
     logfile.close();
