@@ -239,13 +239,6 @@ int main(int argc, char *argv[]) {
             histos->at("cutflow")->Fill(3., 1.);
         }
 
-        // anti-lepton discriminators
-        if (tau.getDecayMode() != 11) {
-            histos->at("cutflow")->Fill(5., 1.);
-        } else {
-            continue;
-        }
-
         // only opposite-sign
         int evt_charge = tau.getCharge() + muon.getCharge();
         if (evt_charge == 0) {
