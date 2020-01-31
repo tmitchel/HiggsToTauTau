@@ -242,7 +242,7 @@ int main(int argc, char *argv[]) {
         // only opposite-sign
         int evt_charge = tau.getCharge() + muon.getCharge();
         if (evt_charge == 0) {
-            histos->at("cutflow")->Fill(6., 1.);
+            histos->at("cutflow")->Fill(4., 1.);
         } else {
             continue;
         }
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
 
         // now do mt selection
         if (mt < 50) {
-            histos->at("cutflow")->Fill(7., 1.);
+            histos->at("cutflow")->Fill(5., 1.);
         } else {
             continue;
         }
@@ -433,7 +433,7 @@ int main(int argc, char *argv[]) {
 
         // b-jet veto
         if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
-            histos->at("cutflow")->Fill(8., 1.);
+            histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
@@ -444,7 +444,7 @@ int main(int argc, char *argv[]) {
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion) {
-            histos->at("cutflow")->Fill(9., 1.);
+            histos->at("cutflow")->Fill(7., 1.);
         } else {
             continue;
         }
