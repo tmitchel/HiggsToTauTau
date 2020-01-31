@@ -406,7 +406,15 @@ int main(int argc, char *argv[]) {
                 // muon-leg
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
                 // tau-leg
-                std::string tau_leg_name("t_trg_pog_deeptau_medium_mutau_embed_ratio");
+                std::string tau_dm = "0";
+                if (tau.getDecayMode() == 1) {
+                  tau_dm = "1";
+                } else if (tau.getDecayMode() == 10) {
+                  tau_dm = "10";
+                } else if (tau.getDecayMode() == 11) {
+                  tau_dm = "11";
+                }
+                std::string tau_leg_name("t_trg_pt_mediumDeepTau_mutau_dm" + tau_dm + "_embed");
                 if (syst.find("trigger") != std::string::npos) {
                   tau_leg_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
