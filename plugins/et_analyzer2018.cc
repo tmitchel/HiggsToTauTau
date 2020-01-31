@@ -30,7 +30,6 @@
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
 #include "../include/tau_factory.h"
-#include "TauPOG/TauIDSFs/interface/TauIDSFTool.h"
 
 typedef std::vector<double> NumV;
 
@@ -149,14 +148,6 @@ int main(int argc, char* argv[]) {
     RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
-    // tau ID efficiency
-    TauIDSFTool *tau_id_eff_sf;
-    if (isEmbed) {
-        tau_id_eff_sf = new TauIDSFTool("2018ReReco", "DeepTau2017v2p1VSjet", "Medium", false, true);
-    } else {
-        tau_id_eff_sf = new TauIDSFTool("2018ReReco", "DeepTau2017v2p1VSjet", "Medium", false, false);
-    }
-
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
@@ -249,13 +240,6 @@ int main(int argc, char* argv[]) {
             histos->at("cutflow")->Fill(3., 1.);
         }
 
-        // anti-lepton discriminators
-        if (tau.getDecayMode() != 11) {
-            histos->at("cutflow")->Fill(5., 1.);
-        } else {
-            continue;
-        }
-
         // only opposite-sign
         int evt_charge = tau.getCharge() + electron.getCharge();
         if (evt_charge == 0) {
@@ -280,16 +264,13 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
-
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // pileup reweighting
             evtwt *= lumi_weights->weight(event.getNPV());
 
             // generator weights
-            if (signal_type == "madgraph") {
-                evtwt *= event.getGenWeight();
-            }
+            evtwt *= event.getGenWeight();
 
             // b-tagging scale factor goes here
             evtwt *= jets.getBWeight();
@@ -318,8 +299,14 @@ int main(int argc, char* argv[]) {
             }
             evtwt *= htt_sf->function(id_name.c_str())->getVal();
 
+            // electron fake rate SF
+            if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
+              evtwt *= htt_sf->function("t_id_vs_e_eta_tight")->getVal();
+            }
+
             // trigger scale factors
             if (electron.getPt() < 33) {
+                // electron-leg
                 evtwt *= htt_sf->function("e_trg_24_ic_ratio")->getVal();
                 if (syst == "trigger_up") {
                     evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_etau_ratio_up")->getVal();
@@ -386,12 +373,14 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
-            // tau ID eff SF
-            std::string id_syst = "";
-            if (syst.find("tau_id_") != std::string::npos) {
-                id_syst = syst.find("Up") != std::string::npos ? "Up" : "Down";
+            auto genweight(event.getGenWeight());
+            if (genweight > 1 || genweight < 0) {
+                genweight = 0;
             }
-            evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), id_syst);
+            evtwt *= genweight;
+
+            // tracking sf
+            evtwt *= helper->embed_tracking(tau.getDecayMode());
 
             // set workspace variables
             htt_sf->var("e_pt")->setVal(electron.getPt());
@@ -408,12 +397,19 @@ int main(int argc, char* argv[]) {
             evtwt *= htt_sf->function("e_trk_embed_ratio")->getVal();
             evtwt *= htt_sf->function("e_idiso_ic_embed_ratio")->getVal();
 
+            // tau ID eff SF
+            std::string embed_id_name = "t_deeptauid_pt_tightvse_embed_medium";
+            if (syst.find("tau_id_") != std::string::npos) {
+                embed_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+            }
+            evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
+
             bool fireSingle = electron.getPt() > 33;
             bool fireCross = electron.getPt() < 33;
 
             std::string single_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_ic_embed_ratio" : "e_trg_ic_data";
             std::string el_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_24_ic_embed_ratio" : "e_trg_24_ic_data";
-            std::string tau_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "t_trg_pog_deeptau_medium_etau_ratio" : "t_trg_pog_deeptau_medium_etau_data";
+            std::string tau_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "t_trg_mediumDeepTau_etau_embed_ratio" : "t_trg_mediumDeepTau_etau_data";
             if (syst == "trigger_up") {
                 tau_leg_eff_name += "_up";
             } else if (syst == "trigger_down") {
@@ -424,8 +420,13 @@ int main(int argc, char* argv[]) {
             auto tau_leg_eff = htt_sf->function(tau_leg_eff_name.c_str())->getVal();
             evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
 
+            // electron fake rate SF
+            if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
+              evtwt *= htt_sf->function("t_id_vs_e_eta_tight")->getVal();
+            }
+
             // double muon trigger eff in selection
-            evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_trg_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(electron.getGenPt());
