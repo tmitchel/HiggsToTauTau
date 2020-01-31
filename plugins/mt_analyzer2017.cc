@@ -161,14 +161,6 @@ int main(int argc, char *argv[]) {
     RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
-    // tau ID efficiency
-    TauIDSFTool *tau_id_eff_sf;
-    if (isEmbed) {
-        tau_id_eff_sf = new TauIDSFTool("2017ReReco", "DeepTau2017v2p1VSjet", "Medium", false, true);
-    } else {
-        tau_id_eff_sf = new TauIDSFTool("2017ReReco", "DeepTau2017v2p1VSjet", "Medium", false, false);
-    }
-
     // STXS theory uncertainties
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
@@ -262,17 +254,10 @@ int main(int argc, char *argv[]) {
             histos->at("cutflow")->Fill(3., 1.);
         }
 
-        // anti-lepton discriminators
-        if (tau.getDecayMode() != 11) {
-            histos->at("cutflow")->Fill(4., 1.);
-        } else {
-            continue;
-        }
-
         // only opposite-sign
         int evt_charge = tau.getCharge() + muon.getCharge();
         if (evt_charge == 0) {
-            histos->at("cutflow")->Fill(5., 1.);
+            histos->at("cutflow")->Fill(4., 1.);
         } else {
             continue;
         }
@@ -288,7 +273,7 @@ int main(int argc, char *argv[]) {
 
         // now do mt selection
         if (mt < 50) {
-            histos->at("cutflow")->Fill(6., 1.);
+            histos->at("cutflow")->Fill(5., 1.);
         } else {
             continue;
         }
@@ -301,9 +286,7 @@ int main(int argc, char *argv[]) {
             }
 
             // generator weights
-            if (signal_type == "madgraph") {
-                evtwt *= event.getGenWeight();
-            }
+            evtwt *= event.getGenWeight();
 
             // prefiring weight
             evtwt *= event.getPrefiringWeight();
@@ -332,17 +315,22 @@ int main(int argc, char *argv[]) {
             }
             evtwt *= htt_sf->function(id_name.c_str())->getVal();
 
+            // muon fake rate SF
+            if (tau.getDecayMode() < 5) {
+              evtwt *= htt_sf->function("t_id_vs_mu_eta_tight")->getVal();
+            }
+
             // trigger scale factors
-            if (muon.getPt() < 25) {
+            if (muon.getPt() < 25) {  // cross-trigger
                 evtwt *= htt_sf->function("m_trg_20_ic_ratio")->getVal();
                 if (syst == "trigger_up") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_ratio_up")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_up")->getVal();
                 } else if (syst == "trigger_down") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_ratio_down")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_down")->getVal();
                 } else {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_ratio")->getVal();
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio")->getVal();
                 }
-            } else {
+            } else {  // muon trigger
                 evtwt *= htt_sf->function("m_trg_ic_ratio")->getVal();
             }
 
@@ -396,18 +384,14 @@ int main(int argc, char *argv[]) {
         } else if (!isData && isEmbed) {
             event.setEmbed();
 
-            // tau ID eff SF
-            std::string id_syst = "";
-            if (syst.find("tau_id_") != std::string::npos) {
-                id_syst = syst.find("Up") != std::string::npos ? "Up" : "Down";
-            }
-            evtwt *= tau_id_eff_sf->getSFvsPT(tau.getPt(), tau.getGenMatch(), id_syst);
-
             auto genweight(event.getGenWeight());
             if (genweight > 1 || genweight < 0) {
                 genweight = 0;
             }
             evtwt *= genweight;
+
+            // tracking sf
+            evtwt *= helper->embed_tracking(tau.getDecayMode());
 
             // set workspace variables
             htt_sf->var("m_pt")->setVal(muon.getPt());
@@ -424,28 +408,40 @@ int main(int argc, char *argv[]) {
             evtwt *= htt_sf->function("m_trk_ratio")->getVal();
             evtwt *= htt_sf->function("m_idiso_ic_embed_ratio")->getVal();
 
-            if (muon.getPt() < 25) {
+            // tau ID eff SF
+            std::string embed_id_name = "t_deeptauid_pt_embed_medium";
+            if (syst.find("tau_id_") != std::string::npos) {
+                embed_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+            }
+            evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
+
+            if (muon.getPt() < 25) {  // cross-trigger
+                // muon-leg
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
-                if (syst == "trigger_up") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_rembed_atio_up")->getVal();
-                } else if (syst == "trigger_down") {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_embed_ratio_down")->getVal();
-                } else {
-                    evtwt *= htt_sf->function("t_trg_mediumDeepTau_mutau_embed_ratio")->getVal();
+                // tau-leg
+                std::string tau_leg_name("t_trg_pt_mediumDeepTau_mutau_embed_ratio");
+                if (syst.find("trigger") != std::string::npos) {
+                  tau_leg_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
-            } else {
+                evtwt *= htt_sf->function(tau_leg_name.c_str())->getVal();
+            } else {  // muon trigger
                 evtwt *= htt_sf->function("m_trg_ic_embed_ratio")->getVal();
             }
 
+            // muon fake rate SF
+            if (tau.getDecayMode() < 5) {
+              evtwt *= htt_sf->function("t_id_vs_mu_eta_tight")->getVal();
+            }
+
             // double muon trigger eff in selection
-            evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_trg_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(muon.getGenPt());
             htt_sf->var("gt_eta")->setVal(muon.getGenEta());
             evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
 
-            // muon ID eff in selection (leg 1)
+            // muon ID eff in selection (leg 2)
             htt_sf->var("gt_pt")->setVal(tau.getGenPt());
             htt_sf->var("gt_eta")->setVal(tau.getGenEta());
             evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
@@ -455,7 +451,7 @@ int main(int argc, char *argv[]) {
 
         // b-jet veto
         if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
-            histos->at("cutflow")->Fill(7., 1.);
+            histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
@@ -466,7 +462,7 @@ int main(int argc, char *argv[]) {
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion) {
-            histos->at("cutflow")->Fill(8., 1.);
+            histos->at("cutflow")->Fill(7., 1.);
         } else {
             continue;
         }
