@@ -148,6 +148,14 @@ int main(int argc, char* argv[]) {
     RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
+    // MadGraph Higgs pT file
+    RooWorkspace *mg_sf;
+    if (signal_type == "madgraph") {
+        TFile mg_sf_file("data/htt_scalefactors_2017_MGggh.root");
+        mg_sf = reinterpret_cast<RooWorkspace*>(mg_sf_file.Get("w"));
+        mg_sf_file.Close();
+    }
+
     TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
@@ -354,6 +362,12 @@ int main(int argc, char* argv[]) {
                 if (syst.find("Rivet") != std::string::npos) {
                   evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
                 }
+            }
+
+            // MadGraph Higgs pT correction
+            if (signal_type == "madgraph") {
+                mg_sf->var("HpT")->setVal(Higgs.Pt());
+                evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
             }
 
             // begin systematics
