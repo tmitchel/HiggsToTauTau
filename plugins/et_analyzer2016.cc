@@ -399,7 +399,7 @@ int main(int argc, char *argv[]) {
             }
 
             // double muon trigger eff in selection
-            evtwt *= htt_sf->function("m_sel_trg_ratio")->getVal();
+            evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
             htt_sf->var("gt_pt")->setVal(electron.getGenPt());

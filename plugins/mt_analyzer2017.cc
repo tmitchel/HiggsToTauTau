@@ -312,7 +312,10 @@ int main(int argc, char *argv[]) {
             if (syst.find("tau_id_") != std::string::npos) {
                 id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
             }
-            evtwt *= htt_sf->function(id_name.c_str())->getVal();
+
+            if (tau.getDecayMode() == 5) {
+              evtwt *= htt_sf->function(id_name.c_str())->getVal();
+            }
 
             // muon fake rate SF
             if (tau.getDecayMode() == 2 || tau.getDecayMode() == 4) {
@@ -413,7 +416,9 @@ int main(int argc, char *argv[]) {
             if (syst.find("tau_id_") != std::string::npos) {
                 embed_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
             }
-            evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
+            if (tau.getDecayMode() == 5) {
+              evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
+            }
 
             // trigger scale factors
             if (muon.getPt() < 25) {  // cross-trigger

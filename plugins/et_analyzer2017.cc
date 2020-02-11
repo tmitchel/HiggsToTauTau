@@ -280,7 +280,9 @@ int main(int argc, char* argv[]) {
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // pileup reweighting
-            evtwt *= lumi_weights->weight(event.getNPV());
+            if (!doAC && !isMG) {
+              evtwt *= lumi_weights->weight(event.getNPV());
+            }
 
             // generator weights
             evtwt *= event.getGenWeight();
