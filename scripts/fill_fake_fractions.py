@@ -165,6 +165,15 @@ def main(args):
                 syst_map[syst] = events.apply(lambda x: get_weight(
                     x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
 
+        for sample in inputs['frac_real'] + ['ZL']:
+            open_file = uproot.open('{}/data_obs.root'.format(args.input))
+            oldtree = pandas.concat([oldtree, open_file[args.tree_name].arrays(['*'])])
+            events = open_file[args.tree_name].arrays([
+                't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_pt', 'el_pt', 'mjj', 'is_antiTauIso', 'cross_trigger'
+            ], outputtype=pandas.DataFrame)
+
+            fake_weights = fake_weights.append(events.apply(lambda x: -1 * get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values)
+
         with uproot.recreate('{}/jetFakes.root'.format(args.input)) as f:
             f[args.tree_name] = uproot.newtree(treedict)
             oldtree['fake_weight'] = fake_weights.reshape(len(fake_weights))
