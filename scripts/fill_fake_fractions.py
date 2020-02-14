@@ -167,7 +167,7 @@ def main(args):
 
         for sample in inputs['frac_real'] + ['ZL']:
             open_file = uproot.open('{}/data_obs.root'.format(args.input))
-            oldtree = pandas.concat([oldtree, open_file[args.tree_name].arrays(['*'])])
+            oldtree = oldtree.append(open_file[args.tree_name].arrays(['*']))
             events = open_file[args.tree_name].arrays([
                 't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_pt', 'el_pt', 'mjj', 'is_antiTauIso', 'cross_trigger'
             ], outputtype=pandas.DataFrame)
