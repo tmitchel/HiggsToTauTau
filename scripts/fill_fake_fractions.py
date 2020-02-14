@@ -26,6 +26,10 @@ systs = [
     "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down",
     "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"
 ]
+filling_variables = [
+    't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_pt',
+    'el_pt', 'mjj', 'is_antiTauIso', 'cross_trigger'
+]
 
 
 def get_categories(channel):
@@ -154,25 +158,27 @@ def main(args):
         anti_events = events[(events['is_antiTauIso'] > 0)]
 
         print 'getting fake weights...'
-        fake_weights = anti_events.apply(lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
+        fake_weights = anti_events[filling_variables].apply(lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
 
         if args.syst:
             syst_map = {}
             for syst in systs:
                 print syst
                 treedict[syst] = numpy.float64
-                syst_map[syst] = anti_events.apply(lambda x: get_weight(
+                syst_map[syst] = anti_events[filling_variables].apply(lambda x: get_weight(
                     x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
 
         for sample in inputs['frac_real'] + ['ZL']:
+            print 'Processing {} for subtraction'.format(sample)
             open_file = uproot.open('{}/{}.root'.format(args.input, sample))
             events = open_file[args.tree_name].arrays(['*'], outputtype=pandas.DataFrame)
             sample_anti_events = events[(events['is_antiTauIso'] > 0)]
+            print len(events), len(sample_anti_events)
 
-            fake_weights = fake_weights.append(sample_anti_events.apply(lambda x: -1 * get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values)
+            fake_weights = numpy.append(fake_weights, sample_anti_events[filling_variables].apply(lambda x: -1 * get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values)
             anti_events = pandas.concat([anti_events, sample_anti_events])
 
-        with uproot.recreate('{}/jetFakes.root'.format(args.input)) as f:
+        with uproot.recreate('{}/jetFakes.root'.format(args.input), compression=None) as f:
             f[args.tree_name] = uproot.newtree(treedict)
             anti_events['fake_weight'] = fake_weights.reshape(len(fake_weights))
             if args.syst:
