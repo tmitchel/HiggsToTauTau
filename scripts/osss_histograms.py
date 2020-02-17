@@ -116,7 +116,7 @@ def fill_all_categories(events, hists, variable, isData):
         hist.Fill(xvar[i], evtwt[i])
     hists['boosted'] = hist
 
-    vbf_events = events[(events['njets'] > 2) & (events['mjj'] > 300)]
+    vbf_events = events[(events['njets'] > 1) & (events['mjj'] > 300)]
     hist = hists['vbf'].Clone()
     for i in xrange(len(vbf_events.index)):
         hist.Fill(xvar[i], evtwt[i])
@@ -163,7 +163,6 @@ def osss_filler(config_variables, input_dir, tree_name, categories, output_file,
         for c in categories:
             osss_ratio = anti_os_hist[c].Integral(0, anti_os_hist[c].GetNbinsX() + 1) / anti_ss_hist[c].Integral(0, anti_ss_hist[c].GetNbinsX() + 1)
             scale = osss_ratio * (signal_hist[c].Integral(0, signal_hist[c].GetNbinsX() + 1) / loose_hist[c].Integral(0, loose_hist[c].GetNbinsX() + 1))
-            print 'ratios', c, osss_ratio, scale
             output_file.cd('{}_{}/{}'.format(channel_prefix, c, variable))
             final_hist = loose_hist[c].Clone()
             final_hist.Scale(scale)
