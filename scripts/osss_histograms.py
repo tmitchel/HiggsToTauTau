@@ -90,6 +90,86 @@ def fill_process_list(data, name, variable, bins, boilerplate, output_file, dire
     ], all_hists
 
 
+def fill_all_categories(events, hists, variable, isData):
+    # get variables
+    xvar = events[variable].values
+    evtwt = events['evtwt'].values
+    if not isData:
+        evtwt *= -1
+
+    # inclusive histograms
+    hist = hists['inclusive'].Clone()
+    for i in xrange(len(events.index)):
+        hist.Fill(xvar[i], evtwt[i])
+    hists['inclusive'] = hist
+
+    # categorize
+    zero_events = events[(events['njets'] == 0)]
+    hist = hists['0jet'].Clone()
+    for i in xrange(len(zero_events.index)):
+        hist.Fill(xvar[i], evtwt[i])
+    hists['0jet'] = hist
+
+    boost_events = events[(events['njets'] == 1) | ((events['njets'] > 1) & (events['mjj'] < 300))]
+    hist = hists['boosted'].Clone()
+    for i in xrange(len(boost_events.index)):
+        hist.Fill(xvar[i], evtwt[i])
+    hists['boosted'] = hist
+
+    vbf_events = events[(events['njets'] > 2) & (events['mjj'] > 300)]
+    hist = hists['vbf'].Clone()
+    for i in xrange(len(vbf_events.index)):
+        hist.Fill(xvar[i], evtwt[i])
+    hists['vbf'] = hist
+
+    return hists
+
+
+def osss_filler(config_variables, input_dir, tree_name, categories, output_file, boilerplate, channel_prefix):
+    osss_bkg_files = ['embed', 'ZL', 'ZJ', 'TTJ', 'TTT', 'VVJ', 'VVT', 'W']
+    osss_data_file = ['data_obs']
+    base_variables = ['OS', 'is_signal', 'is_antiLepIso', 'njets', 'mjj']
+
+    for variable, bins in config_variables.iteritems():
+        anti_os_hist = {}
+        anti_ss_hist = {}
+        loose_hist = {}
+        signal_hist = {}
+        for c in categories:
+            output_file.cd('{}/{}'.format(c, variable))
+            anti_os_hist[c] = build_histogram('anti_os_qcd', bins, output_file, c)
+            anti_ss_hist[c] = build_histogram('anti_ss_qcd', bins, output_file, c)
+            loose_hist[c] = build_histogram('loose_qcd', bins, output_file, c)
+            signal_hist[c] = build_histogram('signal_qcd', bins, output_file, c)
+
+        for ifile in osss_bkg_files + osss_data_file:
+            input_file = uproot.open('{}/{}.root'.format(input_dir, ifile))
+            events = input_file[tree_name].arrays(base_variables + [variable], outputtype=pandas.DataFrame)
+
+            antiiso_os_events = events[(events['is_signal'] == 0) & (events['is_antiLepIso'] > 0) & (events['OS'] > 0)]
+            anti_os_hist = fill_all_categories(antiiso_os_events, anti_os_hist, variable, (ifile in osss_data_file))
+
+            antiiso_ss_events = events[(events['is_signal'] == 0) & (events['is_antiLepIso'] > 0) & (events['OS'] == 0)]
+            anti_ss_hist = fill_all_categories(antiiso_ss_events, anti_ss_hist, variable, (ifile in osss_data_file))
+
+            loose_ss_events = events[(events['is_antiLepIso'] > 0) & (events['OS'] == 0)]
+            loose_hist = fill_all_categories(loose_ss_events, loose_hist, variable, (ifile in osss_data_file))
+
+            signal_ss_events = events[(events['is_signal'] > 0) & (events['OS'] == 0)]
+            signal_hist = fill_all_categories(signal_ss_events, signal_hist, variable, (ifile in osss_data_file))
+
+        for c in categories:
+            osss_ratio = anti_os_hist[c].Integral(0, anti_os_hist[c].GetNbinsX() + 1) / anti_ss_hist[c].Integral(0, anti_ss_hist[c].GetNbinsX() + 1)
+            scale = osss_ratio * (signal_hist[c].Integral(0, signal_hist[c].GetNbinsX() + 1) / loose_hist[c].Integral(0, loose_hist[c].GetNbinsX() + 1))
+            output_file.cd('{}/{}'.format(c, variable))
+            final_hist = loose_hist[c].Clone()
+            final_hist.Scale(scale)
+            for ibin in range(len(final_hist.GetNbinsX() + 1)):
+                if final_hist.GetBinContent(ibin) < 0:
+                    final_hist.SetBinContent(ibin, 0)
+            final_hist.SetName('QCD')
+            final_hist.Write()
+
 def main(args):
     start = time.time()
     config = {}
@@ -217,85 +297,6 @@ def main(args):
 
     output_file.Close()
     print 'Finished in {} seconds'.format(time.time() - start)
-
-
-def fill_all_categories(events, hists, variable, isData):
-    # get variables
-    xvar = events[variable].values
-    evtwt = events['evtwt'].values
-    if not isData:
-        evtwt *= -1
-
-    # inclusive histograms
-    hist = hists['inclusive'].Clone()
-    for i in xrange(len(events.index)):
-        hist.Fill(xvar[i], evtwt[i])
-    hists['inclusive'] = hist
-
-    # categorize
-    zero_events = events[(events['njets'] == 0)]
-    hist = hists['0jet'].Clone()
-    for i in xrange(len(zero_events.index)):
-        hist.Fill(xvar[i], evtwt[i])
-    hists['0jet'] = hist
-
-    boost_events = events[(events['njets'] == 1) | ((events['njets'] > 1) & (events['mjj'] < 300))]
-    hist = hists['boosted'].Clone()
-    for i in xrange(len(boost_events.index)):
-        hist.Fill(xvar[i], evtwt[i])
-    hists['boosted'] = hist
-
-    vbf_events = events[(events['njets'] > 2) & (events['mjj'] > 300)]
-    hist = hists['vbf'].Clone()
-    for i in xrange(len(vbf_events.index)):
-        hist.Fill(xvar[i], evtwt[i])
-    hists['vbf'] = hist
-
-    return hists
-
-def osss_filler(config_variables, input_dir, tree_name, categories, output_file, boilerplate, channel_prefix):
-    osss_bkg_files = ['embed', 'ZL', 'ZJ', 'TTJ', 'TTT', 'VVJ', 'VVT', 'W']
-    osss_data_file = ['data_obs']
-    base_variables = ['OS', 'is_signal', 'is_antiLepIso', 'njets', 'mjj']
-
-    for variable, bins in config_variables.iteritems():
-        anti_os_hist = {}
-        anti_ss_hist = {}
-        loose_hist = {}
-        signal_hist = {}
-        for c in categories:
-            output_file.cd('{}/{}'.format(c, variable))
-            anti_os_hist[c] = build_histogram('anti_os_qcd', bins, output_file, c)
-            anti_ss_hist[c] = build_histogram('anti_ss_qcd', bins, output_file, c)
-            loose_hist[c] = build_histogram('loose_qcd', bins, output_file, c)
-            signal_hist[c] = build_histogram('signal_qcd', bins, output_file, c)
-
-        for ifile in osss_bkg_files + osss_data_file:
-            input_file = uproot.open('{}/{}.root'.format(input_dir, ifile))
-            events = input_file[tree_name].arrays(base_variables + [variable], outputtype=pandas.DataFrame)
-
-            antiiso_os_events = events[(events['is_signal'] == 0) & (events['is_antiLepIso'] > 0) & (events['OS'] > 0)]
-            anti_os_hist = fill_all_categories(antiiso_os_events, anti_os_hist, variable, (ifile in osss_data_file))
-
-            antiiso_ss_events = events[(events['is_signal'] == 0) & (events['is_antiLepIso'] > 0) & (events['OS'] == 0)]
-            anti_ss_hist = fill_all_categories(antiiso_ss_events, anti_ss_hist, variable, (ifile in osss_data_file))
-
-            loose_ss_events = events[(events['is_antiLepIso'] > 0) & (events['OS'] == 0)]
-            loose_hist = fill_all_categories(loose_ss_events, loose_hist, variable, (ifile in osss_data_file))
-
-            signal_ss_events = events[(events['is_signal'] > 0) & (events['OS'] == 0)]
-            signal_hist = fill_all_categories(signal_ss_events, signal_hist, variable, (ifile in osss_data_file))
-
-        for c in categories:
-            osss_ratio = anti_os_hist[c].Integral(0, anti_os_hist[c].GetNbinsX() + 1) / anti_ss_hist[c].Integral(0, anti_ss_hist[c].GetNbinsX() + 1)
-            scale = osss_ratio * (signal_hist[c].Integral(0, signal_hist[c].GetNbinsX() + 1) / loose_hist[c].Integral(0, loose_hist[c].GetNbinsX() + 1))
-            output_file.cd('{}/{}'.format(c, variable))
-            final_hist = loose_hist[c].Clone()
-            final_hist.Scale(scale)
-            for ibin in range(len(final_hist.GetNbinsX() + 1)):
-                if final_hist.GetBinContent(ibin) < 0:
-                    final_hist.SetBinContent(ibin, 0)
-            final_hist.Write()
 
 
 if __name__ == "__main__":
