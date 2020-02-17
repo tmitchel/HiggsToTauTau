@@ -136,15 +136,17 @@ def osss_filler(config_variables, input_dir, tree_name, categories, output_file,
         loose_hist = {}
         signal_hist = {}
         for c in categories:
-            output_file.cd('{}_{}/{}'.format(channel_prefix, c, variable))
-            anti_os_hist[c] = build_histogram('anti_os_qcd', bins, output_file, channel_prefix + "_" + c)
-            anti_ss_hist[c] = build_histogram('anti_ss_qcd', bins, output_file, channel_prefix + "_" + c)
-            loose_hist[c] = build_histogram('loose_qcd', bins, output_file, channel_prefix + "_" + c)
-            signal_hist[c] = build_histogram('signal_qcd', bins, output_file, channel_prefix + "_" + c)
+            output_file.cd('')
+            anti_os_hist[c] = build_histogram('anti_os_qcd' + c, bins, output_file, "")
+            anti_ss_hist[c] = build_histogram('anti_ss_qcd' + c, bins, output_file, "")
+            loose_hist[c] = build_histogram('loose_qcd' + c, bins, output_file, "")
+            signal_hist[c] = build_histogram('signal_qcd' + c, bins, output_file, "")
 
         for ifile in osss_bkg_files + osss_data_file:
             input_file = uproot.open('{}/{}.root'.format(input_dir, ifile))
             events = input_file[tree_name].arrays(base_variables + [variable], outputtype=pandas.DataFrame)
+
+            output_file.cd("")
 
             antiiso_os_events = events[(events['is_signal'] == 0) & (events['is_antiLepIso'] > 0) & (events['OS'] > 0)]
             anti_os_hist = fill_all_categories(antiiso_os_events, anti_os_hist, variable, (ifile in osss_data_file))
@@ -161,6 +163,7 @@ def osss_filler(config_variables, input_dir, tree_name, categories, output_file,
         for c in categories:
             osss_ratio = anti_os_hist[c].Integral(0, anti_os_hist[c].GetNbinsX() + 1) / anti_ss_hist[c].Integral(0, anti_ss_hist[c].GetNbinsX() + 1)
             scale = osss_ratio * (signal_hist[c].Integral(0, signal_hist[c].GetNbinsX() + 1) / loose_hist[c].Integral(0, loose_hist[c].GetNbinsX() + 1))
+            print 'ratios', c, osss_ratio, scale
             output_file.cd('{}_{}/{}'.format(channel_prefix, c, variable))
             final_hist = loose_hist[c].Clone()
             final_hist.Scale(scale)
