@@ -128,7 +128,7 @@ def fill_all_categories(events, hists, variable, isData):
 def osss_filler(config_variables, input_dir, tree_name, categories, output_file, boilerplate, channel_prefix):
     osss_bkg_files = ['embed', 'ZL', 'ZJ', 'TTJ', 'TTT', 'VVJ', 'VVT', 'W']
     osss_data_file = ['data_obs']
-    base_variables = ['OS', 'is_signal', 'is_antiLepIso', 'njets', 'mjj']
+    base_variables = ['evtwt', 'OS', 'is_signal', 'is_antiLepIso', 'njets', 'mjj']
 
     for variable, bins in config_variables.iteritems():
         anti_os_hist = {}
@@ -136,11 +136,11 @@ def osss_filler(config_variables, input_dir, tree_name, categories, output_file,
         loose_hist = {}
         signal_hist = {}
         for c in categories:
-            output_file.cd('{}/{}'.format(c, variable))
-            anti_os_hist[c] = build_histogram('anti_os_qcd', bins, output_file, c)
-            anti_ss_hist[c] = build_histogram('anti_ss_qcd', bins, output_file, c)
-            loose_hist[c] = build_histogram('loose_qcd', bins, output_file, c)
-            signal_hist[c] = build_histogram('signal_qcd', bins, output_file, c)
+            output_file.cd('{}_{}/{}'.format(channel_prefix, c, variable))
+            anti_os_hist[c] = build_histogram('anti_os_qcd', bins, output_file, channel_prefix + "_" + c)
+            anti_ss_hist[c] = build_histogram('anti_ss_qcd', bins, output_file, channel_prefix + "_" + c)
+            loose_hist[c] = build_histogram('loose_qcd', bins, output_file, channel_prefix + "_" + c)
+            signal_hist[c] = build_histogram('signal_qcd', bins, output_file, channel_prefix + "_" + c)
 
         for ifile in osss_bkg_files + osss_data_file:
             input_file = uproot.open('{}/{}.root'.format(input_dir, ifile))
@@ -161,10 +161,10 @@ def osss_filler(config_variables, input_dir, tree_name, categories, output_file,
         for c in categories:
             osss_ratio = anti_os_hist[c].Integral(0, anti_os_hist[c].GetNbinsX() + 1) / anti_ss_hist[c].Integral(0, anti_ss_hist[c].GetNbinsX() + 1)
             scale = osss_ratio * (signal_hist[c].Integral(0, signal_hist[c].GetNbinsX() + 1) / loose_hist[c].Integral(0, loose_hist[c].GetNbinsX() + 1))
-            output_file.cd('{}/{}'.format(c, variable))
+            output_file.cd('{}_{}/{}'.format(channel_prefix, c, variable))
             final_hist = loose_hist[c].Clone()
             final_hist.Scale(scale)
-            for ibin in range(len(final_hist.GetNbinsX() + 1)):
+            for ibin in range(final_hist.GetNbinsX() + 1):
                 if final_hist.GetBinContent(ibin) < 0:
                     final_hist.SetBinContent(ibin, 0)
             final_hist.SetName('QCD')
@@ -204,7 +204,7 @@ def main(args):
             output_file.mkdir('{}_{}/{}'.format(channel_prefix, cat, variable))
     output_file.cd()
 
-    qcd_hists = {}
+    osss_filler(config_variables, args.input_dir, args.tree_name, boilerplate['categories'], output_file, boilerplate, channel_prefix)
 
     for ifile in files:
 
@@ -292,8 +292,6 @@ def main(args):
                 output_file.cd('{}_vbf/{}'.format(channel_prefix, variable))
                 for obj in vbf_hists.itervalues():
                     obj['config'].queue.get().Write()
-
-    osss_filler(config_variables, args.input_dir, args.tree_name, boilerplate['categories'], output_file, boilerplate, channel_prefix)
 
     output_file.Close()
     print 'Finished in {} seconds'.format(time.time() - start)
