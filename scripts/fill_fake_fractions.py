@@ -69,10 +69,10 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     xbin = fractions['frac_data'][category].GetXaxis().FindBin(df['vis_mass'])
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
-    weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
-                                  fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_w'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin))
+    weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'], .15, .7, .15)
+                                  # fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+                                  # fractions['frac_w'][category].GetBinContent(xbin, ybin),
+                                  # fractions['frac_tt'][category].GetBinContent(xbin, ybin))
 
     return weights
 
@@ -93,7 +93,6 @@ def main(args):
         'frac_tt': ['TTJ'],
         'frac_data': ['data_obs'],
         'frac_real': ['embed', 'TTT', 'VVT'],
-        # 'frac_real': ['ZTT', 'TTT', 'VVT'],
     }
 
     fractions = {
@@ -106,7 +105,7 @@ def main(args):
 
     variables = set([
         'evtwt', 'vis_mass', 'mjj', 'njets',
-        'is_antiTauIso', 'mt', 'higgs_pT', 't1_pt', 'contamination'
+        'is_antiTauIso', 'mt', 'higgs_pT', 't1_pt', 'contamination', 't1_genMatch'
     ])
 
     for frac, samples in inputs.iteritems():
@@ -116,7 +115,7 @@ def main(args):
                                  )[args.tree_name].arrays(list(variables), outputtype=pandas.DataFrame)
 
             anti_iso_events = events[
-                (events['is_antiTauIso'] > 0) & (events['contamination'] == 0)
+                (events['is_antiTauIso'] > 0)
             ]
 
             zero_jet_events = anti_iso_events[anti_iso_events['njets'] == 0]
@@ -138,10 +137,20 @@ def main(args):
         fractions['frac_qcd'][cat].Add(fractions['frac_tt'][cat], -1)
         fractions['frac_qcd'][cat].Add(fractions['frac_real'][cat], -1)
 
-        fractions['frac_w'][cat].Divide(fractions['frac_data'][cat])
-        fractions['frac_tt'][cat].Divide(fractions['frac_data'][cat])
-        fractions['frac_real'][cat].Divide(fractions['frac_data'][cat])
-        fractions['frac_qcd'][cat].Divide(fractions['frac_data'][cat])
+        denom = fractions['frac_qcd'][cat].Clone()
+        denom.Add(fractions['frac_w'][cat])
+        denom.Add(fractions['frac_tt'][cat])
+
+        print 'Category: {}'.format(cat)
+        print '\tfrac_w: {}'.format(fractions['frac_w'][cat].Integral() / denom.Integral())
+        print '\tfrac_tt: {}'.format(fractions['frac_tt'][cat].Integral() / denom.Integral())
+        print '\tfrac_qcd: {}'.format(fractions['frac_qcd'][cat].Integral() / denom.Integral())
+        print '\tfrac_real: {}'.format(fractions['frac_real'][cat].Integral() / denom.Integral())
+
+        fractions['frac_w'][cat].Divide(denom)
+        fractions['frac_tt'][cat].Divide(denom)
+        fractions['frac_qcd'][cat].Divide(denom)
+
 
     for frac_name, categories in fractions.iteritems():
         for cat_name, ihist in categories.iteritems():
@@ -168,15 +177,14 @@ def main(args):
                 syst_map[syst] = anti_events[filling_variables].apply(lambda x: get_weight(
                     x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
 
-        for sample in inputs['frac_real'] + ['ZL']:
+        for sample in ['ZL', 'TTT', 'VVT', 'embed']:
             print 'Processing {} for subtraction'.format(sample)
             open_file = uproot.open('{}/{}.root'.format(args.input, sample))
             events = open_file[args.tree_name].arrays(['*'], outputtype=pandas.DataFrame)
             sample_anti_events = events[(events['is_antiTauIso'] > 0)]
-            print len(events), len(sample_anti_events)
 
             fake_weights = numpy.append(fake_weights, sample_anti_events[filling_variables].apply(lambda x: -1 * get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values)
-            anti_events = pandas.concat([anti_events, sample_anti_events])
+            anti_events = pandas.concat([anti_events, sample_anti_events], sort=False)
 
         with uproot.recreate('{}/jetFakes.root'.format(args.input), compression=None) as f:
             f[args.tree_name] = uproot.newtree(treedict)
