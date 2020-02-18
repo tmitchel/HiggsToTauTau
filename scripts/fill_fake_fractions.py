@@ -69,10 +69,10 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     xbin = fractions['frac_data'][category].GetXaxis().FindBin(df['vis_mass'])
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
-    weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'], .15, .7, .15)
-                                  # fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
-                                  # fractions['frac_w'][category].GetBinContent(xbin, ybin),
-                                  # fractions['frac_tt'][category].GetBinContent(xbin, ybin))
+    weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+                                  fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+                                  fractions['frac_w'][category].GetBinContent(xbin, ybin),
+                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin))
 
     return weights
 
@@ -115,7 +115,7 @@ def main(args):
                                  )[args.tree_name].arrays(list(variables), outputtype=pandas.DataFrame)
 
             anti_iso_events = events[
-                (events['is_antiTauIso'] > 0)
+                (events['is_antiTauIso'] > 0) & (events['contamination'] == 0)
             ]
 
             zero_jet_events = anti_iso_events[anti_iso_events['njets'] == 0]
