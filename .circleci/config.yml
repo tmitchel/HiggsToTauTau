@@ -4,7 +4,7 @@ version: 2.1
 jobs:
     build:
         docker:
-            - image: "clelange/cmssw"
+            - image: "clelange/cmssw:10_6_8_patch1"
         steps:
             - checkout
             - run:
