@@ -70,9 +70,9 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
     weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin),
                                   fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_w'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin))
+                                  fractions['frac_w'][category].GetBinContent(xbin, ybin))
 
     return weights
 
@@ -92,7 +92,7 @@ def main(args):
         'frac_w': ['W', 'ZJ', 'VVJ'],
         'frac_tt': ['TTJ'],
         'frac_data': ['data_obs'],
-        'frac_real': ['embed', 'TTT', 'VVT'],
+        'frac_real': ['embed', 'TTT', 'VVT', 'ZL'],
     }
 
     fractions = {
