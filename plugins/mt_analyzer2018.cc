@@ -281,7 +281,6 @@ int main(int argc, char *argv[]) {
         // create regions
         bool signalRegion = (tau.getMediumIsoDeep() && muon.getIso() < 0.15);
         bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && muon.getIso() < 0.15);
-        bool antiLepIsoRegion = (tau.getMediumIsoDeep() && muon.getIso() < 0.30);
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion) {
@@ -471,8 +470,6 @@ int main(int argc, char *argv[]) {
             tree_cat.push_back("signal");
         } else if (antiTauIsoRegion) {
             tree_cat.push_back("antiTauIso");
-        } else if (antiLepIsoRegion) {
-            tree_cat.push_back("antiLepIso");
         }
 
         // event charge

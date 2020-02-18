@@ -273,6 +273,24 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
+        // b-jet veto
+        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
+            histos->at("cutflow")->Fill(6., 1.);
+        } else {
+            continue;
+        }
+
+        // create regions
+        bool signalRegion = (tau.getMediumIsoDeep() && electron.getIso() < 0.15);
+        bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && electron.getIso() < 0.15);
+
+        // only keep the regions we need
+        if (signalRegion || antiTauIsoRegion) {
+            histos->at("cutflow")->Fill(7., 1.);
+        } else {
+            continue;
+        }
+
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // pileup reweighting
@@ -457,25 +475,6 @@ int main(int argc, char* argv[]) {
         }
         fout->cd();
 
-        // b-jet veto
-        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
-            histos->at("cutflow")->Fill(6., 1.);
-        } else {
-            continue;
-        }
-
-        // create regions
-        bool signalRegion = (tau.getMediumIsoDeep() && electron.getIso() < 0.15);
-        bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && electron.getIso() < 0.15);
-        bool antiLepIsoRegion = (tau.getMediumIsoDeep() && electron.getIso() < 0.30);
-
-        // only keep the regions we need
-        if (signalRegion || antiTauIsoRegion || antiLepIsoRegion) {
-            histos->at("cutflow")->Fill(7., 1.);
-        } else {
-            continue;
-        }
-
         std::vector<std::string> tree_cat;
 
         // regions
@@ -483,8 +482,6 @@ int main(int argc, char* argv[]) {
             tree_cat.push_back("signal");
         } else if (antiTauIsoRegion) {
             tree_cat.push_back("antiTauIso");
-        } else if (antiLepIsoRegion) {
-            tree_cat.push_back("antiLepIso");
         }
 
         // event charge
