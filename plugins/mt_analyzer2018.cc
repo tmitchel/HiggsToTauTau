@@ -239,7 +239,7 @@ int main(int argc, char *argv[]) {
             continue;
         } else if ((name == "ZTT" || name == "TTT" || name == "VVT") && tau.getGenMatch() != 5) {
             continue;
-        } else if ((name == "ZLL" || name == "TTJ" || name == "VVJ") && tau.getGenMatch() == 5) {
+        } else if ((name == "TTJ" || name == "VVJ") && tau.getGenMatch() != 6) {
             continue;
         } else if (name == "ZJ" && tau.getGenMatch() != 6) {
             continue;
@@ -267,6 +267,24 @@ int main(int argc, char *argv[]) {
         // now do mt selection
         if (mt < 50) {
             histos->at("cutflow")->Fill(5., 1.);
+        } else {
+            continue;
+        }
+
+        // b-jet veto
+        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
+            histos->at("cutflow")->Fill(6., 1.);
+        } else {
+            continue;
+        }
+
+        // create regions
+        bool signalRegion = (tau.getMediumIsoDeep() && muon.getIso() < 0.15);
+        bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && muon.getIso() < 0.15);
+
+        // only keep the regions we need
+        if (signalRegion || antiTauIsoRegion) {
+            histos->at("cutflow")->Fill(7., 1.);
         } else {
             continue;
         }
@@ -444,24 +462,6 @@ int main(int argc, char *argv[]) {
             evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
         }
         fout->cd();
-
-        // b-jet veto
-        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
-            histos->at("cutflow")->Fill(6., 1.);
-        } else {
-            continue;
-        }
-
-        // create regions
-        bool signalRegion = (tau.getMediumIsoDeep() && muon.getIso() < 0.15);
-        bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && muon.getIso() < 0.15);
-
-        // only keep the regions we need
-        if (signalRegion || antiTauIsoRegion) {
-            histos->at("cutflow")->Fill(7., 1.);
-        } else {
-            continue;
-        }
 
         std::vector<std::string> tree_cat;
 
