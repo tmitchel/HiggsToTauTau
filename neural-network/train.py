@@ -33,7 +33,7 @@ def main(args):
     ## build callbacks
     callbacks = [
         EarlyStopping(monitor='val_loss', patience=50),
-        ModelCheckpoint('models/{}.hdf5'.format(args.model), monitor='val_loss',
+        ModelCheckpoint('Output/models/{}.hdf5'.format(args.model), monitor='val_loss',
                         verbose=0, save_best_only=True,
                         save_weights_only=False, mode='auto',
                         period=1

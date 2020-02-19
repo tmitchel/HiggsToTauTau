@@ -215,7 +215,7 @@ def main(args):
     start = time.time()
 
     # create the store
-    store = pd.HDFStore('datasets/{}.h5'.format(args.output),
+    store = pd.HDFStore('Output/datasets/{}.h5'.format(args.output),
                         complevel=9, complib='bzip2')
 
     # build dictionaries of directory/files
@@ -236,8 +236,6 @@ def main(args):
 
     # now handle the systematics
     for idir, files in systematics.iteritems():
-        if 'jetVeto' in idir: # temporary
-            continue
         all_data.clear()
         for ifile in files:
             all_data = handle_tree(all_data, ifile, idir)

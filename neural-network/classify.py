@@ -46,7 +46,7 @@ def main(args):
         raise Exception(
             'Input files must have MUTAU or ETAU in the provided path. You gave {}, ya goober.'.format(args.input_dir))
 
-    model = load_model('models/{}.hdf5'.format(args.model))
+    model = load_model('Output/models/{}.hdf5'.format(args.model))
     all_data = pd.HDFStore(args.input_name)
 
     if not path.isdir(args.output_dir):
@@ -56,18 +56,8 @@ def main(args):
     print 'Files to process...'
     pprint(dict(filelist))
     for syst, ifiles in filelist.iteritems():
-        # if 'Rivet' in syst or 'MES' in syst or 'Jet' in syst or 'DM' in syst:
-        #   continue
-        # if not 'Rivet' in syst:
-        #   continue
-        # if not 'MES' in syst:
-        #   continue
-        # if not 'Jet' in syst:
-        #   continue
-        # if not 'DM' in syst:
-        #   continue
-        if not path.exists('{}/{}'.format(args.output_dir, syst)):
-          mkdir('{}/{}'.format(args.output_dir, syst))
+        if not path.exists('Output/trees/{}/{}'.format(args.output_dir, syst)):
+          mkdir('Output/trees/{}/{}'.format(args.output_dir, syst))
         
         for ifile in ifiles:
             # if not '125' in ifile:
@@ -103,16 +93,16 @@ def main(args):
             ## do the classification
             guesses = model.predict(scaled.values, verbose=True)
 
-            if 'embed' in fname:
-              with uproot.recreate('{}/{}/{}.root'.format(args.output_dir, syst, fname), compression=None) as f:
-                  f[tree_prefix] = uproot.newtree(treedict)
-                  oldtree['NN_disc'] = guesses.reshape(len(guesses))
-                  f[tree_prefix].extend(oldtree)
-            else:
-              with uproot.recreate('{}/{}/{}.root'.format(args.output_dir, syst, fname)) as f:
-                  f[tree_prefix] = uproot.newtree(treedict)
-                  oldtree['NN_disc'] = guesses.reshape(len(guesses))
-                  f[tree_prefix].extend(oldtree)
+            # if 'embed' in fname:
+            #   with uproot.recreate('Output/trees/{}/{}/{}.root'.format(args.output_dir, syst, fname), compression=None) as f:
+            #       f[tree_prefix] = uproot.newtree(treedict)
+            #       oldtree['NN_disc'] = guesses.reshape(len(guesses))
+            #       f[tree_prefix].extend(oldtree)
+            # else:
+            with uproot.recreate('Output/trees/{}/{}/{}.root'.format(args.output_dir, syst, fname)) as f:
+                f[tree_prefix] = uproot.newtree(treedict)
+                oldtree['NN_disc'] = guesses.reshape(len(guesses))
+                f[tree_prefix].extend(oldtree)
 
 
 
