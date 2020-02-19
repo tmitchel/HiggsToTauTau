@@ -295,6 +295,9 @@ int main(int argc, char *argv[]) {
         // create regions
         bool signalRegion = (tau.getMediumIsoDeep() && muon.getIso() < 0.15);
         bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && muon.getIso() < 0.15);
+        if (signal_type != "None") {
+            antiTauIsoRegion = false;  // don't need anti-tau iso region in signal
+        }
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion) {
