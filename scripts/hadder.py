@@ -80,9 +80,7 @@ def main(args):
     ]
     signals = [
         'ggh125_JHU', 'vbf125_JHU', 'wh125_JHU', 'zh125_JHU',
-
-        'ggh125_madgraph', 'ggh125_madgraph', 'ggh125_madgraph',
-        # 'vbf125_madgraph',
+        'ggh125_madgraph',
         'ggh125_powheg', 'vbf125_powheg', 'zh125_powheg'
     ]
     bkg_hadd_list = {
