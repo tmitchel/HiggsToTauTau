@@ -55,25 +55,19 @@ cmsrel CMSSW_CMSSW_10_4_0 && cd CMSSW_10_4_0/src && cmsenv
 2. Clone and build all necessary repositories, including this one.
     - clone this repo
         ```
-        git clone ssh://git@gitlab.cern.ch:7999/KState-HEP-HTT/ltau_analyzers.git
+        git clone -b stabalize-workflow git@github.com:tmitchel/LTau_Analyzers.git
         ```
     - Compile all repos (none are currently needed)
         ```
         cd ${CMSSW_BASE}/src
         scram b -j 8
         ```
-    - Get scale factor files
+    - Setup a python virtual environment
         ```
-        cd ${CMSSW_BASE}/src/ltau_analyzers/setup
-        source download.sh
-        cd ${CMSSW_BASE}/src/ltau_analyzers
-        ```
-    - Setup virtualenv
-        ```
-        cd ${CMSSW_BASE}/src/ltau_analyzers
-        virtualenv .pyenv
+        cd ${CMSSW_BASE}/src/LTau_Analyzers
+        python3 -m venv .pyenv
         source .pyenv/bin/activate  # this must be done every time you log in
-        pip install -r setup/requirements.txt
+        source setup/setup-python.sh
         ```
 3. Compile the appropriate plugin. For example, to compile the 2018 analyzer for the muon+tau channel, use the following command
     ```
@@ -110,7 +104,6 @@ cmsrel CMSSW_CMSSW_10_4_0 && cd CMSSW_10_4_0/src && cmsenv
     This will create stacked histograms for each variable listed at the beginning of the script. 
 10. Create a 2D datacards for Combine
     ```
-    cd $CMSSW_BASE/src/ltau_analyzers
     python scripts/produce_datacards.py -e -y 2018 -t mt_tree -i Output/trees/mt2018_v5p3 --suffix v5p3 -c baseline
     ```
     This script will produce all the 2D datacards needed for Higgs Combine. VBF category variables and binning are configured using the `scripts/binning.json` file where multiple scenarios may be defined. The previous command will use the baseline scenario. Use `python -h` to see other options including running with systematics.
