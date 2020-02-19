@@ -25,7 +25,7 @@ def recognize_signal(ifile, is2018):
 def main(args):
     input_directories = [idir for idir in glob('{}/*'.format(args.input)) if not 'logs' in idir]
     input_files = {
-        idir: [ifile for ifile in glob('{}/{}/*.root'.format(args.input, idir) if to_reweight(ifile))]
+        idir: [ifile for ifile in glob('{}/{}/merged/*.root'.format(args.input, idir) if to_reweight(ifile))]
         for idir in input_directories
     }
     pprint.pprint('Directory structure to process {}'.format(input_files))
