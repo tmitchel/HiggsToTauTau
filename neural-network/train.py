@@ -41,8 +41,8 @@ def main(args):
         TensorBoard(log_dir="logs/{}".format(time()), histogram_freq=200, write_grads=False, write_images=True)
     ]
 
-    sig_df = data[(data['sample_names'] == args.signal)]
-    bkg_df = data[(data['sample_names'] == args.background)]
+    sig_df = data[(data['sample_names'] == args.signal) & (data['is_signal'] > 0)]
+    bkg_df = data[(data['sample_names'] == args.background) & (data['is_signal'] > 0)]
 
     print 'No. Signal Events:     {}'.format(len(sig_df))
     print 'No. Background Events: {}'.format(len(bkg_df))

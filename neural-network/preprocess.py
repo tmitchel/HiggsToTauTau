@@ -25,6 +25,7 @@ scaled_vars = [
 
 default_object = {
     'unscaled': pd.DataFrame(),
+    'selection': pd.DataFrame(),
     'names': np.array([]),
     'isSignal': np.array([]),
     'weights': np.array([]),
@@ -92,7 +93,7 @@ def get_labels(nevents, name):
 
 def apply_selection(df):
     # preselection
-    slim_df = df[(df['njets'] > 1) & (df['mjj'] > 300) & (df['is_signal'] > 0)]
+    slim_df = df[(df['njets'] > 1) & (df['mjj'] > 300)]
 
     # make sure our DataFrame is actually reasonable
     slim_df = slim_df.dropna(axis=0, how='any')  # drop events with a NaN
@@ -119,6 +120,9 @@ def handle_file(all_data, channel, ifile, syst):
     input_df = open_file['{}_tree'.format(channel)].pandas.df(columns)
     slim_df = apply_selection(input_df)
 
+    # get variables needed for selection (so they aren't normalized)
+    selection_df = slim_df[selection_vars]
+
     # get just the weights (they are scaled differently)
     slim_df, weights = split_dataframe(filename, slim_df, todrop)
 
@@ -134,6 +138,8 @@ def handle_file(all_data, channel, ifile, syst):
 
     # add data to the full set
     all_data[syst]['unscaled'] = pd.concat([all_data[syst]['unscaled'], slim_df])
+    # add selection variables to full set
+    all_data[syst]['selection'] = pd.concat([all_data[syst]['selection'], selection_df])
     # insert the name of the current sample
     all_data[syst]['names'] = np.append(all_data[syst]['names'], np.full(len(slim_df), filename.split('/')[-1]))
     # insert the name of the channel
@@ -164,6 +170,10 @@ def format_for_store(all_data, idir, scaler):
     formatted_data = pd.DataFrame(
         scaler.transform(all_data[idir]['unscaled'].values),
         columns=all_data[idir]['unscaled'].columns.values, dtype='float64')
+
+    # add selection variables
+    for column in all_data[idir]['selection'].columns:
+        formatted_data[column] = all_data[idir]['selection'][column].values
 
     # add other useful data
     formatted_data['sample_names'] = pd.Series(all_data[idir]['names'])
