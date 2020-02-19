@@ -1,4 +1,5 @@
 import json
+import pandas
 import pprint
 import uproot
 from glob import glob
@@ -26,11 +27,11 @@ def recognize_signal(ifile, is2018):
 def main(args):
     input_directories = [idir for idir in glob('{}/*'.format(args.input)) if not 'logs' in idir]
     input_files = {
-        idir: [ifile for ifile in glob('{}/merged/*.root'.format(idir) if to_reweight(ifile))]
+        idir: [ifile for ifile in glob('{}/merged/*.root'.format(idir)) if to_reweight(ifile)]
         for idir in input_directories
     }
     print 'Directory structure to process'
-    pprint.pprint(inut_files)
+    pprint.pprint(input_files)
 
     boilerplate = {}
     with open('configs/boilerplate.json', 'r') as config_file:
@@ -49,10 +50,11 @@ def main(args):
             key, process = recognize_signal(ifile, args.is2018)
             weight_names = boilerplate[key][process]
             for weight, name in weight_names:
+                print idir, ifile, name
                 weighted_signal_events = signal_events.copy(deep=True)
                 weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
 
-                with uproot.recreate('{}/{}.root'.format(idir, name), compression=None) as f:
+                with uproot.recreate('{}/{}.root'.format(idir, name)) as f:
                     f[args.tree_name] = uproot.newtree(treedict)
                     f[args.tree_name].extend(weighted_signal_events.to_dict('list'))
 
