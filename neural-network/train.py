@@ -41,37 +41,11 @@ def main(args):
         TensorBoard(log_dir="logs/{}".format(time()), histogram_freq=200, write_grads=False, write_images=True)
     ]
 
-    ## get the data for the two-classes to discriminate
-    training_processes = data[
-        (data['sample_names'] == args.signal) | (data['sample_names'] == args.background)
-    ]
+    sig_df = data[(data['sample_names'] == args.signal)]
+    bkg_df = data[(data['sample_names'] == args.background)]
 
-    ## apply VBF category selection
-    vbf_processes = training_processes[
-        (training_processes['is_signal'] > 0)
-        ]
-
-    print 'No. Signal Events:     {}'.format(len(vbf_processes[vbf_processes['sample_names'] == args.signal]))
-    print 'No. Background Events: {}'.format(len(vbf_processes[vbf_processes['sample_names'] == args.background]))
-
-    etau   = vbf_processes[(vbf_processes['lepton'] == 'et')]
-    mutau  = vbf_processes[(vbf_processes['lepton'] == 'mt')]
-
-    ## do event selection
-    selected_et, selected_mt = pd.DataFrame(), pd.DataFrame()
-
-    ## electron-tau channel selection (all in vbf_process for now)
-    if len(etau) > 0:
-        selected_et = etau
-
-    ## muon-tau channel selection (all in vbf_process for now)
-    if len(mutau) > 0:
-        selected_mt = mutau
-
-    ## combine channels into total dataset
-    combine = pd.concat([selected_et, selected_mt])
-    sig_df = combine[(combine['sample_names'] == args.signal)]
-    bkg_df = combine[(combine['sample_names'] == args.background)]
+    print 'No. Signal Events:     {}'.format(len(sig_df))
+    print 'No. Background Events: {}'.format(len(bkg_df))
 
     ## reweight to have equal events per class
     scaleto = max(len(sig_df), len(bkg_df))
