@@ -1,5 +1,6 @@
 import os
 import sys
+import copy
 import math
 import time
 import uproot
@@ -22,25 +23,33 @@ scaled_vars = [
     'costheta2', 'costhetastar', 'mjj', 'higgs_pT', 'm_sv',
 ]
 
+default_object = {
+    'unscaled': pd.DataFrame(),
+    'selection': pd.DataFrame(),
+    'names': np.array([]),
+    'isSignal': np.array([]),
+    'weights': np.array([]),
+    'index': np.array([]),
+    'lepton': np.array([])
+}
 
 def build_filelist(el_input_dir, mu_input_dir):
     files = [
-        ifile for ifile in glob('{}/*/merged/*.root'.format(el_input_dir))
+        ('et', ifile) for ifile in glob('{}/*/merged/*.root'.format(el_input_dir))
     ]
     files += [
-        ifile for ifile in glob('{}/*/merged/*.root'.format(mu_input_dir))
+        ('mt', ifile) for ifile in glob('{}/*/merged/*.root'.format(mu_input_dir))
     ]
 
     nominal = {'nominal': []}
     systematics = {}
-    for fname in files:
-
+    for channel, fname in files:
       if 'SYST_' in fname:
           keyname = fname.split('SYST_')[-1].split('/')[0]
           systematics.setdefault(keyname, [])
-          systematics[keyname].append(fname)
+          systematics[keyname].append((channel, fname))
       else:
-          nominal['nominal'].append(fname)
+          nominal['nominal'].append((channel, fname))
     pprint(nominal)
     pprint(systematics)
     return nominal, systematics
@@ -88,26 +97,9 @@ def get_labels(nevents, name):
     return isSignal, isSM
 
 
-def loadFile(ifile, open_file, syst):
-    print 'Loading input file...', ifile, 'with syst...', syst
-    if 'mutau' in ifile or 'mtau' in ifile:
-        channel = 'mt'
-    elif 'etau' in ifile or 'etau' in ifile:
-        channel = 'et'
-    else:
-        raise Exception(
-            'Input files must have MUTAU or ETAU in the provided path. You gave {}, ya goober.'.format(ifile))
-
-    columns, todrop = get_columns(ifile)
-
-    # read from TTrees into DataFrame
-    if syst == 'nominal':
-        input_df = open_file['{}_tree'.format(channel)].pandas.df(columns)
-    else:
-        input_df = open_file['{}_tree'.format(channel)].pandas.df(columns)
-    input_df['idx'] = np.array([i for i in xrange(0, len(input_df.index))])
-
-    slim_df = input_df[(input_df['njets'] > 1) & (input_df['mjj'] > 300)]  # preselection
+def apply_selection(df):
+    # preselection
+    slim_df = df[(df['njets'] > 1) & (df['mjj'] > 300)]
 
     # make sure our DataFrame is actually reasonable
     slim_df = slim_df.dropna(axis=0, how='any')  # drop events with a NaN
@@ -120,11 +112,27 @@ def loadFile(ifile, open_file, syst):
     slim_df = slim_df[(slim_df['costheta2'] > -1) & (slim_df['costheta2'] < 1)]
     slim_df = slim_df[(slim_df['costhetastar'] > -1) & (slim_df['costhetastar'] < 1)]
 
+    return slim_df
+
+
+def handle_file(all_data, channel, ifile, syst):
+    print 'Loading input file...', filename, 'with syst...', syst
+    filename = ifile.replace('.root', '')
+    syst = syst.replace(';1', '')
+
+    open_file = uproot.open(ifile)
+    columns, todrop = get_columns(filename)
+
+    input_df = open_file['{}_tree'.format(channel)].pandas.df(columns)
+    input_df['idx'] = np.array([i for i in xrange(0, len(input_df.index))])
+
+    slim_df = apply_selection(input_df)
+
     # get variables needed for selection (so they aren't normalized)
     selection_df = slim_df[selection_vars]
 
     # get just the weights (they are scaled differently)
-    slim_df, weights, index = split_dataframe(ifile, slim_df, todrop)
+    slim_df, weights, index = split_dataframe(filename, slim_df, todrop)
 
     # add the event label
     isSignal, isSM = get_labels(len(slim_df), ifile.lower())
@@ -134,47 +142,21 @@ def loadFile(ifile, open_file, syst):
     weights = MinMaxScaler(feature_range=(1., 2.)).fit_transform(
         weights.values.reshape(-1, 1))
 
-    return {
-        'slim_df': slim_df,
-        'selection_df': selection_df,
-        'isSignal': isSignal,
-        'weights': weights,
-        'index': index,
-        'somenames': np.full(len(slim_df), ifile.split('/')[-1]),
-        'lepton': np.full(len(slim_df), channel),
-    }, syst.replace(';1', '')
-
-
-def handle_tree(all_data, ifile, syst):
-    default_object = {
-        'unscaled': pd.DataFrame(),
-        'selection': pd.DataFrame(),
-        'names': np.array([]),
-        'isSignal': np.array([]),
-        'weights': np.array([]),
-        'index': np.array([]),
-        'lepton': np.array([])
-    }
-
-    open_file = uproot.open(ifile)
-    filename = ifile.replace('.root', '')
-
-    proc_file, syst = loadFile(filename, open_file, syst)
-    all_data.setdefault(syst, default_object.copy())
+    all_data.setdefault(syst, copy.deepcopy(default_object))
 
     # add data to the full set
-    all_data[syst]['unscaled'] = pd.concat([all_data[syst]['unscaled'], proc_file['slim_df']])
+    all_data[syst]['unscaled'] = pd.concat([all_data[syst]['unscaled'], slim_df])
     # add selection variables to full set
-    all_data[syst]['selection'] = pd.concat([all_data[syst]['selection'], proc_file['selection_df']])
+    all_data[syst]['selection'] = pd.concat([all_data[syst]['selection'], selection_df])
     # insert the name of the current sample
-    all_data[syst]['names'] = np.append(all_data[syst]['names'], proc_file['somenames'])
+    all_data[syst]['names'] = np.append(all_data[syst]['names'], np.full(len(slim_df), filename.split('/')[-1]))
     # insert the name of the channel
-    all_data[syst]['lepton'] = np.append(all_data[syst]['lepton'], proc_file['lepton'])
+    all_data[syst]['lepton'] = np.append(all_data[syst]['lepton'], np.full(len(slim_df), channel))
     # labels for signal/background
-    all_data[syst]['isSignal'] = np.append(all_data[syst]['isSignal'], proc_file['isSignal'])
+    all_data[syst]['isSignal'] = np.append(all_data[syst]['isSignal'], isSignal)
     # weights scaled from 0 - 1
-    all_data[syst]['weights'] = np.append(all_data[syst]['weights'], proc_file['weights'])
-    all_data[syst]['index'] = np.append(all_data[syst]['index'], proc_file['index'])
+    all_data[syst]['weights'] = np.append(all_data[syst]['weights'], weights)
+    all_data[syst]['index'] = np.append(all_data[syst]['index'], index)
 
     return all_data
 
@@ -224,8 +206,8 @@ def main(args):
     # handle the nominal case first
     for idir, files in nominal.iteritems():
         all_data = {}
-        for ifile in files:
-            all_data = handle_tree(all_data, ifile, idir)
+        for info in files:
+            all_data = handle_file(all_data, info[0], info[1], idir)
 
     # build the scaler fit only to nominal SM backgrounds
     sm_only = all_data['nominal']['unscaled'][all_data['nominal']['unscaled']['isSM'] == 1]
@@ -237,8 +219,8 @@ def main(args):
     # now handle the systematics
     for idir, files in systematics.iteritems():
         all_data.clear()
-        for ifile in files:
-            all_data = handle_tree(all_data, ifile, idir)
+        for info in files:
+            all_data = handle_file(all_data, info[0], info[1], idir)
 
         # scale and save to the output file
         store[idir] = format_for_store(all_data, idir, scaler)
