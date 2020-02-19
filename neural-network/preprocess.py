@@ -25,11 +25,9 @@ scaled_vars = [
 
 default_object = {
     'unscaled': pd.DataFrame(),
-    'selection': pd.DataFrame(),
     'names': np.array([]),
     'isSignal': np.array([]),
     'weights': np.array([]),
-    'index': np.array([]),
     'lepton': np.array([])
 }
 
@@ -57,7 +55,7 @@ def build_filelist(el_input_dir, mu_input_dir):
 
 def get_columns(fname):
     columns = scaled_vars + selection_vars
-    todrop = ['evtwt', 'idx']
+    todrop = ['evtwt']
     if 'vbf125_JHU' in fname:
         columns = columns + ['wt_vbf_a1']
         todrop = todrop + ['wt_vbf_a1']
@@ -66,22 +64,17 @@ def get_columns(fname):
 
 def split_dataframe(fname, slim_df, todrop):
     weights = slim_df['evtwt']
-    index = slim_df['idx']
     if 'vbf125_JHU' in fname:
         weights = weights * slim_df['wt_vbf_a1']
     slim_df = slim_df.drop(selection_vars+todrop, axis=1)
     slim_df = slim_df.astype('float64')
-    return slim_df, weights, index
+    return slim_df, weights
 
 
 def get_labels(nevents, name):
     # get training label
     isSignal = np.zeros(nevents)
     if 'vbf125' in name or 'ggh125' in name or 'wh125' in name or 'zh125' in name:
-        isSignal = np.ones(nevents)
-
-    # temp
-    if 'vbf' in name:
         isSignal = np.ones(nevents)
 
     # get scaling label
@@ -99,7 +92,7 @@ def get_labels(nevents, name):
 
 def apply_selection(df):
     # preselection
-    slim_df = df[(df['njets'] > 1) & (df['mjj'] > 300)]
+    slim_df = df[(df['njets'] > 1) & (df['mjj'] > 300) & (df['is_signal'] > 0)]
 
     # make sure our DataFrame is actually reasonable
     slim_df = slim_df.dropna(axis=0, how='any')  # drop events with a NaN
@@ -124,15 +117,10 @@ def handle_file(all_data, channel, ifile, syst):
     columns, todrop = get_columns(filename)
 
     input_df = open_file['{}_tree'.format(channel)].pandas.df(columns)
-    input_df['idx'] = np.array([i for i in xrange(0, len(input_df.index))])
-
     slim_df = apply_selection(input_df)
 
-    # get variables needed for selection (so they aren't normalized)
-    selection_df = slim_df[selection_vars]
-
     # get just the weights (they are scaled differently)
-    slim_df, weights, index = split_dataframe(filename, slim_df, todrop)
+    slim_df, weights = split_dataframe(filename, slim_df, todrop)
 
     # add the event label
     isSignal, isSM = get_labels(len(slim_df), ifile.lower())
@@ -146,8 +134,6 @@ def handle_file(all_data, channel, ifile, syst):
 
     # add data to the full set
     all_data[syst]['unscaled'] = pd.concat([all_data[syst]['unscaled'], slim_df])
-    # add selection variables to full set
-    all_data[syst]['selection'] = pd.concat([all_data[syst]['selection'], selection_df])
     # insert the name of the current sample
     all_data[syst]['names'] = np.append(all_data[syst]['names'], np.full(len(slim_df), filename.split('/')[-1]))
     # insert the name of the channel
@@ -156,7 +142,6 @@ def handle_file(all_data, channel, ifile, syst):
     all_data[syst]['isSignal'] = np.append(all_data[syst]['isSignal'], isSignal)
     # weights scaled from 0 - 1
     all_data[syst]['weights'] = np.append(all_data[syst]['weights'], weights)
-    all_data[syst]['index'] = np.append(all_data[syst]['index'], index)
 
     return all_data
 
@@ -180,16 +165,11 @@ def format_for_store(all_data, idir, scaler):
         scaler.transform(all_data[idir]['unscaled'].values),
         columns=all_data[idir]['unscaled'].columns.values, dtype='float64')
 
-    # add selection variables
-    for column in all_data[idir]['selection'].columns:
-        formatted_data[column] = all_data[idir]['selection'][column].values
-
     # add other useful data
     formatted_data['sample_names'] = pd.Series(all_data[idir]['names'])
     formatted_data['lepton'] = pd.Series(all_data[idir]['lepton'])
     formatted_data['isSignal'] = pd.Series(all_data[idir]['isSignal'])
     formatted_data['evtwt'] = pd.Series(all_data[idir]['weights'])
-    formatted_data['idx'] = pd.Series(all_data[idir]['index'])
     return formatted_data
 
 
