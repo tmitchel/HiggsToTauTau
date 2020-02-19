@@ -154,13 +154,13 @@ This example compiles the electron-tau channel analyzer to make an executable na
 
 Most scripts cannot be run with the tools provided by the basic CMSSW environment. It is recommended to create a virtual environment for installing all necessary packages.
 ```
-virtualenv .pyenv
+python3 -m venv .pyenv
 ```
 This will create a python2 virtual environment in the directory .pyenv. To activiate this environment, use
 ```
 source .pyenv/bin/activate  # deactivate to return to normal environment
 ```
-With the environment activated, install all necessary packages
+With the environment activated, install all necessary packages (/cvmfs does weird things so it's hard to get a requirements.txt)
 ```
-pip install -r setup/requirements.txt
+source setup/setup-python.sh
 ```
