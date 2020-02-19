@@ -20,13 +20,11 @@ class Config:
         self.bins = bins
         self.queue = None
         self.fake_weight = None
-        self.ac_weights = None
         self.hists = None
 
     def __deepcopy__(self, memo):
       cp = Config(deepcopy(self.name, memo), deepcopy(self.data, memo), deepcopy(self.xvar_name, memo), deepcopy(self.bins, memo))
       cp.fake_weight = deepcopy(self.fake_weight, memo)
-      cp.ac_weights = deepcopy(self.ac_weights, memo)
       cp.queue = None
       cp.hists = deepcopy(self.hists, memo)
       return cp
@@ -34,16 +32,6 @@ class Config:
     def submit(self):
         self.queue = Queue()
         return {'config': self}
-
-def get_ac_weights(name, ac_reweighting_map):
-    if 'ggh' in name.lower():
-        return ac_reweighting_map['ggh']
-    elif 'vbf' in name.lower():
-        return ac_reweighting_map['vbf']
-    elif 'wh' in name.lower():
-        return ac_reweighting_map['wh']
-    elif 'zh' in name.lower():
-        return ac_reweighting_map['zh']
 
 
 def build_histogram(name, bins, output_file, directory):
@@ -53,8 +41,7 @@ def build_histogram(name, bins, output_file, directory):
 
 def fill_histograms(config):
     # get common variables
-    evtwt = config.data['evtwt'].values if config.ac_weights == None else (
-        config.data['evtwt'] * config.data[config.ac_weights]).values
+    evtwt = config.data['evtwt'].values
     xvar = config.data[config.xvar_name].values
 
     if config.fake_weight != None:
@@ -86,20 +73,6 @@ def fill_process_list(data, name, variable, bins, boilerplate, output_file, dire
     else:
         config.hists = build_histogram(name, bins, output_file, directory)
         all_hists['nominal'] = config.submit()
-        if '_JHU' in name or '_madgraph' in name:
-            if '_JHU' in name:
-                ac_map = 'jhu_ac_reweighting_map'
-            else:
-                if year == '2018':
-                    ac_map = 'new_mg_ac_reweighting_map'
-                else:
-                    ac_map = 'mg_ac_reweighting_map'
-
-            for weight in get_ac_weights(name, boilerplate[ac_map]):
-                ac_config = copy.deepcopy(config)
-                ac_config.hists = build_histogram(weight[1], bins, output_file, directory)
-                ac_config.ac_weights = weight[0]
-                all_hists[weight[1]] = ac_config.submit()
 
     return [
         Process(target=fill_histograms, kwargs=proc_args, name=proc_name) for proc_name, proc_args in all_hists.iteritems()
@@ -172,7 +145,7 @@ def main(args):
                 name = name.replace('embed', 'ZTT')
 
             variables = set([
-                'is_signal', 'is_antiTauIso', 'contamination', 'njets', 'mjj', 'evtwt', 'wt_*',
+                'is_signal', 'is_antiTauIso', 'contamination', 'njets', 'mjj', 'evtwt',
                 't1_decayMode', 'vis_mass', 'higgs_pT', 'm_sv'
             ] + config_variables.keys() + [zvars[0]])
 

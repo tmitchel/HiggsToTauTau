@@ -25,23 +25,13 @@ def build_filelist(input_dir):
     return filelist
 
 
-def get_ac_weights(name, ac_reweighting_map):
-    if 'ggh' in name.lower():
-        return ac_reweighting_map['ggh']
-    elif 'vbf' in name.lower():
-        return ac_reweighting_map['vbf']
-    elif 'wh' in name.lower():
-        return ac_reweighting_map['wh']
-    elif 'zh' in name.lower():
-        return ac_reweighting_map['zh']
-
 
 def build_histogram(name, x_bins, y_bins):
     return ROOT.TH2F(name, name, len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins))
 
 
-def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, ac_weight=None, fake_weight=None, DCP_idx=None):
-    evtwt = data['evtwt'].to_numpy(copy=True) if ac_weight == None else (data['evtwt'] * data[ac_weight]).to_numpy(copy=True)
+def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fake_weight=None, DCP_idx=None):
+    evtwt = data['evtwt'].to_numpy(copy=True)
     xvar = data[xvar_name].values
     yvar = data[yvar_name].values
     zvar = data[zvar_name].values if zvar_name != None else None
@@ -168,7 +158,7 @@ def main(args):
                 name = name.replace('embed', 'ZTT')
 
             variables = set([
-                'is_signal', 'is_antiTauIso', 'contamination', 'njets', 'mjj', 'evtwt', 'wt_*',
+                'is_signal', 'is_antiTauIso', 'contamination', 'njets', 'mjj', 'evtwt',
                 't1_decayMode', 'vis_mass', 'higgs_pT', 'm_sv',
                 'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH',
                 vbf_cat_x_var, vbf_cat_y_var, vbf_cat_edge_var
@@ -236,61 +226,6 @@ def main(args):
 
                 # write then reset histograms
                 output_file.Write()
-
-                if 'vbf125_JHU' in name or 'ggh125_JHU' in name:
-                    for weight in get_ac_weights(name, boilerplate['jhu_ac_reweighting_map']):
-                        logging.info('Reweighting sample {} to {}'.format(name, weight[1]+postfix))
-                        # start with 0-jet category
-                        output_file.cd('{}_0jet'.format(channel_prefix))
-                        zero_jet_hist = build_histogram(weight[1]+postfix, decay_mode_bins, vis_mass_bins)
-                        fill_hists(zero_jet_events, zero_jet_hist, 't1_decayMode', 'vis_mass', ac_weight=weight[0])
-
-                        # now boosted category
-                        output_file.cd('{}_boosted'.format(channel_prefix))
-                        boost_hist = build_histogram(weight[1]+postfix, higgs_pT_bins_boost, m_sv_bins_boost,)
-                        fill_hists(boosted_events, boost_hist, 'higgs_pT', 'm_sv', ac_weight=weight[0])
-
-                        # vbf category is last
-                        output_file.cd('{}_vbf'.format(channel_prefix))
-                        vbf_hist = build_histogram(weight[1]+postfix, vbf_cat_x_bins, vbf_cat_y_bins)
-                        fill_hists(vbf_events, vbf_hist, vbf_cat_x_var, vbf_cat_y_var, ac_weight=weight[0])
-
-                        # vbf sub-categories event after normal vbf categories
-                        vbf_cat_hists = []
-                        for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
-                            output_file.cd('{}_{}'.format(channel_prefix, cat))
-                            vbf_cat_hists.append(build_histogram(weight[1]+postfix, vbf_cat_x_bins, vbf_cat_y_bins))
-                        fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var,
-                                zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, ac_weight=weight[0],
-                                DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
-                        output_file.Write()
-                elif '_madgraph' in name and not 'vbf' in name:
-                    for weight in get_ac_weights(name, boilerplate['mg_ac_reweighting_map']):
-                        logging.info('Reweighting sample {} to {}'.format(name, weight[1]+postfix))
-                        # start with 0-jet category
-                        output_file.cd('{}_0jet'.format(channel_prefix))
-                        zero_jet_hist = build_histogram(weight[1]+postfix+postfix, decay_mode_bins, vis_mass_bins)
-                        fill_hists(zero_jet_events, zero_jet_hist, 't1_decayMode', 'vis_mass', ac_weight=weight[0])
-
-                        # now boosted category
-                        output_file.cd('{}_boosted'.format(channel_prefix))
-                        boost_hist = build_histogram(weight[1]+postfix, higgs_pT_bins_boost, m_sv_bins_boost,)
-                        fill_hists(boosted_events, boost_hist, 'higgs_pT', 'm_sv', ac_weight=weight[0])
-
-                        # vbf category is last
-                        output_file.cd('{}_vbf'.format(channel_prefix))
-                        vbf_hist = build_histogram(weight[1]+postfix, vbf_cat_x_bins, vbf_cat_y_bins)
-                        fill_hists(vbf_events, vbf_hist, vbf_cat_x_var, vbf_cat_y_var, ac_weight=weight[0])
-
-                        # vbf sub-categories event after normal vbf categories
-                        vbf_cat_hists = []
-                        for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
-                            output_file.cd('{}_{}'.format(channel_prefix, cat))
-                            vbf_cat_hists.append(build_histogram(weight[1]+postfix, vbf_cat_x_bins, vbf_cat_y_bins))
-                        fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var,
-                                zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, ac_weight=weight[0],
-                                DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
-                        output_file.Write()
 
             # do anti-iso categorization for fake-factor using data
             else:
