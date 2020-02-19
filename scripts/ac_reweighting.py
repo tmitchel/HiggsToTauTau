@@ -1,3 +1,4 @@
+import json
 import pprint
 import uproot
 from glob import glob
@@ -61,5 +62,5 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--input', '-i', required=True, help='path to input files')
     parser.add_argument('--tree-name', '-t', required=True, help='name of TTree')
-    parser.add_argument('--is2018', action='store_tree', help='is this 2018?')
+    parser.add_argument('--is2018', action='store_true', help='is this 2018?')
     main(parser.parse_args())
