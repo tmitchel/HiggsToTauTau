@@ -65,7 +65,7 @@ cmsrel CMSSW_CMSSW_10_4_0 && cd CMSSW_10_4_0/src && cmsenv
     - Setup a python virtual environment
         ```
         cd ${CMSSW_BASE}/src/LTau_Analyzers
-        python3 -m venv .pyenv
+        virtualenv .pyenv
         source .pyenv/bin/activate  # this must be done every time you log in
         source setup/setup-python.sh
         ```
@@ -154,7 +154,7 @@ This example compiles the electron-tau channel analyzer to make an executable na
 
 Most scripts cannot be run with the tools provided by the basic CMSSW environment. It is recommended to create a virtual environment for installing all necessary packages.
 ```
-python3 -m venv .pyenv
+virtualenv .pyenv
 ```
 This will create a python2 virtual environment in the directory .pyenv. To activiate this environment, use
 ```
