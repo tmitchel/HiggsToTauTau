@@ -4,7 +4,7 @@ from glob import glob
 
 
 def to_reweight(ifile):
-    for name in ['ggh125_madgraph', 'vbf125_JHU', 'wh125_JHU', 'zh125_JHU']:
+    for name in ['ggh125_madgraph.root', 'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root']:
         if name in ifile:
             return True
     return False
@@ -25,10 +25,11 @@ def recognize_signal(ifile, is2018):
 def main(args):
     input_directories = [idir for idir in glob('{}/*'.format(args.input)) if not 'logs' in idir]
     input_files = {
-        idir: [ifile for ifile in glob('{}/{}/merged/*.root'.format(args.input, idir) if to_reweight(ifile))]
+        idir: [ifile for ifile in glob('{}/merged/*.root'.format(idir) if to_reweight(ifile))]
         for idir in input_directories
     }
-    pprint.pprint('Directory structure to process {}'.format(input_files))
+    print 'Directory structure to process'
+    pprint.pprint(inut_files)
 
     boilerplate = {}
     with open('configs/boilerplate.json', 'r') as config_file:
