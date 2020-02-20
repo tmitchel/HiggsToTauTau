@@ -44,7 +44,7 @@ def trainingPlots(history, name):
     ax.legend(loc="upper left")
     ax.set_xlabel('epoch')
     ax.set_ylabel('acc')
-    plt.savefig('Outputplots/{}.png'.format(name))
+    plt.savefig('Output/plots/{}.png'.format(name))
 
 
 def discPlot(name, model, train_sig, train_bkg, test_sig, test_bkg):
