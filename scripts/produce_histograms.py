@@ -21,16 +21,16 @@ class Config:
     be done in parallel.
 
     Variables:
-    name -- name of the process
-    data -- pandas DataFrame containing event data
-    xvar_name -- variable being plotted
-    bins -- binning for the histogram
-    queue -- multiprocessing.Queue to write output histogram
+    name        -- name of the process
+    data        -- pandas DataFrame containing event data
+    xvar_name   -- variable being plotted
+    bins        -- binning for the histogram
+    queue       -- multiprocessing.Queue to write output histogram
     fake_weight -- for jetFakes, we need to weight with the fake_weight
-    hists -- output histograms
+    hists       -- output histograms
 
     Functions:
-    submit -- create a new Queue and return Config as a dict to provide as kwargs
+    submit      -- create a new Queue and return Config as a dict to provide as kwargs
     """
 
     def __init__(self, name, data, variable, bins):
@@ -87,19 +87,19 @@ def fill_process_list(data, name, variable, bins, boilerplate, output_file, dire
     returned for processing later.
 
     Variables:
-    data -- pandas DataFrame containing event information
-    name -- name of the process
-    variable -- variable to plot
-    bins -- binning for the histogram
+    data        -- pandas DataFrame containing event information
+    name        -- name of the process
+    variable    -- variable to plot
+    bins        -- binning for the histogram
     boilerplate -- json config containing some naming
     output_file -- TFile where histograms will be written
-    directory -- name of TDirectory for this histogram
-    year -- which year is this? (2016, 2017, 2018)
-    doSyst -- fill histograms after systematic shifts (not implemented) 
+    directory   -- name of TDirectory for this histogram
+    year        -- which year is this? (2016, 2017, 2018)
+    doSyst      -- fill histograms after systematic shifts (not implemented) 
 
     Returns:
-    List -- multiprocessing.Process-es to be run
-    all_hists -- dictionary containing Configs used in List
+    List        -- multiprocessing.Process-es to be run
+    all_hists   -- dictionary containing Configs used in List
     """
     all_hists = {}
     config = Config(name, data, variable, bins)

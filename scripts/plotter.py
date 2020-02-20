@@ -199,13 +199,13 @@ def BuildPlot(args):
     Build the stacked plot with everything included and formatted then save as PDF.
 
     Variables (inside args):
-    input -- input TFile full of histograms
-    category -- which TDirectory to read
-    variable -- which variable to plot
-    scale -- value to scale the top of the plot (keep histograms from being cutoff)
-    year -- which era is this?
-    label -- LaTeX label for variable on x-axis
-    prefix -- name to attach to output file
+    input       -- input TFile full of histograms
+    category    -- which TDirectory to read
+    variable    -- which variable to plot
+    scale       -- value to scale the top of the plot (keep histograms from being cutoff)
+    year        -- which era is this?
+    label       -- LaTeX label for variable on x-axis
+    prefix      -- name to attach to output file
     """
     ifile = ROOT.TFile(args.input)
     category = ifile.Get(args.category)
