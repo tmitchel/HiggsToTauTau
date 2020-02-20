@@ -82,12 +82,12 @@ def get_labels(nevents, name):
     """Label events as sig vs bkg and SM vs non-SM."""
     # get training label
     isSignal = np.zeros(nevents)
-    if 'vbf125' in name or 'ggh125' in name or 'wh125' in name or 'zh125' in name:
+    if 'vbf125' in name or 'ggh125' in name or 'wh125' in name or 'zh125' in name or 'qqh' in name:
         isSignal = np.ones(nevents)
 
     # get scaling label
     isSM = np.ones(nevents)
-    if 'JHU' in name or 'madgraph' in name:
+    if 'JHU' in name or 'madgraph' in name or 'reweighted' in name or 'GGH2Jets' in name:
         isSM = np.zeros(nevents)
     elif 'data' in name:
         isSM = np.zeros(nevents)

@@ -1,6 +1,8 @@
 from visualize import discPlot, trainingPlots
 from time import time
 from sklearn.model_selection import train_test_split
+from os import environ
+environ['KERAS_BACKEND'] = 'tensorflow'
 from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
@@ -8,8 +10,6 @@ from keras import optimizers
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from os import environ
-environ['KERAS_BACKEND'] = 'tensorflow'
 
 
 def main(args):

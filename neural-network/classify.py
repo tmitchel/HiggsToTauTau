@@ -6,15 +6,15 @@ import pandas as pd
 from glob import glob
 from array import array
 from pprint import pprint
+from os import environ, path, mkdir, listdir
+environ['KERAS_BACKEND'] = 'tensorflow'
 from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
 from collections import defaultdict
-from os import environ, path, mkdir, listdir
-environ['KERAS_BACKEND'] = 'tensorflow'
 
 
 def build_filelist(input_dir):
-    """Build list of files to be processed.""""
+    """Build list of files to be processed."""
     files = [
         ifile for ifile in glob('{}/*/merged/*.root'.format(input_dir))
     ]
