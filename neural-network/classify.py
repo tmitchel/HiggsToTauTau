@@ -71,7 +71,6 @@ def main(args):
 
             # read input and get things ready for output TTree
             open_file = uproot.open(ifile)
-            nevents = open_file['nevents']
             oldtree = open_file[tree_prefix].arrays(['*'])
             treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
             treedict['NN_disc'] = numpy.float64
