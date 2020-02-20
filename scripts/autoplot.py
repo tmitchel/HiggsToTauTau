@@ -25,7 +25,6 @@ plots = [
     ('costheta2', 'cos(#theta_{2})', 1.4),
     ('costhetastar', 'cos(#theta*)', 2.2),
 
-
     ('el_pt', 'Electron p_{T}', 1.4),
     ('el_eta', 'Electron #eta', 2.2),
     ('mu_pt', 'Muon p_{T}', 1.4),
@@ -35,6 +34,7 @@ plots = [
 categories = [ '_0jet', '_boosted', '_vbf', '_inclusive']
 
 class PlotArgs():
+    """Wrap all inputs as if they are comming from ArgumentParser"""
     def __init__(self, input, year, category, variable, label, prefix, scale):
         self.input = input
         self.year = year

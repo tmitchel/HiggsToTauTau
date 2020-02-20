@@ -12,6 +12,7 @@ from pprint import pprint
 
 
 def build_filelist(input_dir):
+    """Gather all files to process (including systematic shifts)"""
     files = [ifile for ifile in glob('{}/*/*.root'.format(input_dir))]
 
     filelist = {'nominal': []}
@@ -25,12 +26,31 @@ def build_filelist(input_dir):
     return filelist
 
 
-
 def build_histogram(name, x_bins, y_bins):
+    """Build TH2F to fill later.""""
     return ROOT.TH2F(name, name, len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins))
 
 
 def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fake_weight=None, DCP_idx=None):
+    """
+    Fill histograms with all necessary weights, binnings, etc.
+
+    Produce a 2D histogram (or set of 2D histograms) with everything necessary for datacards. The histograms
+    will be properly weighted and binned.
+
+    Variables:
+    data        -- pandas DataFrame containing event data
+    hists       -- histogram (or list of histograms) to fill
+    xvar_name   -- name of variable for x-axis
+    yvar_name   -- name of variable for y-axis
+    zvar_name   -- if provided, fill a histogram for each bin in this variable
+    edges       -- binning for zvar_name. Must be provided if zvar_name is provided
+    fake_weight -- weights to be applied to jetFakes
+    DCP_idx     -- hists index offset (DCP minus bins are offset by this amount)
+
+    Returns:
+    hists -- filled histograms
+    """
     evtwt = data['evtwt'].to_numpy(copy=True)
     xvar = data[xvar_name].values
     yvar = data[yvar_name].values
@@ -65,6 +85,7 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
 
 
 def get_syst_name(channel, syst, syst_name_map):
+    """Map input systematic name to the name needed for Higgs Combine datacards"""
     if syst == 'nominal':
         return ''
     elif syst in syst_name_map.keys():
@@ -75,6 +96,7 @@ def get_syst_name(channel, syst, syst_name_map):
     else:
         print '\t \033[91m[INFO]  {} is unknown. Skipping...\033[0m'.format(syst)
         return 'unknown'
+
 
 def main(args):
     start = time.time()
@@ -95,7 +117,6 @@ def main(args):
         vbf_cat_y_var, vbf_cat_y_bins = config['vbf_cat_y_bins']
         vbf_cat_edge_var, vbf_cat_edges = config['vbf_cat_edges']
 
-    # channel_prefix = args.tree_name.replace('_tree', '')  # need prefix for things later
     channel_prefix = args.tree_name.replace('mt_tree', 'mt')
     channel_prefix = channel_prefix.replace('et_tree', 'et')
     assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
@@ -120,19 +141,20 @@ def main(args):
     # output_file = uproot.recreate('Output/templates/htt_{}_{}_{}_fa3_{}{}.root'.format(channel_prefix,
     #                                                                               ztt_name, syst_name, args.date, '_'+args.suffix))
 
-    logging.basicConfig(filename='logs/2D_htt_{}_{}_{}_fa3_{}_{}{}.log'.format(channel_prefix, ztt_name, syst_name, args.year, date, args.suffix))
+    logging.basicConfig(filename='logs/2D_htt_{}_{}_{}_fa3_{}_{}{}.log'.format(channel_prefix,
+                                                                               ztt_name, syst_name, args.year, date, args.suffix))
     nsysts = len(filelist.keys())
     idx = -1
     for syst, files in filelist.iteritems():
         if not args.syst and syst != 'nominal':
-          continue
+            continue
         idx += 1
         print 'Processing syst {} ({} of {})'.format(syst, idx, nsysts)
         postfix = get_syst_name(channel_prefix, syst, syst_name_map)
-        if postfix == 'unknown': # skip unknown systematics
+        if postfix == 'unknown':  # skip unknown systematics
             continue
 
-        postfix = postfix.replace('YEAR', args.year) # add correct year
+        postfix = postfix.replace('YEAR', args.year)  # add correct year
 
         for ifile in files:
             # handle ZTT vs embedded
@@ -143,7 +165,7 @@ def main(args):
 
             name = ifile.replace('.root', '').split('/')[-1]
             if 'wh125_JHU_CMS' in name or 'zh125_JHU_CMS' in name or name == 'wh125_JHU' or name == 'zh125_JHU':
-              continue
+                continue
 
             logging.info('Processing: {}'.format(name + postfix))
             input_file = uproot.open(ifile)
@@ -170,7 +192,7 @@ def main(args):
                 if args.syst:
                     variables.add('ff_*')
 
-            name = name + postfix # add systematic postfix to file name
+            name = name + postfix  # add systematic postfix to file name
 
             events = input_file[args.tree_name].arrays(list(variables), outputtype=pandas.DataFrame)
 
@@ -195,11 +217,11 @@ def main(args):
 
                 if 'wh125_JHU_' in name or 'zh125_JHU_' in name:
                     if 'nominal' in ifile:
-                      name = boilerplate['wh_zh_name_map'][name]
+                        name = boilerplate['wh_zh_name_map'][name]
                     else:
-                      name, syst_suf = name.split('_CMS_')[0], name.split('_CMS_')[1]
-                      name = boilerplate['wh_zh_name_map'][name]
-                      name = name + '_CMS_' + syst_suf
+                        name, syst_suf = name.split('_CMS_')[0], name.split('_CMS_')[1]
+                        name = boilerplate['wh_zh_name_map'][name]
+                        name = name + '_CMS_' + syst_suf
 
                 # start with 0-jet category
                 output_file.cd('{}_0jet'.format(channel_prefix))
@@ -222,7 +244,7 @@ def main(args):
                     output_file.cd('{}_{}'.format(channel_prefix, cat))
                     vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins))
                 fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var,
-                        zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
+                           zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
 
                 # write then reset histograms
                 output_file.Write()
@@ -240,7 +262,7 @@ def main(args):
                 output_file.cd('{}_0jet'.format(channel_prefix))
                 zero_jet_hist = build_histogram('jetFakes', decay_mode_bins, vis_mass_bins)
                 zero_jet_hist = fill_hists(fake_zero_jet_events, zero_jet_hist,
-                                        't1_decayMode', 'vis_mass', fake_weight='fake_weight')
+                                           't1_decayMode', 'vis_mass', fake_weight='fake_weight')
 
                 output_file.cd('{}_boosted'.format(channel_prefix))
                 boost_hist = build_histogram('jetFakes', higgs_pT_bins_boost, m_sv_bins_boost)
@@ -249,7 +271,7 @@ def main(args):
                 output_file.cd('{}_vbf'.format(channel_prefix))
                 vbf_hist = build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins)
                 vbf_hist = fill_hists(fake_vbf_events, vbf_hist, vbf_cat_x_var,
-                                    vbf_cat_y_var, fake_weight='fake_weight')
+                                      vbf_cat_y_var, fake_weight='fake_weight')
 
                 # vbf sub-categories event after normal vbf categories
                 vbf_cat_hists = []
@@ -257,7 +279,7 @@ def main(args):
                     output_file.cd('{}_{}'.format(channel_prefix, cat))
                     vbf_cat_hists.append(build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins))
                 fill_hists(fake_vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
-                        edges=vbf_cat_edges, fake_weight='fake_weight', DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
+                           edges=vbf_cat_edges, fake_weight='fake_weight', DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
 
                 output_file.Write()
 
@@ -267,11 +289,11 @@ def main(args):
                         zero_jet_hist = build_histogram(
                             'jetFakes_CMS_htt_{}'.format(syst), decay_mode_bins, vis_mass_bins)
                         zero_jet_hist = fill_hists(fake_zero_jet_events, zero_jet_hist,
-                                                't1_decayMode', 'vis_mass', fake_weight=syst)
+                                                   't1_decayMode', 'vis_mass', fake_weight=syst)
 
                         output_file.cd('{}_boosted'.format(channel_prefix))
                         boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
-                                                    higgs_pT_bins_boost, m_sv_bins_boost)
+                                                     higgs_pT_bins_boost, m_sv_bins_boost)
                         boost_hist = fill_hists(fake_boosted_events, boost_hist, 'higgs_pT', 'm_sv', fake_weight=syst)
 
                         output_file.cd('{}_vbf'.format(channel_prefix))
@@ -284,7 +306,7 @@ def main(args):
                             output_file.cd('{}_{}'.format(channel_prefix, cat))
                             vbf_cat_hists.append(build_histogram('jetFakes_' + syst, vbf_cat_x_bins, vbf_cat_y_bins))
                         fill_hists(fake_vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
-                                edges=vbf_cat_edges, fake_weight=syst, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
+                                   edges=vbf_cat_edges, fake_weight=syst, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
                         output_file.Write()
 
     output_file.Close()

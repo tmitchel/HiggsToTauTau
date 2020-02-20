@@ -33,14 +33,17 @@ filling_variables = [
 
 
 def get_categories(channel):
+    """Return list of categories with the lepton prefix added."""
     return [channel + pref for pref in ['_inclusive', '_0jet', '_boosted', '_vbf']]
 
 
 def build_histogram(name):
+    """Build TH2F to fill with fake fraction.""""
     return ROOT.TH2F(name, name, len(mvis_bins) - 1, array('d', mvis_bins), len(njets_bins) - 1, array('d', njets_bins))
 
 
 def categorize(njets, mjj, channel):
+    """Categorize this event based on njets and mjj."""
     if njets == 0:
         return '{}_0jet'.format(channel)
     elif njets == 1 or (njets > 1 and mjj < 300):
@@ -52,6 +55,7 @@ def categorize(njets, mjj, channel):
 
 
 def fill_fraction(df, fraction):
+    """Use visible Higgs mass and njets to fill this histogram."""
     vis_mass = df['vis_mass'].values
     njets = df['njets'].values
     evtwt = df['evtwt'].values
@@ -60,6 +64,7 @@ def fill_fraction(df, fraction):
 
 
 def get_weight(df, fake_weights, fractions, channel, syst=None):
+    """Read input variables and fake fractions to get the correct fake weight."""
     category = categorize(df['njets'], df['mjj'], channel)
     if channel == 'et':
         pt_name = 'el_pt'
@@ -177,6 +182,7 @@ def main(args):
                 syst_map[syst] = anti_events[filling_variables].apply(lambda x: get_weight(
                     x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
 
+        # Subtract real backgrounds from data
         for sample in ['ZL', 'TTT', 'VVT', 'embed']:
             print 'Processing {} for subtraction'.format(sample)
             open_file = uproot.open('{}/{}.root'.format(args.input, sample))
@@ -186,6 +192,7 @@ def main(args):
             fake_weights = numpy.append(fake_weights, sample_anti_events[filling_variables].apply(lambda x: -1 * get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values)
             anti_events = pandas.concat([anti_events, sample_anti_events], sort=False)
 
+        # write the output file
         with uproot.recreate('{}/jetFakes.root'.format(args.input), compression=None) as f:
             f[args.tree_name] = uproot.newtree(treedict)
             anti_events['fake_weight'] = fake_weights.reshape(len(fake_weights))

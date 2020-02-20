@@ -1,15 +1,15 @@
+from visualize import discPlot, trainingPlots
+from time import time
+from sklearn.model_selection import train_test_split
+from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
+from keras.layers import Dense, Dropout
+from keras.models import Sequential
+from keras import optimizers
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from os import environ
 environ['KERAS_BACKEND'] = 'tensorflow'
-from keras import optimizers
-from keras.models import Sequential
-from keras.layers import Dense, Dropout
-from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
-from sklearn.model_selection import train_test_split
-from time import time
-from visualize import discPlot, trainingPlots
 
 
 def main(args):
@@ -22,6 +22,7 @@ def main(args):
 
     nvars = len(training_variables)
 
+    # build the model
     model = Sequential()
     model.add(Dense(nvars*2, input_shape=(nvars,), name='input', activation='relu'))
     # model.add(Dropout(0.1))
@@ -42,6 +43,7 @@ def main(args):
         TensorBoard(log_dir="logs/{}".format(time()), histogram_freq=200, write_grads=False, write_images=True)
     ]
 
+    # split into signal/background for scaling
     sig_df = data[(data['sample_names'] == args.signal) & (data['is_signal'] > 0)]
     bkg_df = data[(data['sample_names'] == args.background) & (data['is_signal'] > 0)]
 
@@ -57,6 +59,7 @@ def main(args):
     # remove all columns except those needed for training
     training_dataframe = selected_events[training_variables + ['isSignal', 'evtwt']]
 
+    # split into testing and training sets
     training_data, testing_data, training_labels, testing_labels, training_weights, _ = train_test_split(
         training_dataframe[training_variables].values, training_dataframe['isSignal'].values, training_dataframe['evtwt'].values,
         test_size=0.05, random_state=7
@@ -68,6 +71,7 @@ def main(args):
                         callbacks=callbacks, validation_split=0.25, sample_weight=training_weights
                         )
 
+    # plotting things
     trainingPlots(history, 'trainingPlot_{}'.format(args.model))
 
     if not args.dont_plot:

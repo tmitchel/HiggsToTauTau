@@ -1,19 +1,20 @@
+import sys
+import ROOT
+import numpy
+import uproot
+import pandas as pd
+from glob import glob
+from array import array
+from pprint import pprint
+from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
 from collections import defaultdict
 from os import environ, path, mkdir, listdir
 environ['KERAS_BACKEND'] = 'tensorflow'
-from keras.models import load_model
-from pprint import pprint
-from array import array
-from glob import glob
-import pandas as pd
-import uproot
-import numpy
-import ROOT
-import sys
 
 
 def build_filelist(input_dir):
+    """Build list of files to be processed.""""
     files = [
         ifile for ifile in glob('{}/*/merged/*.root'.format(input_dir))
     ]
@@ -33,6 +34,7 @@ def build_filelist(input_dir):
 
 
 def main(args):
+    # this will be removed soon
     if 'mutau' in args.input_dir or 'mt20' in args.input_dir:
         tree_prefix = 'mt_tree'
     elif 'etau' in args.input_dir or 'et20' in args.input_dir:
@@ -41,9 +43,17 @@ def main(args):
         raise Exception(
             'Input files must have MUTAU or ETAU in the provided path. You gave {}, ya goober.'.format(args.input_dir))
 
+    # load the model
     model = load_model('Output/models/{}.hdf5'.format(args.model))
-    all_data = pd.HDFStore(args.input_name)
 
+    # get scaler setup
+    scaler = StandardScaler()
+    scaler_info = pd.HDFStore(args.input_name)['scaler']
+    scaler_info = scaler_info.drop('isSM', axis=0)
+    scaler.mean_ = scaler_info['mean'].values.reshape(1, -1)
+    scaler.scale_ = scaler_info['scale'].values.reshape(1, -1)
+
+    # create output directory
     if not path.isdir('Output/trees/{}'.format(args.output_dir)):
         mkdir('Output/trees/{}'.format(args.output_dir))
 
@@ -51,32 +61,25 @@ def main(args):
     print 'Files to process...'
     pprint(dict(filelist))
     for syst, ifiles in filelist.iteritems():
+        # create output sub-directory (needed for systematics/nominal)
         if not path.exists('Output/trees/{}/{}'.format(args.output_dir, syst)):
             mkdir('Output/trees/{}/{}'.format(args.output_dir, syst))
 
         for ifile in ifiles:
-            # if not '125' in ifile:
-            #   continue
             fname = ifile.replace('.root', '').split('/')[-1]
             print 'Processing file: {} from {}'.format(fname, ifile.split('merged')[0].split('/')[-2])
 
+            # read input and get things ready for output TTree
             open_file = uproot.open(ifile)
             nevents = open_file['nevents']
             oldtree = open_file[tree_prefix].arrays(['*'])
             treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
             treedict['NN_disc'] = numpy.float64
 
-            # load the correct tree
-            scaler_info = all_data['scaler']
-            scaler_info = scaler_info.drop('isSM', axis=0)
-
             # drop all variables not going into the network
             to_classify = open_file[tree_prefix].arrays(scaler_info.index.values, outputtype=pd.DataFrame)
 
-            scaler = StandardScaler()
-            scaler.mean_ = scaler_info['mean'].values.reshape(1, -1)
-            scaler.scale_ = scaler_info['scale'].values.reshape(1, -1)
-
+            # clean inputs
             to_classify.fillna(-100, inplace=True)
             to_classify.replace([numpy.inf, -numpy.inf], -100, inplace=True)
 
@@ -85,15 +88,13 @@ def main(args):
                 scaler.transform(to_classify.values),
                 columns=to_classify.columns.values, dtype='float64')
 
+            # There's room here to try and optimize by only classifying VBF events and storing a
+            # default value for others. Just need to figure out how to keep everything in order
+            # so that it can be slotted back into the correct place in the TTree.
+
             # do the classification
             guesses = model.predict(scaled.values, verbose=True)
 
-            # if 'embed' in fname:
-            #   with uproot.recreate('Output/trees/{}/{}/{}.root'.format(args.output_dir, syst, fname), compression=None) as f:
-            #       f[tree_prefix] = uproot.newtree(treedict)
-            #       oldtree['NN_disc'] = guesses.reshape(len(guesses))
-            #       f[tree_prefix].extend(oldtree)
-            # else:
             with uproot.recreate('Output/trees/{}/{}/{}.root'.format(args.output_dir, syst, fname)) as f:
                 f[tree_prefix] = uproot.newtree(treedict)
                 oldtree['NN_disc'] = guesses.reshape(len(guesses))

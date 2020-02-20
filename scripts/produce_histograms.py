@@ -13,7 +13,28 @@ from multiprocessing import Process, Queue
 
 
 class Config:
+    """
+    Provide a wrapper around all information needed to plot a single sample/variable combination.
+
+    Config wraps all of the information needed to process a sample and create correctly weighted
+    histograms for the provided variable and binning. Config contains a Queue so that things can
+    be done in parallel.
+
+    Variables:
+    name -- name of the process
+    data -- pandas DataFrame containing event data
+    xvar_name -- variable being plotted
+    bins -- binning for the histogram
+    queue -- multiprocessing.Queue to write output histogram
+    fake_weight -- for jetFakes, we need to weight with the fake_weight
+    hists -- output histograms
+
+    Functions:
+    submit -- create a new Queue and return Config as a dict to provide as kwargs
+    """
+
     def __init__(self, name, data, variable, bins):
+        """Initialize variables and set the rest to None"""
         self.name = name
         self.data = data
         self.xvar_name = variable
@@ -23,6 +44,7 @@ class Config:
         self.hists = None
 
     def __deepcopy__(self, memo):
+        """Deep copy everything except the Queue."""
       cp = Config(deepcopy(self.name, memo), deepcopy(self.data, memo), deepcopy(self.xvar_name, memo), deepcopy(self.bins, memo))
       cp.fake_weight = deepcopy(self.fake_weight, memo)
       cp.queue = None
@@ -30,16 +52,19 @@ class Config:
       return cp
 
     def submit(self):
+        """Create a new Queue and return self in a form for fill_histograms"""
         self.queue = Queue()
         return {'config': self}
 
 
 def build_histogram(name, bins, output_file, directory):
+    """Build a TH1F with provided binning in the correct TDirectory"""
     output_file.cd(directory)
     return ROOT.TH1F(name, name, bins[0], bins[1], bins[2])
 
 
 def fill_histograms(config):
+    """Use config to fill a histogram"""
     # get common variables
     evtwt = config.data['evtwt'].values
     xvar = config.data[config.xvar_name].values
@@ -55,6 +80,27 @@ def fill_histograms(config):
 
 
 def fill_process_list(data, name, variable, bins, boilerplate, output_file, directory, year, doSyst=False):
+    """
+    Create the list of processes to be run.
+
+    Configure all options needed to fill histograms for this process. A list of multiprocessing.Process-es will be
+    returned for processing later.
+
+    Variables:
+    data -- pandas DataFrame containing event information
+    name -- name of the process
+    variable -- variable to plot
+    bins -- binning for the histogram
+    boilerplate -- json config containing some naming
+    output_file -- TFile where histograms will be written
+    directory -- name of TDirectory for this histogram
+    year -- which year is this? (2016, 2017, 2018)
+    doSyst -- fill histograms after systematic shifts (not implemented) 
+
+    Returns:
+    List -- multiprocessing.Process-es to be run
+    all_hists -- dictionary containing Configs used in List
+    """
     all_hists = {}
     config = Config(name, data, variable, bins)
 
@@ -92,7 +138,6 @@ def main(args):
         config_variables = config['variables']
         zvars = config['zvar']
 
-    # channel_prefix = args.tree_name.replace('_tree', '')  # need prefix for things later
     channel_prefix = args.tree_name.replace('mt_tree', 'mt')
     channel_prefix = channel_prefix.replace('et_tree', 'et')
     assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
@@ -167,6 +212,7 @@ def main(args):
             if args.embed:
                 general_selection = general_selection[(general_selection['contamination'] == 0)]
 
+            # categorize
             zero_jet_events = general_selection[general_selection['njets'] == 0]
             boosted_events = general_selection[
                 (general_selection['njets'] == 1) |
@@ -174,13 +220,8 @@ def main(args):
             ]
             vbf_events = general_selection[(general_selection['njets'] > 1) & (general_selection['mjj'] > 300)]
 
-            # I'm thinking the following part can be made parallel. So filling the 3+ histograms can happen in
-            # in parallel. I think that would speed things up tremendously. Especially, if I apply the same thing
-            # to reweighting to different scenarios in parallel and doing fake factor systematics in parallel. In
-            # general, I like this approach much more than the C++ one I had. AND! It's faster than the C++ version.
-
             for variable, bins in config_variables.iteritems():
-
+                # build list of processes
                 inclusive_processes, inclusive_hists = fill_process_list(general_selection, name, variable, bins, boilerplate, output_file,
                                                                          '{}_inclusive/{}'.format(channel_prefix, variable), args.syst)
 
@@ -193,11 +234,13 @@ def main(args):
                 vbf_processes, vbf_hists = fill_process_list(vbf_events, name, variable, bins, boilerplate, output_file,
                                                              '{}_vbf/{}'.format(channel_prefix, variable), args.syst)
 
+                # start all processes and wait for all to finish
                 for proc in inclusive_processes + zero_jet_processes + boosted_processes + vbf_processes:
                     proc.start()
                 for proc in inclusive_processes + zero_jet_processes + boosted_processes + vbf_processes:
                     proc.join()
 
+                # grab everything from the Queue's and write to the TFile
                 output_file.cd('{}_inclusive/{}'.format(channel_prefix, variable))
                 for obj in inclusive_hists.itervalues():
                     obj['config'].queue.get().Write()

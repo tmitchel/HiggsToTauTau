@@ -39,6 +39,7 @@ style_map = {
 
 
 def ApplyStyle(ihist, styles):
+    """Apply styling to histogram."""
     ihist.SetFillColor(styles.fill_color)
     ihist.SetLineColor(styles.line_color)
     ihist.SetLineStyle(styles.line_style)
@@ -48,6 +49,7 @@ def ApplyStyle(ihist, styles):
 
 
 def createCanvas():
+    """Build the TCanvas and split into pads."""
     can = ROOT.TCanvas('can', 'can', 432, 451)
     can.Divide(2, 1)
 
@@ -72,7 +74,9 @@ def createCanvas():
     can.cd(1)
     return can
 
+
 def formatStat(stat):
+    """Format the statistical uncertainty histogram"""
     stat.SetMarkerStyle(0)
     stat.SetLineWidth(2)
     stat.SetLineColor(0)
@@ -80,7 +84,9 @@ def formatStat(stat):
     stat.SetFillColor(ROOT.kBlack)
     return stat
 
+
 def formatStack(stack):
+    """Format the stacked background histograms."""
     stack.GetXaxis().SetLabelSize(0)
     stack.GetYaxis().SetTitle('Events / Bin')
     stack.GetYaxis().SetTitleFont(42)
@@ -91,6 +97,7 @@ def formatStack(stack):
 
 
 def fillLegend(data, backgrounds, signals, stat):
+    """Fill the legend with appropriate processes."""
     leg = ROOT.TLegend(0.5, 0.45, 0.85, 0.85)
     leg.SetLineColor(0)
     leg.SetFillColor(0)
@@ -109,7 +116,7 @@ def fillLegend(data, backgrounds, signals, stat):
 
     leg.AddEntry(signals['JHU__reweighted_qqH_htt_0PM125'], 'VBF SM Higgs(125)x50', 'l')
     leg.AddEntry(signals['JHU__reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
-    
+
     # backgrounds
     leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
     leg.AddEntry(backgrounds['ZL'], 'ZL', 'f')
@@ -119,10 +126,12 @@ def fillLegend(data, backgrounds, signals, stat):
 
     # stat. uncertainty
     leg.AddEntry(stat, 'Uncertainty', 'f')
-    
+
     return leg
 
+
 def formatPull(pull, title):
+    """Format the pull (or ratio) histogram in the lower pad."""
     pull.SetTitle('')
     pull.SetMaximum(1.3)
     pull.SetMinimum(0.7)
@@ -145,18 +154,20 @@ def formatPull(pull, title):
     pull.GetYaxis().SetNdivisions(204)
     return pull
 
+
 def sigmaLines(data):
+    """Draw lines on pull (or ratio) plot."""
     low = data.GetBinLowEdge(1)
     high = data.GetBinLowEdge(data.GetNbinsX()) + \
         data.GetBinWidth(data.GetNbinsX())
 
-    ## high line
+    # high line
     line1 = ROOT.TLine(low, 1.2, high, 1.2)
     line1.SetLineWidth(1)
     line1.SetLineStyle(3)
     line1.SetLineColor(ROOT.kBlack)
 
-    ## low line
+    # low line
     line2 = ROOT.TLine(low, 0.8, high, 0.8)
     line2.SetLineWidth(1)
     line2.SetLineStyle(3)
@@ -164,7 +175,9 @@ def sigmaLines(data):
 
     return line1, line2
 
+
 def blindData(data, signal, background):
+    """Apply blinding procedure to data."""
     for ibin in range(data.GetNbinsX()+1):
         sig = signal.GetBinContent(ibin)
         bkg = background.GetBinContent(ibin)
@@ -180,7 +193,20 @@ def blindData(data, signal, background):
 
     return data
 
+
 def BuildPlot(args):
+    """
+    Build the stacked plot with everything included and formatted then save as PDF.
+
+    Variables (inside args):
+    input -- input TFile full of histograms
+    category -- which TDirectory to read
+    variable -- which variable to plot
+    scale -- value to scale the top of the plot (keep histograms from being cutoff)
+    year -- which era is this?
+    label -- LaTeX label for variable on x-axis
+    prefix -- name to attach to output file
+    """
     ifile = ROOT.TFile(args.input)
     category = ifile.Get(args.category)
     variable = category.Get(args.variable)
@@ -200,18 +226,18 @@ def BuildPlot(args):
         elif hname in style_map['signals']:
             ihist = ApplyStyle(ihist, style_map['signals'][hname])
             signals[hname] = ihist
-            
+
     # now get stat and stack filled
-    stat = data_hist.Clone() # sum of all backgrounds
+    stat = data_hist.Clone()  # sum of all backgrounds
     stat.Reset()
-    stack = ROOT.THStack() # stack of all backgrounds
-    for bkg in sorted(backgrounds.itervalues(), key = lambda hist: hist.Integral()):
+    stack = ROOT.THStack()  # stack of all backgrounds
+    for bkg in sorted(backgrounds.itervalues(), key=lambda hist: hist.Integral()):
         stat.Add(bkg)
         stack.Add(bkg)
 
     sig_yields = [ihist.GetMaximum() for ihist in signals.itervalues()] + [data_hist.GetMaximum(), stat.GetMaximum()]
     stack.SetMaximum(max(sig_yields) * args.scale)
-    
+
     # format the plots
     can = createCanvas()
     data_hist = ApplyStyle(data_hist, style_map['data_obs'])
@@ -235,7 +261,6 @@ def BuildPlot(args):
     #     if 'qqH' in sig_name:
     #         sig_hist.Scale(50*signals['vbf125_powheg'].Integral()/sig_hist.Integral())
     #     sig_hist.Draw('same hist')
-    
 
     legend = fillLegend(data_hist, backgrounds, signals, stat)
     legend.Draw('same')
@@ -310,7 +335,6 @@ def BuildPlot(args):
 
     # save the pdf
     can.SaveAs('Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.variable, args.category, args.year))
-
 
 
 if __name__ == "__main__":

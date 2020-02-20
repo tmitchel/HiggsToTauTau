@@ -12,6 +12,7 @@ from glob import glob
 
 
 def getNames(sample):
+    """Return the sample names and signal type."""
     if 'DYJets' in sample:
         names = ['ZL', 'ZJ', 'ZTT']
     elif 'TT' in sample:
@@ -52,8 +53,22 @@ def getNames(sample):
     return names, signal_type
 
 
-def getSyst(name, signal_type, exe):
+def getSyst(name, signal_type, exe, doSyst):
+    """Return the list of systematics to be processed for this sample.
+
+    The list of systematics is built based on the process, signal type, and channel.
+    All applicable systematics will be added to the list for processing.
+    Arguments:
+    name        -- name of the process
+    signal_type -- signal type or None
+    exe         -- name of the executable to determine the channel
+    doSyst      -- if False, returns a list with just the nominal case
+    Returns:
+    systs       -- list of systematics to processes
+    """
     systs = ['']
+    if not doSyst:
+        return systs
 
     if name == 'TTT' or name == 'VVT' or name == 'embed' or name == 'ZTT' or signal_type != 'None':
         systs += ['tau_id_Up', 'tau_id_Down']  # names will probably be updated
@@ -112,7 +127,14 @@ def getSyst(name, signal_type, exe):
     return systs
 
 
-def run_command(cmd, q, parallel=False):
+def run_command(cmd, q, save_fcn):
+    """Run the provided command and write the output
+
+    Arguments:
+    cmd      -- the command to be run in the shell
+    q        -- the writable object (must be a Queue if parallel is True)
+    save_fcn -- function to write output to q
+    """
     code = call(cmd, shell=True)
     message = ''
     if code != 0:
@@ -123,15 +145,13 @@ def run_command(cmd, q, parallel=False):
     # print message
     print message
 
-    # write to log or queue depending on if multiprocessing
     file_message = message[5:-5]  # strip colors off message for file
-    q.put(file_message) if parallel else q.write(file_message + '\n')
+    save_fcn(q, file_message)  # write the message
     return None
 
 
 def listener(q, fname):
-    '''listens for messages on the q, writes to file. '''
-
+    """Listen for messages on q then writes to file."""
     with open(fname, 'w') as f:
         while 1:
             m = q.get()
@@ -142,7 +162,61 @@ def listener(q, fname):
             f.flush()
 
 
+def build_processes(processes, callstring, names, signal_type, doSyst):
+    """Create output directories and callstrings then add them to the list of processes."""
+    for name in names:
+        for isyst in getSyst(name, signal_type, args.exe, doSyst):
+            if isyst == "" and not path.exists('Output/trees/{}/NOMINAL'.format(args.output_dir)):
+                makedirs('Output/trees/{}/NOMINAL'.format(args.output_dir))
+            if isyst != "" and not path.exists('Output/trees/{}/SYST_{}'.format(args.output_dir, isyst)):
+                makedirs('Output/trees/{}/SYST_{}'.format(args.output_dir, isyst))
+
+            tocall = callstring + ' -n {}'.format(name)
+            if isyst != "":
+                tocall += ' -u {}'.format(isyst)
+
+            processes.append(tocall)
+    return processes
+
+
+def run_parallel(output_dir, processes):
+    """Run analyzer using multiprocessing."""
+    manager = multiprocessing.Manager()
+    q = manager.Queue()
+
+    # Use 10 cores if the machine has more than 20 total cores.
+    # Otherwise, use half the available cores.
+    n_processes = min(10, multiprocessing.cpu_count() / 2)
+    pool = multiprocessing.Pool(processes=n_processes)
+    watcher = pool.apply_async(listener, (q, 'Output/trees/{}/logs/runninglog.txt'.format(output_dir)))
+
+    def save_fcn(q, msg):
+        q.put(msg)
+
+    jobs = []
+    for command in processes:
+        job = pool.apply_async(run_command, (command, q, save_fcn))
+        jobs.append(job)
+
+    for job in jobs:
+        job.get()
+
+    q.put('kill')
+    pool.close()
+    pool.join()
+
+
+def run_series(output_dir, processes):
+    """Run analyzer on processes in series."""
+    def save_fcn(q, msg):
+        q.write(msg + '\n')
+
+    with open('Output/trees/{}/logs/runninglog.txt'.format(output_dir), 'w') as ifile:
+        [run_command(command, ifile, save_fcn) for command in processes]
+
+
 def main(args):
+    """Build all processes and run them."""
     suffix = '.root'
 
     try:
@@ -153,69 +227,23 @@ def main(args):
     start = time.time()
     fileList = [ifile for ifile in glob(args.path+'/*') if '.root' in ifile]
 
-    get_systs = None
-    if args.syst == '2016':
-        get_systs = getSyst
-    elif args.syst == '2017':
-        get_systs = getSyst
-    elif args.syst == '2018':
-        get_systs = getSyst
-
     processes = []
-
     for ifile in fileList:
         sample = ifile.split('/')[-1].split(suffix)[0]
         tosample = ifile.replace(sample+suffix, '')
-
-        if 'vbf125_madgraph' in ifile:
-          continue
 
         names, signal_type = getNames(sample)
         callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                  tosample, sample, args.output_dir, signal_type)
 
-        if get_systs != None and not 'Data' in sample.lower():
-            for name in names:
-                for isyst in get_systs(name, signal_type, args.exe):
-                    if isyst == "" and not path.exists('Output/trees/{}/NOMINAL'.format(args.output_dir)):
-                        makedirs('Output/trees/{}/NOMINAL'.format(args.output_dir))
-                    if isyst != "" and not path.exists('Output/trees/{}/SYST_{}'.format(args.output_dir, isyst)):
-                        makedirs('Output/trees/{}/SYST_{}'.format(args.output_dir, isyst))
+        doSyst = True if args.syst != None and not 'data' in sample.lower() else False
+        processes = build_processes(processes, callstring, names, signal_type, doSyst)
+    pprint(processes, width=150)
 
-                    tocall = callstring + ' -n %s -u %s' % (name, isyst)
-                    processes.append(tocall)
-        else:
-            for name in names:
-                if not path.exists('Output/trees/{}/NOMINAL'.format(args.output_dir)):
-                    makedirs('Output/trees/{}/NOMINAL'.format(args.output_dir))
-                tocall = callstring + ' -n %s ' % name
-                processes.append(tocall)
-
-    pprint(processes)
     if args.parallel:
-        manager = multiprocessing.Manager()
-        q = manager.Queue()
-
-        # Use 10 cores if the machine has more than 20 total cores.
-        # Otherwise, use half the available cores.
-        n_processes = min(10, multiprocessing.cpu_count() / 2)
-        pool = multiprocessing.Pool(processes=n_processes)
-        watcher = pool.apply_async(listener, (q, 'Output/trees/{}/logs/runninglog.txt'.format(args.output_dir)))
-
-        jobs = []
-        for command in processes:
-            job = pool.apply_async(run_command, (command, q, True))
-            jobs.append(job)
-
-        for job in jobs:
-            job.get()
-
-        q.put('kill')
-        pool.close()
-        pool.join()
+        run_parallel(args.output_dir, processes)
     else:
-        with open('Output/trees/{}/logs/runninglog.txt'.format(args.output_dir), 'w') as ifile:
-            [run_command(command, ifile, False) for command in processes]
+        run_series(args.output_dir, processes)
 
     end = time.time()
     print 'Processing completed in', end-start, 'seconds.'

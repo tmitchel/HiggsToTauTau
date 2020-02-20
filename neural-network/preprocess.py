@@ -34,6 +34,7 @@ default_object = {
 
 
 def build_filelist(el_input_dir, mu_input_dir):
+    """Build list of files to be processed and included in the DataFrame."""
     files = [
         ('et', ifile) for ifile in glob('{}/*/merged/*.root'.format(el_input_dir))
     ]
@@ -58,6 +59,7 @@ def build_filelist(el_input_dir, mu_input_dir):
 
 
 def get_columns(fname):
+    """Return columns to keep and columns to drop."""
     columns = scaled_vars + selection_vars
     todrop = ['evtwt']
     if 'vbf125_JHU' in fname:
@@ -67,6 +69,7 @@ def get_columns(fname):
 
 
 def split_dataframe(fname, slim_df, todrop):
+    """Split the DataFrame to get weights separate. Also, weights by AC if neeeded."""
     weights = slim_df['evtwt']
     if 'vbf125_JHU' in fname:
         weights = weights * slim_df['wt_vbf_a1']
@@ -76,6 +79,7 @@ def split_dataframe(fname, slim_df, todrop):
 
 
 def get_labels(nevents, name):
+    """Label events as sig vs bkg and SM vs non-SM."""
     # get training label
     isSignal = np.zeros(nevents)
     if 'vbf125' in name or 'ggh125' in name or 'wh125' in name or 'zh125' in name:
@@ -95,6 +99,7 @@ def get_labels(nevents, name):
 
 
 def apply_selection(df):
+    """Apply basic preselection and clean some variables."""
     # preselection
     slim_df = df[(df['njets'] > 1) & (df['mjj'] > 300)]
 
@@ -114,6 +119,7 @@ def apply_selection(df):
 
 
 def handle_file(all_data, channel, ifile, syst):
+    """Process this file and add to the DataFrame."""
     filename = ifile.replace('.root', '')
     syst = syst.replace(';1', '')
     print 'Loading input file...', filename, 'with syst...', syst
@@ -157,6 +163,7 @@ def handle_file(all_data, channel, ifile, syst):
 
 
 def build_scaler(sm_only):
+    """Fit to SM only then build DataFrame with all info to store in output file."""
     scaler = StandardScaler()
     # only fit the nominal backgrounds
     scaler.fit(sm_only.values)
@@ -171,6 +178,7 @@ def build_scaler(sm_only):
 
 
 def format_for_store(all_data, idir, scaler):
+    """Take the DataFrame and format it for storage."""
     formatted_data = pd.DataFrame(
         scaler.transform(all_data[idir]['unscaled'].values),
         columns=all_data[idir]['unscaled'].columns.values, dtype='float64')

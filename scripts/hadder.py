@@ -7,6 +7,7 @@ from pprint import pprint
 
 
 def clean(hadd_list):
+    """Remove any entry with 0 files."""
     for idir, isample in hadd_list.items():
         for sample, files in isample.items():
             if len(files) == 0:
@@ -15,6 +16,7 @@ def clean(hadd_list):
 
 
 def do_hadd(hadd_list, path):
+    """Start hadding files."""
     for idir, isamples in hadd_list.items():
         if not os.path.exists(path + '/' + idir + '/merged'):
             os.mkdir(path + '/' + idir + '/merged')
@@ -31,6 +33,7 @@ def do_hadd(hadd_list, path):
 
 
 def combine_wh(hadd_list, path):
+    """Take care of combining signed wh powheg samples."""
     for idir in hadd_list.keys():
         wh_files = []
         for ifile in glob('{}/*.root'.format(path + '/' + idir)):
@@ -44,6 +47,7 @@ def combine_wh(hadd_list, path):
 
 
 def rename_wh_zh(hadd_list, path):
+    """Strip suffix off WH/ZH files and copy them into merged directory without hadding."""
     for idir, samples in hadd_list.iteritems():
         if not 'wh125_JHU' in samples and not 'zh125_JHU' in samples:
             print '\033[93m[WARNING] No wh or zh samples in {}\033[0m'.format(idir)
@@ -61,12 +65,14 @@ def rename_wh_zh(hadd_list, path):
 
 
 def good_bkg(ifile):
+    """Remove background files we don't want."""
     if not 'EWK_W' in ifile and not 'EWKZ' in ifile and not 'WW_VV' in ifile and not 'WZ_VV' in ifile and not 'ZZ_VV' in ifile:
         return True
     return False
 
 
 def good_sig(ifile):
+    """Remove signal files we don't want."""
     if 'decay' in ifile and not 'nom-decay' in ifile:
         return False
     elif 'madgraph' in ifile and 'inc' in ifile:
@@ -75,6 +81,7 @@ def good_sig(ifile):
 
 
 def main(args):
+    """Build list of files and hadd them together."""
     bkgs = [
         'ZJ', 'ZL', 'ZTT', 'embed', 'data_obs', 'VVJ', 'VVT', 'TTT', 'TTJ', 'W',
     ]
@@ -102,6 +109,7 @@ def main(args):
     sig_hadd_list = clean(sig_hadd_list)
     sig_hadd_list = combine_wh(sig_hadd_list, args.path)
 
+    # keep list of what is being hadded together
     with file('haddlog.txt', 'a') as outfile:
         json.dump({
             'background': bkg_hadd_list,

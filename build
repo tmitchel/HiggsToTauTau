@@ -22,6 +22,7 @@ echo "${s// //}"
 
 set -e
 
+# none of these are actually used anymore
 doFF="${CMSSW_BASE}/lib/${SCRAM_ARCH}/libHTTutilitiesJet2TauFakes.so"
 lep2016="${CMSSW_BASE}/lib/${SCRAM_ARCH}/libHTT-utilitiesLepEffInterface.so"
 tauID="${CMSSW_BASE}/lib/${SCRAM_ARCH}/libTauIDSFTool.so"
