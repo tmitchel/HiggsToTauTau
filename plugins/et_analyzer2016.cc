@@ -232,7 +232,7 @@ int main(int argc, char *argv[]) {
         event.setNjets(jets.getNjets());
 
         // pass event flags
-        if (event.getPassFlags()) {
+        if (event.getPassFlags(isData)) {
             histos->at("cutflow")->Fill(2., 1.);
         } else {
             continue;

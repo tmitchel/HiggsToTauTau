@@ -71,7 +71,7 @@ class event_info {
     Bool_t getPassMu20Tau27();
     Bool_t getPassMu24();
     Bool_t getPassMu27();
-    Bool_t getPassFlags();
+    Bool_t getPassFlags(Bool_t);
     Bool_t getPassCrossTrigger(Float_t);
 
     // Lepton vetos
@@ -283,19 +283,18 @@ Float_t event_info::getRivetUnc(std::vector<double> uncs, std::string syst) {
     }
 }
 
-Bool_t event_info::getPassFlags() {
+Bool_t event_info::getPassFlags(Bool_t isData) {
     if (era == 2016) {
-        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseIsoFilter
-                || Flag_HBHENoiseFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter);
-
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
+                || Flag_HBHENoiseIsoFilter || (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter);
     } else if (era == 2017) {
         return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
-                || Flag_HBHENoiseIsoFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
-                || Flag_BadChargedCandidateFilter || Flag_eeBadScFilter || Flag_ecalBadCalibFilter);
+                || Flag_HBHENoiseIsoFilter || (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
+                || Flag_ecalBadCalibFilter);
     } else {
         return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
-                || Flag_HBHENoiseIsoFilter || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
-                || Flag_eeBadScFilter || Flag_ecalBadCalibFilter);
+                || Flag_HBHENoiseIsoFilter || (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
+                || Flag_ecalBadCalibFilter);
     }
 }
 

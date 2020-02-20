@@ -242,7 +242,7 @@ int main(int argc, char *argv[]) {
         jets.run_factory();
 
         // pass event flags
-        if (event.getPassFlags()) {
+        if (event.getPassFlags(isData)) {
             histos->at("cutflow")->Fill(2., 1.);
         } else {
             continue;
