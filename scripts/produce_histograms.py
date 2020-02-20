@@ -45,11 +45,11 @@ class Config:
 
     def __deepcopy__(self, memo):
         """Deep copy everything except the Queue."""
-      cp = Config(deepcopy(self.name, memo), deepcopy(self.data, memo), deepcopy(self.xvar_name, memo), deepcopy(self.bins, memo))
-      cp.fake_weight = deepcopy(self.fake_weight, memo)
-      cp.queue = None
-      cp.hists = deepcopy(self.hists, memo)
-      return cp
+        cp = Config(deepcopy(self.name, memo), deepcopy(self.data, memo), deepcopy(self.xvar_name, memo), deepcopy(self.bins, memo))
+        cp.fake_weight = deepcopy(self.fake_weight, memo)
+        cp.queue = None
+        cp.hists = deepcopy(self.hists, memo)
+        return cp
 
     def submit(self):
         """Create a new Queue and return self in a form for fill_histograms"""
