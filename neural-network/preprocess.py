@@ -32,6 +32,7 @@ default_object = {
     'lepton': np.array([])
 }
 
+
 def build_filelist(el_input_dir, mu_input_dir):
     files = [
         ('et', ifile) for ifile in glob('{}/*/merged/*.root'.format(el_input_dir))
@@ -43,14 +44,16 @@ def build_filelist(el_input_dir, mu_input_dir):
     nominal = {'nominal': []}
     systematics = {}
     for channel, fname in files:
-      if 'SYST_' in fname:
-          keyname = fname.split('SYST_')[-1].split('/')[0]
-          systematics.setdefault(keyname, [])
-          systematics[keyname].append((channel, fname))
-      else:
-          nominal['nominal'].append((channel, fname))
-    pprint(nominal)
-    pprint(systematics)
+        if 'jetFakes' in fname:
+            continue
+        if 'SYST_' in fname:
+            keyname = fname.split('SYST_')[-1].split('/')[0]
+            systematics.setdefault(keyname, [])
+            systematics[keyname].append((channel, fname))
+        else:
+            nominal['nominal'].append((channel, fname))
+    pprint(nominal, width=150)
+    pprint(systematics, width=150)
     return nominal, systematics
 
 
@@ -100,7 +103,8 @@ def apply_selection(df):
     slim_df = slim_df.drop_duplicates()
     slim_df = slim_df[(slim_df['Q2V1'] > -1e10) & (slim_df['Q2V1'] < 1e10)]
     slim_df = slim_df[(slim_df['Q2V2'] > -1e10) & (slim_df['Q2V2'] < 1e10)]
-    slim_df = slim_df[(slim_df['Phi'] > -2.1 * math.pi) & (slim_df['Phi'] < 2.1 * math.pi)] # gave this a little wiggle room
+    slim_df = slim_df[(slim_df['Phi'] > -2.1 * math.pi) & (slim_df['Phi']
+                                                           < 2.1 * math.pi)]  # gave this a little wiggle room
     slim_df = slim_df[(slim_df['Phi1'] > -2.1 * math.pi) & (slim_df['Phi1'] < 2.1 * math.pi)]
     slim_df = slim_df[(slim_df['costheta1'] > -1) & (slim_df['costheta1'] < 1)]
     slim_df = slim_df[(slim_df['costheta2'] > -1) & (slim_df['costheta2'] < 1)]
@@ -110,9 +114,9 @@ def apply_selection(df):
 
 
 def handle_file(all_data, channel, ifile, syst):
-    print 'Loading input file...', filename, 'with syst...', syst
     filename = ifile.replace('.root', '')
     syst = syst.replace(';1', '')
+    print 'Loading input file...', filename, 'with syst...', syst
 
     open_file = uproot.open(ifile)
     columns, todrop = get_columns(filename)
