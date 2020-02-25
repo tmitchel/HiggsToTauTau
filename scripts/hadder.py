@@ -22,7 +22,7 @@ def do_hadd(hadd_list, path):
             os.mkdir(path + '/' + idir + '/merged')
 
         commands = ['hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
-                    for sample, files in isamples.items()]
+                    for sample, files in isamples.items() if not 'wh125_JHU' in sample and not 'zh125_JHU' in sample]
 
         n_processes = min(12, multiprocessing.cpu_count() / 2)
         pool = multiprocessing.Pool(processes=n_processes)
