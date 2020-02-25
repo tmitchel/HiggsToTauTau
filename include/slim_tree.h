@@ -31,8 +31,10 @@ class slim_tree {
         t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode,
         t1_genMatch,  // t1 is used for et and mt, as well
         njets, nbjets, j1_pt, j1_eta, j1_phi, j2_pt, j2_eta, j2_phi, b1_pt, b1_eta, b1_phi, b2_pt, b2_eta, b2_phi, met, metphi, mjj, numGenJets, mt,
-        dmf, dmf_new, pt_sv, m_sv, Dbkg_VBF, Dbkg_ggH, MELA_D2j, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2, ME_sm_ggH_qqInit,
-        ME_ps_ggH_qqInit, ME_ps_ggH, ME_ps_VBF, ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH,
+        dmf, dmf_new, pt_sv, m_sv, MELA_D2j, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2, ME_sm_ggH_qqInit,
+        ME_ps_ggH_qqInit, ME_ps_ggH, ME_ps_VBF, ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2,
+        ME_a2_VBF, ME_L1_VBF, ME_L1Zg_VBF,
+        D0_ggH, DCP_ggH, D0_VBF, D_a2_VBF, D_l1_VBF, D_l1zg_VBF, DCP_VBF,
         higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, MT_lepMET, MT_t2MET, MT_HiggsMET, hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr,
         lt_dphi;
     Float_t cross_trigger;
@@ -93,12 +95,13 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
 
     otree->Branch("pt_sv", &pt_sv, "pt_sv/F");
     otree->Branch("m_sv", &m_sv, "m_sv/F");
-    otree->Branch("Dbkg_VBF", &Dbkg_VBF, "Dbkg_VBF/F");
-    otree->Branch("Dbkg_ggH", &Dbkg_ggH, "Dbkg_ggH/F");
-    otree->Branch("D0_VBF", &D0_VBF, "D0_VBF/F");
-    otree->Branch("DCP_VBF", &DCP_VBF, "DCP_VBF/F");
     otree->Branch("D0_ggH", &D0_ggH, "D0_ggH/F");
     otree->Branch("DCP_ggH", &DCP_ggH, "DCP_ggH/F");
+    otree->Branch("D0_VBF", &D0_VBF, "D0_VBF/F");
+    otree->Branch("D_a2_VBF", &D_a2_VBF, "D_a2_VBF/F");
+    otree->Branch("D_l1_VBF", &D_l1_VBF, "D_l1_VBF/F");
+    otree->Branch("D_l1zg_VBF", &D_l1zg_VBF, "D_l1zg_VBF/F");
+    otree->Branch("DCP_VBF,", &DCP_VBF, "DCP_VBF/F");
 
     otree->Branch("Phi", &Phi, "Phi/F");
     otree->Branch("Phi1", &Phi1, "Phi1/F");
@@ -107,14 +110,17 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("costhetastar", &costhetastar, "costhetastar/F");
     otree->Branch("Q2V1", &Q2V1, "Q2V1/F");
     otree->Branch("Q2V2", &Q2V2, "Q2V2/F");
-    otree->Branch("ME_sm_ggH_qqInit", &ME_sm_ggH_qqInit, "ME_sm_ggH_qqInit/F");
-    otree->Branch("ME_ps_ggH_qqInit", &ME_ps_ggH_qqInit, "ME_ps_ggH_qqInit/F");
     otree->Branch("ME_sm_VBF", &ME_sm_VBF, "ME_sm_VBF/F");
     otree->Branch("ME_sm_ggH", &ME_sm_ggH, "ME_sm_ggH/F");
-    otree->Branch("ME_ps_VBF", &ME_ps_VBF, "ME_ps_VBF/F");
-    otree->Branch("ME_ps_ggH", &ME_ps_ggH, "ME_ps_ggH/F");
+    otree->Branch("ME_sm_ggH_qqInit", &ME_sm_ggH_qqInit, "ME_sm_ggH_qqInit/F");
     otree->Branch("ME_sm_WH", &ME_sm_WH, "ME_sm_WH/F");
     otree->Branch("ME_sm_ZH", &ME_sm_ZH, "ME_sm_ZH/F");
+    otree->Branch("ME_ps_VBF", &ME_ps_VBF, "ME_ps_VBF/F");
+    otree->Branch("ME_ps_ggH", &ME_ps_ggH, "ME_ps_ggH/F");
+    otree->Branch("ME_ps_ggH_qqInit", &ME_ps_ggH_qqInit, "ME_ps_ggH_qqInit/F");
+    otree->Branch("ME_a2_VBF", &ME_a2_VBF, "ME_a2_VBF/F");
+    otree->Branch("ME_L1_VBF", &ME_L1_VBF, "ME_L1_VBF/F");
+    otree->Branch("ME_L1Zg_VBF", &ME_L1Zg_VBF, "ME_L1Zg_VBF/F");
     otree->Branch("ME_bkg", &ME_bkg, "ME_bkg/F");
     otree->Branch("ME_bkg1", &ME_bkg1, "ME_bkg1/F");
     otree->Branch("ME_bkg2", &ME_bkg2, "ME_bkg2/F");
@@ -228,12 +234,6 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
     mjj = fjets->getDijetMass();
     pt_sv = evt->getPtSV();
     m_sv = evt->getMSV();
-    Dbkg_VBF = evt->getDbkg_VBF();
-    Dbkg_ggH = evt->getDbkg_ggH();
-    D0_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 0.297979 * 0.297979 * evt->getME_ps_VBF());
-    DCP_VBF = evt->getDCP_VBF();
-    D0_ggH = evt->getME_sm_ggH() / (evt->getME_sm_ggH() + 1.0 * 1.0 * evt->getME_ps_ggH());
-    DCP_ggH = evt->getDCP_ggH();
     Phi = evt->getPhi();
     Phi1 = evt->getPhi1();
     costheta1 = evt->getCosTheta1();
@@ -241,18 +241,28 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
     costhetastar = evt->getCosThetaStar();
     Q2V1 = evt->getQ2V1();
     Q2V2 = evt->getQ2V2();
-    ME_sm_ggH_qqInit = evt->getME_sm_ggH_qqInit();
-    ME_ps_ggH_qqInit = evt->getME_ps_ggH_qqInit();
-    ME_ps_VBF = evt->getME_ps_VBF();
-    ME_ps_ggH = evt->getME_ps_ggH();
     ME_sm_VBF = evt->getME_sm_VBF();
     ME_sm_ggH = evt->getME_sm_ggH();
+    ME_sm_ggH_qqInit = evt->getME_sm_ggH_qqInit();
     ME_sm_WH = evt->getME_sm_WH();
     ME_sm_ZH = evt->getME_sm_ZH();
+    ME_ps_VBF = evt->getME_ps_VBF();
+    ME_ps_ggH = evt->getME_ps_ggH();
+    ME_ps_ggH_qqInit = evt->getME_ps_ggH_qqInit();
+    ME_a2_VBF = evt->getME_a2_VBF();
+    ME_L1_VBF = evt->getME_L1_VBF();
+    ME_L1Zg_VBF = evt->getME_L1Zg_VBF();
     ME_bkg = evt->getME_bkg();
     ME_bkg1 = evt->getME_bkg1();
     ME_bkg2 = evt->getME_bkg2();
 
+    D0_ggH = evt->getME_sm_ggH() / (evt->getME_sm_ggH() + 1.0 * 1.0 * evt->getME_ps_ggH());
+    DCP_ggH = evt->getDCP_ggH();
+    D0_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 0.297979 * 0.297979 * evt->getME_ps_VBF());
+    D_a2_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 1.0 * 1.0 * evt->getME_a2_VBF());
+    D_l1_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 1.0 * 1.0 * evt->getME_L1_VBF());
+    D_l1zg_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 1.0 * 1.0 * evt->getME_L1Zg_VBF());
+    DCP_VBF = evt->getDCP_VBF();
     MELA_D2j = (evt->getME_sm_ggH() + evt->getME_ps_ggH()) / (evt->getME_sm_ggH() + evt->getME_ps_ggH() + 8 * evt->getME_sm_VBF());
 
     auto met_x = fmet->getMet() * cos(fmet->getMetPhi());

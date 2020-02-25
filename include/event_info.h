@@ -33,9 +33,10 @@ class event_info {
     Bool_t PassEle24Tau30_2018;
 
     Float_t m_sv, pt_sv;                                                                                      // SVFit
-    Float_t Dbkg_VBF, Dbkg_ggH, Dbkg_ZH, Dbkg_WH, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
-    Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, D0_VBF, DCP_VBF, D0_ggH, DCP_ggH, ME_ps_VBF, ME_ps_ggH,
-        ME_sm_ggH_qqInit, ME_ps_ggH_qqInit;
+    Float_t Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
+    Float_t DCP_VBF, DCP_ggH;
+    Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_ggH_qqInit, ME_sm_WH, ME_sm_ZH, ME_ps_VBF, ME_ps_ggH, ME_ps_ggH_qqInit,
+        ME_a2_VBF, ME_L1_VBF, ME_L1Zg_VBF, ME_bkg, ME_bkg1, ME_bkg2;
     Float_t njets;
     std::string syst;
 
@@ -98,13 +99,7 @@ class event_info {
     Float_t getTauGenDR() { return genDR; }
 
     // MELA Info
-    Float_t getDbkg_VBF() { return Dbkg_VBF; }
-    Float_t getDbkg_ggH() { return Dbkg_ggH; }
-    Float_t getDbkg_ZH() { return Dbkg_ZH; }
-    Float_t getDbkg_WH() { return Dbkg_WH; }
-    Float_t getD0_VBF() { return D0_VBF; }
     Float_t getDCP_VBF() { return DCP_VBF; }
-    Float_t getD0_ggH() { return D0_ggH; }
     Float_t getDCP_ggH() { return DCP_ggH; }
     Float_t getPhi() { return Phi; }
     Float_t getPhi1() { return Phi1; }
@@ -113,14 +108,17 @@ class event_info {
     Float_t getCosThetaStar() { return costhetastar; }
     Float_t getQ2V1() { return Q2V1; }
     Float_t getQ2V2() { return Q2V2; }
-    Float_t getME_sm_ggH_qqInit() { return ME_sm_ggH_qqInit; }
-    Float_t getME_ps_ggH_qqInit() { return ME_ps_ggH_qqInit; }
     Float_t getME_sm_VBF() { return ME_sm_VBF; }
     Float_t getME_sm_ggH() { return ME_sm_ggH; }
-    Float_t getME_ps_VBF() { return ME_ps_VBF; }
-    Float_t getME_ps_ggH() { return ME_ps_ggH; }
+    Float_t getME_sm_ggH_qqInit() { return ME_sm_ggH_qqInit; }
     Float_t getME_sm_WH() { return ME_sm_WH; }
     Float_t getME_sm_ZH() { return ME_sm_ZH; }
+    Float_t getME_ps_VBF() { return ME_ps_VBF; }
+    Float_t getME_ps_ggH() { return ME_ps_ggH; }
+    Float_t getME_ps_ggH_qqInit() { return ME_ps_ggH_qqInit; }
+    Float_t getME_a2_VBF() { return ME_a2_VBF; }
+    Float_t getME_L1_VBF() { return ME_L1_VBF; }
+    Float_t getME_L1Zg_VBF() { return ME_L1Zg_VBF; }
     Float_t getME_bkg() { return ME_bkg; }
     Float_t getME_bkg1() { return ME_bkg1; }
     Float_t getME_bkg2() { return ME_bkg2; }
@@ -175,13 +173,7 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
 
     input->SetBranchAddress(m_sv_name.c_str(), &m_sv);
     input->SetBranchAddress(pt_sv_name.c_str(), &pt_sv);
-    input->SetBranchAddress("Dbkg_VBF", &Dbkg_VBF);
-    input->SetBranchAddress("Dbkg_ggH", &Dbkg_ggH);
-    input->SetBranchAddress("Dbkg_ZH", &Dbkg_ZH);
-    input->SetBranchAddress("Dbkg_WH", &Dbkg_WH);
-    input->SetBranchAddress("D_PS_VBF", &D0_VBF);
     input->SetBranchAddress("D_CP_VBF", &DCP_VBF);
-    input->SetBranchAddress("D_PS_ggH", &D0_ggH);
     input->SetBranchAddress("D_CP_ggH", &DCP_ggH);
     input->SetBranchAddress("Phi", &Phi);
     input->SetBranchAddress("Phi1", &Phi1);
@@ -190,14 +182,17 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
     input->SetBranchAddress("costhetastar", &costhetastar);
     input->SetBranchAddress("Q2V1", &Q2V1);
     input->SetBranchAddress("Q2V2", &Q2V2);
-    input->SetBranchAddress("ME_sm_ggH_qqInit", &ME_sm_ggH_qqInit);
-    input->SetBranchAddress("ME_ps_ggH_qqInit", &ME_ps_ggH_qqInit);
     input->SetBranchAddress("ME_sm_VBF", &ME_sm_VBF);
     input->SetBranchAddress("ME_sm_ggH", &ME_sm_ggH);
-    input->SetBranchAddress("ME_ps_VBF", &ME_ps_VBF);
-    input->SetBranchAddress("ME_ps_ggH", &ME_ps_ggH);
+    input->SetBranchAddress("ME_sm_ggH_qqInit", &ME_sm_ggH_qqInit);
     input->SetBranchAddress("ME_sm_WH", &ME_sm_WH);
     input->SetBranchAddress("ME_sm_ZH", &ME_sm_ZH);
+    input->SetBranchAddress("ME_ps_VBF", &ME_ps_VBF);
+    input->SetBranchAddress("ME_ps_ggH", &ME_ps_ggH);
+    input->SetBranchAddress("ME_ps_ggH_qqInit", &ME_ps_ggH_qqInit);
+    input->SetBranchAddress("ME_a2_VBF", &ME_a2_VBF);
+    input->SetBranchAddress("ME_L1_VBF", &ME_L1_VBF);
+    input->SetBranchAddress("ME_L1Zg_VBF", &ME_L1Zg_VBF);
     input->SetBranchAddress("ME_bkg", &ME_bkg);
     input->SetBranchAddress("ME_bkg1", &ME_bkg1);
     input->SetBranchAddress("ME_bkg2", &ME_bkg2);
