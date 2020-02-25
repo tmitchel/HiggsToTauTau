@@ -92,7 +92,7 @@ def main(args):
                 weighted_signal_events = signal_events.copy(deep=True)
                 weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
 
-                with uproot.recreate('{}/{}.root'.format(idir, name)) as f:
+                with uproot.recreate('{}/merged/{}.root'.format(idir, name)) as f:
                     f[args.tree_name] = uproot.newtree(treedict)
                     f[args.tree_name].extend(weighted_signal_events.to_dict('list'))
 
