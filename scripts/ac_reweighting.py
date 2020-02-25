@@ -54,7 +54,7 @@ def handle_wh_zh(ifile):
     sample_name = ifile.split('/')[-1].replace('.root', '')
     new_name = temp_wh_zh_map[sample_name]
     new_file_name = ifile.replace(sample_name, new_name)
-    call('cp {} {}'.format(ifile, new_file_name), shell=True)
+    call('mv -v {} {}'.format(ifile, new_file_name), shell=True)
 
 
 def main(args):
