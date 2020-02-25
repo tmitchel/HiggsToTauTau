@@ -3,11 +3,34 @@ import pandas
 import pprint
 import uproot
 from glob import glob
+from subprocess import call
+
+
+temp_wh_zh_map = {
+    'wh125_JHU_a1': 'JHU__reweighted_WH_htt_0PM125',
+    'wh125_JHU_a2': 'JHU__reweighted_WH_htt_0PH125',
+    'wh125_JHU_a2int': 'JHU__reweighted_WH_htt_0PHf05ph0125',
+    'wh125_JHU_a3': 'JHU__reweighted_WH_htt_0Mf05ph0125',
+    'wh125_JHU_a3int': 'JHU__reweighted_WH_htt_0M125',
+    'wh125_JHU_l1': 'JHU__reweighted_WH_htt_0L1125',
+    'wh125_JHU_l1int': 'JHU__reweighted_WH_htt_0L1f05ph0125',
+    'wh125_JHU_l1zg': 'JHU__reweighted_WH_htt_0L1Zg125',
+    'wh125_JHU_l1zgint': 'JHU__reweighted_WH_htt_0L1Zgf05ph0125',
+    'zh125_JHU_a1': 'JHU__reweighted_ZH_htt_0PM125',
+    'zh125_JHU_a2': 'JHU__reweighted_ZH_htt_0PH125',
+    'zh125_JHU_a2int': 'JHU__reweighted_ZH_htt_0PHf05ph0125',
+    'zh125_JHU_a3': 'JHU__reweighted_ZH_htt_0Mf05ph0125',
+    'zh125_JHU_a3int': 'JHU__reweighted_ZH_htt_0M125',
+    'zh125_JHU_l1': 'JHU__reweighted_ZH_htt_0L1125',
+    'zh125_JHU_l1int': 'JHU__reweighted_ZH_htt_0L1f05ph0125',
+    'zh125_JHU_l1zg': 'JHU__reweighted_ZH_htt_0L1Zg125',
+    'zh125_JHU_l1zgint': 'JHU__reweighted_ZH_htt_0L1Zgf05ph0125',
+}
 
 
 def to_reweight(ifile):
     """List of signal samples. Only processes these files."""
-    for name in ['ggh125_madgraph.root', 'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root']:
+    for name in ['ggh125_madgraph.root', 'vbf125_JHU.root', 'wh125_JHU_', 'zh125_JHU_']:
         if name in ifile:
             return True
     return False
@@ -26,6 +49,14 @@ def recognize_signal(ifile, is2018):
     return key, process
 
 
+def handle_wh_zh(ifile):
+    """Copy the file and fix the name."""
+    sample_name = ifile.split('/')[-1].replace('.root', '')
+    new_name = temp_wh_zh_map[sample_name]
+    new_file_name = ifile.replace(sample_name, new_name)
+    call('cp {} {}'.format(ifile, new_file_name), shell=True)
+
+
 def main(args):
     input_directories = [idir for idir in glob('{}/*'.format(args.input)) if not 'logs' in idir]
     input_files = {
@@ -41,6 +72,11 @@ def main(args):
 
     for idir, files in input_files.iteritems():
         for ifile in files:
+            # until weights are corrected, don't reweight WH or ZH
+            if 'wh125_JHU' in ifile or 'zh125_JHU' in ifile:
+                handle_wh_zh(ifile)
+                continue
+
             open_file = uproot.open(ifile)
             oldtree = open_file[args.tree_name].arrays(['*'])
             treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
