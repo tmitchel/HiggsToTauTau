@@ -39,8 +39,8 @@ settings = {
 def main(args):
     variables = ['evtwt', 'is_signal', 'njets', 'mjj']
     setting = settings[args.variable]
-    sig = settings['sig_sample']
-    bkg = settings['bkg_sample']
+    sig = setting['sig_sample']
+    bkg = setting['bkg_sample']
     sig_variable = setting['sig_variable']
     bkg_variable = setting['bkg_variable']
     branches = [sig_variable, bkg_variable]
@@ -66,10 +66,15 @@ def main(args):
     results = pandas.DataFrame({'alpha': [], 'ratio': []})
     for i in range(0, 500):
         alpha = (i * 0.01) + 0.01
+        if '_L1_' in bkg_variable:
+            alpha *= 10000 + 1000000
+        elif '_L1Zg_' in bkg_variable:
+            alpha *= 10000 + 5000000
+
         d0_vbf = data[sig_variable] / (data[sig_variable] + alpha * data[bkg_variable])
         numerator = (data[(d0_vbf > 0.5) & (data['signal_sample'] == 1)]['final_weight'].sum() / data[(data['signal_sample'] == 1)]['final_weight'].sum()) 
         denominator = (data[(d0_vbf <= 0.5) & (data['signal_sample'] == 0)]['final_weight'].sum() / data[(data['signal_sample'] == 0)]['final_weight'].sum())
-        results = pandas.concat([results, pandas.DataFrame({'alpha': [alpha], 'ratio': [abs(1 - (numerator / denominator))]})])
+        results = pandas.concat([results, pandas.DataFrame({'alpha': [alpha], 'ratio': [abs(1 - (numerator / denominator)) if denominator > 0 else: 1]})])
 
     print (results[results['ratio'] == results['ratio'].min()])
 
