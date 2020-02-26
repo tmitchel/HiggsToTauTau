@@ -27,7 +27,7 @@ def build_filelist(input_dir):
 
 
 def build_histogram(name, x_bins, y_bins):
-    """Build TH2F to fill later.""""
+    """Build TH2F to fill later."""
     return ROOT.TH2F(name, name, len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins))
 
 
@@ -51,7 +51,7 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
     Returns:
     hists -- filled histograms
     """
-    evtwt = data['evtwt'].to_numpy(copy=True)
+    evtwt = data['evtwt'].values
     xvar = data[xvar_name].values
     yvar = data[yvar_name].values
     zvar = data[zvar_name].values if zvar_name != None else None
