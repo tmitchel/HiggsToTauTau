@@ -4,15 +4,33 @@ import uproot
 
 
 settings = {
-    'D0_VBF': {
-        'sig_weight': 'wt_vbf_a1',
-        'bkg_weight': 'wt_vbf_a3',
+    'D0_VBF_a3': {
+        'sig_sample': 'JHU__reweighted_qqH_htt_0PM125.root',
+        'bkg_sample': 'JHU__reweighted_qqH_htt_0M125.root',
         'sig_variable': 'ME_sm_VBF',
         'bkg_variable': 'ME_ps_VBF',
     },
+    'D0_VBF_a2': {
+        'sig_sample': 'JHU__reweighted_qqH_htt_0PM125.root',
+        'bkg_sample': 'JHU__reweighted_qqH_htt_0PH125.root',
+        'sig_variable': 'ME_sm_VBF',
+        'bkg_variable': 'ME_a2_VBF',
+    },
+    'D0_VBF_l1': {
+        'sig_sample': 'JHU__reweighted_qqH_htt_0PM125.root',
+        'bkg_sample': 'JHU__reweighted_qqH_htt_0L1125.root',
+        'sig_variable': 'ME_sm_VBF',
+        'bkg_variable': 'ME_L1_VBF',
+    },
+    'D0_VBF_l1zg': {
+        'sig_sample': 'JHU__reweighted_qqH_htt_0PM125.root',
+        'bkg_sample': 'JHU__reweighted_qqH_htt_0L1Zg125.root',
+        'sig_variable': 'ME_sm_VBF',
+        'bkg_variable': 'ME_L1Zg_VBF',
+    },
     'D0_ggH': {
-        'sig_weight': 'wt_ggh_a1',
-        'bkg_weight': 'wt_ggh_a3',
+        'sig_sample': 'MG__GGH2Jets_sm_M125.root',
+        'bkg_sample': 'MG__GGH2Jets_pseudoscalar_M125.root',
         'sig_variable': 'ME_sm_ggH',
         'bkg_variable': 'ME_ps_ggH',
     },
@@ -21,15 +39,15 @@ settings = {
 def main(args):
     variables = ['evtwt', 'is_signal', 'njets', 'mjj']
     setting = settings[args.variable]
-    sig_weight = setting['sig_weight']
+    sig = settings['sig_sample']
+    bkg = settings['bkg_sample']
     sig_variable = setting['sig_variable']
-    bkg_weight = setting['bkg_weight']
     bkg_variable = setting['bkg_variable']
-    branches = [sig_weight, bkg_weight, sig_variable, bkg_variable]
+    branches = [sig_variable, bkg_variable]
 
     # open files
-    signal = uproot.open(args.signal)[args.tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
-    background = uproot.open(args.background)[args.tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
+    signal = uproot.open('{}/{}'.format(args.input, sig))[args.tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
+    background = uproot.open('{}/{}'.format(args.input, bkg))[args.tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
 
     # store branch with signal vs background
     signal['signal_sample'] = numpy.ones(len(signal))
@@ -59,7 +77,6 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('-v', '--variable', required=True, help='variable to optimize')
-    parser.add_argument('-s', '--signal', required=True, help='signal sample')
-    parser.add_argument('-b', '--background', required=True, help='background sample')
+    parser.add_argument('-i', '--input-dir', required=True, help='directory containing files')
     parser.add_argument('-t', '--tree-name', required=True, help='name of TTree')
     main(parser.parse_args())
