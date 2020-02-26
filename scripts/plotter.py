@@ -235,7 +235,7 @@ def BuildPlot(args):
         stat.Add(bkg)
         stack.Add(bkg)
 
-    sig_yields = [ihist.GetMaximum() for ihist in signals.itervalues()] + [data_hist.GetMaximum(), stat.GetMaximum()]
+    sig_yields = [ihist.GetMaximum() for ihist in [signals['ggh125_powheg'], signals['vbf125_powheg']]] + [data_hist.GetMaximum(), stat.GetMaximum()]
     stack.SetMaximum(max(sig_yields) * args.scale)
 
     # format the plots
