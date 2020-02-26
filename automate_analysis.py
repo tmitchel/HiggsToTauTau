@@ -127,13 +127,13 @@ def getSyst(name, signal_type, exe, doSyst):
     return systs
 
 
-def run_command(cmd, q, save_fcn):
+def run_command(cmd, q, parallel=False):
     """Run the provided command and write the output
 
     Arguments:
     cmd      -- the command to be run in the shell
     q        -- the writable object (must be a Queue if parallel is True)
-    save_fcn -- function to write output to q
+    save_fcn -- are you running with multiprocessing? 
     """
     code = call(cmd, shell=True)
     message = ''
@@ -146,7 +146,7 @@ def run_command(cmd, q, save_fcn):
     print message
 
     file_message = message[5:-5]  # strip colors off message for file
-    save_fcn(q, file_message)  # write the message
+    q.put(message) if parallel else q.write(message + "\n")
     return None
 
 
@@ -162,14 +162,14 @@ def listener(q, fname):
             f.flush()
 
 
-def build_processes(processes, callstring, names, signal_type, doSyst):
+def build_processes(processes, callstring, names, signal_type, exe, output_dir, doSyst):
     """Create output directories and callstrings then add them to the list of processes."""
     for name in names:
-        for isyst in getSyst(name, signal_type, args.exe, doSyst):
-            if isyst == "" and not path.exists('Output/trees/{}/NOMINAL'.format(args.output_dir)):
-                makedirs('Output/trees/{}/NOMINAL'.format(args.output_dir))
-            if isyst != "" and not path.exists('Output/trees/{}/SYST_{}'.format(args.output_dir, isyst)):
-                makedirs('Output/trees/{}/SYST_{}'.format(args.output_dir, isyst))
+        for isyst in getSyst(name, signal_type, exe, doSyst):
+            if isyst == "" and not path.exists('Output/trees/{}/NOMINAL'.format(output_dir)):
+                makedirs('Output/trees/{}/NOMINAL'.format(output_dir))
+            if isyst != "" and not path.exists('Output/trees/{}/SYST_{}'.format(output_dir, isyst)):
+                makedirs('Output/trees/{}/SYST_{}'.format(output_dir, isyst))
 
             tocall = callstring + ' -n {}'.format(name)
             if isyst != "":
@@ -190,12 +190,9 @@ def run_parallel(output_dir, processes):
     pool = multiprocessing.Pool(processes=n_processes)
     watcher = pool.apply_async(listener, (q, 'Output/trees/{}/logs/runninglog.txt'.format(output_dir)))
 
-    def save_fcn(q, msg):
-        q.put(msg)
-
     jobs = []
     for command in processes:
-        job = pool.apply_async(run_command, (command, q, save_fcn))
+        job = pool.apply_async(run_command, (command, q, True))
         jobs.append(job)
 
     for job in jobs:
@@ -208,11 +205,8 @@ def run_parallel(output_dir, processes):
 
 def run_series(output_dir, processes):
     """Run analyzer on processes in series."""
-    def save_fcn(q, msg):
-        q.write(msg + '\n')
-
     with open('Output/trees/{}/logs/runninglog.txt'.format(output_dir), 'w') as ifile:
-        [run_command(command, ifile, save_fcn) for command in processes]
+        [run_command(command, ifile, False) for command in processes]
 
 
 def main(args):
@@ -237,7 +231,7 @@ def main(args):
                                                                  tosample, sample, args.output_dir, signal_type)
 
         doSyst = True if args.syst != None and not 'data' in sample.lower() else False
-        processes = build_processes(processes, callstring, names, signal_type, doSyst)
+        processes = build_processes(processes, callstring, names, signal_type, args.exe, args.output_dir, doSyst)
     pprint(processes, width=150)
 
     if args.parallel:
