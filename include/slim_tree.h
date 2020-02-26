@@ -101,7 +101,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("D_a2_VBF", &D_a2_VBF, "D_a2_VBF/F");
     otree->Branch("D_l1_VBF", &D_l1_VBF, "D_l1_VBF/F");
     otree->Branch("D_l1zg_VBF", &D_l1zg_VBF, "D_l1zg_VBF/F");
-    otree->Branch("DCP_VBF,", &DCP_VBF, "DCP_VBF/F");
+    otree->Branch("DCP_VBF", &DCP_VBF, "DCP_VBF/F");
 
     otree->Branch("Phi", &Phi, "Phi/F");
     otree->Branch("Phi1", &Phi1, "Phi1/F");
