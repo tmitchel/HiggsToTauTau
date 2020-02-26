@@ -57,7 +57,7 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
     zvar = data[zvar_name].values if zvar_name != None else None
     if zvar_name == 'D0_ggH':
         dcp = data['DCP_ggH'].values
-    elif zvar_name == 'D0_VBF':
+    elif zvar_name == 'D0_VBF' or zvar_name == 'D_a2_VBF' or zvar_name == 'D_l1_VBF' or zvar_name == 'D_l1zg_VBF':
         dcp = data['DCP_VBF'].values
     elif zvar_name != None:
         raise Exception('Don\'t know how to handle DCP for provided zvar_name {}'.format(zvar_name))
@@ -182,7 +182,7 @@ def main(args):
             variables = set([
                 'is_signal', 'is_antiTauIso', 'contamination', 'njets', 'mjj', 'evtwt',
                 't1_decayMode', 'vis_mass', 'higgs_pT', 'm_sv',
-                'D0_VBF', 'D0_ggH', 'DCP_VBF', 'DCP_ggH',
+                'DCP_VBF', 'DCP_ggH',
                 vbf_cat_x_var, vbf_cat_y_var, vbf_cat_edge_var
             ])
 
