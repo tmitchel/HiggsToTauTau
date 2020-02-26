@@ -209,6 +209,14 @@ def run_series(output_dir, processes):
         [run_command(command, ifile, False) for command in processes]
 
 
+def valid_sample(ifile):
+    """Remove samples that aren't used any longer"""
+    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'minlo', 'ggh125_madgraph_inc']
+    for sample in invalid_samples:
+        if sample in ifile:
+            return False
+    return True
+
 def main(args):
     """Build all processes and run them."""
     suffix = '.root'
@@ -219,7 +227,7 @@ def main(args):
         pass
 
     start = time.time()
-    fileList = [ifile for ifile in glob(args.path+'/*') if '.root' in ifile]
+    fileList = [ifile for ifile in glob(args.path+'/*') if '.root' in ifile and valid_sample(ifile)]
 
     processes = []
     for ifile in fileList:
