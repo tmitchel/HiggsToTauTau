@@ -206,108 +206,75 @@ def main(args):
             if args.embed:
                 general_selection = general_selection[(general_selection['contamination'] == 0)]
 
-            if not 'jetFakes' in name:
-                # do signal categorization
-                zero_jet_events = general_selection[general_selection['njets'] == 0]
-                boosted_events = general_selection[
-                    (general_selection['njets'] == 1) |
-                    ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300))
-                ]
-                vbf_events = general_selection[(general_selection['njets'] > 1) & (general_selection['mjj'] > 300)]
+            # do signal categorization
+            zero_jet_events = general_selection[general_selection['njets'] == 0]
+            boosted_events = general_selection[
+                (general_selection['njets'] == 1) |
+                ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300))
+            ]
+            vbf_events = general_selection[(general_selection['njets'] > 1) & (general_selection['mjj'] > 300)]
 
-                if 'wh125_JHU_' in name or 'zh125_JHU_' in name:
-                    if 'nominal' in ifile:
-                        name = boilerplate['wh_zh_name_map'][name]
-                    else:
-                        name, syst_suf = name.split('_CMS_')[0], name.split('_CMS_')[1]
-                        name = boilerplate['wh_zh_name_map'][name]
-                        name = name + '_CMS_' + syst_suf
+            if 'wh125_JHU_' in name or 'zh125_JHU_' in name:
+                if 'nominal' in ifile:
+                    name = boilerplate['wh_zh_name_map'][name]
+                else:
+                    name, syst_suf = name.split('_CMS_')[0], name.split('_CMS_')[1]
+                    name = boilerplate['wh_zh_name_map'][name]
+                    name = name + '_CMS_' + syst_suf
 
-                # start with 0-jet category
-                output_file.cd('{}_0jet'.format(channel_prefix))
-                zero_jet_hist = build_histogram(name, decay_mode_bins, vis_mass_bins)
-                fill_hists(zero_jet_events, zero_jet_hist, 't1_decayMode', 'vis_mass')
+            fweight = None
+            if 'jetFakes' in name:
+                fweight = 'fake_weight'
 
-                # now boosted category
-                output_file.cd('{}_boosted'.format(channel_prefix))
-                boost_hist = build_histogram(name, higgs_pT_bins_boost, m_sv_bins_boost)
-                fill_hists(boosted_events, boost_hist, 'higgs_pT', 'm_sv')
+            # start with 0-jet category
+            output_file.cd('{}_0jet'.format(channel_prefix))
+            zero_jet_hist = build_histogram(name, decay_mode_bins, vis_mass_bins)
+            fill_hists(zero_jet_events, zero_jet_hist, 't1_decayMode', 'vis_mass', fake_weight=fweight)
 
-                # vbf category is last
-                output_file.cd('{}_vbf'.format(channel_prefix))
-                vbf_hist = build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins)
-                fill_hists(vbf_events, vbf_hist, vbf_cat_x_var, vbf_cat_y_var)
+            output_file.cd('{}_boosted'.format(channel_prefix))
+            boost_hist = build_histogram(name, higgs_pT_bins_boost, m_sv_bins_boost)
+            boost_hist = fill_hists(boosted_events, boost_hist, 'higgs_pT', 'm_sv', fake_weight=fweight)
 
-                # vbf sub-categories event after normal vbf categories
-                vbf_cat_hists = []
-                for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
-                    output_file.cd('{}_{}'.format(channel_prefix, cat))
-                    vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins))
-                fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var,
-                           zvar_name=vbf_cat_edge_var, edges=vbf_cat_edges, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
+            output_file.cd('{}_vbf'.format(channel_prefix))
+            vbf_hist = build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins)
+            vbf_hist = fill_hists(vbf_events, vbf_hist, vbf_cat_x_var,
+                                    vbf_cat_y_var, fake_weight=fweight)
 
-                # write then reset histograms
-                output_file.Write()
+            # vbf sub-categories event after normal vbf categories
+            vbf_cat_hists = []
+            for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
+                output_file.cd('{}_{}'.format(channel_prefix, cat))
+                vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins))
+            fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
+                        edges=vbf_cat_edges, fake_weight=fweight, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
 
-            # do anti-iso categorization for fake-factor using data
-            else:
-                logging.info('making fake factor hists')
-                fake_zero_jet_events = general_selection[general_selection['njets'] == 0]
-                fake_boosted_events = general_selection[
-                    (general_selection['njets'] == 1) |
-                    ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300))
-                ]
-                fake_vbf_events = general_selection[(general_selection['njets'] > 1) & (general_selection['mjj'] > 300)]
+            output_file.Write()
 
-                output_file.cd('{}_0jet'.format(channel_prefix))
-                zero_jet_hist = build_histogram('jetFakes', decay_mode_bins, vis_mass_bins)
-                zero_jet_hist = fill_hists(fake_zero_jet_events, zero_jet_hist,
-                                           't1_decayMode', 'vis_mass', fake_weight='fake_weight')
+            if args.syst and 'jetFakes' in name:
+                for syst in boilerplate['fake_factor_systematics']:
+                    output_file.cd('{}_0jet'.format(channel_prefix))
+                    zero_jet_hist = build_histogram(
+                        'jetFakes_CMS_htt_{}'.format(syst), decay_mode_bins, vis_mass_bins)
+                    zero_jet_hist = fill_hists(zero_jet_events, zero_jet_hist,
+                                                't1_decayMode', 'vis_mass', fake_weight=syst)
 
-                output_file.cd('{}_boosted'.format(channel_prefix))
-                boost_hist = build_histogram('jetFakes', higgs_pT_bins_boost, m_sv_bins_boost)
-                boost_hist = fill_hists(fake_boosted_events, boost_hist, 'higgs_pT', 'm_sv', fake_weight='fake_weight')
+                    output_file.cd('{}_boosted'.format(channel_prefix))
+                    boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
+                                                    higgs_pT_bins_boost, m_sv_bins_boost)
+                    boost_hist = fill_hists(boosted_events, boost_hist, 'higgs_pT', 'm_sv', fake_weight=syst)
 
-                output_file.cd('{}_vbf'.format(channel_prefix))
-                vbf_hist = build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins)
-                vbf_hist = fill_hists(fake_vbf_events, vbf_hist, vbf_cat_x_var,
-                                      vbf_cat_y_var, fake_weight='fake_weight')
+                    output_file.cd('{}_vbf'.format(channel_prefix))
+                    vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), vbf_cat_x_bins, vbf_cat_y_bins)
+                    vbf_hist = fill_hists(vbf_events, vbf_hist, vbf_cat_x_var, vbf_cat_y_var, fake_weight=syst)
 
-                # vbf sub-categories event after normal vbf categories
-                vbf_cat_hists = []
-                for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
-                    output_file.cd('{}_{}'.format(channel_prefix, cat))
-                    vbf_cat_hists.append(build_histogram('jetFakes', vbf_cat_x_bins, vbf_cat_y_bins))
-                fill_hists(fake_vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
-                           edges=vbf_cat_edges, fake_weight='fake_weight', DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
-
-                output_file.Write()
-
-                if args.syst:
-                    for syst in boilerplate['fake_factor_systematics']:
-                        output_file.cd('{}_0jet'.format(channel_prefix))
-                        zero_jet_hist = build_histogram(
-                            'jetFakes_CMS_htt_{}'.format(syst), decay_mode_bins, vis_mass_bins)
-                        zero_jet_hist = fill_hists(fake_zero_jet_events, zero_jet_hist,
-                                                   't1_decayMode', 'vis_mass', fake_weight=syst)
-
-                        output_file.cd('{}_boosted'.format(channel_prefix))
-                        boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
-                                                     higgs_pT_bins_boost, m_sv_bins_boost)
-                        boost_hist = fill_hists(fake_boosted_events, boost_hist, 'higgs_pT', 'm_sv', fake_weight=syst)
-
-                        output_file.cd('{}_vbf'.format(channel_prefix))
-                        vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), vbf_cat_x_bins, vbf_cat_y_bins)
-                        vbf_hist = fill_hists(fake_vbf_events, vbf_hist, vbf_cat_x_var, vbf_cat_y_var, fake_weight=syst)
-
-                        # vbf sub-categories event after normal vbf categories
-                        vbf_cat_hists = []
-                        for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
-                            output_file.cd('{}_{}'.format(channel_prefix, cat))
-                            vbf_cat_hists.append(build_histogram('jetFakes_' + syst, vbf_cat_x_bins, vbf_cat_y_bins))
-                        fill_hists(fake_vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
-                                   edges=vbf_cat_edges, fake_weight=syst, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
-                        output_file.Write()
+                    # vbf sub-categories event after normal vbf categories
+                    vbf_cat_hists = []
+                    for cat in boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
+                        output_file.cd('{}_{}'.format(channel_prefix, cat))
+                        vbf_cat_hists.append(build_histogram('jetFakes_' + syst, vbf_cat_x_bins, vbf_cat_y_bins))
+                    fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
+                                edges=vbf_cat_edges, fake_weight=syst, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
+                    output_file.Write()
 
     output_file.Close()
     print 'Finished in {} seconds'.format(time.time() - start)
