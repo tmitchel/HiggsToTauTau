@@ -38,7 +38,7 @@ def get_categories(channel):
 
 
 def build_histogram(name):
-    """Build TH2F to fill with fake fraction.""""
+    """Build TH2F to fill with fake fraction."""
     return ROOT.TH2F(name, name, len(mvis_bins) - 1, array('d', mvis_bins), len(njets_bins) - 1, array('d', njets_bins))
 
 
