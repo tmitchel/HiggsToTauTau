@@ -46,8 +46,8 @@ def main(args):
     branches = [sig_variable, bkg_variable]
 
     # open files
-    signal = uproot.open('{}/{}'.format(args.input, sig))[args.tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
-    background = uproot.open('{}/{}'.format(args.input, bkg))[args.tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
+    signal = uproot.open('{}/{}'.format(args.input_dir, sig))[args.tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
+    background = uproot.open('{}/{}'.format(args.input_dir, bkg))[args.tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
 
     # store branch with signal vs background
     signal['signal_sample'] = numpy.ones(len(signal))
