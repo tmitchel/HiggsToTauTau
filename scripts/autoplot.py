@@ -3,6 +3,10 @@ import plotter
 plots = [
     ('m_sv', 'm_{SVFit}', 2.2),
     ('D0_VBF', 'D_{0-}^{VBF}', 2.2),
+    ('D_a2_VBF', 'D_{a2}^{VBF}', 2.2),
+    ('D_l1_VBF', 'D_{l1}^{VBF}', 2.2),
+    ('D_l1zg_VBF', 'D_{l1zg}^{VBF}', 2.2),
+
     ('D0_ggH', 'D_{0-}^{ggH}', 2.2),
     ('DCP_VBF', 'D_{CP}^{VBF}', 2.2),
     ('DCP_ggH', 'D_{CP}^{ggH}', 2.2),
