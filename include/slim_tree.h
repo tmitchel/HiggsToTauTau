@@ -256,12 +256,12 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
     ME_bkg1 = evt->getME_bkg1();
     ME_bkg2 = evt->getME_bkg2();
 
-    D0_ggH = evt->getME_sm_ggH() / (evt->getME_sm_ggH() + 1.0 * 1.0 * evt->getME_ps_ggH());
+    D0_ggH = evt->getME_sm_ggH() / (evt->getME_sm_ggH() + 1.0 * evt->getME_ps_ggH());
     DCP_ggH = evt->getDCP_ggH();
-    D0_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 0.297979 * 0.297979 * evt->getME_ps_VBF());
-    D_a2_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 1.0 * 1.0 * evt->getME_a2_VBF());
-    D_l1_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 1.0 * 1.0 * evt->getME_L1_VBF());
-    D_l1zg_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 1.0 * 1.0 * evt->getME_L1Zg_VBF());
+    D0_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 0.04 * evt->getME_ps_VBF());
+    D_a2_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 0.04 * evt->getME_a2_VBF());
+    D_l1_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 1896275.0 * evt->getME_L1_VBF());
+    D_l1zg_VBF = evt->getME_sm_VBF() / (evt->getME_sm_VBF() + 10195350.0 * evt->getME_L1Zg_VBF());
     DCP_VBF = evt->getDCP_VBF();
     MELA_D2j = (evt->getME_sm_ggH() + evt->getME_ps_ggH()) / (evt->getME_sm_ggH() + evt->getME_ps_ggH() + 8 * evt->getME_sm_VBF());
 
