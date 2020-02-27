@@ -36,6 +36,17 @@ settings = {
     },
 }
 
+
+def parse_tree_name(keys):
+    """Take list of keys in the file and search for our TTree"""
+    if 'et_tree' in keys():
+        return 'et_tree'
+    elif 'mt_tree' in keys():
+        return 'mt_tree'
+    else:
+        raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
+
+
 def main(args):
     variables = ['evtwt', 'is_signal', 'njets', 'mjj']
     setting = settings[args.variable]
@@ -46,8 +57,12 @@ def main(args):
     branches = [sig_variable, bkg_variable]
 
     # open files
-    signal = uproot.open('{}/{}'.format(args.input_dir, sig))[args.tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
-    background = uproot.open('{}/{}'.format(args.input_dir, bkg))[args.tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
+    keys = uproot.open('{}/{}'.format(args.input_dir, sig)).keys()
+    tree_name = parse_tree_name(keys)
+    signal = uproot.open('{}/{}'.format(args.input_dir, sig)
+                         )[tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
+    background = uproot.open('{}/{}'.format(args.input_dir, bkg)
+                             )[tree_name].arrays(variables + branches, outputtype=pandas.DataFrame)
 
     # store branch with signal vs background
     signal['signal_sample'] = numpy.ones(len(signal))
@@ -72,16 +87,18 @@ def main(args):
             alpha *= 10000 + 5000000
 
         d0_vbf = data[sig_variable] / (data[sig_variable] + alpha * data[bkg_variable])
-        numerator = (data[(d0_vbf > 0.5) & (data['signal_sample'] == 1)]['final_weight'].sum() / data[(data['signal_sample'] == 1)]['final_weight'].sum()) 
-        denominator = (data[(d0_vbf <= 0.5) & (data['signal_sample'] == 0)]['final_weight'].sum() / data[(data['signal_sample'] == 0)]['final_weight'].sum())
+        numerator = (data[(d0_vbf > 0.5) & (data['signal_sample'] == 1)]['final_weight'].sum() /
+                     data[(data['signal_sample'] == 1)]['final_weight'].sum())
+        denominator = (data[(d0_vbf <= 0.5) & (data['signal_sample'] == 0)]['final_weight'].sum() /
+                       data[(data['signal_sample'] == 0)]['final_weight'].sum())
         results = pandas.concat([results, pandas.DataFrame({'alpha': [alpha], 'ratio': [abs(1 - (numerator / denominator)) if denominator > 0 else: 1]})])
 
     print (results[results['ratio'] == results['ratio'].min()])
+
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('-v', '--variable', required=True, help='variable to optimize')
     parser.add_argument('-i', '--input-dir', required=True, help='directory containing files')
-    parser.add_argument('-t', '--tree-name', required=True, help='name of TTree')
     main(parser.parse_args())
