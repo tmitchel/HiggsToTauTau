@@ -148,13 +148,13 @@ def main(args):
                                                                                         ztt_name, syst_name, args.year, date, args.suffix), 'RECREATE')
 
     # create structure within output file
-    all_categories = boilerplate['categories']
+    vbf_categories = []
     if 'D0_' in vbf_cat_edge_var:
-        all_categories += boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']
+        vbf_categories += boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']
     else:
-        all_categories += boilerplate['vbf_sub_cats']
+        vbf_categories += boilerplate['vbf_sub_cats']
 
-    for cat in all_categories:
+    for cat in boilerplate['categories'] + vbf_categories:
         output_file.cd()
         output_file.mkdir('{}_{}'.format(channel_prefix, cat))
     output_file.cd()
@@ -264,7 +264,7 @@ def main(args):
 
             # vbf sub-categories event after normal vbf categories
             vbf_cat_hists = []
-            for cat in all_categories:
+            for cat in vbf_categories:
                 output_file.cd('{}_{}'.format(channel_prefix, cat))
                 vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins))
             fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
@@ -291,7 +291,7 @@ def main(args):
 
                     # vbf sub-categories event after normal vbf categories
                     vbf_cat_hists = []
-                    for cat in all_categories:
+                    for cat in vbf_categories:
                         output_file.cd('{}_{}'.format(channel_prefix, cat))
                         vbf_cat_hists.append(build_histogram('jetFakes_' + syst, vbf_cat_x_bins, vbf_cat_y_bins))
                     fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
