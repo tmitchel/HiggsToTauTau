@@ -57,8 +57,10 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
     zvar = data[zvar_name].values if zvar_name != None else None
     if zvar_name == 'D0_ggH':
         dcp = data['DCP_ggH'].values
-    elif zvar_name == 'D0_VBF' or zvar_name == 'D_a2_VBF' or zvar_name == 'D_l1_VBF' or zvar_name == 'D_l1zg_VBF':
+    elif zvar_name == 'D0_VBF':
         dcp = data['DCP_VBF'].values
+    elif zvar_name == 'D_a2_VBF' or zvar_name == 'D_l1_VBF' or zvar_name == 'D_l1zg_VBF':
+        DCP_idx = None  # DCP binning is only used when measuring fa3
     elif zvar_name != None:
         raise Exception('Don\'t know how to handle DCP for provided zvar_name {}'.format(zvar_name))
 
@@ -146,7 +148,13 @@ def main(args):
                                                                                         ztt_name, syst_name, args.year, date, args.suffix), 'RECREATE')
 
     # create structure within output file
-    for cat in boilerplate['categories'] + boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']:
+    all_categories = boilerplate['categories']
+    if 'D0_' in vbf_cat_edge_var:
+        all_categories += boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']
+    else:
+        all_categories += boilerplate['vbf_sub_cats']
+
+    for cat in all_categories:
         output_file.cd()
         output_file.mkdir('{}_{}'.format(channel_prefix, cat))
     output_file.cd()
