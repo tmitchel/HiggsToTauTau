@@ -51,7 +51,7 @@ def fill_hists(data, hists, xvar_name, yvar_name, zvar_name=None, edges=None, fa
     Returns:
     hists -- filled histograms
     """
-    evtwt = data['evtwt'].values
+    evtwt = data['evtwt'].to_numpy(copy=True)
     xvar = data[xvar_name].values
     yvar = data[yvar_name].values
     zvar = data[zvar_name].values if zvar_name != None else None
