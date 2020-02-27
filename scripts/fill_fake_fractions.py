@@ -60,7 +60,7 @@ def fill_fraction(df, fraction):
     njets = df['njets'].values
     evtwt = df['evtwt'].values
     for i in xrange(len(df.index)):
-        fraction.Fill(vis_mass[i], njets[i], evtwt[i])   
+        fraction.Fill(vis_mass[i], njets[i], evtwt[i])
 
 
 def get_weight(df, fake_weights, fractions, channel, syst=None):
@@ -82,8 +82,20 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     return weights
 
 
+def parse_tree_name(keys):
+    """Take list of keys in the file and search for our TTree"""
+    if 'et_tree' in keys():
+        return 'et_tree'
+    elif 'mt_tree' in keys():
+        return 'mt_tree'
+    else:
+        raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
+
+
 def main(args):
-    channel_prefix = args.tree_name[:2]
+    keys = uproot.open('{}/data_obs.root'.format(args.input)).keys()
+    tree_name = parse_tree_name(keys)
+    channel_prefix = tree_name[:2]
     fout = ROOT.TFile('Output/fake_fractions/{}{}_{}.root'.format(channel_prefix, args.year, args.suffix), 'recreate')
     categories = get_categories(channel_prefix)
     fake_file = '/hdfs/store/user/tmitchel/deep-tau-fake-factor/ff_files_{}_{}/'.format(channel_prefix, args.year)
@@ -117,7 +129,7 @@ def main(args):
         for sample in samples:
             print sample
             events = uproot.open('{}/{}.root'.format(args.input, sample)
-                                 )[args.tree_name].arrays(list(variables), outputtype=pandas.DataFrame)
+                                 )[tree_name].arrays(list(variables), outputtype=pandas.DataFrame)
 
             anti_iso_events = events[
                 (events['is_antiTauIso'] > 0) & (events['contamination'] == 0)
@@ -162,50 +174,50 @@ def main(args):
         fractions['frac_tt'][cat].Divide(denom)
         fractions['frac_qcd'][cat].Divide(denom)
 
-
     for frac_name, categories in fractions.iteritems():
         for cat_name, ihist in categories.iteritems():
             fout.cd(cat_name)
             ihist.Write(frac_name)
 
-    if args.create_fakes:
-        open_file = uproot.open('{}/data_obs.root'.format(args.input))
-        oldtree = open_file[args.tree_name].arrays(['*'])
-        treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
-        treedict['fake_weight'] = numpy.float64
+    open_file = uproot.open('{}/data_obs.root'.format(args.input))
+    oldtree = open_file[tree_name].arrays(['*'])
+    treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
+    treedict['fake_weight'] = numpy.float64
 
-        events = pandas.DataFrame(oldtree)
-        anti_events = events[(events['is_antiTauIso'] > 0)]
+    events = pandas.DataFrame(oldtree)
+    anti_events = events[(events['is_antiTauIso'] > 0)]
 
-        print 'getting fake weights...'
-        fake_weights = anti_events[filling_variables].apply(lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
+    print 'getting fake weights...'
+    fake_weights = anti_events[filling_variables].apply(
+        lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
 
+    if args.syst:
+        syst_map = {}
+        for syst in systs:
+            print syst
+            treedict[syst] = numpy.float64
+            syst_map[syst] = anti_events[filling_variables].apply(lambda x: get_weight(
+                x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
+
+    # Subtract real backgrounds from data
+    for sample in ['ZL', 'TTT', 'VVT', 'embed']:
+        print 'Processing {} for subtraction'.format(sample)
+        open_file = uproot.open('{}/{}.root'.format(args.input, sample))
+        events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
+        sample_anti_events = events[(events['is_antiTauIso'] > 0)]
+
+        fake_weights = numpy.append(fake_weights, sample_anti_events[filling_variables].apply(
+            lambda x: -1 * get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values)
+        anti_events = pandas.concat([anti_events, sample_anti_events], sort=False)
+
+    # write the output file
+    with uproot.recreate('{}/jetFakes.root'.format(args.input), compression=None) as f:
+        f[tree_name] = uproot.newtree(treedict)
+        anti_events['fake_weight'] = fake_weights.reshape(len(fake_weights))
         if args.syst:
-            syst_map = {}
             for syst in systs:
-                print syst
-                treedict[syst] = numpy.float64
-                syst_map[syst] = anti_events[filling_variables].apply(lambda x: get_weight(
-                    x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
-
-        # Subtract real backgrounds from data
-        for sample in ['ZL', 'TTT', 'VVT', 'embed']:
-            print 'Processing {} for subtraction'.format(sample)
-            open_file = uproot.open('{}/{}.root'.format(args.input, sample))
-            events = open_file[args.tree_name].arrays(['*'], outputtype=pandas.DataFrame)
-            sample_anti_events = events[(events['is_antiTauIso'] > 0)]
-
-            fake_weights = numpy.append(fake_weights, sample_anti_events[filling_variables].apply(lambda x: -1 * get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values)
-            anti_events = pandas.concat([anti_events, sample_anti_events], sort=False)
-
-        # write the output file
-        with uproot.recreate('{}/jetFakes.root'.format(args.input), compression=None) as f:
-            f[args.tree_name] = uproot.newtree(treedict)
-            anti_events['fake_weight'] = fake_weights.reshape(len(fake_weights))
-            if args.syst:
-                for syst in systs:
-                    anti_events[syst] = syst_map[syst]
-            f[args.tree_name].extend(anti_events.to_dict('list'))
+                anti_events[syst] = syst_map[syst]
+        f[tree_name].extend(anti_events.to_dict('list'))
 
     fout.Close()
 
@@ -216,8 +228,5 @@ if __name__ == "__main__":
     parser.add_argument('--input', '-i', required=True, help='path to input files')
     parser.add_argument('--suffix', '-s', required=True, help='string to append to output file name')
     parser.add_argument('--year', '-y', required=True, help='year being processed')
-    parser.add_argument('--tree-name', '-t', dest='tree_name', required=True, help='name of TTree to process')
-    parser.add_argument('--create-fakes', '-c', action='store_true',
-                        help='create root file with data and fake weights applied')
     parser.add_argument('--syst', action='store_true', help='run fake factor systematics as well')
     main(parser.parse_args())

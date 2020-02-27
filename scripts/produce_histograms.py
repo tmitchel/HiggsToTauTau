@@ -125,6 +125,16 @@ def fill_process_list(data, name, variable, bins, boilerplate, output_file, dire
     ], all_hists
 
 
+def parse_tree_name(keys):
+    """Take list of keys in the file and search for our TTree"""
+    if 'et_tree' in keys():
+        return 'et_tree'
+    elif 'mt_tree' in keys():
+        return 'mt_tree'
+    else:
+        raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
+
+
 def main(args):
     start = time.time()
     config = {}
@@ -138,10 +148,14 @@ def main(args):
         config_variables = config['variables']
         zvars = config['zvar']
 
-    channel_prefix = args.tree_name.replace('mt_tree', 'mt')
+    files = [ifile for ifile in glob('{}/*.root'.format(args.input_dir))]  # get files to process
+
+    keys = uproot.open(file[0]).keys()
+    tree_name = parse_tree_name(keys)
+
+    channel_prefix = tree_name.replace('mt_tree', 'mt')
     channel_prefix = channel_prefix.replace('et_tree', 'et')
     assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
-    files = [ifile for ifile in glob('{}/*.root'.format(args.input_dir))]  # get files to process
 
     # get things for output file name
     ztt_name = 'emb' if args.embed else 'ztt'
@@ -173,11 +187,11 @@ def main(args):
         print name
         input_file = uproot.open(ifile)
         trees = [ikey.replace(';1', '') for ikey in input_file.keys()
-                 if 'tree' in ikey] if args.syst else [args.tree_name]
+                 if 'tree' in ikey] if args.syst else [tree_name]
         for itree in trees:
-            if itree != args.tree_name:
+            if itree != tree_name:
                 name = ifile.replace('.root', '').split(
-                    '/')[-1] + boilerplate['syst_name_map'][itree.replace(args.tree_name, '')]
+                    '/')[-1] + boilerplate['syst_name_map'][itree.replace(tree_name, '')]
             else:
                 name = ifile.replace('.root', '').split('/')[-1]
 
@@ -268,7 +282,6 @@ if __name__ == "__main__":
     parser.add_argument('--embed', '-e', action='store_true', help='use embedded instead of MC')
     parser.add_argument('--year', '-y', required=True, action='store', help='year being processed')
     parser.add_argument('--input-dir', '-i', required=True, action='store', dest='input_dir', help='path to files')
-    parser.add_argument('--tree-name', '-t', required=True, action='store', dest='tree_name', help='name of input tree')
     parser.add_argument('--date', '-d', required=True, action='store', help='today\'s date for output name')
     parser.add_argument('--suffix', action='store', default='', help='suffix for filename')
     parser.add_argument('--config', '-c', action='store', default=None, required=True, help='config for binning, etc.')

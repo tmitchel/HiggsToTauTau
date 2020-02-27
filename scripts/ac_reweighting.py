@@ -57,6 +57,16 @@ def handle_wh_zh(ifile):
     call('mv -v {} {}'.format(ifile, new_file_name), shell=True)
 
 
+def parse_tree_name(keys):
+    """Take list of keys in the file and search for our TTree"""
+    if 'et_tree' in keys():
+        return 'et_tree'
+    elif 'mt_tree' in keys():
+        return 'mt_tree'
+    else:
+        raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
+
+
 def main(args):
     input_directories = [idir for idir in glob('{}/*'.format(args.input)) if not 'logs' in idir]
     input_files = {
@@ -78,7 +88,8 @@ def main(args):
                 continue
 
             open_file = uproot.open(ifile)
-            oldtree = open_file[args.tree_name].arrays(['*'])
+            tree_name = parse_tree_name(open_file.keys())
+            oldtree = open_file[tree_name].arrays(['*'])
             treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
 
             # build DataFrame
@@ -93,14 +104,13 @@ def main(args):
                 weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
 
                 with uproot.recreate('{}/merged/{}.root'.format(idir, name)) as f:
-                    f[args.tree_name] = uproot.newtree(treedict)
-                    f[args.tree_name].extend(weighted_signal_events.to_dict('list'))
+                    f[tree_name] = uproot.newtree(treedict)
+                    f[tree_name].extend(weighted_signal_events.to_dict('list'))
 
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--input', '-i', required=True, help='path to input files')
-    parser.add_argument('--tree-name', '-t', required=True, help='name of TTree')
     parser.add_argument('--is2018', action='store_true', help='is this 2018?')
     main(parser.parse_args())

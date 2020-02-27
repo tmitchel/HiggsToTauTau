@@ -98,6 +98,16 @@ def get_syst_name(channel, syst, syst_name_map):
         return 'unknown'
 
 
+def parse_tree_name(keys):
+    """Take list of keys in the file and search for our TTree"""
+    if 'et_tree' in keys():
+        return 'et_tree'
+    elif 'mt_tree' in keys():
+        return 'mt_tree'
+    else:
+        raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
+
+
 def main(args):
     start = time.time()
     config = {}
@@ -117,11 +127,15 @@ def main(args):
         vbf_cat_y_var, vbf_cat_y_bins = config['vbf_cat_y_bins']
         vbf_cat_edge_var, vbf_cat_edges = config['vbf_cat_edges']
 
-    channel_prefix = args.tree_name.replace('mt_tree', 'mt')
-    channel_prefix = channel_prefix.replace('et_tree', 'et')
-    assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
     filelist = build_filelist(args.input_dir)
     assert len(filelist['nominal']) > 0, 'could\'nt locate any nominal files'
+
+    keys = uproot.open(filelist['nominal'][0]).keys()
+    tree_name = parse_tree_name(keys)
+
+    channel_prefix = tree_name.replace('mt_tree', 'mt')
+    channel_prefix = channel_prefix.replace('et_tree', 'et')
+    assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
 
     # get things for output file name
     ztt_name = 'emb' if args.embed else 'ztt'
@@ -194,7 +208,7 @@ def main(args):
 
             name = name + postfix  # add systematic postfix to file name
 
-            events = input_file[args.tree_name].arrays(list(variables), outputtype=pandas.DataFrame)
+            events = input_file[tree_name].arrays(list(variables), outputtype=pandas.DataFrame)
 
             if 'jetFakes' in name:
                 iso_branch = 'is_antiTauIso'
@@ -238,7 +252,7 @@ def main(args):
             output_file.cd('{}_vbf'.format(channel_prefix))
             vbf_hist = build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins)
             vbf_hist = fill_hists(vbf_events, vbf_hist, vbf_cat_x_var,
-                                    vbf_cat_y_var, fake_weight=fweight)
+                                  vbf_cat_y_var, fake_weight=fweight)
 
             # vbf sub-categories event after normal vbf categories
             vbf_cat_hists = []
@@ -246,7 +260,7 @@ def main(args):
                 output_file.cd('{}_{}'.format(channel_prefix, cat))
                 vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins))
             fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
-                        edges=vbf_cat_edges, fake_weight=fweight, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
+                       edges=vbf_cat_edges, fake_weight=fweight, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
 
             output_file.Write()
 
@@ -256,11 +270,11 @@ def main(args):
                     zero_jet_hist = build_histogram(
                         'jetFakes_CMS_htt_{}'.format(syst), decay_mode_bins, vis_mass_bins)
                     zero_jet_hist = fill_hists(zero_jet_events, zero_jet_hist,
-                                                't1_decayMode', 'vis_mass', fake_weight=syst)
+                                               't1_decayMode', 'vis_mass', fake_weight=syst)
 
                     output_file.cd('{}_boosted'.format(channel_prefix))
                     boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
-                                                    higgs_pT_bins_boost, m_sv_bins_boost)
+                                                 higgs_pT_bins_boost, m_sv_bins_boost)
                     boost_hist = fill_hists(boosted_events, boost_hist, 'higgs_pT', 'm_sv', fake_weight=syst)
 
                     output_file.cd('{}_vbf'.format(channel_prefix))
@@ -273,7 +287,7 @@ def main(args):
                         output_file.cd('{}_{}'.format(channel_prefix, cat))
                         vbf_cat_hists.append(build_histogram('jetFakes_' + syst, vbf_cat_x_bins, vbf_cat_y_bins))
                     fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
-                                edges=vbf_cat_edges, fake_weight=syst, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
+                               edges=vbf_cat_edges, fake_weight=syst, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
                     output_file.Write()
 
     output_file.Close()
@@ -285,10 +299,8 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--no-syst', '-s', dest='syst', action='store_false', help='run without systematics')
     parser.add_argument('--embed', '-e', action='store_true', help='use embedded instead of MC')
-    parser.add_argument('--local', '-l', action='store_true', help='running locally')
     parser.add_argument('--year', '-y', required=True, action='store', help='year being processed')
     parser.add_argument('--input-dir', '-i', required=True, action='store', dest='input_dir', help='path to files')
-    parser.add_argument('--tree-name', '-t', required=True, action='store', dest='tree_name', help='name of input tree')
     parser.add_argument('--suffix', action='store', default='', help='suffix for filename')
     parser.add_argument('--config', '-c', action='store', default=None, required=True, help='config for binning, etc.')
     main(parser.parse_args())
