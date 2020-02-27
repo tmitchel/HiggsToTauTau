@@ -143,10 +143,10 @@ def main(args):
         fractions['frac_qcd'][cat].Add(fractions['frac_real'][cat], -1)
 
         # handle bins that go negative
-        for xbin in range(fractions['frac_qcd'][cat].GetNbinsX()):
-            for ybin in range(fractions['frac_qcd'][cat].GetNbinsY()):
+        for xbin in range(0, fractions['frac_qcd'][cat].GetNbinsX() + 1):
+            for ybin in range(0, fractions['frac_qcd'][cat].GetNbinsY() + 1):
                 if fractions['frac_qcd'][cat].GetBinContent(xbin, ybin) < 0:
-                    fractions['frac_qcd'][cat].SetBinContent(0., xbin, ybin)
+                    fractions['frac_qcd'][cat].SetBinContent(xbin, ybin, 0.)
 
         denom = fractions['frac_qcd'][cat].Clone()
         denom.Add(fractions['frac_w'][cat])
