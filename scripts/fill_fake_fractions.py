@@ -97,7 +97,7 @@ def main(args):
         'frac_w': ['W', 'ZJ', 'VVJ'],
         'frac_tt': ['TTJ'],
         'frac_data': ['data_obs'],
-        'frac_real': ['embed', 'TTT', 'VVT', 'ZL'],
+        'frac_real': ['embed', 'TTT', 'VVT'],
     }
 
     fractions = {
@@ -141,6 +141,12 @@ def main(args):
         fractions['frac_qcd'][cat].Add(fractions['frac_w'][cat], -1)
         fractions['frac_qcd'][cat].Add(fractions['frac_tt'][cat], -1)
         fractions['frac_qcd'][cat].Add(fractions['frac_real'][cat], -1)
+
+        # handle bins that go negative
+        for xbin in range(fractions['frac_qcd'][cat].GetNbinsX()):
+            for ybin in range(fractions['frac_qcd'][cat].GetNbinsY()):
+                if fractions['frac_qcd'][cat].GetBinContent(xbin, ybin) < 0:
+                    fractions['frac_qcd'][cat].SetBinContent(0., xbin, ybin)
 
         denom = fractions['frac_qcd'][cat].Clone()
         denom.Add(fractions['frac_w'][cat])
