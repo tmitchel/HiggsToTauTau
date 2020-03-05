@@ -39,9 +39,9 @@ settings = {
 
 def parse_tree_name(keys):
     """Take list of keys in the file and search for our TTree"""
-    if 'et_tree' in keys():
+    if 'et_tree;1' in keys:
         return 'et_tree'
-    elif 'mt_tree' in keys():
+    elif 'mt_tree;1' in keys:
         return 'mt_tree'
     else:
         raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
@@ -87,11 +87,11 @@ def main(args):
             alpha *= 10000 + 5000000
 
         d0_vbf = data[sig_variable] / (data[sig_variable] + alpha * data[bkg_variable])
-        numerator = (data[(d0_vbf > 0.5) & (data['signal_sample'] == 1)]['final_weight'].sum() /
-                     data[(data['signal_sample'] == 1)]['final_weight'].sum())
-        denominator = (data[(d0_vbf <= 0.5) & (data['signal_sample'] == 0)]['final_weight'].sum() /
-                       data[(data['signal_sample'] == 0)]['final_weight'].sum())
-        results = pandas.concat([results, pandas.DataFrame({'alpha': [alpha], 'ratio': [abs(1 - (numerator / denominator)) if denominator > 0 else: 1]})])
+        numerator = (data[(d0_vbf > 0.5) & (data['signal_sample'] == 0)]['final_weight'].sum() /
+                     data[(data['signal_sample'] == 0)]['final_weight'].sum())
+        denominator = (data[(d0_vbf <= 0.5) & (data['signal_sample'] == 1)]['final_weight'].sum() /
+                       data[(data['signal_sample'] == 1)]['final_weight'].sum())
+        results = pandas.concat([results, pandas.DataFrame({'alpha': [alpha], 'ratio': [abs(1 - (numerator / denominator)) if denominator > 0 else 1]})])
 
     print (results[results['ratio'] == results['ratio'].min()])
 

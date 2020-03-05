@@ -127,9 +127,9 @@ def fill_process_list(data, name, variable, bins, boilerplate, output_file, dire
 
 def parse_tree_name(keys):
     """Take list of keys in the file and search for our TTree"""
-    if 'et_tree' in keys():
+    if 'et_tree;1' in keys:
         return 'et_tree'
-    elif 'mt_tree' in keys():
+    elif 'mt_tree;1' in keys:
         return 'mt_tree'
     else:
         raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
@@ -150,7 +150,7 @@ def main(args):
 
     files = [ifile for ifile in glob('{}/*.root'.format(args.input_dir))]  # get files to process
 
-    keys = uproot.open(file[0]).keys()
+    keys = uproot.open(files[0]).keys()
     tree_name = parse_tree_name(keys)
 
     channel_prefix = tree_name.replace('mt_tree', 'mt')
