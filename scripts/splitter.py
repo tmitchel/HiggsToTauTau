@@ -1,5 +1,6 @@
 from math import ceil
 from glob import glob
+import subprocess
 import pandas
 import numpy
 import pprint
@@ -32,27 +33,16 @@ def main(args):
         print 'Going to split {}'.format(ifile)
 
         nevents = open_file['nevents']
-        branches = input_tree.arrays(['*'])
-        treedict = {ikey: branches[ikey].dtype for ikey in branches.keys()}
-        pprint.pprint(treedict)
-        all_events = pandas.DataFrame(branches)
-
-        print numpy.unique(treedict.values())
-
         steps = ceil(input_tree.numentries / args.max_entries)
-        print 'Splitting into {} files'.format(steps)
-        split_events = [all_events.iloc[(args.max_entries * step):(args.max_entries * (step + 1))] for step in range(int(steps) + 1)]
 
+        print 'Splitting into {} files'.format(steps)
         base_name = ifile.split('/')[-1]
-        i = 0
-        for split in split_events:
+        for step in range(int(steps) + 1):
             file_name = base_name.replace('.root', '_split{}.root'.format(i))
-            with uproot.recreate(file_name) as f:
-                f[tree_name] = uproot.newtree(treedict)
-                f[tree_name].extend(split.to_dict('list'))
+            call('rooteventselector -f {} -l {} {}:{} {}'.format(
+                args.max_entries * step, args.max_entries * (step + 1), ifile, tree_name, file_name))
+            with uproot.update(file_name) as f:
                 f['nevents'] = nevents
-            print 'File: {} written'.format(file_name)
-            i += 1
 
 
 if __name__ == "__main__":
