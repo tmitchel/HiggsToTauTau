@@ -226,11 +226,11 @@ std::vector<double> ACWeighter::getWeights(Long64_t currentEventID) {
     auto it = acWeights.find(currentEventID);
     if (it != acWeights.end()) {
         weights = it->second;
-    } else if (notSignal || isWHAC || isZHAC) {
+    } else if (notSignal) {
       return weights;
     } else {
-      // std::cerr << "Unable to find event " << currentEventID << std::endl;
-      // throw;
+      std::cerr << "Unable to find event " << currentEventID << std::endl;
+      throw;
     }
     return weights;
 }
