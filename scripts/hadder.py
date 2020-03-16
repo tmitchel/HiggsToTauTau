@@ -22,7 +22,10 @@ def do_hadd(hadd_list, path):
             os.mkdir(path + '/' + idir + '/merged')
 
         commands = ['hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
-                    for sample, files in isamples.items() if not 'wh125_JHU' in sample and not 'zh125_JHU' in sample]
+                    for sample, files in isamples.items()]
+
+#         commands = ['hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
+#                     for sample, files in isamples.items() if not 'wh125_JHU' in sample and not 'zh125_JHU' in sample]
 
         n_processes = min(12, multiprocessing.cpu_count() / 2)
         pool = multiprocessing.Pool(processes=n_processes)
@@ -118,7 +121,7 @@ def main(args):
 
     do_hadd(bkg_hadd_list, args.path)
     do_hadd(sig_hadd_list, args.path)
-    rename_wh_zh(sig_hadd_list, args.path)
+    # rename_wh_zh(sig_hadd_list, args.path)
 
 
 if __name__ == "__main__":

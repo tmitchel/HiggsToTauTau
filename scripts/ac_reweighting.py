@@ -30,7 +30,7 @@ temp_wh_zh_map = {
 
 def to_reweight(ifile):
     """List of signal samples. Only processes these files."""
-    for name in ['ggh125_madgraph.root', 'vbf125_JHU.root', 'wh125_JHU_', 'zh125_JHU_']:
+    for name in ['ggh125_madgraph.root', 'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root']:
         if name in ifile:
             return True
     return False
@@ -83,9 +83,9 @@ def main(args):
     for idir, files in input_files.iteritems():
         for ifile in files:
             # until weights are corrected, don't reweight WH or ZH
-            if 'wh125_JHU' in ifile or 'zh125_JHU' in ifile:
-                handle_wh_zh(ifile)
-                continue
+            # if 'wh125_JHU' in ifile or 'zh125_JHU' in ifile:
+            #     handle_wh_zh(ifile)
+            #     continue
 
             open_file = uproot.open(ifile)
             tree_name = parse_tree_name(open_file.keys())
