@@ -195,29 +195,29 @@ int main(int argc, char* argv[]) {
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 9.679;
+                evtwt = 9.091;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 4.808;
+                evtwt = 4.516;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 3.290;
+                evtwt = 3.090;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 3.435;
+                evtwt = 3.227;
             } else {
-                evtwt = 55.160;
+                evtwt = 51.812;
             }
         }
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.671;
+                evtwt = 0.630;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 0.588;
+                evtwt = 0.553;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 0.640;
+                evtwt = 0.601;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 1.172;
+                evtwt = 0.832;
             } else {
-                evtwt = 3.865;
+                evtwt = 3.632;
             }
         }
         histos->at("cutflow")->Fill(1., 1.);
@@ -226,6 +226,7 @@ int main(int argc, char* argv[]) {
         auto electron = electrons.run_factory();
         auto tau = taus.run_factory();
         jets.run_factory();
+        event.setNjets(jets.getNjets());
 
         // pass event flags
         if (event.getPassFlags(isData)) {
@@ -295,10 +296,13 @@ int main(int argc, char* argv[]) {
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // pileup reweighting
-            evtwt *= lumi_weights->weight(event.getNPV());
+             evtwt *= lumi_weights->weight(event.getNPU());
 
             // generator weights
             evtwt *= event.getGenWeight();
+
+            // prefiring weight
+            evtwt *= event.getPrefiringWeight();
 
             // b-tagging scale factor goes here
             evtwt *= jets.getBWeight();
@@ -325,7 +329,9 @@ int main(int argc, char* argv[]) {
             if (syst.find("tau_id_") != std::string::npos) {
                 id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
             }
-            evtwt *= htt_sf->function(id_name.c_str())->getVal();
+            if (tau.getDecayMode() == 5) {
+              evtwt *= htt_sf->function(id_name.c_str())->getVal();
+            }
 
             // electron fake rate SF
             if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
@@ -404,7 +410,7 @@ int main(int argc, char* argv[]) {
         } else if (!isData && isEmbed) {
             event.setEmbed();
             // embedded cross-triggers not applied in skimmer
-            if (electron.getPt() < 33 && !event.getPassEle24Tau30_2018()) {
+            if (electron.getPt() < 33 && !event.getPassEle24Tau30_2018(isData) && abs(tau.getEta()) < 1.479) {
                 continue;
             }
 

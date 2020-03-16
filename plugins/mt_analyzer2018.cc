@@ -209,13 +209,13 @@ int main(int argc, char *argv[]) {
             if (event.getNumGenJets() == 1) {
                 evtwt = 0.671;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 0.588;
+                evtwt = 0.589;
             } else if (event.getNumGenJets() == 3) {
                 evtwt = 0.640;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 1.172;
+                evtwt = 0.885;
             } else {
-                evtwt = 3.865;
+                evtwt = 3.867;
             }
         }
         histos->at("cutflow")->Fill(1., 1.);
@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // pileup reweighting
-            evtwt *= lumi_weights->weight(event.getNPV());
+            evtwt *= lumi_weights->weight(event.getNPU());
 
             // generator weights
             evtwt *= event.getGenWeight();
