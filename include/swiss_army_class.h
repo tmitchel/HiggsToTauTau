@@ -40,7 +40,7 @@ class Helper {
 Helper::Helper(TFile *fout, std::string name, std::string syst)
     : luminosity2016(35900.),
       luminosity2017(41500.),
-      luminosity2018(63670.),
+      luminosity2018(59740.0),
       systematics{{"met_UESDown", "_CMS_scale_met_unclustered_13TeVDown"},       {"met_UESUp", "_CMS_scale_met_unclustered_13TeVUp"},
                   {"met_JESDown", "_CMS_scale_met_clustered_13TeVDown"},         {"met_JESUp", "_CMS_scale_met_clustered_13TeVUp"},
                   {"metphi_UESDown", "_CMS_scale_metphi_unclustered_13TeVDown"}, {"metphi_UESUp", "_CMS_scale_metphi_unclustered_13TeVUp"},

@@ -63,7 +63,7 @@ class event_info {
     Bool_t getPassEle32();
     Bool_t getPassEle35();
     Bool_t getPassEle24Tau30();
-    Bool_t getPassEle24Tau30_2018();
+    Bool_t getPassEle24Tau30_2018(Bool_t);
     Bool_t getPassMu19Tau20();
     Bool_t getPassIsoMu22();
     Bool_t getPassIsoTkMu22();
@@ -297,12 +297,12 @@ Bool_t event_info::getPassEle24Tau30() {
     return Ele24LooseTau30Pass && eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path;
 }
 
-Bool_t event_info::getPassEle24Tau30_2018() {
+Bool_t event_info::getPassEle24Tau30_2018(Bool_t isData) {
     PassEle24Tau30_2018 = eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path;
-    if (PassEle24Tau30_2018 && Ele24LooseHPSTau30TightIDPass && run >= 317509) {
-      return true;
-    } else if (PassEle24Tau30_2018 && Ele24LooseHPSTau30Pass && run < 317509) {
-      return true;
+    if (isData && run < 317509) {
+      return eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path && Ele24LooseTau30Pass; 
+    } else if ((isData && run >= 317509) || !isData) {
+      return eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path && Ele24LooseHPSTau30Pass; 
     }
     return false;
 }
