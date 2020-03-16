@@ -6,7 +6,7 @@
         "m_sv_bins_boost": [0, 80, 90, 100, 110, 120, 130, 140, 150, 160, 300],
         "vbf_cat_x_bins": ["mjj", [300, 500, 10000]],
         "vbf_cat_y_bins": ["m_sv", [0, 80, 100, 115, 130, 150, 1000]],
-        "vbf_cat_edges": ["m_sv", [0, 10000.0]]
+        "vbf_cat_edges": ["D0_VBF", [0, 10000.0]]
     },
     "neural_ggh": {
         "decay_mode_bins": [0, 1, 10, 11],
