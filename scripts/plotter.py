@@ -271,9 +271,9 @@ def BuildPlot(args):
     ll.SetTextSize(0.06)
     ll.SetTextFont(42)
     if 'et_' in args.category:
-        lepLabel = "e#tau_{e}"
+        lepLabel = "#tau_{e}#tau_{h}"
     elif 'mt_' in args.category:
-        lepLabel = "#mu#tau_{#mu}"
+        lepLabel = "#tau_{#mu}#tau_{h}"
     if args.year == '2016':
         lumi = "35.9 fb^{-1}"
     elif args.year == '2017':
