@@ -18,7 +18,7 @@ def getNames(sample):
     elif 'TT' in sample:
         names = ['TTT', 'TTJ', 'TTL']
     elif '-tW' in sample or '-tchan' in sample:
-        names = ['STT', 'STL']
+        names = ['STT', 'STL', 'STJ']
     elif 'WJets' in sample:
         names = ['W']
     elif 'EWKW' in sample:
@@ -76,7 +76,7 @@ def getSyst(name, signal_type, exe, doSyst):
         systs += ['tau_id_Up', 'tau_id_Down']  # names will probably be updated
         systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
 
-    if name == 'ZL' or name == 'W':
+    if name == 'ZL' or name == 'W' or name == 'TTL' or name == 'VVL':
         systs += ['LES_DM0_Up', 'LES_DM0_Down', 'LES_DM1_Up', 'LES_DM1_Down']
 
     if name != 'embed' and name != 'data_obs':
