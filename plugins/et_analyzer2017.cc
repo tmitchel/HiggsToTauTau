@@ -249,11 +249,11 @@ int main(int argc, char* argv[]) {
         }
 
         // Separate processes
-        if ((name == "ZL" || name == "TTL" || name == "VVL") && tau.getGenMatch() > 4) {
+        if ((name == "ZL" || name == "TTL" || name == "VVL" || name == "STL") && tau.getGenMatch() > 4) {
             continue;
-        } else if ((name == "ZTT" || name == "TTT" || name == "VVT") && tau.getGenMatch() != 5) {
+        } else if ((name == "ZTT" || name == "TTT" || name == "VVT" || name == "STT") && tau.getGenMatch() != 5) {
             continue;
-        } else if ((name == "ZJ" || name == "TTJ" || name == "VVJ") && tau.getGenMatch() != 6) {
+        } else if ((name == "ZJ" || name == "TTJ" || name == "VVJ" || name == "STJ") && tau.getGenMatch() != 6) {
             continue;
         } else {
             histos->at("cutflow")->Fill(3., 1.);
@@ -376,7 +376,7 @@ int main(int argc, char* argv[]) {
             }
 
             // top-pT Reweighting
-            if (name == "TTT" || name == "TT" || name == "TTJ" || name == "TTL") {
+            if (name == "TTT" || name == "TTJ" || name == "TTL" || name == "STT" || name == "STJ" || name == "STL") {
                 float pt_top1 = std::min(static_cast<float>(400.), jets.getTopPt1());
                 float pt_top2 = std::min(static_cast<float>(400.), jets.getTopPt2());
                 if (syst == "ttbarShape_Up") {
@@ -409,7 +409,7 @@ int main(int argc, char* argv[]) {
             // begin systematics
 
             // jet to tau fake rate systematic
-            if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W" || name == "VVJ") {
+            if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W" || name == "VVJ" || name == "STJ") {
                 auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
                 if (syst == "jetToTauFake_Up") {
                     evtwt *= (1 - (0.2 * temp_tau_pt / 100));
