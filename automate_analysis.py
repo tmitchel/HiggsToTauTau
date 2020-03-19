@@ -235,6 +235,10 @@ def main(args):
         tosample = ifile.replace(sample+suffix, '')
 
         names, signal_type = getNames(sample)
+        if not 'DYJets1' in sample: continue
+        # if not 'data_obs' in names: continue
+        # if signal_type != "powheg": continue
+        # if not 'ZTT' in names: continue
         callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                  tosample, sample, args.output_dir, signal_type)
 
