@@ -48,8 +48,10 @@ met_factory::met_factory(TTree* input, int era, std::string syst) {
         metphi_name += "_JESDown";
     } else if (syst.find("Jet") != std::string::npos && (syst.find("Up") != std::string::npos || syst.find("Down") != std::string::npos)) {
         syst.erase(std::remove(syst.begin(), syst.end(), '_'), syst.end());
-        met_name += "_" + syst;
-        metphi_name += "_" + syst;
+        std::string syst_name = syst;
+        syst_name.erase(0, 3);
+        met_name += "_" + syst_name;
+        metphi_name += "_" + syst_name;
     }
 
     input->SetBranchAddress(met_name.c_str(), &met);
