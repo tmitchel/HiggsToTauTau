@@ -16,7 +16,9 @@ def getNames(sample):
     if 'DYJets' in sample:
         names = ['ZL', 'ZJ', 'ZTT']
     elif 'TT' in sample:
-        names = ['TTT', 'TTJ']
+        names = ['TTT', 'TTJ', 'TTL']
+    elif '-tW' in sample or '-tchan' in sample:
+        names = ['STT', 'STL']
     elif 'WJets' in sample:
         names = ['W']
     elif 'EWKW' in sample:
@@ -38,7 +40,7 @@ def getNames(sample):
     elif 'embed' in sample:
         names = ['embed']
     else:
-        names = ['VVJ', 'VVT']
+        names = ['VVJ', 'VVT', 'VVL']
 
     signal_type = 'None'
     if 'JHU' in sample:
