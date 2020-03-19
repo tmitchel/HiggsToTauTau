@@ -106,10 +106,10 @@ def main(args):
         fout.cd()
 
     inputs = {
-        'frac_w': ['W', 'ZJ', 'VVJ'],
+        'frac_w': ['W', 'ZJ', 'VVJ', 'STJ'],
         'frac_tt': ['TTJ'],
         'frac_data': ['data_obs'],
-        'frac_real': ['embed', 'TTT', 'VVT'],
+        'frac_real': ['STL', 'VVL', 'TTL', 'ZL', 'STT', 'VVT', 'TTT', 'embed'],
     }
 
     fractions = {
@@ -200,7 +200,7 @@ def main(args):
                 x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
 
     # Subtract real backgrounds from data
-    for sample in ['ZL', 'TTT', 'VVT', 'embed']:
+    for sample in ['STL', 'VVL', 'TTL', 'ZL', 'STT', 'VVT', 'TTT', 'embed']:
         print 'Processing {} for subtraction'.format(sample)
         open_file = uproot.open('{}/{}.root'.format(args.input, sample))
         events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)

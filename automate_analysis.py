@@ -212,7 +212,7 @@ def run_series(output_dir, processes):
 
 def valid_sample(ifile):
     """Remove samples that aren't used any longer"""
-    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'minlo', 'ggh125_madgraph_inc']
+    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc']
     for sample in invalid_samples:
         if sample in ifile:
             return False
