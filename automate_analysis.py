@@ -93,8 +93,7 @@ def getSyst(name, signal_type, exe, doSyst):
             'JetHFyear_Up', 'JetHFyear_Down',
             'JetRelBal_Up', 'JetRelBal_Down',
             'JetRelSam_Up', 'JetRelSam_Down',
-            'JetRes_Up', 'JetRes_Down',
-            'JetUES_Up', 'JetUES_Down'
+            'JetRes_Up', 'JetRes_Down'
         ]
         systs += ['trigger_up', 'trigger_down']
         if '2016' in exe or '2017' in exe:

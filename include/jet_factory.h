@@ -6,16 +6,16 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include "TLorentzVector.h"
 #include "TRandom3.h"
 #include "TTree.h"
-#include "TLorentzVector.h"
 
 class jet {
- private:
+   private:
     Float_t pt, eta, phi, csv, flavor;
     TLorentzVector p4;
 
- public:
+   public:
     jet(Float_t, Float_t, Float_t, Float_t, Float_t);
     virtual ~jet() {}
 
@@ -33,7 +33,7 @@ jet::jet(Float_t Pt, Float_t Eta, Float_t Phi, Float_t Csv, Float_t Flavor = -99
 }
 
 class jet_factory {
- private:
+   private:
     Float_t mjj;
     Float_t jpt_1, jeta_1, jphi_1, jcsv_1;
     Float_t jpt_2, jeta_2, jphi_2, jcsv_2;
@@ -44,13 +44,15 @@ class jet_factory {
     Int_t nbtag;
     Float_t bweight;
     std::vector<jet> plain_jets, btag_jets;
+    std::unordered_map<std::string, std::string> syst_name_map;
 
- public:
+   public:
     jet_factory(TTree *, int, std::string);
     virtual ~jet_factory() {}
     void run_factory();
     void promoteDemote(TH2F *, TH2F *, TH2F *, int);
     double bTagEventWeight(int, int);
+    std::string fix_syst_string(std::string);
 
     // getters
     Float_t getNbtag() { return Nbtag; }
@@ -67,19 +69,27 @@ class jet_factory {
 };
 
 // read data from tree into member variables
-jet_factory::jet_factory(TTree *input, int era, std::string syst) {
+jet_factory::jet_factory(TTree *input, int era, std::string syst)
+    : syst_name_map{
+          {"JetRelSam_Up", "JetRelativeSampleUp"},
+          {"JetRelSam_Down", "JetRelativeSampleDown"},
+          {"JetRelBal_Up", "JetRelativeBalUp"},
+          {"JetRelBal_Down", "JetRelativeBalDown"},
+          {"JetJER_Up", "JERUp"},
+          {"JetJER_Down", "JERDown"},
+      } {
     std::string mjj_name("vbfMass"), njets_name("jetVeto30");
     if (era == 2017) {
         mjj_name += "WoNoisyJets";
         njets_name += "WoNoisyJets";
     }
 
-    if (syst.find("Jet") != std::string::npos && (syst.find("Up") != std::string::npos || syst.find("Down") != std::string::npos)) {
-        syst.erase(std::remove(syst.begin(), syst.end(), '_'), syst.end());
-        mjj_name += "_" + syst;
-        njets_name += "_" + syst;
+    auto end = std::string::npos;
+    if (syst.find("Jet") != end) {
+        auto syst_name = fix_syst_string(syst);
+        mjj_name += "_" + syst_name;
+        njets_name += "_" + syst_name;
     }
-
 
     std::string btag_string("2016"), bweight_string("bweight_");
     if (era == 2016) {
@@ -136,6 +146,24 @@ void jet_factory::run_factory() {
     plain_jets.push_back(j2);
     btag_jets.push_back(b1);
     btag_jets.push_back(b2);
+}
+
+std::string jet_factory::fix_syst_string(std::string syst) {
+    auto formatted(syst);
+    auto end = std::string::npos;
+    if (syst.find("JetRel") != end || syst.find("JetJER") != end) {
+        return "_" + syst_name_map[syst];
+    } else {
+        auto pos = syst.find("_Up");
+        if (pos != end) {
+            formatted.replace(pos, 3, "Up");
+        }
+        auto pos = syst.find("_Down");
+        if (pos != end) {
+            formatted.replace(pos, 5, "Down");
+        }
+    }
+    return formatted;
 }
 
 namespace btagSF {

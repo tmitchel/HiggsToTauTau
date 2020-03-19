@@ -5,18 +5,20 @@
 
 #include <algorithm>
 #include <string>
-#include "TTree.h"
 #include "TLorentzVector.h"
+#include "TTree.h"
 
 class met_factory {
- private:
+   private:
     Float_t met, metphi, met_py, met_px;
     Float_t metSig, metcov00, metcov10, metcov11, metcov01;
     TLorentzVector p4;
+    std::unordered_map<std::string, std::string> syst_name_map;
 
- public:
+   public:
     met_factory(TTree*, int, std::string);
     virtual ~met_factory() {}
+    std::string fix_syst_string(std::string);
 
     // getters
     Float_t getMet() { return met; }
@@ -32,21 +34,18 @@ class met_factory {
 };
 
 // initialize member data and set TLorentzVector
-met_factory::met_factory(TTree* input, int era, std::string syst) {
+met_factory::met_factory(TTree* input, int era, std::string syst)
+    : syst_name_map{
+          {"UncMet_Up", "UESUp"},
+          {"UncMet_Down", "UESDown"},
+          {"JetRelBal_Up", "JetRelativeBalUp"},
+          {"JetRelBal_Down", "JetRelativeBalDown"},
+          {"JetJER_Up", "JERUp"},
+          {"JetJER_Down", "JERDown"},
+      } {
     std::string met_name("met"), metphi_name("metphi");
-    if (syst == "UncMet_Up") {
-        met_name += "_UESUp";
-        metphi_name += "_UESUp";
-    } else if (syst == "UncMet_Down") {
-        met_name += "_UESDown";
-        metphi_name += "_UESDown";
-    } else if (syst == "ClusteredMet_Up") {
-        met_name += "_JESUp";
-        metphi_name += "_JESUp";
-    } else if (syst == "ClusteredMet_Down") {
-        met_name += "_JESDown";
-        metphi_name += "_JESDown";
-    } else if (syst.find("Jet") != std::string::npos && (syst.find("Up") != std::string::npos || syst.find("Down") != std::string::npos)) {
+    auto end = std::string::npos;
+    if (syst.find("Jet") != end && (syst.find("Up") != end || syst.find("Down") != end)) {
         syst.erase(std::remove(syst.begin(), syst.end(), '_'), syst.end());
         std::string syst_name = syst;
         syst_name.erase(0, 3);
@@ -63,6 +62,24 @@ met_factory::met_factory(TTree* input, int era, std::string syst) {
     input->SetBranchAddress("metcov01", &metcov01);
     input->SetBranchAddress("met_px", &met_px);
     input->SetBranchAddress("met_py", &met_py);
+}
+
+std::string met_factory::fix_syst_string(std::string syst) {
+    auto formatted(syst);
+    auto end = std::string::npos;
+    if (syst.find("JetRel") != end || syst.find("JetJER") != end || syst.find("UncMet") != end) {
+        return "_" + syst_name_map[syst];
+    } else {
+        auto pos = syst.find("_Up");
+        if (pos != end) {
+            formatted.replace(pos, 3, "Up");
+        }
+        auto pos = syst.find("_Down");
+        if (pos != end) {
+            formatted.replace(pos, 5, "Down");
+        }
+    }
+    return formatted;
 }
 
 TLorentzVector met_factory::getP4() {
