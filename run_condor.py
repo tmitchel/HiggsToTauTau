@@ -1,6 +1,7 @@
 from os import makedirs
 from glob import glob
 from pprint import pprint
+from collections import defaultdict
 
 def valid_sample(ifile):
     """Remove samples that aren't used any longer"""
@@ -98,7 +99,7 @@ def getSyst(name, signal_type, channel, year, doSyst):
             'JetRes_Up', 'JetRes_Down'
         ]
         systs += ['trigger_up', 'trigger_down']
-        if '2016' in exe or '2017' in year:
+        if '2016' in year or '2017' in year:
             systs += ['prefiring_up', 'prefiring_down']
 
     if name == 'TTT' or name == 'TTJ':
@@ -138,7 +139,7 @@ def main(args):
         pass
 
     fileList = [ifile for ifile in glob(args.path+'/*') if '.root' in ifile and valid_sample(ifile)]
-    job_map = {}
+    job_map = defaultdict(list)
     for ifile in fileList:
         sample = ifile.split('/')[-1].split(suffix)[0]
         tosample = ifile.replace(sample+suffix, '')
@@ -146,12 +147,12 @@ def main(args):
         for name in names:
             systs = getSyst(name, signal_type, args.channel, args.year, args.syst)
             for syst in systs:
-                job_map[syst] = {
+                job_map[syst].append({
                     'path': ifile,
                     'name': name,
                     'signal_type': signal_type,
                     'syst': syst,
-                }
+                })
     pprint(job_map)
 
 
