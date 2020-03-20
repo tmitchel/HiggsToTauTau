@@ -74,7 +74,7 @@ std::string met_factory::fix_syst_string(std::string syst) {
         if (pos != end) {
             formatted.replace(pos, 3, "Up");
         }
-        auto pos = syst.find("_Down");
+        pos = syst.find("_Down");
         if (pos != end) {
             formatted.replace(pos, 5, "Down");
         }
