@@ -165,7 +165,7 @@ def main(args):
             out_name = '{}-{}'.format(sample, syst)
             input_files = ['{}/{}.root'.format(configs[0]['path'], sample)]
             commands = [
-                '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p {} -s {} -d ./ --stype {} -n {} -u {}'.format(
+                '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p {} -s {} -d ./ --stype {} -n {} -u {} --condor'.format(
                     args.exe, config['path'], config['sample'], config['signal_type'], 
                     config['name'], config['syst'].replace('SYST_', ''))
                 for config in configs
