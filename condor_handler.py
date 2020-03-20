@@ -37,7 +37,7 @@ def default_farmout(jobName, input_name, output_dir, bash_name, submit_dir, dag_
     return farmoutString
 
 
-def submit_command(jobName, input_files, commands, output_sample_name, dryrun=True):
+def submit_command(jobName, input_files, commands, output_sample_name, syst, dryrun=True):
     print "output_sample_name:", output_sample_name
     nfs_sample_dir = '/nfs_scratch/{}/{}/{}'.format(
         pwd.getpwuid(os.getuid())[0], jobName, output_sample_name)
@@ -55,7 +55,7 @@ def submit_command(jobName, input_files, commands, output_sample_name, dryrun=Tr
 
     # output dir
     output_dir = 'gsiftp://cms-lvs-gridftp.hep.wisc.edu:2811//hdfs/store/user/{}/{}/{}/'.format(
-        pwd.getpwuid(os.getuid())[0], jobName, output_sample_name)
+        pwd.getpwuid(os.getuid())[0], jobName, syst)
 
     # create file list
     filesperjob = 1

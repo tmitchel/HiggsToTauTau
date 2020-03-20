@@ -162,7 +162,7 @@ def main(args):
             if len(configs) == 0:
                 continue
             
-            job_name = '{}-{}'.format(sample, syst)
+            out_name = '{}-{}'.format(sample, syst)
             input_files = ['{}/{}.root'.format(configs[0]['path'], sample)]
             commands = [
                 '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p {} -s {} -d ./ --stype {} -n {} -u {}'.format(
@@ -170,7 +170,7 @@ def main(args):
                     config['name'], config['syst'].replace('SYST_', ''))
                 for config in configs
                 ]
-            submit_command(syst, input_files, commands, job_name)
+            submit_command(args.jobname, input_files, commands, out_name, syst)
 
 
 if __name__ == "__main__":
