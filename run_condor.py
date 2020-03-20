@@ -2,6 +2,14 @@ from os import makedirs
 from glob import glob
 from pprint import pprint
 
+def valid_sample(ifile):
+    """Remove samples that aren't used any longer"""
+    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc']
+    for sample in invalid_samples:
+        if sample in ifile:
+            return False
+    return True
+
 def getNames(sample):
     """Return the sample names and signal type."""
     if 'DYJets' in sample:
