@@ -130,6 +130,8 @@ def main(args):
                     f[tree_name] = uproot.newtree(treedict)
                     f[tree_name].extend(weighted_signal_events.to_dict('list'))
 
+            call('mv -v {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True)            
+
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
