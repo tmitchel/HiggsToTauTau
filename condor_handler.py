@@ -5,6 +5,7 @@ import pwd
 
 def write_bash_script(commands, output_sample_name, dag_dir):
     bash_name = '{}/{}.sh'.format(dag_dir+'inputs', output_sample_name)
+    bashScript = '#!/bin/bash\n'
     for command in commands:
         bashScript += command
         bashScript += '\n'

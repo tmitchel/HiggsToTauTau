@@ -157,20 +157,20 @@ def main(args):
                 })
         job_map[sample] = file_map
 
-    for sample, systs in job_map:
-        for syst, configs in systs:
+    for sample, systs in job_map.iteritems():
+        for syst, configs in systs.iteritems():
             if len(configs) == 0:
                 continue
             
-            job_name = '{}/{}'.format(args.jobname, syst)
+            job_name = '{}-{}'.format(sample, syst)
             input_files = ['{}/{}.root'.format(configs[0]['path'], sample)]
             commands = [
-                '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p {} -s {} -d {}/{} --stype {} -n {} -u {}'.format(
-                    args.exe, config['path'], config['sample'], args.jobname, config['syst'],
-                    config['signal_type'], config['name'], config['syst'].replace('SYST_', ''))
+                '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p {} -s {} -d ./ --stype {} -n {} -u {} --condor'.format(
+                    args.exe, config['path'], config['sample'], config['signal_type'], 
+                    config['name'], config['syst'].replace('SYST_', ''))
                 for config in configs
                 ]
-            submit_command(job_name, input_files, commands, syst)
+            submit_command(syst, input_files, commands, syst)
 
 
 if __name__ == "__main__":
