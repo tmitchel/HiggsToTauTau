@@ -2,6 +2,7 @@ from os import makedirs
 from glob import glob
 from pprint import pprint
 from collections import defaultdict
+from condor_handler import submit_command
 
 def valid_sample(ifile):
     """Remove samples that aren't used any longer"""
@@ -133,17 +134,13 @@ def main(args):
     """Build all processes and run them."""
     suffix = '.root'
 
-    try:
-        makedirs('/hdfs/store/user/tmitchel/{}'.format(args.jobname))
-    except:
-        pass
-
     fileList = [ifile for ifile in glob(args.path+'/*') if '.root' in ifile and valid_sample(ifile)]
-    job_map = defaultdict(list)
+    job_map = {}
     for ifile in fileList:
         sample = ifile.split('/')[-1].split(suffix)[0]
         tosample = ifile.replace(sample+suffix, '')
         names, signal_type = getNames(sample)
+        file_map = defaultdict(list)
         for name in names:
             systs = getSyst(name, signal_type, args.channel, args.year, args.syst)
             for syst in systs:
@@ -151,18 +148,28 @@ def main(args):
                   syst = 'NOMINAL'
                 else:
                   syst = 'SYST_' + syst
-                job_map[syst].append({
-                    'path': ifile,
+                file_map[syst].append({
+                    'path': tosample,
+                    'sample': sample,
                     'name': name,
                     'signal_type': signal_type,
                     'syst': syst,
                 })
+        job_map[sample] = file_map
+
     pprint(dict(job_map))
+
+    # for syst, configs in job_map:
+    #     job_name = '{}/{}'.format(args.jobname, syst)
+    #     input_files = ['{}/{}'.format(ifile['path'], ifile['sample'] for ifile in config)
+    #     command = '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p'.format(args.exe)
+    #     submit_command(job_name, input_files, args.exe, command, syst)
 
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
+    parser.add_argument('--exe', '-e', required=True, help='name of executable')
     parser.add_argument('--jobname', '-j', required=True, help='name for this job')
     parser.add_argument('--path', '-p', required=True, help='path to input files')
     parser.add_argument('--channel', '-c', required=True, help='channel to process')
