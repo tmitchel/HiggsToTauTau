@@ -1,4 +1,5 @@
 from os import makedirs
+from glob import glob
 from pprint import pprint
 
 def getNames(sample):
@@ -103,7 +104,7 @@ def getSyst(name, signal_type, channel, year, doSyst):
 
     if name != 'data_obs' and channel == 'et':
         systs += ['EEScale_Up', 'EEScale_Down', 'EESigma_Up', 'EESigma_Down']
-    elif name != 'data_obs' and channel = 'mt':
+    elif name != 'data_obs' and channel == 'mt':
         systs += ['MES_Up', 'MES_Down']
 
     # if name == 'ggH125' and signal_type == 'powheg':
@@ -153,5 +154,5 @@ if __name__ == "__main__":
     parser.add_argument('--path', '-p', required=True, help='path to input files')
     parser.add_argument('--channel', '-c', required=True, help='channel to process')
     parser.add_argument('--year', '-y', required=True, help='year to process')
-    parser.add_argument('--syst', action='store_tree', help='run all systematics')
+    parser.add_argument('--syst', action='store_true', help='run all systematics')
     main(parser.parse_args())
