@@ -27,10 +27,22 @@ temp_wh_zh_map = {
     'zh125_JHU_l1zgint': 'JHU__reweighted_ZH_htt_0L1Zgf05ph0125',
 }
 
+powheg_map = {
+    "ggh125_minlo": "ggH_MINLO125",
+    "ggh125_powheg": "ggH125",
+    "vbf125_powheg": "VBF125",
+    "wh125_powheg": "WH125",
+    "zh125_powheg": "ZH125",
+}
+
 
 def to_reweight(ifile):
     """List of signal samples. Only processes these files."""
-    for name in ['ggh125_madgraph.root', 'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root']:
+    for name in [
+        'ggh125_madgraph.root', 'ggh125_minlo.root', 'ggh125_powheg.root',
+        'vbf125_powheg.root', 'wh125_powheg.root', 'zh125_powheg.root'
+        'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root'
+        ]:
         if name in ifile:
             return True
     return False
@@ -67,6 +79,14 @@ def parse_tree_name(keys):
         raise Exception('Can\'t find et_tree or mt_tree in keys: {}'.format(keys))
 
 
+def handle_powheg(ifile):
+    """Copy the file and fix the name."""
+    filename = ifile.split('/')[-1].replace('.root', '')
+    new_name = powheg_map[filename]
+    new_file_name = ifile.replace(filename, new_name)
+    call('mv -v {} {}'.format(ifile, new_file_name), shell=True)
+
+
 def main(args):
     input_directories = [idir for idir in glob('{}/*'.format(args.input)) if not 'logs' in idir]
     input_files = {
@@ -82,6 +102,9 @@ def main(args):
 
     for idir, files in input_files.iteritems():
         for ifile in files:
+            if 'powheg' in ifile or 'minlo' in ifile:
+                handle_powheg(ifile)
+                continue
             # until weights are corrected, don't reweight WH or ZH
             # if 'wh125_JHU' in ifile or 'zh125_JHU' in ifile:
             #     handle_wh_zh(ifile)

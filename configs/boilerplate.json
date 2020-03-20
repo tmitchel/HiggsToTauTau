@@ -38,40 +38,40 @@
     ],
     "jhu_ac_reweighting_map": {
         "ggh": [
-            ["wt_ggh_a1", "JHU__GGH2Jets_sm_M125"], ["wt_ggh_a3", "JHU__GGH2Jets_pseudoscalar_M125"],
-            ["wt_ggh_a3int", "JHU__GGH2Jets_pseudoscalar_Mf05ph0125"]
+            ["wt_ggh_a1", "reweighted_ggH_htt_0PM125"], ["wt_ggh_a3", "reweighted_ggH_htt_0M125"],
+            ["wt_ggh_a3int", "reweighted_ggH_htt_0Mf05ph0125"]
         ],
         "wh": [
-            ["wt_wh_a1", "JHU__reweighted_WH_htt_0PM125"], ["wt_wh_a2", "JHU__reweighted_WH_htt_0PH125"],
-            ["wt_wh_a2int", "JHU__reweighted_WH_htt_0PHf05ph0125"], ["wt_wh_a3", "JHU__reweighted_WH_htt_0M125"],
-            ["wt_wh_a3int", "JHU__reweighted_WH_htt_0Mf05ph0125"], ["wt_wh_L1", "JHU__reweighted_WH_htt_0L1125"],
-            ["wt_wh_L1int", "JHU__reweighted_WH_htt_0L1f05ph0125"], ["wt_wh_L1Zg", "JHU__reweighted_WH_htt_0L1Zg125"],
-            ["wt_wh_L1Zgint", "JHU__reweighted_WH_htt_0L1Zgf05ph0125"]
+            ["wt_wh_a1", "reweighted_WH_htt_0PM125"], ["wt_wh_a2", "reweighted_WH_htt_0PH125"],
+            ["wt_wh_a2int", "reweighted_WH_htt_0PHf05ph0125"], ["wt_wh_a3", "reweighted_WH_htt_0M125"],
+            ["wt_wh_a3int", "reweighted_WH_htt_0Mf05ph0125"], ["wt_wh_L1", "reweighted_WH_htt_0L1125"],
+            ["wt_wh_L1int", "reweighted_WH_htt_0L1f05ph0125"], ["wt_wh_L1Zg", "reweighted_WH_htt_0L1Zg125"],
+            ["wt_wh_L1Zgint", "reweighted_WH_htt_0L1Zgf05ph0125"]
         ],
         "zh": [
-            ["wt_zh_a1", "JHU__reweighted_ZH_htt_0PM125"], ["wt_zh_a2", "JHU__reweighted_ZH_htt_0PH125"],
-            ["wt_zh_a2int", "JHU__reweighted_ZH_htt_0PHf05ph0125"], ["wt_zh_a3", "JHU__reweighted_ZH_htt_0M125"],
-            ["wt_zh_a3int", "JHU__reweighted_ZH_htt_0Mf05ph0125"], ["wt_zh_L1", "JHU__reweighted_ZH_htt_0L1125"],
-            ["wt_zh_L1int", "JHU__reweighted_ZH_htt_0L1f05ph0125"], ["wt_zh_L1Zg", "JHU__reweighted_ZH_htt_0L1Zg125"],
-            ["wt_zh_L1Zgint", "JHU__reweighted_ZH_htt_0L1Zgf05ph0125"]],
+            ["wt_zh_a1", "reweighted_ZH_htt_0PM125"], ["wt_zh_a2", "reweighted_ZH_htt_0PH125"],
+            ["wt_zh_a2int", "reweighted_ZH_htt_0PHf05ph0125"], ["wt_zh_a3", "reweighted_ZH_htt_0M125"],
+            ["wt_zh_a3int", "reweighted_ZH_htt_0Mf05ph0125"], ["wt_zh_L1", "reweighted_ZH_htt_0L1125"],
+            ["wt_zh_L1int", "reweighted_ZH_htt_0L1f05ph0125"], ["wt_zh_L1Zg", "reweighted_ZH_htt_0L1Zg125"],
+            ["wt_zh_L1Zgint", "reweighted_ZH_htt_0L1Zgf05ph0125"]],
         "vbf": [
-            ["wt_vbf_a1", "JHU__reweighted_qqH_htt_0PM125"], ["wt_vbf_a2", "JHU__reweighted_qqH_htt_0PH125"],
-            ["wt_vbf_a2int", "JHU__reweighted_qqH_htt_0PHf05ph0125"], ["wt_vbf_a3", "JHU__reweighted_qqH_htt_0M125"],
-            ["wt_vbf_a3int", "JHU__reweighted_qqH_htt_0Mf05ph0125"], ["wt_vbf_L1", "JHU__reweighted_qqH_htt_0L1125"],
-            ["wt_vbf_L1int", "JHU__reweighted_qqH_htt_0L1f05ph0125"], ["wt_vbf_L1Zg", "JHU__reweighted_qqH_htt_0L1Zg125"],
-            ["wt_vbf_L1Zgint", "JHU__reweighted_qqH_htt_0L1Zgf05ph0125"]
+            ["wt_vbf_a1", "reweighted_qqH_htt_0PM125"], ["wt_vbf_a2", "reweighted_qqH_htt_0PH125"],
+            ["wt_vbf_a2int", "reweighted_qqH_htt_0PHf05ph0125"], ["wt_vbf_a3", "reweighted_qqH_htt_0M125"],
+            ["wt_vbf_a3int", "reweighted_qqH_htt_0Mf05ph0125"], ["wt_vbf_L1", "reweighted_qqH_htt_0L1125"],
+            ["wt_vbf_L1int", "reweighted_qqH_htt_0L1f05ph0125"], ["wt_vbf_L1Zg", "reweighted_qqH_htt_0L1Zg125"],
+            ["wt_vbf_L1Zgint", "reweighted_qqH_htt_0L1Zgf05ph0125"]
         ]
     },
     "mg_ac_reweighting_map": {
         "ggh": [
-            ["wt_ggh_a1", "MG__GGH2Jets_sm_M125"], ["wt_ggh_a3", "MG__GGH2Jets_pseudoscalar_M125"],
-            ["wt_ggh_a3int", "MG__GGH2Jets_pseudoscalar_Mf05ph0125"]
+            ["wt_ggh_a1", "reweighted_ggH_htt_0PM125"], ["wt_ggh_a3", "reweighted_ggH_htt_0M125"],
+            ["wt_ggh_a3int", "reweighted_ggH_htt_0Mf05ph0125"]
         ]
     },
     "new_mg_ac_reweighting_map": {
         "ggh": [
-            ["sm_weight_nlo", "MG__GGH2Jets_sm_M125"], ["ps_weight_nlo", "MG__GGH2Jets_pseudoscalar_M125"],
-            ["mm_weight_nlo", "MG__GGH2Jets_pseudoscalar_Mf05ph0125"]
+            ["sm_weight_nlo", "reweighted_ggH_htt_0PM125"], ["ps_weight_nlo", "reweighted_ggH_htt_0M125"],
+            ["mm_weight_nlo", "reweighted_ggH_htt_0Mf05ph0125"]
         ]
     },
     "wh_zh_name_map": {
