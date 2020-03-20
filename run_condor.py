@@ -147,13 +147,17 @@ def main(args):
         for name in names:
             systs = getSyst(name, signal_type, args.channel, args.year, args.syst)
             for syst in systs:
+                if syst == '':
+                  syst = 'NOMINAL'
+                else:
+                  syst = 'SYST_' + syst
                 job_map[syst].append({
                     'path': ifile,
                     'name': name,
                     'signal_type': signal_type,
                     'syst': syst,
                 })
-    pprint(job_map)
+    pprint(dict(job_map))
 
 
 if __name__ == "__main__":
