@@ -33,11 +33,11 @@ def default_farmout(jobName, input_name, output_dir, bash_name, submit_dir, dag_
         submit_dir, dag_dir, output_dir)
     farmoutString += ' --input-files-per-job=%i %s %s ' % (
         filesperjob, jobName, bash_name)
-    farmoutString += '--use-hdfs  --memory-requirements=3000 --vsize-limit=8000'
+    farmoutString += '--use-hdfs  --memory-requirements=3000 --vsize-limit=8000 --max-usercode-size=200'
     return farmoutString
 
 
-def submit_command(jobName, input_files, commands, output_sample_name, syst, dryrun=True):
+def submit_command(jobName, input_files, commands, output_sample_name, syst, dryrun=False):
     print "output_sample_name:", output_sample_name
     nfs_sample_dir = '/nfs_scratch/{}/{}/{}'.format(
         pwd.getpwuid(os.getuid())[0], jobName, output_sample_name)

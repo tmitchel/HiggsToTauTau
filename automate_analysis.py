@@ -69,7 +69,7 @@ def getSyst(name, signal_type, exe, doSyst):
     systs       -- list of systematics to processes
     """
     systs = ['']
-    if not doSyst:
+    if not doSyst or signal_type == 'minlo':
         return systs
 
     if name == 'TTT' or name == 'VVT' or name == 'embed' or name == 'ZTT' or signal_type != 'None':
