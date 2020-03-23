@@ -181,13 +181,15 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
         pt_sv_name += "_" + syst;
         shifting = true;
         always_shift = true;  // shift is always valid
-    } else if (syst.find("EES") != end || syst.find("MES") != end) {  // lepton ES
+    } else if (syst.find("EES") != end) {  // lepton ES
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
         shifting = true;
-        if (syst.find("EES") != std::string::npos) {
-            always_shift = true;  // shift is always valid
-        }
+        always_shift = true;  // shift is always valid
+    } else if (syst.find("MES") != end) {
+        m_sv_name += "_" + fix_syst_string(syst);
+        pt_sv_name += "_" + fix_syst_string(syst);
+        shifting = true;
     } else if (syst.find("RecoilReso") != end || syst.find("RecoilResp") != end) {
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
@@ -280,7 +282,6 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
 }
 
 std::string event_info::fix_syst_string(std::string syst) {
-    auto formatted(syst);
     auto end = std::string::npos;
     if (syst.find("DM0_Up") != end) {
         return "LES_DM0_Up";
@@ -290,8 +291,10 @@ std::string event_info::fix_syst_string(std::string syst) {
         return "LES_DM1_Up";
     } else if (syst.find("DM1_Down") != end) {
         return "LES_DM1_Down";
+    } else if (syst.find("MES") != end) {
+        return syst.find("Up") != end ? "MES_Up" : "MES_Down";
     }
-    return formatted;
+    return syst;
 }
 
 Float_t event_info::getPrefiringWeight() {

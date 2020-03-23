@@ -325,9 +325,9 @@ int main(int argc, char* argv[]) {
             // tau ID efficiency SF and systematics
             std::string id_name = "t_deeptauid_pt_medium";  // nominal
             if (syst.find("tau_id_") != std::string::npos) {
-                if ((syst.find("30to35") && tau.getPt() >= 30 && tau.getPt() < 35) ||
-                    (syst.find("35to40") && tau.getPt() >= 35 && tau.getPt() < 40) ||
-                    (syst.find("ptgt40") && tau.getPt() >= 40)) {
+                if ((syst.find("30to35") != std::string::npos && tau.getPt() >= 30 && tau.getPt() < 35) ||
+                    (syst.find("35to40") != std::string::npos && tau.getPt() >= 35 && tau.getPt() < 40) ||
+                    (syst.find("ptgt40") != std::string::npos && tau.getPt() >= 40)) {
                     id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
             }
@@ -338,10 +338,10 @@ int main(int argc, char* argv[]) {
             // electron fake rate SF
             std::string e_fake_id_name = "t_id_vs_e_eta_tight";
             if (syst.find("tau_id_el_disc") != std::string::npos) {
-                if ((syst.find("DM0_barrel") && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM0_endcap") && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
-                    (syst.find("DM1_barrel") && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM1_endcap") && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)
+                if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
+                    (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
+                    (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
+                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)
                 ) {
                     e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
@@ -448,11 +448,17 @@ int main(int argc, char* argv[]) {
             evtwt *= htt_sf->function("e_idiso_ic_embed_ratio")->getVal();
 
             // tau ID eff SF
-            std::string embed_id_name = "t_deeptauid_pt_tightvse_embed_medium";
+            std::string id_name = "t_deeptauid_pt_tightvse_embed_medium";
             if (syst.find("tau_id_") != std::string::npos) {
-                embed_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                if ((syst.find("30to35") != std::string::npos && tau.getPt() >= 30 && tau.getPt() < 35) ||
+                    (syst.find("35to40") != std::string::npos && tau.getPt() >= 35 && tau.getPt() < 40) ||
+                    (syst.find("ptgt40") != std::string::npos && tau.getPt() >= 40)) {
+                    id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                }
             }
-            evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
+            if (tau.getDecayMode() == 5) {
+              evtwt *= htt_sf->function(id_name.c_str())->getVal();
+            }
 
             // trigger scale factors
             bool fireSingle = electron.getPt() > 33;
@@ -471,8 +477,18 @@ int main(int argc, char* argv[]) {
             evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
 
             // electron fake rate SF
+            std::string e_fake_id_name = "t_id_vs_e_eta_tight";
+            if (syst.find("tau_id_el_disc") != std::string::npos) {
+                if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
+                    (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
+                    (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
+                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)
+                ) {
+                    e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                }
+            }
             if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-              evtwt *= htt_sf->function("t_id_vs_e_eta_tight")->getVal();
+              evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
             }
 
             // double muon trigger eff in selection
