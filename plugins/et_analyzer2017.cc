@@ -75,9 +75,9 @@ int main(int argc, char* argv[]) {
         filename = prefix + sample + std::string("_") + name + "_" + systname + suffix;
         logname = pre_prefix + output_dir + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
     }
-    
+
     if (condor) {
-      filename = sample + std::string("_") + name + "_" + systname + "-" + sample + std::string(".root");
+      filename = sample + std::string("_") + name + "_" + systname + "-" + sample + suffix;
     }
 
     // create the log file

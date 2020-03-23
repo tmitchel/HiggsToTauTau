@@ -172,6 +172,8 @@ def main(args):
                 ]
               out_name = '{}_{}_{}'.format(sample, config['name'], syst)
               submit_command(args.jobname, input_files, commands, out_name, syst)
+            break
+        break
 
 
 if __name__ == "__main__":

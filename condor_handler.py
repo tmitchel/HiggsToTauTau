@@ -3,12 +3,13 @@ import sys
 import pwd
 
 
-def write_bash_script(commands, output_sample_name, dag_dir):
+def write_bash_script(commands, output_sample_name, dag_dir, output_dir):
     bash_name = '{}/{}.sh'.format(dag_dir+'inputs', output_sample_name)
     bashScript = '#!/bin/bash\n'
     for command in commands:
         bashScript += command
         bashScript += '\n'
+    backScript += 'for i in *_output.root; do gfal-copy -f -p $i {}'.format(output_dir)
     with open(bash_name, 'w') as file:
         file.write(bashScript)
     os.system('chmod +x {}'.format(bash_name))
@@ -29,8 +30,8 @@ done\n
 def default_farmout(jobName, input_name, output_dir, bash_name, submit_dir, dag_dir, filesperjob):
     farmoutString = 'farmoutAnalysisJobs --infer-cmssw-path --fwklite --input-file-list=%s' % (
         input_name)
-    farmoutString += ' --submit-dir=%s --output-dag-file=%s --output-dir=%s' % (
-        submit_dir, dag_dir, output_dir)
+    farmoutString += ' --submit-dir=%s --output-dag-file=%s % (
+        submit_dir, dag_dir)
     farmoutString += ' --input-files-per-job=%i %s %s ' % (
         filesperjob, jobName, bash_name)
     farmoutString += '--use-hdfs  --memory-requirements=3000 --vsize-limit=8000 --max-usercode-size=200'
@@ -65,7 +66,7 @@ def submit_command(jobName, input_files, commands, output_sample_name, syst, dry
             file.write('%s\n' % f.replace('/hdfs', '', 1))
 
     # create bash script
-    bash_name = write_bash_script(commands, output_sample_name, dag_dir)
+    bash_name = write_bash_script(commands, output_sample_name, dag_dir, output_dir)
 
     # create farmout command
     farmoutString = default_farmout(
