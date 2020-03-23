@@ -86,7 +86,6 @@ def getSyst(name, signal_type, channel, year, doSyst):
             'UncMet_Up', 'UncMet_Down',
             'JetJER_Up', 'JetJER_Down',
             'JetAbsolute_Up', 'JetAbsolute_Down',
-            'JetAbsolute_Up', 'JetAbsolute_Down',
             'JetAbsoluteyear_Up', 'JetAbsoluteyear_Down',
             'JetBBEC1_Up', 'JetBBEC1_Down',
             'JetBBEC1year_Up', 'JetBBEC1year_Down',
