@@ -354,9 +354,9 @@ int main(int argc, char* argv[]) {
             if (electron.getPt() < 33) {
                 // electron-leg
                 evtwt *= htt_sf->function("e_trg_24_ic_ratio")->getVal();
-                if (syst == "cross_trigger_up") {
+                if (syst == "mc_cross_trigger_up") {
                     evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_etau_ratio_up")->getVal();
-                } else if (syst == "cross_trigger_down") {
+                } else if (syst == "mc_cross_trigger_down") {
                     evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_etau_ratio_down")->getVal();
                 } else {
                     evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_etau_ratio")->getVal();
@@ -466,9 +466,9 @@ int main(int argc, char* argv[]) {
             std::string single_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_ic_embed_ratio" : "e_trg_ic_data";
             std::string el_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_24_ic_embed_ratio" : "e_trg_24_ic_data";
             std::string tau_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "t_trg_mediumDeepTau_etau_embed_ratio" : "t_trg_mediumDeepTau_etau_data";
-            if (syst == "cross_trigger_up") {
+            if (syst == "embed_cross_trigger_up") {
                 tau_leg_eff_name += "_up";
-            } else if (syst == "cross_trigger_down") {
+            } else if (syst == "embed_cross_trigger_down") {
                 tau_leg_eff_name += "_down";
             }
             auto single_eff = htt_sf->function(single_eff_name.c_str())->getVal();

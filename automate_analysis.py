@@ -135,8 +135,13 @@ def getSyst(name, signal_type, exe, doSyst):
         if '2016' in exe or '2017' in exe:
             systs += ['prefiring_up', 'prefiring_down']
         systs += [
-            'single_trigger_up', 'single_trigger_down',
-            'cross_trigger_up', 'cross_trigger_down',
+            'mc_single_trigger_up', 'mc_single_trigger_down',
+            'mc_cross_trigger_up', 'mc_cross_trigger_down',
+        ]
+    else:
+        systs += [
+            'embed_single_trigger_up', 'embed_single_trigger_down',
+            'embed_cross_trigger_up', 'embed_cross_trigger_down',
         ]
 
     if name == 'TTT':

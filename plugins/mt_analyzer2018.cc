@@ -345,9 +345,9 @@ int main(int argc, char *argv[]) {
             // trigger scale factors
             if (muon.getPt() < 25) {  // cross-trigger
                 evtwt *= htt_sf->function("m_trg_20_ic_ratio")->getVal();
-                if (syst == "cross_trigger_up") {
+                if (syst == "mc_cross_trigger_up") {
                     evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_up")->getVal();
-                } else if (syst == "cross_trigger_down") {
+                } else if (syst == "mc_cross_trigger_down") {
                     evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_down")->getVal();
                 } else {
                     evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio")->getVal();
@@ -456,7 +456,7 @@ int main(int argc, char *argv[]) {
                 evtwt *= htt_sf->function("m_trg_20_ic_embed_ratio")->getVal();
                 // tau-leg
                 std::string tau_leg_name("t_trg_mediumDeepTau_mutau_embed_ratio");
-                if (syst.find("cross_trigger") != std::string::npos) {
+                if (syst.find("embed_cross_trigger") != std::string::npos) {
                   tau_leg_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
                 evtwt *= htt_sf->function(tau_leg_name.c_str())->getVal();
