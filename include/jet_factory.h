@@ -152,7 +152,7 @@ std::string jet_factory::fix_syst_string(std::string syst) {
     auto formatted(syst);
     auto end = std::string::npos;
     if (syst.find("JetRel") != end || syst.find("JetJER") != end) {
-        return "_" + syst_name_map[syst];
+        return syst_name_map[syst];
     } else {
         auto pos = syst.find("_Up");
         if (pos != end) {
