@@ -154,26 +154,26 @@ int main(int argc, char *argv[]) {
         }
         std::replace(datasetName.begin(), datasetName.end(), '/', '#');
         lumi_weights =
-            new reweight::LumiReWeighting("data/pu_distributions_mc_2017.root", "data/pu_distributions_data_2017.root", ("pua/#" +
+            new reweight::LumiReWeighting("/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2017.root", "/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2017.root", ("pua/#" +
             datasetName).c_str(), "pileup");
         running_log << "using PU dataset name: " << datasetName << std::endl;
     }
 
     // legacy sf's
-    TFile htt_sf_file("data/htt_scalefactors_legacy_2017.root");
+    TFile htt_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2017.root");
     RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
     // MadGraph Higgs pT file
     RooWorkspace *mg_sf;
     if (signal_type == "madgraph") {
-        TFile mg_sf_file("data/htt_scalefactors_2017_MGggh.root");
+        TFile mg_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2017_MGggh.root");
         mg_sf = reinterpret_cast<RooWorkspace*>(mg_sf_file.Get("w"));
         mg_sf_file.Close();
     }
 
     // STXS theory uncertainties
-    TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
+    TFile *f_NNLOPS = new TFile("/hdfs/store/user/tmitchel/HTT_ScaleFactors/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
     TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));

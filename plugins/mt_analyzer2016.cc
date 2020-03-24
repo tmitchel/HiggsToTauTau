@@ -147,22 +147,22 @@ int main(int argc, char *argv[]) {
 
     // read inputs for lumi reweighting
     auto lumi_weights =
-        new reweight::LumiReWeighting("data/MC_Moriond17_PU25ns_V1.root", "data/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
+        new reweight::LumiReWeighting("/hdfs/store/user/tmitchel/HTT_ScaleFactors/MC_Moriond17_PU25ns_V1.root", "/hdfs/store/user/tmitchel/HTT_ScaleFactors/Data_Pileup_2016_271036-284044_80bins.root", "pileup", "pileup");
 
     // legacy sf's
-    TFile htt_sf_file("data/htt_scalefactors_legacy_2016.root");
+    TFile htt_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2016.root");
     RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
     // MadGraph Higgs pT file
     RooWorkspace *mg_sf;
     if (signal_type == "madgraph") {
-        TFile mg_sf_file("data/htt_scalefactors_2016_MGggh.root");
+        TFile mg_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2016_MGggh.root");
         mg_sf = reinterpret_cast<RooWorkspace*>(mg_sf_file.Get("w"));
         mg_sf_file.Close();
     }
 
-    TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
+    TFile *f_NNLOPS = new TFile("/hdfs/store/user/tmitchel/HTT_ScaleFactors/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
     TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));
