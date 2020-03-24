@@ -60,19 +60,13 @@ int main(int argc, char *argv[]) {
 
     // create output path
     auto suffix = "_output.root";
-    auto pre_prefix = "Output/trees/";
-    auto prefix = pre_prefix + output_dir + "/" + systname + "/";
+    auto prefix = "Output/trees/" + output_dir;
     std::string filename, logname;
-    if (name == sample) {
-        filename = prefix + name + systname + suffix;
-        logname = pre_prefix + output_dir + "/logs/" + name + systname + ".txt";
-    } else {
-        filename = prefix + sample + std::string("_") + name + "_" + systname + suffix;
-        logname = pre_prefix + output_dir + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
-    }
+    filename = prefix + "/" + systname + "/" + sample + std::string("_") + name + "_" + systname + suffix;
+    logname = prefix + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
 
     if (condor) {
-        filename = sample + std::string("_") + name + "_" + systname + "-" + sample + suffix;
+        filename = sample + std::string("_") + name + "_" + systname + suffix;
     }
 
     // create the log file

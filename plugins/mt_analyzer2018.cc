@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
     ////////////////////////////////////////////////
 
     CLParser parser(argc, argv);
+    bool condor = parser.Flag("--condor");
     std::string name = parser.Option("-n");
     std::string path = parser.Option("-p");
     std::string syst = parser.Option("-u");
@@ -59,32 +60,35 @@ int main(int argc, char *argv[]) {
 
     // create output path
     auto suffix = "_output.root";
-    auto prefix = "Output/trees/" + output_dir + "/" + systname + "/";
+    auto prefix = "Output/trees/" + output_dir;
     std::string filename, logname;
-    if (name == sample) {
-        filename = prefix + name + systname + suffix;
-        logname = "Output/trees/" + output_dir + "/logs/" + name + systname + ".txt";
-    } else {
-        filename = prefix + sample + std::string("_") + name + "_" + systname + suffix;
-        logname = "Output/trees/" + output_dir + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
+    filename = prefix + "/" + systname + "/" + sample + std::string("_") + name + "_" + systname + suffix;
+    logname = prefix + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
+
+    if (condor) {
+        filename = sample + std::string("_") + name + "_" + systname + suffix;
     }
 
     // create the log file
     std::ofstream logfile;
-    logfile.open(logname, std::ios::out | std::ios::trunc);
+    if (!condor) {
+        logfile.open(logname, std::ios::out | std::ios::trunc);
+    }
+
+    std::ostream &running_log = (condor ? std::cout : logfile);
 
     // open log file and log some things
-    logfile << "Opening file... " << sample << std::endl;
-    logfile << "With name...... " << name << std::endl;
-    logfile << "And running systematic " << systname << std::endl;
-    logfile << "Using options: " << std::endl;
-    logfile << "\t name: " << name << std::endl;
-    logfile << "\t path: " << path << std::endl;
-    logfile << "\t syst: " << syst << std::endl;
-    logfile << "\t sample: " << sample << std::endl;
-    logfile << "\t output_dir: " << output_dir << std::endl;
-    logfile << "\t signal_type: " << signal_type << std::endl;
-    logfile << "\t isData: " << isData << " isEmbed: " << isEmbed << " doAC: " << doAC << std::endl;
+    running_log << "Opening file... " << sample << std::endl;
+    running_log << "With name...... " << name << std::endl;
+    running_log << "And running systematic " << systname << std::endl;
+    running_log << "Using options: " << std::endl;
+    running_log << "\t name: " << name << std::endl;
+    running_log << "\t path: " << path << std::endl;
+    running_log << "\t syst: " << syst << std::endl;
+    running_log << "\t sample: " << sample << std::endl;
+    running_log << "\t output_dir: " << output_dir << std::endl;
+    running_log << "\t signal_type: " << signal_type << std::endl;
+    running_log << "\t isData: " << isData << " isEmbed: " << isEmbed << " doAC: " << doAC << std::endl;
 
     auto fin = TFile::Open(fname.c_str());
     auto ntuple = reinterpret_cast<TTree *>(fin->Get("mutau_tree"));
@@ -185,7 +189,7 @@ int main(int argc, char *argv[]) {
     for (Int_t i = 0; i < nevts; i++) {
         ntuple->GetEntry(i);
         if (i == progress * fraction) {
-            logfile << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
+            running_log << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
             progress++;
         }
 
@@ -524,7 +528,9 @@ int main(int argc, char *argv[]) {
     fout->cd();
     fout->Write();
     fout->Close();
-    logfile << "Finished processing " << sample << std::endl;
-    logfile.close();
+    running_log << "Finished processing " << sample << std::endl;
+    if (!condor) {
+        logfile.close();
+    }
     return 0;
 }
