@@ -18,9 +18,9 @@
 #include "TTree.h"
 
 // user includes
-#include "../include/ComputeWG1Unc.h"
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
+#include "../include/ComputeWG1Unc.h"
 #include "../include/LumiReweightingStandAlone.h"
 #include "../include/electron_factory.h"
 #include "../include/event_info.h"
@@ -33,7 +33,7 @@
 
 typedef std::vector<double> NumV;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     ////////////////////////////////////////////////
     // Initial setup:                             //
     // Get file names, normalization, paths, etc. //
@@ -61,11 +61,6 @@ int main(int argc, char* argv[]) {
     // create output path
     auto suffix = "_output.root";
     auto pre_prefix = "Output/trees/";
-    std::string scale_factor_prefix = "data/";
-    if (condor) {
-        pre_prefix = "./";
-        scale_factor_prefix = "/hdfs/store/user/tmitchel/HTT_ScaleFactors/";
-    }
     auto prefix = pre_prefix + output_dir + "/" + systname + "/";
     std::string filename, logname;
     if (name == sample) {
@@ -77,7 +72,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (condor) {
-      filename = sample + std::string("_") + name + "_" + systname + "-" + sample + suffix;
+        filename = sample + std::string("_") + name + "_" + systname + "-" + sample + suffix;
     }
 
     // create the log file
@@ -102,10 +97,10 @@ int main(int argc, char* argv[]) {
     running_log << "\t isData: " << isData << " isEmbed: " << isEmbed << " doAC: " << doAC << std::endl;
 
     auto fin = TFile::Open(fname.c_str());
-    auto ntuple = reinterpret_cast<TTree*>(fin->Get("etau_tree"));
+    auto ntuple = reinterpret_cast<TTree *>(fin->Get("etau_tree"));
 
     // get number of generated events
-    auto counts = reinterpret_cast<TH1D*>(fin->Get("nevents"));
+    auto counts = reinterpret_cast<TH1D *>(fin->Get("nevents"));
     auto gen_number = counts->GetBinContent(2);
 
     // create output file
@@ -115,11 +110,11 @@ int main(int argc, char* argv[]) {
     fout->cd("grabbag");
 
     // initialize Helper class
-    Helper* helper = new Helper(fout, name, syst);
+    Helper *helper = new Helper(fout, name, syst);
 
     // cd to root of output file and create tree
     fout->cd();
-    slim_tree* st = new slim_tree("et_tree", doAC);
+    slim_tree *st = new slim_tree("et_tree", doAC);
 
     std::string original = sample;
     if (name == "VBF125") {
@@ -155,10 +150,10 @@ int main(int argc, char* argv[]) {
     // Read weights, hists, graphs, etc. for SFs //
     ///////////////////////////////////////////////
 
-    reweight::LumiReWeighting* lumi_weights;
+    reweight::LumiReWeighting *lumi_weights;
     // read inputs for lumi reweighting
     if (!isData && !isEmbed && !doAC && !isMG) {
-        TNamed* dbsName = reinterpret_cast<TNamed*>(fin->Get("MiniAOD_name"));
+        TNamed *dbsName = reinterpret_cast<TNamed *>(fin->Get("MiniAOD_name"));
         std::string datasetName = dbsName->GetTitle();
         if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
             fin->Close();
@@ -166,25 +161,26 @@ int main(int argc, char* argv[]) {
             return 2;
         }
         std::replace(datasetName.begin(), datasetName.end(), '/', '#');
-        lumi_weights = new reweight::LumiReWeighting((scale_factor_prefix + "pu_distributions_mc_2017.root").c_str(), (scale_factor_prefix + "pu_distributions_data_2017.root").c_str(), ("pua/#" +
-        datasetName).c_str(), "pileup");
+        lumi_weights = new reweight::LumiReWeighting("/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2017.root",
+                                                     "/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2017.root",
+                                                     ("pua/#" + datasetName).c_str(), "pileup");
         running_log << "using PU dataset name: " << datasetName << std::endl;
     }
 
     // legacy sf's
-    TFile htt_sf_file((scale_factor_prefix + "htt_scalefactors_legacy_2017.root").c_str());
-    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
+    TFile htt_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2017.root");
+    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
     // MadGraph Higgs pT file
     RooWorkspace *mg_sf;
     if (signal_type == "madgraph") {
-        TFile mg_sf_file((scale_factor_prefix + "htt_scalefactors_2017_MGggh.root").c_str());
-        mg_sf = reinterpret_cast<RooWorkspace*>(mg_sf_file.Get("w"));
+        TFile mg_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2017_MGggh.root");
+        mg_sf = reinterpret_cast<RooWorkspace *>(mg_sf_file.Get("w"));
         mg_sf_file.Close();
     }
 
-    TFile *f_NNLOPS = new TFile((scale_factor_prefix + "NNLOPS_reweight.root").c_str());
+    TFile *f_NNLOPS = new TFile("/hdfs/store/user/tmitchel/HTT_ScaleFactors/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
     TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));
@@ -313,7 +309,7 @@ int main(int argc, char* argv[]) {
         }
 
         // only keep the regions we need
-        if (signalRegion || antiTauIsoRegion)  {
+        if (signalRegion || antiTauIsoRegion) {
             histos->at("cutflow")->Fill(8., 1.);
         } else {
             continue;
@@ -323,7 +319,7 @@ int main(int argc, char* argv[]) {
         if (!isData && !isEmbed) {
             // pileup reweighting
             if (!doAC && !isMG) {
-              evtwt *= lumi_weights->weight(event.getNPU());
+                evtwt *= lumi_weights->weight(event.getNPU());
             }
 
             // generator weights
@@ -361,7 +357,7 @@ int main(int argc, char* argv[]) {
 
             // electron fake rate SF
             if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-              evtwt *= htt_sf->function("t_id_vs_e_eta_tight")->getVal();
+                evtwt *= htt_sf->function("t_id_vs_e_eta_tight")->getVal();
             }
 
             // trigger scale factors
@@ -385,7 +381,7 @@ int main(int argc, char* argv[]) {
                 if (syst == "dyShape_Up") {
                     nom_zpt_weight = nom_zpt_weight + ((nom_zpt_weight - 1) * 0.1);
                 } else if (syst == "dyShape_Down") {
-                    nom_zpt_weight = nom_zpt_weight -  ((nom_zpt_weight - 1) * 0.1);
+                    nom_zpt_weight = nom_zpt_weight - ((nom_zpt_weight - 1) * 0.1);
                 }
                 evtwt *= nom_zpt_weight;
             }
@@ -411,7 +407,7 @@ int main(int argc, char* argv[]) {
                 if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
                 NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
                 if (syst.find("Rivet") != std::string::npos) {
-                  evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
+                    evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
                 }
             }
 
@@ -489,7 +485,7 @@ int main(int argc, char* argv[]) {
 
             // electron fake rate SF
             if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-              evtwt *= htt_sf->function("t_id_vs_e_eta_tight")->getVal();
+                evtwt *= htt_sf->function("t_id_vs_e_eta_tight")->getVal();
             }
 
             // double muon trigger eff in selection
