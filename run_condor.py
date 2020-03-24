@@ -163,15 +163,14 @@ def main(args):
             
             out_name = '{}_{}'.format(sample, syst)
             input_files = ['{}/{}.root'.format(configs[0]['path'], sample)]
-            for config in configs:
-              commands = [
-                '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p {} -s {} -d ./ --stype {} -n {} -u {} --condor'.format(
-                    args.exe, config['path'], config['sample'], config['signal_type'], 
-                    config['name'], config['syst'].replace('SYST_', ''))
-                ]
-              out_name = '{}_{}_{}'.format(sample, config['name'], syst)
-              submit_command(args.jobname, input_files, commands, out_name, syst)
-            break
+            commands = [
+            '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p {} -s {} -d ./ --stype {} -n {} -u {} --condor'.format(
+                args.exe, config['path'], config['sample'], config['signal_type'], 
+                config['name'], config['syst'].replace('SYST_', ''))
+                for config in configs
+            ]
+            out_name = '{}_{}'.format(sample, syst)
+            submit_command(args.jobname, input_files, commands, out_name, syst)
         break
 
 
