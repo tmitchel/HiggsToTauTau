@@ -274,6 +274,8 @@ def main(args):
     fileList = [ifile for ifile in glob(args.path+'/*') if '.root' in ifile and valid_sample(ifile)]
 
     if args.condor:
+        if args.jobname == None:
+            raise Exception('must provide --jobname if using condor')
         job_map = {}
         for ifile in fileList:
             sample = ifile.split('/')[-1].split(suffix)[0]
@@ -350,4 +352,5 @@ if __name__ == "__main__":
     parser.add_argument('--output-dir', required=True, dest='output_dir',
                         help='name of output directory after Output/trees')
     parser.add_argument('--condor', action='store_true', help='submit jobs to condor')
+    parser.add_argument('--jobname', '-j', default=None, help='name for this job')
     main(parser.parse_args())
