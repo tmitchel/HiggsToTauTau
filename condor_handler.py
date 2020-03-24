@@ -9,7 +9,8 @@ def write_bash_script(commands, output_sample_name, dag_dir, output_dir):
     for command in commands:
         bashScript += command
         bashScript += '\n'
-    bashScript += 'for i in *_output.root; do gfal-copy -f -p $i {}'.format(output_dir)
+    bashScript += 'mkdir -p {}\n'.format(output_dir)
+    bashScript += 'for i in *_output.root; do cp -v $i {}; done\n'.format(output_dir)
     with open(bash_name, 'w') as file:
         file.write(bashScript)
     os.system('chmod +x {}'.format(bash_name))
@@ -34,7 +35,7 @@ def default_farmout(jobName, input_name, output_dir, bash_name, submit_dir, dag_
         submit_dir, dag_dir)
     farmoutString += ' --input-files-per-job=%i %s %s ' % (
         filesperjob, jobName, bash_name)
-    farmoutString += '--use-hdfs  --memory-requirements=3000 --vsize-limit=8000 --max-usercode-size=200'
+    farmoutString += '--use-hdfs --job-generates-output-name  --memory-requirements=3000 --vsize-limit=8000 --max-usercode-size=200'
     return farmoutString
 
 
@@ -55,7 +56,9 @@ def submit_command(jobName, input_files, commands, output_sample_name, syst, dry
     os.system('mkdir -p {}'.format(dag_dir+'inputs'))
 
     # output dir
-    output_dir = 'gsiftp://cms-lvs-gridftp.hep.wisc.edu:2811//hdfs/store/user/{}/{}/{}/'.format(
+#     output_dir = 'gsiftp://cms-lvs-gridftp.hep.wisc.edu:2811//hdfs/store/user/{}/{}/{}/'.format(
+#         pwd.getpwuid(os.getuid())[0], jobName, syst)
+    output_dir = '/hdfs/store/user/{}/{}/{}/'.format(
         pwd.getpwuid(os.getuid())[0], jobName, syst)
 
     # create file list
