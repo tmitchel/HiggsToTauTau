@@ -121,8 +121,8 @@ def main(args):
     with open('configs/binning.json', 'r') as config_file:
         config = json.load(config_file)
         config = config[args.config]
-        decay_mode_bins = config['decay_mode_bins']
-        vis_mass_bins = config['vis_mass_bins']
+        tau_pt_bins = config['tau_pt_bins']
+        m_sv_bins_0jet = config['m_sv_bins_0jet']
         higgs_pT_bins_boost = config['higgs_pT_bins_boost']
         m_sv_bins_boost = config['m_sv_bins_boost']
         vbf_cat_x_var, vbf_cat_x_bins = config['vbf_cat_x_bins']
@@ -203,7 +203,7 @@ def main(args):
 
             variables = set([
                 'is_signal', 'is_antiTauIso', 'contamination', 'njets', 'mjj', 'evtwt',
-                't1_decayMode', 'vis_mass', 'higgs_pT', 'm_sv',
+                't1_pt', 'higgs_pT', 'm_sv',
                 'DCP_VBF', 'DCP_ggH',
                 vbf_cat_x_var, vbf_cat_y_var, vbf_cat_edge_var
             ])
@@ -250,8 +250,8 @@ def main(args):
 
             # start with 0-jet category
             output_file.cd('{}_0jet'.format(channel_prefix))
-            zero_jet_hist = build_histogram(name, decay_mode_bins, vis_mass_bins)
-            fill_hists(zero_jet_events, zero_jet_hist, 't1_decayMode', 'vis_mass', fake_weight=fweight)
+            zero_jet_hist = build_histogram(name, tau_pt_bins, m_sv_bins_0jet)
+            fill_hists(zero_jet_events, zero_jet_hist, 't1_pt', 'm_sv', fake_weight=fweight)
 
             output_file.cd('{}_boosted'.format(channel_prefix))
             boost_hist = build_histogram(name, higgs_pT_bins_boost, m_sv_bins_boost)
@@ -276,9 +276,9 @@ def main(args):
                 for syst in boilerplate['fake_factor_systematics']:
                     output_file.cd('{}_0jet'.format(channel_prefix))
                     zero_jet_hist = build_histogram(
-                        'jetFakes_CMS_htt_{}'.format(syst), decay_mode_bins, vis_mass_bins)
+                        'jetFakes_CMS_htt_{}'.format(syst), tau_pt_bins, m_sv_bins_0jet)
                     zero_jet_hist = fill_hists(zero_jet_events, zero_jet_hist,
-                                               't1_decayMode', 'vis_mass', fake_weight=syst)
+                                               't1_pt', 'm_sv', fake_weight=syst)
 
                     output_file.cd('{}_boosted'.format(channel_prefix))
                     boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
