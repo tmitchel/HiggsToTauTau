@@ -352,7 +352,7 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (tau.getDecayMode() == 5) {
-              evtwt *= htt_sf->function(id_name.c_str())->getVal();
+                evtwt *= htt_sf->function(id_name.c_str())->getVal();
             }
 
             // electron fake rate SF
@@ -361,13 +361,12 @@ int main(int argc, char *argv[]) {
                 if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
                     (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
                     (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)
-                ) {
+                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)) {
                     e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
             }
             if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-              evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+                evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
             }
 
             // trigger scale factors
@@ -430,7 +429,7 @@ int main(int argc, char *argv[]) {
             // handle reading different m_sv values
             if ((syst.find("efaket_es_barrel") != std::string::npos && fabs(electron.getEta()) < 1.479) ||
                 (syst.find("efaket_es_endcap") != std::string::npos && fabs(electron.getEta()) >= 1.479)) {
-                    event.do_shift(true);
+                event.do_shift(true);
             } else {
                 event.do_shift(false);  // always_shift is set for things that will always be shifted so this is ok
             }
@@ -477,7 +476,7 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (tau.getDecayMode() == 5) {
-              evtwt *= htt_sf->function(id_name.c_str())->getVal();
+                evtwt *= htt_sf->function(id_name.c_str())->getVal();
             }
 
             // trigger scale factors
@@ -502,13 +501,12 @@ int main(int argc, char *argv[]) {
                 if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
                     (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
                     (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)
-                ) {
+                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)) {
                     e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
             }
             if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-              evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+                evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
             }
 
             // double muon trigger eff in selection

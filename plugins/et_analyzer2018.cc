@@ -18,9 +18,9 @@
 #include "TTree.h"
 
 // user includes
-#include "../include/ComputeWG1Unc.h"
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
+#include "../include/ComputeWG1Unc.h"
 #include "../include/LumiReweightingStandAlone.h"
 #include "../include/electron_factory.h"
 #include "../include/event_info.h"
@@ -33,7 +33,7 @@
 
 typedef std::vector<double> NumV;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     ////////////////////////////////////////////////
     // Initial setup:                             //
     // Get file names, normalization, paths, etc. //
@@ -91,10 +91,10 @@ int main(int argc, char* argv[]) {
     running_log << "\t isData: " << isData << " isEmbed: " << isEmbed << " doAC: " << doAC << std::endl;
 
     auto fin = TFile::Open(fname.c_str());
-    auto ntuple = reinterpret_cast<TTree*>(fin->Get("etau_tree"));
+    auto ntuple = reinterpret_cast<TTree *>(fin->Get("etau_tree"));
 
     // get number of generated events
-    auto counts = reinterpret_cast<TH1D*>(fin->Get("nevents"));
+    auto counts = reinterpret_cast<TH1D *>(fin->Get("nevents"));
     auto gen_number = counts->GetBinContent(2);
 
     // create output file
@@ -104,11 +104,11 @@ int main(int argc, char* argv[]) {
     fout->cd("grabbag");
 
     // initialize Helper class
-    Helper* helper = new Helper(fout, name, syst);
+    Helper *helper = new Helper(fout, name, syst);
 
     // cd to root of output file and create tree
     fout->cd();
-    slim_tree* st = new slim_tree("et_tree", doAC);
+    slim_tree *st = new slim_tree("et_tree", doAC);
 
     std::string original = sample;
     if (name == "VBF125") {
@@ -143,18 +143,19 @@ int main(int argc, char* argv[]) {
     ///////////////////////////////////////////////
 
     auto lumi_weights =
-        new reweight::LumiReWeighting("/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2018.root", "/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2018.root", "pileup", "pileup");
+        new reweight::LumiReWeighting("/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2018.root",
+                                      "/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2018.root", "pileup", "pileup");
 
     // legacy sf's
     TFile htt_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2018.root");
-    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
+    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
     // MadGraph Higgs pT file
     RooWorkspace *mg_sf;
     if (signal_type == "madgraph") {
         TFile mg_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2017_MGggh.root");
-        mg_sf = reinterpret_cast<RooWorkspace*>(mg_sf_file.Get("w"));
+        mg_sf = reinterpret_cast<RooWorkspace *>(mg_sf_file.Get("w"));
         mg_sf_file.Close();
     }
 
@@ -163,7 +164,6 @@ int main(int argc, char* argv[]) {
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
     TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));
     TGraph *g_NNLOPS_3jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_3jet"));
-
 
     //////////////////////////////////////
     // Final setup:                     //
@@ -298,7 +298,7 @@ int main(int argc, char* argv[]) {
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // pileup reweighting
-             evtwt *= lumi_weights->weight(event.getNPU());
+            evtwt *= lumi_weights->weight(event.getNPU());
 
             // generator weights
             evtwt *= event.getGenWeight();
@@ -336,7 +336,7 @@ int main(int argc, char* argv[]) {
                 }
             }
             if (tau.getDecayMode() == 5) {
-              evtwt *= htt_sf->function(id_name.c_str())->getVal();
+                evtwt *= htt_sf->function(id_name.c_str())->getVal();
             }
 
             // electron fake rate SF
@@ -345,13 +345,12 @@ int main(int argc, char* argv[]) {
                 if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
                     (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
                     (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)
-                ) {
+                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)) {
                     e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
             }
             if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-              evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+                evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
             }
 
             // trigger scale factors
@@ -375,7 +374,7 @@ int main(int argc, char* argv[]) {
                 if (syst == "dyShape_Up") {
                     nom_zpt_weight = nom_zpt_weight + ((nom_zpt_weight - 1) * 0.1);
                 } else if (syst == "dyShape_Down") {
-                    nom_zpt_weight = nom_zpt_weight -  ((nom_zpt_weight - 1) * 0.1);
+                    nom_zpt_weight = nom_zpt_weight - ((nom_zpt_weight - 1) * 0.1);
                 }
                 evtwt *= nom_zpt_weight;
             }
@@ -401,7 +400,7 @@ int main(int argc, char* argv[]) {
                 if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
                 NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
                 if (syst.find("Rivet") != std::string::npos) {
-                  evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
+                    evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
                 }
             }
 
@@ -414,7 +413,7 @@ int main(int argc, char* argv[]) {
             // handle reading different m_sv values
             if ((syst.find("efaket_es_barrel") != std::string::npos && fabs(electron.getEta()) < 1.479) ||
                 (syst.find("efaket_es_endcap") != std::string::npos && fabs(electron.getEta()) >= 1.479)) {
-                    event.do_shift(true);
+                event.do_shift(true);
             } else {
                 event.do_shift(false);  // always_shift is set for things that will always be shifted so this is ok
             }
@@ -461,7 +460,7 @@ int main(int argc, char* argv[]) {
                 }
             }
             if (tau.getDecayMode() == 5) {
-              evtwt *= htt_sf->function(id_name.c_str())->getVal();
+                evtwt *= htt_sf->function(id_name.c_str())->getVal();
             }
 
             // trigger scale factors
@@ -486,13 +485,12 @@ int main(int argc, char* argv[]) {
                 if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
                     (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
                     (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)
-                ) {
+                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)) {
                     e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
             }
             if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-              evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+                evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
             }
 
             // double muon trigger eff in selection
