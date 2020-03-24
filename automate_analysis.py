@@ -69,6 +69,7 @@ def getSyst(name, signal_type, exe, doSyst):
     systs       -- list of systematics to processes
     """
     systs = ['']
+
     # handle cases with no systematics
     if not doSyst or signal_type == 'minlo' or name == 'data_obs' or (
             name == 'TTJ' or name == 'VVJ' or name == 'ZJ' or name == 'STJ' or name == 'W'):

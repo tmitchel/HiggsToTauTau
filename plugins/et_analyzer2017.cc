@@ -18,9 +18,9 @@
 #include "TTree.h"
 
 // user includes
-#include "../include/ComputeWG1Unc.h"
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
+#include "../include/ComputeWG1Unc.h"
 #include "../include/LumiReweightingStandAlone.h"
 #include "../include/electron_factory.h"
 #include "../include/event_info.h"
@@ -33,13 +33,14 @@
 
 typedef std::vector<double> NumV;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     ////////////////////////////////////////////////
     // Initial setup:                             //
     // Get file names, normalization, paths, etc. //
     ////////////////////////////////////////////////
 
     CLParser parser(argc, argv);
+    bool condor = parser.Flag("--condor");
     std::string name = parser.Option("-n");
     std::string path = parser.Option("-p");
     std::string syst = parser.Option("-u");
@@ -59,38 +60,47 @@ int main(int argc, char* argv[]) {
 
     // create output path
     auto suffix = "_output.root";
-    auto prefix = "Output/trees/" + output_dir + "/" + systname + "/";
+    auto pre_prefix = "Output/trees/";
+    auto prefix = pre_prefix + output_dir + "/" + systname + "/";
     std::string filename, logname;
     if (name == sample) {
         filename = prefix + name + systname + suffix;
-        logname = "Output/trees/" + output_dir + "/logs/" + name + systname + ".txt";
+        logname = pre_prefix + output_dir + "/logs/" + name + systname + ".txt";
     } else {
         filename = prefix + sample + std::string("_") + name + "_" + systname + suffix;
-        logname = "Output/trees/" + output_dir + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
+        logname = pre_prefix + output_dir + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
+    }
+
+    if (condor) {
+        filename = sample + std::string("_") + name + "_" + systname + "-" + sample + suffix;
     }
 
     // create the log file
     std::ofstream logfile;
-    logfile.open(logname, std::ios::out | std::ios::trunc);
+    if (!condor) {
+        logfile.open(logname, std::ios::out | std::ios::trunc);
+    }
+
+    std::ostream &running_log = (condor ? std::cout : logfile);
 
     // open log file and log some things
-    logfile << "Opening file... " << sample << std::endl;
-    logfile << "With name...... " << name << std::endl;
-    logfile << "And running systematic " << systname << std::endl;
-    logfile << "Using options: " << std::endl;
-    logfile << "\t name: " << name << std::endl;
-    logfile << "\t path: " << path << std::endl;
-    logfile << "\t syst: " << syst << std::endl;
-    logfile << "\t sample: " << sample << std::endl;
-    logfile << "\t output_dir: " << output_dir << std::endl;
-    logfile << "\t signal_type: " << signal_type << std::endl;
-    logfile << "\t isData: " << isData << " isEmbed: " << isEmbed << " doAC: " << doAC << std::endl;
+    running_log << "Opening file... " << sample << std::endl;
+    running_log << "With name...... " << name << std::endl;
+    running_log << "And running systematic " << systname << std::endl;
+    running_log << "Using options: " << std::endl;
+    running_log << "\t name: " << name << std::endl;
+    running_log << "\t path: " << path << std::endl;
+    running_log << "\t syst: " << syst << std::endl;
+    running_log << "\t sample: " << sample << std::endl;
+    running_log << "\t output_dir: " << output_dir << std::endl;
+    running_log << "\t signal_type: " << signal_type << std::endl;
+    running_log << "\t isData: " << isData << " isEmbed: " << isEmbed << " doAC: " << doAC << std::endl;
 
     auto fin = TFile::Open(fname.c_str());
-    auto ntuple = reinterpret_cast<TTree*>(fin->Get("etau_tree"));
+    auto ntuple = reinterpret_cast<TTree *>(fin->Get("etau_tree"));
 
     // get number of generated events
-    auto counts = reinterpret_cast<TH1D*>(fin->Get("nevents"));
+    auto counts = reinterpret_cast<TH1D *>(fin->Get("nevents"));
     auto gen_number = counts->GetBinContent(2);
 
     // create output file
@@ -100,11 +110,11 @@ int main(int argc, char* argv[]) {
     fout->cd("grabbag");
 
     // initialize Helper class
-    Helper* helper = new Helper(fout, name, syst);
+    Helper *helper = new Helper(fout, name, syst);
 
     // cd to root of output file and create tree
     fout->cd();
-    slim_tree* st = new slim_tree("et_tree", doAC);
+    slim_tree *st = new slim_tree("et_tree", doAC);
 
     std::string original = sample;
     if (name == "VBF125") {
@@ -140,10 +150,10 @@ int main(int argc, char* argv[]) {
     // Read weights, hists, graphs, etc. for SFs //
     ///////////////////////////////////////////////
 
-    reweight::LumiReWeighting* lumi_weights;
+    reweight::LumiReWeighting *lumi_weights;
     // read inputs for lumi reweighting
     if (!isData && !isEmbed && !doAC && !isMG) {
-        TNamed* dbsName = reinterpret_cast<TNamed*>(fin->Get("MiniAOD_name"));
+        TNamed *dbsName = reinterpret_cast<TNamed *>(fin->Get("MiniAOD_name"));
         std::string datasetName = dbsName->GetTitle();
         if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
             fin->Close();
@@ -151,25 +161,26 @@ int main(int argc, char* argv[]) {
             return 2;
         }
         std::replace(datasetName.begin(), datasetName.end(), '/', '#');
-        lumi_weights = new reweight::LumiReWeighting("data/pu_distributions_mc_2017.root", "data/pu_distributions_data_2017.root", ("pua/#" +
-        datasetName).c_str(), "pileup");
-        logfile << "using PU dataset name: " << datasetName << std::endl;
+        lumi_weights = new reweight::LumiReWeighting("/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2017.root",
+                                                     "/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2017.root",
+                                                     ("pua/#" + datasetName).c_str(), "pileup");
+        running_log << "using PU dataset name: " << datasetName << std::endl;
     }
 
     // legacy sf's
-    TFile htt_sf_file("data/htt_scalefactors_legacy_2017.root");
-    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
+    TFile htt_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2017.root");
+    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
     // MadGraph Higgs pT file
     RooWorkspace *mg_sf;
     if (signal_type == "madgraph") {
-        TFile mg_sf_file("data/htt_scalefactors_2017_MGggh.root");
-        mg_sf = reinterpret_cast<RooWorkspace*>(mg_sf_file.Get("w"));
+        TFile mg_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2017_MGggh.root");
+        mg_sf = reinterpret_cast<RooWorkspace *>(mg_sf_file.Get("w"));
         mg_sf_file.Close();
     }
 
-    TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
+    TFile *f_NNLOPS = new TFile("/hdfs/store/user/tmitchel/HTT_ScaleFactors/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
     TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));
@@ -201,7 +212,7 @@ int main(int argc, char* argv[]) {
     for (Int_t i = 0; i < nevts; i++) {
         ntuple->GetEntry(i);
         if (i == progress * fraction) {
-            logfile << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
+            running_log << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
             progress++;
         }
 
@@ -298,7 +309,7 @@ int main(int argc, char* argv[]) {
         }
 
         // only keep the regions we need
-        if (signalRegion || antiTauIsoRegion)  {
+        if (signalRegion || antiTauIsoRegion) {
             histos->at("cutflow")->Fill(8., 1.);
         } else {
             continue;
@@ -308,7 +319,7 @@ int main(int argc, char* argv[]) {
         if (!isData && !isEmbed) {
             // pileup reweighting
             if (!doAC && !isMG) {
-              evtwt *= lumi_weights->weight(event.getNPU());
+                evtwt *= lumi_weights->weight(event.getNPU());
             }
 
             // generator weights
@@ -386,7 +397,7 @@ int main(int argc, char* argv[]) {
                 if (syst == "dyShape_Up") {
                     nom_zpt_weight = nom_zpt_weight + ((nom_zpt_weight - 1) * 0.1);
                 } else if (syst == "dyShape_Down") {
-                    nom_zpt_weight = nom_zpt_weight -  ((nom_zpt_weight - 1) * 0.1);
+                    nom_zpt_weight = nom_zpt_weight - ((nom_zpt_weight - 1) * 0.1);
                 }
                 evtwt *= nom_zpt_weight;
             }
@@ -412,7 +423,7 @@ int main(int argc, char* argv[]) {
                 if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
                 NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
                 if (syst.find("Rivet") != std::string::npos) {
-                  evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
+                    evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
                 }
             }
 
@@ -550,7 +561,9 @@ int main(int argc, char* argv[]) {
     fout->cd();
     fout->Write();
     fout->Close();
-    logfile << "Finished processing " << sample << std::endl;
-    logfile.close();
+    running_log << "Finished processing " << sample << std::endl;
+    if (!condor) {
+        logfile.close();
+    }
     return 0;
 }
