@@ -9,6 +9,8 @@ from subprocess import call
 import time
 import multiprocessing
 from glob import glob
+from collections import defaultdict
+from condor_handler import submit_command
 
 
 def getNames(sample):
@@ -55,6 +57,15 @@ def getNames(sample):
     return names, signal_type
 
 
+def valid_sample(ifile):
+    """Remove samples that aren't used any longer"""
+    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc']
+    for sample in invalid_samples:
+        if sample in ifile:
+            return False
+    return True
+
+
 def getSyst(name, signal_type, exe, doSyst):
     """Return the list of systematics to be processed for this sample.
 
@@ -82,6 +93,12 @@ def getSyst(name, signal_type, exe, doSyst):
             'tau_id_pt_35to40_Up', 'tau_id_pt_35to40_Down',
             'tau_id_pt_ptgt40_Up', 'tau_id_pt_ptgt40_Down',
         ]
+        # this is for once the embedded energy scale is updated
+        # if name == 'embed':
+        #     systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'DM11_Up', 'DM11_Down']
+        # else:
+        #     # tau energy scale systematics (will be split by pT as well soon)
+        #     systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'DM11_Up', 'DM11_Down']
         # tau energy scale systematics (will be split by pT as well soon)
         systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'DM11_Up', 'DM11_Down']
 
@@ -93,7 +110,7 @@ def getSyst(name, signal_type, exe, doSyst):
                 'tau_id_el_disc_endcap_Up', 'tau_id_el_disc_endcap_Down',
             ]
             if name != 'embed':
-                # electron faking tau energy scale systematics
+                # electron faking tau energy scale systematics (will be included eventually)
                 systs += [
                     'efaket_es_barrel_DM0_Up', 'efaket_es_barrel_DM0_Down',
                     'efaket_es_endcap_DM0_Up', 'efaket_es_endcap_DM0_Down',
@@ -160,7 +177,7 @@ def getSyst(name, signal_type, exe, doSyst):
             'MES_gt2p1_Up', 'MES_gt2p1_Down',
             'MES_1p2to2p1_Up', 'MES_1p2to2p1_Down',
             'MES_lt1p2_Up', 'MES_lt1p2_Down',
-            ]
+        ]
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
         systs += ['RecoilReso_Up', 'RecoilReso_Down', 'RecoilResp_Up', 'RecoilResp_Down']
@@ -250,56 +267,87 @@ def run_series(output_dir, processes):
         [run_command(command, ifile, False) for command in processes]
 
 
-def valid_sample(ifile):
-    """Remove samples that aren't used any longer"""
-    invalid_samples = ['EWKZ', 'EWKW', 'WW.root', 'WZ.root', 'ZZ.root', 'ggh125_madgraph_inc']
-    for sample in invalid_samples:
-        if sample in ifile:
-            return False
-    return True
-
-
 def main(args):
     """Build all processes and run them."""
-    suffix = '.root'
-
-    try:
-        makedirs('Output/trees/{}/logs'.format(args.output_dir))
-    except:
-        pass
-
     start = time.time()
+    suffix = '.root'
     fileList = [ifile for ifile in glob(args.path+'/*') if '.root' in ifile and valid_sample(ifile)]
 
-    processes = []
-    for ifile in fileList:
-        sample = ifile.split('/')[-1].split(suffix)[0]
-        tosample = ifile.replace(sample+suffix, '')
+    if args.condor:
+        job_map = {}
+        for ifile in fileList:
+            sample = ifile.split('/')[-1].split(suffix)[0]
+            tosample = ifile.replace(sample+suffix, '')
+            names, signal_type = getNames(sample)
+            file_map = defaultdict(list)
+            for name in names:
+                systs = getSyst(name, signal_type, args.exe, args.syst)
+                for syst in systs:
+                    if syst == '':
+                      syst = 'NOMINAL'
+                    else:
+                      syst = 'SYST_' + syst
+                      file_map[syst].append({
+                          'path': tosample,
+                          'sample': sample,
+                          'name': name,
+                          'signal_type': signal_type,
+                          'syst': syst,
+                      })
+            job_map[sample] = file_map
 
-        names, signal_type = getNames(sample)
-        callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
-                                                                 tosample, sample, args.output_dir, signal_type)
+        for sample, systs in job_map.iteritems():
+            for syst, configs in systs.iteritems():
+                if len(configs) == 0:
+                    continue
 
-        doSyst = True if args.syst != None and not 'data' in sample.lower() else False
-        processes = build_processes(processes, callstring, names, signal_type, args.exe, args.output_dir, doSyst)
-    pprint(processes, width=150)
-
-    if args.parallel:
-        run_parallel(args.output_dir, processes)
+                out_name = '{}_{}'.format(sample, syst)
+                input_files = ['{}/{}.root'.format(configs[0]['path'], sample)]
+                commands = [
+                    '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p {} -s {} -d ./ --stype {} -n {} -u {} --condor'.format(
+                        args.exe, config['path'], config['sample'], config['signal_type'],
+                        config['name'], config['syst'].replace('SYST_', ''))
+                    for config in configs
+                ]
+                out_name = '{}_{}'.format(sample, syst)
+                submit_command(args.output_dir, input_files, commands, out_name, syst)
+            break
     else:
-        run_series(args.output_dir, processes)
+        try:
+            makedirs('Output/trees/{}/logs'.format(args.output_dir))
+        except:
+            pass
 
-    end = time.time()
-    print 'Processing completed in', end-start, 'seconds.'
+        processes = []
+        for ifile in fileList:
+            sample = ifile.split('/')[-1].split(suffix)[0]
+            tosample = ifile.replace(sample+suffix, '')
+
+            names, signal_type = getNames(sample)
+            callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
+                                                                     tosample, sample, args.output_dir, signal_type)
+
+            doSyst = True if args.syst and not 'data' in sample.lower() else False
+            processes = build_processes(processes, callstring, names, signal_type, args.exe, args.output_dir, doSyst)
+        pprint(processes, width=150)
+
+        if args.parallel:
+            run_parallel(args.output_dir, processes)
+        else:
+            run_series(args.output_dir, processes)
+
+        end = time.time()
+        print 'Processing completed in', end-start, 'seconds.'
 
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--exe', '-e', required=True, help='name of executable')
-    parser.add_argument('--syst', default=None, help='run systematics as well')
+    parser.add_argument('--syst', action='store_true', help='run systematics as well')
     parser.add_argument('--path', '-p', required=True, help='path to input file directory')
     parser.add_argument('--parallel', action='store_true', help='run in parallel')
     parser.add_argument('--output-dir', required=True, dest='output_dir',
                         help='name of output directory after Output/trees')
+    parser.add_argument('--condor', action='store_true', help='submit jobs to condor')
     main(parser.parse_args())
