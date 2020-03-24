@@ -69,21 +69,58 @@ def getSyst(name, signal_type, exe, doSyst):
     systs       -- list of systematics to processes
     """
     systs = ['']
-    if not doSyst:
+    # handle cases with no systematics
+    if not doSyst or signal_type == 'minlo' or name == 'data_obs' or (
+            name == 'TTJ' or name == 'VVJ' or name == 'ZJ' or name == 'STJ' or name == 'W'):
         return systs
 
-    if name == 'TTT' or name == 'VVT' or name == 'embed' or name == 'ZTT' or signal_type != 'None':
-        systs += ['tau_id_Up', 'tau_id_Down']  # names will probably be updated
-        systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down']
+    if name == 'TTT' or name == 'VVT' or name == 'embed' or name == 'ZTT' or name == 'STT' or signal_type != 'None':
+        # tau id vsJet systematics
+        systs += [
+            'tau_id_pt_30to35_Up', 'tau_id_pt_30to35_Down',
+            'tau_id_pt_35to40_Up', 'tau_id_pt_35to40_Down',
+            'tau_id_pt_ptgt40_Up', 'tau_id_pt_ptgt40_Down',
+        ]
+        # tau energy scale systematics (will be split by pT as well soon)
+        systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'DM11_Up', 'DM11_Down']
 
-    if name == 'ZL' or name == 'W' or name == 'TTL' or name == 'VVL':
-        systs += ['LES_DM0_Up', 'LES_DM0_Down', 'LES_DM1_Up', 'LES_DM1_Down']
+    if name == 'ZL' or name == 'TTL' or name == 'VVL' or name == 'STL' or name == 'embed':
+        if '_et' in exe:
+            # tau id vsEl systematics
+            systs += [
+                'tau_id_el_disc_barrel_Up', 'tau_id_el_disc_barrel_Down',
+                'tau_id_el_disc_endcap_Up', 'tau_id_el_disc_endcap_Down',
+            ]
+            if name != 'embed':
+                # electron faking tau energy scale systematics
+                systs += [
+                    'efaket_es_barrel_DM0_Up', 'efaket_es_barrel_DM0_Down',
+                    'efaket_es_endcap_DM0_Up', 'efaket_es_endcap_DM0_Down',
+                    'efaket_es_barrel_DM1_Up', 'efaket_es_barrel_DM1_Down',
+                    'efaket_es_endcap_DM1_Up', 'efaket_es_endcap_DM1_Down',
+                ]
+        elif '_mt' in exe:
+            # tau id vsMu systematics
+            systs += [
+                'tau_id_mu_disc_eta_lt0p4_Up', 'tau_id_mu_disc_eta_lt0p4_Down',
+                'tau_id_mu_disc_eta_0p4to0p8_Up', 'tau_id_mu_disc_eta_0p4to0p8_Down',
+                'tau_id_mu_disc_eta_0p8to1p2_Up', 'tau_id_mu_disc_eta_0p8to1p2_Down',
+                'tau_id_mu_disc_eta_1p2to1p7_Up', 'tau_id_mu_disc_eta_1p2to1p7_Down',
+                'tau_id_mu_disc_eta_gt1p7_Up', 'tau_id_mu_disc_eta_gt1p7_Down',
+            ]
+            if name != 'embed':
+                # muon faking tau energy scale systematics (currently identical to nominal,
+                # but will be 1% uncorrelated across DM bins)
+                systs += [
+                    'mfaket_es_DM0_Up', 'mfaket_es_DM0_Down',
+                    'mfaket_es_DM1_Up', 'mfaket_es_DM1_Down',
+                ]
 
-    if name != 'embed' and name != 'data_obs':
+    if name != 'embed':
+        # jet energy scale, unclustered MET, and JER
         systs += [
             'UncMet_Up', 'UncMet_Down',
             'JetJER_Up', 'JetJER_Down',
-            'JetAbsolute_Up', 'JetAbsolute_Down',
             'JetAbsolute_Up', 'JetAbsolute_Down',
             'JetAbsoluteyear_Up', 'JetAbsoluteyear_Down',
             'JetBBEC1_Up', 'JetBBEC1_Down',
@@ -95,32 +132,34 @@ def getSyst(name, signal_type, exe, doSyst):
             'JetHFyear_Up', 'JetHFyear_Down',
             'JetRelBal_Up', 'JetRelBal_Down',
             'JetRelSam_Up', 'JetRelSam_Down',
-            'JetRes_Up', 'JetRes_Down'
         ]
-        systs += ['trigger_up', 'trigger_down']
         if '2016' in exe or '2017' in exe:
             systs += ['prefiring_up', 'prefiring_down']
+        systs += [
+            'mc_single_trigger_up', 'mc_single_trigger_down',
+            'mc_cross_trigger_up', 'mc_cross_trigger_down',
+        ]
+    else:
+        systs += [
+            'embed_single_trigger_up', 'embed_single_trigger_down',
+            'embed_cross_trigger_up', 'embed_cross_trigger_down',
+        ]
 
-    if name == 'TTT' or name == 'TTJ':
+    if name == 'TTT':
         systs += ['ttbarShape_Up', 'ttbarShape_Down']
 
-    if name == 'TTJ' or name == 'ZJ' or name == 'VVJ' or name == 'W':
-        systs += ['jetToTauFake_Up', 'jetToTauFake_Down']
-
-    if name == 'ZJ' or name == 'ZL' or name == 'ZTT':
+    if name == 'ZL' or name == 'ZTT':
         systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
 
-    if name != 'data_obs' and '_et' in exe:
-        systs += ['EEScale_Up', 'EEScale_Down', 'EESigma_Up', 'EESigma_Down']
-    elif name != 'data_obs' and '_mt' in exe:
-        systs += ['MES_Up', 'MES_Down']
-
-    # if name == 'ggH125' and signal_type == 'powheg':
-    #     systs += [
-    #         'Rivet0_Up', 'Rivet0_Down', 'Rivet1_Up', 'Rivet1_Down', 'Rivet2_Up', 'Rivet2_Down',
-    #         'Rivet3_Up', 'Rivet3_Down', 'Rivet4_Up', 'Rivet4_Down', 'Rivet5_Up', 'Rivet5_Down',
-    #         'Rivet6_Up', 'Rivet6_Down', 'Rivet7_Up', 'Rivet7_Down', 'Rivet8_Up', 'Rivet8_Down',
-    #     ]
+    # lepton energy scales
+    if '_et' in exe:
+        systs += ['EEScale_Up', 'EEScale_Down']
+    elif '_mt' in exe:
+        systs += [
+            'MES_gt2p1_Up', 'MES_gt2p1_Down',
+            'MES_1p2to2p1_Up', 'MES_1p2to2p1_Down',
+            'MES_lt1p2_Up', 'MES_lt1p2_Down',
+            ]
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
         systs += ['RecoilReso_Up', 'RecoilReso_Down', 'RecoilResp_Up', 'RecoilResp_Down']
@@ -217,6 +256,7 @@ def valid_sample(ifile):
         if sample in ifile:
             return False
     return True
+
 
 def main(args):
     """Build all processes and run them."""

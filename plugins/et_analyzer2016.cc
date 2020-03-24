@@ -302,7 +302,7 @@ int main(int argc, char *argv[]) {
             // generator weights
             evtwt *= event.getGenWeight();
 
-            // prefiring weight
+            // prefiring weight (systematics already taken care of)
             evtwt *= event.getPrefiringWeight();
 
             // b-tagging scale factor goes here
@@ -325,13 +325,29 @@ int main(int argc, char *argv[]) {
             // tau ID efficiency SF and systematics
             std::string id_name = "t_deeptauid_pt_medium";  // nominal
             if (syst.find("tau_id_") != std::string::npos) {
-                id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                if ((syst.find("30to35") != std::string::npos && tau.getPt() >= 30 && tau.getPt() < 35) ||
+                    (syst.find("35to40") != std::string::npos && tau.getPt() >= 35 && tau.getPt() < 40) ||
+                    (syst.find("ptgt40") != std::string::npos && tau.getPt() >= 40)) {
+                    id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                }
             }
-            evtwt *= htt_sf->function(id_name.c_str())->getVal();
+            if (tau.getDecayMode() == 5) {
+              evtwt *= htt_sf->function(id_name.c_str())->getVal();
+            }
 
             // electron fake rate SF
+            std::string e_fake_id_name = "t_id_vs_e_eta_tight";
+            if (syst.find("tau_id_el_disc") != std::string::npos) {
+                if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
+                    (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
+                    (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
+                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)
+                ) {
+                    e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                }
+            }
             if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-              evtwt *= htt_sf->function("t_id_vs_e_eta_tight")->getVal();
+              evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
             }
 
             evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
@@ -378,17 +394,14 @@ int main(int argc, char *argv[]) {
                 evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
             }
 
-            // begin systematics
-
-            // jet to tau fake rate systematic
-            if (tau.getGenMatch() == 6 && name == "TTJ" || name == "ZJ" || name == "W" || name == "VVJ" || name == "STJ") {
-                auto temp_tau_pt = std::min(200., static_cast<double>(tau.getPt()));
-                if (syst == "jetToTauFake_Up") {
-                    evtwt *= (1 - (0.2 * temp_tau_pt / 100));
-                } else if (syst == "jetToTauFake_Down") {
-                    evtwt *= (1 + (0.2 * temp_tau_pt / 100));
-                }
+            // handle reading different m_sv values
+            if ((syst.find("efaket_es_barrel") != std::string::npos && fabs(electron.getEta()) < 1.479) ||
+                (syst.find("efaket_es_endcap") != std::string::npos && fabs(electron.getEta()) >= 1.479)) {
+                    event.do_shift(true);
+            } else {
+                event.do_shift(false);  // always_shift is set for things that will always be shifted so this is ok
             }
+
         } else if (!isData && isEmbed) {
             // embedded generator weights
             auto genweight(event.getGenWeight());
@@ -417,18 +430,34 @@ int main(int argc, char *argv[]) {
             evtwt *= htt_sf->function("e_idiso_ic_embed_ratio")->getVal();
 
             // tau ID eff SF
-            std::string embed_id_name = "t_deeptauid_pt_tightvse_embed_medium";
+            std::string id_name = "t_deeptauid_pt_tightvse_embed_medium";
             if (syst.find("tau_id_") != std::string::npos) {
-                embed_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                if ((syst.find("30to35") != std::string::npos && tau.getPt() >= 30 && tau.getPt() < 35) ||
+                    (syst.find("35to40") != std::string::npos && tau.getPt() >= 35 && tau.getPt() < 40) ||
+                    (syst.find("ptgt40") != std::string::npos && tau.getPt() >= 40)) {
+                    id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                }
             }
-            evtwt *= htt_sf->function(embed_id_name.c_str())->getVal();
+            if (tau.getDecayMode() == 5) {
+              evtwt *= htt_sf->function(id_name.c_str())->getVal();
+            }
 
             // trigger scale factor
             evtwt *= htt_sf->function("e_trg_ic_embed_ratio")->getVal();
 
             // electron fake rate SF
+            std::string e_fake_id_name = "t_id_vs_e_eta_tight";
+            if (syst.find("tau_id_el_disc") != std::string::npos) {
+                if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
+                    (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
+                    (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
+                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)
+                ) {
+                    e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                }
+            }
             if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-              evtwt *= htt_sf->function("t_id_vs_e_eta_tight")->getVal();
+              evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
             }
 
             // double muon trigger eff in selection
