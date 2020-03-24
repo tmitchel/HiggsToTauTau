@@ -31,3 +31,4 @@ tauTrig="${CMSSW_BASE}/lib/${SCRAM_ARCH}/libTauAnalysisToolsTauTriggerSFs.so"
 # this is the important part for compiling
 g++ -O3 $1 `root-config --cflags --glibs`  -lRooFit -lRooFitCore -I ${CMSSW_BASE}/src -I ${CMSSW_BASE}/src/ltau_analyzers/include -I include -o $2
 cp $2 $HOME/bin
+cp $2 $CMSSW_BASE/bin/$SCRAM_ARCH
