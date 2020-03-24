@@ -109,7 +109,8 @@ def getSyst(name, signal_type, exe, doSyst):
                 'tau_id_mu_disc_eta_gt1p7_Up', 'tau_id_mu_disc_eta_gt1p7_Down',
             ]
             if name != 'embed':
-                # muon faking tau energy scale systematics
+                # muon faking tau energy scale systematics (currently identical to nominal,
+                # but will be 1% uncorrelated across DM bins)
                 systs += [
                     'mfaket_es_DM0_Up', 'mfaket_es_DM0_Down',
                     'mfaket_es_DM1_Up', 'mfaket_es_DM1_Down',
