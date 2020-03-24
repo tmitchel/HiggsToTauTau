@@ -274,8 +274,6 @@ def main(args):
     fileList = [ifile for ifile in glob(args.path+'/*') if '.root' in ifile and valid_sample(ifile)]
 
     if args.condor:
-        if args.jobname == None:
-            raise Exception('must provide --jobname if using condor')
         job_map = {}
         for ifile in fileList:
             sample = ifile.split('/')[-1].split(suffix)[0]
@@ -286,16 +284,16 @@ def main(args):
                 systs = getSyst(name, signal_type, args.exe, args.syst)
                 for syst in systs:
                     if syst == '':
-                    syst = 'NOMINAL'
+                      syst = 'NOMINAL'
                     else:
-                    syst = 'SYST_' + syst
-                    file_map[syst].append({
-                        'path': tosample,
-                        'sample': sample,
-                        'name': name,
-                        'signal_type': signal_type,
-                        'syst': syst,
-                    })
+                      syst = 'SYST_' + syst
+                      file_map[syst].append({
+                          'path': tosample,
+                          'sample': sample,
+                          'name': name,
+                          'signal_type': signal_type,
+                          'syst': syst,
+                      })
             job_map[sample] = file_map
 
         for sample, systs in job_map.iteritems():
@@ -312,7 +310,7 @@ def main(args):
                     for config in configs
                 ]
                 out_name = '{}_{}'.format(sample, syst)
-                submit_command(args.jobname, input_files, commands, out_name, syst)
+                submit_command(args.output_dir, input_files, commands, out_name, syst)
             break
     else:
         try:
@@ -329,7 +327,7 @@ def main(args):
             callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                      tosample, sample, args.output_dir, signal_type)
 
-            doSyst = True if args.syst != None and not 'data' in sample.lower() else False
+            doSyst = True if args.syst and not 'data' in sample.lower() else False
             processes = build_processes(processes, callstring, names, signal_type, args.exe, args.output_dir, doSyst)
         pprint(processes, width=150)
 
@@ -346,11 +344,10 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--exe', '-e', required=True, help='name of executable')
-    parser.add_argument('--syst', default=None, help='run systematics as well')
+    parser.add_argument('--syst', action='store_true', help='run systematics as well')
     parser.add_argument('--path', '-p', required=True, help='path to input file directory')
     parser.add_argument('--parallel', action='store_true', help='run in parallel')
     parser.add_argument('--output-dir', required=True, dest='output_dir',
                         help='name of output directory after Output/trees')
     parser.add_argument('--condor', action='store_true', help='submit jobs to condor')
-    parser.add_argument('--jobname', '-j', default=None, help='name for this job')
     main(parser.parse_args())
