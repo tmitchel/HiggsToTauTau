@@ -82,6 +82,12 @@ def getSyst(name, signal_type, exe, doSyst):
             'tau_id_pt_35to40_Up', 'tau_id_pt_35to40_Down',
             'tau_id_pt_ptgt40_Up', 'tau_id_pt_ptgt40_Down',
         ]
+        # this is for once the embedded energy scale is updated
+        # if name == 'embed':
+        #     systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'DM11_Up', 'DM11_Down']
+        # else:
+        #     # tau energy scale systematics (will be split by pT as well soon)
+        #     systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'DM11_Up', 'DM11_Down']
         # tau energy scale systematics (will be split by pT as well soon)
         systs += ['DM0_Up', 'DM0_Down', 'DM1_Up', 'DM1_Down', 'DM10_Up', 'DM10_Down', 'DM11_Up', 'DM11_Down']
 
@@ -93,7 +99,7 @@ def getSyst(name, signal_type, exe, doSyst):
                 'tau_id_el_disc_endcap_Up', 'tau_id_el_disc_endcap_Down',
             ]
             if name != 'embed':
-                # electron faking tau energy scale systematics
+                # electron faking tau energy scale systematics (will be included eventually)
                 systs += [
                     'efaket_es_barrel_DM0_Up', 'efaket_es_barrel_DM0_Down',
                     'efaket_es_endcap_DM0_Up', 'efaket_es_endcap_DM0_Down',
