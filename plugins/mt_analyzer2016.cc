@@ -357,7 +357,15 @@ int main(int argc, char *argv[]) {
 
             // trigger scale factors
             if (muon.getPt() < 23) {
+                // muon leg with systematics
                 evtwt *= htt_sf->function("m_trg_19_ic_ratio")->getVal();
+                if (syst == "mc_cross_trigger_up") {
+                    evtwt *= 1.02;  // 2% per light lepton leg
+                } else if (syst == "mc_cross_trigger_down") {
+                    evtwt *= 0.98;
+                }
+
+                // tau leg with systematics
                 if (syst == "mc_cross_trigger_up") {
                     evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_up")->getVal();
                 } else if (syst == "mc_cross_trigger_down") {
@@ -367,6 +375,11 @@ int main(int argc, char *argv[]) {
                 }
             } else {
                 evtwt *= htt_sf->function("m_trg_ic_ratio")->getVal();
+                if (syst == "mc_single_trigger_up") {
+                    evtwt *= 1.02;  // 2% per light lepton leg
+                } else if (syst == "mc_single_trigger_down") {
+                    evtwt *= 0.98;
+                }
             }
 
             // Z-pT Reweighting
@@ -465,6 +478,12 @@ int main(int argc, char *argv[]) {
             if (muon.getPt() < 23) {
                 // muon-leg
                 evtwt *= htt_sf->function("m_trg_19_ic_embed_ratio")->getVal();
+                if (syst == "embed_cross_trigger_up") {
+                    evtwt *= 1.02;  // 2% per light lepton leg
+                } else if (syst == "embed_cross_trigger_down") {
+                    evtwt *= 0.98;
+                }
+
                 // tau-leg
                 std::string tau_leg_name("t_trg_mediumDeepTau_mutau_embed_ratio");
                 if (syst.find("embed_cross_trigger") != std::string::npos) {
@@ -473,6 +492,11 @@ int main(int argc, char *argv[]) {
                 evtwt *= htt_sf->function(tau_leg_name.c_str())->getVal();
             } else {
                 evtwt *= htt_sf->function("m_trg_ic_embed_ratio")->getVal();
+                if (syst == "embed_single_trigger_up") {
+                    evtwt *= 1.02;  // 2% per light lepton leg
+                } else if (syst == "embed_single_trigger_down") {
+                    evtwt *= 0.98;
+                }
             }
 
             // muon fake rate SF

@@ -355,6 +355,11 @@ int main(int argc, char *argv[]) {
             }
 
             evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
+            if (syst == "mc_single_trigger_up") {
+                evtwt *= 1.02;  // 2% per light lepton leg
+            } else if (syst == "mc_single_trigger_down") {
+                evtwt *= 0.98;
+            }
 
             // Z-pT Reweighting
             if (name == "EWKZ2l" || name == "EWKZ2nu" || name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
@@ -448,6 +453,11 @@ int main(int argc, char *argv[]) {
 
             // trigger scale factor
             evtwt *= htt_sf->function("e_trg_ic_embed_ratio")->getVal();
+            if (syst == "embed_single_trigger_up") {
+                evtwt *= 1.02;  // 2% per light lepton leg
+            } else if (syst == "embed_single_trigger_down") {
+                evtwt *= 0.98;
+            }
 
             // electron fake rate SF
             std::string e_fake_id_name = "t_id_vs_e_eta_tight";

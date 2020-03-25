@@ -355,8 +355,15 @@ int main(int argc, char *argv[]) {
 
             // trigger scale factors
             if (electron.getPt() < 33) {
-                // electron-leg
+                // electron leg with systematics
                 evtwt *= htt_sf->function("e_trg_24_ic_ratio")->getVal();
+                if (syst == "mc_cross_trigger_up") {
+                    evtwt *= 1.02;  // 2% per light lepton leg
+                } else if (syst == "mc_cross_trigger_down") {
+                    evtwt *= 0.98;
+                }
+
+                // tau leg with systematics
                 if (syst == "mc_cross_trigger_up") {
                     evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_etau_ratio_up")->getVal();
                 } else if (syst == "mc_cross_trigger_down") {
@@ -366,6 +373,11 @@ int main(int argc, char *argv[]) {
                 }
             } else {
                 evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
+                if (syst == "mc_single_trigger_up") {
+                    evtwt *= 1.02;  // 2% per light lepton leg
+                } else if (syst == "mc_single_trigger_down") {
+                    evtwt *= 0.98;
+                }
             }
 
             // Z-pT Reweighting
@@ -474,8 +486,21 @@ int main(int argc, char *argv[]) {
             } else if (syst == "embed_cross_trigger_down") {
                 tau_leg_eff_name += "_down";
             }
+
             auto single_eff = htt_sf->function(single_eff_name.c_str())->getVal();
+            if (syst == "embed_single_trigger_up") {
+                single_eff *= 1.02;  // 2% per light lepton leg
+            } else if (syst == "embed_single_trigger_down") {
+                single_eff *= 0.98;
+            }
+
             auto el_leg_eff = htt_sf->function(el_leg_eff_name.c_str())->getVal();
+            if (syst == "embed_cross_trigger_up") {
+                el_leg_eff *= 1.02;  // 2% per light lepton leg
+            } else if (syst == "embed_cross_trigger_down") {
+                el_leg_eff *= 0.98;
+            }
+
             auto tau_leg_eff = htt_sf->function(tau_leg_eff_name.c_str())->getVal();
             evtwt *= (single_eff * fireSingle + el_leg_eff * tau_leg_eff * fireCross);
 
