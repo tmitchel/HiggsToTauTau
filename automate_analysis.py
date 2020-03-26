@@ -10,7 +10,7 @@ import time
 import multiprocessing
 from glob import glob
 from collections import defaultdict
-from condor_handler import submit_command
+from raw_condor_submit import submit_command
 
 
 def getNames(sample):
@@ -287,31 +287,28 @@ def main(args):
                       syst = 'NOMINAL'
                     else:
                       syst = 'SYST_' + syst
-                      file_map[syst].append({
-                          'path': tosample,
-                          'sample': sample,
-                          'name': name,
-                          'signal_type': signal_type,
-                          'syst': syst,
-                      })
+
+                    command = '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p {} -s {} -d ./ --stype {} -n {} -u {} --condor'.format(
+                            args.exe, tosample, sample, signal_type,
+                            name, syst.replace('SYST_', ''))
+
+                    file_map[syst].append({
+                        'path': tosample,
+                        'sample': sample,
+                        'name': name,
+                        'command': command,
+                        'signal_type': signal_type,
+                        'syst': syst,
+                    })
+
             job_map[sample] = file_map
 
+        to_submit = []
         for sample, systs in job_map.iteritems():
             for syst, configs in systs.iteritems():
-                if len(configs) == 0:
-                    continue
-
-                out_name = '{}_{}'.format(sample, syst)
-                input_files = ['{}/{}.root'.format(configs[0]['path'], sample)]
-                commands = [
-                    '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p {} -s {} -d ./ --stype {} -n {} -u {} --condor'.format(
-                        args.exe, config['path'], config['sample'], config['signal_type'],
-                        config['name'], config['syst'].replace('SYST_', ''))
-                    for config in configs
-                ]
-                out_name = '{}_{}'.format(sample, syst)
-                submit_command(args.output_dir, input_files, commands, out_name, syst)
-            break
+                for config in configs:
+                    to_submit.append(config)
+        submit_command(args.output_dir, to_submit, True)
     else:
         try:
             makedirs('Output/trees/{}/logs'.format(args.output_dir))
