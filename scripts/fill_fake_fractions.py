@@ -208,6 +208,13 @@ def main(args):
 
         fake_weights = numpy.append(fake_weights, sample_anti_events[filling_variables].apply(
             lambda x: -1 * get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values)
+
+        if args.syst:
+            for syst in systs:
+                print syst
+                syst_map[syst] = numpy.append(syst_map[syst], anti_events[filling_variables].apply(lambda x: -1 * get_weight(
+                    x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values)
+
         anti_events = pandas.concat([anti_events, sample_anti_events], sort=False)
 
     # write the output file
