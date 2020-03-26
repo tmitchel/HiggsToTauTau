@@ -9,23 +9,17 @@ from ApplyFF import FFApplicationTool
 
 mvis_bins = [0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000]
 njets_bins = [-0.5, 0.5, 1.5, 15]
-systs = [
-    "ff_qcd_syst_up", "ff_qcd_syst_down",
-    "ff_qcd_dm0_njet0_stat_up", "ff_qcd_dm0_njet0_stat_down",
-    "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down",
-    "ff_qcd_dm1_njet0_stat_up", "ff_qcd_dm1_njet0_stat_down",
-    "ff_qcd_dm1_njet1_stat_up", "ff_qcd_dm1_njet1_stat_down",
-    "ff_w_syst_up", "ff_w_syst_down",
-    "ff_w_dm0_njet0_stat_up", "ff_w_dm0_njet0_stat_down",
-    "ff_w_dm0_njet1_stat_up", "ff_w_dm0_njet1_stat_down",
-    "ff_w_dm1_njet0_stat_up", "ff_w_dm1_njet0_stat_down",
-    "ff_w_dm1_njet1_stat_up", "ff_w_dm1_njet1_stat_down",
-    "ff_tt_syst_up", "ff_tt_syst_down",
-    "ff_tt_dm0_njet0_stat_up", "ff_tt_dm0_njet0_stat_down",
-    "ff_tt_dm0_njet1_stat_up", "ff_tt_dm0_njet1_stat_down",
-    "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down",
-    "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"
+systs_names = [
+    'ff_qcd_0jet_unc1', 'ff_qcd_0jet_unc2', 'ff_qcd_1jet_unc1', 'ff_qcd_1jet_unc2', 'ff_qcd_2jet_unc1', 'ff_qcd_2jet_unc2',
+    'ff_w_0jet_unc1', 'ff_w_0jet_unc2', 'ff_w_1jet_unc1', 'ff_w_1jet_unc2', 'ff_w_2jet_unc1', 'ff_w_2jet_unc2',
+    'ff_tt_0jet_unc1', 'ff_tt_0jet_unc2',
+    'mtclosure_w_unc1', 'mtclosure_w_unc2',
+    'lptclosure_xtrg_qcd', 'lptclosure_xtrg_w', 'lptclosure_xtrg_tt',
+    'lptclosure_qcd', 'lptclosure_w', 'lptclosure_tt',
+    'osssclosure_qcd'
 ]
+systs = [(name, 'up') for name in systs_names] + [(name, 'down') for name in systs_names]
+
 filling_variables = [
     't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_pt',
     'el_pt', 'mjj', 'is_antiTauIso', 'cross_trigger'
