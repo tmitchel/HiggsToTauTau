@@ -57,7 +57,7 @@ def fill_fraction(df, fraction):
         fraction.Fill(vis_mass[i], njets[i], evtwt[i])
 
 
-def get_weight(df, fake_weights, fractions, channel, syst=None):
+def get_weight(df, fake_weights, fractions, channel, syst=None, direction=''):
     """Read input variables and fake fractions to get the correct fake weight."""
     category = categorize(df['njets'], df['mjj'], channel)
     if channel == 'et':
@@ -68,10 +68,17 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     xbin = fractions['frac_data'][category].GetXaxis().FindBin(df['vis_mass'])
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
-    weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
-                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_w'][category].GetBinContent(xbin, ybin))
+    if syst != None:
+      weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+                                    fractions['frac_tt'][category].GetBinContent(xbin, ybin),
+                                    fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+                                    fractions['frac_w'][category].GetBinContent(xbin, ybin),
+                                    syst, direction)
+    else:
+      weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+                                    fractions['frac_tt'][category].GetBinContent(xbin, ybin),
+                                    fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+                                    fractions['frac_w'][category].GetBinContent(xbin, ybin))
 
     return weights
 
