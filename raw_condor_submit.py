@@ -18,7 +18,7 @@ def submit_command(jobName, job_configs, dryrun=False):
     config_dir = '{}/configs'.format(head_dir)
     os.system('mkdir -p {}'.format(config_dir))
 
-    config_name = '{}/config.jdl'.format(config_dir)
+    config_name = '{}/config.jdl'.format(exe_dir)
     condorConfig = '''universe = vanilla
 Executable = overlord.sh
 Should_Transfer_Files = YES
@@ -27,6 +27,7 @@ Output = {1}/logs/sleep_\$(Cluster)_\$(Process).stdout
 Error = {1}/logs/sleep_\$(Cluster)_\$(Process).stderr
 Log = {1}/logs/sleep_\$(Cluster)_\$(Process).log
 x509userproxy = $ENV(X509_USER_PROXY)
+Arguments=$(process)
 Queue {0}
     '''.format(len(job_configs), exe_dir)
     with open(config_name, 'w') as file:
@@ -37,8 +38,9 @@ Queue {0}
     overlord_name = '{}/overlord.sh'.format(exe_dir)
     overloardScript = '''#!/bin/bash
 let "sample=${{1}}"
-bash exe_${{sample}}.sh
-    '''
+array=($(ls {}/submit_*))
+echo "${{array[${{sample}}]}}"
+    '''.format(exe_dir)
     with open(overlord_name, 'w') as file:
         file.write(overloardScript)
 
@@ -62,7 +64,7 @@ eval `scram b` \n
     i = 0
     for config in job_configs:
         # create the bash config script
-        bash_name = '{}/{}_{}_{}.sh'.format(exe_dir, config['sample'], config['name'], config['syst'])
+        bash_name = '{}/submit_{}_{}_{}.sh'.format(exe_dir, config['sample'], config['name'], config['syst'])
         bashScript = bashScriptSetup + config['command'] + '\n'
         bashScript += 'mkdir -p /hdfs/store/{}/{}/{} \n'.format(pwd.getpwuid(os.getuid())[0], jobName, config['syst'])
         bashScript += 'cp -v *_output.root /hdfs/store/{}/{}/{} \n'.format(
