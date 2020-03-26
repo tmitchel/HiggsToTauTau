@@ -287,13 +287,14 @@ def main(args):
                       syst = 'NOMINAL'
                     else:
                       syst = 'SYST_' + syst
-                      file_map[syst].append({
-                          'path': tosample,
-                          'sample': sample,
-                          'name': name,
-                          'signal_type': signal_type,
-                          'syst': syst,
-                      })
+
+                    file_map[syst].append({
+                        'path': tosample,
+                        'sample': sample,
+                        'name': name,
+                        'signal_type': signal_type,
+                        'syst': syst,
+                    })
             job_map[sample] = file_map
 
         for sample, systs in job_map.iteritems():
@@ -311,7 +312,6 @@ def main(args):
                 ]
                 out_name = '{}_{}'.format(sample, syst)
                 submit_command(args.output_dir, input_files, commands, out_name, syst)
-            break
     else:
         try:
             makedirs('Output/trees/{}/logs'.format(args.output_dir))
