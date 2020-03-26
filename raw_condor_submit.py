@@ -13,6 +13,7 @@ def submit_command(jobName, job_configs, dryrun=False):
 
     exe_dir = '{}/executables'.format(head_dir)
     os.system('mkdir -p {}'.format(exe_dir))
+    os.system('mkdir -p {}/logs'.format(exe_dir))
 
     config_dir = '{}/configs'.format(head_dir)
     os.system('mkdir -p {}'.format(config_dir))
@@ -22,12 +23,12 @@ def submit_command(jobName, job_configs, dryrun=False):
 Executable = overlord.sh
 Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
-Output = sleep_\$(Cluster)_\$(Process).stdout
-Error = sleep_\$(Cluster)_\$(Process).stderr
-Log = sleep_\$(Cluster)_\$(Process).log
+Output = {1}/logs/sleep_\$(Cluster)_\$(Process).stdout
+Error = {1}/logs/sleep_\$(Cluster)_\$(Process).stderr
+Log = {1}/logs/sleep_\$(Cluster)_\$(Process).log
 x509userproxy = $ENV(X509_USER_PROXY)
-Queue {}
-    '''.format(len(job_configs))
+Queue {0}
+    '''.format(len(job_configs), exe_dir)
     with open(config_name, 'w') as file:
         file.write(condorConfig)
 
