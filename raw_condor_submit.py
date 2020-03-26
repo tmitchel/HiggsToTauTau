@@ -18,18 +18,19 @@ def submit_command(jobName, job_configs, dryrun=False):
     config_dir = '{}/configs'.format(head_dir)
     os.system('mkdir -p {}'.format(config_dir))
 
-    config_name = '{}/config.jdl'.format(exe_dir)
+    config_name = '{}/config.jdl'.format(config_dir)
     condorConfig = '''universe = vanilla
-Executable = overlord.sh
+Executable = {2}/overlord.sh
 Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
-Output = {1}/logs/sleep_\$(Cluster)_\$(Process).stdout
-Error = {1}/logs/sleep_\$(Cluster)_\$(Process).stderr
-Log = {1}/logs/sleep_\$(Cluster)_\$(Process).log
-x509userproxy = $ENV(X509_USER_PROXY)
+Requirements = TARGET.Arch == "x86_64" && HasAFS_OSG && TARGET.UWCMS_CVMFS_Exists && TARGET.CMS_CVMFS_Exists && HAS_CMS_HDFS && OpSysAndVer == "CentOS7"
+Output = {1}/logs/sleep_$(Cluster)_$(Process).stdout
+Error = {1}/logs/sleep_$(Cluster)_$(Process).stderr
+Log = {1}/logs/sleep_$(Cluster)_$(Process).log
+x509userproxy = /tmp/x509up_u23269
 Arguments=$(process)
 Queue {0}
-    '''.format(len(job_configs), exe_dir)
+    '''.format(len(job_configs), exe_dir, exe_dir)
     with open(config_name, 'w') as file:
         file.write(condorConfig)
 
@@ -38,7 +39,10 @@ Queue {0}
     overlord_name = '{}/overlord.sh'.format(exe_dir)
     overloardScript = '''#!/bin/bash
 let "sample=${{1}}"
-array=($(ls {}/submit_*))
+echo `ls`
+echo `ls /`
+echo `pwd`
+array=($(ls submit_*))
 echo "${{array[${{sample}}]}}"
     '''.format(exe_dir)
     with open(overlord_name, 'w') as file:
@@ -77,7 +81,7 @@ eval `scram b` \n
     print 'All executables have been written.'
     if not dryrun:
         print 'Now submitting to condor...'
-        os.system('condor_submit {}'.format(config_name))
+        # os.system('condor_submit {}'.format(config_name))
 
     return
 
