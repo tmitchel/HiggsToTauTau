@@ -288,7 +288,7 @@ def main(args):
                     else:
                       syst = 'SYST_' + syst
 
-                    command = '$CMSSW_BASE/bin/$SCRAM_ARCH/{} -p {} -s {} -d ./ --stype {} -n {} -u {} --condor'.format(
+                    command = '{} -p {} -s {} -d ./ --stype {} -n {} -u {} --condor'.format(
                             args.exe, tosample, sample, signal_type,
                             name, syst.replace('SYST_', ''))
 
@@ -308,7 +308,7 @@ def main(args):
             for syst, configs in systs.iteritems():
                 for config in configs:
                     to_submit.append(config)
-        submit_command(args.output_dir, to_submit, True)
+        submit_command(args.output_dir, to_submit, False)
     else:
         try:
             makedirs('Output/trees/{}/logs'.format(args.output_dir))

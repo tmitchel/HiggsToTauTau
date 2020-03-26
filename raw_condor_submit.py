@@ -36,15 +36,15 @@ Queue {}
     overlord_name = '{}/overlord.sh'.format(exe_dir)
     overloardScript = '''#!/bin/bash
 let "sample=${{1}}"
-bash {}_${{sample}}.sh
-    '''.format(syst)
+bash exe_${{sample}}.sh
+    '''
     with open(overlord_name, 'w') as file:
         file.write(overloardScript)
 
     print 'Condor overlord has been written: {}'.format(overlord_name)
 
     # create tarball with user code
-    os.system('tar czf ana_code.tar.gz *')
+    os.system('tar --exclude="Output" --exclude="logs" -czf ana_code.tar.gz *')
     os.system('mv -v ana_code.tar.gz {}'.format(config_dir))
 
     bashScriptSetup = '''#!/bin/bash
@@ -62,16 +62,17 @@ eval `scram b` \n
     for config in job_configs:
         # create the bash config script
         bash_name = '{}/{}_{}_{}.sh'.format(exe_dir, config['sample'], config['name'], config['syst'])
-        bashScript = bashScriptSetup + config['command']
-        bashScript += 'cp -v *_output.root /hdfs/store/{}/{}/{}'.format(
-            output_file, pwd.getpwuid(os.getuid())[0], jobName, config['syst'])
+        bashScript = bashScriptSetup + config['command'] + '\n'
+        bashScript += 'mkdir -p /hdfs/store/{}/{}/{} \n'.format(pwd.getpwuid(os.getuid())[0], jobName, config['syst'])
+        bashScript += 'cp -v *_output.root /hdfs/store/{}/{}/{} \n'.format(
+            pwd.getpwuid(os.getuid())[0], jobName, config['syst'])
         with open(bash_name, 'w') as file:
             file.write(bashScript)
         os.system('chmod +x {}'.format(bash_name))
         i += 1
 
     print 'All executables have been written.'
-    if not args.dryrun:
+    if not dryrun:
         print 'Now submitting to condor...'
         os.system('condor_submit {}'.format(config_name))
 
