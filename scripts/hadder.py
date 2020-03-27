@@ -21,7 +21,7 @@ def do_hadd(hadd_list, path):
         if not os.path.exists(path + '/' + idir + '/merged'):
             os.mkdir(path + '/' + idir + '/merged')
 
-        commands = ['hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
+        commands = ['ahadd.py {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
                     for sample, files in isamples.items()]
 
 #         commands = ['hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
