@@ -24,6 +24,9 @@ Executable = {2}/overlord.sh
 Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
 Requirements = (MY.RequiresSharedFS=!=true || TARGET.HasAFS_OSG) && (TARGET.OSG_major =!= undefined || TARGET.IS_GLIDEIN=?=true) && (TARGET.HasParrotCVMFS=?=true || (TARGET.CMS_CVMFS_Exists && TARGET.CMS_CVMFS_Revision >= 89991 )) && TARGET.HAS_CMS_HDFS
+request_memory       = 7000
+request_disk         = 2048000
+request_cpus         = 1
 Transfer_Input_Files = {2},{3}
 Output = {1}/logs/sleep_$(Cluster)_$(Process).stdout
 Error = {1}/logs/sleep_$(Cluster)_$(Process).stderr
