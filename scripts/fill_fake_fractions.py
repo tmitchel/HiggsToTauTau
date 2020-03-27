@@ -9,23 +9,17 @@ from ApplyFF import FFApplicationTool
 
 mvis_bins = [0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000]
 njets_bins = [-0.5, 0.5, 1.5, 15]
-systs = [
-    "ff_qcd_syst_up", "ff_qcd_syst_down",
-    "ff_qcd_dm0_njet0_stat_up", "ff_qcd_dm0_njet0_stat_down",
-    "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down",
-    "ff_qcd_dm1_njet0_stat_up", "ff_qcd_dm1_njet0_stat_down",
-    "ff_qcd_dm1_njet1_stat_up", "ff_qcd_dm1_njet1_stat_down",
-    "ff_w_syst_up", "ff_w_syst_down",
-    "ff_w_dm0_njet0_stat_up", "ff_w_dm0_njet0_stat_down",
-    "ff_w_dm0_njet1_stat_up", "ff_w_dm0_njet1_stat_down",
-    "ff_w_dm1_njet0_stat_up", "ff_w_dm1_njet0_stat_down",
-    "ff_w_dm1_njet1_stat_up", "ff_w_dm1_njet1_stat_down",
-    "ff_tt_syst_up", "ff_tt_syst_down",
-    "ff_tt_dm0_njet0_stat_up", "ff_tt_dm0_njet0_stat_down",
-    "ff_tt_dm0_njet1_stat_up", "ff_tt_dm0_njet1_stat_down",
-    "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down",
-    "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"
+systs_names = [
+    'ff_qcd_0jet_unc1', 'ff_qcd_0jet_unc2', 'ff_qcd_1jet_unc1', 'ff_qcd_1jet_unc2', 'ff_qcd_2jet_unc1', 'ff_qcd_2jet_unc2',
+    'ff_w_0jet_unc1', 'ff_w_0jet_unc2', 'ff_w_1jet_unc1', 'ff_w_1jet_unc2', 'ff_w_2jet_unc1', 'ff_w_2jet_unc2',
+    'ff_tt_0jet_unc1', 'ff_tt_0jet_unc2',
+    'mtclosure_w_unc1', 'mtclosure_w_unc2',
+    'lptclosure_xtrg_qcd', 'lptclosure_xtrg_w', 'lptclosure_xtrg_tt',
+    'lptclosure_qcd', 'lptclosure_w', 'lptclosure_tt',
+    'osssclosure_qcd'
 ]
+systs = [(name, 'up') for name in systs_names] + [(name, 'down') for name in systs_names]
+
 filling_variables = [
     't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_pt',
     'el_pt', 'mjj', 'is_antiTauIso', 'cross_trigger'
@@ -63,7 +57,7 @@ def fill_fraction(df, fraction):
         fraction.Fill(vis_mass[i], njets[i], evtwt[i])
 
 
-def get_weight(df, fake_weights, fractions, channel, syst=None):
+def get_weight(df, fake_weights, fractions, channel, syst=None, direction=''):
     """Read input variables and fake fractions to get the correct fake weight."""
     category = categorize(df['njets'], df['mjj'], channel)
     if channel == 'et':
@@ -74,10 +68,17 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     xbin = fractions['frac_data'][category].GetXaxis().FindBin(df['vis_mass'])
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
-    weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
-                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_w'][category].GetBinContent(xbin, ybin))
+    if syst != None:
+      weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+                                    fractions['frac_tt'][category].GetBinContent(xbin, ybin),
+                                    fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+                                    fractions['frac_w'][category].GetBinContent(xbin, ybin),
+                                    syst, direction)
+    else:
+      weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+                                    fractions['frac_tt'][category].GetBinContent(xbin, ybin),
+                                    fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+                                    fractions['frac_w'][category].GetBinContent(xbin, ybin))
 
     return weights
 
@@ -208,6 +209,13 @@ def main(args):
 
         fake_weights = numpy.append(fake_weights, sample_anti_events[filling_variables].apply(
             lambda x: -1 * get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values)
+
+        if args.syst:
+            for syst in systs:
+                print syst
+                syst_map[syst] = numpy.append(syst_map[syst], anti_events[filling_variables].apply(lambda x: -1 * get_weight(
+                    x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values)
+
         anti_events = pandas.concat([anti_events, sample_anti_events], sort=False)
 
     # write the output file
