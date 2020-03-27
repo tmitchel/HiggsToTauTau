@@ -23,14 +23,15 @@ def submit_command(jobName, job_configs, dryrun=False):
 Executable = {2}/overlord.sh
 Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
-Requirements = TARGET.Arch == "x86_64" && HasAFS_OSG && TARGET.UWCMS_CVMFS_Exists && TARGET.CMS_CVMFS_Exists && HAS_CMS_HDFS && OpSysAndVer == "CentOS7"
+Requirements = (MY.RequiresSharedFS=!=true || TARGET.HasAFS_OSG) && (TARGET.OSG_major =!= undefined || TARGET.IS_GLIDEIN=?=true) && (TARGET.HasParrotCVMFS=?=true || (TARGET.CMS_CVMFS_Exists && TARGET.CMS_CVMFS_Revision >= 89991 )) && TARGET.HAS_CMS_HDFS
+Transfer_Input_Files = {2},{3}
 Output = {1}/logs/sleep_$(Cluster)_$(Process).stdout
 Error = {1}/logs/sleep_$(Cluster)_$(Process).stderr
 Log = {1}/logs/sleep_$(Cluster)_$(Process).log
 x509userproxy = /tmp/x509up_u23269
 Arguments=$(process)
 Queue {0}
-    '''.format(len(job_configs), exe_dir, exe_dir)
+    '''.format(len(job_configs), exe_dir, exe_dir, config_dir)
     with open(config_name, 'w') as file:
         file.write(condorConfig)
 
@@ -39,11 +40,8 @@ Queue {0}
     overlord_name = '{}/overlord.sh'.format(exe_dir)
     overloardScript = '''#!/bin/bash
 let "sample=${{1}}"
-echo `ls`
-echo `ls /`
-echo `pwd`
-array=($(ls submit_*))
-echo "${{array[${{sample}}]}}"
+array=($(ls executables/))
+bash ./executables/"${{array[${{sample}}]}}"
     '''.format(exe_dir)
     with open(overlord_name, 'w') as file:
         file.write(overloardScript)
@@ -56,22 +54,21 @@ echo "${{array[${{sample}}]}}"
 
     bashScriptSetup = '''#!/bin/bash
 source /cvmfs/cms.cern.ch/cmsset_default.sh
+source /afs/hep.wisc.edu/cms/setup/bashrc
 export SCRAM_ARCH=slc6_amd64_gcc700
-eval `scramv1 project CMSSW CMSSW_10_4_0`
+scramv1 project CMSSW CMSSW_10_4_0
 cd CMSSW_10_4_0/src
-eval `scramv1 runtime -sh`
-cp -rv {}/ana_code.tar.gz .
-tar xvzf ana_code.tar.gz
-eval `scram b` \n
-    '''.format(config_dir)
+eval `scram runtime -sh`
+cp -rv ../../configs/ana_code.tar.gz .
+tar xvzf ana_code.tar.gz \n'''.format(config_dir)
 
     i = 0
     for config in job_configs:
         # create the bash config script
         bash_name = '{}/submit_{}_{}_{}.sh'.format(exe_dir, config['sample'], config['name'], config['syst'])
         bashScript = bashScriptSetup + config['command'] + '\n'
-        bashScript += 'mkdir -p /hdfs/store/{}/{}/{} \n'.format(pwd.getpwuid(os.getuid())[0], jobName, config['syst'])
-        bashScript += 'cp -v *_output.root /hdfs/store/{}/{}/{} \n'.format(
+        bashScript += 'mkdir -p /hdfs/store/user/{}/{}/{} \n'.format(pwd.getpwuid(os.getuid())[0], jobName, config['syst'])
+        bashScript += 'cp -v *_output.root /hdfs/store/user/{}/{}/{}/ \n'.format(
             pwd.getpwuid(os.getuid())[0], jobName, config['syst'])
         with open(bash_name, 'w') as file:
             file.write(bashScript)
