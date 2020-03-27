@@ -186,6 +186,7 @@ def run_parallel(output_dir, processes):
     # Use 10 cores if the machine has more than 20 total cores.
     # Otherwise, use half the available cores.
     n_processes = min(10, multiprocessing.cpu_count() / 2)
+    print 'Process with {} cores'.format(n_processes)
     pool = multiprocessing.Pool(processes=n_processes)
     watcher = pool.apply_async(listener, (q, 'Output/trees/{}/logs/runninglog.txt'.format(output_dir)))
 
@@ -234,7 +235,8 @@ def main(args):
         tosample = ifile.replace(sample+suffix, '')
 
         names, signal_type = getNames(sample)
-        if not 'DYJets1' in sample: continue
+        if not 'TTT' in names: continue
+        # if not 'DYJets1' in sample: continue
         # if not 'data_obs' in names: continue
         # if signal_type != "powheg": continue
         # if not 'ZTT' in names: continue

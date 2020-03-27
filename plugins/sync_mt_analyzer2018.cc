@@ -269,12 +269,12 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        // // b-jet veto
-        // if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
-        //     histos->at("cutflow")->Fill(6., 1.);
-        // } else {
-        //     continue;
-        // }
+        // b-jet veto
+        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
+            histos->at("cutflow")->Fill(6., 1.);
+        } else {
+            continue;
+        }
 
         // create regions
         bool signalRegion = (tau.getMediumIsoDeep() && muon.getIso() < 0.15);
