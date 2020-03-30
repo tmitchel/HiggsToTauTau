@@ -26,10 +26,10 @@ def build_filelist(input_dir):
     return filelist
 
 
-def build_histogram(name, x_bins, y_bins):
+def build_histogram(name, x_bins, y_bins, powheg_map):
     """Build TH2F to fill later."""
-    if name == 'ggh125_powheg':
-        name = 'ggH125'
+    if 'powheg' in name:
+        name = powheg_map[name]
     return ROOT.TH2F(name, name, len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins))
 
 
@@ -252,15 +252,15 @@ def main(args):
 
             # start with 0-jet category
             output_file.cd('{}_0jet'.format(channel_prefix))
-            zero_jet_hist = build_histogram(name, tau_pt_bins, m_sv_bins_0jet)
+            zero_jet_hist = build_histogram(name, tau_pt_bins, m_sv_bins_0jet, boilerplate["powheg_map"])
             fill_hists(zero_jet_events, zero_jet_hist, 't1_pt', 'm_sv', fake_weight=fweight)
 
             output_file.cd('{}_boosted'.format(channel_prefix))
-            boost_hist = build_histogram(name, higgs_pT_bins_boost, m_sv_bins_boost)
+            boost_hist = build_histogram(name, higgs_pT_bins_boost, m_sv_bins_boost, boilerplate["powheg_map"])
             boost_hist = fill_hists(boosted_events, boost_hist, 'higgs_pT', 'm_sv', fake_weight=fweight)
 
             output_file.cd('{}_vbf'.format(channel_prefix))
-            vbf_hist = build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins)
+            vbf_hist = build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins, boilerplate["powheg_map"])
             vbf_hist = fill_hists(vbf_events, vbf_hist, vbf_cat_x_var,
                                   vbf_cat_y_var, fake_weight=fweight)
 
@@ -268,7 +268,7 @@ def main(args):
             vbf_cat_hists = []
             for cat in vbf_categories:
                 output_file.cd('{}_{}'.format(channel_prefix, cat))
-                vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins))
+                vbf_cat_hists.append(build_histogram(name, vbf_cat_x_bins, vbf_cat_y_bins, boilerplate["powheg_map"]))
             fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
                        edges=vbf_cat_edges, fake_weight=fweight, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
 
@@ -278,24 +278,26 @@ def main(args):
                 for syst in boilerplate['fake_factor_systematics']:
                     output_file.cd('{}_0jet'.format(channel_prefix))
                     zero_jet_hist = build_histogram(
-                        'jetFakes_CMS_htt_{}'.format(syst), tau_pt_bins, m_sv_bins_0jet)
+                        'jetFakes_CMS_htt_{}'.format(syst), tau_pt_bins, m_sv_bins_0jet, boilerplate["powheg_map"])
                     zero_jet_hist = fill_hists(zero_jet_events, zero_jet_hist,
                                                't1_pt', 'm_sv', fake_weight=syst)
 
                     output_file.cd('{}_boosted'.format(channel_prefix))
                     boost_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst),
-                                                 higgs_pT_bins_boost, m_sv_bins_boost)
+                                                 higgs_pT_bins_boost, m_sv_bins_boost, boilerplate["powheg_map"])
                     boost_hist = fill_hists(boosted_events, boost_hist, 'higgs_pT', 'm_sv', fake_weight=syst)
 
                     output_file.cd('{}_vbf'.format(channel_prefix))
-                    vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(syst), vbf_cat_x_bins, vbf_cat_y_bins)
+                    vbf_hist = build_histogram('jetFakes_CMS_htt_{}'.format(
+                        syst), vbf_cat_x_bins, vbf_cat_y_bins, boilerplate["powheg_map"])
                     vbf_hist = fill_hists(vbf_events, vbf_hist, vbf_cat_x_var, vbf_cat_y_var, fake_weight=syst)
 
                     # vbf sub-categories event after normal vbf categories
                     vbf_cat_hists = []
                     for cat in vbf_categories:
                         output_file.cd('{}_{}'.format(channel_prefix, cat))
-                        vbf_cat_hists.append(build_histogram('jetFakes_' + syst, vbf_cat_x_bins, vbf_cat_y_bins))
+                        vbf_cat_hists.append(build_histogram('jetFakes_' + syst, vbf_cat_x_bins,
+                                                             vbf_cat_y_bins, boilerplate["powheg_map"]))
                     fill_hists(vbf_events, vbf_cat_hists, vbf_cat_x_var, vbf_cat_y_var, zvar_name=vbf_cat_edge_var,
                                edges=vbf_cat_edges, fake_weight=syst, DCP_idx=len(boilerplate['vbf_sub_cats_plus']))
                     output_file.Write()

@@ -39,8 +39,7 @@ powheg_map = {
 def to_reweight(ifile):
     """List of signal samples. Only processes these files."""
     for name in [
-        'ggh125_madgraph.root', 'ggh125_minlo.root', 'ggh125_powheg.root',
-        'vbf125_powheg.root', 'wh125_powheg.root', 'zh125_powheg.root'
+        'ggh125_madgraph.root',
         'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root'
         ]:
         if name in ifile:
@@ -102,9 +101,9 @@ def main(args):
 
     for idir, files in input_files.iteritems():
         for ifile in files:
-            if 'powheg' in ifile or 'minlo' in ifile:
-                handle_powheg(ifile)
-                continue
+            # if 'powheg' in ifile or 'minlo' in ifile:
+            #     handle_powheg(ifile)
+            #     continue
             # until weights are corrected, don't reweight WH or ZH
             # if 'wh125_JHU' in ifile or 'zh125_JHU' in ifile:
             #     handle_wh_zh(ifile)
