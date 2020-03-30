@@ -47,13 +47,13 @@ def to_reweight(ifile):
     return False
 
 
-def recognize_signal(ifile, is2018):
+def recognize_signal(ifile, is2017):
     """Pick the correct keys for this sample."""
     process = ifile.split('/')[-1].split('125')[0]
     key = ''
-    if process == 'ggh' and is2018:
+    if process == 'ggh':
         key = 'new_mg_ac_reweighting_map'
-    elif process == 'ggh':
+    elif process == 'ggh' and is2017:
         key = 'mg_ac_reweighting_map'
     else:
         key = 'jhu_ac_reweighting_map'
@@ -118,7 +118,7 @@ def main(args):
             events = pandas.DataFrame(oldtree)
             signal_events = events[(events['is_signal'] > 0)]
 
-            key, process = recognize_signal(ifile, args.is2018)
+            key, process = recognize_signal(ifile, args.is2017)
             weight_names = boilerplate[key][process]
             for weight, name in weight_names:
                 print idir, ifile, name
@@ -136,5 +136,5 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--input', '-i', required=True, help='path to input files')
-    parser.add_argument('--is2018', action='store_true', help='is this 2018?')
+    parser.add_argument('--is2017', action='store_true', help='is this 2017?')
     main(parser.parse_args())
