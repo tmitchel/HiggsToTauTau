@@ -29,12 +29,12 @@ style_map = {
     },
     "signals": {
         "ggh125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
-        "MG__GGH2Jets_sm_M125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
-        "MG__GGH2Jets_pseudoscalar_M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
+        "reweighted_ggH_htt_0PM125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
+        "reweighted_ggH_htt_0M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
 
         "vbf125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
-        "JHU__reweighted_qqH_htt_0PM125": style_map_tuple(no_color, GetColor("#FF0000"), 1, 3, 1),
-        "JHU__reweighted_qqH_htt_0M125": style_map_tuple(no_color, GetColor("#ff5e00"), 1, 3, 1),
+        "reweighted_qqH_htt_0PM125": style_map_tuple(no_color, GetColor("#FF0000"), 1, 3, 1),
+        "reweighted_qqH_htt_0M125": style_map_tuple(no_color, GetColor("#ff5e00"), 1, 3, 1),
     }
 }
 
@@ -48,7 +48,7 @@ def clean_samples(input_histos):
         'Others': input_histos['STT'].Clone()
     }
 
-    input_histos['tt'].Add(input_histos['TTL'])
+    merged['tt'].Add(input_histos['TTL'])
     for name in ['STL', 'VVT', 'VVL']:
         merged['Others'].Add(input_histos[name])
 
@@ -126,11 +126,11 @@ def fillLegend(data, backgrounds, signals, stat):
     leg.AddEntry(data, 'Data', 'lep')
 
     # signals
-    leg.AddEntry(signals['MG__GGH2Jets_sm_M125'], 'ggH SM Higgs(125)x50', 'l')
-    leg.AddEntry(signals['MG__GGH2Jets_pseudoscalar_M125'], 'ggH PS Higgs(125)x50', 'l')
+    leg.AddEntry(signals['reweighted_ggH_htt_0PM125'], 'ggH SM Higgs(125)x50', 'l')
+    leg.AddEntry(signals['reweighted_ggH_htt_0M125'], 'ggH PS Higgs(125)x50', 'l')
 
-    leg.AddEntry(signals['JHU__reweighted_qqH_htt_0PM125'], 'VBF SM Higgs(125)x50', 'l')
-    leg.AddEntry(signals['JHU__reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
+    leg.AddEntry(signals['reweighted_qqH_htt_0PM125'], 'VBF SM Higgs(125)x50', 'l')
+    leg.AddEntry(signals['reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
 
     # backgrounds
     leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
@@ -264,7 +264,7 @@ def BuildPlot(args):
     formatStack(stack)
 
     # combo_signal = signals['MG__GGH2Jets_pseudoscalar_M125'].Clone()
-    combo_signal = signals['MG__GGH2Jets_pseudoscalar_M125'].Clone()
+    combo_signal = signals['reweighted_ggH_htt_0PM125'].Clone()
     combo_signal.Reset()
     combo_signal.Add(signals['ggh125_powheg'])
     combo_signal.Add(signals['vbf125_powheg'])
