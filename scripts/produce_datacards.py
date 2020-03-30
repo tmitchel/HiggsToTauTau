@@ -28,6 +28,8 @@ def build_filelist(input_dir):
 
 def build_histogram(name, x_bins, y_bins):
     """Build TH2F to fill later."""
+    if name == 'ggh125_powheg':
+        name = 'ggH125'
     return ROOT.TH2F(name, name, len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins))
 
 
