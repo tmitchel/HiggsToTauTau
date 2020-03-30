@@ -9,7 +9,7 @@
 #include "TTree.h"
 
 class slim_tree {
- public:
+   public:
     slim_tree(std::string, bool);
     ~slim_tree() {}  // default destructor
 
@@ -31,12 +31,10 @@ class slim_tree {
         t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode,
         t1_genMatch,  // t1 is used for et and mt, as well
         njets, nbjets, j1_pt, j1_eta, j1_phi, j2_pt, j2_eta, j2_phi, b1_pt, b1_eta, b1_phi, b2_pt, b2_eta, b2_phi, met, metphi, mjj, numGenJets, mt,
-        dmf, dmf_new, pt_sv, m_sv, MELA_D2j, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2, ME_sm_ggH_qqInit,
-        ME_ps_ggH_qqInit, ME_ps_ggH, ME_ps_VBF, ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2,
-        ME_a2_VBF, ME_L1_VBF, ME_L1Zg_VBF,
-        D0_ggH, DCP_ggH, D0_VBF, D_a2_VBF, D_l1_VBF, D_l1zg_VBF, DCP_VBF,
-        higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, MT_lepMET, MT_t2MET, MT_HiggsMET, hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr,
-        lt_dphi;
+        dmf, dmf_new, pt_sv, m_sv, MELA_D2j, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2, ME_sm_ggH_qqInit, ME_ps_ggH_qqInit, ME_ps_ggH,
+        ME_ps_VBF, ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, ME_a2_VBF, ME_L1_VBF, ME_L1Zg_VBF, D0_ggH, DCP_ggH, D0_VBF,
+        D_a2_VBF, D_l1_VBF, D_l1zg_VBF, DCP_VBF, higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, MT_lepMET, MT_t2MET, MT_HiggsMET,
+        hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr, lt_dphi;
     Float_t cross_trigger;
 
     // Anomolous coupling branches
@@ -441,11 +439,11 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (el->getP4() + t->getP4()).M();
-    if ((el->getGenMatch() > 2 && el->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
-        contamination = 1;  // ttbar/diboson contaminating embedded samples
+    if ((name == "ZTT" || name == "ZL" || name == "TTT" || name == "TTL" || name == "STT" || name == "STL" || name == "VVT" || name == "VVL") &&
+        (e->getGenMatch() > 2 && e->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
+        contamination = 1;  // mc contaminating embedded samples
     }
     cross_trigger = evt->getPassCrossTrigger(el->getPt());
-
 
     otree->Fill();
 }
@@ -479,8 +477,9 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (mu->getP4() + t->getP4()).M();
-    if ((mu->getGenMatch() > 2 && mu->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
-        contamination = 1;  // ttbar/diboson contaminating embedded samples
+    if ((name == "ZTT" || name == "ZL" || name == "TTT" || name == "TTL" || name == "STT" || name == "STL" || name == "VVT" || name == "VVL") &&
+        (mu->getGenMatch() > 2 && mu->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
+        contamination = 1;  // mc contaminating embedded samples
     }
     cross_trigger = evt->getPassCrossTrigger(mu->getPt());
 
