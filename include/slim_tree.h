@@ -441,7 +441,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (el->getP4() + t->getP4()).M();
-    if ((name == "VVT" || name == "TTT") && el->getGenMatch() > 2 && t->getGenMatch() == 5) {
+    if ((el->getGenMatch() > 2 && el->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
         contamination = 1;  // ttbar/diboson contaminating embedded samples
     }
     cross_trigger = evt->getPassCrossTrigger(el->getPt());
@@ -479,7 +479,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (mu->getP4() + t->getP4()).M();
-    if ((name == "VVT" || name == "TTT") && mu->getGenMatch() > 2 && t->getGenMatch() == 5) {
+    if ((mu->getGenMatch() > 2 && mu->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
         contamination = 1;  // ttbar/diboson contaminating embedded samples
     }
     cross_trigger = evt->getPassCrossTrigger(mu->getPt());
