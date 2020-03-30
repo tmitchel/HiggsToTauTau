@@ -440,7 +440,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     dmf_new = t->getDecayModeFindingNew();
     vis_mass = (el->getP4() + t->getP4()).M();
     if ((name == "ZTT" || name == "ZL" || name == "TTT" || name == "TTL" || name == "STT" || name == "STL" || name == "VVT" || name == "VVL") &&
-        (e->getGenMatch() > 2 && e->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
+        (el->getGenMatch() > 2 && el->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
         contamination = 1;  // mc contaminating embedded samples
     }
     cross_trigger = evt->getPassCrossTrigger(el->getPt());
