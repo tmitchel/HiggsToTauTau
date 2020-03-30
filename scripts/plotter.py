@@ -19,23 +19,40 @@ style_map = {
         "embedded": style_map_tuple(GetColor("#f9cd66"), black, 1, 1, 1),
         "ZTT": style_map_tuple(GetColor("#f9cd66"), black, 1, 1, 1),
         "jetFakes": style_map_tuple(GetColor("#ffccff"), black, 1, 1, 1),
-        "TTT": style_map_tuple(GetColor("#cfe87f"), black, 1, 1, 1),
         "ZL": style_map_tuple(GetColor("#de5a6a"), black, 1, 1, 1),
+        "TTT": style_map_tuple(GetColor("#cfe87f"), black, 1, 1, 1),
+        "TTL": style_map_tuple(GetColor("#cfe87f"), black, 1, 1, 1),
         "VVT": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "VVL": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "STT": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "STL": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
     },
     "signals": {
         "ggh125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
         "MG__GGH2Jets_sm_M125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
         "MG__GGH2Jets_pseudoscalar_M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
-        # use JHU for 2018 because MG isn't available
-        # "JHU__GGH2Jets_sm_M125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
-        # "JHU__GGH2Jets_pseudoscalar_M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
 
         "vbf125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
         "JHU__reweighted_qqH_htt_0PM125": style_map_tuple(no_color, GetColor("#FF0000"), 1, 3, 1),
         "JHU__reweighted_qqH_htt_0M125": style_map_tuple(no_color, GetColor("#ff5e00"), 1, 3, 1),
     }
 }
+
+
+def clean_samples(input_histos):
+    merged = {
+        'ZTT': input_histos['ZTT'].Clone(),
+        'ZL': input_histos['ZL'].Clone(),
+        'jetFakes': input_histos['jetFakes'].Clone(),
+        'tt': input_histos['TTT'].Clone(),
+        'Others': input_histos['STT'].Clone()
+    }
+
+    input_histos['tt'].Add(input_histos['TTL'])
+    for name in ['STL', 'VVT', 'VVL']:
+        merged['Others'].Add(input_histos[name])
+
+    return merged
 
 
 def ApplyStyle(ihist, styles):
@@ -111,8 +128,6 @@ def fillLegend(data, backgrounds, signals, stat):
     # signals
     leg.AddEntry(signals['MG__GGH2Jets_sm_M125'], 'ggH SM Higgs(125)x50', 'l')
     leg.AddEntry(signals['MG__GGH2Jets_pseudoscalar_M125'], 'ggH PS Higgs(125)x50', 'l')
-    # leg.AddEntry(signals['JHU__GGH2Jets_sm_M125'], 'ggH SM Higgs(125)x50', 'l')
-    # leg.AddEntry(signals['JHU__GGH2Jets_pseudoscalar_M125'], 'ggH PS Higgs(125)x50', 'l')
 
     leg.AddEntry(signals['JHU__reweighted_qqH_htt_0PM125'], 'VBF SM Higgs(125)x50', 'l')
     leg.AddEntry(signals['JHU__reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
@@ -120,9 +135,9 @@ def fillLegend(data, backgrounds, signals, stat):
     # backgrounds
     leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
     leg.AddEntry(backgrounds['ZL'], 'ZL', 'f')
-    leg.AddEntry(backgrounds['jetFakes'], 'jetFakes', 'f')
-    leg.AddEntry(backgrounds['TTT'], 'TTT', 'f')
-    leg.AddEntry(backgrounds['VVT'], 'VVT', 'f')
+    leg.AddEntry(backgrounds['jetFakes'], 'Jet Mis-ID', 'f')
+    leg.AddEntry(backgrounds['tt'], 'tt', 'f')
+    leg.AddEntry(backgrounds['Others'], 'Others', 'f')
 
     # stat. uncertainty
     leg.AddEntry(stat, 'Uncertainty', 'f')
@@ -226,6 +241,9 @@ def BuildPlot(args):
         elif hname in style_map['signals']:
             ihist = ApplyStyle(ihist, style_map['signals'][hname])
             signals[hname] = ihist
+
+    # merge backgrounds
+    backgrounds = clean_samples(backgrounds)
 
     # now get stat and stack filled
     stat = data_hist.Clone()  # sum of all backgrounds
