@@ -102,7 +102,7 @@ def main(args):
     temp_name = ''
     if '/hdfs' in args.input:
         temp_name = 'tmp/{}'.format(args.input.split('/')[-1])
-        call('mkdir -p {}'.format(temp_name))
+        call('mkdir -p {}'.format(temp_name), shell=True)
 
     for idir, files in input_files.iteritems():
         for ifile in files:
@@ -139,7 +139,7 @@ def main(args):
                     print 'Moving {}/{}.root to {}/merged'.format(temp_name, name, idir)
                     call('mv {}/{}.root {}/merged'.format(temp_name, name, idir), shell=True)
 
-            print 'Moving {} to {}'.format(ifiel, ifile.replace('/merged', ''))
+            print 'Moving {} to {}'.format(ifile, ifile.replace('/merged', ''))
             call('mv {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True)
 
 
