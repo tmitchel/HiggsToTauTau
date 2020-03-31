@@ -131,9 +131,11 @@ def main(args):
                     f[tree_name].extend(weighted_signal_events.to_dict('list'))
 
                 if '/hdfs' in args.input:
-                    call('mv -v {}.root {}/merged'.format(name, idir), shell=True)
+                    print 'Moving {}.root to {}/merged'.format(name, idir)
+                    call('mv {}.root {}/merged'.format(name, idir), shell=True)
 
-            call('mv -v {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True)            
+            print 'Moving {} to {}'.format(ifiel, ifile.replace('/merged', ''))
+            call('mv {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True)            
 
 
 if __name__ == "__main__":

@@ -58,14 +58,19 @@ def main(args):
     call('mkdir -p {}/../SYST_embed_contam_up'.format(args.input), shell=True)
     call('mkdir -p {}/../SYST_embed_contam_down'.format(args.input), shell=True)
 
-    with uproot.recreate('{}/../SYST_embed_contam_up/embed.root'.format(args.input)) as f:
+    output_name_up = 'embed_up.root' if '/hdfs' in args.input else '{}/../SYST_embed_contam_up/embed.root'.format(args.input)
+    output_name_dn = 'embed_down.root' if '/hdfs' in args.input else '{}/../SYST_embed_contam_down/embed.root'.format(args.input)
+    with uproot.recreate(output_name_up) as f:
         f[tree_name] = uproot.newtree(treedict)
         f[tree_name].extend(shift_up.to_dict('list'))
 
-    with uproot.recreate('{}/../SYST_embed_contam_down/embed.root'.format(args.input)) as f:
+    with uproot.recreate(output_name_dn) as f:
         f[tree_name] = uproot.newtree(treedict)
         f[tree_name].extend(shift_dn.to_dict('list'))
 
+    if '/hdfs' in args.input:
+        call('mv -v embed_up.root {}/../SYST_embed_contam_up/embed.root'.format(args.input), shell=True)
+        call('mv -v embed_down.root {}/../SYST_embed_contam_down/embed.root'.format(args.input), shell=True)
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
