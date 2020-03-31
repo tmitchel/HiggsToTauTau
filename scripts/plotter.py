@@ -274,7 +274,7 @@ def BuildPlot(args):
     data_hist.Draw('same lep')
     stat.Draw('same e2')
     for sig_name, sig_hist in signals.iteritems():
-        if 'GGH' in sig_name:
+        if 'ggH' in sig_name:
             sig_hist.Scale(50*signals['ggh125_powheg'].Integral()/sig_hist.Integral())
         if 'qqH' in sig_name:
             sig_hist.Scale(50*signals['vbf125_powheg'].Integral()/sig_hist.Integral())
