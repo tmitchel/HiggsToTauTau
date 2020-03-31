@@ -195,6 +195,13 @@ def main(args):
     oldtree = open_file[tree_name].arrays(['*'])
     treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
     treedict['fake_weight'] = numpy.float64
+    if args.syst:
+        for syst in systs:
+            treedict[syst] = numpy.float64
+
+    # build the file writer
+    output_writer = build_file_writer(treedict, tree_name)
+    output_dir = '.' if '/hdfs' in args.input else args.input
     
     events = pandas.DataFrame(oldtree)
     anti_events = events[(events['is_antiTauIso'] > 0)]
@@ -206,13 +213,8 @@ def main(args):
     if args.syst:
         for syst in systs:
             print syst
-            treedict[syst] = numpy.float64
             anti_events[syst] = anti_events[filling_variables].apply(lambda x: get_weight(
                 x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
-
-    # build the file writer
-    output_writer = build_file_writer(treedict, tree_name)
-    output_dir = '.' if '/hdfs' in args.input else args.input
 
     # write data first
     output_writer(anti_events, '{}/jetFakes_data.root'.format(output_dir))
