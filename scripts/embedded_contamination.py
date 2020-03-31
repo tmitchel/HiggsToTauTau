@@ -2,13 +2,8 @@ import pandas
 import pprint
 import uproot
 from glob import glob
+from pprint import pprint
 from subprocess import call
-
-
-backgrounds = [
-    'TTT', 'TTL', 'STT', 'STL',
-    'VVT', 'VVL', 'ZL'
-]
 
 
 def parse_tree_name(keys):
@@ -21,14 +16,26 @@ def parse_tree_name(keys):
         raise Exception('Can\'t find et_tree or mt_tree in keys: {}'.format(keys))
 
 
+def valid_background(name):
+    background_names = [
+        'TTT', 'TTL', 'STT', 'STL',
+        'VVT', 'VVL', 'ZL'
+    ]
+
+    if name.split('/')[-1].replace('.root', '') in background_names:
+      return True
+    return False
+
+
 def main(args):
-    files = [ifile for ifile in glob('{}/*.root'.format(args.input))]
+
+    files = [ifile for ifile in glob('{}/*.root'.format(args.input)) if valid_background(ifile)]
     backgrounds = pandas.DataFrame()
     for ifile in files:
         open_file = uproot.open(ifile)
         tree_name = parse_tree_name(open_file.keys())
         events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
-        signal_events = events[(events['is_signal'] > 0 & events['contamination'] == 1)]
+        signal_events = events[(events['is_signal'] > 0) & (events['contamination'] > 0)]
         backgrounds = pandas.concat([backgrounds, signal_events], sort=False)
 
     shift_up = backgrounds.copy(deep=True)
@@ -37,7 +44,7 @@ def main(args):
     shift_up['evtwt'] *= 0.1
     shift_dn['evtwt'] *= -0.1
 
-    open_file = uproot.open('{}/embed.root')
+    open_file = uproot.open('{}/embed.root'.format(args.input))
     tree_name = parse_tree_name(open_file.keys())
     oldtree = open_file[tree_name].arrays(['*'])
     treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
@@ -45,8 +52,8 @@ def main(args):
     events = pandas.DataFrame(oldtree)
     signal_events = events[(events['is_signal'] > 0)]
 
-    shift_up = pandas.concat([shift_up, signal_events])
-    shift_dn = pandas.concat([shift_dn, signal_events])
+    shift_up = pandas.concat([shift_up, signal_events], sort=False)
+    shift_dn = pandas.concat([shift_dn, signal_events], sort=False)
 
     call('mkdir -p {}/../SYST_embed_contam_up'.format(args.input), shell=True)
     call('mkdir -p {}/../SYST_embed_contam_down'.format(args.input), shell=True)
