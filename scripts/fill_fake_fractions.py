@@ -105,7 +105,7 @@ def build_file_writer(treedict, tree_name):
 
 
 def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fake_file, fractions):
-    def process_file(sample, systs=None):
+    def process_file(sample, q, systs=None):
         ff_weighter = FFApplicationTool(fake_file, channel_prefix)
 
         open_file = uproot.open('{}/{}.root'.format(input_name, sample))
@@ -130,6 +130,7 @@ def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fa
             f[tree_name] = uproot.newtree(treedict)
             f[tree_name.extend(anti_events.to_dict('list'))]
 
+        q.put('done')
         return None
     return process_file
 
@@ -237,12 +238,13 @@ def main(args):
     ]
 
     manager = multiprocessing.Manager()
+    q = manager.Queue()
     n_processes = min(9, multiprocessing.cpu_count() / 2)
     pool = multiprocessing.Pool(processes=n_processes)
 
     jobs = []
     for sample in samples:
-        job = pool.apply_async(weighter, (sample, args.syst))
+        job = pool.apply_async(weighter, (sample, q, args.syst))
         jobs.append(job)
 
     for job in jobs:
@@ -252,7 +254,7 @@ def main(args):
     pool.join()
     fout.Close()
 
-    call('ahadd.py {1}/jetFakes.root {1}/jetFakes_*.root'.format(output_dir))
+    call('ahadd.py {0}/jetFakes.root {0}/jetFakes_*.root'.format(output_dir))
 
     if '/hdfs' in args.input:
         call('mv -v ./jetFakes.root {}'.format(args.input), shell=True)
