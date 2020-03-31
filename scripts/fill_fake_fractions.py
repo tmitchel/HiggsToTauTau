@@ -129,7 +129,8 @@ def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fa
         with uproot.recreate('{}/jetFakes_{}.root'.format(output_dir, sample)) as f:
             f[tree_name] = uproot.newtree(treedict)
             f[tree_name.extend(anti_events.to_dict('list'))]
-    
+
+        return None
     return process_file
 
 
