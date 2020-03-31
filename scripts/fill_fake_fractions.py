@@ -104,35 +104,32 @@ def build_file_writer(treedict, tree_name):
     return file_writer
 
 
-def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fake_file, fractions):
-    def weighter(sample, systs=None):
-        print 'starting'
-        ff_weighter = FFApplicationTool(fake_file, channel_prefix)
+def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fake_file, fractions, sample, doSysts=False):
+    print 'starting'
+    ff_weighter = FFApplicationTool(fake_file, channel_prefix)
 
-        open_file = uproot.open('{}/{}.root'.format(input_name, sample))
-        events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
-        anti_events = events[(events['is_antiTauIso'] > 0)]
+    open_file = uproot.open('{}/{}.root'.format(input_name, sample))
+    events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
+    anti_events = events[(events['is_antiTauIso'] > 0)]
 
-        anti_events['fake_weight'] = anti_events[filling_variables].apply(
-            lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
-        if sample != 'data_obs':
-            anti_events['fake_weight'] *= -1
+    anti_events['fake_weight'] = anti_events[filling_variables].apply(
+        lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
+    if sample != 'data_obs':
+        anti_events['fake_weight'] *= -1
 
-        if systs != None:
-            for syst in systs:
-                print 'Processing: {} {}'.format(sample, syst)
-                anti_events[syst] = anti_events[filling_variables].apply(lambda x: -1 * get_weight(
-                    x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
-                if sample != 'data_obs':
-                    anti_events[syst] *= -1
+    if doSysts:
+        for syst in systs:
+            print 'Processing: {} {}'.format(sample, syst)
+            anti_events[syst] = anti_events[filling_variables].apply(lambda x: -1 * get_weight(
+                x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
+            if sample != 'data_obs':
+                anti_events[syst] *= -1
 
+    with uproot.recreate('{}/jetFakes_{}.root'.format(output_dir, sample)) as f:
+        f[tree_name] = uproot.newtree(treedict)
+        f[tree_name.extend(anti_events.to_dict('list'))]
 
-        with uproot.recreate('{}/jetFakes_{}.root'.format(output_dir, sample)) as f:
-            f[tree_name] = uproot.newtree(treedict)
-            f[tree_name.extend(anti_events.to_dict('list'))]
-
-        return sample
-    return weighter
+    return sample
 
 
 def main(args):
@@ -231,7 +228,6 @@ def main(args):
             treedict[syst] = numpy.float64
 
     output_dir = '.' if '/hdfs' in args.input else args.input
-    weighter = create_fakes(args.input, tree_name, channel_prefix, treedict, output_dir, fake_file, fractions)
     samples = [
         'data_obs', 'embed',
         'STL', 'VVL', 'TTL', 'ZL', 'STT', 'VVT', 'TTT'
@@ -241,7 +237,8 @@ def main(args):
     n_processes = min(9, multiprocessing.cpu_count() / 2)
     pool = multiprocessing.Pool(processes=n_processes)
 
-    jobs = [pool.apply_async(weighter, (sample, args.syst)) for sample in samples]
+    jobs = [pool.apply_async(create_fakes, (args.input, tree_name, channel_prefix, treedict,
+                                            output_dir, fake_file, fractions, sample, args.syst)) for sample in samples]
     [j.get() for j in jobs]
 
     pool.close()
