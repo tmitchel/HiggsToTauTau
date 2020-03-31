@@ -6,6 +6,7 @@ from multiprocessing import Process, Queue
 from array import array
 from collections import defaultdict
 from ApplyFF import FFApplicationTool
+from subprocess import call
 
 mvis_bins = [0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000]
 njets_bins = [-0.5, 0.5, 1.5, 15]
@@ -219,7 +220,8 @@ def main(args):
         anti_events = pandas.concat([anti_events, sample_anti_events], sort=False)
 
     # write the output file
-    with uproot.recreate('{}/jetFakes.root'.format(args.input), compression=None) as f:
+    output_dir = '.' if '/hdfs' in args.input else args.input
+    with uproot.recreate('{}/jetFakes.root'.format(output_dir)) as f:
         f[tree_name] = uproot.newtree(treedict)
         anti_events['fake_weight'] = fake_weights.reshape(len(fake_weights))
         if args.syst:
@@ -228,6 +230,9 @@ def main(args):
         f[tree_name].extend(anti_events.to_dict('list'))
 
     fout.Close()
+
+    if '/hdfs' in args.input:
+        call('mv -v ./jetFakes.root {}'.format(args.input), shell=True)
 
 
 if __name__ == "__main__":
