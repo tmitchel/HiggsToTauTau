@@ -41,7 +41,7 @@ def to_reweight(ifile):
     for name in [
         'ggh125_madgraph.root',
         'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root'
-        ]:
+    ]:
         if name in ifile:
             return True
     return False
@@ -99,6 +99,11 @@ def main(args):
     with open('configs/boilerplate.json', 'r') as config_file:
         boilerplate = json.load(config_file)
 
+    temp_name = ''
+    if '/hdfs' in args.input:
+        temp_name = 'tmp/{}'.format(args.input.split('/')[-1])
+        call('mkdir -p {}'.format(temp_name))
+
     for idir, files in input_files.iteritems():
         for ifile in files:
             # if 'powheg' in ifile or 'minlo' in ifile:
@@ -125,17 +130,17 @@ def main(args):
                 weighted_signal_events = signal_events.copy(deep=True)
                 weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
 
-                output_name = '{}.root'.format(name) if '/hdfs' in args.input else '{}/merged/{}.root'.format(idir, name)
+                output_name = '{}/{}.root'.format(temp_name, name) if '/hdfs' in args.input else '{}/merged/{}.root'.format(idir, name)
                 with uproot.recreate(output_name) as f:
                     f[tree_name] = uproot.newtree(treedict)
                     f[tree_name].extend(weighted_signal_events.to_dict('list'))
 
                 if '/hdfs' in args.input:
-                    print 'Moving {}.root to {}/merged'.format(name, idir)
-                    call('mv {}.root {}/merged'.format(name, idir), shell=True)
+                    print 'Moving {}/{}.root to {}/merged'.format(temp_name, name, idir)
+                    call('mv {}/{}.root {}/merged'.format(temp_name, name, idir), shell=True)
 
             print 'Moving {} to {}'.format(ifiel, ifile.replace('/merged', ''))
-            call('mv {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True)            
+            call('mv {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True)
 
 
 if __name__ == "__main__":
