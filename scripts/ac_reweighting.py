@@ -125,9 +125,13 @@ def main(args):
                 weighted_signal_events = signal_events.copy(deep=True)
                 weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
 
-                with uproot.recreate('{}/merged/{}.root'.format(idir, name)) as f:
+                output_name = '{}.root'.format(name) if '/hdfs' in args.input else '{}/merged/{}.root'.format(idir, name)
+                with uproot.recreate(output_name) as f:
                     f[tree_name] = uproot.newtree(treedict)
                     f[tree_name].extend(weighted_signal_events.to_dict('list'))
+
+                if '/hdfs' in args.input:
+                    call('mv -v {}.root {}/merged'.format(name, idir), shell=True)
 
             call('mv -v {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True)            
 
