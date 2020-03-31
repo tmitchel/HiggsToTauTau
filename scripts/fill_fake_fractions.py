@@ -131,7 +131,7 @@ def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fa
             f[tree_name] = uproot.newtree(treedict)
             f[tree_name.extend(anti_events.to_dict('list'))]
 
-        return None
+        return sample
     return weighter
 
 
@@ -241,13 +241,8 @@ def main(args):
     n_processes = min(9, multiprocessing.cpu_count() / 2)
     pool = multiprocessing.Pool(processes=n_processes)
 
-    jobs = []
-    for sample in samples:
-        job = pool.apply_async(weighter, (sample, args.syst))
-        jobs.append(job)
-
-    for job in jobs:
-        job.get()
+    jobs = [pool.apply_async(weighter, (sample, args.syst)) for sample in samples]
+    [j.get() for j in jobs]
 
     pool.close()
     pool.join()
