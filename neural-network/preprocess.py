@@ -136,8 +136,9 @@ def handle_file(all_data, channel, ifile, syst):
     slim_df['isSM'] = isSM
 
     # scale event weights between 0 - 1
-    weights = MinMaxScaler(feature_range=(1., 2.)).fit_transform(
-        weights.values.reshape(-1, 1))
+    if len(weights.values) > 0:
+        weights = MinMaxScaler(feature_range=(1., 2.)).fit_transform(
+            weights.values.reshape(-1, 1))
 
     all_data.setdefault(syst, copy.deepcopy(default_object))
 
@@ -213,14 +214,14 @@ def main(args):
     # scale and save the nominal case to the output file
     store['nominal'] = format_for_store(all_data, 'nominal', scaler)
 
-    # now handle the systematics
-    for idir, files in systematics.iteritems():
-        all_data.clear()
-        for info in files:
-            all_data = handle_file(all_data, info[0], info[1], idir)
+    # # now handle the systematics
+    # for idir, files in systematics.iteritems():
+    #     all_data.clear()
+    #     for info in files:
+    #         all_data = handle_file(all_data, info[0], info[1], idir)
 
-        # scale and save to the output file
-        store[idir] = format_for_store(all_data, idir, scaler)
+    #     # scale and save to the output file
+    #     store[idir] = format_for_store(all_data, idir, scaler)
 
     print 'Complete! Preprocessing completed in {} seconds'.format(time.time() - start)
 
