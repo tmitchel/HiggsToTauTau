@@ -62,17 +62,12 @@ def get_columns(fname):
     """Return columns to keep and columns to drop."""
     columns = scaled_vars + selection_vars
     todrop = ['evtwt']
-    if 'vbf125_JHU' in fname:
-        columns = columns + ['wt_vbf_a1']
-        todrop = todrop + ['wt_vbf_a1']
     return columns, todrop
 
 
 def split_dataframe(fname, slim_df, todrop):
     """Split the DataFrame to get weights separate. Also, weights by AC if neeeded."""
     weights = slim_df['evtwt']
-    if 'vbf125_JHU' in fname:
-        weights = weights * slim_df['wt_vbf_a1']
     slim_df = slim_df.drop(selection_vars+todrop, axis=1)
     slim_df = slim_df.astype('float64')
     return slim_df, weights
@@ -82,12 +77,12 @@ def get_labels(nevents, name):
     """Label events as sig vs bkg and SM vs non-SM."""
     # get training label
     isSignal = np.zeros(nevents)
-    if 'vbf125' in name or 'ggh125' in name or 'wh125' in name or 'zh125' in name or 'qqh' in name:
+    if 'reweighted' in name or 'powheg' in name:
         isSignal = np.ones(nevents)
 
     # get scaling label
     isSM = np.ones(nevents)
-    if 'JHU' in name or 'madgraph' in name or 'reweighted' in name or 'GGH2Jets' in name:
+    if 'reweighted' in name or 'powheg' in name:
         isSM = np.zeros(nevents)
     elif 'data' in name:
         isSM = np.zeros(nevents)
