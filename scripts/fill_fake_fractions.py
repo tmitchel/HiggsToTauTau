@@ -63,7 +63,7 @@ def fill_fraction(df, fraction):
         fraction.Fill(vis_mass[i], njets[i], evtwt[i])
 
 
-def get_weight(df, fake_weights, fractions, channel, syst=None, direction=''):
+def get_weight(df, fake_weights, fractions, channel, syst=None):
     """Read input variables and fake fractions to get the correct fake weight."""
     category = categorize(df['njets'], df['mjj'], channel)
     if channel == 'et':
@@ -79,7 +79,7 @@ def get_weight(df, fake_weights, fractions, channel, syst=None, direction=''):
                                       fractions['frac_tt'][category].GetBinContent(xbin, ybin),
                                       fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
                                       fractions['frac_w'][category].GetBinContent(xbin, ybin),
-                                      syst, direction)
+                                      syst[0], syst[1])
     else:
         weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
                                       fractions['frac_tt'][category].GetBinContent(xbin, ybin),
@@ -122,7 +122,7 @@ def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fa
     if doSysts:
         for syst in systs:
             print 'Processing: {} {}'.format(sample, syst)
-            anti_events[syst[0]] = anti_events[filling_variables].apply(lambda x: -1 * get_weight(
+            anti_events[syst[0]] = anti_events[filling_variables].apply(lambda x: get_weight(
                 x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
             if sample != 'data_obs':
                 anti_events[syst[0]] *= -1
@@ -248,7 +248,7 @@ def main(args):
     pool.join()
     fout.Close()
 
-    call('ahadd.py {0}/jetFakes.root {0}/jetFakes_*.root'.format(output_dir))
+    call('ahadd.py {0}/jetFakes.root {0}/jetFakes_*.root'.format(output_dir), shell=True)
 
     if '/hdfs' in args.input:
         call('mv -v ./jetFakes.root {}'.format(args.input), shell=True)
