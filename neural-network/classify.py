@@ -36,7 +36,7 @@ def build_filelist(input_dir):
 
 def classify(ifile, tree_prefix, scaler, scaler_info, model_name, output_dir):
     fname = ifile.replace('.root', '').split('/')[-1]
-    print 'Processing file: {} from {}'.format(fname, ifile.split('merged')[0].split('/')[-2])
+    # print 'Processing file: {} from {}'.format(fname, ifile.split('merged')[0].split('/')[-2])
 
     # load the model
     model = load_model('Output/models/{}.hdf5'.format(model_name))
@@ -64,14 +64,14 @@ def classify(ifile, tree_prefix, scaler, scaler_info, model_name, output_dir):
     # so that it can be slotted back into the correct place in the TTree.
 
     # do the classification
-    guesses = model.predict(scaled.values, verbose=True)
+    guesses = model.predict(scaled.values, verbose=False)
 
     with uproot.recreate('Output/trees/{}/{}.root'.format(output_dir, fname)) as f:
         f[tree_prefix] = uproot.newtree(treedict)
         oldtree['NN_disc'] = guesses.reshape(len(guesses))
         f[tree_prefix].extend(oldtree)
 
-    return 1
+    return None
 
 def main(args):
     # this will be removed soon
@@ -97,8 +97,6 @@ def main(args):
     if not path.isdir('Output/trees/{}'.format(args.output_dir)):
         mkdir('Output/trees/{}'.format(args.output_dir))
 
-    manager = multiprocessing.Manager()
-
     filelist = build_filelist(args.input_dir)
     print 'Files to process...'
     pprint(dict(filelist))
@@ -108,15 +106,14 @@ def main(args):
             mkdir('Output/trees/{}/{}'.format(args.output_dir, syst))
 
         n_processes = min(12, multiprocessing.cpu_count() / 2)
-        pool = multiprocessing.Pool(processes=2)
+        pool = multiprocessing.Pool(processes=n_processes)
         jobs = [pool.apply_async(classify, (ifile, tree_prefix, scaler, scaler_columns, args.model,
                                        '{}/{}'.format(args.output_dir, syst))) for ifile in ifiles]
-        print jobs[0]
-        print jobs[0].get()
+
         [j.get() for j in jobs]
         pool.close()
         pool.join()
-        break
+        print 'All files written for {}'.format(syst)
 
 
 if __name__ == "__main__":
