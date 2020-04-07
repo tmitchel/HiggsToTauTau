@@ -1,3 +1,5 @@
+from os import environ, path, mkdir, listdir
+environ['KERAS_BACKEND'] = 'tensorflow'
 from collections import defaultdict
 from sklearn.preprocessing import StandardScaler
 from keras.models import load_model
@@ -9,8 +11,6 @@ import pandas as pd
 from glob import glob
 from array import array
 from pprint import pprint
-from os import environ, path, mkdir, listdir
-environ['KERAS_BACKEND'] = 'tensorflow'
 
 
 def build_filelist(input_dir):
@@ -68,7 +68,8 @@ def main(args):
         if not path.exists('Output/trees/{}/{}'.format(args.output_dir, syst)):
             mkdir('Output/trees/{}/{}'.format(args.output_dir, syst))
 
-        r = pool.map_async(classify, (ifile, tree_prefix, scaler_info, model, '{}/{}'.format(args.output_dir, syst)))
+        r = pool.map_async(classify, [(ifile, tree_prefix, scaler_info, model,
+                                       '{}/{}'.format(args.output_dir, syst)) for ifile in ifiles])
         r.wait()
 
 
