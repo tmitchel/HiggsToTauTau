@@ -107,13 +107,14 @@ def process_dir(ifile, idir, temp_name, input_path, is2017, boilerplate):
         with uproot.recreate(output_name) as f:
             f[tree_name] = uproot.newtree(treedict)
             f[tree_name].extend(weighted_signal_events.to_dict('list'))
-
+        
         if '/hdfs' in input_path:
             print 'Moving {}/{}.root to {}/merged'.format(temp_name, name, idir)
             call('mv {}/{}.root {}/merged'.format(temp_name, name, idir), shell=True)
 
     print 'Moving {} to {}'.format(ifile, ifile.replace('/merged', ''))
     call('mv {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True)
+    return None
 
 
 def main(args):
@@ -138,7 +139,7 @@ def main(args):
         n_processes = min(12, multiprocessing.cpu_count() / 2)
         pool = multiprocessing.Pool(processes=n_processes)
         jobs = [
-            pool.apply_async(process_dir, (ifile, idir, temp_wh_zh_map, args.input, args.is2017, boilerplate))
+            pool.apply_async(process_dir, (ifile, idir, temp_name, args.input, args.is2017, boilerplate))
             for ifile in files
         ]
 
