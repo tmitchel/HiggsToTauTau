@@ -83,8 +83,6 @@ def main(args):
         raise Exception(
             'Input files must have MUTAU or ETAU in the provided path. You gave {}, ya goober.'.format(args.input_dir))
 
-
-
     # get scaler setup
     scaler = StandardScaler()
     scaler_info = pd.HDFStore(args.input_name)['scaler']
