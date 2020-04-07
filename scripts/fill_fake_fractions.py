@@ -7,6 +7,11 @@ from array import array
 from collections import defaultdict
 from ApplyFF import FFApplicationTool
 from subprocess import call
+import multiprocessing
+
+import warnings
+warnings.filterwarnings(
+    'ignore', category=pandas.io.pytables.PerformanceWarning)
 
 mvis_bins = [0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000]
 njets_bins = [-0.5, 0.5, 1.5, 15]
@@ -58,7 +63,7 @@ def fill_fraction(df, fraction):
         fraction.Fill(vis_mass[i], njets[i], evtwt[i])
 
 
-def get_weight(df, fake_weights, fractions, channel, syst=None, direction=''):
+def get_weight(df, fake_weights, fractions, channel, syst=None):
     """Read input variables and fake fractions to get the correct fake weight."""
     category = categorize(df['njets'], df['mjj'], channel)
     if channel == 'et':
@@ -70,16 +75,16 @@ def get_weight(df, fake_weights, fractions, channel, syst=None, direction=''):
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
     if syst != None:
-      weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
-                                    fractions['frac_tt'][category].GetBinContent(xbin, ybin),
-                                    fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
-                                    fractions['frac_w'][category].GetBinContent(xbin, ybin),
-                                    syst, direction)
+        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+                                      fractions['frac_tt'][category].GetBinContent(xbin, ybin),
+                                      fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+                                      fractions['frac_w'][category].GetBinContent(xbin, ybin),
+                                      syst[0], syst[1])
     else:
-      weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
-                                    fractions['frac_tt'][category].GetBinContent(xbin, ybin),
-                                    fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
-                                    fractions['frac_w'][category].GetBinContent(xbin, ybin))
+        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+                                      fractions['frac_tt'][category].GetBinContent(xbin, ybin),
+                                      fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+                                      fractions['frac_w'][category].GetBinContent(xbin, ybin))
 
     return weights
 
@@ -92,6 +97,42 @@ def parse_tree_name(keys):
         return 'mt_tree'
     else:
         raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
+
+
+def build_file_writer(treedict, tree_name):
+    def file_writer(events, name):
+        with uproot.recreate(name) as f:
+            f[tree_name] = uproot.newtree(treedict)
+            f[tree_name.extend(events.to_dict('list'))]
+    return file_writer
+
+
+def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fake_file, fractions, sample, doSysts=False):
+    ff_weighter = FFApplicationTool(fake_file, channel_prefix)
+
+    open_file = uproot.open('{}/{}.root'.format(input_name, sample))
+    events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
+    anti_events = events[(events['is_antiTauIso'] > 0)].copy()
+
+    anti_events['fake_weight'] = anti_events[filling_variables].apply(
+        lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
+    if sample != 'data_obs':
+        anti_events['fake_weight'] *= -1
+
+    if doSysts:
+        for syst in systs:
+            print 'Processing: {} {}'.format(sample, syst)
+            anti_events[syst[0]] = anti_events[filling_variables].apply(lambda x: get_weight(
+                x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
+            if sample != 'data_obs':
+                anti_events[syst[0]] *= -1
+
+    with uproot.recreate('{}/jetFakes_{}.root'.format(output_dir, sample), compression=None) as f:
+        f[tree_name] = uproot.newtree(treedict)
+        f[tree_name].extend(anti_events.to_dict('list'))
+
+    print 'Finished writing {}'.format(sample)
+    return None
 
 
 def main(args):
@@ -185,51 +226,29 @@ def main(args):
     oldtree = open_file[tree_name].arrays(['*'])
     treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
     treedict['fake_weight'] = numpy.float64
-
-    events = pandas.DataFrame(oldtree)
-    anti_events = events[(events['is_antiTauIso'] > 0)]
-
-    print 'getting fake weights...'
-    fake_weights = anti_events[filling_variables].apply(
-        lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
-
     if args.syst:
-        syst_map = {}
         for syst in systs:
-            print syst
-            treedict[syst] = numpy.float64
-            syst_map[syst] = anti_events[filling_variables].apply(lambda x: get_weight(
-                x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
+            treedict[syst[0]] = numpy.float64
 
-    # Subtract real backgrounds from data
-    for sample in ['STL', 'VVL', 'TTL', 'ZL', 'STT', 'VVT', 'TTT', 'embed']:
-        print 'Processing {} for subtraction'.format(sample)
-        open_file = uproot.open('{}/{}.root'.format(args.input, sample))
-        events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
-        sample_anti_events = events[(events['is_antiTauIso'] > 0)]
-
-        fake_weights = numpy.append(fake_weights, sample_anti_events[filling_variables].apply(
-            lambda x: -1 * get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values)
-
-        if args.syst:
-            for syst in systs:
-                print syst
-                syst_map[syst] = numpy.append(syst_map[syst], anti_events[filling_variables].apply(lambda x: -1 * get_weight(
-                    x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values)
-
-        anti_events = pandas.concat([anti_events, sample_anti_events], sort=False)
-
-    # write the output file
     output_dir = '.' if '/hdfs' in args.input else args.input
-    with uproot.recreate('{}/jetFakes.root'.format(output_dir)) as f:
-        f[tree_name] = uproot.newtree(treedict)
-        anti_events['fake_weight'] = fake_weights.reshape(len(fake_weights))
-        if args.syst:
-            for syst in systs:
-                anti_events[syst] = syst_map[syst]
-        f[tree_name].extend(anti_events.to_dict('list'))
+    samples = [
+        'data_obs', 'embed',
+        'STL', 'VVL', 'TTL', 'ZL', 'STT', 'VVT', 'TTT'
+    ]
 
+    manager = multiprocessing.Manager()
+    n_processes = min(9, multiprocessing.cpu_count() / 2)
+    pool = multiprocessing.Pool(processes=n_processes)
+
+    jobs = [pool.apply_async(create_fakes, (args.input, tree_name, channel_prefix, treedict,
+                                            output_dir, fake_file, fractions, sample, args.syst)) for sample in samples]
+    a = [j.get() for j in jobs]
+
+    pool.close()
+    pool.join()
     fout.Close()
+
+    call('ahadd.py {0}/jetFakes.root {0}/jetFakes_*.root'.format(output_dir), shell=True)
 
     if '/hdfs' in args.input:
         call('mv -v ./jetFakes.root {}'.format(args.input), shell=True)
