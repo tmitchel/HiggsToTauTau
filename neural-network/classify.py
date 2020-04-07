@@ -11,6 +11,7 @@ import pandas as pd
 from glob import glob
 from array import array
 from pprint import pprint
+import multiprocessing
 
 
 def build_filelist(input_dir):
@@ -33,49 +34,12 @@ def build_filelist(input_dir):
     return data
 
 
-def main(args):
-    # this will be removed soon
-    if 'mutau' in args.input_dir or 'mt20' in args.input_dir:
-        tree_prefix = 'mt_tree'
-    elif 'etau' in args.input_dir or 'et20' in args.input_dir:
-        tree_prefix = 'et_tree'
-    else:
-        raise Exception(
-            'Input files must have MUTAU or ETAU in the provided path. You gave {}, ya goober.'.format(args.input_dir))
-
-    # load the model
-    model = load_model('Output/models/{}.hdf5'.format(args.model))
-
-    # get scaler setup
-    scaler = StandardScaler()
-    scaler_info = pd.HDFStore(args.input_name)['scaler']
-    scaler_info = scaler_info.drop('isSM', axis=0)
-    scaler.mean_ = scaler_info['mean'].values.reshape(1, -1)
-    scaler.scale_ = scaler_info['scale'].values.reshape(1, -1)
-
-    # create output directory
-    if not path.isdir('Output/trees/{}'.format(args.output_dir)):
-        mkdir('Output/trees/{}'.format(args.output_dir))
-
-    n_processes = min(12, multiprocessing.cpu_count() / 2)
-    pool = multiprocessing.Pool(processes=n_processes)
-
-    filelist = build_filelist(args.input_dir)
-    print 'Files to process...'
-    pprint(dict(filelist))
-    for syst, ifiles in filelist.iteritems():
-        # create output sub-directory (needed for systematics/nominal)
-        if not path.exists('Output/trees/{}/{}'.format(args.output_dir, syst)):
-            mkdir('Output/trees/{}/{}'.format(args.output_dir, syst))
-
-        r = pool.map_async(classify, [(ifile, tree_prefix, scaler_info, model,
-                                       '{}/{}'.format(args.output_dir, syst)) for ifile in ifiles])
-        r.wait()
-
-
-def classify(ifile, tree_prefix, scaler_info, model, output_dir):
+def classify(ifile, tree_prefix, scaler, scaler_info, model_name, output_dir):
     fname = ifile.replace('.root', '').split('/')[-1]
     print 'Processing file: {} from {}'.format(fname, ifile.split('merged')[0].split('/')[-2])
+
+    # load the model
+    model = load_model('Output/models/{}.hdf5'.format(model_name))
 
     # read input and get things ready for output TTree
     open_file = uproot.open(ifile)
@@ -84,7 +48,7 @@ def classify(ifile, tree_prefix, scaler_info, model, output_dir):
     treedict['NN_disc'] = numpy.float64
 
     # drop all variables not going into the network
-    to_classify = open_file[tree_prefix].arrays(scaler_info.index.values, outputtype=pd.DataFrame)
+    to_classify = open_file[tree_prefix].arrays(scaler_info, outputtype=pd.DataFrame)
 
     # clean inputs
     to_classify.fillna(-100, inplace=True)
@@ -106,6 +70,53 @@ def classify(ifile, tree_prefix, scaler_info, model, output_dir):
         f[tree_prefix] = uproot.newtree(treedict)
         oldtree['NN_disc'] = guesses.reshape(len(guesses))
         f[tree_prefix].extend(oldtree)
+
+    return 1
+
+def main(args):
+    # this will be removed soon
+    if 'mutau' in args.input_dir or 'mt20' in args.input_dir:
+        tree_prefix = 'mt_tree'
+    elif 'etau' in args.input_dir or 'et20' in args.input_dir:
+        tree_prefix = 'et_tree'
+    else:
+        raise Exception(
+            'Input files must have MUTAU or ETAU in the provided path. You gave {}, ya goober.'.format(args.input_dir))
+
+
+
+    # get scaler setup
+    scaler = StandardScaler()
+    scaler_info = pd.HDFStore(args.input_name)['scaler']
+    scaler_info = scaler_info.drop('isSM', axis=0)
+    scaler.mean_ = scaler_info['mean'].values.reshape(1, -1)
+    scaler.scale_ = scaler_info['scale'].values.reshape(1, -1)
+    scaler_columns = scaler_info.index.values
+
+    # create output directory
+    if not path.isdir('Output/trees/{}'.format(args.output_dir)):
+        mkdir('Output/trees/{}'.format(args.output_dir))
+
+    manager = multiprocessing.Manager()
+
+    filelist = build_filelist(args.input_dir)
+    print 'Files to process...'
+    pprint(dict(filelist))
+    for syst, ifiles in filelist.iteritems():
+        # create output sub-directory (needed for systematics/nominal)
+        if not path.exists('Output/trees/{}/{}'.format(args.output_dir, syst)):
+            mkdir('Output/trees/{}/{}'.format(args.output_dir, syst))
+
+        n_processes = min(12, multiprocessing.cpu_count() / 2)
+        pool = multiprocessing.Pool(processes=2)
+        jobs = [pool.apply_async(classify, (ifile, tree_prefix, scaler, scaler_columns, args.model,
+                                       '{}/{}'.format(args.output_dir, syst))) for ifile in ifiles]
+        print jobs[0]
+        print jobs[0].get()
+        [j.get() for j in jobs]
+        pool.close()
+        pool.join()
+        break
 
 
 if __name__ == "__main__":
