@@ -238,13 +238,13 @@ def main(args):
             ]
             vbf_events = general_selection[(general_selection['njets'] > 1) & (general_selection['mjj'] > 300)]
 
-            if 'wh125_JHU_' in name or 'zh125_JHU_' in name:
-                if 'nominal' in ifile:
-                    name = boilerplate['wh_zh_name_map'][name]
-                else:
-                    name, syst_suf = name.split('_CMS_')[0], name.split('_CMS_')[1]
-                    name = boilerplate['wh_zh_name_map'][name]
-                    name = name + '_CMS_' + syst_suf
+            # if 'wh125_JHU_' in name or 'zh125_JHU_' in name:
+            #     if 'nominal' in ifile:
+            #         name = boilerplate['wh_zh_name_map'][name]
+            #     else:
+            #         name, syst_suf = name.split('_CMS_')[0], name.split('_CMS_')[1]
+            #         name = boilerplate['wh_zh_name_map'][name]
+            #         name = name + '_CMS_' + syst_suf
 
             fweight = None
             if 'jetFakes' in name:
