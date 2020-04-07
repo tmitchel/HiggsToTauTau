@@ -21,7 +21,7 @@ def do_hadd(hadd_list, path):
         if not os.path.exists(path + '/' + idir + '/merged'):
             os.mkdir(path + '/' + idir + '/merged')
 
-        commands = ['hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
+        commands = ['ahadd.py {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
                     for sample, files in isamples.items()]
 
 #         commands = ['hadd {}/{}.root {}'.format(path + '/' + idir + '/merged', sample, ' '.join(files))
@@ -86,11 +86,16 @@ def good_sig(ifile):
 def main(args):
     """Build list of files and hadd them together."""
     bkgs = [
-        'ZJ', 'ZL', 'ZTT', 'embed', 'data_obs', 'VVJ', 'VVT', 'TTT', 'TTJ', 'W',
+        'data_obs', 'embed', 
+        'ZJ', 'ZTT', 'ZL',
+        'VVJ', 'VVT', 'VVL', 
+        'TTJ', 'TTT', 'TTL', 
+        'STJ', 'STT', 'STL', 
+        'W',
     ]
     signals = [
         'ggh125_JHU', 'vbf125_JHU', 'wh125_JHU', 'zh125_JHU',
-        'ggh125_madgraph',
+        'ggh125_madgraph', 'ggh125_minlo',
         'ggh125_powheg', 'vbf125_powheg', 'zh125_powheg'
     ]
     bkg_hadd_list = {

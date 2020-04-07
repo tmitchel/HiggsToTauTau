@@ -6,26 +6,26 @@ from multiprocessing import Process, Queue
 from array import array
 from collections import defaultdict
 from ApplyFF import FFApplicationTool
+from subprocess import call
+import multiprocessing
+
+import warnings
+warnings.filterwarnings(
+    'ignore', category=pandas.io.pytables.PerformanceWarning)
 
 mvis_bins = [0, 50, 80, 100, 110, 120, 130, 150, 170, 200, 250, 1000]
 njets_bins = [-0.5, 0.5, 1.5, 15]
-systs = [
-    "ff_qcd_syst_up", "ff_qcd_syst_down",
-    "ff_qcd_dm0_njet0_stat_up", "ff_qcd_dm0_njet0_stat_down",
-    "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down",
-    "ff_qcd_dm1_njet0_stat_up", "ff_qcd_dm1_njet0_stat_down",
-    "ff_qcd_dm1_njet1_stat_up", "ff_qcd_dm1_njet1_stat_down",
-    "ff_w_syst_up", "ff_w_syst_down",
-    "ff_w_dm0_njet0_stat_up", "ff_w_dm0_njet0_stat_down",
-    "ff_w_dm0_njet1_stat_up", "ff_w_dm0_njet1_stat_down",
-    "ff_w_dm1_njet0_stat_up", "ff_w_dm1_njet0_stat_down",
-    "ff_w_dm1_njet1_stat_up", "ff_w_dm1_njet1_stat_down",
-    "ff_tt_syst_up", "ff_tt_syst_down",
-    "ff_tt_dm0_njet0_stat_up", "ff_tt_dm0_njet0_stat_down",
-    "ff_tt_dm0_njet1_stat_up", "ff_tt_dm0_njet1_stat_down",
-    "ff_tt_dm1_njet0_stat_up", "ff_tt_dm1_njet0_stat_down",
-    "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"
+systs_names = [
+    'ff_qcd_0jet_unc1', 'ff_qcd_0jet_unc2', 'ff_qcd_1jet_unc1', 'ff_qcd_1jet_unc2', 'ff_qcd_2jet_unc1', 'ff_qcd_2jet_unc2',
+    'ff_w_0jet_unc1', 'ff_w_0jet_unc2', 'ff_w_1jet_unc1', 'ff_w_1jet_unc2', 'ff_w_2jet_unc1', 'ff_w_2jet_unc2',
+    'ff_tt_0jet_unc1', 'ff_tt_0jet_unc2',
+    'mtclosure_w_unc1', 'mtclosure_w_unc2',
+    'lptclosure_xtrg_qcd', 'lptclosure_xtrg_w', 'lptclosure_xtrg_tt',
+    'lptclosure_qcd', 'lptclosure_w', 'lptclosure_tt',
+    'osssclosure_qcd'
 ]
+systs = [(name, 'up') for name in systs_names] + [(name, 'down') for name in systs_names]
+
 filling_variables = [
     't1_pt', 't1_decayMode', 'njets', 'vis_mass', 'mt', 'mu_pt',
     'el_pt', 'mjj', 'is_antiTauIso', 'cross_trigger'
@@ -74,10 +74,17 @@ def get_weight(df, fake_weights, fractions, channel, syst=None):
     xbin = fractions['frac_data'][category].GetXaxis().FindBin(df['vis_mass'])
     ybin = fractions['frac_data'][category].GetYaxis().FindBin(df['njets'])
 
-    weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
-                                  fractions['frac_tt'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
-                                  fractions['frac_w'][category].GetBinContent(xbin, ybin))
+    if syst != None:
+        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+                                      fractions['frac_tt'][category].GetBinContent(xbin, ybin),
+                                      fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+                                      fractions['frac_w'][category].GetBinContent(xbin, ybin),
+                                      syst[0], syst[1])
+    else:
+        weights = fake_weights.get_ff(df['t1_pt'], df['mt'], df['vis_mass'], df[pt_name], df['njets'], df['cross_trigger'],
+                                      fractions['frac_tt'][category].GetBinContent(xbin, ybin),
+                                      fractions['frac_qcd'][category].GetBinContent(xbin, ybin),
+                                      fractions['frac_w'][category].GetBinContent(xbin, ybin))
 
     return weights
 
@@ -90,6 +97,42 @@ def parse_tree_name(keys):
         return 'mt_tree'
     else:
         raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
+
+
+def build_file_writer(treedict, tree_name):
+    def file_writer(events, name):
+        with uproot.recreate(name) as f:
+            f[tree_name] = uproot.newtree(treedict)
+            f[tree_name.extend(events.to_dict('list'))]
+    return file_writer
+
+
+def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fake_file, fractions, sample, doSysts=False):
+    ff_weighter = FFApplicationTool(fake_file, channel_prefix)
+
+    open_file = uproot.open('{}/{}.root'.format(input_name, sample))
+    events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
+    anti_events = events[(events['is_antiTauIso'] > 0)].copy()
+
+    anti_events['fake_weight'] = anti_events[filling_variables].apply(
+        lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
+    if sample != 'data_obs':
+        anti_events['fake_weight'] *= -1
+
+    if doSysts:
+        for syst in systs:
+            print 'Processing: {} {}'.format(sample, syst)
+            anti_events[syst[0]] = anti_events[filling_variables].apply(lambda x: get_weight(
+                x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
+            if sample != 'data_obs':
+                anti_events[syst[0]] *= -1
+
+    with uproot.recreate('{}/jetFakes_{}.root'.format(output_dir, sample), compression=None) as f:
+        f[tree_name] = uproot.newtree(treedict)
+        f[tree_name].extend(anti_events.to_dict('list'))
+
+    print 'Finished writing {}'.format(sample)
+    return None
 
 
 def main(args):
@@ -106,10 +149,10 @@ def main(args):
         fout.cd()
 
     inputs = {
-        'frac_w': ['W', 'ZJ', 'VVJ'],
+        'frac_w': ['W', 'ZJ', 'VVJ', 'STJ'],
         'frac_tt': ['TTJ'],
         'frac_data': ['data_obs'],
-        'frac_real': ['embed', 'TTT', 'VVT'],
+        'frac_real': ['STL', 'VVL', 'TTL', 'ZL', 'STT', 'VVT', 'TTT', 'embed'],
     }
 
     fractions = {
@@ -183,43 +226,32 @@ def main(args):
     oldtree = open_file[tree_name].arrays(['*'])
     treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
     treedict['fake_weight'] = numpy.float64
-
-    events = pandas.DataFrame(oldtree)
-    anti_events = events[(events['is_antiTauIso'] > 0)]
-
-    print 'getting fake weights...'
-    fake_weights = anti_events[filling_variables].apply(
-        lambda x: get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values
-
     if args.syst:
-        syst_map = {}
         for syst in systs:
-            print syst
-            treedict[syst] = numpy.float64
-            syst_map[syst] = anti_events[filling_variables].apply(lambda x: get_weight(
-                x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
+            treedict[syst[0]] = numpy.float64
 
-    # Subtract real backgrounds from data
-    for sample in ['ZL', 'TTT', 'VVT', 'embed']:
-        print 'Processing {} for subtraction'.format(sample)
-        open_file = uproot.open('{}/{}.root'.format(args.input, sample))
-        events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
-        sample_anti_events = events[(events['is_antiTauIso'] > 0)]
+    output_dir = '.' if '/hdfs' in args.input else args.input
+    samples = [
+        'data_obs', 'embed',
+        'STL', 'VVL', 'TTL', 'ZL', 'STT', 'VVT', 'TTT'
+    ]
 
-        fake_weights = numpy.append(fake_weights, sample_anti_events[filling_variables].apply(
-            lambda x: -1 * get_weight(x, ff_weighter, fractions, channel_prefix), axis=1).values)
-        anti_events = pandas.concat([anti_events, sample_anti_events], sort=False)
+    manager = multiprocessing.Manager()
+    n_processes = min(9, multiprocessing.cpu_count() / 2)
+    pool = multiprocessing.Pool(processes=n_processes)
 
-    # write the output file
-    with uproot.recreate('{}/jetFakes.root'.format(args.input), compression=None) as f:
-        f[tree_name] = uproot.newtree(treedict)
-        anti_events['fake_weight'] = fake_weights.reshape(len(fake_weights))
-        if args.syst:
-            for syst in systs:
-                anti_events[syst] = syst_map[syst]
-        f[tree_name].extend(anti_events.to_dict('list'))
+    jobs = [pool.apply_async(create_fakes, (args.input, tree_name, channel_prefix, treedict,
+                                            output_dir, fake_file, fractions, sample, args.syst)) for sample in samples]
+    a = [j.get() for j in jobs]
 
+    pool.close()
+    pool.join()
     fout.Close()
+
+    call('ahadd.py {0}/jetFakes.root {0}/jetFakes_*.root'.format(output_dir), shell=True)
+
+    if '/hdfs' in args.input:
+        call('mv -v ./jetFakes.root {}'.format(args.input), shell=True)
 
 
 if __name__ == "__main__":

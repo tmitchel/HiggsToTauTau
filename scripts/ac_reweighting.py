@@ -2,9 +2,9 @@ import json
 import pandas
 import pprint
 import uproot
+import multiprocessing
 from glob import glob
 from subprocess import call
-
 
 temp_wh_zh_map = {
     'wh125_JHU_a1': 'JHU__reweighted_WH_htt_0PM125',
@@ -27,22 +27,33 @@ temp_wh_zh_map = {
     'zh125_JHU_l1zgint': 'JHU__reweighted_ZH_htt_0L1Zgf05ph0125',
 }
 
+powheg_map = {
+    "ggh125_minlo": "ggH_MINLO125",
+    "ggh125_powheg": "ggH125",
+    "vbf125_powheg": "VBF125",
+    "wh125_powheg": "WH125",
+    "zh125_powheg": "ZH125",
+}
+
 
 def to_reweight(ifile):
     """List of signal samples. Only processes these files."""
-    for name in ['ggh125_madgraph.root', 'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root']:
+    for name in [
+        'ggh125_madgraph.root',
+        'vbf125_JHU.root', 'wh125_JHU.root', 'zh125_JHU.root'
+    ]:
         if name in ifile:
             return True
     return False
 
 
-def recognize_signal(ifile, is2018):
+def recognize_signal(ifile, is2017):
     """Pick the correct keys for this sample."""
     process = ifile.split('/')[-1].split('125')[0]
     key = ''
-    if process == 'ggh' and is2018:
+    if process == 'ggh':
         key = 'new_mg_ac_reweighting_map'
-    elif process == 'ggh':
+    elif process == 'ggh' and is2017:
         key = 'mg_ac_reweighting_map'
     else:
         key = 'jhu_ac_reweighting_map'
@@ -67,6 +78,45 @@ def parse_tree_name(keys):
         raise Exception('Can\'t find et_tree or mt_tree in keys: {}'.format(keys))
 
 
+def handle_powheg(ifile):
+    """Copy the file and fix the name."""
+    filename = ifile.split('/')[-1].replace('.root', '')
+    new_name = powheg_map[filename]
+    new_file_name = ifile.replace(filename, new_name)
+    call('mv -v {} {}'.format(ifile, new_file_name), shell=True)
+
+
+def process_dir(ifile, idir, temp_name, input_path, is2017, boilerplate):
+    open_file = uproot.open(ifile)
+    tree_name = parse_tree_name(open_file.keys())
+    oldtree = open_file[tree_name].arrays(['*'])
+    treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
+
+    # build DataFrame
+    events = pandas.DataFrame(oldtree)
+    signal_events = events[(events['is_signal'] > 0)]
+
+    key, process = recognize_signal(ifile, is2017)
+    weight_names = boilerplate[key][process]
+    for weight, name in weight_names:
+        print idir, ifile, name
+        weighted_signal_events = signal_events.copy(deep=True)
+        weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
+
+        output_name = '{}/{}.root'.format(temp_name, name) if '/hdfs' in input_path else '{}/merged/{}.root'.format(idir, name)
+        with uproot.recreate(output_name) as f:
+            f[tree_name] = uproot.newtree(treedict)
+            f[tree_name].extend(weighted_signal_events.to_dict('list'))
+        
+        if '/hdfs' in input_path:
+            print 'Moving {}/{}.root to {}/merged'.format(temp_name, name, idir)
+            call('mv {}/{}.root {}/merged'.format(temp_name, name, idir), shell=True)
+
+    print 'Moving {} to {}'.format(ifile, ifile.replace('/merged', ''))
+    call('mv {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True)
+    return None
+
+
 def main(args):
     input_directories = [idir for idir in glob('{}/*'.format(args.input)) if not 'logs' in idir]
     input_files = {
@@ -80,37 +130,64 @@ def main(args):
     with open('configs/boilerplate.json', 'r') as config_file:
         boilerplate = json.load(config_file)
 
+    temp_name = ''
+    if '/hdfs' in args.input:
+        temp_name = 'tmp/{}'.format(args.input.split('/')[-1])
+        call('mkdir -p {}'.format(temp_name), shell=True)
+
     for idir, files in input_files.iteritems():
-        for ifile in files:
-            # until weights are corrected, don't reweight WH or ZH
-            # if 'wh125_JHU' in ifile or 'zh125_JHU' in ifile:
-            #     handle_wh_zh(ifile)
-            #     continue
+        n_processes = min(12, multiprocessing.cpu_count() / 2)
+        pool = multiprocessing.Pool(processes=n_processes)
+        jobs = [
+            pool.apply_async(process_dir, (ifile, idir, temp_name, args.input, args.is2017, boilerplate))
+            for ifile in files
+        ]
 
-            open_file = uproot.open(ifile)
-            tree_name = parse_tree_name(open_file.keys())
-            oldtree = open_file[tree_name].arrays(['*'])
-            treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
+        [j.get() for j in jobs]
+        pool.close()
+        pool.join()
+        print 'All files written for {}'.format(idir)
+        # for ifile in files:
+        #     # if 'powheg' in ifile or 'minlo' in ifile:
+        #     #     handle_powheg(ifile)
+        #     #     continue
+        #     # until weights are corrected, don't reweight WH or ZH
+        #     # if 'wh125_JHU' in ifile or 'zh125_JHU' in ifile:
+        #     #     handle_wh_zh(ifile)
+        #     #     continue
 
-            # build DataFrame
-            events = pandas.DataFrame(oldtree)
-            signal_events = events[(events['is_signal'] > 0)]
+        #     open_file = uproot.open(ifile)
+        #     tree_name = parse_tree_name(open_file.keys())
+        #     oldtree = open_file[tree_name].arrays(['*'])
+        #     treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
 
-            key, process = recognize_signal(ifile, args.is2018)
-            weight_names = boilerplate[key][process]
-            for weight, name in weight_names:
-                print idir, ifile, name
-                weighted_signal_events = signal_events.copy(deep=True)
-                weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
+        #     # build DataFrame
+        #     events = pandas.DataFrame(oldtree)
+        #     signal_events = events[(events['is_signal'] > 0)]
 
-                with uproot.recreate('{}/merged/{}.root'.format(idir, name)) as f:
-                    f[tree_name] = uproot.newtree(treedict)
-                    f[tree_name].extend(weighted_signal_events.to_dict('list'))
+        #     key, process = recognize_signal(ifile, args.is2017)
+        #     weight_names = boilerplate[key][process]
+        #     for weight, name in weight_names:
+        #         print idir, ifile, name
+        #         weighted_signal_events = signal_events.copy(deep=True)
+        #         weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
+
+        #         output_name = '{}/{}.root'.format(temp_name, name) if '/hdfs' in args.input else '{}/merged/{}.root'.format(idir, name)
+        #         with uproot.recreate(output_name) as f:
+        #             f[tree_name] = uproot.newtree(treedict)
+        #             f[tree_name].extend(weighted_signal_events.to_dict('list'))
+
+        #         if '/hdfs' in args.input:
+        #             print 'Moving {}/{}.root to {}/merged'.format(temp_name, name, idir)
+        #             call('mv {}/{}.root {}/merged'.format(temp_name, name, idir), shell=True)
+
+        #     print 'Moving {} to {}'.format(ifile, ifile.replace('/merged', ''))
+        #     call('mv {} {}'.format(ifile, ifile.replace('/merged', '')), shell=True)
 
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--input', '-i', required=True, help='path to input files')
-    parser.add_argument('--is2018', action='store_true', help='is this 2018?')
+    parser.add_argument('--is2017', action='store_true', help='is this 2017?')
     main(parser.parse_args())

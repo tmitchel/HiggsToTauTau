@@ -18,9 +18,9 @@
 #include "TTree.h"
 
 // user includes
-#include "../include/ComputeWG1Unc.h"
 #include "../include/ACWeighter.h"
 #include "../include/CLParser.h"
+#include "../include/ComputeWG1Unc.h"
 #include "../include/LumiReweightingStandAlone.h"
 #include "../include/event_info.h"
 #include "../include/jet_factory.h"
@@ -138,22 +138,23 @@ int main(int argc, char *argv[]) {
     ///////////////////////////////////////////////
 
     auto lumi_weights =
-        new reweight::LumiReWeighting("data/pu_distributions_mc_2018.root", "data/pu_distributions_data_2018.root", "pileup", "pileup");
+        new reweight::LumiReWeighting("/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2018.root",
+                                      "/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2018.root", "pileup", "pileup");
 
     // legacy sf's
-    TFile htt_sf_file("data/htt_scalefactors_legacy_2018.root");
-    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace*>(htt_sf_file.Get("w"));
+    TFile htt_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2018.root");
+    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
     // MadGraph Higgs pT file
     RooWorkspace *mg_sf;
     if (signal_type == "madgraph") {
-        TFile mg_sf_file("data/htt_scalefactors_2017_MGggh.root");
-        mg_sf = reinterpret_cast<RooWorkspace*>(mg_sf_file.Get("w"));
+        TFile mg_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_2017_MGggh.root");
+        mg_sf = reinterpret_cast<RooWorkspace *>(mg_sf_file.Get("w"));
         mg_sf_file.Close();
     }
 
-    TFile *f_NNLOPS = new TFile("data/NNLOPS_reweight.root");
+    TFile *f_NNLOPS = new TFile("/hdfs/store/user/tmitchel/HTT_ScaleFactors/NNLOPS_reweight.root");
     TGraph *g_NNLOPS_0jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_0jet"));
     TGraph *g_NNLOPS_1jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_1jet"));
     TGraph *g_NNLOPS_2jet = reinterpret_cast<TGraph *>(f_NNLOPS->Get("gr_NNLOPSratio_pt_powheg_2jet"));
@@ -189,7 +190,7 @@ int main(int argc, char *argv[]) {
             progress++;
         }
 
-       // find the event weight (not lumi*xs if looking at W or Drell-Yan)
+        // find the event weight (not lumi*xs if looking at W or Drell-Yan)
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
@@ -232,14 +233,12 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        // Separate Drell-Yan
-        if (name == "ZL" && tau.getGenMatch() > 4) {
+        // Separate processes
+        if ((name == "ZL" || name == "TTL" || name == "VVL" || name == "STL") && tau.getGenMatch() > 4) {
             continue;
-        } else if ((name == "ZTT" || name == "TTT" || name == "VVT") && tau.getGenMatch() != 5) {
+        } else if ((name == "ZTT" || name == "TTT" || name == "VVT" || name == "STT") && tau.getGenMatch() != 5) {
             continue;
-        } else if ((name == "TTJ" || name == "VVJ") && tau.getGenMatch() != 6) {
-            continue;
-        } else if (name == "ZJ" && tau.getGenMatch() != 6) {
+        } else if ((name == "ZJ" || name == "TTJ" || name == "VVJ" || name == "STJ") && tau.getGenMatch() != 6) {
             continue;
         } else {
             histos->at("cutflow")->Fill(3., 1.);
@@ -325,7 +324,7 @@ int main(int argc, char *argv[]) {
 
             // muon fake rate SF
             if (tau.getDecayMode() == 2 || tau.getDecayMode() == 4) {
-              evtwt *= htt_sf->function("t_id_vs_mu_eta_tight")->getVal();
+                evtwt *= htt_sf->function("t_id_vs_mu_eta_tight")->getVal();
             }
 
             // trigger scale factors
@@ -348,13 +347,13 @@ int main(int argc, char *argv[]) {
                 if (syst == "dyShape_Up") {
                     nom_zpt_weight = nom_zpt_weight + ((nom_zpt_weight - 1) * 0.1);
                 } else if (syst == "dyShape_Down") {
-                    nom_zpt_weight = nom_zpt_weight -  ((nom_zpt_weight - 1) * 0.1);
+                    nom_zpt_weight = nom_zpt_weight - ((nom_zpt_weight - 1) * 0.1);
                 }
                 evtwt *= nom_zpt_weight;
             }
 
             // top-pT Reweighting
-            if (name == "TTT" || name == "TT" || name == "TTJ") {
+            if (name == "TTT" || name == "TTJ" || name == "TTL" || name == "STT" || name == "STJ" || name == "STL") {
                 float pt_top1 = std::min(static_cast<float>(400.), jets.getTopPt1());
                 float pt_top2 = std::min(static_cast<float>(400.), jets.getTopPt2());
                 if (syst == "ttbarShape_Up") {
@@ -374,7 +373,7 @@ int main(int argc, char *argv[]) {
                 if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
                 NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
                 if (syst.find("Rivet") != std::string::npos) {
-                  evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
+                    evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
                 }
             }
 
@@ -438,7 +437,7 @@ int main(int argc, char *argv[]) {
                 // tau-leg
                 std::string tau_leg_name("t_trg_mediumDeepTau_mutau_embed_ratio");
                 if (syst.find("trigger") != std::string::npos) {
-                  tau_leg_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                    tau_leg_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
                 evtwt *= htt_sf->function(tau_leg_name.c_str())->getVal();
             } else {  // muon trigger
@@ -447,7 +446,7 @@ int main(int argc, char *argv[]) {
 
             // muon fake rate SF
             if (tau.getDecayMode() == 2 || tau.getDecayMode() == 4) {
-              evtwt *= htt_sf->function("t_id_vs_mu_eta_tight")->getVal();
+                evtwt *= htt_sf->function("t_id_vs_mu_eta_tight")->getVal();
             }
 
             // double muon trigger eff in selection
