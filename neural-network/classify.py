@@ -1,3 +1,6 @@
+from collections import defaultdict
+from sklearn.preprocessing import StandardScaler
+from keras.models import load_model
 import sys
 import ROOT
 import numpy
@@ -8,9 +11,6 @@ from array import array
 from pprint import pprint
 from os import environ, path, mkdir, listdir
 environ['KERAS_BACKEND'] = 'tensorflow'
-from keras.models import load_model
-from sklearn.preprocessing import StandardScaler
-from collections import defaultdict
 
 
 def build_filelist(input_dir):
@@ -57,6 +57,9 @@ def main(args):
     if not path.isdir('Output/trees/{}'.format(args.output_dir)):
         mkdir('Output/trees/{}'.format(args.output_dir))
 
+    n_processes = min(12, multiprocessing.cpu_count() / 2)
+    pool = multiprocessing.Pool(processes=n_processes)
+
     filelist = build_filelist(args.input_dir)
     print 'Files to process...'
     pprint(dict(filelist))
@@ -65,39 +68,43 @@ def main(args):
         if not path.exists('Output/trees/{}/{}'.format(args.output_dir, syst)):
             mkdir('Output/trees/{}/{}'.format(args.output_dir, syst))
 
-        for ifile in ifiles:
-            fname = ifile.replace('.root', '').split('/')[-1]
-            print 'Processing file: {} from {}'.format(fname, ifile.split('merged')[0].split('/')[-2])
+        r = pool.map_async(classify, (ifile, tree_prefix, scaler_info, model, '{}/{}'.format(args.output_dir, syst)))
+        r.wait()
 
-            # read input and get things ready for output TTree
-            open_file = uproot.open(ifile)
-            oldtree = open_file[tree_prefix].arrays(['*'])
-            treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
-            treedict['NN_disc'] = numpy.float64
 
-            # drop all variables not going into the network
-            to_classify = open_file[tree_prefix].arrays(scaler_info.index.values, outputtype=pd.DataFrame)
+def classify(ifile, tree_prefix, scaler_info, model, output_dir):
+    fname = ifile.replace('.root', '').split('/')[-1]
+    print 'Processing file: {} from {}'.format(fname, ifile.split('merged')[0].split('/')[-2])
 
-            # clean inputs
-            to_classify.fillna(-100, inplace=True)
-            to_classify.replace([numpy.inf, -numpy.inf], -100, inplace=True)
+    # read input and get things ready for output TTree
+    open_file = uproot.open(ifile)
+    oldtree = open_file[tree_prefix].arrays(['*'])
+    treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
+    treedict['NN_disc'] = numpy.float64
 
-            # scale correctly
-            scaled = pd.DataFrame(
-                scaler.transform(to_classify.values),
-                columns=to_classify.columns.values, dtype='float64')
+    # drop all variables not going into the network
+    to_classify = open_file[tree_prefix].arrays(scaler_info.index.values, outputtype=pd.DataFrame)
 
-            # There's room here to try and optimize by only classifying VBF events and storing a
-            # default value for others. Just need to figure out how to keep everything in order
-            # so that it can be slotted back into the correct place in the TTree.
+    # clean inputs
+    to_classify.fillna(-100, inplace=True)
+    to_classify.replace([numpy.inf, -numpy.inf], -100, inplace=True)
 
-            # do the classification
-            guesses = model.predict(scaled.values, verbose=True)
+    # scale correctly
+    scaled = pd.DataFrame(
+        scaler.transform(to_classify.values),
+        columns=to_classify.columns.values, dtype='float64')
 
-            with uproot.recreate('Output/trees/{}/{}/{}.root'.format(args.output_dir, syst, fname)) as f:
-                f[tree_prefix] = uproot.newtree(treedict)
-                oldtree['NN_disc'] = guesses.reshape(len(guesses))
-                f[tree_prefix].extend(oldtree)
+    # There's room here to try and optimize by only classifying VBF events and storing a
+    # default value for others. Just need to figure out how to keep everything in order
+    # so that it can be slotted back into the correct place in the TTree.
+
+    # do the classification
+    guesses = model.predict(scaled.values, verbose=True)
+
+    with uproot.recreate('Output/trees/{}/{}.root'.format(output_dir, fname)) as f:
+        f[tree_prefix] = uproot.newtree(treedict)
+        oldtree['NN_disc'] = guesses.reshape(len(guesses))
+        f[tree_prefix].extend(oldtree)
 
 
 if __name__ == "__main__":
