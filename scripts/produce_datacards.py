@@ -26,10 +26,21 @@ def build_filelist(input_dir):
     return filelist
 
 
+def powheg_naming(name):
+    if 'ggh125_powheg' in name:
+        name = name.replace('ggh125_powheg', 'ggH125')
+    elif 'vbf125_powheg' in name:
+        name = name.replace('vbf125_powheg', 'VBF125')
+    elif 'wh125_powheg' in name:
+        name = name.replace('wh125_powheg', 'WH125')
+    elif 'zh125_powheg' in name:
+        name = name.replace('zh125_powheg', 'ZH125')
+    return name
+
 def build_histogram(name, x_bins, y_bins, powheg_map):
     """Build TH2F to fill later."""
     if 'powheg' in name:
-        name = powheg_map[name]
+        name = powheg_naming(name)
     return ROOT.TH2F(name, name, len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins))
 
 
