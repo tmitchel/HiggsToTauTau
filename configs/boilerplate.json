@@ -110,10 +110,10 @@
         "tau_id_pt_ptgt40_Up": "_CMS_tauideff_ptgt40_YEARUp",
         "tau_id_pt_ptgt40_Down": "_CMS_tauideff_ptgt40_YEARDown",
         
-        "mc_single_trigger_up": "_CMS_singleLEPtrg_YEARUp",
-        "mc_single_trigger_down": "_CMS_singleLEPtrg_YEARDown",
-        "mc_cross_trigger_up": "_CMS_LEPtautrg_YEARUp",
-        "mc_cross_trigger_down": "_CMS_LEPtautrg_YEARDown",
+        "single_trigger_up": "_CMS_singleLEPtrg_YEARUp",
+        "single_trigger_down": "_CMS_singleLEPtrg_YEARDown",
+        "cross_trigger_up": "_CMS_LEPtautrg_YEARUp",
+        "cross_trigger_down": "_CMS_LEPtautrg_YEARDown",
 
         "efaket_es_barrel_DM0_Up": "_CMS_scale_efaket_1prong_barrel_YEARUp",
         "efaket_es_barrel_DM0_Down": "_CMS_scale_efaket_1prong_barrel_YEARDown",
@@ -231,6 +231,33 @@
         "MES_1p2to2p1_Up": "_CMS_scale_m_eta1p2to2p1Up",
         "MES_1p2to2p1_Down": "_CMS_scale_m_eta1p2to2p1Down",
         "MES_gt2p1_Up": "_CMS_scale_m_eta2p1to2p4p",
-        "MES_gt2p1_Down": "_CMS_scale_m_eta2p1to2p4Down"
+        "MES_gt2p1_Down": "_CMS_scale_m_eta2p1to2p4Down",
+
+        "SYST_embed_contam_up": "_CMS_htt_emb_ttbar_YEARUp",
+        "SYST_embed_contam_down": "_CMS_htt_emb_ttbar_YEARDown",
+
+        "ff_qcd_0jet_unc1": "_CMS_rawFF_CHAN_qcd_0jet_unc1_YEARUp",
+        "ff_qcd_0jet_unc2": "_CMS_rawFF_CHAN_qcd_0jet_unc2_YEARUp",
+        "ff_qcd_1jet_unc1": "_CMS_rawFF_CHAN_qcd_1jet_unc1_YEARUp",
+        "ff_qcd_1jet_unc2": "_CMS_rawFF_CHAN_qcd_1jet_unc2_YEARUp",
+        "ff_qcd_2jet_unc1": "_CMS_rawFF_CHAN_qcd_2jet_unc1_YEARUp",
+        "ff_qcd_2jet_unc2": "_CMS_rawFF_CHAN_qcd_2jet_unc2_YEARUp",
+        "ff_w_0jet_unc1": "_CMS_rawFF_CHAN_w_0jet_unc1_YEARUp",
+        "ff_w_0jet_unc2": "_CMS_rawFF_CHAN_w_0jet_unc2_YEARUp",
+        "ff_w_1jet_unc1": "_CMS_rawFF_CHAN_w_1jet_unc1_YEARUp",
+        "ff_w_1jet_unc2": "_CMS_rawFF_CHAN_w_1jet_unc2_YEARUp",
+        "ff_w_2jet_unc1": "_CMS_rawFF_CHAN_w_2jet_unc1_YEARUp",
+        "ff_w_2jet_unc2": "_CMS_rawFF_CHAN_w_2jet_unc2_YEARUp",
+        "ff_tt_0jet_unc1": "_CMS_rawFF_CHAN_tt_0jet_unc1_YEARUp",
+        "ff_tt_0jet_unc2": "_CMS_rawFF_CHAN_tt_0jet_unc2_YEARUp",
+        "mtclosure_w_unc1": "_CMS_FF_closure_mt_CHAN_w_unc1_YEAR",
+        "mtclosure_w_unc2": "_CMS_FF_closure_mt_CHAN_w_unc2_YEAR",
+        "lptclosure_xtrg_qcd": "_CMS_FF_closure_lpt_xtrg_CHAN_qcd_YEAR",
+        "lptclosure_xtrg_w": "_CMS_FF_closure_lpt_xtrg_CHAN_w_YEAR",
+        "lptclosure_xtrg_tt": "_CMS_FF_closure_lpt_xtrg_CHAN_tt_YEAR",
+        "lptclosure_qcd": "_CMS_FF_closure_lpt_CHAN_qcd",
+        "lptclosure_w": "_CMS_FF_closure_lpt_CHAN_w",
+        "lptclosure_tt": "_CMS_FF_closure_lpt_CHAN_tt",
+        "osssclosure_qcd": "_CMS_FF_closure_OSSS_mvis_CHAN_qcd_YEAR"
     }
 }
