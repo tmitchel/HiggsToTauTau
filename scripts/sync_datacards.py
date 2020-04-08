@@ -158,13 +158,7 @@ def main(args):
                                                                                         ztt_name, syst_name, args.year, date, args.suffix), 'RECREATE')
 
     # create structure within output file
-    vbf_categories = []
-    if 'D0_' in vbf_cat_edge_var:
-        vbf_categories += boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']
-    else:
-        vbf_categories += boilerplate['vbf_sub_cats']
-
-    for cat in boilerplate['categories'] + vbf_categories:
+    for cat in boilerplate['categories']:
         output_file.cd()
         output_file.mkdir('{}_{}'.format(channel_prefix, cat))
     output_file.cd()
