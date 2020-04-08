@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include "./swiss_army_class.h"
+#include "./qq2Hqq_uncert_scheme.h"
 
 /////////////////////////////////////////
 // Purpose: To hold general event data //
@@ -132,6 +133,7 @@ class event_info {
     Float_t getHiggsPtRivet() { return Rivet_higgsPt; }
     Float_t getJetPtRivet() { return Rivet_stage1_cat_pTjet30GeV; }
     Float_t getRivetUnc(std::vector<double>, std::string);
+    Float_t getVBFTheoryUnc(std::string);
 
     // Prefiring Weight
     Float_t getPrefiringWeight();
@@ -320,6 +322,44 @@ Float_t event_info::getRivetUnc(std::vector<double> uncs, std::string syst) {
             return -1 * uncs.at(index);
         }
     }
+}
+
+Float_t event_info::getVBFTheoryUnc(std::string syst) {
+    if (syst.find("VBF_Rivet") == std::string::npos) {
+        return 1.;
+    }
+
+    double shift(1.0);
+    if (syst.find("_Down") != std::string::npos) {
+        shift *= -1.;
+    }
+
+    int source;
+    if (syst.find("VBF_Rivet0") != std::string::npos) {
+        source = 0;
+    } else if (syst.find("VBF_Rivet1") != std::string::npos) {
+        source = 1;
+    } else if (syst.find("VBF_Rivet2") != std::string::npos) {
+        source = 2;
+    } else if (syst.find("VBF_Rivet3") != std::string::npos) {
+        source = 3;
+    } else if (syst.find("VBF_Rivet4") != std::string::npos) {
+        source = 4;
+    } else if (syst.find("VBF_Rivet5") != std::string::npos) {
+        source = 5;
+    } else if (syst.find("VBF_Rivet6") != std::string::npos) {
+        source = 6;
+    } else if (syst.find("VBF_Rivet7") != std::string::npos) {
+        source = 7;
+    } else if (syst.find("VBF_Rivet8") != std::string::npos) {
+        source = 8;
+    } else if (syst.find("VBF_Rivet9") != std::string::npos) {
+        source = 9;
+    } else {
+        return 1.;
+    }
+
+    return vbf_uncert_stage_1_1(source, static_cast<int>(Rivet_stage1_cat_pTjet30GeV), shift);
 }
 
 Bool_t event_info::getPassFlags(Bool_t isData) {

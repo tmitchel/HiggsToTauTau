@@ -154,13 +154,13 @@ def getSyst(name, signal_type, exe, doSyst):
         if '2016' in exe or '2017' in exe:
             systs += ['prefiring_up', 'prefiring_down']
         systs += [
-            'mc_single_trigger_up', 'mc_single_trigger_down',
-            'mc_cross_trigger_up', 'mc_cross_trigger_down',
+            'single_trigger_up', 'single_trigger_down',
+            'cross_trigger_up', 'cross_trigger_down',
         ]
     else:
         systs += [
-            'embed_single_trigger_up', 'embed_single_trigger_down',
-            'embed_cross_trigger_up', 'embed_cross_trigger_down',
+            'single_trigger_up', 'single_trigger_down',
+            'cross_trigger_up', 'cross_trigger_down',
         ]
 
     if name == 'TTT':
@@ -185,6 +185,21 @@ def getSyst(name, signal_type, exe, doSyst):
             'RecoilReso_1jet_Up', 'RecoilReso_1jet_Down', 'RecoilResp_1jet_Up', 'RecoilResp_1jet_Down',
             'RecoilReso_2jet_Up', 'RecoilReso_2jet_Down', 'RecoilResp_2jet_Up', 'RecoilResp_2jet_Down',
             ]
+
+    if name == 'ggH125' and signal_type == 'powheg':
+        systs += [
+            'ggH_Rivet0_Up', 'ggH_Rivet0_Down', 'ggH_Rivet1_Up', 'ggH_Rivet1_Down', 'ggH_Rivet2_Up', 'ggH_Rivet2_Down',
+            'ggH_Rivet3_Up', 'ggH_Rivet3_Down', 'ggH_Rivet4_Up', 'ggH_Rivet4_Down', 'ggH_Rivet5_Up', 'ggH_Rivet5_Down',
+            'ggH_Rivet6_Up', 'ggH_Rivet6_Down', 'ggH_Rivet7_Up', 'ggH_Rivet7_Down', 'ggH_Rivet8_Up', 'ggH_Rivet8_Down',
+        ]
+
+    if name == 'VBF125' and signal_type == 'powheg':
+        systs += [
+            'VBF_Rivet0_Up', 'VBF_Rivet0_Down', 'VBF_Rivet1_Up', 'VBF_Rivet1_Down', 'VBF_Rivet2_Up', 'VBF_Rivet2_Down',
+            'VBF_Rivet3_Up', 'VBF_Rivet3_Down', 'VBF_Rivet4_Up', 'VBF_Rivet4_Down', 'VBF_Rivet5_Up', 'VBF_Rivet5_Down',
+            'VBF_Rivet6_Up', 'VBF_Rivet6_Down', 'VBF_Rivet7_Up', 'VBF_Rivet7_Down', 'VBF_Rivet8_Up', 'VBF_Rivet8_Down',
+            'VBF_Rivet9_Up', 'VBF_Rivet9_Down',
+        ]
 
     return systs
 

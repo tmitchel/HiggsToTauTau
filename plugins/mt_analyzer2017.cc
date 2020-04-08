@@ -417,16 +417,21 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            // NNLOPS ggH reweighting
+            // ggH theory uncertainty
             if (sample == "ggh125" && signal_type == "powheg") {
                 if (event.getNjetsRivet() == 0) evtwt *= g_NNLOPS_0jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(125.0)));
                 if (event.getNjetsRivet() == 1) evtwt *= g_NNLOPS_1jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(625.0)));
                 if (event.getNjetsRivet() == 2) evtwt *= g_NNLOPS_2jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(800.0)));
                 if (event.getNjetsRivet() >= 3) evtwt *= g_NNLOPS_3jet->Eval(std::min(event.getHiggsPtRivet(), static_cast<float>(925.0)));
                 NumV WG1unc = qcd_ggF_uncert_2017(event.getNjetsRivet(), event.getHiggsPtRivet(), event.getJetPtRivet());
-                if (syst.find("Rivet") != std::string::npos) {
+                if (syst.find("ggH_Rivet") != std::string::npos) {
                     evtwt *= (1 + event.getRivetUnc(WG1unc, syst));
                 }
+            }
+
+            // VBF theory uncertainty
+            if (sample == "vbf125" && signal_type == "powheg" && syst.find("VBF_Rivet") != std::string::npos) {
+                evtwt *= event.getVBFTheoryUnc(syst);
             }
 
             // recoil correction systematics
