@@ -1,13 +1,12 @@
 {
     "fake_factor_systematics": [
-        "ff_qcd_syst_up", "ff_qcd_syst_down", "ff_qcd_dm0_njet0_stat_up", "ff_qcd_dm0_njet0_stat_down",
-        "ff_qcd_dm0_njet1_stat_up", "ff_qcd_dm0_njet1_stat_down", "ff_qcd_dm1_njet0_stat_up", "ff_qcd_dm1_njet0_stat_down",
-        "ff_qcd_dm1_njet1_stat_up", "ff_qcd_dm1_njet1_stat_down", "ff_w_syst_up", "ff_w_syst_down",
-        "ff_w_dm0_njet0_stat_up", "ff_w_dm0_njet0_stat_down", "ff_w_dm0_njet1_stat_up", "ff_w_dm0_njet1_stat_down",
-        "ff_w_dm1_njet0_stat_up", "ff_w_dm1_njet0_stat_down", "ff_w_dm1_njet1_stat_up", "ff_w_dm1_njet1_stat_down",
-        "ff_tt_syst_up", "ff_tt_syst_down", "ff_tt_dm0_njet0_stat_up", "ff_tt_dm0_njet0_stat_down",
-        "ff_tt_dm0_njet1_stat_up",  "ff_tt_dm0_njet1_stat_down", "ff_tt_dm1_njet0_stat_up",  "ff_tt_dm1_njet0_stat_down",
-        "ff_tt_dm1_njet1_stat_up", "ff_tt_dm1_njet1_stat_down"],
+      "ff_qcd_0jet_unc1", "ff_qcd_0jet_unc2", "ff_qcd_1jet_unc1", "ff_qcd_1jet_unc2", "ff_qcd_2jet_unc1", "ff_qcd_2jet_unc2",
+      "ff_w_0jet_unc1", "ff_w_0jet_unc2", "ff_w_1jet_unc1", "ff_w_1jet_unc2", "ff_w_2jet_unc1", "ff_w_2jet_unc2",
+      "ff_tt_0jet_unc1", "ff_tt_0jet_unc2",
+      "mtclosure_w_unc1", "mtclosure_w_unc2",
+      "lptclosure_xtrg_qcd", "lptclosure_xtrg_w", "lptclosure_xtrg_tt",
+      "lptclosure_qcd", "lptclosure_w", "lptclosure_tt",
+      "osssclosure_qcd"],
     "categories": [
         "inclusive",         "0jet",
         "boosted",           "vbf"

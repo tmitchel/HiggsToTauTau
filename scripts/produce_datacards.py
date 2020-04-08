@@ -37,6 +37,7 @@ def powheg_naming(name):
         name = name.replace('zh125_powheg', 'ZH125')
     return name
 
+
 def build_histogram(name, x_bins, y_bins, powheg_map):
     """Build TH2F to fill later."""
     if 'powheg' in name:
@@ -226,6 +227,9 @@ def main(args):
                 variables.add('fake_weight')
                 if args.syst:
                     variables.add('ff_*')
+                    variables.add('mtclosure_*')
+                    variables.add('lptclosure_*')
+                    variables.add('osssclosure_*')
 
             name = name + postfix  # add systematic postfix to file name
 
