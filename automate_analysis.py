@@ -167,7 +167,7 @@ def getSyst(name, signal_type, exe, doSyst):
         systs += ['ttbarShape_Up', 'ttbarShape_Down']
 
     if name == 'ZL' or name == 'ZTT':
-        systs += ['dyShape_Up', 'dyShape_Down', 'zmumuShape_Up', 'zmumuShape_Down']
+        systs += ['dyShape_Up', 'dyShape_Down']
 
     # lepton energy scales
     if '_et' in exe:
@@ -180,7 +180,11 @@ def getSyst(name, signal_type, exe, doSyst):
         ]
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
-        systs += ['RecoilReso_Up', 'RecoilReso_Down', 'RecoilResp_Up', 'RecoilResp_Down']
+        systs += [
+            'RecoilReso_0jet_Up', 'RecoilReso_0jet_Down', 'RecoilResp_0jet_Up', 'RecoilResp_0jet_Down',
+            'RecoilReso_1jet_Up', 'RecoilReso_1jet_Down', 'RecoilResp_1jet_Up', 'RecoilResp_1jet_Down',
+            'RecoilReso_2jet_Up', 'RecoilReso_2jet_Down', 'RecoilResp_2jet_Up', 'RecoilResp_2jet_Down',
+            ]
 
     return systs
 

@@ -194,7 +194,6 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
         shifting = true;
-        always_shift = true;  // shift is always valid
     }
 
     input->SetBranchAddress("m_sv", &m_sv_noshift);

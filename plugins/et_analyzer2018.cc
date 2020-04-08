@@ -416,6 +416,19 @@ int main(int argc, char *argv[]) {
                 }
             }
 
+            // recoil correction systematics
+            if (syst.find("RecoilRes") != std::string::npos) {
+                if (jets.getNjets() == 0 && syst.find("0jet") != std::string::npos) {
+                    event.do_shift(true);
+                } else if (jets.getNjets() == 1 && syst.find("1jet") != std::string::npos) {
+                    event.do_shift(true);
+                } else if (jets.getNjets() > 1 && syst.find("2jet") != std::string::npos) {
+                    event.do_shift(true);
+                } else {
+                    event.do_shift(false);
+                }
+            }
+
             // MadGraph Higgs pT correction
             if (signal_type == "madgraph") {
                 mg_sf->var("HpT")->setVal(Higgs.Pt());
