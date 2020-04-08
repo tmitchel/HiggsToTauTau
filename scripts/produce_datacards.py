@@ -190,6 +190,7 @@ def main(args):
             continue
 
         postfix = postfix.replace('YEAR', args.year)  # add correct year
+        postfix = postfix.replace('LEP', 'ele') if channel_prefix == 'et' else postfix.replace('LEP', 'mu')
 
         for ifile in files:
             # handle ZTT vs embedded
