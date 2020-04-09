@@ -245,8 +245,8 @@
         "VBF_Rivet9_Up": "_THU_qqH_JET01Up",
         "VBF_Rivet9_Down": "_THU_qqH_JET01Down",
 
-        "EEScale_Up": "_CMS_scale_e_Scale_YEARUp",
-        "EEScale_Down": "_CMS_scale_e_Scale_YEARDown",
+        "EEScale_Up": "_CMS_scale_e_YEARUp",
+        "EEScale_Down": "_CMS_scale_e_YEARDown",
         "MES_lt1p2_Up": "_CMS_scale_m_etalt1p2Up",
         "MES_lt1p2_Down": "_CMS_scale_m_etalt1p2Down",
         "MES_1p2to2p1_Up": "_CMS_scale_m_eta1p2to2p1Up",

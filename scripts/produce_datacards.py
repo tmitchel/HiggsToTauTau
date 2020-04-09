@@ -192,6 +192,7 @@ def main(args):
 
         postfix = postfix.replace('YEAR', args.year)  # add correct year
         postfix = postfix.replace('LEP', 'ele') if channel_prefix == 'et' else postfix.replace('LEP', 'mu')
+        stable_postfix = postfix
 
         for ifile in files:
             # handle ZTT vs embedded
@@ -199,6 +200,17 @@ def main(args):
                 continue
             elif not args.embed and 'embed' in ifile:
                 continue
+
+            # handle embed vs mc systematics
+            postfix = stable_postfix # reset to original
+            if 'embed' in ifile:
+                if 'CMS_tauideff' in postfix:
+                    postfix = postfix.replace('tauideff', 'eff_t_embedded')
+                elif 'CMS_scale_e_' in postfix:
+                    postfix = postfix.replace('scale_e_', 'scale_emb_e')
+                # this will be once I update my embedded energy scale
+                # elif 'CMS_scale_t_' in postfix:
+                #     postfix = postfix.replace('scale_t_', 'scale_emb_t_')
 
             name = ifile.replace('.root', '').split('/')[-1]
             if 'wh125_JHU_CMS' in name or 'zh125_JHU_CMS' in name or name == 'wh125_JHU' or name == 'zh125_JHU':
