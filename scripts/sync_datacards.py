@@ -19,10 +19,10 @@ def build_filelist(input_dir):
     for fname in files:
         if 'nominal' in fname:
             filelist['nominal'].append(fname)
-        else:
-            keyname = fname.split('/')[-2]
-            filelist.setdefault(keyname, [])
-            filelist[keyname].append(fname)
+        # else:
+        #     keyname = fname.split('/')[-2]
+        #     filelist.setdefault(keyname, [])
+        #     filelist[keyname].append(fname)
     return filelist
 
 
