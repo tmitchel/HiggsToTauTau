@@ -10,10 +10,10 @@ jobs:
             - run:
                 name: Building
                 command: |
-                    './test_build plugins/et_analyzer2018.cc test'
-                    './test_build plugins/et_analyzer2017.cc test'
-                    './test_build plugins/et_analyzer2016.cc test'
-                    './test_build plugins/mt_analyzer2018.cc test'
-                    './test_build plugins/mt_analyzer2017.cc test'
-                    './test_build plugins/mt_analyzer2016.cc test'
+                    ./test_build plugins/et_analyzer2018.cc test
+                    ./test_build plugins/et_analyzer2017.cc test
+                    ./test_build plugins/et_analyzer2016.cc test
+                    ./test_build plugins/mt_analyzer2018.cc test
+                    ./test_build plugins/mt_analyzer2017.cc test
+                    ./test_build plugins/mt_analyzer2016.cc test
                     
