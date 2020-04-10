@@ -21,7 +21,7 @@ def do_hadd(hadd_list, path):
     i = 0
     for idir, isamples in hadd_list.items():
         i += 1
-        print '\033[92m Begin directory {} of {} \033[0m'.format(i, ndir)
+        print '\n\033[92m Begin directory {} of {} \033[0m'.format(i, ndir)
         if not os.path.exists(path + '/' + idir + '/merged'):
             os.mkdir(path + '/' + idir + '/merged')
 

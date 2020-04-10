@@ -138,7 +138,7 @@ def main(args):
     ndir = len(input_files.keys())
     for idir, files in input_files.iteritems():
         i += 1
-        print '\033[92m Begin directory {} of {} \033[0m'.format(i, ndir)
+        print '\n\033[92m Begin directory {} of {} \033[0m'.format(i, ndir)
         n_processes = min(12, multiprocessing.cpu_count() / 2)
         pool = multiprocessing.Pool(processes=n_processes)
         jobs = [
