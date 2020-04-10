@@ -1,4 +1,4 @@
-from os import environ, path, mkdir, listdir
+from os import environ, path, mkdir, listdir, system
 environ['KERAS_BACKEND'] = 'tensorflow'
 from collections import defaultdict
 from sklearn.preprocessing import StandardScaler
@@ -98,10 +98,13 @@ def main(args):
     filelist = build_filelist(args.input_dir)
     print 'Files to process...'
     pprint(dict(filelist))
+    nsyst = len(filelist.keys())
+    i = 1
     for syst, ifiles in filelist.iteritems():
         # create output sub-directory (needed for systematics/nominal)
-        if not path.exists('Output/trees/{}/{}'.format(args.output_dir, syst)):
-            mkdir('Output/trees/{}/{}'.format(args.output_dir, syst))
+        out_path = 'Output/trees/{}/{}'.format(args.output_dir, syst)
+        if not path.exists(out_path):
+            mkdir(out_path)
 
         n_processes = min(12, multiprocessing.cpu_count() / 2)
         pool = multiprocessing.Pool(processes=n_processes)
@@ -111,7 +114,12 @@ def main(args):
         [j.get() for j in jobs]
         pool.close()
         pool.join()
-        print 'All files written for {}'.format(syst)
+        i += 1
+        print 'All files written for {} ({} of {})'.format(syst, i, nsyst)
+        if args.move != None:
+            system('mkdir -p {}'.format(args.move))
+            system('mv {} {}/'.format(out_path, args.move))
+            print 'Moved files from {} to {}'.format(out_path, args.move)
 
 
 if __name__ == "__main__":
@@ -123,5 +131,6 @@ if __name__ == "__main__":
     parser.add_argument('--dir', '-d', action='store', dest='input_dir',
                         default='input_files/etau_stable_Oct24', help='name of ROOT input directory')
     parser.add_argument('--out', '-o', action='store', dest='output_dir', default='output_files/example')
+    parser.add_argument('--move', action='store', default=None, help='Move files to this location while running')
 
     main(parser.parse_args())
