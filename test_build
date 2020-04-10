@@ -23,5 +23,5 @@ echo "${s// //}"
 set -e
 
 # this is the important part for compiling
-g++ -O3 $1 `root-config --cflags --glibs` -I include -o $2
+g++ -O3 $1 `root-config --cflags --glibs`  -lRooFit -lRooFitCore -I include -o $2
 
