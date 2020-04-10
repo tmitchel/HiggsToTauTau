@@ -1,0 +1,19 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+jobs:
+    build:
+        docker:
+            - image: "rootproject/root-ubuntu16"
+        steps:
+            - checkout
+            - run:
+                name: Building
+                command: |
+                    ./test_build plugins/et_analyzer2018.cc test
+                    ./test_build plugins/et_analyzer2017.cc test
+                    ./test_build plugins/et_analyzer2016.cc test
+                    ./test_build plugins/mt_analyzer2018.cc test
+                    ./test_build plugins/mt_analyzer2017.cc test
+                    ./test_build plugins/mt_analyzer2016.cc test
+                    
