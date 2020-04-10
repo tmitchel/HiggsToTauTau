@@ -99,7 +99,6 @@ def process_dir(ifile, idir, temp_name, input_path, is2017, boilerplate):
     key, process = recognize_signal(ifile, is2017)
     weight_names = boilerplate[key][process]
     for weight, name in weight_names:
-        print idir, ifile, name
         weighted_signal_events = signal_events.copy(deep=True)
         weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
 
