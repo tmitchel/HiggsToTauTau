@@ -230,7 +230,11 @@ def main(args):
         for syst in systs:
             treedict[syst[0]] = numpy.float64
 
-    output_dir = '.' if '/hdfs' in args.input else args.input
+    output_dir = args.input
+    if '/hdfs' in args.input:
+        output_dir = '/tmp/{}'.format(args.suffix)
+        call('mkdir {}'.format(output_dir), shell=True)
+
     samples = [
         'data_obs', 'embed',
         'STL', 'VVL', 'TTL', 'ZL', 'STT', 'VVT', 'TTT'
@@ -251,7 +255,7 @@ def main(args):
     call('ahadd.py {0}/jetFakes.root {0}/jetFakes_*.root'.format(output_dir), shell=True)
 
     if '/hdfs' in args.input:
-        call('mv -v ./jetFakes.root {}'.format(args.input), shell=True)
+        call('mv -v {}/jetFakes.root {}'.format(output_dir, args.input), shell=True)
 
 
 if __name__ == "__main__":
