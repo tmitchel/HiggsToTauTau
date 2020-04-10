@@ -18,6 +18,7 @@ def build_filelist(input_dir):
     """Build list of files to be processed."""
     files = [
         ifile for ifile in glob('{}/*/merged/*.root'.format(input_dir))
+        if not 'VBF_Rivet' in ifile
     ]
 
     data = {}
