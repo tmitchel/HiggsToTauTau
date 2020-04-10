@@ -99,7 +99,7 @@ def main(args):
     print 'Files to process...'
     pprint(dict(filelist))
     nsyst = len(filelist.keys())
-    i = 1
+    i = 0
     for syst, ifiles in filelist.iteritems():
         # create output sub-directory (needed for systematics/nominal)
         out_path = 'Output/trees/{}/{}'.format(args.output_dir, syst)
