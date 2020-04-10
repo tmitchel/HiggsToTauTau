@@ -17,7 +17,11 @@ def clean(hadd_list):
 
 def do_hadd(hadd_list, path):
     """Start hadding files."""
+    ndir = len(hadd_list.keys())
+    i = 0
     for idir, isamples in hadd_list.items():
+        i += 1
+        print '\033[92m Begin directory {} of {} \033[0m'.format(i, ndir)
         if not os.path.exists(path + '/' + idir + '/merged'):
             os.mkdir(path + '/' + idir + '/merged')
 

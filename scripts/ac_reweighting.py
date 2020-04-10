@@ -99,7 +99,6 @@ def process_dir(ifile, idir, temp_name, input_path, is2017, boilerplate):
     key, process = recognize_signal(ifile, is2017)
     weight_names = boilerplate[key][process]
     for weight, name in weight_names:
-        print idir, ifile, name
         weighted_signal_events = signal_events.copy(deep=True)
         weighted_signal_events['evtwt'] *= weighted_signal_events[weight]
 
@@ -135,7 +134,11 @@ def main(args):
         temp_name = 'tmp/{}'.format(args.input.split('/')[-1])
         call('mkdir -p {}'.format(temp_name), shell=True)
 
+    i = 0
+    ndir = len(input_files.keys())
     for idir, files in input_files.iteritems():
+        i += 1
+        print '\033[92m Begin directory {} of {} \033[0m'.format(i, ndir)
         n_processes = min(12, multiprocessing.cpu_count() / 2)
         pool = multiprocessing.Pool(processes=n_processes)
         jobs = [
