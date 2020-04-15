@@ -122,10 +122,10 @@ def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fa
     if doSysts:
         for syst in systs:
             print 'Processing: {} {}'.format(sample, syst)
-            anti_events[syst[0]] = anti_events[filling_variables].apply(lambda x: get_weight(
+            anti_events[syst[0] + "_" + syst[1]] = anti_events[filling_variables].apply(lambda x: get_weight(
                 x, ff_weighter, fractions, channel_prefix, syst=syst), axis=1).values
             if sample != 'data_obs':
-                anti_events[syst[0]] *= -1
+                anti_events[syst[0] + "_" + syst[1]] *= -1
 
     with uproot.recreate('{}/jetFakes_{}.root'.format(output_dir, sample), compression=None) as f:
         f[tree_name] = uproot.newtree(treedict)
@@ -228,11 +228,11 @@ def main(args):
     treedict['fake_weight'] = numpy.float64
     if args.syst:
         for syst in systs:
-            treedict[syst[0]] = numpy.float64
+            treedict[syst[0] + "_" + syst[1]] = numpy.float64
 
     output_dir = args.input
     if '/hdfs' in args.input:
-        output_dir = '/tmp/{}'.format(args.suffix)
+        output_dir = 'tmp/fakes_{}'.format(args.suffix)
         call('mkdir {}'.format(output_dir), shell=True)
 
     samples = [
