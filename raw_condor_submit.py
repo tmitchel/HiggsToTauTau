@@ -24,13 +24,13 @@ Executable = {2}/overlord.sh
 Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
 Requirements = (MY.RequiresSharedFS=!=true || TARGET.HasAFS_OSG) && (TARGET.OSG_major =!= undefined || TARGET.IS_GLIDEIN=?=true) && (TARGET.HasParrotCVMFS=?=true || (TARGET.CMS_CVMFS_Exists && TARGET.CMS_CVMFS_Revision >= 89991 )) && TARGET.HAS_CMS_HDFS
-request_memory       = 7000
+request_memory       = 9000
 request_disk         = 2048000
 request_cpus         = 1
 Transfer_Input_Files = {2},{3}
-Output = {1}/logs/sleep_$(Cluster)_$(Process).stdout
-Error = {1}/logs/sleep_$(Cluster)_$(Process).stderr
-Log = {1}/logs/sleep_$(Cluster)_$(Process).log
+Output = {1}/logs/out_$(Cluster)_$(Process).out
+Error = {1}/logs/run_$(Cluster)_$(Process).err
+Log = {1}/logs/running_$(Cluster).log
 x509userproxy = /tmp/x509up_u23269
 Arguments=$(process)
 Queue {0}
@@ -44,6 +44,7 @@ Queue {0}
     overloardScript = '''#!/bin/bash
 let "sample=${{1}}"
 array=($(ls executables/))
+echo ./executables/"${{array[${{sample}}]}}"
 bash ./executables/"${{array[${{sample}}]}}"
     '''.format(exe_dir)
     with open(overlord_name, 'w') as file:
