@@ -251,7 +251,7 @@
         "MES_lt1p2_Down": "_CMS_scale_m_etalt1p2Down",
         "MES_1p2to2p1_Up": "_CMS_scale_m_eta1p2to2p1Up",
         "MES_1p2to2p1_Down": "_CMS_scale_m_eta1p2to2p1Down",
-        "MES_gt2p1_Up": "_CMS_scale_m_eta2p1to2p4p",
+        "MES_gt2p1_Up": "_CMS_scale_m_eta2p1to2p4Up",
         "MES_gt2p1_Down": "_CMS_scale_m_eta2p1to2p4Down",
 
         "SYST_embed_contam_up": "_CMS_htt_emb_ttbar_YEARUp",
