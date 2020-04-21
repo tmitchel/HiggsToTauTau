@@ -475,7 +475,13 @@ int main(int argc, char *argv[]) {
             evtwt *= genweight;
 
             // tracking sf
-            evtwt *= helper->embed_tracking(tau.getDecayMode());
+            if (syst == "tracking_up") {
+                evtwt *= helper->embed_tracking(tau.getDecayMode(), 1);
+            } else if (syst == "tracking_down") {
+                evtwt *= helper->embed_tracking(tau.getDecayMode(), -1);
+            } else {
+                evtwt *= helper->embed_tracking(tau.getDecayMode());
+            }
 
             // set workspace variables
             htt_sf->var("m_pt")->setVal(muon.getPt());

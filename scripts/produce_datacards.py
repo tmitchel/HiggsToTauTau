@@ -192,6 +192,7 @@ def main(args):
 
         postfix = postfix.replace('YEAR', args.year)  # add correct year
         postfix = postfix.replace('LEP', 'ele') if channel_prefix == 'et' else postfix.replace('LEP', 'mu')
+        postfix = postfix.replace('CHAN', 'et') if channel_prefix == 'et' else postfix.replace('CHAN', 'mt')
         stable_postfix = postfix
 
         for ifile in files:
@@ -208,6 +209,10 @@ def main(args):
                     postfix = postfix.replace('tauideff', 'eff_t_embedded')
                 elif 'CMS_scale_e_' in postfix:
                     postfix = postfix.replace('scale_e_', 'scale_emb_e')
+                elif 'CMS_single' in postfix and 'trg' in postfix:
+                    postfix = postfix.replace('trg', 'trg_emb')
+                elif 'tautrg_' in postfix:
+                    postfix = postfix.replace('trg', 'trg_emb')
                 # this will be once I update my embedded energy scale
                 # elif 'CMS_scale_t_' in postfix:
                 #     postfix = postfix.replace('scale_t_', 'scale_emb_t_')
