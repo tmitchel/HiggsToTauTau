@@ -99,14 +99,6 @@ def parse_tree_name(keys):
         raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
 
 
-def build_file_writer(treedict, tree_name):
-    def file_writer(events, name):
-        with uproot.recreate(name) as f:
-            f[tree_name] = uproot.newtree(treedict)
-            f[tree_name.extend(events.to_dict('list'))]
-    return file_writer
-
-
 def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fake_file, fractions, sample, doSysts=False):
     ff_weighter = FFApplicationTool(fake_file, channel_prefix)
 
@@ -127,7 +119,7 @@ def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fa
             if sample != 'data_obs':
                 anti_events[syst[0] + "_" + syst[1]] *= -1
 
-    with uproot.recreate('{}/jetFakes_{}.root'.format(output_dir, sample), compression=None) as f:
+    with uproot.recreate('{}/jetFakes_{}.root'.format(output_dir, sample)) as f:
         f[tree_name] = uproot.newtree(treedict)
         f[tree_name].extend(anti_events.to_dict('list'))
 
@@ -142,7 +134,6 @@ def main(args):
     fout = ROOT.TFile('Output/fake_fractions/{}{}_{}.root'.format(channel_prefix, args.year, args.suffix), 'recreate')
     categories = get_categories(channel_prefix)
     fake_file = '/hdfs/store/user/tmitchel/deep-tau-fake-factor/ff_files_{}_{}/'.format(channel_prefix, args.year)
-    ff_weighter = FFApplicationTool(fake_file, channel_prefix)
     for cat in categories:
         fout.cd()
         fout.mkdir(cat)
@@ -230,10 +221,8 @@ def main(args):
         for syst in systs:
             treedict[syst[0] + "_" + syst[1]] = numpy.float64
 
-    output_dir = args.input
-    if '/hdfs' in args.input:
-        output_dir = 'tmp/fakes_{}'.format(args.suffix)
-        call('mkdir {}'.format(output_dir), shell=True)
+    output_dir = 'tmp/fakes_{}'.format(args.suffix)
+    call('mkdir {}'.format(output_dir), shell=True)
 
     samples = [
         'data_obs', 'embed',

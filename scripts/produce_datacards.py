@@ -106,9 +106,6 @@ def get_syst_name(channel, syst, syst_name_map):
         return ''
     elif syst in syst_name_map.keys():
         return syst_name_map[syst]
-    elif 'LES_DM' in syst:
-        temp = syst.replace('LES_DM', 'efaket') if channel == 'et' else syst.replace('LES_DM', 'mfaket')
-        return syst_name_map[temp]
     else:
         print '\t \033[91m[INFO]  {} is unknown. Skipping...\033[0m'.format(syst)
         return 'unknown'
@@ -228,11 +225,6 @@ def main(args):
             if 'Data' in name:
                 name = 'data_obs'
 
-            # handle MC vs embedded name
-            # if 'embed' in ifile:
-            #     name = name.replace('embedded', 'ZTT')
-            #     name = name.replace('embed', 'ZTT')
-
             variables = set([
                 'is_signal', 'is_antiTauIso', 'contamination', 'njets', 'mjj', 'evtwt',
                 't1_pt', 'higgs_pT', 'm_sv',
@@ -270,14 +262,6 @@ def main(args):
                 ((general_selection['njets'] > 1) & (general_selection['mjj'] < 300))
             ]
             vbf_events = general_selection[(general_selection['njets'] > 1) & (general_selection['mjj'] > 300)]
-
-            # if 'wh125_JHU_' in name or 'zh125_JHU_' in name:
-            #     if 'nominal' in ifile:
-            #         name = boilerplate['wh_zh_name_map'][name]
-            #     else:
-            #         name, syst_suf = name.split('_CMS_')[0], name.split('_CMS_')[1]
-            #         name = boilerplate['wh_zh_name_map'][name]
-            #         name = name + '_CMS_' + syst_suf
 
             fweight = None
             if 'jetFakes' in name:
