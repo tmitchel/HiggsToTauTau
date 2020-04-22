@@ -51,10 +51,10 @@ def recognize_signal(ifile, is2017):
     """Pick the correct keys for this sample."""
     process = ifile.split('/')[-1].split('125')[0]
     key = ''
-    if process == 'ggh':
-        key = 'new_mg_ac_reweighting_map'
-    elif process == 'ggh' and is2017:
+    if process == 'ggh' and is2017:
         key = 'mg_ac_reweighting_map'
+    elif process == 'ggh':
+        key = 'new_mg_ac_reweighting_map'
     else:
         key = 'jhu_ac_reweighting_map'
     return key, process
