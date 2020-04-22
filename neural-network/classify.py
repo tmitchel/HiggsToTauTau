@@ -12,6 +12,7 @@ from glob import glob
 from array import array
 from pprint import pprint
 import multiprocessing
+import subprocess
 
 
 def build_filelist(input_dir):
@@ -119,7 +120,7 @@ def main(args):
         print 'All files written for {} ({} of {})'.format(syst, i, nsyst)
         if args.move != None:
             system('mkdir -p {}'.format(args.move))
-            system('mv {} {}/'.format(out_path, args.move))
+            subprocess.Popen('nohup', 'mv', out_path, '{}/'.format(args.move))
             print 'Moved files from {} to {}'.format(out_path, args.move)
 
 
