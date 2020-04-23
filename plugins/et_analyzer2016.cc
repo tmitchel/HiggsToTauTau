@@ -421,6 +421,16 @@ int main(int argc, char *argv[]) {
                 evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
             }
 
+            auto efake_pt_shift(1.);
+            if (syst.find("efaket_norm_ptgt50") != std::string::npos && tau.getPt() > 50) {
+                efake_pt_shift = (syst == "efaket_norm_ptgt50_Up" ? 1.1 : 0.9);
+            } else if (syst.find("efaket_norm_pt40to50") != std::string::npos && tau.getPt() > 40) {
+                efake_pt_shift = (syst == "efaket_norm_pt40to50_Up" ? 1.1 : 0.9);
+            } else if (syst.find("efaket_norm_pt30to40") != std::string::npos && tau.getPt() > 30) {
+                efake_pt_shift = (syst == "efaket_norm_pt30to40_Up" ? 1.1 : 0.9);
+            }
+            evtwt *= efake_pt_shift;
+
             // handle reading different m_sv values
             if ((syst.find("efaket_es_barrel") != std::string::npos && fabs(electron.getEta()) < 1.479) ||
                 (syst.find("efaket_es_endcap") != std::string::npos && fabs(electron.getEta()) >= 1.479)) {
