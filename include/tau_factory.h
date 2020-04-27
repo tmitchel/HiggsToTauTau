@@ -188,16 +188,16 @@ tau tau_factory::run_factory() {
     t.gen_eta = tZTTGenEta;
     t.gen_phi = tZTTGenPhi;
 
-    float shift = get_TES_shift(era, dmf);
-    if (syst.find("ltau_FES") != std::string::npos) {
-        syst.find("_Up") != std::string::npos ? t.scaleTES(1 + 0.02) : t.scaleTES(1 - 0.02);
-    } else if (syst.find("DM0") != std::string::npos && dmf == 0) {
-        syst.find("_Up") != std::string::npos ? t.scaleTES(1 + shift) : t.scaleTES(1 - shift);
-    } else if (syst.find("DM1_") != std::string::npos && dmf == 1) {
-        syst.find("_Up") != std::string::npos ? t.scaleTES(1 + shift) : t.scaleTES(1 - shift);
-    } else if (syst.find("DM10_") != std::string::npos && dmf == 10) {
-        syst.find("_Up") != std::string::npos ? t.scaleTES(1 + shift) : t.scaleTES(1 - shift);
-    }
+    // float shift = get_TES_shift(era, dmf);
+    // if (syst.find("ltau_FES") != std::string::npos) {
+    //     syst.find("_Up") != std::string::npos ? t.scaleTES(1 + 0.02) : t.scaleTES(1 - 0.02);
+    // } else if (syst.find("DM0") != std::string::npos && dmf == 0) {
+    //     syst.find("_Up") != std::string::npos ? t.scaleTES(1 + shift) : t.scaleTES(1 - shift);
+    // } else if (syst.find("DM1_") != std::string::npos && dmf == 1) {
+    //     syst.find("_Up") != std::string::npos ? t.scaleTES(1 + shift) : t.scaleTES(1 - shift);
+    // } else if (syst.find("DM10_") != std::string::npos && dmf == 10) {
+    //     syst.find("_Up") != std::string::npos ? t.scaleTES(1 + shift) : t.scaleTES(1 - shift);
+    // }
 
     return t;
 }
