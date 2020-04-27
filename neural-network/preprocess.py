@@ -48,6 +48,7 @@ def build_filelist(el_input_dir, mu_input_dir):
         if 'jetFakes' in fname:
             continue
         if 'SYST_' in fname:
+            continue
             keyname = fname.split('SYST_')[-1].split('/')[0]
             systematics.setdefault(keyname, [])
             systematics[keyname].append((channel, fname))
