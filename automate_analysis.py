@@ -116,6 +116,9 @@ def getSyst(name, signal_type, exe, doSyst):
                     'efaket_es_endcap_DM0_Up', 'efaket_es_endcap_DM0_Down',
                     'efaket_es_barrel_DM1_Up', 'efaket_es_barrel_DM1_Down',
                     'efaket_es_endcap_DM1_Up', 'efaket_es_endcap_DM1_Down',
+                    'efaket_norm_pt30to40_Up', 'efaket_norm_pt30to40_Down',
+                    'efaket_norm_pt40to50_Up', 'efaket_norm_pt40to50_Down',
+                    'efaket_norm_ptgt50_Up', 'efaket_norm_ptgt50_Down',
                 ]
         elif '_mt' in exe:
             # tau id vsMu systematics
