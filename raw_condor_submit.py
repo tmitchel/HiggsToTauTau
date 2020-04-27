@@ -13,10 +13,12 @@ def submit_command(jobName, job_configs, dryrun=False):
 
     exe_dir = '{}/executables'.format(head_dir)
     os.system('mkdir -p {}'.format(exe_dir))
-    os.system('mkdir -p {}/logs'.format(exe_dir))
 
     config_dir = '{}/configs'.format(head_dir)
     os.system('mkdir -p {}'.format(config_dir))
+
+    log_dir = '{}/logs'.format(head_dir)
+    os.system('mkdir -p {}'.format(log_dir))
 
     config_name = '{}/config.jdl'.format(config_dir)
     condorConfig = '''universe = vanilla
@@ -28,13 +30,13 @@ request_memory       = 9000
 request_disk         = 2048000
 request_cpus         = 1
 Transfer_Input_Files = {2},{3}
-Output = {1}/logs/out_$(Cluster)_$(Process).out
-Error = {1}/logs/run_$(Cluster)_$(Process).err
-Log = {1}/logs/running_$(Cluster).log
+Output = {1}/out_$(Cluster)_$(Process).out
+Error = {1}/run_$(Cluster)_$(Process).err
+Log = {1}/running_$(Cluster).log
 x509userproxy = /tmp/x509up_u23269
 Arguments=$(process)
 Queue {0}
-    '''.format(len(job_configs), exe_dir, exe_dir, config_dir)
+    '''.format(len(job_configs), log_dir, exe_dir, config_dir)
     with open(config_name, 'w') as file:
         file.write(condorConfig)
 
