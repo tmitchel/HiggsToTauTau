@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     std::string original = sample;
     if (name == "VBF125") {
         sample = "vbf125";
-    } else if (name == "ggH125") {
+    } else if (name == "ggH125" && signal_type != "madgraph") {
         sample = "ggh125";
     } else if (name == "WH125") {
         sample = "wh125";
@@ -125,8 +125,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (signal_type == "JHU" && (sample == "ggh125" || sample == "vbf125")) {
-        gen_number = 1.;
-    } else if (signal_type == "madgraph") {
         gen_number = 1.;
     }
 

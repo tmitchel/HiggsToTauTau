@@ -129,7 +129,10 @@ def main(args):
         }, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
     full_hadd_list = bkg_hadd_list
-    full_hadd_list.update(sig_hadd_list)
+    for isyst, samples in sig_hadd_list.iteritems():
+        for sample, files in samples.iteritems():
+            full_hadd_list[isyst][sample] = files
+
     do_hadd(full_hadd_list, args.path)
     # do_hadd(bkg_hadd_list, args.path)
     # do_hadd(sig_hadd_list, args.path)
