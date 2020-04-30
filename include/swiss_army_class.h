@@ -34,12 +34,13 @@ class Helper {
     std::unordered_map<std::string, TH2F *> *getHistos2D() { return &histos_2d; }
 
     Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) { return sqrt(pow(eta1 - eta2, 2) + pow(phi1 - phi2, 2)); }
+    Float_t embed_tracking(Float_t, Int_t);
 };
 
 Helper::Helper(TFile *fout, std::string name, std::string syst)
     : luminosity2016(35900.),
       luminosity2017(41500.),
-      luminosity2018(63670.),
+      luminosity2018(59740.0),
       systematics{{"met_UESDown", "_CMS_scale_met_unclustered_13TeVDown"},       {"met_UESUp", "_CMS_scale_met_unclustered_13TeVUp"},
                   {"met_JESDown", "_CMS_scale_met_clustered_13TeVDown"},         {"met_JESUp", "_CMS_scale_met_clustered_13TeVUp"},
                   {"metphi_UESDown", "_CMS_scale_metphi_unclustered_13TeVDown"}, {"metphi_UESUp", "_CMS_scale_metphi_unclustered_13TeVUp"},
@@ -83,7 +84,17 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
                      {"Data", 1.0},
                      {"vbf125", 3.782 * 0.0627},
                      {"ggh125", 48.58 * 0.0627},
+                     {"ggh125_madgraph_zero_a1_filtered", 0.3989964912},
+                     {"ggh125_madgraph_zero_a3_filtered", 0.394402286},
+                     {"ggh125_madgraph_zero_a3int_filtered", 0.3909346216},
+                     {"ggh125_madgraph_one_a1_filtered", 0.2270577971},
+                     {"ggh125_madgraph_one_a3_filtered", 0.2279645653},
+                     {"ggh125_madgraph_one_a3int_filtered", 0.2278590524},
+                     {"ggh125_madgraph_two_a1_filtered", 0.1383997884},
+                     {"ggh125_madgraph_two_a3_filtered", 0.1336590511},
+                     {"ggh125_madgraph_two_a3int_filtered", 0.1375149881},
                      {"tth125", 0.5071 * 0.0627},
+                     {"wh125", 0.6864 * 0.0627},  // took the average of W+ and W-. Not important because for JHU it's reweighted to Powheg anyways
                      {"wminus125", 0.5328 * 0.0627},
                      {"wplus125", 0.840 * 0.0627},
                      {"zh125", 0.8839 * 0.062}},
@@ -92,6 +103,23 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
                 {"tau_pt", new TH1F("tau_pt", "tau_pt", 12, 0, 300)},
                 {"triggers", new TH1F("triggers", "triggers", 4, -0.5, 3.5)}} {
     std::string suffix = systematics[syst];
+};
+
+Float_t Helper::embed_tracking(Float_t decay_mode, Int_t syst = 0) {
+  Float_t sf(.99), prong(0.975), pizero(1.051);
+  Float_t dm0_syst(0.008), dm1_syst(0.016124515), dm10_syst(0.013856406), dm11_syst(0.019697716);
+  if (decay_mode == 0) {
+    sf *= prong + (syst * dm0_syst);
+  } else if (decay_mode == 1) {
+    sf *= prong * pizero + (syst * dm1_syst);
+  } else if (decay_mode == 10) {
+    sf *= prong * prong * prong + (syst * dm10_syst);
+  } else if (decay_mode == 11) {
+    sf *= prong * prong * prong * pizero + (syst * dm11_syst);
+  } else {
+    std::cerr << "Invalid decay mode " << decay_mode << std::endl;
+    return 1;
+  }
 }
 
 #endif  // INCLUDE_SWISS_ARMY_CLASS_H_

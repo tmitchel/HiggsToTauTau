@@ -1,0 +1,27 @@
+
+######################################
+## Script for compiling an analyzer ##
+######################################
+
+# this is all just for formatting
+srclen=${#1}
+binlen=${#2}
+l1=$((${srclen}+28+3))
+l2=$((${binlen}+28+3-${l1}))
+if [ "$l2" -lt 0 ]
+then
+    l2=$(($l2 * -1))
+fi
+s=$(printf "%-${l1}s" "/")
+echo "${s// //}"
+printf "// Compiling analysis code: $1 //\n"
+printf "//               with name: $2"
+printf "%-${l2}s"
+printf " //\n"
+echo "${s// //}"
+
+set -e
+
+# this is the important part for compiling
+g++ -O3 $1 `root-config --cflags --glibs`  -lRooFit -lRooFitCore -I include -o $2
+

@@ -1,186 +1,142 @@
 # Higgs to Tau-Tau Analysis Code 
 
-[![pipeline status](https://gitlab.cern.ch/KState-HEP-HTT/ltau_analyzers/badges/master/pipeline.svg)](https://gitlab.cern.ch/KState-HEP-HTT/ltau_analyzers/commits/master)
-
-This code is used for the study of a Higgs boson decaying to a pair of tau leptons. The repository includes analyzers, corresponding to the final states being studied: electron-tau (et), muon-tau (mt), and electron-muon (emu).
+This code is used for the study of a Higgs boson decaying to a pair of tau leptons. The repository includes analyzers, corresponding to the final states being studied: electron-tau (et) and muon-tau (mt).
 
 ##### Table of Contents
 [Organization](#organization) <br/>
 [File Locations](#files) <br/>
 [Processed Files](#ofiles) <br/>
 [Quick Start](#quickstart) <br/>
-[Modules](#modules) <br/>
+[Objects](#objects) <br/>
+[Helpers](#helpers) <br/>
 [Plugins](#plugins) <br/>
 [Compiling Plugins](#compiling) <br/>
-[ROC curves](#roc) <br/>
+[Scripts](#scripts) <br/>
 
 <a name="organization"/>
 
 ## Organization
 
 - Directories
-  - `bin`: Contains binaries to be run later.
-  - `include`: This is where the majority of the library is contained. Header files for each object are stored here along with headers for   corrections and other necessary components. 
-  - `inputs`: Some scale factors require input files to do some calculation. All necessary input files are stored in this directory.
-  - `plugins`: This directory contains all C++ plugins using the library. This is primarily the analyzers and template makers, but any code   drawing on the library can be placed here.
-  - `scripts`: All short scripts are stored here. Plotting scripts and other small scripts can be stored in this directory.
-  - `Output`: All outputs are stored in the directory. Outputs include plots, TTrees, and templates for Higgs Combine. These are all stored in subdirectories within the `Output` directory.
-- Spare Files
+  - `bin`: Contains binaries primarily used for initial processing.
+  - `include`: This is where the majority of the library is contained. Header files for each object are stored here along with headers for corrections and other necessary components. 
+  - `data`: All input ROOT files for corrections are contained here. This includes a file containing legacy scale factors for each year, pileup corrections, and Higgs pT reweighting files for MadGraph samples.
+  - `plugins`: This directory contains all C++ plugins using the library. This is currently limited to analyzers, but other plugins may be added.
+  - `scripts`: Scripts used to process the outputs from analyzers are contained here. This includes plotters, datacard builders, and fake weighters.
+  - `Output`: All outputs are stored in the directory. Outputs include plots, fake fractions, TTrees, and datacards for Higgs Combine. These are all stored in subdirectories within the `Output` directory.
+- Other Files
   - `build`: A simple bash script for compiling a plugin with the correct libraries (ROOT). The script takes two ordered arguments: the plugin to compile and the name of the output binary. The binary should be copied to your $HOME/bin directory
   - `automate_analysis.py`: Used for analyzing an entire directory. Explained more later
-  - `hadder.sh`: Quick script to hadd analyzed ROOT files into the correctly named files
 
 <a name="files"/>
 
 ## File Locations
 
-Here are the locations of all currently used files. Directory names should be obvious
-- /hdfs/store/user/tmitchel/etau2016_legacy-v1_mela/
-- /hdfs/store/user/tmitchel/etau2017_legacy-v1_mela/
-- /hdfs/store/user/tmitchel/mutau2016_legacy-v1_mela/
-- /hdfs/store/user/tmitchel/mutau2017_legacy-v1_mela/
+Here are the locations of all currently used files on the Wisconsin cluster. Directory names should be obvious
+- /hdfs/store/user/tmitchel/legacy-v5
 
 <a name="ofiles"/>
 
 ## Processed Locations
 
-Location of all files already processed by one of the analyzers. They are ready to be fed to the NN or used directly for making templates/plots.
-- /hdfs/store/user/tmitchel/etau2016_official_v3-analyzed
-- /hdfs/store/user/tmitchel/etau2017_official_v3-analyzed
-- /hdfs/store/user/tmitchel/mutau2016_official_v3-analyzed
-- /hdfs/store/user/tmitchel/mutau2017_official_v3-analyzed
+Location of all files already processed by one of the analyzers. They are ready to be fed to the NN or used directly for making datacards/plots.
+- /hdfs/store/user/tmitchel/legacy-v5/analyzed
 
 <a name="quickstart"/>
 
 ## Quick Start
 
-This section is intended to help someone quickly get started producing plots and templates. Most details about how to use the repository will be excluded, so read the rest of the instructions for more detailed information.
+This section is intended to help someone quickly get started producing plots and datacards. Most details about how to use the repository will be excluded, so read the rest of the instructions for more detailed information.
 
-To start, there are many files containing scale factors, corrections, etc. that need to be gathered. For those that can't be easily grabbed, I put a tarball in the /afs area that can be copied.
-
-1. Setup a new CMSSW release (needed for fake factor and 2017 tau trigger SFs)
+1. Setup a new CMSSW release (must be 104X or greater for python scripts)
 ```
-cmsrel CMSSW_9_4_0 && cd CMSSW_9_4_0/src && cmsenv
+cmsrel CMSSW_CMSSW_10_4_0 && cd CMSSW_10_4_0/src && cmsenv
 ```
 2. Clone and build all necessary repositories, including this one.
     - clone this repo
         ```
-        git clone -b new-skims ssh://git@gitlab.cern.ch:7999/KState-HEP-HTT/ltau_analyzers.git
+        git clone -b stabalize-workflow git@github.com:tmitchel/LTau_Analyzers.git
         ```
-    - get lepton SF files
+    - Compile all repos (none are currently needed)
         ```
-        git clone https://github.com/CMS-HTT/LeptonEfficiencies
-        ```
-    - get tau trigger SF repo
-        ```
-        cd $CMSSW_BASE/src
-        mkdir TauAnalysisTools
-        git clone -b final_2017_MCv2 https://github.com/cms-tau-pog/TauTriggerSFs $CMSSW_BASE/src/TauAnalysisTools/TauTriggerSFs
+        cd ${CMSSW_BASE}/src
         scram b -j 8
         ```
-    -  <a href="https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsToTauTauJet2TauFakes#Install">Follow Jet2TauFakes installation instructions</a>
-        - change `git clone -b 2017` to `git clone -b 2016` to get the fake factors for 2016
-    - Compile all repos
+    - Setup a python virtual environment
         ```
-        cd ../..
-        scram b -j 8
+        cd ${CMSSW_BASE}/src/LTau_Analyzers
+        virtualenv .pyenv
+        source .pyenv/bin/activate  # this must be done every time you log in
+        source setup/setup-python.sh
         ```
-    - Get the tarball full of missing files
-        ```
-        cd ltau_analyzers
-        cp /afs/hep.wisc.edu/home/tmitchel/public/ltau_analyzer_data.tar.gz .
-        tar xzvf ltau_analyzer_data.tar.gz
-        ```
-3. Compile the appropriate plugin. For example, to compile the 2016 analyzer for the electron+tau channel, use the following command
+3. Compile the appropriate plugin. For example, to compile the 2018 analyzer for the muon+tau channel, use the following command
     ```
-    ./build plugins/et_analyzer2016.cc bin/analyze2016_et
+    ./build plugins/mt_analyzer2018.cc bin/analyze2018_mt
     ```
-    This will produce a binary named `analyze2016_et` in the `bin` directory that can be used to analyze 2016 etau events.
-4. Later, you will also need to a plugin for filling fake fracitons and a plugin for creating 2D templates for Combine. Might as well compile these right now.
-    - Compile the binary for filling the fake fractions
-        ```
-        ./build plugins/fill_fake_fractions.cc bin/fill-fake-fractions
-        ```
-    - Compile the binary for creating the 2D template that is given to Combine for limit setting. This also uses embedded samples and 2D fake factor
-        ```
-        ./build plugins/produce_templates.cc bin/produce-templates
-        ```
-5. Use the python automation script to processes all MELA'd files and produce output trees with selection branches and weight branches
+    This will produce a binary named `analyze2018_mt` in the `bin` directory that can be used to analyze 2018 mutau events.
+4. Use the python automation script to processes all files in a directory and produce output trees with selection branches and weight branches
     ```
-    python automate_analysis.py 2017 -e bin/analyze2017_et -p /hdfs/store/user/tmitchel/etau2017_official_v3-mela/etau2017_official_v3-hadd/ --output-dir etau2017_official_v3-analyzed --syst 2017    
+    python automate_analysis.py -e bin/analyze2018_mt -p /hdfs/store/user/tmitchel/legacy-v5/mela/mt2018_v1p3 --output-dir mt2018_v5p3 --parallel --syst
     ```
-    This command requires some explanation because it has many options. The purpose of this script is to run a provided binary on all *.root files in a given directory. The binary is supplied with the `-e` option and the input directory is supplied with the `-p` option. Because the analyzers use the name of the input root file to lookup the correct cross-section, any prefixes added to the filenames (looking at you SVFit and MELA) need to be stripped before providing the sample name to the binary. The script `scripts/strip.sh` can be used to make a copy of the files with the prefix removed. All processed files are stored in `Output/trees/`. The `--output-dir` option can be used to create a new directory in `Output/trees/` and store the processed files there. The `-a` option enable the AC reweighter. The reweighter is used for AC samples to read weights from `data/AC_weights` files and store them in the output tree. The final option `--syst` is provided when you want to produce additional trees containing systematic variations. Either '2016' or '2017' must be passed in order to choose the correct branch names.
+    This command requires some explanation because it has many options. The purpose of this script is to run a provided binary on all *.root files in a given directory. The binary is supplied with the `-e` option and the input directory is supplied with the `-p` option. Because the analyzers use the name of the input root file to lookup the correct cross-section, any prefixes added to the filenames (looking at you SVFit and MELA) need to be stripped before providing the sample name to the binary. All processed files are stored in `Output/trees/`. The `--output-dir` option can be used to create a new directory in `Output/trees/` and store the processed files there. The --parallel option is used to enable multiprocessing. The maximum number of processes at any one time is the minimum(10, ncores / 2). Each input file will recieve it's own process.  The final option `--syst` is provided when you want to produce additional output files containing systematic shifts. Within the output directory, nominal files are stored in the `NOMINAL` sub-directory and sub-directories will be created for each systematic with the prefix SYST_. Logs will also be saved in the `logs` subdirectory.
 
-6. hadd the appropriate files together `problem with naming for ggH JHUGEN and MadGraph samples`
+5. hadd the appropriate files together
     ```
-    bash hadder.sh El Output/trees/etau2017_official_v3-analyzed
+    python scripts/hadder.py -p Output/trees/mt2018_v5p3
     ```
-    This will hadd all files in the directory `Output/trees/etau2017_official_v3-analyzed` into the appropriate files. The hadded files will be stored in the same directory and a sub-directory named `originals` will be made to store all pre-hadded files. The `El` option needs to be passed so that embedEl*.root is hadded. `Mu` is used for the muon embedded samples.
-7. Fill the fake fractions to be used in plotting and template making.
+    This will hadd all files in the directory `Output/trees/mt2018_v5p3` into the appropriate files. This will descend into each subdirectory (exluding logs) to hadd files for NOMINAL and all systematics. The hadded files will be stored in the new sub-directory within the current sub-directory named `merged`.
+7. Fill the fake fractions to be used in plotting and datacard making and store them in the `fake_factors` directory.
     ```
-    bin/fill-fake-fractions --suf v1p9 -d /hdfs/store/user/tmitchel/etau2017_official_v1p9-analyzed -y 2017 -t etau_tree
+    python scripts/fill_fake_fractions.py -i Output/trees/mt2018_v5p3/NOMINAL/merged -y 2018 -t mt_tree -s v5p3 -c
     ```
-8. (Optional) Convert the slim trees into templates for plotting.
-    - Define the variables to be plotted and give their binning.
-        Inside the file `plugins/produce_plots.cc`, you can define which variable should be plotted and with which binning. This is done in the the `var` variable
+    The `-s` option is used to add a descriptor to the output file containing the fake fractions. When the `-c` flag is provided, the newly calculated fractions will be used to create a new ROOT file named 'jetFakes.root' within the input directory. This file contains all necessary data and MC events used for calculating the jetFakes background. A new branch is added containing the fake weight used to appropriately scale events.
+8. (Optional) Create histograms for plotting.
+    - Plots and binning are defined in the JSON file `scripts/plotting.json`. Multiple plotting scenarios can be defined and then chosen at runtime via a command line option. The `variables` key defines the variable name along with the binning. Binning is assumed to be [nbins, lowest, highest]. The `zvar` key is used to specify a variable and binning to use for the VBF sub-categorization. The binning for `zvar` is assumed to be [lowest, edge1, edge2, ...].
+    - Produce the plots
         ```
-        // variables to plot
-        std::map<std::string, std::vector<float>> vars = {
-            {"m_sv", {30, 50, 180}},
-            {"t1_pt", {30, 30, 200}},
-            {"met", {30, 0, 500}},
-            {"higgs_pT", {30, 0, 300}}};
+        python scripts/produce_histograms.py -e -y 2018 -t mt_tree -i Output/trees/mt2018_v5p3/NOMINAL/merged -d v5p3 -c baseline
         ```
-
-        Add as many variables as you'd like and edit the binning as you please.
-    - Compile the binary for creating 1D templates with fake-factor estimation (using recommended 2D method). These are used for plotting later
-        ```
-        ./build plugins/produce_plots.cc bin/produce-plots
-        ```
-    - Produce the histograms
-        ```
-        bin/produce-plots --suf Workshop_v1p9 -d /hdfs/store/user/tmitchel/etau2017_official_v1p9-analyzed -y 2017 -t etau_tree -f Output/fake_fractions/et2017_v1p9.root
-        ```
-    This will create a root file named `Output/templates/et2017_Workshop_v1p9.root` containing the histograms. The root of this file will have a single directory named 'plots'. Inside the 'plots' directory, there will be a directory for each variable in the plot list. Inside each of these directories there will be a directory for each defined category (at least '0jet', 'boosted', 'vbf'). These directories contain the actual histograms. The arguments provided are `-d` to give the input directory, `-y` to provide the year, `-t` to give the treename, `--suf` to give a suffix to the output file name, and `-f` to provide the the root file containing the fake fractions.
-9. (Optional) Plot histograms from the previously created template
+        This will produce an output root file in the `Output/histograms` directory. The file contains a TDirectory for each category. Inside each category will be a TDirectory for each variable containing histograms for each sample. `-d` is used to add a descriptive string to the name of the output file. `-c` is used to specify the plotting scenario to be read from `plotting.json`. The `-e` flag tells the script to use the embedded background instead of ZTT MC.
+9. (Optional) Create stack plots from previous histograms.
     ```
-    cd scripts
-    python stackPlot.py -p your_prefix -c et_inclusive --channel et -v t1_pt -y 2016 -s 1.6
+    python scripts/autoplot.py --input Output/histograms/htt_mt_emb_noSys_fa3_2018_v5p3.root -c mt -p v5p3 -y 2018
     ```
-    This will create a stacked histogram showing t1_pt in the etau inclusive region with the previously chosen binning. The `-y` option tells the script which year to use in labels. The `-s` option tells the script by what factor to multiply the the maximum bin yield when setting the top of the histogram. Increase the value of `-s` if histograms are going off the top of the pad. The plot will be stored in `../Output/plots/your_prefix_t1_pt_et_inclusive_2016.pdf`. NOTE: The most likely error here occurs when you attempt to plot a variable for which I haven't given an appropriate title. To correct this, open the script and find the `titles` dictionary. Simply add the variable provided to `-v` and give a name to be printed on the X-axis of histograms.
-
-10. Create a 2D template for Combine
+    This will create stacked histograms for each variable listed at the beginning of the script. 
+10. Create a 2D datacards for Combine
     ```
-    cd $CMSSW_BASE/src/ltau_analyzers
-    bin/produce-template --suf 3d-baseline -d /hdfs/store/user/tmitchel/etau2017_official_v1p9-analyzed -y 2017 -t etau_tree -f Output/fake_fractions/et2017_v1p9.root
+    python scripts/produce_datacards.py -e -y 2018 -t mt_tree -i Output/trees/mt2018_v5p3 --suffix v5p3 -c baseline
     ```
-    The produce-template binary is used to create the 2D templates that will unrolled and given to Combine for limit setting. The binning and sensitive observables are all hard-coded, so changing them requires recompiling. The above command will create a template using the input directory given to `-d` and store the root file containing templates as `Output/templates/et2017_3d-baseline.root`. `-y` tells the binary to use things specific to 2016 and `-t` tells the binary to read a TTree named "etau_tree". `-f` is used to provide the file containing fake fractions. The output root file should be ready for unrolling.
+    This script will produce all the 2D datacards needed for Higgs Combine. VBF category variables and binning are configured using the `scripts/binning.json` file where multiple scenarios may be defined. The previous command will use the baseline scenario. Use `python -h` to see other options including running with systematics.
 
-    NOTE: The `-s` option can be given to the produce-template binary in order to produce fake factor systematics up/down shapes.
+<a name="objects"/>
 
-<a name="modules"/>
+## Objects
 
-## Modules
+All input variables are accessed through factories. These factories group information into physics-motivated classes. Some factories provide access to variables directly (i.e. event_info provides direct access to the event's run number), while others provide access to friend classes that then provide even more physics context to the variables (i.e. electron_factory provides access to electron objects containing information about a single electron). This reduces the mental burden of remembering the meaning of each variable name in your input files. These factories are all contained within the `include` directory.
 
-Each physics object has a module containing all relevant data. All modules are defined in the `include` directory and can be included in plugins as needed. In addition to physics object modules, the include directory also includes classes for various reweighters, as well as a utility class containing histograms and cross-sections. Additionally, the include directory has a simple class used to provide functionality for command line flags.
+<a name="helpers"/>
 
+## Helpers
+
+The `include` directory also contains headers providing many useful functions. 
+- ACWeighter.h provides methods for accessing AC reweighting coefficients for JHU samples. These can then be stored in output TTrees.
+- CLParser.h provides the basic command-line parsing capabilities used by plugins
+- LumiReweightingStandAlone.h provides helper functions for reading pileup corrections
+- slim_tree.h contains the output TTree and defines how it will be filled
+- swiss_army_class.h contains useful information with no other home. This includes: luminosities, cross-sections, embedded tracking scale factors, and more.
 
 <a name="plugins"/>
 
 ## Plugins
 
-The `plugins` directory contains many useful C++ plugins for analyzing data, making plotting templates, or making Combine templates. These plugins are all compiled using the `build` script discussed in the "Compiling Plugins" section. A list of currently maintained plugins is shown below:
+The `plugins` directory contains the code for analyzing input skims. These plugins are all compiled using the `build` script discussed in the "Compiling Plugins" section. A list of currently maintained plugins is shown below:
 
-- `et_analyzer2016.cc`: Used to analyze the 2016 etau channel and produce slimmed trees. Partial systematics included. 
-- `et_analyzer2017.cc`: Used to analyze the 2017 etau channel and produce slimmed trees. Partail systematics included.
-- `et_analyzer2018.cc`: Used to analyze the 2018 etau channel and produce slimmed trees. Partail systematics included.
-- `mt_analyzer2016.cc`: Used to analyze the 2016 mutau channel and produce slimmed trees. Partial systematics included. 
-- `mt_analyzer2017.cc`: Used to analyze the 2017 mutau channel and produce slimmed trees. Partail systematics included.
-- `mt_analyzer2018.cc`: Used to analyze the 2018 mutau channel and produce slimmed trees. Partail systematics included.
-- `plugins/produce_plots.cc`: Produce templates for plotting with fake factor. No systematics incuded.
-- `plugins/produce_templates.cc`: Produce Combine templates using fake factor. Fake factor systematics are implemented. 
-
-All other plugins have not been constantly updated and are at various degrees of deprecation.
+- `et_analyzer2016.cc`: Used to analyze the 2016 etau channel and produce slimmed trees.
+- `et_analyzer2017.cc`: Used to analyze the 2017 etau channel and produce slimmed trees.
+- `et_analyzer2018.cc`: Used to analyze the 2018 etau channel and produce slimmed trees.
+- `mt_analyzer2016.cc`: Used to analyze the 2016 mutau channel and produce slimmed trees.
+- `mt_analyzer2017.cc`: Used to analyze the 2017 mutau channel and produce slimmed trees.
+- `mt_analyzer2018.cc`: Used to analyze the 2018 mutau channel and produce slimmed trees.
 
 <a name="compiling"/>
 
@@ -192,8 +148,19 @@ The `build` script is provided to make compilation easier/less verbose. The scri
 ```
 This example compiles the electron-tau channel analyzer to make an executable named Analyze_et. All analyzers are compiled with O3 level optimization as well as linking ROOT and RooFit.
 
-<a name="roc"/>
+<a name="scripts"/>
 
-## ROC curves
-ROC curves can easily be produced by changing the ROOT macro `plotRocCurves.C` and then running with CINT. 
+## Scripts
 
+Most scripts cannot be run with the tools provided by the basic CMSSW environment. It is recommended to create a virtual environment for installing all necessary packages.
+```
+virtualenv .pyenv
+```
+This will create a python2 virtual environment in the directory .pyenv. To activiate this environment, use
+```
+source .pyenv/bin/activate  # deactivate to return to normal environment
+```
+With the environment activated, install all necessary packages (/cvmfs does weird things so it's hard to get a requirements.txt)
+```
+source setup/setup-python.sh
+```
