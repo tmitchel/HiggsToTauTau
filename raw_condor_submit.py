@@ -55,7 +55,7 @@ bash ./executables/"${{array[${{sample}}]}}"
     print 'Condor overlord has been written: {}'.format(overlord_name)
 
     # create tarball with user code
-    os.system('tar --exclude="Output" --exclude="logs" -czf ana_code.tar.gz *')
+    os.system('tar --exclude="Output" --exclude="logs" --exclude="neural-network" --exclude="tmp" -czf ana_code.tar.gz *')
     os.system('mv -v ana_code.tar.gz {}'.format(config_dir))
 
     bashScriptSetup = '''#!/bin/bash
