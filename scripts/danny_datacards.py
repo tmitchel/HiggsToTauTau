@@ -65,21 +65,21 @@ def fill_hists(data, hists, xvar_name, yvar_name, split_z=False, fake_weight=Non
     Returns:
     hists -- filled histograms
     """
-    evtwt = data['evtwt'].to_numpy(copy=True)
 
     vbf_bins = [data]
     if split_z:
         vbf_bins = [
-            data[(data['mjj'] < 500) & (data['higgs_pT'] < 200)], # loose-low
-            data[(data['mjj'] < 500) & (data['higgs_pT'] > 200)], # loose-high
-            data[(data['mjj'] > 500) & (data['higgs_pT'] < 200)], # tight-low
-            data[(data['mjj'] > 500) & (data['higgs_pT'] > 200)]  # tight-high
+            data[(data['mjj'] < 500) & (data['higgs_pT'] < 150)], # loose-low
+            data[(data['mjj'] < 500) & (data['higgs_pT'] > 150)], # loose-high
+            data[(data['mjj'] > 500) & (data['higgs_pT'] < 150)], # tight-low
+            data[(data['mjj'] > 500) & (data['higgs_pT'] > 150)]  # tight-high
         ]
 
     lenbins = len(vbf_bins)
     for b, vbf_bin in enumerate(vbf_bins):
         xvar = vbf_bin[xvar_name].values
         yvar = vbf_bin[yvar_name].values
+        evtwt = vbf_bin['evtwt'].to_numpy(copy=True)
 
         if fake_weight != None:
             evtwt *= vbf_bin[fake_weight].values
@@ -153,7 +153,7 @@ def main(args):
 
     # create structure within output file
     vbf_categories = []
-    if 'D0_' in vbf_cat_edge_var:
+    if 'D0_' in vbf_cat_edge_var and False:
         vbf_categories += boilerplate['vbf_sub_cats_plus'] + boilerplate['vbf_sub_cats_minus']
     else:
         vbf_categories += boilerplate['vbf_sub_cats']
