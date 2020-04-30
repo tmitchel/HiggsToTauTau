@@ -9,13 +9,13 @@
 #include "TTree.h"
 
 class met_factory {
-   private:
+ private:
     Float_t met, metphi, met_py, met_px;
     Float_t metSig, metcov00, metcov10, metcov11, metcov01;
     TLorentzVector p4;
     std::unordered_map<std::string, std::string> syst_name_map;
 
-   public:
+ public:
     met_factory(TTree*, int, std::string);
     virtual ~met_factory() {}
     std::string fix_syst_string(std::string);

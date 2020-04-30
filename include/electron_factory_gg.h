@@ -1,59 +1,16 @@
 // Copyright [2019] Tyler Mitchell
 
-#ifndef INCLUDE_ELECTRON_FACTORY_H_
-#define INCLUDE_ELECTRON_FACTORY_H_
+#ifndef INCLUDE_ELECTRON_FACTORY_GG_H_
+#define INCLUDE_ELECTRON_FACTORY_GG_H_
 
 #include <cmath>
 #include <string>
 #include <vector>
 #include "TLorentzVector.h"
 #include "TTree.h"
+#include "models/electron.h"
 
-class electron_factory;  // forward declare so it can befriend electrons
-
-//////////////////////////////////////////////////
-// Purpose: To hold a single composite electron //
-//////////////////////////////////////////////////
-class electron {
-    friend electron_factory;
-
- private:
-    std::string name = "electron";
-    Int_t gen_match;
-    Float_t pt, eta, phi, mass, charge, px, py, pz, iso, gen_pt, gen_eta, gen_phi, gen_energy;
-    TLorentzVector p4;
-
- public:
-    electron(Float_t, Float_t, Float_t, Float_t, Float_t);
-    ~electron() {}
-
-    // getters
-    std::string getName() { return name; }
-    TLorentzVector getP4() { return p4; }
-    Float_t getPt() { return p4.Pt(); }
-    Float_t getEta() { return p4.Eta(); }
-    Float_t getPhi() { return p4.Phi(); }
-    Float_t getMass() { return p4.M(); }
-    Float_t getIso() { return iso; }
-    Int_t getGenMatch() { return gen_match; }
-    Float_t getGenPt() { return gen_pt; }
-    Float_t getGenEta() { return gen_eta; }
-    Float_t getGenPhi() { return gen_phi; }
-    Float_t getGenE() { return gen_energy; }
-    Int_t getCharge() { return charge; }
-};
-
-// initialize member data and set TLorentzVector
-electron::electron(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge)
-    : pt(Pt), eta(Eta), phi(Phi), mass(M), charge(Charge) {
-    p4.SetPtEtaPhiM(pt, eta, phi, mass);
-}
-
-/////////////////////////////////////////////////
-// Purpose: To build a collection of electrons //
-// from the ntuple                             //
-/////////////////////////////////////////////////
-class electron_factory {
+class electron_factory_gg {
  private:
     std::string syst;
     Int_t gen_match_1;
@@ -61,13 +18,13 @@ class electron_factory {
     Float_t eCorrectedEt, eEnergyScaleUp, eEnergyScaleDown, eEnergySigmaUp, eEnergySigmaDown;
 
  public:
-    electron_factory(TTree*, int, std::string);
-    virtual ~electron_factory() {}
+    electron_factory_gg(TTree*, int, std::string);
+    virtual ~electron_factory_gg() {}
     electron run_factory();
 };
 
 // read data from tree into member variables
-electron_factory::electron_factory(TTree* input, int era, std::string _syst) : syst(_syst) {
+electron_factory_gg::electron_factory_gg(TTree* input, int era, std::string _syst) : syst(_syst) {
     input->SetBranchAddress("px_1", &px_1);
     input->SetBranchAddress("py_1", &py_1);
     input->SetBranchAddress("pz_1", &pz_1);
@@ -90,7 +47,7 @@ electron_factory::electron_factory(TTree* input, int era, std::string _syst) : s
 }
 
 // create electron object and set member data
-electron electron_factory::run_factory() {
+electron electron_factory_gg::run_factory() {
     electron el(pt_1, eta_1, phi_1, m_1, q_1);
     el.px = px_1;
     el.py = py_1;
@@ -116,4 +73,4 @@ electron electron_factory::run_factory() {
     return el;
 }
 
-#endif  // INCLUDE_ELECTRON_FACTORY_H_
+#endif  // INCLUDE_ELECTRON_FACTORY_GG_H_

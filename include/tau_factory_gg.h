@@ -1,7 +1,7 @@
 // Copyright [2018] Tyler Mitchell
 
-#ifndef INCLUDE_TAU_FACTORY_H_
-#define INCLUDE_TAU_FACTORY_H_
+#ifndef INCLUDE_TAU_FACTORY_GG_H_
+#define INCLUDE_TAU_FACTORY_GG_H_
 
 #include <cmath>
 #include <iostream>
@@ -9,92 +9,11 @@
 #include <vector>
 #include "TLorentzVector.h"
 #include "TTree.h"
+#include "models/tau.h"
 
-class tau_factory;
 Float_t get_TES_shift(int, float);
 
-////////////////////////////////////////////////////
-// Purpose: To hold a single composite tau lepton //
-////////////////////////////////////////////////////
-class tau {
-    friend tau_factory;
-
- private:
-    std::string name = "tau";
-    Int_t gen_match;
-    Float_t pt, eta, phi, mass, charge, decayMode, dmf, dmf_new, iso, deepiso, gen_pt, gen_eta, gen_phi;
-    Float_t VLooseIsoMVA, LooseIsoMVA, MediumIsoMVA, TightIsoMVA, VTightIsoMVA, VVTightIsoMVA;
-    Float_t VVVLooseIsoDeep, VLooseIsoDeep, LooseIsoDeep, MediumIsoDeep, TightIsoDeep, VTightIsoDeep, VVTightIsoDeep;
-    Bool_t AgainstTightElectronMVA, AgainstVLooseElectronMVA, AgainstTightMuonMVA, AgainstLooseMuonMVA;
-    Bool_t AgainstTightElectronDeep, AgainstVVLooseElectronDeep, AgainstVVVLooseElectronDeep, AgainstTightMuonDeep, AgainstVLooseMuonDeep;
-
-    TLorentzVector p4;
-
- public:
-    tau(Float_t, Float_t, Float_t, Float_t, Float_t);
-    ~tau() {}
-
-    // scale tau pT for embedded samples
-    void scalePt(Float_t newPt) {
-        pt *= newPt;
-        p4.SetPtEtaPhiM(pt, eta, phi, mass);
-    }
-
-    void scaleTES(Float_t val) {
-        p4 *= val;
-    }
-
-    // getters
-    std::string getName() { return name; }
-    TLorentzVector getP4() { return p4; }
-    Float_t getPt() { return p4.Pt(); }
-    Float_t getEta() { return p4.Eta(); }
-    Float_t getPhi() { return p4.Phi(); }
-    Float_t getMass() { return p4.M(); }
-    Float_t getIso() { return iso; }
-    Float_t getDeepIso() { return deepiso; }
-    Float_t getVLooseIsoMVA() { return VLooseIsoMVA; }
-    Float_t getLooseIsoMVA() { return LooseIsoMVA; }
-    Float_t getMediumIsoMVA() { return MediumIsoMVA; }
-    Float_t getTightIsoMVA() { return TightIsoMVA; }
-    Float_t getVTightIsoMVA() { return VTightIsoMVA; }
-    Float_t getVVTightIsoMVA() { return VVTightIsoMVA; }
-    Float_t getVVVLooseIsoDeep() { return VVVLooseIsoDeep; }
-    Float_t getVLooseIsoDeep() { return VLooseIsoDeep; }
-    Float_t getLooseIsoDeep() { return LooseIsoDeep; }
-    Float_t getMediumIsoDeep() { return MediumIsoDeep; }
-    Float_t getTightIsoDeep() { return TightIsoDeep; }
-    Float_t getVTightIsoDeep() { return VTightIsoDeep; }
-    Float_t getVVTightIsoDeep() { return VVTightIsoDeep; }
-    Float_t getDecayMode() { return decayMode; }
-    Float_t getDecayModeFinding() { return dmf; }
-    Float_t getDecayModeFindingNew() { return dmf_new; }
-    Bool_t getAgainstTightElectronMVA() { return AgainstTightElectronMVA; }
-    Bool_t getAgainstVLooseElectronMVA() { return AgainstVLooseElectronMVA; }
-    Bool_t getAgainstTightMuonMVA() { return AgainstTightMuonMVA; }
-    Bool_t getAgainstLooseMuonMVA() { return AgainstLooseMuonMVA; }
-    Bool_t getAgainstTightElectronDeep() { return AgainstTightElectronDeep; }
-    Bool_t getAgainstVVLooseElectronDeep() { return AgainstVVLooseElectronDeep; }
-    Bool_t getAgainstVVVLooseElectronDeep() { return AgainstVVVLooseElectronDeep; }
-    Bool_t getAgainstTightMuonDeep() { return AgainstTightMuonDeep; }
-    Bool_t getAgainstVLooseMuonDeep() { return AgainstVLooseMuonDeep; }
-    Int_t getGenMatch() { return gen_match; }
-    Float_t getGenPt() { return gen_pt; }
-    Float_t getGenEta() { return gen_eta; }
-    Float_t getGenPhi() { return gen_phi; }
-    Int_t getCharge() { return charge; }
-};
-
-// initialize member data and set TLorentzVector
-tau::tau(Float_t Pt, Float_t Eta, Float_t Phi, Float_t M, Float_t Charge) : pt(Pt), eta(Eta), phi(Phi), mass(M), charge(Charge) {
-    p4.SetPtEtaPhiM(pt, eta, phi, mass);
-}
-
-/////////////////////////////////////////////////
-// Purpose: To build a collection of taus      //
-// from the ntuple                             //
-/////////////////////////////////////////////////
-class tau_factory {
+class tau_factory_gg {
  private:
     std::string syst;
     Int_t gen_match_2, era;
@@ -107,13 +26,13 @@ class tau_factory {
         tTightDeepTau2017v2p1VSjet, tVTightDeepTau2017v2p1VSjet, tVVTightDeepTau2017v2p1VSjet, deepiso_2;
 
  public:
-    tau_factory(TTree*, int, std::string);
-    virtual ~tau_factory() {}
+    tau_factory_gg(TTree*, int, std::string);
+    virtual ~tau_factory_gg() {}
     tau run_factory();
 };
 
 // read data from tree Int_to member variables
-tau_factory::tau_factory(TTree* input, int _era, std::string _syst) : era(_era), syst(_syst) {
+tau_factory_gg::tau_factory_gg(TTree* input, int _era, std::string _syst) : era(_era), syst(_syst) {
     input->SetBranchAddress("pt_2", &pt_2);
     input->SetBranchAddress("eta_2", &eta_2);
     input->SetBranchAddress("phi_2", &phi_2);
@@ -154,7 +73,7 @@ tau_factory::tau_factory(TTree* input, int _era, std::string _syst) : era(_era),
 }
 
 // create electron object and set member data
-tau tau_factory::run_factory() {
+tau tau_factory_gg::run_factory() {
     tau t(pt_2, eta_2, phi_2, m_2, q_2);
     t.iso = iso_2;
     t.deepiso = deepiso_2;
@@ -232,4 +151,4 @@ Float_t get_TES_shift(int year, float decayMode) {
   return -999;
 }
 
-#endif  // INCLUDE_TAU_FACTORY_H_
+#endif  // INCLUDE_TAU_FACTORY_GG_H_
