@@ -45,35 +45,13 @@ muon_factory_gg::muon_factory_gg(TTree* input, int era, std::string _syst) : sys
 // create muon object and set member data
 muon muon_factory_gg::run_factory() {
     muon mu(pt_1, eta_1, phi_1, m_1, q_1);
-    mu.px = px_1;
-    mu.py = py_1;
-    mu.pz = pz_1;
-    mu.iso = iso_1;
-    mu.gen_match = gen_match_1;
-    mu.mediumID = mediumID;
-    mu.gen_pt = mGenPt;
-    mu.gen_eta = mGenEta;
-    mu.gen_phi = mGenPhi;
-    mu.gen_energy = mGenEnergy;
-
-    // muon energy scale systematics
-    if (syst.find("MES") != std::string::npos) {
-        int dir(1);
-        if (syst == "MES_Down") {
-            dir = -1;
-        }
-        if (mu.getEta() < -2.1) {
-            mu.p4 *= dir * 1.027;
-        } else if (mu.getEta() < -1.2) {
-            mu.p4 *= dir * 1.009;
-        } else if (mu.getEta() < 1.2) {
-            mu.p4 *= dir * 1.004;
-        } else if (mu.getEta() < 2.1) {
-            mu.p4 *= dir * 1.009;
-        } else {
-            mu.p4 *= dir * 1.017;
-        }
-    }
+    mu.setGenMatch(gen_match_1);
+    mu.setIso(iso_1);
+    mu.setMediumID(mediumID);
+    mu.setGenPt(mGenPt);
+    mu.setGenEta(mGenEta);
+    mu.setGenPhi(mGenPhi);
+    mu.setGenEnergy(mGenEnergy);
 
     return mu;
 }

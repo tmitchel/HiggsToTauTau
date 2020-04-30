@@ -5,13 +5,8 @@
 
 #include <string>
 #include "TLorentzVector.h"
-#include "../electron_factory_fsa.h"
-#include "../electron_factory_gg.h"
 
 class electron {
-    friend class electron_factory_fsa;
-    friend class electron_factory_gg;
-
  private:
     std::string name = "electron";
     Int_t gen_match;
@@ -22,6 +17,7 @@ class electron {
     electron(Float_t, Float_t, Float_t, Float_t, Float_t);
     ~electron() {}
 
+    // getters
     std::string getName() { return name; }
     Int_t getCharge() { return charge; }
     Int_t getGenMatch() { return gen_match; }
@@ -35,6 +31,15 @@ class electron {
     Float_t getGenPhi() { return gen_phi; }
     Float_t getGenE() { return gen_energy; }
     TLorentzVector getP4() { return p4; }
+
+    // setters
+    void setGenMatch(Int_t _gen_match) { gen_match = _gen_match; }
+    void setIso(Float_t _iso) { iso = _iso; }
+    void setGenPt(Float_t _gen_pt) { gen_pt = _gen_pt; }
+    void setGenEta(Float_t _gen_eta) { gen_eta = _gen_eta; }
+    void setGenPhi(Float_t _gen_phi) { gen_phi = _gen_phi; }
+    void setGenEnergy(Float_t _gen_energy) { gen_energy = _gen_energy; }
+    void scaleP4(Float_t sf) { p4 *= sf; }
 };
 
 // initialize member data and set TLorentzVector

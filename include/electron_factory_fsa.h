@@ -49,25 +49,22 @@ electron_factory_fsa::electron_factory_fsa(TTree* input, int era, std::string _s
 // create electron object and set member data
 electron electron_factory_fsa::run_factory() {
     electron el(pt_1, eta_1, phi_1, m_1, q_1);
-    el.px = px_1;
-    el.py = py_1;
-    el.pz = pz_1;
-    el.iso = iso_1;
-    el.gen_match = gen_match_1;
-    el.gen_pt = eGenPt;
-    el.gen_eta = eGenEta;
-    el.gen_phi = eGenPhi;
-    el.gen_energy = eGenEnergy;
+    el.setGenMatch(gen_match_1);
+    el.setIso(iso_1);
+    el.setGenPt(eGenPt);
+    el.setGenEta(eGenEta);
+    el.setGenPhi(eGenPhi);
+    el.setGenEnergy(eGenEnergy);
 
     // Electron energy scale systematics (eCorrectedEt is already applied so divide it out)
     if (syst == "EEScale_Up") {
-        el.p4 *= eEnergyScaleUp / eCorrectedEt;
+        el.scaleP4(eEnergyScaleUp / eCorrectedEt);
     } else if (syst == "EEScale_Down") {
-        el.p4 *= eEnergyScaleDown / eCorrectedEt;
+        el.scaleP4(eEnergyScaleDown / eCorrectedEt);
     } else if (syst == "EESigma_Up") {
-        el.p4 *= eEnergySigmaUp / eCorrectedEt;
+        el.scaleP4(eEnergySigmaUp / eCorrectedEt);
     } else if (syst == "EESigma_Down") {
-        el.p4 *= eEnergySigmaDown / eCorrectedEt;
+        el.scaleP4(eEnergySigmaDown / eCorrectedEt);
     }
 
     return el;

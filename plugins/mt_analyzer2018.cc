@@ -23,12 +23,12 @@
 #include "../include/ComputeWG1Unc.h"
 #include "../include/LumiReweightingStandAlone.h"
 #include "../include/event_info.h"
-#include "../include/jet_factory.h"
+#include "../include/jet_factory_fsa.h"
 #include "../include/met_factory.h"
-#include "../include/muon_factory.h"
+#include "../include/muon_factory_fsa.h"
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
-#include "../include/tau_factory.h"
+#include "../include/tau_factory_fsa.h"
 
 typedef std::vector<double> NumV;
 
@@ -175,9 +175,9 @@ int main(int argc, char *argv[]) {
 
     // construct factories
     event_info event(ntuple, lepton::MUON, 2018, isMG, syst);
-    muon_factory muons(ntuple, 2018, syst);
-    tau_factory taus(ntuple, 2018, syst);
-    jet_factory jets(ntuple, 2018, syst);
+    muon_factory_fsa muons(ntuple, 2018, syst);
+    tau_factory_fsa taus(ntuple, 2018, syst);
+    jet_factory_fsa jets(ntuple, 2018, syst);
     met_factory met(ntuple, 2018, syst);
 
     if (sample == "ggh125" && signal_type == "powheg") {

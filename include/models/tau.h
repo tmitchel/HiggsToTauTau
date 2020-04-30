@@ -4,22 +4,18 @@
 #define INCLUDE_MODELS_TAU_H_
 
 #include <string>
+#include <vector>
 #include "TLorentzVector.h"
-#include "../tau_factory_fsa.h"
-#include "../tau_factory_gg.h"
-
 class tau {
-    friend class tau_factory_fsa;
-    friend class tau_factory_gg;
-
  private:
     std::string name = "tau";
     Int_t gen_match;
-    Float_t pt, eta, phi, mass, charge, decayMode, dmf, dmf_new, iso, deepiso, gen_pt, gen_eta, gen_phi;
+    Float_t pt, eta, phi, mass, charge, decay_mode, dmf, dmf_new, iso, deepiso, gen_pt, gen_eta, gen_phi;
     Float_t VLooseIsoMVA, LooseIsoMVA, MediumIsoMVA, TightIsoMVA, VTightIsoMVA, VVTightIsoMVA;
     Float_t VVVLooseIsoDeep, VLooseIsoDeep, LooseIsoDeep, MediumIsoDeep, TightIsoDeep, VTightIsoDeep, VVTightIsoDeep;
-    Bool_t AgainstTightElectronMVA, AgainstVLooseElectronMVA, AgainstTightMuonMVA, AgainstLooseMuonMVA;
-    Bool_t AgainstTightElectronDeep, AgainstVVLooseElectronDeep, AgainstVVVLooseElectronDeep, AgainstTightMuonDeep, AgainstVLooseMuonDeep;
+    Float_t AgainstTightElectronMVA, AgainstVLooseElectronMVA, AgainstTightMuonMVA, AgainstLooseMuonMVA;
+    Float_t AgainstTightElectronDeep, AgainstVVLooseElectronDeep, AgainstVVVLooseElectronDeep, AgainstTightMuonDeep, AgainstVLooseMuonDeep;
+    std::vector<Float_t> mva_wps, deep_wps, mva_againstel_wps, mva_againstmu_wps, deep_againstel_wps, deep_againstmu_wps;
 
     TLorentzVector p4;
 
@@ -27,6 +23,7 @@ class tau {
     tau(Float_t, Float_t, Float_t, Float_t, Float_t);
     ~tau() {}
 
+    // getters
     std::string getName() { return name; }
     Int_t getGenMatch() { return gen_match; }
     Int_t getCharge() { return charge; }
@@ -49,27 +46,100 @@ class tau {
     Float_t getTightIsoDeep() { return TightIsoDeep; }
     Float_t getVTightIsoDeep() { return VTightIsoDeep; }
     Float_t getVVTightIsoDeep() { return VVTightIsoDeep; }
-    Float_t getDecayMode() { return decayMode; }
+    Float_t getDecayMode() { return decay_mode; }
     Float_t getDecayModeFinding() { return dmf; }
     Float_t getDecayModeFindingNew() { return dmf_new; }
     Float_t getGenPt() { return gen_pt; }
     Float_t getGenEta() { return gen_eta; }
     Float_t getGenPhi() { return gen_phi; }
-    Bool_t getAgainstTightElectronMVA() { return AgainstTightElectronMVA; }
-    Bool_t getAgainstVLooseElectronMVA() { return AgainstVLooseElectronMVA; }
-    Bool_t getAgainstTightMuonMVA() { return AgainstTightMuonMVA; }
-    Bool_t getAgainstLooseMuonMVA() { return AgainstLooseMuonMVA; }
-    Bool_t getAgainstTightElectronDeep() { return AgainstTightElectronDeep; }
-    Bool_t getAgainstVVLooseElectronDeep() { return AgainstVVLooseElectronDeep; }
-    Bool_t getAgainstVVVLooseElectronDeep() { return AgainstVVVLooseElectronDeep; }
-    Bool_t getAgainstTightMuonDeep() { return AgainstTightMuonDeep; }
-    Bool_t getAgainstVLooseMuonDeep() { return AgainstVLooseMuonDeep; }
+    Float_t getAgainstTightElectronMVA() { return AgainstTightElectronMVA; }
+    Float_t getAgainstVLooseElectronMVA() { return AgainstVLooseElectronMVA; }
+    Float_t getAgainstTightMuonMVA() { return AgainstTightMuonMVA; }
+    Float_t getAgainstLooseMuonMVA() { return AgainstLooseMuonMVA; }
+    Float_t getAgainstTightElectronDeep() { return AgainstTightElectronDeep; }
+    Float_t getAgainstVVLooseElectronDeep() { return AgainstVVLooseElectronDeep; }
+    Float_t getAgainstVVVLooseElectronDeep() { return AgainstVVVLooseElectronDeep; }
+    Float_t getAgainstTightMuonDeep() { return AgainstTightMuonDeep; }
+    Float_t getAgainstVLooseMuonDeep() { return AgainstVLooseMuonDeep; }
     TLorentzVector getP4() { return p4; }
+
+    // setters
+    void setGenMatch(Int_t _gen_match) { gen_match = _gen_match; }
+    void setRawMVAIso(Float_t _iso) { iso = _iso; }
+    void setRawDeepIso(Float_t _iso) {deepiso = _iso; }
+    void setDecayMode(Float_t _decay_mode) { decay_mode = _decay_mode; }
+    void setDecayModeFinding(Float_t _dmf) { dmf = _dmf; }
+    void setDecayModeFindingNew(Float_t _dmf_new) { dmf_new = _dmf_new; }
+    void setGenPt(Float_t _gen_pt) { gen_pt = _gen_pt; }
+    void setGenEta(Float_t _gen_eta) { gen_eta = _gen_eta; }
+    void setGenPhi(Float_t _gen_phi) { gen_phi = _gen_phi; }
+
+    void setMVAIsoWPs(std::vector<Float_t>);
+    void setDeepIsoWPs(std::vector<Float_t>);
+    void setMVAAgainstElectron(std::vector<Float_t>);
+    void setMVAAgainstMuon(std::vector<Float_t>);
+    void setDeepAgainstElectron(std::vector<Float_t>);
+    void setDeepAgainstMuon(std::vector<Float_t>);
 };
+
+void tau::setMVAIsoWPs(std::vector<Float_t> wps) {
+    if (wps.size() < 5) {
+        std::cerr << "MVA tau iso must be provided 5 working points" << std::endl;
+    }
+    for (unsigned i = 0; i < 5; i++) {
+        mva_wps.at(i) = wps.at(i);
+    }
+}
+
+void tau::setDeepIsoWPs(std::vector<Float_t> wps) {
+    if (wps.size() < 9) {
+        std::cerr << "Deep tau iso must be provided 9 working points" << std::endl;
+    }
+    for (unsigned i = 0; i < 5; i++) {
+        deep_wps.at(i) = wps.at(i);
+    }
+}
+
+void tau::setMVAAgainstElectron(std::vector<Float_t> wps) {
+        if (wps.size() < 5) {
+        std::cerr << "MVA tau iso must be provided 5 working points" << std::endl;
+    }
+    for (unsigned i = 0; i < 5; i++) {
+        mva_againstel_wps.at(i) = wps.at(i);
+    }
+}
+
+void tau::setMVAAgainstMuon(std::vector<Float_t> wps) {
+        if (wps.size() < 5) {
+        std::cerr << "MVA tau iso must be provided 5 working points" << std::endl;
+    }
+    for (unsigned i = 0; i < 5; i++) {
+        mva_againstmu_wps.at(i) = wps.at(i);
+    }
+}
+
+void tau::setDeepAgainstElectron(std::vector<Float_t> wps) {
+        if (wps.size() < 9) {
+        std::cerr << "Deep tau iso must be provided 9 working points" << std::endl;
+    }
+    for (unsigned i = 0; i < 9; i++) {
+        deep_againstel_wps.at(i) = wps.at(i);
+    }
+}
+
+void tau::setDeepAgainstMuon(std::vector<Float_t> wps) {
+        if (wps.size() < 9) {
+        std::cerr << "Deep tau iso must be provided 9 working points" << std::endl;
+    }
+    for (unsigned i = 0; i < 9; i++) {
+        deep_againstmu_wps.at(i) = wps.at(i);
+    }
+}
 
 // initialize member data and set TLorentzVector
 tau::tau(Float_t _pt, Float_t _eta, Float_t _phi, Float_t _mass, Float_t _charge)
-    : pt(_pt), eta(_eta), phi(_phi), mass(_mass), charge(_charge) {
+    : pt(_pt), eta(_eta), phi(_phi), mass(_mass), charge(_charge),
+      mva_wps{0, 0, 0, 0, 0} {
     p4.SetPtEtaPhiM(pt, eta, phi, mass);
 }
 

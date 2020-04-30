@@ -5,13 +5,8 @@
 
 #include <string>
 #include "TLorentzVector.h"
-#include "../jet_factory_fsa.h"
-#include "../jet_factory_gg.h"
 
 class jet {
-    friend class jet_factory_fsa
-    friend class jet_factory_gg;
-
  private:
     Float_t pt, eta, phi, csv, flavor;
     TLorentzVector p4;
@@ -20,6 +15,7 @@ class jet {
     jet(Float_t, Float_t, Float_t, Float_t, Float_t);
     virtual ~jet() {}
 
+    // getters
     Float_t getPt() { return pt; }
     Float_t getEta() { return eta; }
     Float_t getPhi() { return phi; }

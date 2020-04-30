@@ -2,11 +2,12 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "./electron_factory.h"
-#include "./muon_factory.h"
-#include "./tau_factory.h"
 #include "TMath.h"
 #include "TTree.h"
+#include "jet_factory_fsa.h"
+#include "models/electron.h"
+#include "models/muon.h"
+#include "models/tau.h"
 
 class slim_tree {
    public:
@@ -15,11 +16,11 @@ class slim_tree {
 
     // member functions
     // fill the tree for this event
-    void fillTree(std::vector<std::string>, electron *, tau *, jet_factory *, met_factory *, event_info *, Float_t, Float_t,
+    void fillTree(std::vector<std::string>, electron *, tau *, jet_factory_fsa *, met_factory *, event_info *, Float_t, Float_t,
                   std::shared_ptr<std::vector<double>>, std::string);
-    void fillTree(std::vector<std::string>, muon *, tau *, jet_factory *, met_factory *, event_info *, Float_t, Float_t,
+    void fillTree(std::vector<std::string>, muon *, tau *, jet_factory_fsa *, met_factory *, event_info *, Float_t, Float_t,
                   std::shared_ptr<std::vector<double>>, std::string);
-    void generalFill(std::vector<std::string>, jet_factory *, met_factory *, event_info *, Float_t, TLorentzVector, Float_t,
+    void generalFill(std::vector<std::string>, jet_factory_fsa *, met_factory *, event_info *, Float_t, TLorentzVector, Float_t,
                      std::shared_ptr<std::vector<double>>, std::string);
 
     // member data
@@ -217,7 +218,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     }
 }
 
-void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t weight,
+void slim_tree::generalFill(std::vector<std::string> cats, jet_factory_fsa *fjets, met_factory *fmet, event_info *evt, Float_t weight,
                             TLorentzVector higgs, Float_t Mt, std::shared_ptr<std::vector<double>> ac_weights, std::string name) {
     // create things needed for later
     auto jets(fjets->getJets());
@@ -412,7 +413,7 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
     }
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t mt,
+void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet_factory_fsa *fjets, met_factory *fmet, event_info *evt, Float_t mt,
                          Float_t weight, std::shared_ptr<std::vector<double>> ac_weights, std::string name) {
     TLorentzVector higgs(el->getP4() + t->getP4() + fmet->getP4());
     generalFill(cat, fjets, fmet, evt, weight, higgs, mt, ac_weights, name);
@@ -451,7 +452,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     otree->Fill();
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_factory *fjets, met_factory *fmet, event_info *evt, Float_t mt,
+void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_factory_fsa *fjets, met_factory *fmet, event_info *evt, Float_t mt,
                          Float_t weight, std::shared_ptr<std::vector<double>> ac_weights, std::string name) {
     TLorentzVector higgs(mu->getP4() + t->getP4() + fmet->getP4());
     generalFill(cat, fjets, fmet, evt, weight, higgs, mt, ac_weights, name);

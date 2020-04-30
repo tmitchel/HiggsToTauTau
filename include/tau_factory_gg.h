@@ -75,80 +75,72 @@ tau_factory_gg::tau_factory_gg(TTree* input, int _era, std::string _syst) : era(
 // create electron object and set member data
 tau tau_factory_gg::run_factory() {
     tau t(pt_2, eta_2, phi_2, m_2, q_2);
-    t.iso = iso_2;
-    t.deepiso = deepiso_2;
-    t.gen_match = gen_match_2;
-    t.decayMode = decayMode;
-    t.AgainstTightElectronMVA = againstElectronTightMVA6_2;
-    t.AgainstVLooseElectronMVA = againstElectronVLooseMVA6_2;
-    t.AgainstTightMuonMVA = againstMuonTight3_2;
-    t.AgainstLooseMuonMVA = againstMuonLoose3_2;
-    t.AgainstTightElectronDeep = tTightDeepTau2017v2p1VSe;
-    t.AgainstVVLooseElectronDeep = tVVLooseDeepTau2017v2p1VSe;
-    t.AgainstVVVLooseElectronDeep = tVVVLooseDeepTau2017v2p1VSe;
-    t.AgainstTightMuonDeep = tTightDeepTau2017v2p1VSmu;
-    t.AgainstVLooseMuonDeep = tVLooseDeepTau2017v2p1VSmu;
-    t.VLooseIsoMVA = byVLooseIsolationMVArun2v1DBoldDMwLT_2;
-    t.LooseIsoMVA = byLooseIsolationMVArun2v1DBoldDMwLT_2;
-    t.MediumIsoMVA = byMediumIsolationMVArun2v1DBoldDMwLT_2;
-    t.TightIsoMVA = byTightIsolationMVArun2v1DBoldDMwLT_2;
-    t.VTightIsoMVA = byVTightIsolationMVArun2v1DBoldDMwLT_2;
-    t.VVTightIsoMVA = byVVTightIsolationMVArun2v1DBoldDMwLT_2;
-    t.VVVLooseIsoDeep = tVVVLooseDeepTau2017v2p1VSjet;
-    t.VLooseIsoDeep = tVLooseDeepTau2017v2p1VSjet;
-    t.LooseIsoDeep = tLooseDeepTau2017v2p1VSjet;
-    t.MediumIsoDeep = tMediumDeepTau2017v2p1VSjet;
-    t.TightIsoDeep = tTightDeepTau2017v2p1VSjet;
-    t.VTightIsoDeep = tVTightDeepTau2017v2p1VSjet;
-    t.VVTightIsoDeep = tVVTightDeepTau2017v2p1VSjet;
-    t.dmf = dmf;
-    t.dmf_new = dmf_new;
-    t.gen_pt = tZTTGenPt;
-    t.gen_eta = tZTTGenEta;
-    t.gen_phi = tZTTGenPhi;
-
-    // float shift = get_TES_shift(era, dmf);
-    // if (syst.find("ltau_FES") != std::string::npos) {
-    //     syst.find("_Up") != std::string::npos ? t.scaleTES(1 + 0.02) : t.scaleTES(1 - 0.02);
-    // } else if (syst.find("DM0") != std::string::npos && dmf == 0) {
-    //     syst.find("_Up") != std::string::npos ? t.scaleTES(1 + shift) : t.scaleTES(1 - shift);
-    // } else if (syst.find("DM1_") != std::string::npos && dmf == 1) {
-    //     syst.find("_Up") != std::string::npos ? t.scaleTES(1 + shift) : t.scaleTES(1 - shift);
-    // } else if (syst.find("DM10_") != std::string::npos && dmf == 10) {
-    //     syst.find("_Up") != std::string::npos ? t.scaleTES(1 + shift) : t.scaleTES(1 - shift);
-    // }
+    t.setGenMatch(gen_match_2);
+    t.setRawMVAIso(iso_2);
+    t.setRawDeepIso(deepiso_2);
+    t.setDecayMode(decayMode);
+    t.setDecayModeFinding(dmf);
+    t.setDecayModeFindingNew(dmf_new);
+    t.setGenPt(tZTTGenPt);
+    t.setGenEta(tZTTGenEta);
+    t.setGenPhi(tZTTGenPhi);
+    t.setMVAIsoWPs(std::vector<Float_t>{
+        byVLooseIsolationMVArun2v1DBoldDMwLT_2,
+        byLooseIsolationMVArun2v1DBoldDMwLT_2,
+        byMediumIsolationMVArun2v1DBoldDMwLT_2,
+        byTightIsolationMVArun2v1DBoldDMwLT_2,
+        byVTightIsolationMVArun2v1DBoldDMwLT_2
+    });
+    t.setDeepIsoWPs(std::vector<Float_t>{
+        tVVVLooseDeepTau2017v2p1VSjet,
+        0,
+        tVLooseDeepTau2017v2p1VSjet,
+        tLooseDeepTau2017v2p1VSjet,
+        tMediumDeepTau2017v2p1VSjet,
+        tTightDeepTau2017v2p1VSjet,
+        tVTightDeepTau2017v2p1VSjet,
+        tVVTightDeepTau2017v2p1VSjet,
+        0
+    });
+    t.setMVAAgainstElectron(std::vector<Float_t>{
+        againstElectronVLooseMVA6_2,
+        0,
+        0,
+        againstElectronTightMVA6_2,
+        0
+    });
+    t.setMVAAgainstMuon(std::vector<Float_t>{
+        0,
+        againstMuonLoose3_2,
+        0,
+        againstMuonTight3_2,
+        0
+    });
+    t.setDeepAgainstElectron(std::vector<Float_t>{
+        tVVVLooseDeepTau2017v2p1VSe,
+        tVVLooseDeepTau2017v2p1VSe,
+        0,
+        0,
+        0,
+        tTightDeepTau2017v2p1VSe,
+        0,
+        0,
+        0
+    });
+    t.setDeepAgainstMuon(std::vector<Float_t>{
+        0,
+        0,
+        tVLooseDeepTau2017v2p1VSmu,
+        0,
+        0,
+        tTightDeepTau2017v2p1VSmu,
+        0,
+        0,
+        0
+    });
 
     return t;
 }
 
-// handle shifting TES for systematics
-Float_t get_TES_shift(int year, float decayMode) {
-  if (year == 2016) {
-    if (decayMode == 0) {
-        return 0.010;
-    } else if (decayMode == 1) {
-        return 0.009;
-    } else if (decayMode == 10) {
-        return 0.011;
-    }
-  } else if (year == 2017) {
-    if (decayMode == 0) {
-        return 0.008;
-    } else if (decayMode == 1) {
-        return 0.008;
-    } else if (decayMode == 10) {
-        return 0.009;
-    }
-  } else if (year == 2018) {
-    if (decayMode == 0) {
-        return 0.011;
-    } else if (decayMode == 1) {
-        return 0.008;
-    } else if (decayMode == 10) {
-        return 0.009;
-    }
-  }
-  return -999;
-}
 
 #endif  // INCLUDE_TAU_FACTORY_GG_H_
