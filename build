@@ -22,8 +22,13 @@ echo "${s// //}"
 
 set -e
 
-doFF="${CMSSW_BASE}/lib/slc6_amd64_gcc630/libHTTutilitiesJet2TauFakes.so"
+# none of these are actually used anymore
+doFF="${CMSSW_BASE}/lib/${SCRAM_ARCH}/libHTTutilitiesJet2TauFakes.so"
+lep2016="${CMSSW_BASE}/lib/${SCRAM_ARCH}/libHTT-utilitiesLepEffInterface.so"
+tauID="${CMSSW_BASE}/lib/${SCRAM_ARCH}/libTauIDSFTool.so"
+tauTrig="${CMSSW_BASE}/lib/${SCRAM_ARCH}/libTauAnalysisToolsTauTriggerSFs.so"
 
 # this is the important part for compiling
-g++ -O3 $1 `root-config --cflags --glibs` ${CMSSW_BASE}/lib/slc6_amd64_gcc630/libTauTriggerSFs2017TauTriggerSFs2017.so $doFF -lRooFit -lRooFitCore -I ${CMSSW_BASE}/src -I ${CMSSW_BASE}/src/ltau_analyzers/include -I include -o $2
+g++ -O3 $1 `root-config --cflags --glibs`  -lRooFit -lRooFitCore -I ${CMSSW_BASE}/src -I ${CMSSW_BASE}/src/ltau_analyzers/include -I include -o $2
 cp $2 $HOME/bin
+cp $2 $CMSSW_BASE/bin/$SCRAM_ARCH

@@ -17,28 +17,26 @@ job1:
   - tar czf repo.tar.gz ltau_analyzers
   - set +e && source /cvmfs/cms.cern.ch/cmsset_default.sh; set -e
   - export SCRAM_ARCH=slc6_amd64_gcc630
-  - scramv1 project CMSSW CMSSW_9_4_0
-  - cd CMSSW_9_4_0/src
+  - scramv1 project CMSSW CMSSW_10_4_0
+  - cd CMSSW_10_4_0/src
   - mv ../../repo.tar.gz .
   - tar xzf repo.tar.gz
   - eval `scramv1 runtime -sh`
-  - mkdir TauTriggerSFs2017
-  - cd TauTriggerSFs2017
-  - git clone -b tauTriggers2017_reMiniaod_test https://github.com/truggles/TauTriggerSFs2017.git TauTriggerSFs2017
-  - cd ..
-  - git clone https://github.com/CMS-HTT/Jet2TauFakes.git HTTutilities/Jet2TauFakes
-  - cd HTTutilities/Jet2TauFakes
-  - git checkout v0.2.2
-  - cd ../..
+  - cd ${CMSSW_BASE}/src
+  - git clone https://github.com/cms-tau-pog/TauIDSFs TauPOG/TauIDSFs
+  - cd ${CMSSW_BASE}/src
   - scram b
   - cd ltau_analyzers
   script:
   - echo "start"
   - echo `ls`
+  - echo `ls $CMSSW_BASE/lib/$SCRAM_ARCH/`
   - ./build plugins/et_analyzer2016.cc test
   - ./build plugins/et_analyzer2017.cc test
+  - ./build plugins/et_analyzer2018.cc test
   - ./build plugins/mt_analyzer2016.cc test
   - ./build plugins/mt_analyzer2017.cc test
+  - ./build plugins/mt_analyzer2018.cc test
 
 #
 # Job: run CppLint

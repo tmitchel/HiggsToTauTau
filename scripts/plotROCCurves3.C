@@ -1,6 +1,15 @@
-#include <map>
 #include <algorithm>
+#include <iostream>
+#include <map>
 #include <vector>
+
+#include "TFile.h"
+#include "TLegend.h"
+#include "TGraph.h"
+#include "TH1F.h"
+#include "TH2F.h"
+#include "TStyle.h"
+
 using namespace std;
 
 TH1F* reorder(TH1F* s, TH1F* b, bool signal = true) {
