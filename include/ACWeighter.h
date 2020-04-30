@@ -66,7 +66,7 @@ ACWeighter::ACWeighter(string original, string sample, string _signal_type, stri
 
     string stype_dir = "";
     if (signal_type == "madgraph" && year == "2016") {
-        stype_dir = "/MG2016_X10/";
+        notSignal = true;
     } else if (signal_type == "madgraph" && year == "2017") {
         stype_dir = "/MG2017_X10_v2/";
     } else if (signal_type == "madgraph" && year == "2018") {
