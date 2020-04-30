@@ -5,10 +5,12 @@
 
 #include <string>
 #include "TLorentzVector.h"
-#include "../electron_factory.h"
+#include "../electron_factory_fsa.h"
+#include "../electron_factory_gg.h"
 
 class electron {
-    friend electron_factory;
+    friend class electron_factory_fsa;
+    friend class electron_factory_gg;
 
  private:
     std::string name = "electron";

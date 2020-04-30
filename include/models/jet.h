@@ -5,10 +5,12 @@
 
 #include <string>
 #include "TLorentzVector.h"
-#include "../jet_factory.h"
+#include "../jet_factory_fsa.h"
+#include "../jet_factory_gg.h"
 
 class jet {
-    friend jet_factory;
+    friend class jet_factory_fsa
+    friend class jet_factory_gg;
 
  private:
     Float_t pt, eta, phi, csv, flavor;

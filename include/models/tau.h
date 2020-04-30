@@ -5,10 +5,12 @@
 
 #include <string>
 #include "TLorentzVector.h"
-#include "../tau_factory.h"
+#include "../tau_factory_fsa.h"
+#include "../tau_factory_gg.h"
 
 class tau {
-    friend tau_factory;
+    friend class tau_factory_fsa;
+    friend class tau_factory_gg;
 
  private:
     std::string name = "tau";

@@ -5,10 +5,12 @@
 
 #include <string>
 #include "TLorentzVector.h"
-#include "../muon_factory.h"
+#include "../muon_factory_fsa.h"
+#include "../muon_factory_gg.h"
 
 class muon {
-    friend muon_factory;
+    friend class muon_factory_fsa;
+    friend class muon_factory_gg;
 
  private:
     std::string name = "muon";
