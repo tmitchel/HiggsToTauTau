@@ -1,7 +1,7 @@
 // Copyright [2018] Tyler Mitchell
 
-#ifndef INCLUDE_TAU_FACTORY_FSA_H_
-#define INCLUDE_TAU_FACTORY_FSA_H_
+#ifndef INCLUDE_FSA_TAU_FACTORY_H_
+#define INCLUDE_FSA_TAU_FACTORY_H_
 
 #include <cmath>
 #include <iostream>
@@ -9,9 +9,9 @@
 #include <vector>
 #include "TLorentzVector.h"
 #include "TTree.h"
-#include "models/tau.h"
+#include "../models/tau.h"
 
-class tau_factory_fsa {
+class tau_factory {
  private:
     std::string syst;
     Int_t gen_match_2, era;
@@ -24,13 +24,13 @@ class tau_factory_fsa {
         tTightDeepTau2017v2p1VSjet, tVTightDeepTau2017v2p1VSjet, tVVTightDeepTau2017v2p1VSjet, deepiso_2;
 
  public:
-    tau_factory_fsa(TTree*, int, std::string);
-    virtual ~tau_factory_fsa() {}
+    tau_factory(TTree*, int, std::string);
+    virtual ~tau_factory() {}
     tau run_factory();
 };
 
 // read data from tree Int_to member variables
-tau_factory_fsa::tau_factory_fsa(TTree* input, int _era, std::string _syst) : era(_era), syst(_syst) {
+tau_factory::tau_factory(TTree* input, int _era, std::string _syst) : era(_era), syst(_syst) {
     input->SetBranchAddress("pt_2", &pt_2);
     input->SetBranchAddress("eta_2", &eta_2);
     input->SetBranchAddress("phi_2", &phi_2);
@@ -71,7 +71,7 @@ tau_factory_fsa::tau_factory_fsa(TTree* input, int _era, std::string _syst) : er
 }
 
 // create electron object and set member data
-tau tau_factory_fsa::run_factory() {
+tau tau_factory::run_factory() {
     tau t(pt_2, eta_2, phi_2, m_2, q_2);
     t.setGenMatch(gen_match_2);
     t.setRawMVAIso(iso_2);
@@ -140,4 +140,4 @@ tau tau_factory_fsa::run_factory() {
     return t;
 }
 
-#endif  // INCLUDE_TAU_FACTORY_FSA_H_
+#endif  // INCLUDE_FSA_TAU_FACTORY_H_

@@ -1,7 +1,7 @@
 // Copyright [2019] Tyler Mitchell
 
-#ifndef INCLUDE_JET_FACTORY_FSA_H_
-#define INCLUDE_JET_FACTORY_FSA_H_
+#ifndef INCLUDE_FSA_JET_FACTORY_H_
+#define INCLUDE_FSA_JET_FACTORY_H_
 
 #include <algorithm>
 #include <unordered_map>
@@ -10,9 +10,9 @@
 #include "TLorentzVector.h"
 #include "TRandom3.h"
 #include "TTree.h"
-#include "models/jet.h"
+#include "../models/jet.h"
 
-class jet_factory_fsa {
+class jet_factory {
    private:
     Float_t mjj;
     Float_t jpt_1, jeta_1, jphi_1, jcsv_1;
@@ -27,8 +27,8 @@ class jet_factory_fsa {
     std::unordered_map<std::string, std::string> syst_name_map;
 
    public:
-    jet_factory_fsa(TTree *, int, std::string);
-    virtual ~jet_factory_fsa() {}
+    jet_factory(TTree *, int, std::string);
+    virtual ~jet_factory() {}
     void run_factory();
     std::string fix_syst_string(std::string);
 
@@ -47,7 +47,7 @@ class jet_factory_fsa {
 };
 
 // read data from tree into member variables
-jet_factory_fsa::jet_factory_fsa(TTree *input, int era, std::string syst)
+jet_factory::jet_factory(TTree *input, int era, std::string syst)
     : syst_name_map{
           {"JetRelSam_Up", "JetRelativeSampleUp"},
           {"JetRelSam_Down", "JetRelativeSampleDown"},
@@ -110,7 +110,7 @@ jet_factory_fsa::jet_factory_fsa(TTree *input, int era, std::string syst)
 }
 
 // initialize member data and set TLorentzVector
-void jet_factory_fsa::run_factory() {
+void jet_factory::run_factory() {
     plain_jets.clear();
     btag_jets.clear();
 
@@ -126,7 +126,7 @@ void jet_factory_fsa::run_factory() {
     btag_jets.push_back(b2);
 }
 
-std::string jet_factory_fsa::fix_syst_string(std::string syst) {
+std::string jet_factory::fix_syst_string(std::string syst) {
     auto formatted(syst);
     auto end = std::string::npos;
     if (syst.find("JetRel") != end || syst.find("JetJER") != end) {
@@ -144,4 +144,4 @@ std::string jet_factory_fsa::fix_syst_string(std::string syst) {
     return formatted;
 }
 
-#endif  // INCLUDE_JET_FACTORY_FSA_H_
+#endif  // INCLUDE_FSA_JET_FACTORY_H_

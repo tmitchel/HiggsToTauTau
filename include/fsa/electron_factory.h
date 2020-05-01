@@ -1,16 +1,16 @@
 // Copyright [2019] Tyler Mitchell
 
-#ifndef INCLUDE_ELECTRON_FACTORY_FSA_H_
-#define INCLUDE_ELECTRON_FACTORY_FSA_H_
+#ifndef INCLUDE_FSA_ELECTRON_FACTORY_H_
+#define INCLUDE_FSA_ELECTRON_FACTORY_H_
 
 #include <cmath>
 #include <string>
 #include <vector>
 #include "TLorentzVector.h"
 #include "TTree.h"
-#include "models/electron.h"
+#include "../models/electron.h"
 
-class electron_factory_fsa {
+class electron_factory {
  private:
     std::string syst;
     Int_t gen_match_1;
@@ -18,13 +18,13 @@ class electron_factory_fsa {
     Float_t eCorrectedEt, eEnergyScaleUp, eEnergyScaleDown, eEnergySigmaUp, eEnergySigmaDown;
 
  public:
-    electron_factory_fsa(TTree*, int, std::string);
-    virtual ~electron_factory_fsa() {}
+    electron_factory(TTree*, int, std::string);
+    virtual ~electron_factory() {}
     electron run_factory();
 };
 
 // read data from tree into member variables
-electron_factory_fsa::electron_factory_fsa(TTree* input, int era, std::string _syst) : syst(_syst) {
+electron_factory::electron_factory(TTree* input, int era, std::string _syst) : syst(_syst) {
     input->SetBranchAddress("px_1", &px_1);
     input->SetBranchAddress("py_1", &py_1);
     input->SetBranchAddress("pz_1", &pz_1);
@@ -47,7 +47,7 @@ electron_factory_fsa::electron_factory_fsa(TTree* input, int era, std::string _s
 }
 
 // create electron object and set member data
-electron electron_factory_fsa::run_factory() {
+electron electron_factory::run_factory() {
     electron el(pt_1, eta_1, phi_1, m_1, q_1);
     el.setGenMatch(gen_match_1);
     el.setIso(iso_1);
@@ -70,4 +70,4 @@ electron electron_factory_fsa::run_factory() {
     return el;
 }
 
-#endif  // INCLUDE_ELECTRON_FACTORY_FSA_H_
+#endif  // INCLUDE_FSA_ELECTRON_FACTORY_H_
