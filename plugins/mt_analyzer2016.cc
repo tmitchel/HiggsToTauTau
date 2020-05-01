@@ -23,12 +23,12 @@
 #include "../include/ComputeWG1Unc.h"
 #include "../include/LumiReweightingStandAlone.h"
 #include "../include/event_info.h"
-#include "../include/jet_factory.h"
+#include "../include/fsa/jet_factory.h"
 #include "../include/met_factory.h"
-#include "../include/muon_factory.h"
+#include "../include/fsa/muon_factory.h"
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
-#include "../include/tau_factory.h"
+#include "../include/fsa/tau_factory.h"
 
 typedef std::vector<double> NumV;
 
@@ -229,10 +229,13 @@ int main(int argc, char *argv[]) {
         histos->at("cutflow")->Fill(1., 1.);
 
         // run factories
-        auto muon = muons.run_factory();
-        auto tau = taus.run_factory();
+        muons.run_factory();
+        taus.run_factory();
         jets.run_factory();
         event.setNjets(jets.getNjets());
+
+        auto muon = muons.good_muon();
+        auto tau = taus.good_tau();
 
         // apply special ID for data
         if (event.getPassFlags(isData)) {

@@ -22,14 +22,14 @@
 #include "../include/CLParser.h"
 #include "../include/ComputeWG1Unc.h"
 #include "../include/LumiReweightingStandAlone.h"
-#include "../include/electron_factory.h"
+#include "../include/fsa/electron_factory.h"
 #include "../include/event_info.h"
-#include "../include/jet_factory.h"
+#include "../include/fsa/jet_factory.h"
 #include "../include/met_factory.h"
-#include "../include/muon_factory.h"
+#include "../include/fsa/muon_factory.h"
 #include "../include/slim_tree.h"
 #include "../include/swiss_army_class.h"
-#include "../include/tau_factory.h"
+#include "../include/fsa/tau_factory.h"
 
 typedef std::vector<double> NumV;
 
@@ -227,10 +227,13 @@ int main(int argc, char *argv[]) {
         histos->at("cutflow")->Fill(1., 1.);
 
         // run factories
-        auto electron = electrons.run_factory();
-        auto tau = taus.run_factory();
+        electrons.run_factory();
+        taus.run_factory();
         jets.run_factory();
         event.setNjets(jets.getNjets());
+
+        auto electron = electrons.good_electron();
+        auto tau = taus.good_tau();
 
         // pass event flags
         if (event.getPassFlags(isData)) {

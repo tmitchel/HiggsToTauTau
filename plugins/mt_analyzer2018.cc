@@ -229,6 +229,7 @@ int main(int argc, char *argv[]) {
         muons.run_factory();
         taus.run_factory();
         jets.run_factory();
+        event.setNjets(jets.getNjets());
 
         auto muon = muons.good_muon();
         auto tau = taus.good_tau();
