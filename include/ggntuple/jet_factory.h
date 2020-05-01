@@ -13,7 +13,7 @@
 #include "../models/jet.h"
 
 class jet_factory {
-   private:
+ private:
     Float_t mjj;
     Float_t jpt_1, jeta_1, jphi_1, jcsv_1;
     Float_t jpt_2, jeta_2, jphi_2, jcsv_2;
@@ -26,7 +26,7 @@ class jet_factory {
     std::vector<jet> plain_jets, btag_jets;
     std::unordered_map<std::string, std::string> syst_name_map;
 
-   public:
+ public:
     jet_factory(TTree *, int, std::string);
     virtual ~jet_factory() {}
     void run_factory();

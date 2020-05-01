@@ -11,8 +11,6 @@
 #include "TTree.h"
 #include "../models/tau.h"
 
-Float_t get_TES_shift(int, float);
-
 class tau_factory {
  private:
     std::string syst;
@@ -24,11 +22,17 @@ class tau_factory {
     Float_t tTightDeepTau2017v2p1VSe, tVVLooseDeepTau2017v2p1VSe, tVVVLooseDeepTau2017v2p1VSe, tTightDeepTau2017v2p1VSmu, tVLooseDeepTau2017v2p1VSmu;
     Float_t tVVVLooseDeepTau2017v2p1VSjet, tVLooseDeepTau2017v2p1VSjet, tLooseDeepTau2017v2p1VSjet, tMediumDeepTau2017v2p1VSjet,
         tTightDeepTau2017v2p1VSjet, tVTightDeepTau2017v2p1VSjet, tVVTightDeepTau2017v2p1VSjet, deepiso_2;
+    std::vector<tau> taus;
 
  public:
     tau_factory(TTree*, int, std::string);
     virtual ~tau_factory() {}
-    tau run_factory();
+    void run_factory();
+    Int_t num_taus() { return taus.size(); }
+    tau tau_at(unsigned i) { return taus.at(i); }
+    tau good_tau() { return taus.at(0); }
+    std::vector<tau> all_taus() { return taus; }
+
 };
 
 // read data from tree Int_to member variables
@@ -73,7 +77,7 @@ tau_factory::tau_factory(TTree* input, int _era, std::string _syst) : era(_era),
 }
 
 // create electron object and set member data
-tau tau_factory::run_factory() {
+void tau_factory::run_factory() {
     tau t(pt_2, eta_2, phi_2, m_2, q_2);
     t.setGenMatch(gen_match_2);
     t.setRawMVAIso(iso_2);
@@ -139,8 +143,7 @@ tau tau_factory::run_factory() {
         0
     });
 
-    return t;
+    taus = { t };
 }
-
 
 #endif  // INCLUDE_GGNTUPLE_TAU_FACTORY_H_

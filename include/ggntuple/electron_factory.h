@@ -3,6 +3,7 @@
 #ifndef INCLUDE_GGNTUPLE_ELECTRON_FACTORY_H_
 #define INCLUDE_GGNTUPLE_ELECTRON_FACTORY_H_
 
+#include <algorithm>
 #include <cmath>
 #include <string>
 #include <vector>
@@ -13,61 +14,70 @@
 class electron_factory {
  private:
     std::string syst;
-    Int_t gen_match_1;
-    Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, eGenPt, eGenEta, eGenPhi, eGenEnergy;
-    Float_t eCorrectedEt, eEnergyScaleUp, eEnergyScaleDown, eEnergySigmaUp, eEnergySigmaDown;
+    Int_t nEle, lepIndex, localIndex;
+    std::vector<Int_t> *charge;
+    std::vector<Float_t> *pt, *eta, *phi, *energy, *ch_iso, *pho_iso, *neu_iso, *pu_iso, *sc_eta, *id_mva_noiso;
+    std::vector<ULong64_t> *single_trig, *double_trig, *l1_trig;
+    std::vector<UShort_t> *id;
+    std::vector<electron> electrons;
 
  public:
     electron_factory(TTree*, int, std::string);
     virtual ~electron_factory() {}
-    electron run_factory();
+    void run_factory(Bool_t);
+    Int_t num_electrons() { return electrons.size(); }
+    electron electron_at(unsigned i) { return electrons.at(i); }
+    electron good_electron() { return electrons.at(localIndex); }
+    std::vector<electron> all_electrons() { return electrons; }
 };
 
 // read data from tree into member variables
 electron_factory::electron_factory(TTree* input, int era, std::string _syst) : syst(_syst) {
-    input->SetBranchAddress("px_1", &px_1);
-    input->SetBranchAddress("py_1", &py_1);
-    input->SetBranchAddress("pz_1", &pz_1);
-    input->SetBranchAddress("pt_1", &pt_1);
-    input->SetBranchAddress("eta_1", &eta_1);
-    input->SetBranchAddress("phi_1", &phi_1);
-    input->SetBranchAddress("m_1", &m_1);
-    input->SetBranchAddress("q_1", &q_1);
-    input->SetBranchAddress("eRelPFIsoRho", &iso_1);
-    input->SetBranchAddress("gen_match_1", &gen_match_1);
-    input->SetBranchAddress("eGenPt", &eGenPt);
-    input->SetBranchAddress("eGenEta", &eGenEta);
-    input->SetBranchAddress("eGenPhi", &eGenPhi);
-    input->SetBranchAddress("eGenEnergy", &eGenEnergy);
-    input->SetBranchAddress("eCorrectedEt", &eCorrectedEt);
-    input->SetBranchAddress("eEnergyScaleUp", &eEnergyScaleUp);
-    input->SetBranchAddress("eEnergyScaleDown", &eEnergyScaleDown);
-    input->SetBranchAddress("eEnergySigmaUp", &eEnergySigmaUp);
-    input->SetBranchAddress("eEnergySigmaDown", &eEnergySigmaDown);
+    input->SetBranchAddress("nEle", &nEle);
+    input->SetBranchAddress("lepIndex", &lepIndex);
+    input->SetBranchAddress("eleCharge", &charge);
+    input->SetBranchAddress("elePt", &pt);
+    input->SetBranchAddress("eleEta", &eta);
+    input->SetBranchAddress("elePhi", &phi);
+    input->SetBranchAddress("eleEn", &energy);
+    input->SetBranchAddress("elePFChIso", &ch_iso);
+    input->SetBranchAddress("elePFPhoIso", &pho_iso);
+    input->SetBranchAddress("elePFNeuIso", &neu_iso);
+    input->SetBranchAddress("elePFPUIso", &pu_iso);
+    input->SetBranchAddress("eleFiredSingleTrgs", &single_trig);
+    input->SetBranchAddress("eleFiredDoubleTrgs", &double_trig);
+    input->SetBranchAddress("eleFiredL1Trgs", &l1_trig);
+    input->SetBranchAddress("eleIDbit", &id);
+    input->SetBranchAddress("eleSCEta", &sc_eta);
+    input->SetBranchAddress("eleIDMVANoIso", &id_mva_noiso);
 }
 
 // create electron object and set member data
-electron electron_factory::run_factory() {
-    electron el(pt_1, eta_1, phi_1, m_1, q_1);
-    el.setGenMatch(gen_match_1);
-    el.setIso(iso_1);
-    el.setGenPt(eGenPt);
-    el.setGenEta(eGenEta);
-    el.setGenPhi(eGenPhi);
-    el.setGenEnergy(eGenEnergy);
+void electron_factory::run_factory(Bool_t all = false) {
+    Float_t iso(0.), id(0.);
+    electrons.clear();
+    for (unsigned i = 0; i < nEle; i++) {
+        if (!all && i != lepIndex) {
+            continue;
+        }
 
-    // Electron energy scale systematics (eCorrectedEt is already applied so divide it out)
-    if (syst == "EEScale_Up") {
-        el.scaleP4(eEnergyScaleUp / eCorrectedEt);
-    } else if (syst == "EEScale_Down") {
-        el.scaleP4(eEnergyScaleDown / eCorrectedEt);
-    } else if (syst == "EESigma_Up") {
-        el.scaleP4(eEnergySigmaUp / eCorrectedEt);
-    } else if (syst == "EESigma_Down") {
-        el.scaleP4(eEnergySigmaDown / eCorrectedEt);
+        electron el(pt->at(i), eta->at(i), phi->at(i), 0.000511, charge->at(i));
+        iso = (ch_iso->at(i) / pt->at(i)) + std::max(0., (neu_iso->at(i) + pho_iso->at(i) - 0.5 * pu_iso->at(i)) / pt->at(i));
+        el.setIso(iso);
+        id = (fabs(sc_eta->at(i)) <= 0.8 && sc_eta->at(i) > 0.837 ||
+              fabs(sc_eta->at(i)) > 0.8 && fabs(sc_eta->at(i)) <= 1.5 && sc_eta->at(i) > 0.715 ||
+              fabs(sc_eta->at(i)) >= 1.5 && sc_eta->at(i) > 0.357);
+        el.setID(id);
+        // el.setGenMatch(gen_match_1);
+        // el.setGenPt(eGenPt);
+        // el.setGenEta(eGenEta);
+        // el.setGenPhi(eGenPhi);
+        // el.setGenEnergy(eGenEnergy);
+        electrons.push_back(el);
     }
 
-    return el;
+    // change index if we don't process the full vector
+    localIndex = all ? lepIndex : 0;
 }
 
 #endif  // INCLUDE_GGNTUPLE_ELECTRON_FACTORY_H_

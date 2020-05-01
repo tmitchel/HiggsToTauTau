@@ -10,7 +10,7 @@ class electron {
  private:
     std::string name = "electron";
     Int_t gen_match;
-    Float_t pt, eta, phi, mass, charge, px, py, pz, iso, gen_pt, gen_eta, gen_phi, gen_energy;
+    Float_t pt, eta, phi, mass, charge, px, py, pz, id, iso, gen_pt, gen_eta, gen_phi, gen_energy;
     TLorentzVector p4;
 
  public:
@@ -25,6 +25,7 @@ class electron {
     Float_t getEta() { return p4.Eta(); }
     Float_t getPhi() { return p4.Phi(); }
     Float_t getMass() { return p4.M(); }
+    Float_t getID() { return id; }
     Float_t getIso() { return iso; }
     Float_t getGenPt() { return gen_pt; }
     Float_t getGenEta() { return gen_eta; }
@@ -34,6 +35,7 @@ class electron {
 
     // setters
     void setGenMatch(Int_t _gen_match) { gen_match = _gen_match; }
+    void setID(Float_t _id) { id = _id; }
     void setIso(Float_t _iso) { iso = _iso; }
     void setGenPt(Float_t _gen_pt) { gen_pt = _gen_pt; }
     void setGenEta(Float_t _gen_eta) { gen_eta = _gen_eta; }
