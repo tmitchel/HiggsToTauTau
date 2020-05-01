@@ -16,11 +16,16 @@ class muon_factory {
     Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, mediumID, mGenPt, mGenEta, mGenPhi,
         mGenEnergy;
     Int_t gen_match_1;
+    std::vector<muon> muons;
 
  public:
     muon_factory(TTree*, int, std::string);
     virtual ~muon_factory() {}
-    muon run_factory();
+    void run_factory();
+    Int_t num_muons() { return muons.size(); }
+    muon muon_at(unsigned i) { return muons.at(i); }
+    muon good_muon() { return muons.at(0); }
+    std::vector<muon> all_muons() { return muons; }
 };
 
 // read data from tree into member variabl
@@ -43,7 +48,7 @@ muon_factory::muon_factory(TTree* input, int era, std::string _syst) : syst(_sys
 }
 
 // create muon object and set member data
-muon muon_factory::run_factory() {
+void muon_factory::run_factory() {
     muon mu(pt_1, eta_1, phi_1, m_1, q_1);
     mu.setGenMatch(gen_match_1);
     mu.setIso(iso_1);
@@ -53,7 +58,7 @@ muon muon_factory::run_factory() {
     mu.setGenPhi(mGenPhi);
     mu.setGenEnergy(mGenEnergy);
 
-    return mu;
+    muons = { mu };
 }
 
 #endif  // INCLUDE_FSA_MUON_FACTORY_H_

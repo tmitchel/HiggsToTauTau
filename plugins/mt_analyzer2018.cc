@@ -226,9 +226,12 @@ int main(int argc, char *argv[]) {
         histos->at("cutflow")->Fill(1., 1.);
 
         // run factories
-        auto muon = muons.run_factory();
-        auto tau = taus.run_factory();
+        muons.run_factory();
+        taus.run_factory();
         jets.run_factory();
+
+        auto muon = muons.good_muon();
+        auto tau = taus.good_tau();
 
         // event flags
         if (event.getPassFlags(isData)) {

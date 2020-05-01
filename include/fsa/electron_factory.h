@@ -16,11 +16,17 @@ class electron_factory {
     Int_t gen_match_1;
     Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, eGenPt, eGenEta, eGenPhi, eGenEnergy;
     Float_t eCorrectedEt, eEnergyScaleUp, eEnergyScaleDown, eEnergySigmaUp, eEnergySigmaDown;
+    std::vector<electron> electrons;
 
  public:
     electron_factory(TTree*, int, std::string);
     virtual ~electron_factory() {}
-    electron run_factory();
+    void run_factory();
+    Int_t num_electrons() { return electrons.size(); }
+    electron electron_at(unsigned i) { return electrons.at(i); }
+    electron good_electron() { return electrons.at(0); }
+    std::vector<electron> all_electrons() { return electrons; }
+
 };
 
 // read data from tree into member variables
@@ -47,7 +53,7 @@ electron_factory::electron_factory(TTree* input, int era, std::string _syst) : s
 }
 
 // create electron object and set member data
-electron electron_factory::run_factory() {
+void electron_factory::run_factory() {
     electron el(pt_1, eta_1, phi_1, m_1, q_1);
     el.setGenMatch(gen_match_1);
     el.setIso(iso_1);
@@ -67,7 +73,7 @@ electron electron_factory::run_factory() {
         el.scaleP4(eEnergySigmaDown / eCorrectedEt);
     }
 
-    return el;
+    electrons = { el };
 }
 
 #endif  // INCLUDE_FSA_ELECTRON_FACTORY_H_
