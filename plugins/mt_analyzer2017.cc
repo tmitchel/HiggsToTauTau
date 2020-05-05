@@ -22,7 +22,7 @@
 #include "../include/CLParser.h"
 #include "../include/ComputeWG1Unc.h"
 #include "../include/LumiReweightingStandAlone.h"
-#include "../include/event_info.h"
+#include "../include/fsa/event_factory.h"
 #include "../include/fsa/jet_factory.h"
 #include "../include/met_factory.h"
 #include "../include/fsa/muon_factory.h"
@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
     auto histos = helper->getHistos1D();
 
     // construct factories
-    event_info event(ntuple, lepton::MUON, 2017, isMG, syst);
+    event_factory event(ntuple, lepton::MUON, 2017, isMG, syst);
     muon_factory muons(ntuple, 2017, syst);
     tau_factory taus(ntuple, 2017, syst);
     jet_factory jets(ntuple, 2017, syst);

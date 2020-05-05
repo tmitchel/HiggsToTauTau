@@ -24,7 +24,7 @@
 #include "../include/ComputeWG1Unc.h"
 #include "../include/LumiReweightingStandAlone.h"
 #include "../include/fsa/electron_factory.h"
-#include "../include/event_info.h"
+#include "../include/fsa/event_factory.h"
 #include "../include/fsa/jet_factory.h"
 #include "../include/met_factory.h"
 #include "../include/fsa/muon_factory.h"
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
     auto histos = helper->getHistos1D();
 
     // construct factories
-    event_info event(ntuple, lepton::ELECTRON, 2016, isMG, syst);
+    event_factory event(ntuple, lepton::ELECTRON, 2016, isMG, syst);
     electron_factory electrons(ntuple, 2016, syst);
     tau_factory taus(ntuple, 2016, syst);
     jet_factory jets(ntuple, 2016, syst);

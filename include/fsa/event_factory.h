@@ -1,18 +1,19 @@
 // Copyright [2018] Tyler Mitchell
 
-#ifndef INCLUDE_EVENT_INFO_H_
-#define INCLUDE_EVENT_INFO_H_
+#ifndef INCLUDE_FSA_EVENT_FACTORY_H_
+#define INCLUDE_FSA_EVENT_FACTORY_H_
 
 #include <unordered_map>
 #include <string>
 #include <vector>
-#include "./swiss_army_class.h"
-#include "./qq2Hqq_uncert_scheme.h"
+#include "TTree.h"
+#include "../swiss_army_class.h"
+#include "../qq2Hqq_uncert_scheme.h"
 
 /////////////////////////////////////////
 // Purpose: To hold general event data //
 /////////////////////////////////////////
-class event_info {
+class event_factory {
  private:
     ULong64_t evt;
     UInt_t run, lumi, convert_evt;
@@ -49,8 +50,8 @@ class event_info {
     std::unordered_map<std::string, std::string> syst_name_map;
 
  public:
-    event_info(TTree*, lepton, int, bool, std::string);
-    virtual ~event_info() {}
+    event_factory(TTree*, lepton, int, bool, std::string);
+    virtual ~event_factory() {}
     void setEmbed() { isEmbed = true; }
     void setNjets(Float_t _njets) { njets = _njets; }  // must be set in event loop
     void setRivets(TTree*);
@@ -145,7 +146,7 @@ class event_info {
 };
 
 // read data from trees into member variables
-event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std::string _syst) :
+event_factory::event_factory(TTree* input, lepton _lep, int _era, bool isMadgraph, std::string _syst) :
     sm_weight_nlo(1.),
     mm_weight_nlo(1.),
     ps_weight_nlo(1.),
@@ -282,7 +283,7 @@ event_info::event_info(TTree* input, lepton _lep, int _era, bool isMadgraph, std
     }
 }
 
-std::string event_info::fix_syst_string(std::string syst) {
+std::string event_factory::fix_syst_string(std::string syst) {
     auto end = std::string::npos;
     if (syst.find("DM0_Up") != end) {
         return "LES_DM0_Up";
@@ -298,7 +299,7 @@ std::string event_info::fix_syst_string(std::string syst) {
     return syst;
 }
 
-Float_t event_info::getPrefiringWeight() {
+Float_t event_factory::getPrefiringWeight() {
     if (syst == "prefiring_up") {
         return prefiring_weight_up;
     } else if (syst == "prefiring_down") {
@@ -307,13 +308,13 @@ Float_t event_info::getPrefiringWeight() {
     return prefiring_weight;
 }
 
-void event_info::setRivets(TTree* input) {
+void event_factory::setRivets(TTree* input) {
     input->SetBranchAddress("Rivet_nJets30", &Rivet_nJets30);
     input->SetBranchAddress("Rivet_higgsPt", &Rivet_higgsPt);
     input->SetBranchAddress("Rivet_stage1_cat_pTjet30GeV", &Rivet_stage1_cat_pTjet30GeV);
 }
 
-Float_t event_info::getRivetUnc(std::vector<double> uncs, std::string syst) {
+Float_t event_factory::getRivetUnc(std::vector<double> uncs, std::string syst) {
     if (syst.find("Rivet") != std::string::npos) {
         int index = unc_map[syst];
         if (syst.find("Up") != std::string::npos) {
@@ -324,7 +325,7 @@ Float_t event_info::getRivetUnc(std::vector<double> uncs, std::string syst) {
     }
 }
 
-Float_t event_info::getVBFTheoryUnc(std::string syst) {
+Float_t event_factory::getVBFTheoryUnc(std::string syst) {
     if (syst.find("VBF_Rivet") == std::string::npos) {
         return 1.;
     }
@@ -362,7 +363,7 @@ Float_t event_info::getVBFTheoryUnc(std::string syst) {
     return vbf_uncert_stage_1_1(source, static_cast<int>(Rivet_stage1_cat_pTjet30GeV), shift);
 }
 
-Bool_t event_info::getPassFlags(Bool_t isData) {
+Bool_t event_factory::getPassFlags(Bool_t isData) {
     if (era == 2016) {
         return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
                 || Flag_HBHENoiseIsoFilter || (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter);
@@ -377,11 +378,11 @@ Bool_t event_info::getPassFlags(Bool_t isData) {
     }
 }
 
-Bool_t event_info::getPassEle24Tau30() {
+Bool_t event_factory::getPassEle24Tau30() {
     return Ele24LooseTau30Pass && eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path;
 }
 
-Bool_t event_info::getPassEle24Tau30_2018(Bool_t isData) {
+Bool_t event_factory::getPassEle24Tau30_2018(Bool_t isData) {
     PassEle24Tau30_2018 = eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path;
     if (isData && run < 317509) {
       return eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path && Ele24LooseTau30Pass; 
@@ -392,19 +393,19 @@ Bool_t event_info::getPassEle24Tau30_2018(Bool_t isData) {
 }
 
 
-Bool_t event_info::getPassElEmbedCross() {
+Bool_t event_factory::getPassElEmbedCross() {
   return eMatchEmbeddedFilterEle24Tau30 && tMatchEmbeddedFilterEle24Tau30;
 }
 
-Bool_t event_info::getPassMuEmbedCross2017() {
+Bool_t event_factory::getPassMuEmbedCross2017() {
   return mMatchEmbeddedFilterMu20Tau27_2017 && tMatchEmbeddedFilterMu20HPSTau27;
 }
 
-Bool_t event_info::getPassMuEmbedCross2018() {
+Bool_t event_factory::getPassMuEmbedCross2018() {
   return mMatchEmbeddedFilterMu20Tau27_2018 && tMatchEmbeddedFilterMu20HPSTau27;
 }
 
-Bool_t event_info::getPassCrossTrigger(Float_t pt) {
+Bool_t event_factory::getPassCrossTrigger(Float_t pt) {
     if (lep == lepton::ELECTRON) {
         if (era == 2016) {
             return false;
@@ -426,4 +427,4 @@ Bool_t event_info::getPassCrossTrigger(Float_t pt) {
     }
 }
 
-#endif  // INCLUDE_EVENT_INFO_H_
+#endif  // INCLUDE_FSA_EVENT_FACTORY_H_
