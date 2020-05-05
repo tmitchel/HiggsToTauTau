@@ -14,99 +14,38 @@
 
 class jet_factory {
  private:
+    Int_t nJet;
     Float_t mjj;
-    Float_t jpt_1, jeta_1, jphi_1, jcsv_1;
-    Float_t jpt_2, jeta_2, jphi_2, jcsv_2;
-    Float_t bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1;
-    Float_t bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2;
-    Float_t topQuarkPt1, topQuarkPt2, temp_njets;
-    Float_t Nbtag, njetspt20, njets, nbtag_loose, nbtag_medium;
-    Int_t nbtag;
-    Float_t bweight;
+    std::vector<Float_t> *pt, *eta, *phi, *energy, *csv_b, *csv_bb, *flavor, *id;
     std::vector<jet> plain_jets, btag_jets;
-    std::unordered_map<std::string, std::string> syst_name_map;
 
  public:
     jet_factory(TTree *, int, std::string);
     virtual ~jet_factory() {}
     void run_factory();
-    std::string fix_syst_string(std::string);
 
     // getters
-    Float_t getNbtag() { return Nbtag; }
-    Float_t getNbtagLoose() { return nbtag_loose; }
-    Float_t getNbtagMedium() { return nbtag_medium; }
-    Float_t getNjets() { return njets; }
-    Int_t getNjetPt20() { return njetspt20; }
+    Float_t getNbtag() { return btag_jets.size(); }
+    Float_t getNjets() { return plain_jets.size(); }
     Float_t getDijetMass() { return mjj; }
-    Float_t getTopPt1() { return topQuarkPt1; }
-    Float_t getTopPt2() { return topQuarkPt2; }
-    Float_t getBWeight() { return bweight; }
+    // Float_t getTopPt1() { return topQuarkPt1; }
+    // Float_t getTopPt2() { return topQuarkPt2; }
+    // Float_t getBWeight() { return bweight; }
     std::vector<jet> getJets() { return plain_jets; }
     std::vector<jet> getBtagJets() { return btag_jets; }
 };
 
 // read data from tree into member variables
-jet_factory::jet_factory(TTree *input, int era, std::string syst)
-    : syst_name_map{
-          {"JetRelSam_Up", "JetRelativeSampleUp"},
-          {"JetRelSam_Down", "JetRelativeSampleDown"},
-          {"JetRelBal_Up", "JetRelativeBalUp"},
-          {"JetRelBal_Down", "JetRelativeBalDown"},
-          {"JetJER_Up", "JERUp"},
-          {"JetJER_Down", "JERDown"},
-      } {
-    std::string mjj_name("vbfMass"), njets_name("jetVeto30");
-    if (era == 2017) {
-        mjj_name += "WoNoisyJets";
-        njets_name += "WoNoisyJets";
-    }
-
-    auto end = std::string::npos;
-    if (syst.find("Jet") != end) {
-        auto syst_name = fix_syst_string(syst);
-        mjj_name += "_" + syst_name;
-        njets_name += "_" + syst_name;
-    }
-
-    std::string btag_string("2016"), bweight_string("bweight_");
-    if (era == 2016) {
-        btag_string = "2016";
-        bweight_string += "2016";
-    } else if (era == 2017) {
-        btag_string = "2017";
-        bweight_string += "2017";
-    } else if (era == 2018) {
-        btag_string = "2018";
-        bweight_string += "2018";
-    }
-
-    input->SetBranchAddress(mjj_name.c_str(), &mjj);
-    input->SetBranchAddress(njets_name.c_str(), &njets);
-    input->SetBranchAddress("nbtag", &nbtag);
-    input->SetBranchAddress(("bjetDeepCSVVeto20Loose_" + btag_string + "_DR0p5").c_str(), &nbtag_loose);
-    input->SetBranchAddress(("bjetDeepCSVVeto20Medium_" + btag_string + "_DR0p5").c_str(), &nbtag_medium);
-    input->SetBranchAddress(bweight_string.c_str(), &bweight);
-    input->SetBranchAddress("j1pt", &jpt_1);
-    input->SetBranchAddress("j1eta", &jeta_1);
-    input->SetBranchAddress("j1phi", &jphi_1);
-    input->SetBranchAddress("j1csv", &jcsv_1);
-    input->SetBranchAddress("j2pt", &jpt_2);
-    input->SetBranchAddress("j2eta", &jeta_2);
-    input->SetBranchAddress("j2phi", &jphi_2);
-    input->SetBranchAddress("j2csv", &jcsv_2);
-    input->SetBranchAddress(("jb1pt_" + btag_string).c_str(), &bpt_1);
-    input->SetBranchAddress(("jb1eta_" + btag_string).c_str(), &beta_1);
-    input->SetBranchAddress(("jb1phi_" + btag_string).c_str(), &bphi_1);
-    // input->SetBranchAddress(("jb1csv_" + btag_string).c_str(), &bcsv_1);
-    input->SetBranchAddress(("jb1hadronflavor_" + btag_string).c_str(), &bflavor_1);
-    input->SetBranchAddress(("jb2pt_" + btag_string).c_str(), &bpt_2);
-    input->SetBranchAddress(("jb2eta_" + btag_string).c_str(), &beta_2);
-    input->SetBranchAddress(("jb2phi_" + btag_string).c_str(), &bphi_2);
-    // input->SetBranchAddress(("jb2csv_" + btag_string).c_str(), &bcsv_2);
-    input->SetBranchAddress(("jb2hadronflavor_" + btag_string).c_str(), &bflavor_2);
-    input->SetBranchAddress("topQuarkPt1", &topQuarkPt1);
-    input->SetBranchAddress("topQuarkPt2", &topQuarkPt2);
+jet_factory::jet_factory(TTree *input, int era, std::string syst) {
+    input->SetBranchAddress("nJet", &nJet);
+    input->SetBranchAddress("jetPt", &pt);
+    input->SetBranchAddress("jetEta", &eta);
+    input->SetBranchAddress("jetPhi", &phi);
+    input->SetBranchAddress("jetEn", &energy);
+    input->SetBranchAddress("jetHadFlvr", &flavor);
+    input->SetBranchAddress("jetDeepCSVTags_b", &csv_b);
+    input->SetBranchAddress("jetDeepCSVTags_bb", &csv_bb);
+    input->SetBranchAddress("jetID", &id);
 }
 
 // initialize member data and set TLorentzVector
@@ -114,34 +53,21 @@ void jet_factory::run_factory() {
     plain_jets.clear();
     btag_jets.clear();
 
-    Nbtag = nbtag;
-
-    jet j1(jpt_1, jeta_1, jphi_1, jcsv_1);
-    jet j2(jpt_2, jeta_2, jphi_2, jcsv_2);
-    jet b1(bpt_1, beta_1, bphi_1, bcsv_1, bflavor_1);
-    jet b2(bpt_2, beta_2, bphi_2, bcsv_2, bflavor_2);
-    plain_jets.push_back(j1);
-    plain_jets.push_back(j2);
-    btag_jets.push_back(b1);
-    btag_jets.push_back(b2);
-}
-
-std::string jet_factory::fix_syst_string(std::string syst) {
-    auto formatted(syst);
-    auto end = std::string::npos;
-    if (syst.find("JetRel") != end || syst.find("JetJER") != end) {
-        return syst_name_map[syst];
-    } else {
-        auto pos = syst.find("_Up");
-        if (pos != end) {
-            formatted.replace(pos, 3, "Up");
-        }
-        pos = syst.find("_Down");
-        if (pos != end) {
-            formatted.replace(pos, 5, "Down");
+    for (auto i = 0; i < nJet; i++) {
+        auto j = jet(pt->at(i), eta->at(i), phi->at(i), csv_b->at(i), flavor->at(i));
+        j.setID(id->at(i));
+        if (csv_b->at(i) + csv_bb->at(i) >  0.6321) {  // cut taken from FSA
+            btag_jets.push_back(j);
+        } else {
+            plain_jets.push_back(j);
         }
     }
-    return formatted;
+
+    // example of calculating in the class
+    // calculated every event and stored in mjj variable to be retrieved
+    if (plain_jets.size() > 1) {
+        mjj = (plain_jets.at(0).getP4() + plain_jets.at(1).getP4()).M();
+    }
 }
 
 #endif  // INCLUDE_GGNTUPLE_JET_FACTORY_H_

@@ -25,6 +25,7 @@ class muon {
     Float_t getEta() { return p4.Eta(); }
     Float_t getPhi() { return p4.Phi(); }
     Float_t getMass() { return p4.M(); }
+    Float_t getID() { return id; }
     Float_t getIso() { return iso; }
     Float_t getMediumID() { return id; }
     Float_t getGenPt() { return gen_pt; }
@@ -35,6 +36,7 @@ class muon {
 
     // setters
     void setGenMatch(Int_t _gen_match) { gen_match = _gen_match; }
+    void setID(Float_t _id) { id = _id; }
     void setIso(Float_t _iso) { iso = _iso; }
     void setMediumID(Float_t _id) { id = _id; }
     void setGenPt(Float_t _gen_pt) { gen_pt = _gen_pt; }
