@@ -18,18 +18,18 @@
 #include "TTree.h"
 
 // user includes
-#include "../include/ACWeighter.h"
-#include "../include/CLParser.h"
-#include "../include/ComputeWG1Unc.h"
-#include "../include/LumiReweightingStandAlone.h"
-#include "../include/fsa/electron_factory.h"
-#include "../include/fsa/event_factory.h"
-#include "../include/fsa/jet_factory.h"
-#include "../include/met_factory.h"
-#include "../include/fsa/muon_factory.h"
-#include "../include/slim_tree.h"
-#include "../include/swiss_army_class.h"
-#include "../include/fsa/tau_factory.h"
+#include "../../include/ACWeighter.h"
+#include "../../include/CLParser.h"
+#include "../../include/ComputeWG1Unc.h"
+#include "../../include/LumiReweightingStandAlone.h"
+#include "../../include/fsa/electron_factory.h"
+#include "../../include/fsa/event_factory.h"
+#include "../../include/fsa/jet_factory.h"
+#include "../../include/met_factory.h"
+#include "../../include/fsa/muon_factory.h"
+#include "../../include/slim_tree.h"
+#include "../../include/swiss_army_class.h"
+#include "../../include/fsa/tau_factory.h"
 
 typedef std::vector<double> NumV;
 
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     bool isData = sample.find("data") != std::string::npos;
     bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
     bool isMG = sample.find("madgraph") != std::string::npos;
-    bool doAC = signal_type != "None" && signal_type != "powheg";
+    bool doAC = signal_type != "None";
 
     std::string systname = "NOMINAL";
     if (!syst.empty()) {
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
     std::string original = sample;
     if (name == "VBF125") {
         sample = "vbf125";
-    } else if (name == "ggH125") {
+    } else if (name == "ggH125" && signal_type != "madgraph") {
         sample = "ggh125";
     } else if (name == "WH125") {
         sample = "wh125";
@@ -125,18 +125,16 @@ int main(int argc, char *argv[]) {
 
     if (signal_type == "JHU" && (sample == "ggh125" || sample == "vbf125")) {
         gen_number = 1.;
-    } else if (signal_type == "madgraph") {
-        gen_number = 1.;
     }
 
     // reweighter for anomolous coupling samples
-    ACWeighter ac_weights = ACWeighter(original, sample, signal_type, "2017");
+    ACWeighter ac_weights = ACWeighter(original, sample, signal_type, "2018");
     ac_weights.fillWeightMap();
 
     // get normalization (lumi & xs are in util.h)
     double norm(1.);
     if (!isData && !isEmbed) {
-        norm = helper->getLuminosity2017() * helper->getCrossSection(sample) / gen_number;
+        norm = helper->getLuminosity2018() * helper->getCrossSection(sample) / gen_number;
     }
 
     ///////////////////////////////////////////////
@@ -144,25 +142,12 @@ int main(int argc, char *argv[]) {
     // Read weights, hists, graphs, etc. for SFs //
     ///////////////////////////////////////////////
 
-    reweight::LumiReWeighting *lumi_weights;
-    // read inputs for lumi reweighting
-    if (!isData && !isEmbed && !doAC && !isMG) {
-        TNamed *dbsName = reinterpret_cast<TNamed *>(fin->Get("MiniAOD_name"));
-        std::string datasetName = dbsName->GetTitle();
-        if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
-            fin->Close();
-            fout->Close();
-            return 2;
-        }
-        std::replace(datasetName.begin(), datasetName.end(), '/', '#');
-        lumi_weights = new reweight::LumiReWeighting("/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2017.root",
-                                                     "/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2017.root",
-                                                     ("pua/#" + datasetName).c_str(), "pileup");
-        running_log << "using PU dataset name: " << datasetName << std::endl;
-    }
+    auto lumi_weights =
+        new reweight::LumiReWeighting("/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2018.root",
+                                      "/hdfs/store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2018.root", "pileup", "pileup");
 
     // legacy sf's
-    TFile htt_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2017.root");
+    TFile htt_sf_file("/hdfs/store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2018.root");
     RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
     htt_sf_file.Close();
 
@@ -190,11 +175,11 @@ int main(int argc, char *argv[]) {
     auto histos = helper->getHistos1D();
 
     // construct factories
-    event_factory event(ntuple, lepton::ELECTRON, 2017, isMG, syst);
-    electron_factory electrons(ntuple, 2017, syst);
-    tau_factory taus(ntuple, 2017, syst);
-    jet_factory jets(ntuple, 2017, syst);
-    met_factory met(ntuple, 2017, syst);
+    event_factory event(ntuple, lepton::ELECTRON, 2018, isMG, syst);
+    electron_factory electrons(ntuple, 2018, syst);
+    tau_factory taus(ntuple, 2018, syst);
+    jet_factory jets(ntuple, 2018, syst);
+    met_factory met(ntuple, 2018, syst);
 
     if (sample == "ggh125" && signal_type == "powheg") {
         event.setRivets(ntuple);
@@ -214,29 +199,29 @@ int main(int argc, char *argv[]) {
         Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
         if (name == "W") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 3.656;
+                evtwt = 9.091;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 3.383;
+                evtwt = 4.516;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 2.145;
+                evtwt = 3.090;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 1.954;
+                evtwt = 3.227;
             } else {
-                evtwt = 25.609;
+                evtwt = 51.812;
             }
         }
 
         if (name == "ZTT" || name == "ZLL" || name == "ZL" || name == "ZJ") {
             if (event.getNumGenJets() == 1) {
-                evtwt = 0.710;
+                evtwt = 0.630;
             } else if (event.getNumGenJets() == 2) {
-                evtwt = 0.921;
+                evtwt = 0.553;
             } else if (event.getNumGenJets() == 3) {
-                evtwt = 1.651;
+                evtwt = 0.601;
             } else if (event.getNumGenJets() == 4) {
-                evtwt = 0.220;
+                evtwt = 0.832;
             } else {
-                evtwt = 2.581;
+                evtwt = 3.632;
             }
         }
         histos->at("cutflow")->Fill(1., 1.);
@@ -294,7 +279,7 @@ int main(int argc, char *argv[]) {
 
         // b-jet veto
         if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
-            histos->at("cutflow")->Fill(7., 1.);
+            histos->at("cutflow")->Fill(6., 1.);
         } else {
             continue;
         }
@@ -308,7 +293,7 @@ int main(int argc, char *argv[]) {
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion) {
-            histos->at("cutflow")->Fill(8., 1.);
+            histos->at("cutflow")->Fill(7., 1.);
         } else {
             continue;
         }
@@ -316,14 +301,12 @@ int main(int argc, char *argv[]) {
         // apply all scale factors/corrections/etc.
         if (!isData && !isEmbed) {
             // pileup reweighting
-            if (!doAC && !isMG) {
-                evtwt *= lumi_weights->weight(event.getNPU());
-            }
+            evtwt *= lumi_weights->weight(event.getNPU());
 
             // generator weights
             evtwt *= event.getGenWeight();
 
-            // prefiring weight (systematics are taken care of already)
+            // prefiring weight
             evtwt *= event.getPrefiringWeight();
 
             // b-tagging scale factor goes here
@@ -481,7 +464,7 @@ int main(int argc, char *argv[]) {
         } else if (!isData && isEmbed) {
             event.setEmbed();
             // embedded cross-triggers not applied in skimmer
-            if (electron.getPt() < 28 && !event.getPassEle24Tau30()) {
+            if (electron.getPt() < 33 && !event.getPassEle24Tau30_2018(isData) && abs(tau.getEta()) < 1.479) {
                 continue;
             }
 
@@ -530,8 +513,8 @@ int main(int argc, char *argv[]) {
             }
 
             // trigger scale factors
-            bool fireSingle = electron.getPt() > 28;
-            bool fireCross = electron.getPt() < 28;
+            bool fireSingle = electron.getPt() > 33;
+            bool fireCross = electron.getPt() < 33;
             std::string single_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_ic_embed_ratio" : "e_trg_ic_data";
             std::string el_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "e_trg_24_ic_embed_ratio" : "e_trg_24_ic_data";
             std::string tau_leg_eff_name = fabs(electron.getEta()) < 1.479 ? "t_trg_mediumDeepTau_etau_embed_ratio" : "t_trg_mediumDeepTau_etau_data";

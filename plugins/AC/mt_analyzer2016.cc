@@ -5,7 +5,6 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <memory>
 
 // ROOT includes
 #include "RooFunctor.h"
@@ -19,18 +18,17 @@
 #include "TTree.h"
 
 // user includes
-#include "../include/ACWeighter.h"
-#include "../include/CLParser.h"
-#include "../include/ComputeWG1Unc.h"
-#include "../include/LumiReweightingStandAlone.h"
-#include "../include/fsa/electron_factory.h"
-#include "../include/fsa/event_factory.h"
-#include "../include/fsa/jet_factory.h"
-#include "../include/met_factory.h"
-#include "../include/fsa/muon_factory.h"
-#include "../include/slim_tree.h"
-#include "../include/swiss_army_class.h"
-#include "../include/fsa/tau_factory.h"
+#include "../../include/ACWeighter.h"
+#include "../../include/CLParser.h"
+#include "../../include/ComputeWG1Unc.h"
+#include "../../include/LumiReweightingStandAlone.h"
+#include "../../include/fsa/event_factory.h"
+#include "../../include/fsa/jet_factory.h"
+#include "../../include/met_factory.h"
+#include "../../include/fsa/muon_factory.h"
+#include "../../include/slim_tree.h"
+#include "../../include/swiss_army_class.h"
+#include "../../include/fsa/tau_factory.h"
 
 typedef std::vector<double> NumV;
 
@@ -54,6 +52,7 @@ int main(int argc, char *argv[]) {
     bool doAC = signal_type != "None";
     bool isMG = sample.find("madgraph") != std::string::npos;
 
+    // get systematic shift name
     std::string systname = "NOMINAL";
     if (!syst.empty()) {
         systname = "SYST_" + syst;
@@ -91,8 +90,9 @@ int main(int argc, char *argv[]) {
     running_log << "\t signal_type: " << signal_type << std::endl;
     running_log << "\t isData: " << isData << " isEmbed: " << isEmbed << " doAC: " << doAC << std::endl;
 
+    // open input file
     auto fin = TFile::Open(fname.c_str());
-    auto ntuple = reinterpret_cast<TTree *>(fin->Get("etau_tree"));
+    auto ntuple = reinterpret_cast<TTree *>(fin->Get("mutau_tree"));
 
     // get number of generated events
     auto counts = reinterpret_cast<TH1D *>(fin->Get("nevents"));
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 
     // cd to root of output file and create tree
     fout->cd();
-    slim_tree *st = new slim_tree("et_tree", doAC);
+    slim_tree *st = new slim_tree("mt_tree", doAC);
 
     std::string original = sample;
     if (name == "VBF125") {
@@ -177,8 +177,8 @@ int main(int argc, char *argv[]) {
     auto histos = helper->getHistos1D();
 
     // construct factories
-    event_factory event(ntuple, lepton::ELECTRON, 2016, isMG, syst);
-    electron_factory electrons(ntuple, 2016, syst);
+    event_factory event(ntuple, lepton::MUON, 2016, isMG, syst);
+    muon_factory muons(ntuple, 2016, syst);
     tau_factory taus(ntuple, 2016, syst);
     jet_factory jets(ntuple, 2016, syst);
     met_factory met(ntuple, 2016, syst);
@@ -229,15 +229,15 @@ int main(int argc, char *argv[]) {
         histos->at("cutflow")->Fill(1., 1.);
 
         // run factories
-        electrons.run_factory();
+        muons.run_factory();
         taus.run_factory();
         jets.run_factory();
         event.setNjets(jets.getNjets());
 
-        auto electron = electrons.good_electron();
+        auto muon = muons.good_muon();
         auto tau = taus.good_tau();
 
-        // pass event flags
+        // apply special ID for data
         if (event.getPassFlags(isData)) {
             histos->at("cutflow")->Fill(2., 1.);
         } else {
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
         }
 
         // only opposite-sign
-        int evt_charge = tau.getCharge() + electron.getCharge();
+        int evt_charge = tau.getCharge() + muon.getCharge();
         if (evt_charge == 0) {
             histos->at("cutflow")->Fill(4., 1.);
         } else {
@@ -264,13 +264,13 @@ int main(int argc, char *argv[]) {
         }
 
         // build Higgs
-        TLorentzVector Higgs = electron.getP4() + tau.getP4() + met.getP4();
+        TLorentzVector Higgs = muon.getP4() + tau.getP4() + met.getP4();
 
         // calculate mt
         double met_x = met.getMet() * cos(met.getMetPhi());
         double met_y = met.getMet() * sin(met.getMetPhi());
         double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-        double mt = sqrt(pow(electron.getPt() + met_pt, 2) - pow(electron.getP4().Px() + met_x, 2) - pow(electron.getP4().Py() + met_y, 2));
+        double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getP4().Px() + met_x, 2) - pow(muon.getP4().Py() + met_y, 2));
 
         // now do mt selection
         if (mt < 50) {
@@ -287,8 +287,8 @@ int main(int argc, char *argv[]) {
         }
 
         // create regions
-        bool signalRegion = (tau.getMediumIsoDeep() && electron.getIso() < 0.15);
-        bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && electron.getIso() < 0.15);
+        bool signalRegion = (tau.getMediumIsoDeep() && muon.getIso() < 0.15);
+        bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && muon.getIso() < 0.15);
         if (signal_type != "None") {
             antiTauIsoRegion = false;  // don't need anti-tau iso region in signal
         }
@@ -308,15 +308,15 @@ int main(int argc, char *argv[]) {
             // generator weights
             evtwt *= event.getGenWeight();
 
-            // prefiring weight (systematics already taken care of)
+            // prefiring weight
             evtwt *= event.getPrefiringWeight();
 
             // b-tagging scale factor goes here
             evtwt *= jets.getBWeight();
 
             // set workspace variables
-            htt_sf->var("e_pt")->setVal(electron.getPt());
-            htt_sf->var("e_eta")->setVal(electron.getEta());
+            htt_sf->var("m_pt")->setVal(muon.getPt());
+            htt_sf->var("m_eta")->setVal(muon.getEta());
             htt_sf->var("t_pt")->setVal(tau.getPt());
             htt_sf->var("t_eta")->setVal(tau.getEta());
             htt_sf->var("t_phi")->setVal(tau.getPhi());
@@ -325,8 +325,8 @@ int main(int argc, char *argv[]) {
             htt_sf->var("z_gen_pt")->setVal(event.getGenPt());
 
             // start applying weights from workspace
-            evtwt *= htt_sf->function("e_trk_ratio")->getVal();
-            evtwt *= htt_sf->function("e_idiso_ic_ratio")->getVal();
+            evtwt *= htt_sf->function("m_trk_ratio")->getVal();
+            evtwt *= htt_sf->function("m_idiso_ic_ratio")->getVal();
 
             // tau ID efficiency SF and systematics
             std::string id_name = "t_deeptauid_pt_medium";  // nominal
@@ -341,25 +341,46 @@ int main(int argc, char *argv[]) {
                 evtwt *= htt_sf->function(id_name.c_str())->getVal();
             }
 
-            // electron fake rate SF
-            std::string e_fake_id_name = "t_id_vs_e_eta_tight";
-            if (syst.find("tau_id_el_disc") != std::string::npos) {
-                if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
-                    (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)) {
-                    e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+            // muon fake rate SF
+            std::string mu_fake_id_name = "t_id_vs_mu_eta_tight";
+            if (syst.find("tau_id_mu_disc") != std::string::npos) {
+                if ((syst.find("eta_lt0p4") != std::string::npos && fabs(tau.getEta()) < 0.4) ||
+                    (syst.find("eta_0p4to0p8") != std::string::npos && fabs(tau.getEta()) >= 0.4 && fabs(tau.getEta()) < 0.8) ||
+                    (syst.find("eta_0p8to1p2") != std::string::npos && fabs(tau.getEta()) >= 0.8 && fabs(tau.getEta()) < 1.2) ||
+                    (syst.find("eta_1p2to1p7") != std::string::npos && fabs(tau.getEta()) >= 1.2 && fabs(tau.getEta()) < 1.7) ||
+                    (syst.find("eta_gt1p7") != std::string::npos && fabs(tau.getEta()) >= 1.7)) {
+                    mu_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
                 }
             }
-            if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-                evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+            if (tau.getDecayMode() == 2 || tau.getDecayMode() == 4) {
+                evtwt *= htt_sf->function(mu_fake_id_name.c_str())->getVal();
             }
 
-            evtwt *= htt_sf->function("e_trg_ic_ratio")->getVal();
-            if (syst == "mc_single_trigger_up") {
-                evtwt *= 1.02;  // 2% per light lepton leg
-            } else if (syst == "mc_single_trigger_down") {
-                evtwt *= 0.98;
+            // trigger scale factors
+            if (muon.getPt() < 23) {
+                // muon leg with systematics
+                evtwt *= htt_sf->function("m_trg_19_ic_ratio")->getVal();
+                if (syst == "mc_cross_trigger_up") {
+                    evtwt *= 1.02;  // 2% per light lepton leg
+                } else if (syst == "mc_cross_trigger_down") {
+                    evtwt *= 0.98;
+                }
+
+                // tau leg with systematics
+                if (syst == "mc_cross_trigger_up") {
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_up")->getVal();
+                } else if (syst == "mc_cross_trigger_down") {
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio_down")->getVal();
+                } else {
+                    evtwt *= htt_sf->function("t_trg_pog_deeptau_medium_mutau_ratio")->getVal();
+                }
+            } else {
+                evtwt *= htt_sf->function("m_trg_ic_ratio")->getVal();
+                if (syst == "mc_single_trigger_up") {
+                    evtwt *= 1.02;  // 2% per light lepton leg
+                } else if (syst == "mc_single_trigger_down") {
+                    evtwt *= 0.98;
+                }
             }
 
             // Z-pT Reweighting
@@ -422,25 +443,18 @@ int main(int argc, char *argv[]) {
                 evtwt *= mg_sf->function("ggH_quarkmass_corr")->getVal();
             }
 
-            auto efake_pt_shift(1.);
-            if (syst.find("efaket_norm_ptgt50") != std::string::npos && tau.getPt() > 50) {
-                efake_pt_shift = (syst == "efaket_norm_ptgt50_Up" ? 1.1 : 0.9);
-            } else if (syst.find("efaket_norm_pt40to50") != std::string::npos && tau.getPt() > 40) {
-                efake_pt_shift = (syst == "efaket_norm_pt40to50_Up" ? 1.1 : 0.9);
-            } else if (syst.find("efaket_norm_pt30to40") != std::string::npos && tau.getPt() > 30) {
-                efake_pt_shift = (syst == "efaket_norm_pt30to40_Up" ? 1.1 : 0.9);
-            }
-            evtwt *= efake_pt_shift;
-
             // handle reading different m_sv values
-            if ((syst.find("efaket_es_barrel") != std::string::npos && fabs(electron.getEta()) < 1.479) ||
-                (syst.find("efaket_es_endcap") != std::string::npos && fabs(electron.getEta()) >= 1.479)) {
+            if ((syst.find("MES_lt1p2") != std::string::npos && fabs(muon.getEta()) < 1.2) ||
+                (syst.find("MES_1p2to2p1") != std::string::npos && fabs(muon.getEta()) >= 1.2 && fabs(muon.getEta()) < 2.1) ||
+                (syst.find("MES_gt2p1") != std::string::npos && fabs(muon.getEta()) >= 2.1)) {
                 event.do_shift(true);
             } else {
                 event.do_shift(false);  // always_shift is set for things that will always be shifted so this is ok
             }
 
         } else if (!isData && isEmbed) {
+            event.setEmbed();
+
             // embedded generator weights
             auto genweight(event.getGenWeight());
             if (genweight > 1 || genweight < 0) {
@@ -458,23 +472,22 @@ int main(int argc, char *argv[]) {
             }
 
             // set workspace variables
-            htt_sf->var("e_pt")->setVal(electron.getPt());
-            htt_sf->var("e_eta")->setVal(electron.getEta());
+            htt_sf->var("m_pt")->setVal(muon.getPt());
+            htt_sf->var("m_eta")->setVal(muon.getEta());
             htt_sf->var("t_pt")->setVal(tau.getPt());
             htt_sf->var("t_eta")->setVal(tau.getEta());
             htt_sf->var("t_phi")->setVal(tau.getPhi());
             htt_sf->var("t_dm")->setVal(tau.getDecayMode());
-            htt_sf->var("gt1_pt")->setVal(electron.getGenPt());
-            htt_sf->var("gt1_eta")->setVal(electron.getGenEta());
+            htt_sf->var("gt1_pt")->setVal(muon.getGenPt());
+            htt_sf->var("gt1_eta")->setVal(muon.getGenEta());
             htt_sf->var("gt2_pt")->setVal(tau.getGenPt());
             htt_sf->var("gt2_eta")->setVal(tau.getGenEta());
 
-            // start applying weights from workspace
-            evtwt *= htt_sf->function("e_trk_embed_ratio")->getVal();
-            evtwt *= htt_sf->function("e_idiso_ic_embed_ratio")->getVal();
+            evtwt *= htt_sf->function("m_trk_ratio")->getVal();
+            evtwt *= htt_sf->function("m_idiso_ic_embed_ratio")->getVal();
 
-            // tau ID eff SF
-            std::string id_name = "t_deeptauid_pt_tightvse_embed_medium";
+            // tau ID efficiency SF and systematics
+            std::string id_name = "t_deeptauid_pt_embed_medium";  // nominal
             if (syst.find("tau_id_") != std::string::npos) {
                 if ((syst.find("30to35") != std::string::npos && tau.getPt() >= 30 && tau.getPt() < 35) ||
                     (syst.find("35to40") != std::string::npos && tau.getPt() >= 35 && tau.getPt() < 40) ||
@@ -486,34 +499,52 @@ int main(int argc, char *argv[]) {
                 evtwt *= htt_sf->function(id_name.c_str())->getVal();
             }
 
-            // trigger scale factor
-            evtwt *= htt_sf->function("e_trg_ic_embed_ratio")->getVal();
-            if (syst == "embed_single_trigger_up") {
-                evtwt *= 1.02;  // 2% per light lepton leg
-            } else if (syst == "embed_single_trigger_down") {
-                evtwt *= 0.98;
-            }
+            // trigger scale factors
+            if (muon.getPt() < 23) {
+                // muon-leg
+                evtwt *= htt_sf->function("m_trg_19_ic_embed_ratio")->getVal();
+                if (syst == "embed_cross_trigger_up") {
+                    evtwt *= 1.02;  // 2% per light lepton leg
+                } else if (syst == "embed_cross_trigger_down") {
+                    evtwt *= 0.98;
+                }
 
-            // electron fake rate SF
-            std::string e_fake_id_name = "t_id_vs_e_eta_tight";
-            if (syst.find("tau_id_el_disc") != std::string::npos) {
-                if ((syst.find("DM0_barrel") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM0_endcap") != std::string::npos && tau.getDecayMode() == 0 && fabs(tau.getEta()) >= 1.479) ||
-                    (syst.find("DM1_barrel") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) < 1.479) ||
-                    (syst.find("DM1_endcap") != std::string::npos && tau.getDecayMode() == 1 && fabs(tau.getEta()) >= 1.479)) {
-                    e_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                // tau-leg
+                std::string tau_leg_name("t_trg_mediumDeepTau_mutau_embed_ratio");
+                if (syst.find("embed_cross_trigger") != std::string::npos) {
+                    tau_leg_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                }
+                evtwt *= htt_sf->function(tau_leg_name.c_str())->getVal();
+            } else {
+                evtwt *= htt_sf->function("m_trg_ic_embed_ratio")->getVal();
+                if (syst == "embed_single_trigger_up") {
+                    evtwt *= 1.02;  // 2% per light lepton leg
+                } else if (syst == "embed_single_trigger_down") {
+                    evtwt *= 0.98;
                 }
             }
-            if (tau.getDecayMode() == 1 || tau.getDecayMode() == 3) {
-                evtwt *= htt_sf->function(e_fake_id_name.c_str())->getVal();
+
+            // muon fake rate SF
+            std::string mu_fake_id_name = "t_id_vs_mu_eta_tight";
+            if (syst.find("tau_id_mu_disc") != std::string::npos) {
+                if ((syst.find("eta_lt0p4") != std::string::npos && fabs(tau.getEta()) < 0.4) ||
+                    (syst.find("eta_0p4to0p8") != std::string::npos && fabs(tau.getEta()) >= 0.4 && fabs(tau.getEta()) < 0.8) ||
+                    (syst.find("eta_0p8to1p2") != std::string::npos && fabs(tau.getEta()) >= 0.8 && fabs(tau.getEta()) < 1.2) ||
+                    (syst.find("eta_1p2to1p7") != std::string::npos && fabs(tau.getEta()) >= 1.2 && fabs(tau.getEta()) < 1.7) ||
+                    (syst.find("eta_gt1p7") != std::string::npos && fabs(tau.getEta()) >= 1.7)) {
+                    mu_fake_id_name += syst.find("Up") != std::string::npos ? "_up" : "_down";
+                }
+            }
+            if (tau.getDecayMode() == 2 || tau.getDecayMode() == 4) {
+                evtwt *= htt_sf->function(mu_fake_id_name.c_str())->getVal();
             }
 
             // double muon trigger eff in selection
             evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
-            htt_sf->var("gt_pt")->setVal(electron.getGenPt());
-            htt_sf->var("gt_eta")->setVal(electron.getGenEta());
+            htt_sf->var("gt_pt")->setVal(muon.getGenPt());
+            htt_sf->var("gt_eta")->setVal(muon.getGenEta());
             evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
 
             // muon ID eff in selection (leg 1)
@@ -545,12 +576,12 @@ int main(int argc, char *argv[]) {
         }
 
         // fill the tree
-        st->fillTree(tree_cat, &electron, &tau, &jets, &met, &event, mt, evtwt, weights, name);
+        st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, mt, evtwt, weights, name);
     }  // close event loop
 
     fin->Close();
     fout->cd();
-    fout->Write();
+    fout->Write(0, TObject::kOverwrite);
     fout->Close();
     running_log << "Finished processing " << sample << std::endl;
     if (!condor) {
