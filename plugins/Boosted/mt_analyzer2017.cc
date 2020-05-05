@@ -1,0 +1,217 @@
+// Copyright [2020] Tyler Mitchell
+
+// system includes
+#include <algorithm>
+#include <cmath>
+#include <fstream>
+#include <iostream>
+
+// user includes
+#include "../../include/CLParser.h"
+#include "../../include/LumiReweightingStandAlone.h"
+#include "../../include/ggntuple/event_factory.h"
+#include "../../include/ggntuple/jet_factory.h"
+#include "../../include/met_factory.h"
+#include "../../include/ggntuple/muon_factory.h"
+// #include "../../include/slim_tree.h"
+#include "../../include/swiss_army_class.h"
+#include "../../include/ggntuple/boosted_tau_factory.h"
+
+
+int main(int argc, char *argv[]) {
+    CLParser parser(argc, argv);
+    bool condor = parser.Flag("--condor");
+    std::string name = parser.Option("-n");
+    std::string path = parser.Option("-p");
+    std::string syst = parser.Option("-u");
+    std::string sample = parser.Option("-s");
+    std::string output_dir = parser.Option("-d");
+    std::string signal_type = parser.Option("--stype");
+    std::string fname = path + sample + ".root";
+    bool isData = sample.find("data") != std::string::npos;
+    bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
+    bool isMG = sample.find("madgraph") != std::string::npos;
+    bool doAC = signal_type != "None" && signal_type != "powheg";
+
+    std::string systname = "NOMINAL";
+    if (!syst.empty()) {
+        systname = "SYST_" + syst;
+    }
+
+    // create output path
+    auto suffix = "_output.root";
+    auto prefix = "Output/trees/" + output_dir;
+    std::string filename, logname;
+    filename = prefix + "/" + systname + "/" + sample + std::string("_") + name + "_" + systname + suffix;
+    logname = prefix + "/logs/" + sample + std::string("_") + name + "_" + systname + ".txt";
+
+    if (condor) {
+        filename = sample + std::string("_") + name + "_" + systname + suffix;
+    }
+
+    // create the log file
+    std::ofstream logfile;
+    if (!condor) {
+        logfile.open(logname, std::ios::out | std::ios::trunc);
+    }
+
+    std::ostream &running_log = (condor ? std::cout : logfile);
+
+    // open log file and log some things
+    running_log << "Opening file... " << sample << std::endl;
+    running_log << "With name...... " << name << std::endl;
+    running_log << "And running systematic " << systname << std::endl;
+    running_log << "Using options: " << std::endl;
+    running_log << "\t name: " << name << std::endl;
+    running_log << "\t path: " << path << std::endl;
+    running_log << "\t syst: " << syst << std::endl;
+    running_log << "\t sample: " << sample << std::endl;
+    running_log << "\t output_dir: " << output_dir << std::endl;
+    running_log << "\t signal_type: " << signal_type << std::endl;
+    running_log << "\t isData: " << isData << " isEmbed: " << isEmbed << " doAC: " << doAC << std::endl;
+
+    auto fin = TFile::Open(fname.c_str());
+    auto ntuple = reinterpret_cast<TTree *>(fin->Get("mutau_tree"));
+
+    // get number of generated events
+    auto counts = reinterpret_cast<TH1F *>(fin->Get("hcount"));
+    auto gen_number = counts->GetBinContent(2);
+
+    auto fout = new TFile(filename.c_str(), "RECREATE");
+    counts->Write();
+    fout->mkdir("grabbag");
+    fout->cd("grabbag");
+
+    // initialize Helper class
+    Helper *helper = new Helper(fout, name, syst);
+
+    // cd to root of output file and create tree
+    fout->cd();
+    // slim_tree *st = new slim_tree("mt_tree", doAC);
+
+    // get normalization (lumi & xs are in swiss_army_class.h)
+    double norm(1.);
+    if (!isData && !isEmbed) {
+        norm = helper->getLuminosity2017() * helper->getCrossSection(sample) / gen_number;
+    }
+
+    // declare histograms (histogram initializer functions in swiss_army_class.h)
+    fout->cd("grabbag");
+    auto histos = helper->getHistos1D();
+
+    // construct factories
+    event_factory event(ntuple, lepton::MUON, 2017, isMG, syst);
+    muon_factory muons(ntuple, 2017, syst);
+    boosted_tau_factory taus(ntuple, 2017, syst);
+    jet_factory jets(ntuple, 2017, syst);
+    met_factory met(ntuple, 2017, syst);
+
+    Int_t nevts = ntuple->GetEntries();
+    int progress(0), fraction((nevts - 1) / 10);
+    for (Int_t i = 0; i < nevts; i++) {
+        ntuple->GetEntry(i);
+        if (i == progress * fraction) {
+            running_log << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
+            progress++;
+        }
+
+        histos->at("cutflow")->Fill(1., 1.);
+
+        // apply trigger
+        // if (trigger selection) {
+        //     histos->at("cutflow")->Fill(2., 1.);
+        // } else {
+        //     continue
+        // }
+
+        // apply met filters
+        // if (met filter selection) {
+        //     histos->at("cutflow")->Fill(3., 1.);
+        // } else {
+        //     continue
+        // }
+
+        // met selection
+        if (met.getMet() > 50) {
+            histos->at("cutflow")->Fill(4., 1.);
+        } else {
+            continue;
+        }
+
+        // get the good muon
+        auto muon = muons.good_muon();
+
+        // muon kinematic selection
+        if (muon.getPt() > 52 && fabs(muon.getEta()) < 2.4) {
+            histos->at("cutflow")->Fill(5., 1.);
+        } else {
+            continue;
+        }
+
+        // muon ID selection
+        if (muon.getID()) {
+            histos->at("cutflow")->Fill(6., 1.);
+        } else {
+            continue;
+        }
+
+        // get the good boosted tau
+        auto tau = taus.good_tau();
+
+        // tau kinematic selection
+        if (tau.getPt() > 40 && fabs(muon.getEta()) < 2.3) {
+            histos->at("cutflow")->Fill(7., 1.);
+        } else {
+            continue;
+        }
+
+        // tau ID selection
+        if (tau.getDecayModeFinding() > 0.5 && tau.getAgainstTightMuonMVA() > 0.5 && tau.getAgainstVLooseElectronMVA() > 0.5) {
+            histos->at("cutflow")->Fill(8., 1.);
+        } else {
+            continue;
+        }
+
+        // event selection
+        auto dR_lep_tau = muon.getP4().DeltaR(tau.getP4());
+        if (dR_lep_tau > 0.1 && dR_lep_tau < 0.8) {
+            histos->at("cutflow")->Fill(9., 1.);
+        } else {
+            continue;
+        }
+
+        // calculate mt and do selection
+        double met_x = met.getMet() * cos(met.getMetPhi());
+        double met_y = met.getMet() * sin(met.getMetPhi());
+        double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
+        double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getP4().Px() + met_x, 2) - pow(muon.getP4().Py() + met_y, 2));
+        if (mt < 80) {
+            histos->at("cutflow")->Fill(10., 1.);
+        } else {
+            continue;
+        }
+
+        // remove low ditau mass
+        if (event.getMSV() > 10) {
+            histos->at("cutflow")->Fill(11., 1.);
+        } else {
+            continue;
+        }
+
+        // b-jet veto
+        if (jets.getNbtag() == 0) {
+            histos->at("cutflow")->Fill(12., 1.);
+        } else {
+            continue;
+        }
+
+        // HT cut
+        if (jets.getHT(30., muon.getP4(), tau.getP4()) > 200) {
+            histos->at("cutflow")->Fill(13., 1.);
+        } else {
+            continue;
+        }
+
+        auto st = jets.getST(30.);
+    }
+}

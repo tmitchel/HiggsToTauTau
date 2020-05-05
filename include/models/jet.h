@@ -8,7 +8,7 @@
 
 class jet {
  private:
-    Float_t pt, eta, phi, csv, flavor, id;
+    Float_t pt, eta, phi, csv, flavor, id, loose_id;
     TLorentzVector p4;
 
  public:
@@ -22,10 +22,12 @@ class jet {
     Float_t getCSV() { return csv; }
     Float_t getFlavor() { return flavor; }
     Float_t getID() { return id; }
+    Float_t getLooseID() { return loose_id; }
     TLorentzVector getP4() { return p4; }
 
     // setters
     void setID(Float_t _id) { id = _id; }
+    void setLooseID(Float_t _loose_id) { loose_id = _loose_id; }
 };
 
 // initialize member data and set TLorentzVector
