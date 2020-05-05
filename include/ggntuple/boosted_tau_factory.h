@@ -1,7 +1,7 @@
 // Copyright [2018] Tyler Mitchell
 
-#ifndef INCLUDE_GGNTUPLE_TAU_FACTORY_H_
-#define INCLUDE_GGNTUPLE_TAU_FACTORY_H_
+#ifndef INCLUDE_GGNTUPLE_BOOSTED_TAU_FACTORY_H_
+#define INCLUDE_GGNTUPLE_BOOSTED_TAU_FACTORY_H_
 
 #include <cmath>
 #include <iostream>
@@ -12,7 +12,7 @@
 #include "TLorentzVector.h"
 #include "TTree.h"
 
-class tau_factory {
+class boosted_tau_factory {
  private:
     std::string syst;
     Int_t nTau, tauIndex, localIndex;
@@ -26,8 +26,8 @@ class tau_factory {
     std::vector<tau> taus;
 
  public:
-    tau_factory(TTree *, int, std::string);
-    virtual ~tau_factory() {}
+    boosted_tau_factory(TTree *, int, std::string);
+    virtual ~boosted_tau_factory() {}
     void run_factory(Bool_t);
     Int_t num_taus() { return taus.size(); }
     tau tau_at(unsigned i) { return taus.at(i); }
@@ -36,36 +36,36 @@ class tau_factory {
 };
 
 // read data from tree Int_to member variables
-tau_factory::tau_factory(TTree *input, int _era, std::string _syst) : syst(_syst) {
-    input->SetBranchAddress("nTau", &nTau);
+boosted_tau_factory::boosted_tau_factory(TTree *input, int _era, std::string _syst) : syst(_syst) {
+    input->SetBranchAddress("nBoostedTau", &nTau);
     input->SetBranchAddress("tauIndex", &tauIndex);
-    input->SetBranchAddress("tauPt", &pt);
-    input->SetBranchAddress("tauEta", &eta);
-    input->SetBranchAddress("tauPhi", &phi);
-    input->SetBranchAddress("tauEnergy", &energy);
-    input->SetBranchAddress("tauCharge", &charge);
-    input->SetBranchAddress("tauMass", &mass);
-    input->SetBranchAddress("tauDecayMode", &decay_mode);
-    input->SetBranchAddress("taupfTausDiscriminationByDecayModeFinding", &decay_mode_finding);
-    input->SetBranchAddress("taupfTausDiscriminationByDecayModeFindingNewDMs", &decay_mode_finding_new);
-    input->SetBranchAddress("tauByIsolationMVArun2v2DBoldDMwLTraw", &vloose_iso_mva2v2_old);
-    input->SetBranchAddress("tauByVLooseIsolationMVArun2v2DBoldDMwLT", &vloose_iso_mva2v2_old);
-    input->SetBranchAddress("tauByLooseIsolationMVArun2v2DBoldDMwLT", &loose_iso_mva2v2_old);
-    input->SetBranchAddress("tauByMediumIsolationMVArun2v2DBoldDMwLT", &medium_iso_mva2v2_old);
-    input->SetBranchAddress("tauByTightIsolationMVArun2v2DBoldDMwLT", &tight_iso_mva2v2_old);
-    input->SetBranchAddress("tauByVTightIsolationMVArun2v2DBoldDMwLT", &vtight_iso_mva2v2_old);
-    input->SetBranchAddress("tauByMVA6VLooseElectronRejection", &vloose_antiel_mva2v2_old);
-    input->SetBranchAddress("tauByMVA6LooseElectronRejection", &loose_antiel_mva2v2_old);
-    input->SetBranchAddress("tauByMVA6MediumElectronRejection", &medium_antiel_mva2v2_old);
-    input->SetBranchAddress("tauByMVA6TightElectronRejection", &tight_antiel_mva2v2_old);
-    input->SetBranchAddress("tauByMVA6VTightElectronRejection", &vtight_antiel_mva2v2_old);
-    input->SetBranchAddress("tauByLooseMuonRejection3", &loose_antimu_mva2v2_old);
-    input->SetBranchAddress("tauByTightMuonRejection3", &tight_antimu_mva2v2_old);
+    input->SetBranchAddress("boostedTauPt", &pt);
+    input->SetBranchAddress("boostedTauEta", &eta);
+    input->SetBranchAddress("boostedTauPhi", &phi);
+    input->SetBranchAddress("boostedTauEnergy", &energy);
+    input->SetBranchAddress("boostedTauCharge", &charge);
+    input->SetBranchAddress("boostedTauMass", &mass);
+    input->SetBranchAddress("boostedTauDecayMode", &decay_mode);
+    input->SetBranchAddress("boostedTaupfTausDiscriminationByDecayModeFinding", &decay_mode_finding);
+    input->SetBranchAddress("boostedTaupfTausDiscriminationByDecayModeFindingNewDMs", &decay_mode_finding_new);
+    input->SetBranchAddress("boostedTauByIsolationMVArun2v2DBoldDMwLTraw", &vloose_iso_mva2v2_old);
+    input->SetBranchAddress("boostedTauByVLooseIsolationMVArun2v2DBoldDMwLT", &vloose_iso_mva2v2_old);
+    input->SetBranchAddress("boostedTauByLooseIsolationMVArun2v2DBoldDMwLT", &loose_iso_mva2v2_old);
+    input->SetBranchAddress("boostedTauByMediumIsolationMVArun2v2DBoldDMwLT", &medium_iso_mva2v2_old);
+    input->SetBranchAddress("boostedTauByTightIsolationMVArun2v2DBoldDMwLT", &tight_iso_mva2v2_old);
+    input->SetBranchAddress("boostedTauByVTightIsolationMVArun2v2DBoldDMwLT", &vtight_iso_mva2v2_old);
+    input->SetBranchAddress("boostedTauByMVA6VLooseElectronRejection", &vloose_antiel_mva2v2_old);
+    input->SetBranchAddress("boostedTauByMVA6LooseElectronRejection", &loose_antiel_mva2v2_old);
+    input->SetBranchAddress("boostedTauByMVA6MediumElectronRejection", &medium_antiel_mva2v2_old);
+    input->SetBranchAddress("boostedTauByMVA6TightElectronRejection", &tight_antiel_mva2v2_old);
+    input->SetBranchAddress("boostedTauByMVA6VTightElectronRejection", &vtight_antiel_mva2v2_old);
+    input->SetBranchAddress("boostedTauByLooseMuonRejection3", &loose_antimu_mva2v2_old);
+    input->SetBranchAddress("boostedTauByTightMuonRejection3", &tight_antimu_mva2v2_old);
 
 }
 
 // create electron object and set member data
-void tau_factory::run_factory(Bool_t all = false) {
+void boosted_tau_factory::run_factory(Bool_t all = false) {
     Float_t iso(0.), id(0.);
     taus.clear();
     for (unsigned i = 0; i < nTau; i++) {
@@ -111,4 +111,4 @@ void tau_factory::run_factory(Bool_t all = false) {
     localIndex = all ? tauIndex : 0;
 }
 
-#endif  // INCLUDE_GGNTUPLE_TAU_FACTORY_H_
+#endif  // INCLUDE_GGNTUPLE_BOOSTED_TAU_FACTORY_H_
