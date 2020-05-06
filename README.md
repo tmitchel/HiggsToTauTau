@@ -1,4 +1,4 @@
-# Higgs to Tau-Tau Analysis Code 
+# Higgs to Tau-Tau Analysis Code [![<tmitchel>](https://circleci.com/gh/tmitchel/HiggsToTauTau.svg?style=svg)](https://app.circleci.com/pipelines/github/tmitchel/HiggsToTauTau)
 
 This code is used for the study of a Higgs boson decaying to a pair of tau leptons. Backends are provided for analyzing FSA ntuples and ggNtuples. These backends provide methods to access variables in a uniform manner independent of the input file type. This allows analyzers to write plugins for different analyses without worrying about the input file format. Adding new backends can be done in a straightforward manner. 
 
