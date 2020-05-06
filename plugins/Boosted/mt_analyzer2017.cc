@@ -11,7 +11,7 @@
 #include "../../include/LumiReweightingStandAlone.h"
 #include "../../include/ggntuple/event_factory.h"
 #include "../../include/ggntuple/jet_factory.h"
-#include "../../include/met_factory.h"
+#include "../../include/ggntuple/met_factory.h"
 #include "../../include/ggntuple/muon_factory.h"
 // #include "../../include/slim_tree.h"
 #include "../../include/swiss_army_class.h"
@@ -181,10 +181,7 @@ int main(int argc, char *argv[]) {
         }
 
         // calculate mt and do selection
-        double met_x = met.getMet() * cos(met.getMetPhi());
-        double met_y = met.getMet() * sin(met.getMetPhi());
-        double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-        double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getP4().Px() + met_x, 2) - pow(muon.getP4().Py() + met_y, 2));
+        auto mt = helper->transverse_mass(muon.getP4(), met.getMet(), met.getMetPhi());
         if (mt < 80) {
             histos->at("cutflow")->Fill(10., 1.);
         } else {

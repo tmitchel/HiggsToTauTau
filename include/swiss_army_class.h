@@ -12,6 +12,7 @@
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TLorentzVector.h"
 
 enum lepton { ELECTRON, MUON, DITAU, EMU };
 
@@ -33,6 +34,7 @@ class Helper {
     std::unordered_map<std::string, TH1F *> *getHistos1D() { return &histos_1d; }
     std::unordered_map<std::string, TH2F *> *getHistos2D() { return &histos_2d; }
 
+    Float_t transverse_mass(TLorentzVector, Float_t, Float_t);
     Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) { return sqrt(pow(eta1 - eta2, 2) + pow(phi1 - phi2, 2)); }
     Float_t embed_tracking(Float_t, Int_t);
 };
@@ -120,6 +122,13 @@ Float_t Helper::embed_tracking(Float_t decay_mode, Int_t syst = 0) {
     std::cerr << "Invalid decay mode " << decay_mode << std::endl;
     return 1;
   }
+}
+
+Float_t Helper::transverse_mass(TLorentzVector lep, Float_t met, Float_t metphi) {
+  double met_x = met * cos(metphi);
+  double met_y = met * sin(metphi);
+  double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
+  return sqrt(pow(lep.Pt() + met_pt, 2) - pow(lep.Px() + met_x, 2) - pow(lep.Py() + met_y, 2));
 }
 
 #endif  // INCLUDE_SWISS_ARMY_CLASS_H_

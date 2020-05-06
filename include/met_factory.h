@@ -10,7 +10,7 @@
 
 class met_factory {
  private:
-    Float_t met, metphi, met_py, met_px;
+    Float_t met, metphi;
     Float_t metSig, metcov00, metcov10, metcov11, metcov01;
     TLorentzVector p4;
     std::unordered_map<std::string, std::string> syst_name_map;
@@ -22,14 +22,12 @@ class met_factory {
 
     // getters
     Float_t getMet() { return met; }
+    Float_t getMetPhi() { return metphi; }
     Float_t getMetSig() { return metSig; }
     Float_t getMetCov00() { return metcov00; }
     Float_t getMetCov10() { return metcov10; }
     Float_t getMetCov11() { return metcov11; }
     Float_t getMetCov01() { return metcov01; }
-    Float_t getMetPhi() { return metphi; }
-    Float_t getMetPx() { return met_px; }
-    Float_t getMetPy() { return met_py; }
     TLorentzVector getP4();
 };
 
@@ -60,8 +58,6 @@ met_factory::met_factory(TTree* input, int era, std::string syst)
     input->SetBranchAddress("metcov10", &metcov10);
     input->SetBranchAddress("metcov11", &metcov11);
     input->SetBranchAddress("metcov01", &metcov01);
-    input->SetBranchAddress("met_px", &met_px);
-    input->SetBranchAddress("met_py", &met_py);
 }
 
 std::string met_factory::fix_syst_string(std::string syst) {
