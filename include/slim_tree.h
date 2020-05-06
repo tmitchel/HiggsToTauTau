@@ -1,3 +1,8 @@
+// Copyright 2020 Tyler Mitchell
+
+#ifndef INCLUDE_SLIM_TREE_H_
+#define INCLUDE_SLIM_TREE_H_
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -11,18 +16,17 @@
 #include "models/tau.h"
 
 class slim_tree {
-   public:
+ public:
     slim_tree(std::string, bool);
     ~slim_tree() {}  // default destructor
 
     // member functions
-    // fill the tree for this event
-    void fillTree(std::vector<std::string>, electron *, tau *, jet_factory *, met_factory *, event_factory *, Float_t, Float_t,
-                  std::shared_ptr<std::vector<double>>, std::string);
-    void fillTree(std::vector<std::string>, muon *, tau *, jet_factory *, met_factory *, event_factory *, Float_t, Float_t,
-                  std::shared_ptr<std::vector<double>>, std::string);
+    void fillTree(electron *, tau *, event_factory *, std::string);
+    void fillTree(muon *, tau *, event_factory *, std::string);
     void generalFill(std::vector<std::string>, jet_factory *, met_factory *, event_factory *, Float_t, TLorentzVector, Float_t,
-                     std::shared_ptr<std::vector<double>>, std::string);
+                     std::shared_ptr<std::vector<double>>);
+    void initial_values();
+    void add_ac_branches();
 
     // member data
     TTree *otree;
@@ -77,7 +81,9 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("t1_dmf", &dmf, "t1_dmf/F");
     otree->Branch("t1_dmf_new", &dmf_new, "t1_dmf_new/F");
     otree->Branch("t1_genMatch", &t1_genMatch, "t1_genMatch/F");
+    otree->Branch("lep_dr", &lep_dr, "lep_dr/F");
 
+    otree->Branch("numGenJets", &numGenJets, "numGenJets/F");
     otree->Branch("njets", &njets, "njets");
     otree->Branch("nbjets", &nbjets, "nbjets");
     otree->Branch("j1_pt", &j1_pt, "j1_pt/F");
@@ -89,13 +95,15 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
 
     otree->Branch("met", &met, "met/F");
     otree->Branch("metphi", &metphi, "metphi/F");
-    otree->Branch("mjj", &mjj, "mjj/F");
     otree->Branch("mt", &mt, "mt/F");
 
-    otree->Branch("numGenJets", &numGenJets, "numGenJets/F");
-
+    otree->Branch("mjj", &mjj, "mjj/F");
+    otree->Branch("higgs_pT", &higgs_pT, "higgs_pT/F");
+    otree->Branch("vis_mass", &vis_mass, "vis_mass/F");
+    otree->Branch("dPhijj", &dPhijj, "dPhijj/F");
     otree->Branch("pt_sv", &pt_sv, "pt_sv/F");
     otree->Branch("m_sv", &m_sv, "m_sv/F");
+
     otree->Branch("D0_ggH", &D0_ggH, "D0_ggH/F");
     otree->Branch("DCP_ggH", &DCP_ggH, "DCP_ggH/F");
     otree->Branch("D0_VBF", &D0_VBF, "D0_VBF/F");
@@ -103,6 +111,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("D_l1_VBF", &D_l1_VBF, "D_l1_VBF/F");
     otree->Branch("D_l1zg_VBF", &D_l1zg_VBF, "D_l1zg_VBF/F");
     otree->Branch("DCP_VBF", &DCP_VBF, "DCP_VBF/F");
+    otree->Branch("MELA_D2j", &MELA_D2j, "MELA_D2j/F");
 
     otree->Branch("Phi", &Phi, "Phi/F");
     otree->Branch("Phi1", &Phi1, "Phi1/F");
@@ -111,116 +120,27 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("costhetastar", &costhetastar, "costhetastar/F");
     otree->Branch("Q2V1", &Q2V1, "Q2V1/F");
     otree->Branch("Q2V2", &Q2V2, "Q2V2/F");
-    // otree->Branch("ME_sm_VBF", &ME_sm_VBF, "ME_sm_VBF/F");
-    // otree->Branch("ME_sm_ggH", &ME_sm_ggH, "ME_sm_ggH/F");
-    // otree->Branch("ME_sm_ggH_qqInit", &ME_sm_ggH_qqInit, "ME_sm_ggH_qqInit/F");
-    // otree->Branch("ME_sm_WH", &ME_sm_WH, "ME_sm_WH/F");
-    // otree->Branch("ME_sm_ZH", &ME_sm_ZH, "ME_sm_ZH/F");
-    // otree->Branch("ME_ps_VBF", &ME_ps_VBF, "ME_ps_VBF/F");
-    // otree->Branch("ME_ps_ggH", &ME_ps_ggH, "ME_ps_ggH/F");
-    // otree->Branch("ME_ps_ggH_qqInit", &ME_ps_ggH_qqInit, "ME_ps_ggH_qqInit/F");
-    // otree->Branch("ME_a2_VBF", &ME_a2_VBF, "ME_a2_VBF/F");
-    // otree->Branch("ME_L1_VBF", &ME_L1_VBF, "ME_L1_VBF/F");
-    // otree->Branch("ME_L1Zg_VBF", &ME_L1Zg_VBF, "ME_L1Zg_VBF/F");
-    // otree->Branch("ME_bkg", &ME_bkg, "ME_bkg/F");
-    // otree->Branch("ME_bkg1", &ME_bkg1, "ME_bkg1/F");
-    // otree->Branch("ME_bkg2", &ME_bkg2, "ME_bkg2/F");
-    otree->Branch("MELA_D2j", &MELA_D2j, "MELA_D2j/F");
-
-    otree->Branch("higgs_pT", &higgs_pT, "higgs_pT/F");
-    // otree->Branch("higgs_m", &higgs_m, "higgs_m/F");
-    // otree->Branch("hjj_pT", &hjj_pT, "hjj_pT/F");
-    // otree->Branch("hjj_m", &hjj_m, "hjj_m/F");
-    otree->Branch("vis_mass", &vis_mass, "vis_mass/F");
-    // otree->Branch("dEtajj", &dEtajj, "dEtajj/F");
-    otree->Branch("dPhijj", &dPhijj, "dPhijj/F");
 
     otree->Branch("OS", &OS, "OS/I");
     otree->Branch("is_signal", &is_signal, "is_signal/I");
     otree->Branch("is_antiLepIso", &is_antiLepIso, "is_antiLepIso/I");
     otree->Branch("is_antiTauIso", &is_antiTauIso, "is_antiTauIso/I");
-    // otree->Branch("cat_0jet", &cat_0jet, "cat_0jet/I");
-    // otree->Branch("cat_boosted", &cat_boosted, "cat_boosted/I");
-    // otree->Branch("cat_vbf", &cat_vbf, "cat_vbf/I");
     otree->Branch("contamination", &contamination, "contamination/I");
     otree->Branch("cross_trigger", &cross_trigger, "cross_trigger/F");
-    otree->Branch("lep_dr", &lep_dr, "lep_dr/F");
 
-    wt_a1 = 1.;
-    wt_a2 = 1.;
-    wt_a3 = 1.;
-    wt_L1 = 1.;
-    wt_L1Zg = 1.;
-    wt_a2int = 1.;
-    wt_a3int = 1.;
-    wt_L1int = 1.;
-    wt_L1Zgint = 1.;
-    wt_ggH_a1 = 1.;
-    wt_ggH_a3 = 1.;
-    wt_ggH_a3int = 1.;
-    wt_wh_a1 = 1.;
-    wt_wh_a2 = 1.;
-    wt_wh_a3 = 1.;
-    wt_wh_L1 = 1.;
-    wt_wh_L1Zg = 1.;
-    wt_wh_a2int = 1.;
-    wt_wh_a3int = 1.;
-    wt_wh_L1int = 1.;
-    wt_wh_L1Zgint = 1.;
-    wt_zh_a1 = 1.;
-    wt_zh_a2 = 1.;
-    wt_zh_a3 = 1.;
-    wt_zh_L1 = 1.;
-    wt_zh_L1Zg = 1.;
-    wt_zh_a2int = 1.;
-    wt_zh_a3int = 1.;
-    wt_zh_L1int = 1.;
-    wt_zh_L1Zgint = 1.;
+    // Set any initial values for variables. For instance, ac weights are
+    // initialized to = 1 so that any non-AC sample has the weight saved as
+    // 1 for all events.
+    initial_values();
 
     // include weights for anomolous coupling
     if (isAC) {
-        otree->Branch("wt_vbf_a1", &wt_a1);
-        otree->Branch("wt_vbf_a2", &wt_a2);
-        otree->Branch("wt_vbf_a3", &wt_a3);
-        otree->Branch("wt_vbf_L1", &wt_L1);
-        otree->Branch("wt_vbf_L1Zg", &wt_L1Zg);
-        otree->Branch("wt_vbf_a2int", &wt_a2int);
-        otree->Branch("wt_vbf_a3int", &wt_a3int);
-        otree->Branch("wt_vbf_L1int", &wt_L1int);
-        otree->Branch("wt_vbf_L1Zgint", &wt_L1Zgint);
-
-        otree->Branch("wt_ggh_a1", &wt_ggH_a1);
-        otree->Branch("wt_ggh_a3", &wt_ggH_a3);
-        otree->Branch("wt_ggh_a3int", &wt_ggH_a3int);
-
-        otree->Branch("wt_wh_a1", &wt_wh_a1);
-        otree->Branch("wt_wh_a2", &wt_wh_a2);
-        otree->Branch("wt_wh_a3", &wt_wh_a3);
-        otree->Branch("wt_wh_L1", &wt_wh_L1);
-        otree->Branch("wt_wh_L1Zg", &wt_wh_L1Zg);
-        otree->Branch("wt_wh_a2int", &wt_wh_a2int);
-        otree->Branch("wt_wh_a3int", &wt_wh_a3int);
-        otree->Branch("wt_wh_L1int", &wt_wh_L1int);
-        otree->Branch("wt_wh_L1Zgint", &wt_wh_L1Zgint);
-
-        otree->Branch("wt_zh_a1", &wt_zh_a1);
-        otree->Branch("wt_zh_a2", &wt_zh_a2);
-        otree->Branch("wt_zh_a3", &wt_zh_a3);
-        otree->Branch("wt_zh_L1", &wt_zh_L1);
-        otree->Branch("wt_zh_L1Zg", &wt_zh_L1Zg);
-        otree->Branch("wt_zh_a2int", &wt_zh_a2int);
-        otree->Branch("wt_zh_a3int", &wt_zh_a3int);
-        otree->Branch("wt_zh_L1int", &wt_zh_L1int);
-        otree->Branch("wt_zh_L1Zgint", &wt_zh_L1Zgint);
-
-        otree->Branch("sm_weight_nlo", &sm_weight_nlo);
-        otree->Branch("mm_weight_nlo", &mm_weight_nlo);
-        otree->Branch("ps_weight_nlo", &ps_weight_nlo);
+        add_ac_branches();
     }
 }
 
 void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, met_factory *fmet, event_factory *evt, Float_t weight,
-                            TLorentzVector higgs, Float_t Mt, std::shared_ptr<std::vector<double>> ac_weights, std::string name) {
+                            TLorentzVector higgs, Float_t Mt, std::shared_ptr<std::vector<double>> ac_weights) {
     // create things needed for later
     auto jets(fjets->getJets());
     auto btags(fjets->getBtagJets());
@@ -414,11 +334,7 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
     }
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet_factory *fjets, met_factory *fmet, event_factory *evt, Float_t mt,
-                         Float_t weight, std::shared_ptr<std::vector<double>> ac_weights, std::string name) {
-    TLorentzVector higgs(el->getP4() + t->getP4() + fmet->getP4());
-    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, ac_weights, name);
-
+void slim_tree::fillTree(electron *el, tau *t, event_factory *evt, std::string name) {
     el_pt = el->getPt();
     el_eta = el->getEta();
     el_phi = el->getPhi();
@@ -453,11 +369,7 @@ void slim_tree::fillTree(std::vector<std::string> cat, electron *el, tau *t, jet
     otree->Fill();
 }
 
-void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_factory *fjets, met_factory *fmet, event_factory *evt, Float_t mt,
-                         Float_t weight, std::shared_ptr<std::vector<double>> ac_weights, std::string name) {
-    TLorentzVector higgs(mu->getP4() + t->getP4() + fmet->getP4());
-    generalFill(cat, fjets, fmet, evt, weight, higgs, mt, ac_weights, name);
-
+void slim_tree::fillTree(muon *mu, tau *t, event_factory *evt, std::string name) {
     mu_pt = mu->getPt();
     mu_eta = mu->getEta();
     mu_phi = mu->getPhi();
@@ -491,3 +403,78 @@ void slim_tree::fillTree(std::vector<std::string> cat, muon *mu, tau *t, jet_fac
 
     otree->Fill();
 }
+
+void slim_tree::initial_values() {
+    wt_a1 = 1.;
+    wt_a2 = 1.;
+    wt_a3 = 1.;
+    wt_L1 = 1.;
+    wt_L1Zg = 1.;
+    wt_a2int = 1.;
+    wt_a3int = 1.;
+    wt_L1int = 1.;
+    wt_L1Zgint = 1.;
+    wt_ggH_a1 = 1.;
+    wt_ggH_a3 = 1.;
+    wt_ggH_a3int = 1.;
+    wt_wh_a1 = 1.;
+    wt_wh_a2 = 1.;
+    wt_wh_a3 = 1.;
+    wt_wh_L1 = 1.;
+    wt_wh_L1Zg = 1.;
+    wt_wh_a2int = 1.;
+    wt_wh_a3int = 1.;
+    wt_wh_L1int = 1.;
+    wt_wh_L1Zgint = 1.;
+    wt_zh_a1 = 1.;
+    wt_zh_a2 = 1.;
+    wt_zh_a3 = 1.;
+    wt_zh_L1 = 1.;
+    wt_zh_L1Zg = 1.;
+    wt_zh_a2int = 1.;
+    wt_zh_a3int = 1.;
+    wt_zh_L1int = 1.;
+    wt_zh_L1Zgint = 1.;
+}
+
+void slim_tree::add_ac_branches() {
+    otree->Branch("wt_vbf_a1", &wt_a1);
+    otree->Branch("wt_vbf_a2", &wt_a2);
+    otree->Branch("wt_vbf_a3", &wt_a3);
+    otree->Branch("wt_vbf_L1", &wt_L1);
+    otree->Branch("wt_vbf_L1Zg", &wt_L1Zg);
+    otree->Branch("wt_vbf_a2int", &wt_a2int);
+    otree->Branch("wt_vbf_a3int", &wt_a3int);
+    otree->Branch("wt_vbf_L1int", &wt_L1int);
+    otree->Branch("wt_vbf_L1Zgint", &wt_L1Zgint);
+
+    otree->Branch("wt_ggh_a1", &wt_ggH_a1);
+    otree->Branch("wt_ggh_a3", &wt_ggH_a3);
+    otree->Branch("wt_ggh_a3int", &wt_ggH_a3int);
+
+    otree->Branch("wt_wh_a1", &wt_wh_a1);
+    otree->Branch("wt_wh_a2", &wt_wh_a2);
+    otree->Branch("wt_wh_a3", &wt_wh_a3);
+    otree->Branch("wt_wh_L1", &wt_wh_L1);
+    otree->Branch("wt_wh_L1Zg", &wt_wh_L1Zg);
+    otree->Branch("wt_wh_a2int", &wt_wh_a2int);
+    otree->Branch("wt_wh_a3int", &wt_wh_a3int);
+    otree->Branch("wt_wh_L1int", &wt_wh_L1int);
+    otree->Branch("wt_wh_L1Zgint", &wt_wh_L1Zgint);
+
+    otree->Branch("wt_zh_a1", &wt_zh_a1);
+    otree->Branch("wt_zh_a2", &wt_zh_a2);
+    otree->Branch("wt_zh_a3", &wt_zh_a3);
+    otree->Branch("wt_zh_L1", &wt_zh_L1);
+    otree->Branch("wt_zh_L1Zg", &wt_zh_L1Zg);
+    otree->Branch("wt_zh_a2int", &wt_zh_a2int);
+    otree->Branch("wt_zh_a3int", &wt_zh_a3int);
+    otree->Branch("wt_zh_L1int", &wt_zh_L1int);
+    otree->Branch("wt_zh_L1Zgint", &wt_zh_L1Zgint);
+
+    otree->Branch("sm_weight_nlo", &sm_weight_nlo);
+    otree->Branch("mm_weight_nlo", &mm_weight_nlo);
+    otree->Branch("ps_weight_nlo", &ps_weight_nlo);
+}
+
+#endif  // INCLUDE_SLIM_TREE_H_

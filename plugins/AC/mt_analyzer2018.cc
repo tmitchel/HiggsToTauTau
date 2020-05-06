@@ -571,7 +571,8 @@ int main(int argc, char *argv[]) {
         }
 
         // fill the tree
-        st->fillTree(tree_cat, &muon, &tau, &jets, &met, &event, mt, evtwt, weights, name);
+        st->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
+        st->fillTree(&muon, &tau, &event, name);
     }  // close event loop
 
     fin->Close();
