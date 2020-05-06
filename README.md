@@ -1,11 +1,10 @@
 # Higgs to Tau-Tau Analysis Code 
 
-This code is used for the study of a Higgs boson decaying to a pair of tau leptons. The repository includes analyzers, corresponding to the final states being studied: electron-tau (et) and muon-tau (mt).
+This code is used for the study of a Higgs boson decaying to a pair of tau leptons. Backends are provided for analyzing FSA ntuples and ggNtuples. These backends provide methods to access variables in a uniform manner independent of the input file type. This allows analyzers to write plugins for different analyses without worrying about the input file format. Adding new backends can be done in a straightforward manner. 
 
 ##### Table of Contents
 [Organization](#organization) <br/>
 [File Locations](#files) <br/>
-[Processed Files](#ofiles) <br/>
 [Quick Start](#quickstart) <br/>
 [Objects](#objects) <br/>
 [Helpers](#helpers) <br/>
@@ -18,29 +17,26 @@ This code is used for the study of a Higgs boson decaying to a pair of tau lepto
 ## Organization
 
 - Directories
-  - `bin`: Contains binaries primarily used for initial processing.
-  - `include`: This is where the majority of the library is contained. Header files for each object are stored here along with headers for corrections and other necessary components. 
-  - `data`: All input ROOT files for corrections are contained here. This includes a file containing legacy scale factors for each year, pileup corrections, and Higgs pT reweighting files for MadGraph samples.
+  - `bin`: Contains binaries compiled by the build scripts.
+  - `include`: This is where the majority of the library is contained. General header files for corrections and other general tasks are stored here. This directory contains a subdirectory for each backend that handles reading the input file and providing the relevant information to the user.
   - `plugins`: This directory contains all C++ plugins using the library. This is currently limited to analyzers, but other plugins may be added.
   - `scripts`: Scripts used to process the outputs from analyzers are contained here. This includes plotters, datacard builders, and fake weighters.
-  - `Output`: All outputs are stored in the directory. Outputs include plots, fake fractions, TTrees, and datacards for Higgs Combine. These are all stored in subdirectories within the `Output` directory.
+  - `Output`: All outputs are stored in the directory. Outputs include plots, fake fractions, TTrees, and datacards for Higgs Combine. The `neural-network` directory stores files here as well. These are all stored in subdirectories within the `Output` directory.
+  - `neural-network`: Contains python scripts for training and applying a neural network.
+  - `docs`: Markdown files containing documentation.
+  - `configs`: JSON files for configuring different processes.
+  - `setup`: Scripts for initial setup of this repository.
 - Other Files
   - `build`: A simple bash script for compiling a plugin with the correct libraries (ROOT). The script takes two ordered arguments: the plugin to compile and the name of the output binary. The binary should be copied to your $HOME/bin directory
   - `automate_analysis.py`: Used for analyzing an entire directory. Explained more later
+  - `raw_condor_submit.py`: Script to submit condor jobs using an executable from the `bin` directory. Only handles submission on the Wisonsin cluster without using the farmoutAnalysisJobs script.
 
 <a name="files"/>
 
 ## File Locations
 
 Here are the locations of all currently used files on the Wisconsin cluster. Directory names should be obvious
-- /hdfs/store/user/tmitchel/legacy-v5
-
-<a name="ofiles"/>
-
-## Processed Locations
-
-Location of all files already processed by one of the analyzers. They are ready to be fed to the NN or used directly for making datacards/plots.
-- /hdfs/store/user/tmitchel/legacy-v5/analyzed
+- AC analysis: /hdfs/store/user/tmitchel/legacy-v6
 
 <a name="quickstart"/>
 
@@ -55,7 +51,7 @@ cmsrel CMSSW_CMSSW_10_4_0 && cd CMSSW_10_4_0/src && cmsenv
 2. Clone and build all necessary repositories, including this one.
     - clone this repo
         ```
-        git clone -b stabalize-workflow git@github.com:tmitchel/LTau_Analyzers.git
+        git clone git@github.com:tmitchel/HiggsToTauTau.git
         ```
     - Compile all repos (none are currently needed)
         ```
@@ -64,21 +60,21 @@ cmsrel CMSSW_CMSSW_10_4_0 && cd CMSSW_10_4_0/src && cmsenv
         ```
     - Setup a python virtual environment
         ```
-        cd ${CMSSW_BASE}/src/LTau_Analyzers
+        cd ${CMSSW_BASE}/src/HiggsToTauTau
         virtualenv .pyenv
         source .pyenv/bin/activate  # this must be done every time you log in
         source setup/setup-python.sh
         ```
-3. Compile the appropriate plugin. For example, to compile the 2018 analyzer for the muon+tau channel, use the following command
+3. Compile the appropriate plugin. For example, to compile the 2018 analyzer for the muon+tau channel AC analysis, use the following command
     ```
-    ./build plugins/mt_analyzer2018.cc bin/analyze2018_mt
+    ./build plugins/AC/mt_analyzer2018.cc bin/AC_2018_mt
     ```
-    This will produce a binary named `analyze2018_mt` in the `bin` directory that can be used to analyze 2018 mutau events.
+    This will produce a binary named `AC_2018_mt` in the `bin` directory that can be used to analyze 2018 mutau events for the AC analysis.
 4. Use the python automation script to processes all files in a directory and produce output trees with selection branches and weight branches
     ```
-    python automate_analysis.py -e bin/analyze2018_mt -p /hdfs/store/user/tmitchel/legacy-v5/mela/mt2018_v1p3 --output-dir mt2018_v5p3 --parallel --syst
+    python automate_analysis.py -e bin/AC_2018_mt -p /hdfs/store/user/tmitchel/legacy-v5/mela/mt2018_v1p3 --output-dir mt2018_v5p3 --parallel --syst
     ```
-    This command requires some explanation because it has many options. The purpose of this script is to run a provided binary on all *.root files in a given directory. The binary is supplied with the `-e` option and the input directory is supplied with the `-p` option. Because the analyzers use the name of the input root file to lookup the correct cross-section, any prefixes added to the filenames (looking at you SVFit and MELA) need to be stripped before providing the sample name to the binary. All processed files are stored in `Output/trees/`. The `--output-dir` option can be used to create a new directory in `Output/trees/` and store the processed files there. The --parallel option is used to enable multiprocessing. The maximum number of processes at any one time is the minimum(10, ncores / 2). Each input file will recieve it's own process.  The final option `--syst` is provided when you want to produce additional output files containing systematic shifts. Within the output directory, nominal files are stored in the `NOMINAL` sub-directory and sub-directories will be created for each systematic with the prefix SYST_. Logs will also be saved in the `logs` subdirectory.
+    This command requires some explanation because it has many options. The purpose of this script is to run a provided binary on all *.root files in a given directory. The binary is supplied with the `-e` option and the input directory is supplied with the `-p` option. Because the analyzers use the name of the input root file to lookup the correct cross-section, any prefixes added to the filenames (looking at you SVFit and MELA) need to be stripped before providing the sample name to the binary. All processed files are stored in `Output/trees/`. The `--output-dir` option can be used to create a new directory in `Output/trees/` and store the processed files there. The --parallel option is used to enable multiprocessing. The maximum number of processes at any one time is the minimum(10, ncores / 2). Each input file will recieve it's own process. Replaicing `--parallel` with `--condor` will submit the jobs to be processed using condor. The output files will be stored in `/hdfs/store/user/{username}/{--ouput-dir}`.  The final option `--syst` is provided when you want to produce additional output files containing systematic shifts. Within the output directory, nominal files are stored in the `NOMINAL` sub-directory and sub-directories will be created for each systematic with the prefix SYST_. Logs will also be saved in the `logs` subdirectory. It is recommended to use the `--condor` option when processing systematics due to the large number of processes.
 
 5. hadd the appropriate files together
     ```
@@ -89,7 +85,7 @@ cmsrel CMSSW_CMSSW_10_4_0 && cd CMSSW_10_4_0/src && cmsenv
     ```
     python scripts/fill_fake_fractions.py -i Output/trees/mt2018_v5p3/NOMINAL/merged -y 2018 -t mt_tree -s v5p3 -c
     ```
-    The `-s` option is used to add a descriptor to the output file containing the fake fractions. When the `-c` flag is provided, the newly calculated fractions will be used to create a new ROOT file named 'jetFakes.root' within the input directory. This file contains all necessary data and MC events used for calculating the jetFakes background. A new branch is added containing the fake weight used to appropriately scale events.
+    The `-s` option is used to add a descriptor to the output file containing the fake fractions. The newly calculated fractions will be used to create a new ROOT file named 'jetFakes.root' within the input directory. This file contains all necessary data and MC events used for calculating the jetFakes background. A new branch is added containing the fake weight used to appropriately scale events.
 8. (Optional) Create histograms for plotting.
     - Plots and binning are defined in the JSON file `scripts/plotting.json`. Multiple plotting scenarios can be defined and then chosen at runtime via a command line option. The `variables` key defines the variable name along with the binning. Binning is assumed to be [nbins, lowest, highest]. The `zvar` key is used to specify a variable and binning to use for the VBF sub-categorization. The binning for `zvar` is assumed to be [lowest, edge1, edge2, ...].
     - Produce the plots
