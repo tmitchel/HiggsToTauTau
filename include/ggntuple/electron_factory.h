@@ -7,32 +7,34 @@
 #include <cmath>
 #include <string>
 #include <vector>
+
+#include "../models/electron.h"
 #include "TLorentzVector.h"
 #include "TTree.h"
-#include "../models/electron.h"
 
 class electron_factory {
  private:
     std::string syst;
-    Int_t nEle, lepIndex, localIndex;
+    Int_t nEle, lepIndex, localIndex, n_good_electrons;
     std::vector<Int_t> *charge;
-    std::vector<Float_t> *pt, *eta, *phi, *energy, *ch_iso, *pho_iso, *neu_iso, *pu_iso, *sc_eta, *id_mva_noiso;
+    std::vector<Float_t> *pt, *eta, *phi, *energy, *ch_iso, *pho_iso, *neu_iso, *pu_iso, *sc_eta, *id_mva_iso, *id_mva_noiso;
     std::vector<ULong64_t> *single_trig, *double_trig, *l1_trig;
     std::vector<UShort_t> *id;
     std::vector<electron> electrons;
 
  public:
-    electron_factory(TTree*, int, std::string);
+    electron_factory(TTree *, int, std::string);
     virtual ~electron_factory() {}
     void run_factory(Bool_t);
     Int_t num_electrons() { return electrons.size(); }
+    Int_t num_good_electrons() { return n_good_electrons; }
     electron electron_at(unsigned i) { return electrons.at(i); }
     electron good_electron() { return electrons.at(localIndex); }
     std::vector<electron> all_electrons() { return electrons; }
 };
 
 // read data from tree into member variables
-electron_factory::electron_factory(TTree* input, int era, std::string _syst) : syst(_syst) {
+electron_factory::electron_factory(TTree *input, int era, std::string _syst) : syst(_syst) {
     input->SetBranchAddress("nEle", &nEle);
     input->SetBranchAddress("lepIndex", &lepIndex);
     input->SetBranchAddress("eleCharge", &charge);
@@ -49,6 +51,7 @@ electron_factory::electron_factory(TTree* input, int era, std::string _syst) : s
     input->SetBranchAddress("eleFiredL1Trgs", &l1_trig);
     input->SetBranchAddress("eleIDbit", &id);
     input->SetBranchAddress("eleSCEta", &sc_eta);
+    input->SetBranchAddress("eleIDMVAIso", &id_mva_iso);
     input->SetBranchAddress("eleIDMVANoIso", &id_mva_noiso);
 }
 
@@ -64,9 +67,9 @@ void electron_factory::run_factory(Bool_t all = false) {
         electron el(pt->at(i), eta->at(i), phi->at(i), 0.000511, charge->at(i));
         iso = (ch_iso->at(i) / pt->at(i)) + std::max(0., (neu_iso->at(i) + pho_iso->at(i) - 0.5 * pu_iso->at(i)) / pt->at(i));
         el.setIso(iso);
-        id = (fabs(sc_eta->at(i)) <= 0.8 && sc_eta->at(i) > 0.837 ||
-              fabs(sc_eta->at(i)) > 0.8 && fabs(sc_eta->at(i)) <= 1.5 && sc_eta->at(i) > 0.715 ||
-              fabs(sc_eta->at(i)) >= 1.5 && sc_eta->at(i) > 0.357);
+        id = (fabs(sc_eta->at(i)) <= 0.8 && id_mva_noiso->at(i) > 0.837 ||
+              fabs(sc_eta->at(i)) > 0.8 && fabs(sc_eta->at(i)) <= 1.5 && id_mva_noiso->at(i) > 0.715 ||
+              fabs(sc_eta->at(i)) >= 1.5 && id_mva_noiso->at(i) > 0.357);
         el.setID(id);
         // el.setGenMatch(gen_match_1);
         // el.setGenPt(eGenPt);
@@ -74,6 +77,14 @@ void electron_factory::run_factory(Bool_t all = false) {
         // el.setGenPhi(eGenPhi);
         // el.setGenEnergy(eGenEnergy);
         electrons.push_back(el);
+
+        // check if extra electron for veto
+        if (pt->at(i) >= 15 && fabs(eta->at(i)) < 2.5 &&
+            (fabs(sc_eta->at(i)) <= 0.8 && id_mva_iso->at(i) > -0.83 ||
+             fabs(sc_eta->at(i)) > 0.8 && fabs(sc_eta->at(i)) <= 1.5 && id_mva_iso->at(i) > -0.77 ||
+             fabs(sc_eta->at(i)) >= 1.5 && id_mva_iso->at(i) > -0.69)) {
+            n_good_electrons++;
+        }
     }
 
     // change index if we don't process the full vector

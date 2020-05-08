@@ -9,7 +9,9 @@
 // user includes
 #include "../../include/CLParser.h"
 #include "../../include/LumiReweightingStandAlone.h"
+#include "../../include/ggntuple/electron_factory.h"
 #include "../../include/ggntuple/event_factory.h"
+#include "../../include/ggntuple/gen_factory.h"
 #include "../../include/ggntuple/jet_factory.h"
 #include "../../include/ggntuple/met_factory.h"
 #include "../../include/ggntuple/muon_factory.h"
@@ -100,8 +102,10 @@ int main(int argc, char *argv[]) {
     auto histos = helper->getHistos1D();
 
     // construct factories
+    electron_factory electron(ntuple, 2017, syst);
     event_factory event(ntuple, lepton::MUON, 2017, isMG, syst);
     muon_factory muons(ntuple, 2017, syst);
+    gen_factory gens(ntuple);
     boosted_tau_factory taus(ntuple, 2017, syst);
     jet_factory jets(ntuple, 2017, syst);
     met_factory met(ntuple, 2017, syst);
@@ -138,6 +142,9 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
+        // run factory before we access muons
+        muons.run_factory(false);
+
         // get the good muon
         auto muon = muons.good_muon();
 
@@ -154,6 +161,9 @@ int main(int argc, char *argv[]) {
         } else {
             continue;
         }
+
+        // run factory before we access taus
+        taus.run_factory(false);
 
         // get the good boosted tau
         auto tau = taus.good_tau();
@@ -195,6 +205,9 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
+        // run jet factory before we access jets
+        jets.run_factory();
+
         // b-jet veto
         if (jets.getNbtag() == 0) {
             histos->at("cutflow")->Fill(12., 1.);
@@ -206,6 +219,27 @@ int main(int argc, char *argv[]) {
         if (jets.getHT(30., muon.getP4(), tau.getP4()) > 200) {
             histos->at("cutflow")->Fill(13., 1.);
         } else {
+            continue;
+        }
+
+        // run electron factory to get veto
+        electron.run_factory(true);
+        if (electron.num_good_electrons() == 0) {
+            histos->at("cutflow")->Fill(14., 1.);
+        } else {
+            continue;
+        }
+
+        // run gen factory to get matches
+        gens.run_factory();
+
+        // separate DY processes
+        auto dy_process = gens.DY_process(tau.getP4());
+        if (name == "ZLL" && dy_process != DY::ZL) {
+            continue;
+        } else if (name == "ZTT" && dy_process != DY::ZTT) {
+            continue;
+        } else if (name == "ZJ" && dy_process != DY::ZJ) {
             continue;
         }
 

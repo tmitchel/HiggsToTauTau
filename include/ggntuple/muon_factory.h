@@ -7,31 +7,33 @@
 #include <cmath>
 #include <string>
 #include <vector>
+
+#include "../models/muon.h"
 #include "TLorentzVector.h"
 #include "TTree.h"
-#include "../models/muon.h"
 
 class muon_factory {
- private:
+   private:
     std::string syst;
-    Int_t nMu, lepIndex, localIndex;
+    Int_t nMu, lepIndex, localIndex, n_good_muons;
     std::vector<Int_t> *charge, *idBit;
     std::vector<Float_t> *pt, *eta, *phi, *energy, *ch_iso, *pho_iso, *neu_iso, *pu_iso, *muD0, *muDz;
     std::vector<ULong64_t> *single_trig, *double_trig, *l1_trig;
     std::vector<muon> muons;
 
- public:
-    muon_factory(TTree*, int, std::string);
+   public:
+    muon_factory(TTree *, int, std::string);
     virtual ~muon_factory() {}
     void run_factory(Bool_t);
     Int_t num_muons() { return muons.size(); }
+    Int_t num_good_muons() { return n_good_muons; }
     muon muon_at(unsigned i) { return muons.at(i); }
     muon good_muon() { return muons.at(localIndex); }
     std::vector<muon> all_muons() { return muons; }
 };
 
 // read data from tree into member variabl
-muon_factory::muon_factory(TTree* input, int era, std::string _syst) : syst(_syst) {
+muon_factory::muon_factory(TTree *input, int era, std::string _syst) : syst(_syst) {
     input->SetBranchAddress("nMu", &nMu);
     input->SetBranchAddress("lepIndex", &lepIndex);
     input->SetBranchAddress("muCharge", &charge);
@@ -68,6 +70,11 @@ void muon_factory::run_factory(Bool_t all = false) {
         // mu.setGenPhi(eGenPhi);
         // mu.setGenEnergy(eGenEnergy);
         muons.push_back(mu);
+
+        // check if good muon for veto
+        if (pt->at(i) > 15 && fabs(eta->at(i)) < 2.4 && (idBit->at(i) >> 2 & 1) && muD0->at(i) < 0.045 && muDz->at(i) < 0.2 && iso < 0.15) {
+            n_good_muons++;
+        }
     }
 
     // change index if we don't process the full vector
