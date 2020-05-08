@@ -3,42 +3,39 @@
 #ifndef INCLUDE_FSA_EVENT_FACTORY_H_
 #define INCLUDE_FSA_EVENT_FACTORY_H_
 
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
-#include "TTree.h"
-#include "../swiss_army_class.h"
+
 #include "../qq2Hqq_uncert_scheme.h"
+#include "../swiss_army_class.h"
+#include "TTree.h"
 
 /////////////////////////////////////////
 // Purpose: To hold general event data //
 /////////////////////////////////////////
 class event_factory {
- private:
+   private:
     ULong64_t evt;
     UInt_t run, lumi, convert_evt;
-    Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR;  // gen
+    Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR;                   // gen
     Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;  // event
-    Float_t prefiring_weight, prefiring_weight_up, prefiring_weight_down;  // prefiring weights
-    Float_t muVetoZTTp001dxyzR0, eVetoZTTp001dxyzR0, dimuonVeto, dielectronVeto;  // lepton vetos
-    Float_t sm_weight_nlo, mm_weight_nlo, ps_weight_nlo;  // madgraph reweighting
+    Float_t prefiring_weight, prefiring_weight_up, prefiring_weight_down;              // prefiring weights
+    Float_t muVetoZTTp001dxyzR0, eVetoZTTp001dxyzR0, dimuonVeto, dielectronVeto;       // lepton vetos
+    Float_t sm_weight_nlo, mm_weight_nlo, ps_weight_nlo;                               // madgraph reweighting
 
     // triggers (passing, matching, filtering)
     Float_t Flag_BadChargedCandidateFilter, Flag_BadPFMuonFilter, Flag_EcalDeadCellTriggerPrimitiveFilter, Flag_HBHENoiseFilter,
         Flag_HBHENoiseIsoFilter, Flag_badMuons, Flag_duplicateMuons, Flag_ecalBadCalibFilter, Flag_eeBadScFilter, Flag_globalSuperTightHalo2016Filter,
         Flag_globalTightHalo2016Filter, Flag_goodVertices;
-    Float_t eMatchEmbeddedFilterEle24Tau30, tMatchEmbeddedFilterEle24Tau30;
-    Float_t mMatchEmbeddedFilterMu20Tau27_2018, mMatchEmbeddedFilterMu20Tau27_2017, tMatchEmbeddedFilterMu20HPSTau27;
-    Float_t Ele24LooseTau30Pass, eMatchesEle24Tau30Filter, eMatchesEle24Tau30Path, tMatchesEle24Tau30Filter, tMatchesEle24Tau30Path;
-    Float_t eMatchesEle24HPSTau30Filter, eMatchesEle24HPSTau30Path, tMatchesEle24HPSTau30Filter, tMatchesEle24HPSTau30Path;
-    Float_t Ele24LooseHPSTau30Pass, Ele24LooseHPSTau30TightIDPass;
-    Bool_t PassEle24Tau30_2018;
-
-    Float_t m_sv, pt_sv, m_sv_shift, m_sv_noshift;                                                                                      // SVFit
+    Float_t Ele24LooseTau30Pass, eMatchesEle24Tau30Filter, eMatchesEle24Tau30Path, tMatchesEle24Tau30Filter, tMatchesEle24Tau30Path,
+        Ele24LooseHPSTau30Pass, PassEle24Tau30_2018, eMatchesEle24HPSTau30Filter, eMatchesEle24HPSTau30Path, tMatchesEle24HPSTau30Filter,
+        tMatchesEle24HPSTau30Path;
+    Float_t m_sv, pt_sv, m_sv_shift, m_sv_noshift;                      // SVFit
     Float_t Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2;  // MELA
     Float_t DCP_VBF, DCP_ggH;
-    Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_ggH_qqInit, ME_sm_WH, ME_sm_ZH, ME_ps_VBF, ME_ps_ggH, ME_ps_ggH_qqInit,
-        ME_a2_VBF, ME_L1_VBF, ME_L1Zg_VBF, ME_bkg, ME_bkg1, ME_bkg2;
+    Float_t ME_sm_VBF, ME_sm_ggH, ME_sm_ggH_qqInit, ME_sm_WH, ME_sm_ZH, ME_ps_VBF, ME_ps_ggH, ME_ps_ggH_qqInit, ME_a2_VBF, ME_L1_VBF, ME_L1Zg_VBF,
+        ME_bkg, ME_bkg1, ME_bkg2;
     Float_t njets;
     std::string syst;
     bool shifting, valid_shift, always_shift;
@@ -49,7 +46,7 @@ class event_factory {
     std::unordered_map<std::string, int> unc_map;
     std::unordered_map<std::string, std::string> syst_name_map;
 
- public:
+   public:
     event_factory(TTree*, lepton, int, bool, std::string);
     virtual ~event_factory() {}
     void setEmbed() { isEmbed = true; }
@@ -61,23 +58,8 @@ class event_factory {
     Float_t getPtSV() { return pt_sv; }
 
     // tautau Trigger Info
-    Bool_t getPassElEmbedCross();
-    Bool_t getPassMuEmbedCross2017();
-    Bool_t getPassMuEmbedCross2018();
-    Bool_t getPassEle25();
-    Bool_t getPassEle27();
-    Bool_t getPassEle32();
-    Bool_t getPassEle35();
     Bool_t getPassEle24Tau30();
     Bool_t getPassEle24Tau30_2018(Bool_t);
-    Bool_t getPassMu19Tau20();
-    Bool_t getPassIsoMu22();
-    Bool_t getPassIsoTkMu22();
-    Bool_t getPassIsoMu22eta2p1();
-    Bool_t getPassIsoTkMu22eta2p1();
-    Bool_t getPassMu20Tau27();
-    Bool_t getPassMu24();
-    Bool_t getPassMu27();
     Bool_t getPassFlags(Bool_t);
     Bool_t getPassCrossTrigger(Float_t);
 
@@ -146,25 +128,20 @@ class event_factory {
 };
 
 // read data from trees into member variables
-event_factory::event_factory(TTree* input, lepton _lep, int _era, bool isMadgraph, std::string _syst) :
-    sm_weight_nlo(1.),
-    mm_weight_nlo(1.),
-    ps_weight_nlo(1.),
-    isEmbed(false),
-    era(_era),
-    syst(_syst),
-    lep(_lep),
-    shifting(false),
-    valid_shift(false),
-    always_shift(false),
-    unc_map{
-        {"Rivet0_Up", 0}, {"Rivet0_Down", 0}, {"Rivet1_Up", 1}, {"Rivet1_Down", 1},
-        {"Rivet2_Up", 2}, {"Rivet2_Down", 2}, {"Rivet3_Up", 3}, {"Rivet3_Down", 3},
-        {"Rivet4_Up", 4}, {"Rivet4_Down", 4}, {"Rivet5_Up", 5}, {"Rivet5_Down", 5},
-        {"Rivet6_Up", 6}, {"Rivet6_Down", 6}, {"Rivet7_Up", 7}, {"Rivet7_Down", 7},
-        {"Rivet8_Up", 8}, {"Rivet8_Down", 8}
-    }
-     {
+event_factory::event_factory(TTree* input, lepton _lep, int _era, bool isMadgraph, std::string _syst)
+    : sm_weight_nlo(1.),
+      mm_weight_nlo(1.),
+      ps_weight_nlo(1.),
+      isEmbed(false),
+      era(_era),
+      syst(_syst),
+      lep(_lep),
+      shifting(false),
+      valid_shift(false),
+      always_shift(false),
+      unc_map{{"Rivet0_Up", 0}, {"Rivet0_Down", 0}, {"Rivet1_Up", 1}, {"Rivet1_Down", 1}, {"Rivet2_Up", 2}, {"Rivet2_Down", 2},
+              {"Rivet3_Up", 3}, {"Rivet3_Down", 3}, {"Rivet4_Up", 4}, {"Rivet4_Down", 4}, {"Rivet5_Up", 5}, {"Rivet5_Down", 5},
+              {"Rivet6_Up", 6}, {"Rivet6_Down", 6}, {"Rivet7_Up", 7}, {"Rivet7_Down", 7}, {"Rivet8_Up", 8}, {"Rivet8_Down", 8}} {
     auto end = std::string::npos;
     std::string m_sv_name("m_sv"), pt_sv_name("pt_sv");
     if (syst.find("efaket_es") != end || syst.find("mfaket_et") != end) {  // lepton faking tau ES
@@ -183,7 +160,7 @@ event_factory::event_factory(TTree* input, lepton _lep, int _era, bool isMadgrap
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
         shifting = true;
-        always_shift = true;  // shift is always valid
+        always_shift = true;               // shift is always valid
     } else if (syst.find("EES") != end) {  // lepton ES
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
@@ -265,22 +242,17 @@ event_factory::event_factory(TTree* input, lepton _lep, int _era, bool isMadgrap
         input->SetBranchAddress("ps_weight_nlo", &ps_weight_nlo);
     }
 
-    if (lep == lepton::ELECTRON) {
-        if (isEmbed) {
-          input->SetBranchAddress("eMatchEmbeddedFilterEle24Tau30", &eMatchEmbeddedFilterEle24Tau30);
-          input->SetBranchAddress("tMatchEmbeddedFilterEle24Tau30", &tMatchEmbeddedFilterEle24Tau30);
-        }
-    } else if (lep == lepton::MUON) {
-        if (isEmbed) {
-          input->SetBranchAddress("mMatchEmbeddedFilterMu20Tau27_2017", &mMatchEmbeddedFilterMu20Tau27_2017);
-          input->SetBranchAddress("mMatchEmbeddedFilterMu20Tau27_2018", &mMatchEmbeddedFilterMu20Tau27_2018);
-          input->SetBranchAddress("tMatchEmbeddedFilterMu20HPSTau27", &tMatchEmbeddedFilterMu20HPSTau27);
-        }
-    } else if (lep == lepton::EMU) {
-        // no analyzer yet
-    } else {
-        std::cerr << "HEY! THAT'S NOT AN ANALYZER. WAT U DOIN." << std::endl;
-    }
+    // if (lep == lepton::ELECTRON) {
+    //     if (isEmbed) {
+    //     }
+    // } else if (lep == lepton::MUON) {
+    //     if (isEmbed) {
+    //     }
+    // } else if (lep == lepton::EMU) {
+    //     // no analyzer yet
+    // } else {
+    //     std::cerr << "HEY! THAT'S NOT AN ANALYZER. WAT U DOIN." << std::endl;
+    // }
 }
 
 std::string event_factory::fix_syst_string(std::string syst) {
@@ -365,16 +337,14 @@ Float_t event_factory::getVBFTheoryUnc(std::string syst) {
 
 Bool_t event_factory::getPassFlags(Bool_t isData) {
     if (era == 2016) {
-        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
-                || Flag_HBHENoiseIsoFilter || (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter);
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter || Flag_HBHENoiseIsoFilter ||
+                 (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter);
     } else if (era == 2017) {
-        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
-                || Flag_HBHENoiseIsoFilter || (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
-                || Flag_ecalBadCalibFilter);
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter || Flag_HBHENoiseIsoFilter ||
+                 (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter || Flag_ecalBadCalibFilter);
     } else {
-        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter
-                || Flag_HBHENoiseIsoFilter || (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter
-                || Flag_ecalBadCalibFilter);
+        return !(Flag_goodVertices || Flag_globalSuperTightHalo2016Filter || Flag_HBHENoiseFilter || Flag_HBHENoiseIsoFilter ||
+                 (Flag_eeBadScFilter && isData) || Flag_EcalDeadCellTriggerPrimitiveFilter || Flag_BadPFMuonFilter || Flag_ecalBadCalibFilter);
     }
 }
 
@@ -385,24 +355,12 @@ Bool_t event_factory::getPassEle24Tau30() {
 Bool_t event_factory::getPassEle24Tau30_2018(Bool_t isData) {
     PassEle24Tau30_2018 = eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path;
     if (isData && run < 317509) {
-      return eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path && Ele24LooseTau30Pass; 
+        return eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path && Ele24LooseTau30Pass;
     } else if ((isData && run >= 317509) || !isData) {
-      return eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path && Ele24LooseHPSTau30Pass; 
+        return eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path &&
+               Ele24LooseHPSTau30Pass;
     }
     return false;
-}
-
-
-Bool_t event_factory::getPassElEmbedCross() {
-  return eMatchEmbeddedFilterEle24Tau30 && tMatchEmbeddedFilterEle24Tau30;
-}
-
-Bool_t event_factory::getPassMuEmbedCross2017() {
-  return mMatchEmbeddedFilterMu20Tau27_2017 && tMatchEmbeddedFilterMu20HPSTau27;
-}
-
-Bool_t event_factory::getPassMuEmbedCross2018() {
-  return mMatchEmbeddedFilterMu20Tau27_2018 && tMatchEmbeddedFilterMu20HPSTau27;
 }
 
 Bool_t event_factory::getPassCrossTrigger(Float_t pt) {
