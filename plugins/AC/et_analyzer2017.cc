@@ -185,10 +185,6 @@ int main(int argc, char *argv[]) {
     // Declare histograms and factories //
     //////////////////////////////////////
 
-    // declare histograms (histogram initializer functions in util.h)
-    fout->cd("grabbag");
-    auto histos = helper->getHistos1D();
-
     // construct factories
     event_factory event(ntuple, lepton::ELECTRON, 2017, isMG, syst);
     electron_factory electrons(ntuple);
@@ -239,7 +235,7 @@ int main(int argc, char *argv[]) {
                 evtwt = 2.581;
             }
         }
-        histos->at("cutflow")->Fill(1., 1.);
+        helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 1., 1.);
 
         // run factories
         electrons.run_factory();
@@ -253,7 +249,7 @@ int main(int argc, char *argv[]) {
 
         // pass event flags
         if (event.getPassFlags(isData)) {
-            histos->at("cutflow")->Fill(2., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 2., 1.);
         } else {
             continue;
         }
@@ -266,13 +262,13 @@ int main(int argc, char *argv[]) {
         } else if ((name == "ZJ" || name == "TTJ" || name == "VVJ" || name == "STJ") && tau.getGenMatch() != 6) {
             continue;
         } else {
-            histos->at("cutflow")->Fill(3., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4., 1.);
         }
 
         // only opposite-sign
         int evt_charge = tau.getCharge() + electron.getCharge();
         if (evt_charge == 0) {
-            histos->at("cutflow")->Fill(4., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5., 1.);
         } else {
             continue;
         }
@@ -288,14 +284,14 @@ int main(int argc, char *argv[]) {
 
         // now do mt selection
         if (mt < 50) {
-            histos->at("cutflow")->Fill(5., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6., 1.);
         } else {
             continue;
         }
 
         // b-jet veto
         if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
-            histos->at("cutflow")->Fill(7., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7., 1.);
         } else {
             continue;
         }
@@ -309,7 +305,7 @@ int main(int argc, char *argv[]) {
 
         // only keep the regions we need
         if (signalRegion || antiTauIsoRegion) {
-            histos->at("cutflow")->Fill(8., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 8., 1.);
         } else {
             continue;
         }

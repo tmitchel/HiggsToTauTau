@@ -120,25 +120,25 @@ int main(int argc, char *argv[]) {
             progress++;
         }
 
-        histos->at("cutflow")->Fill(1., 1.);
+        helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 1, 1.);
 
         // apply trigger
         if (event.fire_trigger(trigger::Mu50)) {
-            histos->at("cutflow")->Fill(2., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 2, 1.);
         } else {
             continue;
         }
 
         // apply met filters
         // if (met filter selection) {
-        //     histos->at("cutflow")->Fill(3., 1.);
+        //     helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 3, 1.);
         // } else {
         //     continue
         // }
 
         // met selection
         if (met.getMet() > 50) {
-            histos->at("cutflow")->Fill(4., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
         } else {
             continue;
         }
@@ -151,14 +151,14 @@ int main(int argc, char *argv[]) {
 
         // muon kinematic selection
         if (muon.getPt() > 52 && fabs(muon.getEta()) < 2.4) {
-            histos->at("cutflow")->Fill(5., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
         } else {
             continue;
         }
 
         // muon ID selection
         if (muon.getID()) {
-            histos->at("cutflow")->Fill(6., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
         } else {
             continue;
         }
@@ -171,14 +171,14 @@ int main(int argc, char *argv[]) {
 
         // tau kinematic selection
         if (tau.getPt() > 40 && fabs(muon.getEta()) < 2.3) {
-            histos->at("cutflow")->Fill(7., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7, 1.);
         } else {
             continue;
         }
 
         // tau ID selection
         if (tau.getDecayModeFinding() > 0.5 && tau.getAgainstTightMuonMVA() > 0.5 && tau.getAgainstVLooseElectronMVA() > 0.5) {
-            histos->at("cutflow")->Fill(8., 1.);
+            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 8, 1.);
         } else {
             continue;
         }
