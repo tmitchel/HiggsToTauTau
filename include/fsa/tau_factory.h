@@ -153,15 +153,15 @@ void tau_factory::run_factory() {
 }
 
 void tau_factory::handle_systematics(std::string syst) {
-    if (syst.find("DM0") != std::string::npos || syst.find("DM1") != std::string::npos) {
-        double scale(1.);
-        TLorentzVector new_tau;
-        auto old_tau = taus.at(0);
-        if (old_tau.getGenMatch() == 5) {
-            scale = syst.find("Up") == std::string::npos ? tes_syst_up : tes_syst_down;
-        } else if (old_tau.getGenMatch() < 5) {
-            scale = syst.find("Up") == std::string::npos ? ftes_syst_up : ftes_syst_down;
-        }
+    double scale(1.);
+    TLorentzVector new_tau;
+    auto old_tau = taus.at(0);
+    if (old_tau.getGenMatch() == 5 && (syst.substr(0, 3) == "DM0" || syst.substr(0, 3) == "DM1")) {
+        scale = syst.find("Up") == std::string::npos ? tes_syst_up : tes_syst_down;
+        new_tau.SetPtEtaPhiM(old_tau.getPt() * (1 + scale), old_tau.getEta(), old_tau.getPhi(), old_tau.getMass());
+        taus.at(0).setP4(new_tau);
+    } else if (old_tau.getGenMatch() < 5 && (syst.substr(0, 6) == "efaket" || syst.substr(0, 6) == "mfaket")) {
+        scale = syst.find("Up") == std::string::npos ? ftes_syst_up : ftes_syst_down;
         new_tau.SetPtEtaPhiM(old_tau.getPt() * (1 + scale), old_tau.getEta(), old_tau.getPhi(), old_tau.getMass());
         taus.at(0).setP4(new_tau);
     }
