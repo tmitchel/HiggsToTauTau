@@ -7,6 +7,7 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 // ROOT include
 #include "TFile.h"
@@ -18,11 +19,11 @@ enum lepton { ELECTRON, MUON, DITAU, EMU };
 
 class Helper {
  private:
+    TFile* output_file;
     double luminosity2016, luminosity2017, luminosity2018;
     std::map<std::string, double> cross_sections;
     std::unordered_map<std::string, TH1F *> histos_1d;
     std::unordered_map<std::string, TH2F *> histos_2d;
-    std::map<std::string, std::string> systematics;
 
  public:
     Helper(TFile *, std::string, std::string);
@@ -37,16 +38,15 @@ class Helper {
     Float_t transverse_mass(TLorentzVector, Float_t, Float_t);
     Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) { return sqrt(pow(eta1 - eta2, 2) + pow(phi1 - phi2, 2)); }
     Float_t embed_tracking(Float_t, Int_t);
+    void create_and_fill(std::string, std::vector<Float_t>, Float_t, Float_t);
+    void create_and_fill(std::string, std::vector<Float_t>, Float_t, Float_t, Float_t);
 };
 
 Helper::Helper(TFile *fout, std::string name, std::string syst)
-    : luminosity2016(35900.),
+    : output_file(fout),
+      luminosity2016(35900.),
       luminosity2017(41500.),
-      luminosity2018(59740.0),
-      systematics{{"met_UESDown", "_CMS_scale_met_unclustered_13TeVDown"},       {"met_UESUp", "_CMS_scale_met_unclustered_13TeVUp"},
-                  {"met_JESDown", "_CMS_scale_met_clustered_13TeVDown"},         {"met_JESUp", "_CMS_scale_met_clustered_13TeVUp"},
-                  {"metphi_UESDown", "_CMS_scale_metphi_unclustered_13TeVDown"}, {"metphi_UESUp", "_CMS_scale_metphi_unclustered_13TeVUp"},
-                  {"metphi_JESDown", "_CMS_scale_metphi_clustered_13TeVDown"},   {"metphi_JESUp", "_CMS_scale_metphi_clustered_13TeVUp"}},
+      luminosity2018(59740.),
       cross_sections{{"DYJets1", 6225.42},
                      {"DYJets2", 6225.42},
                      {"DYJets2_lowM", 6225.42},
@@ -99,13 +99,7 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
                      {"wh125", 0.6864 * 0.0627},  // took the average of W+ and W-. Not important because for JHU it's reweighted to Powheg anyways
                      {"wminus125", 0.5328 * 0.0627},
                      {"wplus125", 0.840 * 0.0627},
-                     {"zh125", 0.8839 * 0.062}},
-      histos_1d{{"cutflow", new TH1F("cutflow", "Cutflow", 12, -0.5, 11.5)},
-                {"el_pt", new TH1F(name.c_str(), "el_pt", 12, 0, 300)},
-                {"tau_pt", new TH1F("tau_pt", "tau_pt", 12, 0, 300)},
-                {"triggers", new TH1F("triggers", "triggers", 4, -0.5, 3.5)}} {
-    std::string suffix = systematics[syst];
-};
+                     {"zh125", 0.8839 * 0.062}} {};
 
 Float_t Helper::embed_tracking(Float_t decay_mode, Int_t syst = 0) {
   Float_t sf(.99), prong(0.975), pizero(1.051);
@@ -129,6 +123,30 @@ Float_t Helper::transverse_mass(TLorentzVector lep, Float_t met, Float_t metphi)
   double met_y = met * sin(metphi);
   double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
   return sqrt(pow(lep.Pt() + met_pt, 2) - pow(lep.Px() + met_x, 2) - pow(lep.Py() + met_y, 2));
+}
+
+void Helper::create_and_fill(std::string name, std::vector<Float_t> bins, Float_t value, Float_t weight) {
+  if (histos_1d.find(name) == histos_1d.end()) {
+    if (bins.size() < 3) {
+      std::cerr << "Not enough bins provided" << std::endl;
+      return;
+    }
+    output_file->cd("grabbag");
+    histos_1d[name] = new TH1F(name.c_str(), name.c_str(), bins.at(0), bins.at(1), bins.at(2));
+  }
+  histos_1d.at(name)->Fill(value, weight);
+}
+
+void Helper::create_and_fill(std::string name, std::vector<Float_t> bins, Float_t value_x, Float_t value_y, Float_t weight) {
+  if (histos_2d.find(name) == histos_2d.end()) {
+    if (bins.size() < 6) {
+      std::cerr << "Not enough bins provided" << std::endl;
+      return;
+    }
+    output_file->cd("grabbag");
+    histos_2d[name] = new TH2F(name.c_str(), name.c_str(), bins.at(0), bins.at(1), bins.at(2), bins.at(3), bins.at(4), bins.at(5));
+  }
+  histos_2d.at(name)->Fill(value_x, value_y, weight);
 }
 
 #endif  // INCLUDE_SWISS_ARMY_CLASS_H_
