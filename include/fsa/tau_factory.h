@@ -21,6 +21,7 @@ class tau_factory {
     Float_t tTightDeepTau2017v2p1VSe, tVVLooseDeepTau2017v2p1VSe, tVVVLooseDeepTau2017v2p1VSe, tTightDeepTau2017v2p1VSmu, tVLooseDeepTau2017v2p1VSmu;
     Float_t tVVVLooseDeepTau2017v2p1VSjet, tVLooseDeepTau2017v2p1VSjet, tLooseDeepTau2017v2p1VSjet, tMediumDeepTau2017v2p1VSjet,
         tTightDeepTau2017v2p1VSjet, tVTightDeepTau2017v2p1VSjet, tVVTightDeepTau2017v2p1VSjet, deepiso_2;
+        Float_t tes_syst_up, tes_syst_down, ftes_syst_up, ftes_syst_down;
     std::vector<tau> taus;
 
  public:
@@ -28,6 +29,7 @@ class tau_factory {
     virtual ~tau_factory() {}
     void set_process_all() { /* nothing to do */ }
     void run_factory();
+    void handle_systematics(std::string);
     Int_t num_taus() { return taus.size(); }
     tau tau_at(unsigned i) { return taus.at(i); }
     tau good_tau() { return taus.at(0); }
@@ -74,6 +76,10 @@ tau_factory::tau_factory(TTree* input) {
     input->SetBranchAddress("tTightDeepTau2017v2p1VSjet", &tTightDeepTau2017v2p1VSjet);
     input->SetBranchAddress("tVTightDeepTau2017v2p1VSjet", &tVTightDeepTau2017v2p1VSjet);
     input->SetBranchAddress("tVVTightDeepTau2017v2p1VSjet", &tVVTightDeepTau2017v2p1VSjet);
+    input->SetBranchAddress("tes_syst_up", &tes_syst_up);
+    input->SetBranchAddress("tes_syst_down", &tes_syst_down);
+    input->SetBranchAddress("ftes_syst_up", &ftes_syst_up);
+    input->SetBranchAddress("ftes_syst_down", &ftes_syst_down);
 }
 
 // create electron object and set member data
@@ -144,6 +150,21 @@ void tau_factory::run_factory() {
     });
 
     taus = { t };
+}
+
+void tau_factory::handle_systematics(std::string syst) {
+    if (syst.substr(0, 3) == "DM0" || syst.substr(0, 3) == "DM1") {
+        double scale(1.);
+        TLorentzVector new_tau;
+        auto old_tau = taus.at(0);
+        if (old_tau.getGenMatch() == 5) {
+            scale = syst.find("Up") == std::string::npos ? tes_syst_up : tes_syst_down;
+        } else if (old_tau.getGenMatch() < 5) {
+            scale = syst.find("Up") == std::string::npos ? ftes_syst_up : ftes_syst_down;
+        }
+        new_tau.SetPtEtaPhiM(old_tau.getPt() * (1 + scale), old_tau.getEta(), old_tau.getPhi(), old_tau.getMass());
+        taus.at(0).setP4(new_tau);
+    }
 }
 
 #endif  // INCLUDE_FSA_TAU_FACTORY_H_

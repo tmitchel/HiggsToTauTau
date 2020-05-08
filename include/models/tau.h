@@ -73,6 +73,7 @@ class tau {
     void setGenPt(Float_t _gen_pt) { gen_pt = _gen_pt; }
     void setGenEta(Float_t _gen_eta) { gen_eta = _gen_eta; }
     void setGenPhi(Float_t _gen_phi) { gen_phi = _gen_phi; }
+    void setP4(TLorentzVector _p4) { p4 = _p4; }
 
     void setMVAIsoWPs(std::vector<Float_t>);
     void setDeepIsoWPs(std::vector<Float_t>);
@@ -80,6 +81,7 @@ class tau {
     void setMVAAgainstMuon(std::vector<Float_t>);
     void setDeepAgainstElectron(std::vector<Float_t>);
     void setDeepAgainstMuon(std::vector<Float_t>);
+
 };
 
 void tau::setMVAIsoWPs(std::vector<Float_t> wps) {

@@ -24,7 +24,7 @@
 #include "../../include/LumiReweightingStandAlone.h"
 #include "../../include/fsa/event_factory.h"
 #include "../../include/fsa/jet_factory.h"
-#include "../../include/met_factory.h"
+#include "../../include/fsa/met_factory.h"
 #include "../../include/fsa/muon_factory.h"
 #include "../../include/slim_tree.h"
 #include "../../include/swiss_army_class.h"
@@ -310,6 +310,10 @@ int main(int argc, char *argv[]) {
             histos->at("cutflow")->Fill(7., 1.);
         } else {
             continue;
+        }
+
+        if (!syst.empty()) {
+            taus.handle_systematics(syst);  // applies TES or FTES shift if needed
         }
 
         // apply all scale factors/corrections/etc.
