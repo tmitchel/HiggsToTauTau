@@ -153,7 +153,7 @@ void tau_factory::run_factory() {
 }
 
 void tau_factory::handle_systematics(std::string syst) {
-    if (syst.substr(0, 3) == "DM0" || syst.substr(0, 3) == "DM1") {
+    if (syst.find("DM0") != std::string::npos || syst.find("DM1") != std::string::npos) {
         double scale(1.);
         TLorentzVector new_tau;
         auto old_tau = taus.at(0);
