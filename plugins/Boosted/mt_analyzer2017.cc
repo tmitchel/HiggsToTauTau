@@ -97,10 +97,6 @@ int main(int argc, char *argv[]) {
         norm = helper->getLuminosity2017() * helper->getCrossSection(sample) / gen_number;
     }
 
-    // declare histograms (histogram initializer functions in swiss_army_class.h)
-    fout->cd("grabbag");
-    auto histos = helper->getHistos1D();
-
     // construct factories
     electron_factory electron(ntuple);
     electron.set_process_all();  // loop through all electrons to build veto
@@ -120,25 +116,25 @@ int main(int argc, char *argv[]) {
             progress++;
         }
 
-        helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 1, 1.);
+        helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 1., 1.);
 
         // apply trigger
         if (event.fire_trigger(trigger::Mu50)) {
-            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 2, 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 2., 1.);
         } else {
             continue;
         }
 
         // apply met filters
         // if (met filter selection) {
-        //     helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 3, 1.);
+        //     helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 3., 1.);
         // } else {
         //     continue
         // }
 
         // met selection
         if (met.getMet() > 50) {
-            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 4., 1.);
         } else {
             continue;
         }
@@ -151,14 +147,14 @@ int main(int argc, char *argv[]) {
 
         // muon kinematic selection
         if (muon.getPt() > 52 && fabs(muon.getEta()) < 2.4) {
-            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 5., 1.);
         } else {
             continue;
         }
 
         // muon ID selection
         if (muon.getID()) {
-            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 6., 1.);
         } else {
             continue;
         }
@@ -171,14 +167,14 @@ int main(int argc, char *argv[]) {
 
         // tau kinematic selection
         if (tau.getPt() > 40 && fabs(muon.getEta()) < 2.3) {
-            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7, 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 7., 1.);
         } else {
             continue;
         }
 
         // tau ID selection
         if (tau.getDecayModeFinding() > 0.5 && tau.getAgainstTightMuonMVA() > 0.5 && tau.getAgainstVLooseElectronMVA() > 0.5) {
-            helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 8, 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 8., 1.);
         } else {
             continue;
         }
@@ -186,7 +182,7 @@ int main(int argc, char *argv[]) {
         // event selection
         auto dR_lep_tau = muon.getP4().DeltaR(tau.getP4());
         if (dR_lep_tau > 0.1 && dR_lep_tau < 0.8) {
-            histos->at("cutflow")->Fill(9., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 9., 1.);
         } else {
             continue;
         }
@@ -194,14 +190,14 @@ int main(int argc, char *argv[]) {
         // calculate mt and do selection
         auto mt = helper->transverse_mass(muon.getP4(), met.getMet(), met.getMetPhi());
         if (mt < 80) {
-            histos->at("cutflow")->Fill(10., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 10., 1.);
         } else {
             continue;
         }
 
         // remove low ditau mass
         if (event.getMSV() > 10) {
-            histos->at("cutflow")->Fill(11., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 11., 1.);
         } else {
             continue;
         }
@@ -211,14 +207,14 @@ int main(int argc, char *argv[]) {
 
         // b-jet veto
         if (jets.getNbtag() == 0) {
-            histos->at("cutflow")->Fill(12., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 12., 1.);
         } else {
             continue;
         }
 
         // HT cut
         if (jets.getHT(30., muon.getP4(), tau.getP4()) > 200) {
-            histos->at("cutflow")->Fill(13., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 13., 1.);
         } else {
             continue;
         }
@@ -226,7 +222,7 @@ int main(int argc, char *argv[]) {
         // run electron factory to get veto
         electron.run_factory();
         if (electron.num_good_electrons() == 0) {
-            histos->at("cutflow")->Fill(14., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 14., 1.);
         } else {
             continue;
         }
