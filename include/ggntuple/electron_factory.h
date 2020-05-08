@@ -14,8 +14,8 @@
 
 class electron_factory {
  private:
-    std::string syst;
     Int_t nEle, lepIndex, localIndex, n_good_electrons;
+    Bool_t process_all;
     std::vector<Int_t> *charge;
     std::vector<Float_t> *pt, *eta, *phi, *energy, *ch_iso, *pho_iso, *neu_iso, *pu_iso, *sc_eta, *id_mva_iso, *id_mva_noiso;
     std::vector<ULong64_t> *single_trig, *double_trig, *l1_trig;
@@ -23,9 +23,11 @@ class electron_factory {
     std::vector<electron> electrons;
 
  public:
-    electron_factory(TTree *, int, std::string);
+    explicit electron_factory(TTree *);
     virtual ~electron_factory() {}
-    void run_factory(Bool_t);
+    void set_process_all() { process_all = true; }
+    void run_factory();
+    void handle_systematics(std::string);
     Int_t num_electrons() { return electrons.size(); }
     Int_t num_good_electrons() { return n_good_electrons; }
     electron electron_at(unsigned i) { return electrons.at(i); }
@@ -34,7 +36,7 @@ class electron_factory {
 };
 
 // read data from tree into member variables
-electron_factory::electron_factory(TTree *input, int era, std::string _syst) : syst(_syst) {
+electron_factory::electron_factory(TTree *input) : process_all(false) {
     input->SetBranchAddress("nEle", &nEle);
     input->SetBranchAddress("lepIndex", &lepIndex);
     input->SetBranchAddress("eleCharge", &charge);
@@ -56,11 +58,11 @@ electron_factory::electron_factory(TTree *input, int era, std::string _syst) : s
 }
 
 // create electron object and set member data
-void electron_factory::run_factory(Bool_t all = false) {
+void electron_factory::run_factory() {
     Float_t iso(0.), id(0.);
     electrons.clear();
     for (unsigned i = 0; i < nEle; i++) {
-        if (!all && i != lepIndex) {
+        if (!process_all && i != lepIndex) {
             continue;
         }
 
@@ -88,7 +90,11 @@ void electron_factory::run_factory(Bool_t all = false) {
     }
 
     // change index if we don't process the full vector
-    localIndex = all ? lepIndex : 0;
+    localIndex = process_all ? lepIndex : 0;
+}
+
+void electron_factory::handle_systematics(std::string syst) {
+    // not implemented yet
 }
 
 #endif  // INCLUDE_GGNTUPLE_ELECTRON_FACTORY_H_

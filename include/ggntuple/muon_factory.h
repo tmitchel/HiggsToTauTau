@@ -14,7 +14,7 @@
 
 class muon_factory {
    private:
-    std::string syst;
+    Bool_t process_all;
     Int_t nMu, lepIndex, localIndex, n_good_muons;
     std::vector<Int_t> *charge, *idBit;
     std::vector<Float_t> *pt, *eta, *phi, *energy, *ch_iso, *pho_iso, *neu_iso, *pu_iso, *muD0, *muDz;
@@ -22,9 +22,10 @@ class muon_factory {
     std::vector<muon> muons;
 
    public:
-    muon_factory(TTree *, int, std::string);
+    explicit muon_factory(TTree *);
     virtual ~muon_factory() {}
-    void run_factory(Bool_t);
+    void set_process_all() { process_all = true; }
+    void run_factory();
     Int_t num_muons() { return muons.size(); }
     Int_t num_good_muons() { return n_good_muons; }
     muon muon_at(unsigned i) { return muons.at(i); }
@@ -33,7 +34,7 @@ class muon_factory {
 };
 
 // read data from tree into member variabl
-muon_factory::muon_factory(TTree *input, int era, std::string _syst) : syst(_syst) {
+muon_factory::muon_factory(TTree *input) : process_all(false) {
     input->SetBranchAddress("nMu", &nMu);
     input->SetBranchAddress("lepIndex", &lepIndex);
     input->SetBranchAddress("muCharge", &charge);
@@ -51,11 +52,11 @@ muon_factory::muon_factory(TTree *input, int era, std::string _syst) : syst(_sys
 }
 
 // create muon object and set member data
-void muon_factory::run_factory(Bool_t all = false) {
+void muon_factory::run_factory() {
     Float_t iso(0.), id(0.);
     muons.clear();
     for (unsigned i = 0; i < nMu; i++) {
-        if (!all && i != lepIndex) {
+        if (!process_all && i != lepIndex) {
             continue;
         }
 
@@ -78,7 +79,7 @@ void muon_factory::run_factory(Bool_t all = false) {
     }
 
     // change index if we don't process the full vector
-    localIndex = all ? lepIndex : 0;
+    localIndex = process_all ? lepIndex : 0;
 }
 
 #endif  // INCLUDE_GGNTUPLE_MUON_FACTORY_H_

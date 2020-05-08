@@ -12,15 +12,15 @@
 
 class muon_factory {
  private:
-    std::string syst;
     Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, mediumID, mGenPt, mGenEta, mGenPhi,
         mGenEnergy;
     Int_t gen_match_1;
     std::vector<muon> muons;
 
  public:
-    muon_factory(TTree*, int, std::string);
+    explicit muon_factory(TTree*);
     virtual ~muon_factory() {}
+    void set_process_all() { /* nothing to do */ }
     void run_factory();
     Int_t num_muons() { return muons.size(); }
     muon muon_at(unsigned i) { return muons.at(i); }
@@ -29,7 +29,7 @@ class muon_factory {
 };
 
 // read data from tree into member variabl
-muon_factory::muon_factory(TTree* input, int era, std::string _syst) : syst(_syst) {
+muon_factory::muon_factory(TTree* input) {
     input->SetBranchAddress("px_1", &px_1);
     input->SetBranchAddress("py_1", &py_1);
     input->SetBranchAddress("pz_1", &pz_1);

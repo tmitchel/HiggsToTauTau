@@ -102,11 +102,12 @@ int main(int argc, char *argv[]) {
     auto histos = helper->getHistos1D();
 
     // construct factories
-    electron_factory electron(ntuple, 2017, syst);
-    event_factory event(ntuple, lepton::MUON, 2017, isMG, syst);
-    muon_factory muons(ntuple, 2017, syst);
+    electron_factory electron(ntuple);
+    electron.set_process_all();  // loop through all electrons to build veto
+    muon_factory muons(ntuple);
     gen_factory gens(ntuple);
-    boosted_tau_factory taus(ntuple, 2017, syst);
+    boosted_tau_factory taus(ntuple);
+    event_factory event(ntuple, lepton::MUON, 2017, isMG, syst);
     jet_factory jets(ntuple, 2017, syst);
     met_factory met(ntuple, 2017, syst);
 
@@ -143,7 +144,7 @@ int main(int argc, char *argv[]) {
         }
 
         // run factory before we access muons
-        muons.run_factory(false);
+        muons.run_factory();
 
         // get the good muon
         auto muon = muons.good_muon();
@@ -163,7 +164,7 @@ int main(int argc, char *argv[]) {
         }
 
         // run factory before we access taus
-        taus.run_factory(false);
+        taus.run_factory();
 
         // get the good boosted tau
         auto tau = taus.good_tau();
@@ -223,7 +224,7 @@ int main(int argc, char *argv[]) {
         }
 
         // run electron factory to get veto
-        electron.run_factory(true);
+        electron.run_factory();
         if (electron.num_good_electrons() == 0) {
             histos->at("cutflow")->Fill(14., 1.);
         } else {

@@ -14,7 +14,7 @@
 
 class tau_factory {
  private:
-    std::string syst;
+    Bool_t process_all;
     Int_t nTau, tauIndex, localIndex;
     std::vector<Int_t> *charge, *decay_mode;
     std::vector<Bool_t> *decay_mode_finding, *decay_mode_finding_new;
@@ -26,9 +26,10 @@ class tau_factory {
     std::vector<tau> taus;
 
  public:
-    tau_factory(TTree *, int, std::string);
+    explicit tau_factory(TTree *);
     virtual ~tau_factory() {}
-    void run_factory(Bool_t);
+    void set_process_all() { process_all = true; }
+    void run_factory();
     Int_t num_taus() { return taus.size(); }
     tau tau_at(unsigned i) { return taus.at(i); }
     tau good_tau() { return taus.at(localIndex); }
@@ -36,7 +37,7 @@ class tau_factory {
 };
 
 // read data from tree Int_to member variables
-tau_factory::tau_factory(TTree *input, int _era, std::string _syst) : syst(_syst) {
+tau_factory::tau_factory(TTree *input) : process_all(false) {
     input->SetBranchAddress("nTau", &nTau);
     input->SetBranchAddress("tauIndex", &tauIndex);
     input->SetBranchAddress("tauPt", &pt);
@@ -61,15 +62,14 @@ tau_factory::tau_factory(TTree *input, int _era, std::string _syst) : syst(_syst
     input->SetBranchAddress("tauByMVA6VTightElectronRejection", &vtight_antiel_mva2v2_old);
     input->SetBranchAddress("tauByLooseMuonRejection3", &loose_antimu_mva2v2_old);
     input->SetBranchAddress("tauByTightMuonRejection3", &tight_antimu_mva2v2_old);
-
 }
 
 // create electron object and set member data
-void tau_factory::run_factory(Bool_t all = false) {
+void tau_factory::run_factory() {
     Float_t iso(0.), id(0.);
     taus.clear();
     for (unsigned i = 0; i < nTau; i++) {
-        if (!all && i != tauIndex) {
+        if (!process_all && i != tauIndex) {
             continue;
         }
 
@@ -108,7 +108,7 @@ void tau_factory::run_factory(Bool_t all = false) {
     }
 
     // change index if we don't process the full vector
-    localIndex = all ? tauIndex : 0;
+    localIndex = process_all ? tauIndex : 0;
 }
 
 #endif  // INCLUDE_GGNTUPLE_TAU_FACTORY_H_

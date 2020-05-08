@@ -178,8 +178,8 @@ int main(int argc, char *argv[]) {
 
     // construct factories
     event_factory event(ntuple, lepton::ELECTRON, 2016, isMG, syst);
-    electron_factory electrons(ntuple, 2016, syst);
-    tau_factory taus(ntuple, 2016, syst);
+    electron_factory electrons(ntuple);
+    tau_factory taus(ntuple);
     jet_factory jets(ntuple, 2016, syst);
     met_factory met(ntuple, 2016, syst);
 
@@ -230,6 +230,7 @@ int main(int argc, char *argv[]) {
 
         // run factories
         electrons.run_factory();
+        electrons.handle_systematics(syst);  // applies EES shift if needed
         taus.run_factory();
         jets.run_factory();
         event.setNjets(jets.getNjets());

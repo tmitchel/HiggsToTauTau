@@ -175,8 +175,8 @@ int main(int argc, char *argv[]) {
 
     // construct factories
     event_factory event(ntuple, lepton::MUON, 2018, isMG, syst);
-    muon_factory muons(ntuple, 2018, syst);
-    tau_factory taus(ntuple, 2018, syst);
+    muon_factory muons(ntuple);
+    tau_factory taus(ntuple);
     jet_factory jets(ntuple, 2018, syst);
     met_factory met(ntuple, 2018, syst);
 

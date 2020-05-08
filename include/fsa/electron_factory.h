@@ -12,25 +12,25 @@
 
 class electron_factory {
  private:
-    std::string syst;
     Int_t gen_match_1;
     Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, q_1, mt_1, iso_1, eGenPt, eGenEta, eGenPhi, eGenEnergy;
     Float_t eCorrectedEt, eEnergyScaleUp, eEnergyScaleDown, eEnergySigmaUp, eEnergySigmaDown;
     std::vector<electron> electrons;
 
  public:
-    electron_factory(TTree*, int, std::string);
+    explicit electron_factory(TTree*);
     virtual ~electron_factory() {}
+    void set_process_all() { /* nothing to do */ }
     void run_factory();
+    void handle_systematics(std::string);
     Int_t num_electrons() { return electrons.size(); }
     electron electron_at(unsigned i) { return electrons.at(i); }
     electron good_electron() { return electrons.at(0); }
     std::vector<electron> all_electrons() { return electrons; }
-
 };
 
 // read data from tree into member variables
-electron_factory::electron_factory(TTree* input, int era, std::string _syst) : syst(_syst) {
+electron_factory::electron_factory(TTree* input) {
     input->SetBranchAddress("px_1", &px_1);
     input->SetBranchAddress("py_1", &py_1);
     input->SetBranchAddress("pz_1", &pz_1);
@@ -61,19 +61,20 @@ void electron_factory::run_factory() {
     el.setGenEta(eGenEta);
     el.setGenPhi(eGenPhi);
     el.setGenEnergy(eGenEnergy);
+    electrons = { el };
+}
 
+void electron_factory::handle_systematics(std::string syst) {
     // Electron energy scale systematics (eCorrectedEt is already applied so divide it out)
     if (syst == "EEScale_Up") {
-        el.scaleP4(eEnergyScaleUp / eCorrectedEt);
+        electrons.at(0).scaleP4(eEnergyScaleUp / eCorrectedEt);
     } else if (syst == "EEScale_Down") {
-        el.scaleP4(eEnergyScaleDown / eCorrectedEt);
+        electrons.at(0).scaleP4(eEnergyScaleDown / eCorrectedEt);
     } else if (syst == "EESigma_Up") {
-        el.scaleP4(eEnergySigmaUp / eCorrectedEt);
+        electrons.at(0).scaleP4(eEnergySigmaUp / eCorrectedEt);
     } else if (syst == "EESigma_Down") {
-        el.scaleP4(eEnergySigmaDown / eCorrectedEt);
+        electrons.at(0).scaleP4(eEnergySigmaDown / eCorrectedEt);
     }
-
-    electrons = { el };
 }
 
 #endif  // INCLUDE_FSA_ELECTRON_FACTORY_H_

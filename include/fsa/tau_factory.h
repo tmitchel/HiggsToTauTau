@@ -13,8 +13,7 @@
 
 class tau_factory {
  private:
-    std::string syst;
-    Int_t gen_match_2, era;
+    Int_t gen_match_2;
     Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, tZTTGenPt, tZTTGenEta, tZTTGenPhi;
     Float_t againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2, decayMode, dmf, dmf_new;
     Float_t byVLooseIsolationMVArun2v1DBoldDMwLT_2, byLooseIsolationMVArun2v1DBoldDMwLT_2, byMediumIsolationMVArun2v1DBoldDMwLT_2,
@@ -25,8 +24,9 @@ class tau_factory {
     std::vector<tau> taus;
 
  public:
-    tau_factory(TTree*, int, std::string);
+    explicit tau_factory(TTree*);
     virtual ~tau_factory() {}
+    void set_process_all() { /* nothing to do */ }
     void run_factory();
     Int_t num_taus() { return taus.size(); }
     tau tau_at(unsigned i) { return taus.at(i); }
@@ -36,7 +36,7 @@ class tau_factory {
 };
 
 // read data from tree Int_to member variables
-tau_factory::tau_factory(TTree* input, int _era, std::string _syst) : era(_era), syst(_syst) {
+tau_factory::tau_factory(TTree* input) {
     input->SetBranchAddress("pt_2", &pt_2);
     input->SetBranchAddress("eta_2", &eta_2);
     input->SetBranchAddress("phi_2", &phi_2);
