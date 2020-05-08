@@ -122,11 +122,11 @@ int main(int argc, char *argv[]) {
         histos->at("cutflow")->Fill(1., 1.);
 
         // apply trigger
-        // if (trigger selection) {
-        //     histos->at("cutflow")->Fill(2., 1.);
-        // } else {
-        //     continue
-        // }
+        if (event.fire_trigger(trigger::Mu50)) {
+            histos->at("cutflow")->Fill(2., 1.);
+        } else {
+            continue;
+        }
 
         // apply met filters
         // if (met filter selection) {
