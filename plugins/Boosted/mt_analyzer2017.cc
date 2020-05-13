@@ -9,16 +9,15 @@
 // user includes
 #include "../../include/CLParser.h"
 #include "../../include/LumiReweightingStandAlone.h"
+#include "../../include/boosted_slim_tree.h"
+#include "../../include/ggntuple/boosted_tau_factory.h"
 #include "../../include/ggntuple/electron_factory.h"
 #include "../../include/ggntuple/event_factory.h"
 #include "../../include/ggntuple/gen_factory.h"
 #include "../../include/ggntuple/jet_factory.h"
 #include "../../include/ggntuple/met_factory.h"
 #include "../../include/ggntuple/muon_factory.h"
-// #include "../../include/slim_tree.h"
 #include "../../include/swiss_army_class.h"
-#include "../../include/ggntuple/boosted_tau_factory.h"
-
 
 int main(int argc, char *argv[]) {
     CLParser parser(argc, argv);
@@ -89,7 +88,7 @@ int main(int argc, char *argv[]) {
 
     // cd to root of output file and create tree
     fout->cd();
-    // slim_tree *st = new slim_tree("mt_tree", doAC);
+    slim_tree *output_tree = new slim_tree("mt_tree", doAC);
 
     // get normalization (lumi & xs are in swiss_army_class.h)
     double norm(1.);
@@ -116,6 +115,7 @@ int main(int argc, char *argv[]) {
             progress++;
         }
 
+        Float_t evtwt(norm);
         helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 1., 1.);
 
         // apply trigger
@@ -241,5 +241,11 @@ int main(int argc, char *argv[]) {
         }
 
         auto st = jets.getST(30.);
+
+        auto Higgs = muon.getP4() + tau.getP4() + met.getP4();
+        std::shared_ptr<std::vector<double>> weights(nullptr);
+        std::vector<std::string> tree_cat;
+        output_tree->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
+        output_tree->fillTree(&muon, &tau, &event, name);
     }
 }
