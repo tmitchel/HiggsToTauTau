@@ -3,6 +3,8 @@ ROOT=`root-config --cflags --glibs`  -lRooFit -lRooFitCore
 CFLAGS=-I${CMSSW_BASE}/src
 OBIN=${CMSSW_BASE}/bin
 
+.PHONY: all test
+
 all: ac-mt-2016 ac-mt-2017 ac-mt-2018 ac-et-2016 ac-et-2017 ac-et-2018 boost-mt-2017
 
 test: test-ac-mt-2016 test-ac-mt-2017 test-ac-mt-2018 test-ac-et-2016 test-ac-et-2017 test-ac-et-2018 test-boost-mt-2017
