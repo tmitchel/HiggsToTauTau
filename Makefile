@@ -1,7 +1,7 @@
 OPT=-O3
 ROOT=`root-config --cflags --glibs`  -lRooFit -lRooFitCore
 CFLAGS=-I${CMSSW_BASE}/src
-OBIN=${CMSSW_BASE}/bin
+OBIN=${CMSSW_BASE}/bin/${SCRAM_ARCH}
 
 .PHONY: all test
 
@@ -30,7 +30,7 @@ ac-et-2018: plugins/AC/et_analyzer2016.cc
 
 # Boosted Tau Analyzers
 boost-mt-2017: plugins/Boosted/mt_analyzer2017.cc
-	g++ $(OPT) plugins/Boosted/mt_analyzer2017.cc $(ROOT) $(CFLAGS) -o $(OBIN)/test
+	g++ $(OPT) plugins/Boosted/mt_analyzer2017.cc $(ROOT) $(CFLAGS) -o $(OBIN)/boost_mt2017
 
 # Testing Anomalous Coupling Analyzers
 test-ac-mt-2016: plugins/AC/mt_analyzer2016.cc
