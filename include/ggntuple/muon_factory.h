@@ -34,7 +34,20 @@ class muon_factory {
 };
 
 // read data from tree into member variabl
-muon_factory::muon_factory(TTree *input) : process_all(false) {
+muon_factory::muon_factory(TTree *input)
+    : process_all(false),
+      charge(nullptr),
+      pt(nullptr),
+      eta(nullptr),
+      phi(nullptr),
+      energy(nullptr),
+      ch_iso(nullptr),
+      pho_iso(nullptr),
+      neu_iso(nullptr),
+      pu_iso(nullptr),
+      idBit(nullptr),
+      muD0(nullptr),
+      muDz(nullptr) {
     input->SetBranchAddress("nMu", &nMu);
     input->SetBranchAddress("lepIndex", &lepIndex);
     input->SetBranchAddress("muCharge", &charge);

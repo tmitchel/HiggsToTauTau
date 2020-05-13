@@ -13,7 +13,7 @@
 #include "TTree.h"
 
 class boosted_tau_factory {
- private:
+   private:
     Bool_t process_all;
     Int_t nTau, tauIndex, localIndex;
     std::vector<Int_t> *charge, *decay_mode;
@@ -25,7 +25,7 @@ class boosted_tau_factory {
     std::vector<Float_t> *pt, *eta, *phi, *energy, *mass, *raw_iso_mva2v2_old;
     std::vector<tau> taus;
 
- public:
+   public:
     explicit boosted_tau_factory(TTree *);
     virtual ~boosted_tau_factory() {}
     void set_process_all() { process_all = true; }
@@ -37,7 +37,30 @@ class boosted_tau_factory {
 };
 
 // read data from tree Int_to member variables
-boosted_tau_factory::boosted_tau_factory(TTree *input) : process_all(false) {
+boosted_tau_factory::boosted_tau_factory(TTree *input)
+    : process_all(false),
+      pt(nullptr),
+      eta(nullptr),
+      phi(nullptr),
+      energy(nullptr),
+      charge(nullptr),
+      mass(nullptr),
+      decay_mode(nullptr),
+      decay_mode_finding(nullptr),
+      decay_mode_finding_new(nullptr),
+      raw_iso_mva2v2_old(nullptr),
+      vloose_iso_mva2v2_old(nullptr),
+      loose_iso_mva2v2_old(nullptr),
+      medium_iso_mva2v2_old(nullptr),
+      tight_iso_mva2v2_old(nullptr),
+      vtight_iso_mva2v2_old(nullptr),
+      vloose_antiel_mva2v2_old(nullptr),
+      loose_antiel_mva2v2_old(nullptr),
+      medium_antiel_mva2v2_old(nullptr),
+      tight_antiel_mva2v2_old(nullptr),
+      vtight_antiel_mva2v2_old(nullptr),
+      loose_antimu_mva2v2_old(nullptr),
+      tight_antimu_mva2v2_old(nullptr) {
     input->SetBranchAddress("nBoostedTau", &nTau);
     input->SetBranchAddress("tauIndex", &tauIndex);
     input->SetBranchAddress("boostedTauPt", &pt);
@@ -49,7 +72,7 @@ boosted_tau_factory::boosted_tau_factory(TTree *input) : process_all(false) {
     input->SetBranchAddress("boostedTauDecayMode", &decay_mode);
     input->SetBranchAddress("boostedTaupfTausDiscriminationByDecayModeFinding", &decay_mode_finding);
     input->SetBranchAddress("boostedTaupfTausDiscriminationByDecayModeFindingNewDMs", &decay_mode_finding_new);
-    input->SetBranchAddress("boostedTauByIsolationMVArun2v2DBoldDMwLTraw", &vloose_iso_mva2v2_old);
+    input->SetBranchAddress("boostedTauByIsolationMVArun2v2DBoldDMwLTraw", &raw_iso_mva2v2_old);
     input->SetBranchAddress("boostedTauByVLooseIsolationMVArun2v2DBoldDMwLT", &vloose_iso_mva2v2_old);
     input->SetBranchAddress("boostedTauByLooseIsolationMVArun2v2DBoldDMwLT", &loose_iso_mva2v2_old);
     input->SetBranchAddress("boostedTauByMediumIsolationMVArun2v2DBoldDMwLT", &medium_iso_mva2v2_old);
@@ -92,13 +115,7 @@ void boosted_tau_factory::run_factory() {
             tight_antiel_mva2v2_old->at(i),
             vtight_antiel_mva2v2_old->at(i),
         });
-        tt.setMVAAgainstMuon(std::vector<Float_t>{
-            0,
-            loose_antimu_mva2v2_old->at(i),
-            0,
-            tight_antimu_mva2v2_old->at(i),
-            0
-        });
+        tt.setMVAAgainstMuon(std::vector<Float_t>{0, loose_antimu_mva2v2_old->at(i), 0, tight_antimu_mva2v2_old->at(i), 0});
         // tt.setGenMatch(gen_match_1);
         // tt.setGenPt(eGenPt);
         // tt.setGenEta(eGenEta);

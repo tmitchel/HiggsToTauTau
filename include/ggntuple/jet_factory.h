@@ -4,23 +4,24 @@
 #define INCLUDE_GGNTUPLE_JET_FACTORY_H_
 
 #include <algorithm>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
+
+#include "../models/jet.h"
 #include "TLorentzVector.h"
 #include "TRandom3.h"
 #include "TTree.h"
-#include "../models/jet.h"
 
 class jet_factory {
- private:
+   private:
     Int_t nJet;
     Float_t mjj;
     std::vector<Bool_t> *loose_id;
     std::vector<Float_t> *pt, *eta, *phi, *energy, *csv_b, *csv_bb, *flavor, *id;
     std::vector<jet> plain_jets, btag_jets, all_jets;
 
- public:
+   public:
     jet_factory(TTree *, int, std::string);
     virtual ~jet_factory() {}
     void run_factory();
@@ -39,7 +40,8 @@ class jet_factory {
 };
 
 // read data from tree into member variables
-jet_factory::jet_factory(TTree *input, int era, std::string syst) {
+jet_factory::jet_factory(TTree *input, int era, std::string syst)
+    : pt(nullptr), eta(nullptr), phi(nullptr), energy(nullptr), flavor(nullptr), csv_b(nullptr), csv_bb(nullptr), id(nullptr), loose_id(nullptr) {
     input->SetBranchAddress("nJet", &nJet);
     input->SetBranchAddress("jetPt", &pt);
     input->SetBranchAddress("jetEta", &eta);
@@ -64,7 +66,7 @@ void jet_factory::run_factory() {
         j.setLooseID(loose_id->at(i));
 
         all_jets.push_back(j);
-        if (csv_b->at(i) + csv_bb->at(i) >  0.6321) {  // cut taken from FSA
+        if (csv_b->at(i) + csv_bb->at(i) > 0.6321) {  // cut taken from FSA
             btag_jets.push_back(j);
         } else {
             plain_jets.push_back(j);

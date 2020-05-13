@@ -13,7 +13,7 @@
 #include "TTree.h"
 
 class electron_factory {
- private:
+   private:
     Int_t nEle, lepIndex, localIndex, n_good_electrons;
     Bool_t process_all;
     std::vector<Int_t> *charge;
@@ -22,7 +22,7 @@ class electron_factory {
     std::vector<UShort_t> *id;
     std::vector<electron> electrons;
 
- public:
+   public:
     explicit electron_factory(TTree *);
     virtual ~electron_factory() {}
     void set_process_all() { process_all = true; }
@@ -36,7 +36,24 @@ class electron_factory {
 };
 
 // read data from tree into member variables
-electron_factory::electron_factory(TTree *input) : process_all(false) {
+electron_factory::electron_factory(TTree *input)
+    : process_all(false),
+      charge(nullptr),
+      pt(nullptr),
+      eta(nullptr),
+      phi(nullptr),
+      energy(nullptr),
+      ch_iso(nullptr),
+      pho_iso(nullptr),
+      neu_iso(nullptr),
+      pu_iso(nullptr),
+      single_trig(nullptr),
+      double_trig(nullptr),
+      l1_trig(nullptr),
+      id(nullptr),
+      sc_eta(nullptr),
+      id_mva_iso(nullptr),
+      id_mva_noiso(nullptr) {
     input->SetBranchAddress("nEle", &nEle);
     input->SetBranchAddress("lepIndex", &lepIndex);
     input->SetBranchAddress("eleCharge", &charge);

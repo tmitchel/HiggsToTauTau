@@ -12,7 +12,7 @@
 enum DY { ZTT, ZL, ZJ };
 
 class gen_factory {
- private:
+   private:
     Int_t nMC, numGenTau;
     Int_t top_idx, topbar_idx;
     std::vector<Int_t> *pid, *status;
@@ -21,7 +21,7 @@ class gen_factory {
     std::vector<Float_t> *taudaugPt, *taudaugEta, *taudaugPhi, *taudaugMass;
     std::vector<gen> gen_collection, tau_daughters, leptons;
 
- public:
+   public:
     explicit gen_factory(TTree *);
     ~gen_factory() {}
     void run_factory();
@@ -32,7 +32,18 @@ class gen_factory {
     TLorentzVector getAntiTop() { return topbar_idx > -1 ? gen_collection.at(topbar_idx).getP4() : TLorentzVector(); }
 };
 
-gen_factory::gen_factory(TTree *input) {
+gen_factory::gen_factory(TTree *input)
+    : pt(nullptr),
+      eta(nullptr),
+      phi(nullptr),
+      mass(nullptr),
+      pid(nullptr),
+      status(nullptr),
+      status_flag(nullptr),
+      taudaugPt(nullptr),
+      taudaugEta(nullptr),
+      taudaugPhi(nullptr),
+      taudaugMass(nullptr) {
     input->SetBranchAddress("nMC", &nMC);
     input->SetBranchAddress("mcPt", &pt);
     input->SetBranchAddress("mcEta", &eta);
@@ -106,6 +117,5 @@ DY gen_factory::DY_process(TLorentzVector reco_tau) {
     // must be ZJ
     return DY::ZJ;
 }
-
 
 #endif  // INCLUDE_GGNTUPLE_GEN_FACTORY_H_
