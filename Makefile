@@ -31,25 +31,25 @@ boost-mt-2017: plugins/Boosted/mt_analyzer2017.cc
 	g++ $(OPT) plugins/Boosted/mt_analyzer2017.cc $(ROOT) $(CFLAGS) -o $(OBIN)/test
 
 test-ac-mt-2016: plugins/AC/mt_analyzer2016.cc
-	g++ plugins/AC/mt_analyzer2016.cc $(ROOT) $(CFLAGS) -o $(OBIN)/test
+	g++ plugins/AC/mt_analyzer2016.cc $(ROOT) $(CFLAGS) -o test
 
 test-ac-mt-2017: plugins/AC/mt_analyzer2016.cc
-	g++ plugins/AC/mt_analyzer2017.cc $(ROOT) $(CFLAGS) -o $(OBIN)/test
+	g++ plugins/AC/mt_analyzer2017.cc $(ROOT) $(CFLAGS) -o test
 
 test-ac-mt-2018: plugins/AC/mt_analyzer2016.cc
-	g++ plugins/AC/mt_analyzer2018.cc $(ROOT) $(CFLAGS) -o $(OBIN)/test
+	g++ plugins/AC/mt_analyzer2018.cc $(ROOT) $(CFLAGS) -o test
 
 test-ac-et-2016: plugins/AC/et_analyzer2016.cc
-	g++ plugins/AC/et_analyzer2016.cc $(ROOT) $(CFLAGS) -o $(OBIN)/test
+	g++ plugins/AC/et_analyzer2016.cc $(ROOT) $(CFLAGS) -o test
 
 test-ac-et-2017: plugins/AC/et_analyzer2016.cc
-	g++ plugins/AC/et_analyzer2017.cc $(ROOT) $(CFLAGS) -o $(OBIN)/test
+	g++ plugins/AC/et_analyzer2017.cc $(ROOT) $(CFLAGS) -o test
 
 test-ac-et-2018: plugins/AC/et_analyzer2016.cc
-	g++ plugins/AC/et_analyzer2018.cc $(ROOT) $(CFLAGS) -o $(OBIN)/test
+	g++ plugins/AC/et_analyzer2018.cc $(ROOT) $(CFLAGS) -o test
 
 test-boost-mt-2017: plugins/Boosted/mt_analyzer2017.cc
-	g++ plugins/Boosted/mt_analyzer2017.cc $(ROOT) $(CFLAGS) -o $(OBIN)/test
+	g++ plugins/Boosted/mt_analyzer2017.cc $(ROOT) $(CFLAGS) -o test
 
 clean:
 	rm $(OBIN)/*
