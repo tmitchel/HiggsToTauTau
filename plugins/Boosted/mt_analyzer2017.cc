@@ -248,4 +248,10 @@ int main(int argc, char *argv[]) {
         output_tree->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
         output_tree->fillTree(&muon, &tau, &event, name);
     }
+    fin->Close();
+    fout->cd();
+    fout->Write();
+    fout->Close();
+    running_log << "Finished processing " << sample << std::endl;
+    return 0;   
 }
