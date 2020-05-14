@@ -18,14 +18,14 @@
 enum lepton { ELECTRON, MUON, DITAU, EMU };
 
 class Helper {
- private:
-    TFile* output_file;
-    double luminosity2016, luminosity2017, luminosity2018;
+   private:
+    TFile *output_file;
+    double luminosity2016, luminosity2017, luminosity2018, w_xs_corr, dy_xs_corr;
     std::map<std::string, double> cross_sections;
     std::unordered_map<std::string, TH1F *> histos_1d;
     std::unordered_map<std::string, TH2F *> histos_2d;
 
- public:
+   public:
     Helper(TFile *, std::string, std::string);
     ~Helper() {}
     double getCrossSection(std::string sample) { return cross_sections[sample]; }
@@ -47,6 +47,8 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
       luminosity2016(35900.),
       luminosity2017(41500.),
       luminosity2018(59740.),
+      w_xs_corr(1.21),
+      dy_xs_corr(1.23),
       cross_sections{{"DYJets1", 6225.42},
                      {"DYJets2", 6225.42},
                      {"DYJets2_lowM", 6225.42},
@@ -62,6 +64,10 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
                      {"T-tW", 35.6},
                      {"Tbar-tchan", 26.23},
                      {"T-tchan", 44.07},
+                     {"ST_tW_antitop", 35.6},
+                     {"ST_tW_top", 35.6},
+                     {"ST_t-channel_antitop", 26.23},
+                     {"ST_t-channel_topn", 44.07},
                      {"TT", 831.76},
                      {"TTHad", 377.96},
                      {"TTLep", 88.29},
@@ -99,54 +105,68 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
                      {"wh125", 0.6864 * 0.0627},  // took the average of W+ and W-. Not important because for JHU it's reweighted to Powheg anyways
                      {"wminus125", 0.5328 * 0.0627},
                      {"wplus125", 0.840 * 0.0627},
-                     {"zh125", 0.8839 * 0.062}} {};
+                     {"zh125", 0.8839 * 0.062},
+                     {"WJetsToLNu_HT-100To200", 1345. * w_xs_corr},
+                     {"WJetsToLNu_HT-200To400", 359.7 * w_xs_corr},
+                     {"WJetsToLNu_HT-400To600", 48.91 * w_xs_corr},
+                     {"WJetsToLNu_HT-600To800", 12.05 * w_xs_corr},
+                     {"WJetsToLNu_HT-800To1200", 5.501 * w_xs_corr},
+                     {"WJetsToLNu_HT-1200To2500", 1.32 * w_xs_corr},
+                     {"WJetsToLNu_HT-2500ToInf", 0.03216 * w_xs_corr},
+                     {"DYJetsToLL_M-50_HT-100to200", 147.40 * dy_xs_corr},
+                     {"DYJetsToLL_M-50_HT-200to400", 40.99 * dy_xs_corr},
+                     {"DYJetsToLL_M-50_HT-400to600", 5.678 * dy_xs_corr},
+                     {"DYJetsToLL_M-50_HT-600to800", 1.367 * dy_xs_corr},
+                     {"DYJetsToLL_M-50_HT-800to1200", 0.6304 * dy_xs_corr},
+                     {"DYJetsToLL_M-50_HT-1200to2500", 0.1514 * dy_xs_corr},
+                     {"DYJetsToLL_M-50_HT-2500toInf", 0.003565 * dy_xs_corr}} {};
 
 Float_t Helper::embed_tracking(Float_t decay_mode, Int_t syst = 0) {
-  Float_t sf(.99), prong(0.975), pizero(1.051);
-  Float_t dm0_syst(0.008), dm1_syst(0.016124515), dm10_syst(0.013856406), dm11_syst(0.019697716);
-  if (decay_mode == 0) {
-    sf *= prong + (syst * dm0_syst);
-  } else if (decay_mode == 1) {
-    sf *= prong * pizero + (syst * dm1_syst);
-  } else if (decay_mode == 10) {
-    sf *= prong * prong * prong + (syst * dm10_syst);
-  } else if (decay_mode == 11) {
-    sf *= prong * prong * prong * pizero + (syst * dm11_syst);
-  } else {
-    std::cerr << "Invalid decay mode " << decay_mode << std::endl;
-    return 1;
-  }
+    Float_t sf(.99), prong(0.975), pizero(1.051);
+    Float_t dm0_syst(0.008), dm1_syst(0.016124515), dm10_syst(0.013856406), dm11_syst(0.019697716);
+    if (decay_mode == 0) {
+        sf *= prong + (syst * dm0_syst);
+    } else if (decay_mode == 1) {
+        sf *= prong * pizero + (syst * dm1_syst);
+    } else if (decay_mode == 10) {
+        sf *= prong * prong * prong + (syst * dm10_syst);
+    } else if (decay_mode == 11) {
+        sf *= prong * prong * prong * pizero + (syst * dm11_syst);
+    } else {
+        std::cerr << "Invalid decay mode " << decay_mode << std::endl;
+        return 1;
+    }
 }
 
 Float_t Helper::transverse_mass(TLorentzVector lep, Float_t met, Float_t metphi) {
-  double met_x = met * cos(metphi);
-  double met_y = met * sin(metphi);
-  double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-  return sqrt(pow(lep.Pt() + met, 2) - pow(lep.Px() + met_x, 2) - pow(lep.Py() + met_y, 2));
+    double met_x = met * cos(metphi);
+    double met_y = met * sin(metphi);
+    double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
+    return sqrt(pow(lep.Pt() + met, 2) - pow(lep.Px() + met_x, 2) - pow(lep.Py() + met_y, 2));
 }
 
 void Helper::create_and_fill(std::string name, std::vector<Float_t> bins, Float_t value, Float_t weight) {
-  if (histos_1d.find(name) == histos_1d.end()) {
-    if (bins.size() < 3) {
-      std::cerr << "Not enough bins provided" << std::endl;
-      return;
+    if (histos_1d.find(name) == histos_1d.end()) {
+        if (bins.size() < 3) {
+            std::cerr << "Not enough bins provided" << std::endl;
+            return;
+        }
+        output_file->cd("grabbag");
+        histos_1d[name] = new TH1F(name.c_str(), name.c_str(), bins.at(0), bins.at(1), bins.at(2));
     }
-    output_file->cd("grabbag");
-    histos_1d[name] = new TH1F(name.c_str(), name.c_str(), bins.at(0), bins.at(1), bins.at(2));
-  }
-  histos_1d.at(name)->Fill(value, weight);
+    histos_1d.at(name)->Fill(value, weight);
 }
 
 void Helper::create_and_fill(std::string name, std::vector<Float_t> bins, Float_t value_x, Float_t value_y, Float_t weight) {
-  if (histos_2d.find(name) == histos_2d.end()) {
-    if (bins.size() < 6) {
-      std::cerr << "Not enough bins provided" << std::endl;
-      return;
+    if (histos_2d.find(name) == histos_2d.end()) {
+        if (bins.size() < 6) {
+            std::cerr << "Not enough bins provided" << std::endl;
+            return;
+        }
+        output_file->cd("grabbag");
+        histos_2d[name] = new TH2F(name.c_str(), name.c_str(), bins.at(0), bins.at(1), bins.at(2), bins.at(3), bins.at(4), bins.at(5));
     }
-    output_file->cd("grabbag");
-    histos_2d[name] = new TH2F(name.c_str(), name.c_str(), bins.at(0), bins.at(1), bins.at(2), bins.at(3), bins.at(4), bins.at(5));
-  }
-  histos_2d.at(name)->Fill(value_x, value_y, weight);
+    histos_2d.at(name)->Fill(value_x, value_y, weight);
 }
 
 #endif  // INCLUDE_SWISS_ARMY_CLASS_H_

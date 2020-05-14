@@ -203,7 +203,6 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-
         // run jet factory before we access jets
         jets.run_factory();
 
