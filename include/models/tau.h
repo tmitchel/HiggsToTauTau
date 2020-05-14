@@ -8,8 +8,22 @@
 
 #include "TLorentzVector.h"
 
-enum mva_wp_vals { vloose, loose, medium, tight, vtight };
-enum deep_wp_vals { vvvloose, vvloose, vloose, loose, medium, tight, vtight, vvtight };
+enum wps {
+    mva_vloose = 0,
+    mva_loose = 1,
+    mva_medium = 2,
+    mva_tight = 3,
+    mva_vtight = 4,
+    deep_vvvloose = 0,
+    deep_vvloose = 1,
+    deep_vloose = 2,
+    deep_loose = 3,
+    deep_medium = 4,
+    deep_tight = 5,
+    deep_vtight = 6,
+    deep_vvtight = 7,
+    deep_vvvtight = 8
+};
 
 class tau {
    private:
@@ -37,13 +51,13 @@ class tau {
     Float_t getPhi() { return p4.Phi(); }
     Float_t getMass() { return p4.M(); }
     Float_t getIso() { return iso; }
-    Float_t getIsoWP(mva_wp_vals wp) { return mva_wps.at(wp); }
-    Float_t getAgainstMuonMVAWP(mva_wp_vals wp) { return mva_againstmu_wps.at(wp); }
-    Float_t getAgainstElectronMVAWP(mva_wp_vals wp) { return mva_againstel_wps.at(wp); }
+    Float_t getIsoWP(wps wp) { return mva_wps.at(wp); }
+    Float_t getAgainstMuonMVAWP(wps wp) { return mva_againstmu_wps.at(wp); }
+    Float_t getAgainstElectronMVAWP(wps wp) { return mva_againstel_wps.at(wp); }
     Float_t getDeepIso() { return deepiso; }
-    Float_t getDeepIsoWP(deep_wp_vals wp) { return deep_wps.at(wp); }
-    Float_t getAgainstMuonDeepWP(deep_wp_vals wp) { return deep_againstmu_wps.at(wp); }
-    Float_t getAgainstElectronDeepWP(deep_wp_vals wp) { return deep_againstel_wps.at(wp); }
+    Float_t getDeepIsoWP(wps wp) { return deep_wps.at(wp); }
+    Float_t getAgainstMuonDeepWP(wps wp) { return deep_againstmu_wps.at(wp); }
+    Float_t getAgainstElectronDeepWP(wps wp) { return deep_againstel_wps.at(wp); }
     Float_t getVLooseIsoMVA() { return VLooseIsoMVA; }
     Float_t getLooseIsoMVA() { return LooseIsoMVA; }
     Float_t getMediumIsoMVA() { return MediumIsoMVA; }

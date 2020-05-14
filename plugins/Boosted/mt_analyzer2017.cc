@@ -173,8 +173,8 @@ int main(int argc, char *argv[]) {
         }
 
         // tau ID selection
-        if (tau.getDecayModeFinding() > 0.5 && tau.getAgainstMuonMVAWP(mva_wp_vals::tight) > 0.5 &&
-            tau.getAgainstElectronMVAWP(mva_wp_vals::vloose) > 0.5) {
+        if (tau.getDecayModeFinding() > 0.5 && tau.getAgainstMuonMVAWP(wps::mva_tight) > 0.5 &&
+            tau.getAgainstElectronMVAWP(wps::mva_vloose) > 0.5) {
             helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 8., 1.);
         } else {
             continue;
