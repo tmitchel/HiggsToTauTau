@@ -141,7 +141,7 @@ void tau::setDeepAgainstMuon(std::vector<Float_t> wps) {
 // initialize member data and set TLorentzVector
 tau::tau(Float_t _pt, Float_t _eta, Float_t _phi, Float_t _mass, Float_t _charge)
     : pt(_pt), eta(_eta), phi(_phi), mass(_mass), charge(_charge),
-      mva_wps{0, 0, 0, 0, 0} {
+      mva_wps{0, 0, 0, 0, 0}, mva_againstel_wps{0, 0, 0, 0, 0}, mva_againstmu_wps{0, 0, 0, 0, 0} {
     p4.SetPtEtaPhiM(pt, eta, phi, mass);
 }
 
