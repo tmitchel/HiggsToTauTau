@@ -279,12 +279,6 @@ void slim_tree::fillTree(electron *el, tau *t, event_factory *evt, std::string n
     t1_charge = t->getCharge();
     t1_decayMode = t->getDecayMode();
     t1_iso = t->getIso();
-    t1_iso_VL = t->getVLooseIsoMVA();
-    t1_iso_L = t->getLooseIsoMVA();
-    t1_iso_M = t->getMediumIsoMVA();
-    t1_iso_T = t->getTightIsoMVA();
-    t1_iso_VT = t->getVTightIsoMVA();
-    t1_iso_VVT = t->getVVTightIsoMVA();
     t1_genMatch = t->getGenMatch();
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
@@ -313,12 +307,6 @@ void slim_tree::fillTree(muon *mu, tau *t, event_factory *evt, std::string name)
     t1_charge = t->getCharge();
     t1_decayMode = t->getDecayMode();
     t1_iso = t->getIso();
-    t1_iso_VL = t->getVLooseIsoMVA();
-    t1_iso_L = t->getLooseIsoMVA();
-    t1_iso_M = t->getMediumIsoMVA();
-    t1_iso_T = t->getTightIsoMVA();
-    t1_iso_VT = t->getVTightIsoMVA();
-    t1_iso_VVT = t->getVVTightIsoMVA();
     t1_genMatch = t->getGenMatch();
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();

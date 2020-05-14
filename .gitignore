@@ -8,3 +8,4 @@ bin
 .pyenv
 *.pyc
 *.tar.gz
+haddlog.txt

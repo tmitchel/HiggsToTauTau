@@ -180,5 +180,6 @@ int test_qq2Hqq(){
   print_bigtable();
   print_bigtable(false);
   print_corr();
+  return 0;
 }
 

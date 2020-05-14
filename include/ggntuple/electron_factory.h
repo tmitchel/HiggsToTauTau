@@ -87,9 +87,9 @@ void electron_factory::run_factory() {
         electron el(pt->at(i), eta->at(i), phi->at(i), 0.000511, charge->at(i));
         iso = (ch_iso->at(i) / pt->at(i)) + std::max(0., (neu_iso->at(i) + pho_iso->at(i) - 0.5 * pu_iso->at(i)) / pt->at(i));
         el.setIso(iso);
-        id = (fabs(sc_eta->at(i)) <= 0.8 && id_mva_noiso->at(i) > 0.837 ||
-              fabs(sc_eta->at(i)) > 0.8 && fabs(sc_eta->at(i)) <= 1.5 && id_mva_noiso->at(i) > 0.715 ||
-              fabs(sc_eta->at(i)) >= 1.5 && id_mva_noiso->at(i) > 0.357);
+        id = ((fabs(sc_eta->at(i)) <= 0.8 && id_mva_noiso->at(i) > 0.837) ||
+              (fabs(sc_eta->at(i)) > 0.8 && fabs(sc_eta->at(i)) <= 1.5 && id_mva_noiso->at(i) > 0.715) ||
+              (fabs(sc_eta->at(i)) >= 1.5 && id_mva_noiso->at(i) > 0.357));
         el.setID(id);
         // el.setGenMatch(gen_match_1);
         // el.setGenPt(eGenPt);
@@ -100,9 +100,9 @@ void electron_factory::run_factory() {
 
         // check if extra electron for veto
         if (pt->at(i) >= 15 && fabs(eta->at(i)) < 2.5 &&
-            (fabs(sc_eta->at(i)) <= 0.8 && id_mva_iso->at(i) > -0.83 ||
-             fabs(sc_eta->at(i)) > 0.8 && fabs(sc_eta->at(i)) <= 1.5 && id_mva_iso->at(i) > -0.77 ||
-             fabs(sc_eta->at(i)) >= 1.5 && id_mva_iso->at(i) > -0.69)) {
+            ((fabs(sc_eta->at(i)) <= 0.8 && id_mva_iso->at(i) > -0.83) ||
+             (fabs(sc_eta->at(i)) > 0.8 && fabs(sc_eta->at(i)) <= 1.5 && id_mva_iso->at(i) > -0.77) ||
+             (fabs(sc_eta->at(i)) >= 1.5 && id_mva_iso->at(i) > -0.69))) {
             n_good_electrons++;
         }
     }

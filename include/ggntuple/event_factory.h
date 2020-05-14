@@ -3,12 +3,11 @@
 #ifndef INCLUDE_GGNTUPLE_EVENT_FACTORY_H_
 #define INCLUDE_GGNTUPLE_EVENT_FACTORY_H_
 
-enum trigger { Ele35_WPTight_Gsf = 3, IsoMu27 = 19, Mu50 = 21, Ele115_CaloIdVT_GsfTrkIdT = 38 };
-
 #include <unordered_map>
 #include <string>
 #include <vector>
 #include "TTree.h"
+#include "../models/defaults.h"
 #include "../swiss_army_class.h"
 #include "../qq2Hqq_uncert_scheme.h"
 
@@ -39,9 +38,11 @@ class event_factory {
     Float_t getGenWeight() { return genWeight; }
     Float_t getMSV() { return m_sv; }
     Float_t getPtSV() { return pt_sv; }
-
-    // triggers
     Bool_t fire_trigger(trigger t) { return (HLTEleMuX >> t & 1); }
+    Bool_t getPassFlags(Bool_t) { return true; }  // TODO(tyler): implement
+    Float_t getPrefiringWeight() { return 1.; }  // TODO(tyler): implement
+    Float_t getNPU() { return 1.; }  // TODO(tyler): implement
+
 };
 
 // read data from trees into member variables
