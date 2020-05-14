@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
         // }
 
         // met selection
-        if (met.getMet() > 50) {
+        if (met.getMet() >= 50) {
             helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 4., 1.);
         } else {
             continue;
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
         auto tau = taus.good_tau();
 
         // tau kinematic selection
-        if (tau.getPt() >= 40 && fabs(tau.getEta()) <= 2.3) {
+        if (tau.getPt() > 40 && fabs(tau.getEta()) < 2.3) {
             helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 7., 1.);
         } else {
             continue;
@@ -188,21 +188,20 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        // remove low ditau mass
-        if (event.getMSV() >= 10) {
+        // calculate mt and do selection
+        auto mt = helper->transverse_mass(muon.getP4(), met.getMet(), met.getMetPhi());
+        if (mt <= 80) {
             helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 10., 1.);
         } else {
             continue;
         }
 
-        // calculate mt and do selection
-        auto mt = helper->transverse_mass(muon.getP4(), met.getMet(), met.getMetPhi());
-        if (mt <= 80) {
+        // remove low ditau mass
+        if (event.getMSV() >= 10) {
             helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 11., 1.);
         } else {
             continue;
         }
-
 
         // run jet factory before we access jets
         jets.run_factory();
