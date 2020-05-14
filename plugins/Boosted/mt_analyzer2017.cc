@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
     std::string output_dir = parser.Option("-d");
     std::string signal_type = parser.Option("--stype");
     std::string fname = path + sample + ".root";
-    bool isData = sample.find("data") != std::string::npos;
+    bool isData = name.find("data") != std::string::npos;
     bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
     bool isMG = sample.find("madgraph") != std::string::npos;
     bool doAC = signal_type != "None" && signal_type != "powheg";
@@ -100,10 +100,10 @@ int main(int argc, char *argv[]) {
     electron_factory electron(ntuple);
     electron.set_process_all();  // loop through all electrons to build veto
     muon_factory muons(ntuple);
-    gen_factory gens(ntuple);
+    gen_factory gens(ntuple, isData);
     boosted_tau_factory taus(ntuple);
     event_factory event(ntuple, lepton::MUON, 2017, isMG, syst);
-    jet_factory jets(ntuple, 2017, syst);
+    jet_factory jets(ntuple, 2017, isData, syst);
     met_factory met(ntuple, 2017, syst);
 
     Int_t nevts = ntuple->GetEntries();
@@ -116,25 +116,25 @@ int main(int argc, char *argv[]) {
         }
 
         Float_t evtwt(norm);
-        helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 1., 1.);
+        helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 1., 1.);
 
         // apply trigger
         if (event.fire_trigger(trigger::Mu50)) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 2., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 2., 1.);
         } else {
             continue;
         }
 
         // apply met filters
         // if (met filter selection) {
-        //     helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 3., 1.);
+        //     helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 3., 1.);
         // } else {
         //     continue
         // }
 
         // met selection
         if (met.getMet() > 50) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 4., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 4., 1.);
         } else {
             continue;
         }
@@ -147,14 +147,14 @@ int main(int argc, char *argv[]) {
 
         // muon kinematic selection
         if (muon.getPt() > 52 && fabs(muon.getEta()) < 2.4) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 5., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 5., 1.);
         } else {
             continue;
         }
 
         // muon ID selection
         if (muon.getID()) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 6., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 6., 1.);
         } else {
             continue;
         }
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
 
         // tau kinematic selection
         if (tau.getPt() > 40 && fabs(muon.getEta()) < 2.3) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 7., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 7., 1.);
         } else {
             continue;
         }
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
         // tau ID selection
         if (tau.getDecayModeFinding() > 0.5 && tau.getAgainstMuonMVAWP(wps::mva_tight) > 0.5 &&
             tau.getAgainstElectronMVAWP(wps::mva_vloose) > 0.5) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 8., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 8., 1.);
         } else {
             continue;
         }
@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) {
         // event selection
         auto dR_lep_tau = muon.getP4().DeltaR(tau.getP4());
         if (dR_lep_tau > 0.1 && dR_lep_tau < 0.8) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 9., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 9., 1.);
         } else {
             continue;
         }
@@ -191,14 +191,14 @@ int main(int argc, char *argv[]) {
         // calculate mt and do selection
         auto mt = helper->transverse_mass(muon.getP4(), met.getMet(), met.getMetPhi());
         if (mt < 80) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 10., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 10., 1.);
         } else {
             continue;
         }
 
         // remove low ditau mass
         if (event.getMSV() > 10) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 11., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 11., 1.);
         } else {
             continue;
         }
@@ -208,14 +208,14 @@ int main(int argc, char *argv[]) {
 
         // b-jet veto
         if (jets.getNbtag() == 0) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 12., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 12., 1.);
         } else {
             continue;
         }
 
         // HT cut
         if (jets.getHT(30., muon.getP4(), tau.getP4()) > 200) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 13., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 13., 1.);
         } else {
             continue;
         }
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
         // run electron factory to get veto
         electron.run_factory();
         if (electron.num_good_electrons() == 0) {
-            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 14., 1.);
+            helper->create_and_fill("cutflow", {14, 0.5, 14.5}, 14., 1.);
         } else {
             continue;
         }
@@ -233,14 +233,12 @@ int main(int argc, char *argv[]) {
 
         // separate DY processes
         auto dy_process = gens.DY_process(tau.getP4());
-        if (name == "ZLL" && dy_process != DY::ZL) {
+        if (name == "ZL" && dy_process != DY::ZL) {
             continue;
         } else if (name == "ZTT" && dy_process != DY::ZTT) {
             continue;
         } else if (name == "ZJ" && dy_process != DY::ZJ) {
             continue;
-        } else {
-            helper->create_and_fill("cutflow", {14, 0.5, 15.5}, 15., 1.);
         }
 
         auto st = jets.getST(30.);

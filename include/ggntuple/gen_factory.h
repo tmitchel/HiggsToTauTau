@@ -9,10 +9,11 @@
 #include "TLorentzVector.h"
 #include "TTree.h"
 
-enum DY { ZTT, ZL, ZJ };
+enum DY { ZTT, ZL, ZJ, None };
 
 class gen_factory {
    private:
+    Bool_t is_data;
     Int_t nMC, numGenTau;
     Int_t top_idx, topbar_idx;
     std::vector<Int_t> *pid, *status;
@@ -22,7 +23,7 @@ class gen_factory {
     std::vector<gen> gen_collection, tau_daughters, leptons;
 
    public:
-    explicit gen_factory(TTree *);
+    explicit gen_factory(TTree *, Bool_t);
     ~gen_factory() {}
     void run_factory();
 
@@ -32,8 +33,9 @@ class gen_factory {
     TLorentzVector getAntiTop() { return topbar_idx > -1 ? gen_collection.at(topbar_idx).getP4() : TLorentzVector(); }
 };
 
-gen_factory::gen_factory(TTree *input)
-    : pt(nullptr),
+gen_factory::gen_factory(TTree *input, Bool_t _is_data)
+    : is_data(_is_data),
+      pt(nullptr),
       eta(nullptr),
       phi(nullptr),
       mass(nullptr),
@@ -44,22 +46,28 @@ gen_factory::gen_factory(TTree *input)
       taudaugEta(nullptr),
       taudaugPhi(nullptr),
       taudaugMass(nullptr) {
-    input->SetBranchAddress("nMC", &nMC);
-    input->SetBranchAddress("mcPt", &pt);
-    input->SetBranchAddress("mcEta", &eta);
-    input->SetBranchAddress("mcPhi", &phi);
-    input->SetBranchAddress("mcMass", &mass);
-    input->SetBranchAddress("mcPID", &pid);
-    input->SetBranchAddress("mcStatus", &status);
-    input->SetBranchAddress("mcStatusFlag", &status_flag);
-    input->SetBranchAddress("numGenTau", &numGenTau);
-    input->SetBranchAddress("taudaugPt", &taudaugPt);
-    input->SetBranchAddress("taudaugEta", &taudaugEta);
-    input->SetBranchAddress("taudaugPhi", &taudaugPhi);
-    input->SetBranchAddress("taudaugMass", &taudaugMass);
+    if (!is_data) {
+        input->SetBranchAddress("nMC", &nMC);
+        input->SetBranchAddress("mcPt", &pt);
+        input->SetBranchAddress("mcEta", &eta);
+        input->SetBranchAddress("mcPhi", &phi);
+        input->SetBranchAddress("mcMass", &mass);
+        input->SetBranchAddress("mcPID", &pid);
+        input->SetBranchAddress("mcStatus", &status);
+        input->SetBranchAddress("mcStatusFlag", &status_flag);
+        input->SetBranchAddress("numGenTau", &numGenTau);
+        input->SetBranchAddress("taudaugPt", &taudaugPt);
+        input->SetBranchAddress("taudaugEta", &taudaugEta);
+        input->SetBranchAddress("taudaugPhi", &taudaugPhi);
+        input->SetBranchAddress("taudaugMass", &taudaugMass);
+    }
 }
 
 void gen_factory::run_factory() {
+    if (is_data) {
+        return;
+    }
+
     gen_collection.clear();
     tau_daughters.clear();
     leptons.clear();
@@ -94,6 +102,10 @@ void gen_factory::run_factory() {
 }
 
 DY gen_factory::DY_process(TLorentzVector reco_tau) {
+    if (is_data) {
+        return DY::None;
+    }
+
     // check if ZL event
     for (auto g : leptons) {
         // need gen matched to reco tau

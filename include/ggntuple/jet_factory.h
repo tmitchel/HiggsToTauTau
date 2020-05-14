@@ -15,6 +15,7 @@
 
 class jet_factory {
    private:
+    Bool_t is_data;
     Int_t nJet;
     Float_t mjj;
     std::vector<Bool_t> *loose_id;
@@ -22,7 +23,7 @@ class jet_factory {
     std::vector<jet> plain_jets, btag_jets, all_jets;
 
    public:
-    jet_factory(TTree *, int, std::string);
+    jet_factory(TTree *, Int_t, Bool_t, std::string);
     virtual ~jet_factory() {}
     void run_factory();
 
@@ -40,18 +41,29 @@ class jet_factory {
 };
 
 // read data from tree into member variables
-jet_factory::jet_factory(TTree *input, int era, std::string syst)
-    : pt(nullptr), eta(nullptr), phi(nullptr), energy(nullptr), flavor(nullptr), csv_b(nullptr), csv_bb(nullptr), id(nullptr), loose_id(nullptr) {
+jet_factory::jet_factory(TTree *input, Int_t era, Bool_t _is_data, std::string syst)
+    : is_data(_is_data),
+      pt(nullptr),
+      eta(nullptr),
+      phi(nullptr),
+      energy(nullptr),
+      flavor(nullptr),
+      csv_b(nullptr),
+      csv_bb(nullptr),
+      id(nullptr),
+      loose_id(nullptr) {
     input->SetBranchAddress("nJet", &nJet);
     input->SetBranchAddress("jetPt", &pt);
     input->SetBranchAddress("jetEta", &eta);
     input->SetBranchAddress("jetPhi", &phi);
     input->SetBranchAddress("jetEn", &energy);
-    input->SetBranchAddress("jetHadFlvr", &flavor);
     input->SetBranchAddress("jetDeepCSVTags_b", &csv_b);
     input->SetBranchAddress("jetDeepCSVTags_bb", &csv_bb);
     input->SetBranchAddress("jetID", &id);
     input->SetBranchAddress("jetPFLooseId", &loose_id);
+    if (!is_data) {
+        input->SetBranchAddress("jetHadFlvr", &flavor);
+    }
 }
 
 // initialize member data and set TLorentzVector
@@ -59,9 +71,11 @@ void jet_factory::run_factory() {
     all_jets.clear();
     plain_jets.clear();
     btag_jets.clear();
+    Float_t jet_flavor(-1);
 
     for (auto i = 0; i < nJet; i++) {
-        auto j = jet(pt->at(i), eta->at(i), phi->at(i), csv_b->at(i), flavor->at(i));
+        jet_flavor = is_data ? -1 : flavor->at(i);
+        auto j = jet(pt->at(i), eta->at(i), phi->at(i), csv_b->at(i), jet_flavor);
         j.setID(id->at(i));
         j.setLooseID(loose_id->at(i));
 
