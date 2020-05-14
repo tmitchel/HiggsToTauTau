@@ -7,23 +7,7 @@
 #include <vector>
 
 #include "TLorentzVector.h"
-
-enum wps {
-    mva_vloose = 0,
-    mva_loose = 1,
-    mva_medium = 2,
-    mva_tight = 3,
-    mva_vtight = 4,
-    deep_vvvloose = 0,
-    deep_vvloose = 1,
-    deep_vloose = 2,
-    deep_loose = 3,
-    deep_medium = 4,
-    deep_tight = 5,
-    deep_vtight = 6,
-    deep_vvtight = 7,
-    deep_vvvtight = 8
-};
+#include "./defaults.h"
 
 class tau {
    private:
@@ -58,34 +42,12 @@ class tau {
     Float_t getDeepIsoWP(wps wp) { return deep_wps.at(wp); }
     Float_t getAgainstMuonDeepWP(wps wp) { return deep_againstmu_wps.at(wp); }
     Float_t getAgainstElectronDeepWP(wps wp) { return deep_againstel_wps.at(wp); }
-    Float_t getVLooseIsoMVA() { return VLooseIsoMVA; }
-    Float_t getLooseIsoMVA() { return LooseIsoMVA; }
-    Float_t getMediumIsoMVA() { return MediumIsoMVA; }
-    Float_t getTightIsoMVA() { return TightIsoMVA; }
-    Float_t getVTightIsoMVA() { return VTightIsoMVA; }
-    Float_t getVVTightIsoMVA() { return VVTightIsoMVA; }
-    Float_t getVVVLooseIsoDeep() { return VVVLooseIsoDeep; }
-    Float_t getVLooseIsoDeep() { return VLooseIsoDeep; }
-    Float_t getLooseIsoDeep() { return LooseIsoDeep; }
-    Float_t getMediumIsoDeep() { return MediumIsoDeep; }
-    Float_t getTightIsoDeep() { return TightIsoDeep; }
-    Float_t getVTightIsoDeep() { return VTightIsoDeep; }
-    Float_t getVVTightIsoDeep() { return VVTightIsoDeep; }
     Float_t getDecayMode() { return decay_mode; }
     Float_t getDecayModeFinding() { return dmf; }
     Float_t getDecayModeFindingNew() { return dmf_new; }
     Float_t getGenPt() { return gen_pt; }
     Float_t getGenEta() { return gen_eta; }
     Float_t getGenPhi() { return gen_phi; }
-    Float_t getAgainstTightElectronMVA() { return AgainstTightElectronMVA; }
-    Float_t getAgainstVLooseElectronMVA() { return AgainstVLooseElectronMVA; }
-    Float_t getAgainstTightMuonMVA() { return AgainstTightMuonMVA; }
-    Float_t getAgainstLooseMuonMVA() { return AgainstLooseMuonMVA; }
-    Float_t getAgainstTightElectronDeep() { return AgainstTightElectronDeep; }
-    Float_t getAgainstVVLooseElectronDeep() { return AgainstVVLooseElectronDeep; }
-    Float_t getAgainstVVVLooseElectronDeep() { return AgainstVVVLooseElectronDeep; }
-    Float_t getAgainstTightMuonDeep() { return AgainstTightMuonDeep; }
-    Float_t getAgainstVLooseMuonDeep() { return AgainstVLooseMuonDeep; }
 
     TLorentzVector getP4() { return p4; }
 

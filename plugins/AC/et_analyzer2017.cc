@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
     //////////////////////////////////////
 
     // construct factories
-    event_factory event(ntuple, lepton::ELECTRON, 2017, isMG, syst);
+    event_factory event(ntuple, isData, lepton::ELECTRON, 2017, isMG, syst);
     electron_factory electrons(ntuple);
     tau_factory taus(ntuple);
     jet_factory jets(ntuple, 2017, syst);
@@ -290,15 +290,15 @@ int main(int argc, char *argv[]) {
         }
 
         // b-jet veto
-        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
+        if (jets.getNbtag(wps::btag_loose) < 2 && jets.getNbtag(wps::btag_medium) < 1) {
             helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7., 1.);
         } else {
             continue;
         }
 
         // create regions
-        bool signalRegion = (tau.getMediumIsoDeep() && electron.getIso() < 0.15);
-        bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && electron.getIso() < 0.15);
+        bool signalRegion = (tau.getDeepIsoWP(wps::deep_medium) && electron.getIso() < 0.15);
+        bool antiTauIsoRegion = (tau.getDeepIsoWP(wps::deep_medium) == 0 && tau.getDeepIsoWP(wps::deep_vvvloose) > 0 && electron.getIso() < 0.15);
         if (signal_type != "None") {
             antiTauIsoRegion = false;  // don't need anti-tau iso region in signal
         }
@@ -483,7 +483,7 @@ int main(int argc, char *argv[]) {
         } else if (!isData && isEmbed) {
             event.setEmbed();
             // embedded cross-triggers not applied in skimmer
-            if (electron.getPt() < 28 && !event.getPassEle24Tau30()) {
+            if (electron.getPt() < 28 && !event.fire_trigger(trigger::Ele24Tau30_2017)) {
                 continue;
             }
 

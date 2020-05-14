@@ -10,6 +10,7 @@
 #include "TLorentzVector.h"
 #include "TRandom3.h"
 #include "TTree.h"
+#include "../models/defaults.h"
 #include "../models/jet.h"
 
 class jet_factory {
@@ -33,9 +34,7 @@ class jet_factory {
     std::string fix_syst_string(std::string);
 
     // getters
-    Float_t getNbtag() { return Nbtag; }
-    Float_t getNbtagLoose() { return nbtag_loose; }
-    Float_t getNbtagMedium() { return nbtag_medium; }
+    Float_t getNbtag(wps);
     Float_t getNjets() { return njets; }
     Int_t getNjetPt20() { return njetspt20; }
     Float_t getDijetMass() { return mjj; }
@@ -125,6 +124,18 @@ void jet_factory::run_factory() {
     btag_jets.push_back(b1);
     btag_jets.push_back(b2);
 }
+
+Float_t jet_factory::getNbtag(wps wp = wps::btag_any) {
+    if (wp == wps::btag_any) {
+        return Nbtag;
+    } else if (wp == wps::btag_loose) {
+        return nbtag_loose;
+    } else if (wp == wps::btag_medium) {
+        return nbtag_loose;
+    }
+    return 0;
+}
+
 
 std::string jet_factory::fix_syst_string(std::string syst) {
     auto formatted(syst);

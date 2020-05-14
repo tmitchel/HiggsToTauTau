@@ -102,20 +102,21 @@ void boosted_tau_factory::run_factory() {
         tt.setDecayModeFinding(decay_mode_finding->at(i));
         tt.setDecayModeFindingNew(decay_mode_finding_new->at(i));
         tt.setMVAIsoWPs(std::vector<Float_t>{
-            vloose_iso_mva2v1_old->at(i),
-            loose_iso_mva2v1_old->at(i),
-            medium_iso_mva2v1_old->at(i),
-            tight_iso_mva2v1_old->at(i),
-            vtight_iso_mva2v1_old->at(i),
+            static_cast<float>(vloose_iso_mva2v1_old->at(i)),
+            static_cast<float>(loose_iso_mva2v1_old->at(i)),
+            static_cast<float>(medium_iso_mva2v1_old->at(i)),
+            static_cast<float>(tight_iso_mva2v1_old->at(i)),
+            static_cast<float>(vtight_iso_mva2v1_old->at(i)),
         });
         tt.setMVAAgainstElectron(std::vector<Float_t>{
-            vloose_antiel_mva2v1_old->at(i),
+            static_cast<float>(vloose_antiel_mva2v1_old->at(i)),
             0.,
             0.,
-            tight_antiel_mva2v1_old->at(i),
+            static_cast<float>(tight_antiel_mva2v1_old->at(i)),
             0.,
         });
-        tt.setMVAAgainstMuon(std::vector<Float_t>{0, loose_antimu_mva2v1_old->at(i), 0, tight_antimu_mva2v1_old->at(i), 0});
+        tt.setMVAAgainstMuon(
+            std::vector<Float_t>{0, static_cast<float>(loose_antimu_mva2v1_old->at(i)), 0, static_cast<float>(tight_antimu_mva2v1_old->at(i)), 0});
         // tt.setGenMatch(gen_match_1);
         // tt.setGenPt(eGenPt);
         // tt.setGenEta(eGenEta);

@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
     //////////////////////////////////////
 
     // construct factories
-    event_factory event(ntuple, lepton::MUON, 2016, isMG, syst);
+    event_factory event(ntuple, isData, lepton::MUON, 2016, isMG, syst);
     muon_factory muons(ntuple);
     tau_factory taus(ntuple);
     jet_factory jets(ntuple, 2016, syst);
@@ -276,15 +276,15 @@ int main(int argc, char *argv[]) {
         }
 
         // b-jet veto
-        if (jets.getNbtagLoose() < 2 && jets.getNbtagMedium() < 1) {
+        if (jets.getNbtag(wps::btag_loose) < 2 && jets.getNbtag(wps::btag_medium) < 1) {
             helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
         } else {
             continue;
         }
 
         // create regions
-        bool signalRegion = (tau.getMediumIsoDeep() && muon.getIso() < 0.15);
-        bool antiTauIsoRegion = (tau.getMediumIsoDeep() == 0 && tau.getVVVLooseIsoDeep() > 0 && muon.getIso() < 0.15);
+        bool signalRegion = (tau.getDeepIsoWP(wps::deep_medium) && muon.getIso() < 0.15);
+        bool antiTauIsoRegion = (tau.getDeepIsoWP(wps::deep_medium) == 0 && tau.getDeepIsoWP(wps::deep_vvvloose) > 0 && muon.getIso() < 0.15);
         if (signal_type != "None") {
             antiTauIsoRegion = false;  // don't need anti-tau iso region in signal
         }

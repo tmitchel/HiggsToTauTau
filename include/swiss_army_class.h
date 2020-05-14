@@ -14,8 +14,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TLorentzVector.h"
-
-enum lepton { ELECTRON, MUON, DITAU, EMU };
+#include "models/defaults.h"
 
 class Helper {
    private:
@@ -125,13 +124,13 @@ Float_t Helper::embed_tracking(Float_t decay_mode, Int_t syst = 0) {
     Float_t sf(.99), prong(0.975), pizero(1.051);
     Float_t dm0_syst(0.008), dm1_syst(0.016124515), dm10_syst(0.013856406), dm11_syst(0.019697716);
     if (decay_mode == 0) {
-        sf *= prong + (syst * dm0_syst);
+        return sf * prong + (syst * dm0_syst);
     } else if (decay_mode == 1) {
-        sf *= prong * pizero + (syst * dm1_syst);
+        return sf * prong * pizero + (syst * dm1_syst);
     } else if (decay_mode == 10) {
-        sf *= prong * prong * prong + (syst * dm10_syst);
+        return sf * prong * prong * prong + (syst * dm10_syst);
     } else if (decay_mode == 11) {
-        sf *= prong * prong * prong * pizero + (syst * dm11_syst);
+        return sf * prong * prong * prong * pizero + (syst * dm11_syst);
     } else {
         std::cerr << "Invalid decay mode " << decay_mode << std::endl;
         return 1;

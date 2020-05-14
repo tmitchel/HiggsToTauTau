@@ -168,17 +168,12 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
     ME_sm_VBF = evt->getME_sm_VBF();
     ME_sm_ggH = evt->getME_sm_ggH();
     ME_sm_ggH_qqInit = evt->getME_sm_ggH_qqInit();
-    ME_sm_WH = evt->getME_sm_WH();
-    ME_sm_ZH = evt->getME_sm_ZH();
     ME_ps_VBF = evt->getME_ps_VBF();
     ME_ps_ggH = evt->getME_ps_ggH();
     ME_ps_ggH_qqInit = evt->getME_ps_ggH_qqInit();
     ME_a2_VBF = evt->getME_a2_VBF();
     ME_L1_VBF = evt->getME_L1_VBF();
     ME_L1Zg_VBF = evt->getME_L1Zg_VBF();
-    ME_bkg = evt->getME_bkg();
-    ME_bkg1 = evt->getME_bkg1();
-    ME_bkg2 = evt->getME_bkg2();
 
     D0_ggH = evt->getME_sm_ggH() / (evt->getME_sm_ggH() + 1.0 * evt->getME_ps_ggH());
     DCP_ggH = evt->getDCP_ggH();
@@ -349,12 +344,6 @@ void slim_tree::fillTree(electron *el, tau *t, event_factory *evt, std::string n
     t1_charge = t->getCharge();
     t1_decayMode = t->getDecayMode();
     t1_iso = t->getIso();
-    t1_iso_VL = t->getVLooseIsoMVA();
-    t1_iso_L = t->getLooseIsoMVA();
-    t1_iso_M = t->getMediumIsoMVA();
-    t1_iso_T = t->getTightIsoMVA();
-    t1_iso_VT = t->getVTightIsoMVA();
-    t1_iso_VVT = t->getVVTightIsoMVA();
     t1_genMatch = t->getGenMatch();
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();
@@ -384,12 +373,6 @@ void slim_tree::fillTree(muon *mu, tau *t, event_factory *evt, std::string name)
     t1_charge = t->getCharge();
     t1_decayMode = t->getDecayMode();
     t1_iso = t->getIso();
-    t1_iso_VL = t->getVLooseIsoMVA();
-    t1_iso_L = t->getLooseIsoMVA();
-    t1_iso_M = t->getMediumIsoMVA();
-    t1_iso_T = t->getTightIsoMVA();
-    t1_iso_VT = t->getVTightIsoMVA();
-    t1_iso_VVT = t->getVVTightIsoMVA();
     t1_genMatch = t->getGenMatch();
     dmf = t->getDecayModeFinding();
     dmf_new = t->getDecayModeFindingNew();

@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../models/defaults.h"
 #include "../qq2Hqq_uncert_scheme.h"
 #include "../swiss_army_class.h"
 #include "TTree.h"
@@ -18,10 +19,9 @@ class event_factory {
    private:
     ULong64_t evt;
     UInt_t run, lumi, convert_evt;
-    Float_t genpX, genpY, genM, genpT, numGenJets, genweight, genDR;                   // gen
-    Float_t npv, npu, rho, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;  // event
+    Float_t genM, genpT, numGenJets, genweight;                   // gen
+    Float_t npu, Rivet_nJets30, Rivet_higgsPt, Rivet_stage1_cat_pTjet30GeV;  // event
     Float_t prefiring_weight, prefiring_weight_up, prefiring_weight_down;              // prefiring weights
-    Float_t muVetoZTTp001dxyzR0, eVetoZTTp001dxyzR0, dimuonVeto, dielectronVeto;       // lepton vetos
     Float_t sm_weight_nlo, mm_weight_nlo, ps_weight_nlo;                               // madgraph reweighting
 
     // triggers (passing, matching, filtering)
@@ -40,51 +40,43 @@ class event_factory {
     std::string syst;
     bool shifting, valid_shift, always_shift;
 
-    bool isEmbed;
+    bool isEmbed, isData;
     int era;
     lepton lep;
     std::unordered_map<std::string, int> unc_map;
     std::unordered_map<std::string, std::string> syst_name_map;
 
+    Bool_t getPassEle24Tau30();
+    Bool_t getPassEle24Tau30_2018();
+
    public:
-    event_factory(TTree*, lepton, int, bool, std::string);
+    event_factory(TTree*, Bool_t, lepton, int, bool, std::string);
     virtual ~event_factory() {}
     void setEmbed() { isEmbed = true; }
     void setNjets(Float_t _njets) { njets = _njets; }  // must be set in event loop
     void setRivets(TTree*);
     std::string fix_syst_string(std::string);
     void do_shift(bool _shift) { valid_shift = (_shift || always_shift); }
-    Float_t getMSV() { return shifting && valid_shift ? m_sv_shift : m_sv_noshift; }
-    Float_t getPtSV() { return pt_sv; }
 
-    // tautau Trigger Info
-    Bool_t getPassEle24Tau30();
-    Bool_t getPassEle24Tau30_2018(Bool_t);
-    Bool_t getPassFlags(Bool_t);
-    Bool_t getPassCrossTrigger(Float_t);
-
-    // Lepton vetos
-    Bool_t hasExtraMuon(lepton lep) { return lep == lepton::MUON ? muVetoZTTp001dxyzR0 > 1 : muVetoZTTp001dxyzR0 > 0; }
-    Bool_t hasExtraElectron(lepton lep) { return lep == lepton::ELECTRON ? eVetoZTTp001dxyzR0 > 1 : eVetoZTTp001dxyzR0 > 0; }
-    Bool_t hasDimuon() { return dimuonVeto > 0; }
-    Bool_t hasDielectron() { return dielectronVeto > 0; }
-
-    // Event Info
-    Float_t getNPV() { return npv; }
-    Float_t getNPU() { return npu; }
-    Float_t getRho() { return rho; }
+    // general interface
+    ULong64_t getEvt() { return evt; }
     UInt_t getRun() { return run; }
     UInt_t getLumi() { return lumi; }
-    ULong64_t getEvt() { return evt; }
+    Float_t getGenWeight() { return genweight; }
+    Float_t getMSV() { return shifting && valid_shift ? m_sv_shift : m_sv_noshift; }
+    Float_t getPtSV() { return pt_sv; }
+    Bool_t fire_trigger(trigger t);
+    Bool_t getPassFlags(Bool_t);
+    Float_t getPrefiringWeight();
+    Float_t getNPU() { return npu; }
+
+    // FSA - AC specific
+    Bool_t getPassCrossTrigger(Float_t);
 
     // Generator Info
-    Float_t getGenPx() { return genpX; }
-    Float_t getGenPy() { return genpY; }
     Float_t getGenM() { return genM; }
     Float_t getGenPt() { return genpT; }
     Float_t getNumGenJets() { return numGenJets; }
-    Float_t getGenWeight() { return genweight; }
-    Float_t getTauGenDR() { return genDR; }
 
     // MELA Info
     Float_t getDCP_VBF() { return DCP_VBF; }
@@ -99,17 +91,12 @@ class event_factory {
     Float_t getME_sm_VBF() { return ME_sm_VBF; }
     Float_t getME_sm_ggH() { return ME_sm_ggH; }
     Float_t getME_sm_ggH_qqInit() { return ME_sm_ggH_qqInit; }
-    Float_t getME_sm_WH() { return ME_sm_WH; }
-    Float_t getME_sm_ZH() { return ME_sm_ZH; }
     Float_t getME_ps_VBF() { return ME_ps_VBF; }
     Float_t getME_ps_ggH() { return ME_ps_ggH; }
     Float_t getME_ps_ggH_qqInit() { return ME_ps_ggH_qqInit; }
     Float_t getME_a2_VBF() { return ME_a2_VBF; }
     Float_t getME_L1_VBF() { return ME_L1_VBF; }
     Float_t getME_L1Zg_VBF() { return ME_L1Zg_VBF; }
-    Float_t getME_bkg() { return ME_bkg; }
-    Float_t getME_bkg1() { return ME_bkg1; }
-    Float_t getME_bkg2() { return ME_bkg2; }
 
     // ggH NNLOPS Info
     Float_t getNjetsRivet() { return Rivet_nJets30; }
@@ -118,9 +105,6 @@ class event_factory {
     Float_t getRivetUnc(std::vector<double>, std::string);
     Float_t getVBFTheoryUnc(std::string);
 
-    // Prefiring Weight
-    Float_t getPrefiringWeight();
-
     // Madgraph Reweighting
     Float_t getMadgraphSM() { return sm_weight_nlo; }
     Float_t getMadgraphMM() { return mm_weight_nlo; }
@@ -128,7 +112,7 @@ class event_factory {
 };
 
 // read data from trees into member variables
-event_factory::event_factory(TTree* input, lepton _lep, int _era, bool isMadgraph, std::string _syst)
+event_factory::event_factory(TTree* input, Bool_t _is_data, lepton _lep, int _era, bool isMadgraph, std::string _syst)
     : sm_weight_nlo(1.),
       mm_weight_nlo(1.),
       ps_weight_nlo(1.),
@@ -139,6 +123,7 @@ event_factory::event_factory(TTree* input, lepton _lep, int _era, bool isMadgrap
       shifting(false),
       valid_shift(false),
       always_shift(false),
+      isData(_is_data),
       unc_map{{"Rivet0_Up", 0}, {"Rivet0_Down", 0}, {"Rivet1_Up", 1}, {"Rivet1_Down", 1}, {"Rivet2_Up", 2}, {"Rivet2_Down", 2},
               {"Rivet3_Up", 3}, {"Rivet3_Down", 3}, {"Rivet4_Up", 4}, {"Rivet4_Down", 4}, {"Rivet5_Up", 5}, {"Rivet5_Down", 5},
               {"Rivet6_Up", 6}, {"Rivet6_Down", 6}, {"Rivet7_Up", 7}, {"Rivet7_Down", 7}, {"Rivet8_Up", 8}, {"Rivet8_Down", 8}} {
@@ -147,34 +132,31 @@ event_factory::event_factory(TTree* input, lepton _lep, int _era, bool isMadgrap
     if (syst.find("efaket_es") != end || syst.find("mfaket_et") != end) {  // lepton faking tau ES
         m_sv_name += "_" + fix_syst_string(syst);
         pt_sv_name += "_" + fix_syst_string(syst);
-        shifting = true;  // shift will depend on eta cuts
         if (syst.find("mfaket_et") != end) {
-            always_shift = true;  // shift is always valid
+            always_shift = true;  // shift is always valid for mutau
         }
     } else if ((syst.find("DM0") != end || syst.find("DM1") != end)) {  // genuine tau ES
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-        shifting = true;
-        always_shift = true;  // shifts will depend on pT in the future
-    } else if (syst.find("Jet") != end) {
+        always_shift = true;
+    } else if (syst.find("Jet") != end) {  // JEC and JER
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-        shifting = true;
         always_shift = true;               // shift is always valid
-    } else if (syst.find("EES") != end) {  // lepton ES
+    } else if (syst.find("EES") != end) {  // electron ES
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-        shifting = true;
         always_shift = true;  // shift is always valid
-    } else if (syst.find("MES") != end) {
+    } else if (syst.find("MES") != end) {  // muon ES
         m_sv_name += "_" + fix_syst_string(syst);
         pt_sv_name += "_" + fix_syst_string(syst);
-        shifting = true;
-    } else if (syst.find("RecoilReso") != end || syst.find("RecoilResp") != end) {
+    } else if (syst.find("RecoilReso") != end || syst.find("RecoilResp") != end) {  // recoil corrections
         m_sv_name += "_" + syst;
         pt_sv_name += "_" + syst;
-        shifting = true;
     }
+
+    // is SVFit mass different than nominal?
+    shifting = (m_sv_name == "m_sv");
 
     input->SetBranchAddress("m_sv", &m_sv_noshift);
     input->SetBranchAddress(pt_sv_name.c_str(), &pt_sv);
@@ -207,13 +189,9 @@ event_factory::event_factory(TTree* input, lepton _lep, int _era, bool isMadgrap
     input->SetBranchAddress("evt", &evt);
     input->SetBranchAddress("run", &run);
     input->SetBranchAddress("lumi", &lumi);
-    input->SetBranchAddress("nvtx", &npv);
     input->SetBranchAddress("nTruePU", &npu);
-    input->SetBranchAddress("genpX", &genpX);
-    input->SetBranchAddress("genpY", &genpY);
     input->SetBranchAddress("genM", &genM);
     input->SetBranchAddress("genpT", &genpT);
-    input->SetBranchAddress("tZTTGenDR", &genDR);
     input->SetBranchAddress("numGenJets", &numGenJets);
     input->SetBranchAddress("GenWeight", &genweight);
     input->SetBranchAddress("prefiring_weight", &prefiring_weight);
@@ -231,28 +209,12 @@ event_factory::event_factory(TTree* input, lepton _lep, int _era, bool isMadgrap
     input->SetBranchAddress("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter);
     input->SetBranchAddress("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter);
     input->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices);
-    input->SetBranchAddress("muVetoZTTp001dxyzR0", &muVetoZTTp001dxyzR0);
-    input->SetBranchAddress("eVetoZTTp001dxyzR0", &eVetoZTTp001dxyzR0);
-    input->SetBranchAddress("dimuonVeto", &dimuonVeto);
-    input->SetBranchAddress("dielectronVeto", &dielectronVeto);
 
     if (isMadgraph) {
         input->SetBranchAddress("sm_weight_nlo", &sm_weight_nlo);
         input->SetBranchAddress("mm_weight_nlo", &mm_weight_nlo);
         input->SetBranchAddress("ps_weight_nlo", &ps_weight_nlo);
     }
-
-    // if (lep == lepton::ELECTRON) {
-    //     if (isEmbed) {
-    //     }
-    // } else if (lep == lepton::MUON) {
-    //     if (isEmbed) {
-    //     }
-    // } else if (lep == lepton::EMU) {
-    //     // no analyzer yet
-    // } else {
-    //     std::cerr << "HEY! THAT'S NOT AN ANALYZER. WAT U DOIN." << std::endl;
-    // }
 }
 
 std::string event_factory::fix_syst_string(std::string syst) {
@@ -295,6 +257,7 @@ Float_t event_factory::getRivetUnc(std::vector<double> uncs, std::string syst) {
             return -1 * uncs.at(index);
         }
     }
+    return 1.;
 }
 
 Float_t event_factory::getVBFTheoryUnc(std::string syst) {
@@ -348,11 +311,13 @@ Bool_t event_factory::getPassFlags(Bool_t isData) {
     }
 }
 
+// PRIVATE - fire_trigger(trigger::Ele24Tau30_2017)
 Bool_t event_factory::getPassEle24Tau30() {
     return Ele24LooseTau30Pass && eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path;
 }
 
-Bool_t event_factory::getPassEle24Tau30_2018(Bool_t isData) {
+// PRIVATE - fire_trigger(trigger::Ele24Tau30_2018)
+Bool_t event_factory::getPassEle24Tau30_2018() {
     PassEle24Tau30_2018 = eMatchesEle24HPSTau30Filter && eMatchesEle24HPSTau30Path && tMatchesEle24HPSTau30Filter && tMatchesEle24HPSTau30Path;
     if (isData && run < 317509) {
         return eMatchesEle24Tau30Filter && eMatchesEle24Tau30Path && tMatchesEle24Tau30Filter && tMatchesEle24Tau30Path && Ele24LooseTau30Pass;
@@ -383,6 +348,16 @@ Bool_t event_factory::getPassCrossTrigger(Float_t pt) {
     } else {
         std::cerr << "Event wasn't ELECTRON or MUON" << std::endl;
     }
+    return false;
+}
+
+Bool_t event_factory::fire_trigger(trigger t) {
+    if (t == trigger::Ele24Tau30_2017) {
+        return getPassEle24Tau30();
+    } else if (t == trigger::Ele24Tau30_2018) {
+        return getPassEle24Tau30_2018();
+    }
+    return true;
 }
 
 #endif  // INCLUDE_FSA_EVENT_FACTORY_H_
