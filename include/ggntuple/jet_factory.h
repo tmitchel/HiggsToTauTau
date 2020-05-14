@@ -19,7 +19,7 @@ class jet_factory {
     Int_t nJet;
     Float_t mjj;
     std::vector<Bool_t> *loose_id;
-    std::vector<Float_t> *pt, *eta, *phi, *energy, *csv_b, *csv_bb, *flavor, *id;
+    std::vector<Float_t> *pt, *eta, *phi, *energy, *csv_b, *csv_bb, *flavor, *id, *mva_csv;
     std::vector<jet> plain_jets, btag_jets, all_jets;
 
    public:
@@ -50,6 +50,7 @@ jet_factory::jet_factory(TTree *input, Int_t era, Bool_t _is_data, std::string s
       flavor(nullptr),
       csv_b(nullptr),
       csv_bb(nullptr),
+      mva_csv(nullptr),
       id(nullptr),
       loose_id(nullptr) {
     input->SetBranchAddress("nJet", &nJet);
@@ -59,6 +60,7 @@ jet_factory::jet_factory(TTree *input, Int_t era, Bool_t _is_data, std::string s
     input->SetBranchAddress("jetEn", &energy);
     input->SetBranchAddress("jetDeepCSVTags_b", &csv_b);
     input->SetBranchAddress("jetDeepCSVTags_bb", &csv_bb);
+    input->SetBranchAddress("jetCSV2BJetTags", &mva_csv);
     input->SetBranchAddress("jetID", &id);
     input->SetBranchAddress("jetPFLooseId", &loose_id);
     if (!is_data) {
@@ -80,7 +82,8 @@ void jet_factory::run_factory() {
         j.setLooseID(loose_id->at(i));
 
         all_jets.push_back(j);
-        if (csv_b->at(i) + csv_bb->at(i) > 0.6321) {  // cut taken from FSA
+        // if (csv_b->at(i) + csv_bb->at(i) > 0.6321) {  // cut taken from FSA
+        if (loose_id->at(i) > 0.5 && pt->at(i) > 20 && fabs(eta->at(i)) < 2.4 && mva_csv->at(i) > 0.8838) {
             btag_jets.push_back(j);
         } else {
             plain_jets.push_back(j);

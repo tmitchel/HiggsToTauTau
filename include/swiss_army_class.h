@@ -122,7 +122,7 @@ Float_t Helper::transverse_mass(TLorentzVector lep, Float_t met, Float_t metphi)
   double met_x = met * cos(metphi);
   double met_y = met * sin(metphi);
   double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
-  return sqrt(pow(lep.Pt() + met_pt, 2) - pow(lep.Px() + met_x, 2) - pow(lep.Py() + met_y, 2));
+  return sqrt(pow(lep.Pt() + met, 2) - pow(lep.Px() + met_x, 2) - pow(lep.Py() + met_y, 2));
 }
 
 void Helper::create_and_fill(std::string name, std::vector<Float_t> bins, Float_t value, Float_t weight) {
