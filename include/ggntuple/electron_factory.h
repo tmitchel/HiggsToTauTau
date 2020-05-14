@@ -78,6 +78,7 @@ electron_factory::electron_factory(TTree *input)
 void electron_factory::run_factory() {
     Float_t iso(0.), id(0.);
     electrons.clear();
+    n_good_electrons = 0;
     for (unsigned i = 0; i < nEle; i++) {
         if (!process_all && i != lepIndex) {
             continue;

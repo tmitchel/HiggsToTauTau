@@ -68,6 +68,7 @@ muon_factory::muon_factory(TTree *input)
 void muon_factory::run_factory() {
     Float_t iso(0.), id(0.);
     muons.clear();
+    n_good_muons = 0;
     for (unsigned i = 0; i < nMu; i++) {
         if (!process_all && i != lepIndex) {
             continue;
