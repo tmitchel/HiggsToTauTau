@@ -56,12 +56,14 @@ def getNames(sample):
     signal_type = 'None'
     if 'JHU' in sample:
         signal_type = 'JHU'
-    elif 'madgraph' in sample:
+    elif 'madgraph' in sample or 'JJH0' in sample:
         signal_type = 'madgraph'
     elif 'minlo' in sample:
         signal_type = 'minlo'
     elif 'powheg' in sample:
         signal_type = 'powheg'
+    elif sample == 'qqH125' or sample == 'ggH125' or sample == 'WMinusH125' or sample == 'WPlusH125' or sample == 'ZH125':
+        signal_type = 'powheg'  # see if abdollah can fix the names so this isn't needed
 
     return names, signal_type
 
@@ -153,6 +155,8 @@ def main(args):
         doSyst = True if args.syst and not 'data' in sample.lower() else False
         processes = build_processes(processes, callstring, names, signal_type, args.exe, args.output_dir, doSyst)
     pprint(processes, width=150)
+    if args.dont_process:
+      return
 
     if args.parallel:
         run_parallel(args.output_dir, processes)
@@ -168,4 +172,5 @@ if __name__ == "__main__":
     parser.add_argument('--parallel', action='store_true', help='run in parallel')
     parser.add_argument('--output-dir', required=True, dest='output_dir',
                         help='name of output directory after Output/trees')
+    parser.add_argument('--dont-process', action='store_true', help='print commands without executing')
     main(parser.parse_args())
