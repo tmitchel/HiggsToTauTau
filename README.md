@@ -3,14 +3,50 @@
 This code is used for the study of a Higgs boson decaying to a pair of tau leptons. Backends are provided for analyzing FSA ntuples and ggNtuples. These backends provide methods to access variables in a uniform manner independent of the input file type. This allows analyzers to write plugins for different analyses without worrying about the input file format. Adding new backends can be done in a straightforward manner. 
 
 ##### Table of Contents
+[Installing](#install) <br/>
+[Usage](#usage) <br/>
 [Organization](#organization) <br/>
-[File Locations](#files) <br/>
-[Quick Start](#quickstart) <br/>
 [Objects](#objects) <br/>
 [Helpers](#helpers) <br/>
-[Plugins](#plugins) <br/>
-[Compiling Plugins](#compiling) <br/>
-[Scripts](#scripts) <br/>
+
+<a name="install"/>
+
+## Installing
+
+1. Setup a new CMSSW release (must be 104X or greater for python scripts)
+    ```
+    cmsrel CMSSW_CMSSW_10_4_0 && cd CMSSW_10_4_0/src && cmsenv
+    ```
+2. Clone and build all necessary repositories, including this one.
+    - clone this repo
+        ```
+        git clone git@github.com:tmitchel/HiggsToTauTau.git
+        ```
+    - nothing else is currently required, but other dependencies can be install here
+3. Compile CMSSW-based things
+    ```
+    cd ${CMSSW_BASE}/src
+    scram b -j 8
+    ```
+4. Setup a python virtual environment
+    ```
+    cd ${CMSSW_BASE}/src/HiggsToTauTau
+    virtualenv .pyenv
+    source .pyenv/bin/activate  # this must be done every time you log in
+    python -m pip install -U uproot keras pandas
+    ```
+5. (Optional) Download scale factors
+    ```
+    source setup/download.sh
+    ```
+
+<a name="usage"/>
+
+## Usage
+
+Write analyzers and store them in the `plugins` directory, preferably in a subdirectory corresponding to your analysis. Based on the type of ntuples you are using, include the correct header files: `include/fsa/` for FSA ntuples, `include/ggntuple` for ggNtuples. Add compilation commands to `Makefile` in order to make compiling analyzers simpler. Use the automation scripts to run your compiled analyzer over your set of input files. Lastly, do any post-processing required (i.e. calculate fake contributions, fill histograms, etc.).
+
+Analysis specific directions are included in README's for each plugin subdirectory.
 
 <a name="organization"/>
 
@@ -27,88 +63,20 @@ This code is used for the study of a Higgs boson decaying to a pair of tau lepto
   - `configs`: JSON files for configuring different processes.
   - `setup`: Scripts for initial setup of this repository.
 - Other Files
-  - `build`: A simple bash script for compiling a plugin with the correct libraries (ROOT). The script takes two ordered arguments: the plugin to compile and the name of the output binary. The binary should be copied to your $HOME/bin directory
-  - `automate_analysis.py`: Used for analyzing an entire directory. Explained more later
-  - `raw_condor_submit.py`: Script to submit condor jobs using an executable from the `bin` directory. Only handles submission on the Wisonsin cluster without using the farmoutAnalysisJobs script.
+- `auto_boost_lpc.py`: Used to run boosted tau jobs on the LPC (condor not yet supported)
+  - `automate_analysis.py`: Used to submit anomalous coupling jobs on the Wisconsin cluster.
+  - `raw_condor_submit.py`: Script to submit anomalous coupling jobs to the Wisconsin condor cluster. Does not use farmout scripts.
 
-<a name="files"/>
-
-## File Locations
-
-Here are the locations of all currently used files on the Wisconsin cluster. Directory names should be obvious
-- AC analysis: /hdfs/store/user/tmitchel/legacy-v6
-
-<a name="quickstart"/>
-
-## Quick Start
-
-This section is intended to help someone quickly get started producing plots and datacards. Most details about how to use the repository will be excluded, so read the rest of the instructions for more detailed information.
-
-1. Setup a new CMSSW release (must be 104X or greater for python scripts)
-```
-cmsrel CMSSW_CMSSW_10_4_0 && cd CMSSW_10_4_0/src && cmsenv
-```
-2. Clone and build all necessary repositories, including this one.
-    - clone this repo
-        ```
-        git clone git@github.com:tmitchel/HiggsToTauTau.git
-        ```
-    - Compile all repos (none are currently needed)
-        ```
-        cd ${CMSSW_BASE}/src
-        scram b -j 8
-        ```
-    - Setup a python virtual environment
-        ```
-        cd ${CMSSW_BASE}/src/HiggsToTauTau
-        virtualenv .pyenv
-        source .pyenv/bin/activate  # this must be done every time you log in
-        source setup/setup-python.sh
-        ```
-3. Compile the appropriate plugin. For example, to compile the 2018 analyzer for the muon+tau channel AC analysis, use the following command
-    ```
-    ./build plugins/AC/mt_analyzer2018.cc bin/AC_2018_mt
-    ```
-    This will produce a binary named `AC_2018_mt` in the `bin` directory that can be used to analyze 2018 mutau events for the AC analysis.
-4. Use the python automation script to processes all files in a directory and produce output trees with selection branches and weight branches
-    ```
-    python automate_analysis.py -e bin/AC_2018_mt -p /hdfs/store/user/tmitchel/legacy-v5/mela/mt2018_v1p3 --output-dir mt2018_v5p3 --parallel --syst
-    ```
-    This command requires some explanation because it has many options. The purpose of this script is to run a provided binary on all *.root files in a given directory. The binary is supplied with the `-e` option and the input directory is supplied with the `-p` option. Because the analyzers use the name of the input root file to lookup the correct cross-section, any prefixes added to the filenames (looking at you SVFit and MELA) need to be stripped before providing the sample name to the binary. All processed files are stored in `Output/trees/`. The `--output-dir` option can be used to create a new directory in `Output/trees/` and store the processed files there. The --parallel option is used to enable multiprocessing. The maximum number of processes at any one time is the minimum(10, ncores / 2). Each input file will recieve it's own process. Replaicing `--parallel` with `--condor` will submit the jobs to be processed using condor. The output files will be stored in `/hdfs/store/user/{username}/{--ouput-dir}`.  The final option `--syst` is provided when you want to produce additional output files containing systematic shifts. Within the output directory, nominal files are stored in the `NOMINAL` sub-directory and sub-directories will be created for each systematic with the prefix SYST_. Logs will also be saved in the `logs` subdirectory. It is recommended to use the `--condor` option when processing systematics due to the large number of processes.
-
-5. hadd the appropriate files together
-    ```
-    python scripts/hadder.py -p Output/trees/mt2018_v5p3
-    ```
-    This will hadd all files in the directory `Output/trees/mt2018_v5p3` into the appropriate files. This will descend into each subdirectory (exluding logs) to hadd files for NOMINAL and all systematics. The hadded files will be stored in the new sub-directory within the current sub-directory named `merged`.
-7. Fill the fake fractions to be used in plotting and datacard making and store them in the `fake_factors` directory.
-    ```
-    python scripts/fill_fake_fractions.py -i Output/trees/mt2018_v5p3/NOMINAL/merged -y 2018 -t mt_tree -s v5p3 -c
-    ```
-    The `-s` option is used to add a descriptor to the output file containing the fake fractions. The newly calculated fractions will be used to create a new ROOT file named 'jetFakes.root' within the input directory. This file contains all necessary data and MC events used for calculating the jetFakes background. A new branch is added containing the fake weight used to appropriately scale events.
-8. (Optional) Create histograms for plotting.
-    - Plots and binning are defined in the JSON file `scripts/plotting.json`. Multiple plotting scenarios can be defined and then chosen at runtime via a command line option. The `variables` key defines the variable name along with the binning. Binning is assumed to be [nbins, lowest, highest]. The `zvar` key is used to specify a variable and binning to use for the VBF sub-categorization. The binning for `zvar` is assumed to be [lowest, edge1, edge2, ...].
-    - Produce the plots
-        ```
-        python scripts/produce_histograms.py -e -y 2018 -t mt_tree -i Output/trees/mt2018_v5p3/NOMINAL/merged -d v5p3 -c baseline
-        ```
-        This will produce an output root file in the `Output/histograms` directory. The file contains a TDirectory for each category. Inside each category will be a TDirectory for each variable containing histograms for each sample. `-d` is used to add a descriptive string to the name of the output file. `-c` is used to specify the plotting scenario to be read from `plotting.json`. The `-e` flag tells the script to use the embedded background instead of ZTT MC.
-9. (Optional) Create stack plots from previous histograms.
-    ```
-    python scripts/autoplot.py --input Output/histograms/htt_mt_emb_noSys_fa3_2018_v5p3.root -c mt -p v5p3 -y 2018
-    ```
-    This will create stacked histograms for each variable listed at the beginning of the script. 
-10. Create a 2D datacards for Combine
-    ```
-    python scripts/produce_datacards.py -e -y 2018 -t mt_tree -i Output/trees/mt2018_v5p3 --suffix v5p3 -c baseline
-    ```
-    This script will produce all the 2D datacards needed for Higgs Combine. VBF category variables and binning are configured using the `scripts/binning.json` file where multiple scenarios may be defined. The previous command will use the baseline scenario. Use `python -h` to see other options including running with systematics.
 
 <a name="objects"/>
 
 ## Objects
 
-All input variables are accessed through factories. These factories group information into physics-motivated classes. Some factories provide access to variables directly (i.e. event_info provides direct access to the event's run number), while others provide access to friend classes that then provide even more physics context to the variables (i.e. electron_factory provides access to electron objects containing information about a single electron). This reduces the mental burden of remembering the meaning of each variable name in your input files. These factories are all contained within the `include` directory.
+All input variables are grouped into physics objects and must be accessed through these objects. For example, all electron-related variables are grouped into the `electron` object. To access the transverse momentum of this electron, use `electron->getPt()`. This provides much more context than simply accessing the `pt_1` variable. All objects are stored in `include/models`. These models are used independent of the input ntuple type providing a consistent interface for all ntuple types.
+
+In order to easily construct objects, factories are provided for all ntuple types. These factories process the relevant TTrees and use the information to construct a `std::vector` of objects the user can access. Factories provide methods to access all constructed objects or a single constructed object. A special case is the `good_{object}` method which provides access to a specially chosen object based on a selection implemented within the factory. The factories also provide additional methods to access the number of objects and other collective properties. All these factories require a call to the `run_factory` once per event to fill their lists of objects.
+
+A special factories is the `event_factory`. This factory doesn't contain any objects, but contains individual event-related variables and provides methods to access these variables. The `met_factory` is similar. It simply provides methods to access MET-related variables directly. These factories do not require a call to `run_factory`.
 
 <a name="helpers"/>
 
@@ -120,43 +88,3 @@ The `include` directory also contains headers providing many useful functions.
 - LumiReweightingStandAlone.h provides helper functions for reading pileup corrections
 - slim_tree.h contains the output TTree and defines how it will be filled
 - swiss_army_class.h contains useful information with no other home. This includes: luminosities, cross-sections, embedded tracking scale factors, and more.
-
-<a name="plugins"/>
-
-## Plugins
-
-The `plugins` directory contains the code for analyzing input skims. These plugins are all compiled using the `build` script discussed in the "Compiling Plugins" section. A list of currently maintained plugins is shown below:
-
-- `et_analyzer2016.cc`: Used to analyze the 2016 etau channel and produce slimmed trees.
-- `et_analyzer2017.cc`: Used to analyze the 2017 etau channel and produce slimmed trees.
-- `et_analyzer2018.cc`: Used to analyze the 2018 etau channel and produce slimmed trees.
-- `mt_analyzer2016.cc`: Used to analyze the 2016 mutau channel and produce slimmed trees.
-- `mt_analyzer2017.cc`: Used to analyze the 2017 mutau channel and produce slimmed trees.
-- `mt_analyzer2018.cc`: Used to analyze the 2018 mutau channel and produce slimmed trees.
-
-<a name="compiling"/>
-
-## Compiling Plugins
-
-The `build` script is provided to make compilation easier/less verbose. The script takes two input parameters and outputs a compiled binary. The first parameter must be the name of the analyzer to be compiled; the second parameter is the desired name of the output binary. An example is shown below:
-```
-./build plugins/et_analyzer.cc bin/Analyze_et
-```
-This example compiles the electron-tau channel analyzer to make an executable named Analyze_et. All analyzers are compiled with O3 level optimization as well as linking ROOT and RooFit.
-
-<a name="scripts"/>
-
-## Scripts
-
-Most scripts cannot be run with the tools provided by the basic CMSSW environment. It is recommended to create a virtual environment for installing all necessary packages.
-```
-virtualenv .pyenv
-```
-This will create a python2 virtual environment in the directory .pyenv. To activiate this environment, use
-```
-source .pyenv/bin/activate  # deactivate to return to normal environment
-```
-With the environment activated, install all necessary packages (/cvmfs does weird things so it's hard to get a requirements.txt)
-```
-source setup/setup-python.sh
-```
