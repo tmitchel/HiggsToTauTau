@@ -27,19 +27,19 @@ The anomalous couplings tau analysis is generally conducted using the Wisconsin 
 
     a. Preprocess nominal files to fit distributions for scaling (output in `Output/datasets`)
     
-        ```
-        python neural-network/preprocess.py -m path/to/mutau -e path/to/etau -o {output name}
-        ```
+    ```
+    python neural-network/preprocess.py -m path/to/mutau -e path/to/etau -o {output name}
+    ```
     b. Train the network if one is not available (output in `Output/models`)
     
-        ```
-        python neural-network/train.py -m {model name} -i path/to/dataset -s reweighted_qqH_htt_0PM125 -b embed
-        ```
+    ```
+    python neural-network/train.py -m {model name} -i path/to/dataset -s reweighted_qqH_htt_0PM125 -b embed
+    ```
     c. Run classifier on all input (nominal and systematics)
     
-        ```
-        python neural-network/classify.py -m {model name} -i path/to/data -o {local output name} -d path/to/inputs --move {path to hdfs area if copying outputs there}
-        ```
+    ```
+    python neural-network/classify.py -m {model name} -i path/to/data -o {local output name} -d path/to/inputs --move {path to hdfs area if copying outputs there}
+    ```
 5. Fill fake fractions and produce `jetFakes.root` file containing the fake tau estimate
     ```
     python scripts/fill_fake_fractions.py -i path/to/nn-output/nominal -y {year} -t {year name} -s {suffix} --syst
