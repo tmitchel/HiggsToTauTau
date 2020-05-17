@@ -63,8 +63,8 @@ Analysis specific directions are included in README's for each plugin subdirecto
   - `configs`: JSON files for configuring different processes.
   - `setup`: Scripts for initial setup of this repository.
 - Other Files
-- `auto_boost_lpc.py`: Used to run boosted tau jobs on the LPC (condor not yet supported)
-  - `automate_analysis.py`: Used to submit anomalous coupling jobs on the Wisconsin cluster.
+  - `auto_boost_lpc.py`: Used to run boosted tau jobs on the LPC (condor not yet supported)
+  - `auto_ac_wisc.py`: Used to submit anomalous coupling jobs on the Wisconsin cluster.
   - `raw_condor_submit.py`: Script to submit anomalous coupling jobs to the Wisconsin condor cluster. Does not use farmout scripts.
 
 

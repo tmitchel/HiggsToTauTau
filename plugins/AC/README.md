@@ -11,9 +11,9 @@ The anomalous couplings tau analysis is generally conducted using the Wisconsin 
     make ac-mt-2018
     ```
     This will produce a binary named `analyze2018_mt` in the `bin` directory.
-3. Use the python automation script (`automate_analysis.py`) to processes all files in a directory with the provided executable. Output files will appear in `Output/trees` unless condor is used. For a list of options, use
+3. Use the python automation script (`auto_ac_wisc.py`) to processes all files in a directory with the provided executable. Output files will appear in `Output/trees` unless condor is used. For a list of options, use
     ```
-    python automate_analysis.py --help
+    python auto_ac_wisc.py --help
     ```
 4. Hadd output files (will descend into subdirectories to handle separate directories per systematic)
     ```
