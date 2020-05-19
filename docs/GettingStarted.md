@@ -71,8 +71,11 @@ xrdcp root://cmseos.fnal.gov//store/user/<username>/<directory>/<file> .  // cop
 ```
 
 ## Useful twikis
+- [Boosted Tau](https://twiki.cern.ch/twiki/bin/viewauth/CMS/BoostedHTT)
 - [Tau ID](https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendationForRun2)
 - [Higgs to Tau Tau group](https://twiki.cern.ch/twiki/bin/view/CMS/Higgs2Tau)
 - [STXS twiki](https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsToTauTauWorkingLegacyRun2)
 - [2018 Embedding](https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauTauEmbeddingSamples2018)
 - [Primary repo](https://github.com/tmitchel/HiggsToTauTau)
+- [ggNtuplizer](https://github.com/abdollah110/ggAnalysis)
+- [Boosted skimmer](https://github.com/abdollah110/BoostedHTT)
