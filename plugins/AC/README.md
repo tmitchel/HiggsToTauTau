@@ -63,3 +63,6 @@ Plots can be made using `scripts/produce_histograms.py` with `scripts/autoplot.p
 
 Here are the locations of all currently used files on the Wisconsin cluster. Directory names should be obvious
 - AC analysis: /hdfs/store/user/tmitchel/legacy-v6
+
+Copy of files on the LPC:
+- AC analysis: /store/user/tmitchel/anomalous-couplings_legacy-v6
