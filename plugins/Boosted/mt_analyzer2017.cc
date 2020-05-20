@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
 
         auto Higgs = muon.getP4() + tau.getP4() + met.getP4();
         std::shared_ptr<std::vector<double>> weights(nullptr);
-        std::vector<std::string> tree_cat;
+        std::vector<std::string> tree_cat = {"signal"};
         output_tree->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
         output_tree->fillTree(&muon, &tau, &event, name);
     }
