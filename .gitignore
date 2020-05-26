@@ -9,3 +9,5 @@ bin
 *.pyc
 *.tar.gz
 haddlog.txt
+config.json
+macos-workspace-sync
