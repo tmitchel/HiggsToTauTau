@@ -91,6 +91,11 @@ int main(int argc, char *argv[]) {
     slim_tree *output_tree = new slim_tree("mt_tree", doAC);
 
     // get normalization (lumi & xs are in swiss_army_class.h)
+    if (sample == "ggh125_powheg") {
+        sample = "ggh125";
+    } else if (sample == "vbf125_powheg") {
+        sample = "vbf125";
+    }
     double norm(1.);
     if (!isData && !isEmbed) {
         norm = helper->getLuminosity2017() * helper->getCrossSection(sample) / gen_number;
