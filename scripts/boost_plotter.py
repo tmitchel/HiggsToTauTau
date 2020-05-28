@@ -10,14 +10,14 @@ def clean_samples(input_histos):
     merged = {
         'ZTT': input_histos['ZTT'].Clone(),
         'ZL': input_histos['ZL'].Clone(),
-        # 'jetFakes': input_histos['jetFakes'].Clone(),
-        'tt': input_histos['TTT'].Clone(),
-        'Others': input_histos['VVT'].Clone()
+        'jetFakes': input_histos['jetFakes'].Clone(),
+        'tt': input_histos['TT'].Clone(),
+        'Others': input_histos['VV'].Clone()
     }
 
-    merged['tt'].Add(input_histos['TTL'])
-    for name in ['VVL']:
-        merged['Others'].Add(input_histos[name])
+    # merged['tt'].Add(input_histos['TTL'])
+    # for name in ['VVL']:
+    #     merged['Others'].Add(input_histos[name])
 
     return merged
 
@@ -42,7 +42,7 @@ def fillLegend(data, backgrounds, signals, stat):
     # backgrounds
     leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
     leg.AddEntry(backgrounds['ZL'], 'ZL', 'f')
-    # leg.AddEntry(backgrounds['jetFakes'], 'Jet Mis-ID', 'f')
+    leg.AddEntry(backgrounds['jetFakes'], 'Jet Mis-ID', 'f')
     leg.AddEntry(backgrounds['tt'], 'tt', 'f')
     leg.AddEntry(backgrounds['Others'], 'Others', 'f')
 

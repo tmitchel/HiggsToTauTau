@@ -40,12 +40,8 @@ boost_style_map = {
         "ZTT": style_map_tuple(GetColor("#f9cd66"), black, 1, 1, 1),
         "jetFakes": style_map_tuple(GetColor("#ffccff"), black, 1, 1, 1),
         "ZL": style_map_tuple(GetColor("#de5a6a"), black, 1, 1, 1),
-        "TTT": style_map_tuple(GetColor("#cfe87f"), black, 1, 1, 1),
-        "TTL": style_map_tuple(GetColor("#cfe87f"), black, 1, 1, 1),
-        "VVT": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
-        "VVL": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
-        "STT": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
-        "STL": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "TT": style_map_tuple(GetColor("#cfe87f"), black, 1, 1, 1),
+        "VV": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
     },
     "signals": {
         "ggh125_powheg": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),  # don't show powheg
