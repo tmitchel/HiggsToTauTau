@@ -131,11 +131,11 @@ int main(int argc, char *argv[]) {
         }
 
         // apply met filters
-        // if (met filter selection) {
-        //     helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 3., 1.);
-        // } else {
-        //     continue
-        // }
+        if (true) {  // met filter selection go here
+            helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 3., 1.);
+        } else {
+            continue;
+        }
 
         // met selection
         if (met.getMet() >= 50) {
@@ -252,7 +252,22 @@ int main(int argc, char *argv[]) {
 
         auto Higgs = muon.getP4() + tau.getP4() + met.getP4();
         std::shared_ptr<std::vector<double>> weights(nullptr);
-        std::vector<std::string> tree_cat = {"signal"};
+        std::vector<std::string> tree_cat;
+
+        // fill categories
+        if (tau.getIsoWP(wps::mva_loose) && muon.getIso() < 0.15) {
+            tree_cat.push_back("signal");
+        } else if (!tau.getIsoWP(wps::mva_loose) && muon.getIso() < 0.15) {
+            tree_cat.push_back("antiTauIso");
+        } else if (tau.getIsoWP(wps::mva_loose) && muon.getIso() >= 0.15) {
+            tree_cat.push_back("antiLepIso");
+        }
+
+        // opposite-sign?
+        if (tau.getCharge() * muon.getCharge() < 0) {
+            tree_cat.push_back("OS");
+        }
+
         output_tree->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
         output_tree->fillTree(&muon, &tau, &event, name);
     }
