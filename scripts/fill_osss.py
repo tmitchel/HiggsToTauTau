@@ -41,18 +41,17 @@ def main(args):
     os_passing, ss_passing, os_failing, ss_failing = categorize(events)
 
     for bkg in backgrounds:
-        bkg_events = uproot.open('{}/{}.root'.format(args.input, bkg)).arrays(['*'], outputtype=pandas.DataFrame)
+        bkg_events = uproot.open('{}/{}.root'.format(args.input, bkg))[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
         bkg_events['evtwt'] *= -1
         bkg_os_passing, bkg_ss_passing, bkg_os_failing, bkg_ss_failing = categorize(bkg_events)
-        pandas.concat([os_passing, bkg_os_passing], ignore_index=True)
-        pandas.concat([ss_passing, bkg_ss_passing], ignore_index=True)
-        pandas.concat([os_failing, bkg_os_failing], ignore_index=True)
-        pandas.concat([ss_failing, bkg_ss_failing], ignore_index=True)
-        pandas.concat([events, bkg_events], ignore_index=True)
+        os_passing = pandas.concat([os_passing, bkg_os_passing], ignore_index=True, sort=False)
+        ss_passing = pandas.concat([ss_passing, bkg_ss_passing], ignore_index=True, sort=False)
+        os_failing = pandas.concat([os_failing, bkg_os_failing], ignore_index=True, sort=False)
+        ss_failing = pandas.concat([ss_failing, bkg_ss_failing], ignore_index=True, sort=False)
 
     os_ss_ratio = os_failing['evtwt'].sum() / ss_failing['evtwt'].sum()
-    output_events = events.copy()
-    output_events['evtwt'] *= os_ss_ratio
+    output_events = ss_passing.copy(deep=True)
+    output_events['fake_weight'] = os_ss_ratio
 
     with uproot.recreate('{}/QCD.root'.format(args.input)) as f:
         f[tree_name] = uproot.newtree(treedict)
