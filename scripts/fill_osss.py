@@ -18,8 +18,8 @@ def parse_tree_name(keys):
 
 
 def categorize(events):
-    passing = events[(events['is_signal'] != 0)]
-    failing = events[(events['is_signal'] == 0)]
+    passing = events[(events['is_signal'] == 1)]
+    failing = events[(events['is_antiBothIso'] == 1)]
 
     os_passing = passing[(passing['OS'] == 1)]
     ss_passing = passing[(passing['OS'] == 0)]
@@ -50,6 +50,7 @@ def main(args):
         ss_failing = pandas.concat([ss_failing, bkg_ss_failing], ignore_index=True, sort=False)
 
     os_ss_ratio = os_failing['evtwt'].sum() / ss_failing['evtwt'].sum()
+    print 'OSSS ratio: {}'.format(os_ss_ratio)
     output_events = ss_passing.copy(deep=True)
     output_events['fake_weight'] = os_ss_ratio
 

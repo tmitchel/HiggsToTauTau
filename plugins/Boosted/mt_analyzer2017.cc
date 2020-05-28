@@ -261,6 +261,8 @@ int main(int argc, char *argv[]) {
             tree_cat.push_back("antiTauIso");
         } else if (tau.getIsoWP(wps::mva_loose) && muon.getIso() >= 0.15) {
             tree_cat.push_back("antiLepIso");
+        } else if (!tau.getIsoWP(wps::mva_loose) && muon.getIso() >= 0.15) {
+            tree_cat.push_back("antiBothIso");
         }
 
         // opposite-sign?

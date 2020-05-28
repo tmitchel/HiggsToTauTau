@@ -31,7 +31,7 @@ class slim_tree {
 
     // member data
     TTree *otree;
-    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiLepIso, is_antiTauIso, is_qcd, is_looseIso, OS, SS, contamination;
+    Int_t cat_0jet, cat_boosted, cat_vbf, cat_VH, is_signal, is_antiLepIso, is_antiTauIso, is_antiBothIso, is_qcd, is_looseIso, OS, SS, contamination;
     ULong64_t evtno;
     UInt_t run, lumi;
     Float_t evtwt, el_pt, el_eta, el_phi, el_mass, el_charge, el_iso, el_genMatch, mu_pt, mu_eta, mu_phi, mu_mass, mu_charge, mu_iso, mu_genMatch,
@@ -126,6 +126,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     otree->Branch("is_signal", &is_signal, "is_signal/I");
     otree->Branch("is_antiLepIso", &is_antiLepIso, "is_antiLepIso/I");
     otree->Branch("is_antiTauIso", &is_antiTauIso, "is_antiTauIso/I");
+    otree->Branch("is_antiBothIso", &is_antiBothIso, "is_antiBothIso/I");
     otree->Branch("contamination", &contamination, "contamination/I");
     otree->Branch("cross_trigger", &cross_trigger, "cross_trigger/F");
 
@@ -236,6 +237,7 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
     is_signal = 0;
     is_antiLepIso = 0;
     is_antiTauIso = 0;
+    is_antiBothIso = 0;
     is_qcd = 0;
     is_looseIso = 0;
     cat_0jet = 0;
@@ -255,6 +257,8 @@ void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, m
             is_antiTauIso = 1;
         } else if (cat == "antiLepIso") {
             is_antiLepIso = 1;
+        } else if (cat == "antiBothIso") {
+            is_antiBothIso = 1;
         }
 
         // event charge
