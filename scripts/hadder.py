@@ -88,7 +88,7 @@ def good_sig(ifile):
 
 
 def get_bkgs(ana):
-    if args.ana == 'ac':
+    if ana == 'ac':
         return [
             'data_obs', 'embed',
             'ZJ', 'ZTT', 'ZL',
@@ -97,7 +97,7 @@ def get_bkgs(ana):
             'STJ', 'STT', 'STL',
             'W',
         ]
-    elif args.ana == 'boosted':
+    elif ana == 'boosted':
         return [
             'data_obs', 'embed',
             'ZJ', 'ZTT', 'ZL',
