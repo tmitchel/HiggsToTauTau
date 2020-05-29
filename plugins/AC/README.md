@@ -17,7 +17,7 @@ The anomalous couplings tau analysis is generally conducted using the Wisconsin 
     ```
 4. Hadd output files (will descend into subdirectories to handle separate directories per systematic)
     ```
-    python scripts/hadder.py -p path/to/output
+    python scripts/hadder.py -p path/to/output -a ac
     ```
 5. Reweighting AC samples
     ```

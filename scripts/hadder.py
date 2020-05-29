@@ -87,21 +87,39 @@ def good_sig(ifile):
     return True
 
 
-def main(args):
-    """Build list of files and hadd them together."""
-    bkgs = [
-        'data_obs', 'embed', 
-        'ZJ', 'ZTT', 'ZL',
-        'VVJ', 'VVT', 'VVL', 
-        'TTJ', 'TTT', 'TTL', 
-        'STJ', 'STT', 'STL', 
-        'W',
-    ]
-    signals = [
+def get_bkgs(ana):
+    if args.ana == 'ac':
+        return [
+            'data_obs', 'embed',
+            'ZJ', 'ZTT', 'ZL',
+            'VVJ', 'VVT', 'VVL',
+            'TTJ', 'TTT', 'TTL',
+            'STJ', 'STT', 'STL',
+            'W',
+        ]
+    elif args.ana == 'boosted':
+        return [
+            'data_obs', 'embed',
+            'ZJ', 'ZTT', 'ZL',
+            'VV', 'TT', 'W'
+        ]
+    else:
+        raise Exception('Provided analysis must be "ac" or "boosted"')
+
+
+def get_signals(ana):
+    return [
         'ggh125_JHU', 'vbf125_JHU', 'wh125_JHU', 'zh125_JHU',
         'ggh125_madgraph',
         'ggh125_powheg', 'vbf125_powheg', 'zh125_powheg'
     ]
+
+
+def main(args):
+    """Build list of files and hadd them together."""
+    bkgs = get_bkgs(args.ana)
+    signals = get_signals(args.ana)
+
     bkg_hadd_list = {
         idir: {
             sample: [
@@ -143,4 +161,5 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--path', '-p', required=True, help='path to files')
+    parser.add_argument('--ana', '-a', required=True, help='which analysis are the files for (ac, boosted)')
     main(parser.parse_args())

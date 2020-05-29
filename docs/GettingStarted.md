@@ -31,7 +31,7 @@
     ```
 - Move into the environment and source it
     ```
-    cd CMSSW_10_4_0/src && cmsenv
+    cd CMSSW_10_4_0/src && cmsenv  // this must be done every time you log in
     ```
 - Setup any code that you need - pull from git, write from scratch, etc.
 - Compile anything CMSSW related
