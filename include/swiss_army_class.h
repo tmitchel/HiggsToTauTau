@@ -37,6 +37,7 @@ class Helper {
     Float_t transverse_mass(TLorentzVector, Float_t, Float_t);
     Float_t deltaR(Float_t eta1, Float_t phi1, Float_t eta2, Float_t phi2) { return sqrt(pow(eta1 - eta2, 2) + pow(phi1 - phi2, 2)); }
     Float_t embed_tracking(Float_t, Int_t);
+    Float_t muon_tracking(Float_t);
     void create_and_fill(std::string, std::vector<Float_t>, Float_t, Float_t);
     void create_and_fill(std::string, std::vector<Float_t>, Float_t, Float_t, Float_t);
 };
@@ -135,6 +136,31 @@ Float_t Helper::embed_tracking(Float_t decay_mode, Int_t syst = 0) {
         std::cerr << "Invalid decay mode " << decay_mode << std::endl;
         return 1;
     }
+}
+
+Float_t Helper::muon_tracking(Float_t eta) {
+    if (eta >= -2.4 && eta < -2.1) {
+        return 0.9879;
+    } else if (eta >= -2.1 && eta < -1.6) {
+        return 0.9939;
+    } else if (eta >= -1.6 && eta < -1.1) {
+        return 0.9970;
+    } else if (eta >= -1.1 && eta < -0.6) {
+        return 0.9954;
+    } else if (eta >= -0.6 && eta < 0) {
+        return 0.9937;
+    } else if (eta >= 0 && eta < 0.6) {
+        return 0.9959;
+    } else if (eta >= 0.6 && eta < 1.1) {
+        return 0.9976;
+    } else if (eta >= 1.1 && eta < 1.6) {
+        return 0.9961;
+    } else if (eta >= 1.6 && eta < 2.1) {
+        return 0.9930;
+    } else if (eta >= 2.1 && eta < 2.4) {
+        return 0.9819;
+    }
+    return 1;
 }
 
 Float_t Helper::transverse_mass(TLorentzVector lep, Float_t met, Float_t metphi) {

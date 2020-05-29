@@ -54,7 +54,7 @@ def main(args):
     output_events = ss_passing.copy(deep=True)
     output_events['fake_weight'] = os_ss_ratio
 
-    with uproot.recreate('{}/jetFakes.root'.format(args.input)) as f:
+    with uproot.recreate('{}/QCD.root'.format(args.input)) as f:
         f[tree_name] = uproot.newtree(treedict)
         f[tree_name].extend(output_events.to_dict('list'))
 

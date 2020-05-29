@@ -104,7 +104,7 @@ def fill_process_list(data, name, variable, bins, boilerplate, output_file, dire
     all_hists = {}
     config = Config(name, data, variable, bins)
 
-    if 'jetFakes' in name:
+    if 'jetFakes' in name or 'QCD' in name:
         config.fake_weight = 'fake_weight'
         config.hists = build_histogram('jetFakes', bins, output_file, directory)
         all_hists['jetFakes'] = config.submit()
@@ -209,7 +209,7 @@ def main(args):
             ] + config_variables.keys() + [zvars[0]])
 
             # get fake factor weights if needed
-            if 'jetFakes' in ifile:
+            if 'jetFakes' in ifile or 'QCD' in ifile:
                 variables.add('fake_weight')
                 if args.syst:
                     variables.add('ff_*')

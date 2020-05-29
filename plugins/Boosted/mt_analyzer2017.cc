@@ -6,6 +6,12 @@
 #include <fstream>
 #include <iostream>
 
+#include "RooFunctor.h"
+#include "RooMsgService.h"
+#include "RooRealVar.h"
+#include "RooWorkspace.h"
+#include "TGraphAsymmErrors.h"
+
 // user includes
 #include "../../include/CLParser.h"
 #include "../../include/LumiReweightingStandAlone.h"
@@ -101,6 +107,22 @@ int main(int argc, char *argv[]) {
         norm = helper->getLuminosity2017() * helper->getCrossSection(sample) / gen_number;
     }
 
+    // Scale factors
+    // auto lumi_weights =
+    //     new reweight::LumiReWeighting(fname.c_str(), "data/Data_nPU_new.root", "hPUTrue", "pileup");
+
+    TFile mu_trg_corr_file("data/EfficienciesAndSF_RunBtoF_Nov17Nov2017.root");
+    TH2F *mu_trg_corr = reinterpret_cast<TH2F*>(mu_trg_corr_file.Get("IsoMu27_PtEtaBins/pt_abseta_ratio"));
+    // mu_trg_corr_file.Close();
+
+    TFile mu_id_corr_file("data/RunBCDEF_SF_ID.root");
+    TH2F *mu_id_corr = reinterpret_cast<TH2F*>(mu_id_corr_file.Get("NUM_MediumID_DEN_genTracks_pt_abseta"));
+    // mu_id_corr_file.Close();
+
+    TFile mu_iso_corr_file("data/RunBCDEF_SF_ISO.root");
+    TH2F *mu_iso_corr = reinterpret_cast<TH2F *>(mu_iso_corr_file.Get("NUM_LooseRelIso_DEN_MediumID_pt_abseta"));
+    // mu_iso_corr_file.Close();
+
     // construct factories
     electron_factory electron(ntuple);
     electron.set_process_all();  // loop through all electrons to build veto
@@ -178,8 +200,7 @@ int main(int argc, char *argv[]) {
         }
 
         // tau ID selection
-        if (tau.getDecayModeFinding() > 0.5 && tau.getAgainstMuonMVAWP(wps::mva_tight) > 0.5 &&
-            tau.getAgainstElectronMVAWP(wps::mva_vloose) > 0.5) {
+        if (tau.getDecayModeFinding() > 0.5 && tau.getAgainstMuonMVAWP(wps::mva_tight) > 0.5 && tau.getAgainstElectronMVAWP(wps::mva_vloose) > 0.5) {
             helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 8., 1.);
         } else {
             continue;
@@ -270,6 +291,25 @@ int main(int argc, char *argv[]) {
             tree_cat.push_back("OS");
         }
 
+        // Apply scale factors once we know the event has passed selection
+        if (!isData) {
+            // generator weights
+            // evtwt *= event.getGenWeight();
+
+            // muon trigger efficiency
+            evtwt *= mu_trg_corr->GetBinContent(mu_trg_corr->GetXaxis()->FindBin(muon.getPt()), mu_trg_corr->GetYaxis()->FindBin(fabs(muon.getEta())));
+
+            // // muon ID
+            evtwt *= mu_id_corr->GetBinContent(mu_id_corr->GetXaxis()->FindBin(muon.getPt()), mu_id_corr->GetYaxis()->FindBin(fabs(muon.getEta())));
+
+            // // muon isolation
+            evtwt *= mu_iso_corr->GetBinContent(mu_iso_corr->GetXaxis()->FindBin(muon.getPt()), mu_iso_corr->GetYaxis()->FindBin(fabs(muon.getEta())));
+
+            // muon tracking
+            evtwt *= helper->muon_tracking(muon.getEta());
+        }
+
+        // store outputs in TTree
         output_tree->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
         output_tree->fillTree(&muon, &tau, &event, name);
     }
