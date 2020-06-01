@@ -297,13 +297,13 @@ int main(int argc, char *argv[]) {
             // evtwt *= event.getGenWeight();
 
             // muon trigger efficiency
-            evtwt *= mu_trg_corr->GetBinContent(mu_trg_corr->GetXaxis()->FindBin(muon.getPt()), mu_trg_corr->GetYaxis()->FindBin(fabs(muon.getEta())));
+            evtwt *= mu_trg_corr->GetBinContent(mu_trg_corr->GetXaxis()->FindBin(std::min(muon.getPt(), static_cast<Float_t>(1000.))), mu_trg_corr->GetYaxis()->FindBin(fabs(muon.getEta())));
 
             // // muon ID
-            evtwt *= mu_id_corr->GetBinContent(mu_id_corr->GetXaxis()->FindBin(muon.getPt()), mu_id_corr->GetYaxis()->FindBin(fabs(muon.getEta())));
+            evtwt *= mu_id_corr->GetBinContent(mu_id_corr->GetXaxis()->FindBin(std::min(muon.getPt(), static_cast<Float_t>(100.))), mu_id_corr->GetYaxis()->FindBin(fabs(muon.getEta())));
 
             // // muon isolation
-            evtwt *= mu_iso_corr->GetBinContent(mu_iso_corr->GetXaxis()->FindBin(muon.getPt()), mu_iso_corr->GetYaxis()->FindBin(fabs(muon.getEta())));
+            evtwt *= mu_iso_corr->GetBinContent(mu_iso_corr->GetXaxis()->FindBin(std::min(muon.getPt(), static_cast<Float_t>(100.))), mu_iso_corr->GetYaxis()->FindBin(fabs(muon.getEta())));
 
             // muon tracking
             evtwt *= helper->muon_tracking(muon.getEta());
