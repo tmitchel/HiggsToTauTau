@@ -29,6 +29,27 @@ def categorize(events):
     return os_passing, ss_passing, os_failing, ss_failing
 
 
+def calculate_ratios(os, ss, var, bins):
+    osss_ratios = []
+    for b in bins:
+        os_bin = os[(os[var] < b)]
+        ss_bin = ss[(ss[var] < b)]
+        osss_ratios.append(os_bin['evtwt'].sum() / ss_bin['evtwt'].sum())
+    
+    # don't forget events greater than last bin
+    os_bin = os[(os[var] > bins[-1])]
+    ss_bin = ss[(ss[var] > bins[-1])]
+    osss_ratios.append(os_bin['evtwt'].sum() / ss_bin['evtwt'].sum())
+
+    return osss_ratios
+
+
+def find_bin(val, bins):
+    for i, b in enumerate(bins):
+        if val < b:
+            return i
+    return -1 
+
 def main(args):
     open_file = uproot.open('{}/data_obs.root'.format(args.input))
     tree_name = parse_tree_name(open_file.keys())
@@ -52,10 +73,13 @@ def main(args):
         os_failing = pandas.concat([os_failing, bkg_os_failing], ignore_index=True, sort=False)
         ss_failing = pandas.concat([ss_failing, bkg_ss_failing], ignore_index=True, sort=False)
 
-    os_ss_ratio = os_failing['evtwt'].sum() / ss_failing['evtwt'].sum()  # calculate ratio
-    print 'OSSS ratio: {}'.format(os_ss_ratio)
+
+    osss_var = 't1_pt'
+    osss_bin = [50, 100, 150]
+    os_ss_ratios = calculate_ratios(os_failing, ss_failing, osss_var, osss_bin)  # calculate ratios
+    print 'OSSS ratios: {}'.format(os_ss_ratios)
     output_events = ss_passing.copy(deep=True)  # use passing same sign events for shape
-    output_events['fake_weight'] = os_ss_ratio  # add weight branch to output
+    output_events['fake_weight'] = output_events.apply(lambda row: os_ss_ratios[find_bin(row[osss_var], osss_bin)], axis=1)  # add weight branch to output
 
     with uproot.recreate('{}/QCD.root'.format(args.input)) as f:
         f[tree_name] = uproot.newtree(treedict)
