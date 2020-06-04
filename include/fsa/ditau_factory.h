@@ -15,11 +15,12 @@ class ditau_factory {
  private:
   // Tau 1 variables
   Int_t gen_match_1;
-  Float_t px_2, py_2, pz_2, pt_1, eta_1, phi_1, m_1, e_2, iso_2, q_1, mt_1, tZTTGenPt_1, tZTTGenEta_1, tZTTGenPhi_1;
+  Float_t px_1, py_1, pz_1, pt_1, eta_1, phi_1, m_1, e_1, iso_1, q_1, mt_1, tZTTGenPt_1, tZTTGenEta_1, tZTTGenPhi_1;
+  Float_t decayMode_1, dmf_1, dmf_new_1;
   // Tau 2 variables
   Int_t gen_match_2;
-  Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, t2ZTTGenPt, t2ZTTGenEta, t2ZTTGenPhi;
-  Float_t againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2, decayMode, dmf, dmf_new;
+  Float_t px_2, py_2, pz_2, pt_2, eta_2, phi_2, m_2, e_2, iso_2, q_2, mt_2, tZTTGenPt_2, tZTTGenEta_2, tZTTGenPhi_2;
+  Float_t againstElectronTightMVA6_2, againstElectronVLooseMVA6_2, againstMuonTight3_2, againstMuonLoose3_2, decayMode_2, dmf_2, dmf_new_2;
   Float_t byVLooseIsolationMVArun2v1DBoldDMwLT_2, byLooseIsolationMVArun2v1DBoldDMwLT_2, byMediumIsolationMVArun2v1DBoldDMwLT_2,
     byTightIsolationMVArun2v1DBoldDMwLT_2, byVTightIsolationMVArun2v1DBoldDMwLT_2, byVVTightIsolationMVArun2v1DBoldDMwLT_2;
   Float_t tTightDeepTau2017v2p1VSe, tVVLooseDeepTau2017v2p1VSe, tVVVLooseDeepTau2017v2p1VSe, tTightDeepTau2017v2p1VSmu, tVLooseDeepTau2017v2p1VSmu;
@@ -37,12 +38,14 @@ class ditau_factory {
   void handle_systematics(std::string);
   Int_t num_taus() { return taus.size(); }
   tau tau_at(unsigned i) { return taus.at(i); }
+  // do I need to change this? because now we have 2?
   tau good_tau() { return taus.at(0); }
   std::vector<tau> all_taus() { return taus; }
 
 };
 
 // read data from tree Int_to member variables
+// The branch address in quotes comes from the root file
 ditau_factory::ditau_factory(TTree* input) {
   // Adding tau 1 variables
   input->SetBranchAddress("pt_1", &pt_1);
@@ -51,10 +54,14 @@ ditau_factory::ditau_factory(TTree* input) {
   input->SetBranchAddress("m_1", &m_1);
   input->SetBranchAddress("e_1", &e_1);
   input->SetBranchAddress("q_1", &q_1);
-  input->SetBranchAddress("gen_match_1", &gen_match_1); // what's this?
+  input->SetBranchAddress("gen_match_1", &gen_match_1); 
   input->SetBranchAddress("t1ZTTGenPt", &tZTTGenPt_1);
-  input->SetBranchAddress("t1ZTTGenEta", &t1ZTTGenEta_1);
-  input->SetBranchAddress("t1ZTTGenPhi", &t1ZTTGenPhi_1);
+  input->SetBranchAddress("t1ZTTGenEta", &tZTTGenEta_1);
+  input->SetBranchAddress("t1ZTTGenPhi", &tZTTGenPhi_1);
+  input->SetBranchAddress("t1_DecayMode", &decayMode_1);
+  input->SetBranchAddress("DecayModeFinding_1", &dmf_1); 
+  input->SetBranchAddress("DecayModeFindingNewDMs_1", &dmf_new_1); 
+
   // Original tau 2 variables
   input->SetBranchAddress("pt_2", &pt_2);
   input->SetBranchAddress("eta_2", &eta_2);
@@ -62,58 +69,61 @@ ditau_factory::ditau_factory(TTree* input) {
   input->SetBranchAddress("m_2", &m_2);
   input->SetBranchAddress("e_2", &e_2);
   input->SetBranchAddress("q_2", &q_2);
-  input->SetBranchAddress("gen_match_2", &gen_match_2); // what's this?
-  input->SetBranchAddress("tZTTGenPt_2", &t1ZTTGenPt);
-  input->SetBranchAddress("tZTTGenEta_2", &t1ZTTGenEta);
-  input->SetBranchAddress("tZTTGenPhi_2", &t1ZTTGenPhi);
-  input->SetBranchAddress("tDecayMode", &decayMode);
-  input->SetBranchAddress("tDecayModeFinding", &dmf);
-  input->SetBranchAddress("tDecayModeFindingNewDMs", &dmf_new);
-  input->SetBranchAddress("tAgainstElectronTightMVA6", &againstElectronTightMVA6_2);
-  input->SetBranchAddress("tAgainstElectronVLooseMVA6", &againstElectronVLooseMVA6_2);
-  input->SetBranchAddress("tAgainstMuonTight3", &againstMuonTight3_2);
-  input->SetBranchAddress("tAgainstMuonLoose3", &againstMuonLoose3_2);
-  input->SetBranchAddress("tTightDeepTau2017v2p1VSe", &tTightDeepTau2017v2p1VSe);
-  input->SetBranchAddress("tVVLooseDeepTau2017v2p1VSe", &tVVLooseDeepTau2017v2p1VSe);
-  input->SetBranchAddress("tVVVLooseDeepTau2017v2p1VSe", &tVVVLooseDeepTau2017v2p1VSe);
-  input->SetBranchAddress("tTightDeepTau2017v2p1VSmu", &tTightDeepTau2017v2p1VSmu);
-  input->SetBranchAddress("tVLooseDeepTau2017v2p1VSmu", &tVLooseDeepTau2017v2p1VSmu);
-  input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTraw", &iso_2);
-  input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVLoose", &byVLooseIsolationMVArun2v1DBoldDMwLT_2);
-  input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTLoose", &byLooseIsolationMVArun2v1DBoldDMwLT_2);
-  input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTMedium", &byMediumIsolationMVArun2v1DBoldDMwLT_2);
-  input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTTight", &byTightIsolationMVArun2v1DBoldDMwLT_2);
-  input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVTight", &byVTightIsolationMVArun2v1DBoldDMwLT_2);
-  input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVVTight", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
-  input->SetBranchAddress("tDeepTau2017v2p1VSjetraw", &deepiso_2);
-  input->SetBranchAddress("tVVVLooseDeepTau2017v2p1VSjet", &tVVVLooseDeepTau2017v2p1VSjet);
-  input->SetBranchAddress("tVLooseDeepTau2017v2p1VSjet", &tVLooseDeepTau2017v2p1VSjet);
-  input->SetBranchAddress("tLooseDeepTau2017v2p1VSjet", &tLooseDeepTau2017v2p1VSjet);
-  input->SetBranchAddress("tMediumDeepTau2017v2p1VSjet", &tMediumDeepTau2017v2p1VSjet);
-  input->SetBranchAddress("tTightDeepTau2017v2p1VSjet", &tTightDeepTau2017v2p1VSjet);
-  input->SetBranchAddress("tVTightDeepTau2017v2p1VSjet", &tVTightDeepTau2017v2p1VSjet);
-  input->SetBranchAddress("tVVTightDeepTau2017v2p1VSjet", &tVVTightDeepTau2017v2p1VSjet);
-  input->SetBranchAddress("tes_syst_up", &tes_syst_up);
-  input->SetBranchAddress("tes_syst_down", &tes_syst_down);
-  input->SetBranchAddress("ftes_syst_up", &ftes_syst_up);
-  input->SetBranchAddress("ftes_syst_down", &ftes_syst_down);
+  input->SetBranchAddress("gen_match_2", &gen_match_2); 
+  input->SetBranchAddress("t2ZTTGenPt", &tZTTGenPt_2);
+  input->SetBranchAddress("t2ZTTGenEta", &tZTTGenEta_2);
+  input->SetBranchAddress("t2ZTTGenPhi", &tZTTGenPhi_2);
+  input->SetBranchAddress("t2_DecayMode", &decayMode_2);
+  input->SetBranchAddress("DecayModeFinding_2", &dmf_2);
+  input->SetBranchAddress("DecayModeFindingNewDMs_2", &dmf_new_2);
+
+  // No branch in file for the following, are the NN vars?
+  // input->SetBranchAddress("AgainstElectronTightMVA6", &againstElectronTightMVA6_2); 
+  // input->SetBranchAddress("AgainstElectronVLooseMVA6", &againstElectronVLooseMVA6_2);
+  // input->SetBranchAddress("AgainstMuonTight3", &againstMuonTight3_2); 
+  // input->SetBranchAddress("AgainstMuonLoose3", &againstMuonLoose3_2); 
+  // input->SetBranchAddress("tTightDeepTau2017v2p1VSe", &tTightDeepTau2017v2p1VSe);
+  // input->SetBranchAddress("tVVLooseDeepTau2017v2p1VSe", &tVVLooseDeepTau2017v2p1VSe);
+  // input->SetBranchAddress("tVVVLooseDeepTau2017v2p1VSe", &tVVVLooseDeepTau2017v2p1VSe);
+  // input->SetBranchAddress("tTightDeepTau2017v2p1VSmu", &tTightDeepTau2017v2p1VSmu);
+  // input->SetBranchAddress("tVLooseDeepTau2017v2p1VSmu", &tVLooseDeepTau2017v2p1VSmu);
+  // input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTraw", &iso_2);
+  // input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVLoose", &byVLooseIsolationMVArun2v1DBoldDMwLT_2);
+  // input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTLoose", &byLooseIsolationMVArun2v1DBoldDMwLT_2);
+  // input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTMedium", &byMediumIsolationMVArun2v1DBoldDMwLT_2);
+  // input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTTight", &byTightIsolationMVArun2v1DBoldDMwLT_2);
+  // input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVTight", &byVTightIsolationMVArun2v1DBoldDMwLT_2);
+  // input->SetBranchAddress("tRerunMVArun2v2DBoldDMwLTVVTight", &byVVTightIsolationMVArun2v1DBoldDMwLT_2);
+  // input->SetBranchAddress("tDeepTau2017v2p1VSjetraw", &deepiso_2);
+  // input->SetBranchAddress("tVVVLooseDeepTau2017v2p1VSjet", &tVVVLooseDeepTau2017v2p1VSjet);
+  // input->SetBranchAddress("tVLooseDeepTau2017v2p1VSjet", &tVLooseDeepTau2017v2p1VSjet);
+  // input->SetBranchAddress("tLooseDeepTau2017v2p1VSjet", &tLooseDeepTau2017v2p1VSjet);
+  // input->SetBranchAddress("tMediumDeepTau2017v2p1VSjet", &tMediumDeepTau2017v2p1VSjet);
+  // input->SetBranchAddress("tTightDeepTau2017v2p1VSjet", &tTightDeepTau2017v2p1VSjet);
+  // input->SetBranchAddress("tVTightDeepTau2017v2p1VSjet", &tVTightDeepTau2017v2p1VSjet);
+  // input->SetBranchAddress("tVVTightDeepTau2017v2p1VSjet", &tVVTightDeepTau2017v2p1VSjet);
+  // input->SetBranchAddress("tes_syst_up", &tes_syst_up);
+  // input->SetBranchAddress("tes_syst_down", &tes_syst_down);
+  // input->SetBranchAddress("ftes_syst_up", &ftes_syst_up);
+  // input->SetBranchAddress("ftes_syst_down", &ftes_syst_down);
 }
 
 // create electron object and set member data
 void ditau_factory::run_factory() {
   // Set up first tau
   tau t1(pt_1, eta_1, phi_1, m_1, q_1);
-  // working on these
-  t1.setGenMatch(gen_match_2);
-  t1.setRawMVAIso(iso_2);
-  t1.setRawDeepIso(deepiso_2);
-  t1.setDecayMode(decayMode);
-  t1.setDecayModeFinding(dmf);
-  t1.setDecayModeFindingNew(dmf_new);
-  t1.setGenPt(tZTTGenPt);
-  t1.setGenEta(tZTTGenEta);
-  t1.setGenPhi(tZTTGenPhi);
-  // Haven't checked this one out
+  t1.setGenMatch(gen_match_1);
+  // Outdated (i think)
+  // t1.setRawMVAIso(iso_1_new);
+  // t1.setRawDeepIso(deepiso_2);
+  t1.setDecayMode(decayMode_1);
+  t1.setDecayModeFinding(dmf_1);
+  t1.setDecayModeFindingNew(dmf_new_1);
+  t1.setGenPt(tZTTGenPt_1);
+  t1.setGenEta(tZTTGenEta_1);
+  t1.setGenPhi(tZTTGenPhi_1);
+  // MVA is no longer used at all, so all of these need to be changed/eliminated at some point
+  /*
   t1.setMVAIsoWPs(std::vector<Float_t>{
       byVLooseIsolationMVArun2v1DBoldDMwLT_2,
         byLooseIsolationMVArun2v1DBoldDMwLT_2,
@@ -133,7 +143,7 @@ void ditau_factory::run_factory() {
         0
 	});
   t1.setMVAAgainstElectron(std::vector<Float_t>{
-      againstElectronVLooseMVA6_2,
+	againstElectronVLooseMVA6_2,
         0,
         0,
         againstElectronTightMVA6_2,
@@ -168,17 +178,21 @@ void ditau_factory::run_factory() {
         0,
         0
 	});
+  */
   // Set up second tau
   tau t2(pt_2, eta_2, phi_2, m_2, q_2);
   t2.setGenMatch(gen_match_2);
-  t2.setRawMVAIso(iso_2);
-  t2.setRawDeepIso(deepiso_2);
-  t2.setDecayMode(decayMode);
-  t2.setDecayModeFinding(dmf);
-  t2.setDecayModeFindingNew(dmf_new);
-  t2.setGenPt(tZTTGenPt);
-  t2.setGenEta(tZTTGenEta);
-  t2.setGenPhi(tZTTGenPhi);
+  // Outdated (i think)
+  // t2.setRawMVAIso();
+  // t2.setRawDeepIso(deepiso_2);
+  t2.setDecayMode(decayMode_2);
+  t2.setDecayModeFinding(dmf_2);
+  t2.setDecayModeFindingNew(dmf_new_2);
+  t2.setGenPt(tZTTGenPt_2);
+  t2.setGenEta(tZTTGenEta_2);
+  t2.setGenPhi(tZTTGenPhi_2);
+  // Don't have any of these
+  /*
   t2.setMVAIsoWPs(std::vector<Float_t>{
       byVLooseIsolationMVArun2v1DBoldDMwLT_2,
         byLooseIsolationMVArun2v1DBoldDMwLT_2,
@@ -233,7 +247,7 @@ void ditau_factory::run_factory() {
         0,
         0
 	});
-
+  */
   // Add them both
   taus = { t1, t2 };
 }
