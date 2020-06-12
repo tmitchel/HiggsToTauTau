@@ -84,8 +84,9 @@ void tau::setDeepIsoWPs(std::vector<Float_t> wps) {
     if (wps.size() < 9) {
         std::cerr << "Deep tau iso must be provided 9 working points" << std::endl;
     }
-    for (unsigned i = 0; i < 5; i++) {
-        deep_wps.at(i) = wps.at(i);
+    // I'm gonna change 5 ==> 9 because I think it should be 9
+    for (unsigned i = 0; i < 9; i++) {
+      deep_wps.at(i) = wps.at(i);
     }
 }
 

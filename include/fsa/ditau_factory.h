@@ -145,7 +145,7 @@ ditau_factory::ditau_factory(TTree* input) {
   input->SetBranchAddress("DeepTauMu_T_2", &tTightDeepTauVSmu_2);
   input->SetBranchAddress("DeepTauMu_VT_2", &tVTightDeepTauVSmu_2);
   input->SetBranchAddress("DeepTauMu_VVT_2", &tVVTightDeepTauVSmu_2);
-  input->SetBranchAddress("DeepTaujet_VVVL_2", &tVVVLooseDeepTauVSjet_2);
+  input->SetBranchAddress("DeepTauJet_VVVL_2", &tVVVLooseDeepTauVSjet_2);
   input->SetBranchAddress("DeepTauJet_VVL_2", &tVVLooseDeepTauVSjet_2);
   input->SetBranchAddress("DeepTauJet_VL_2", &tVLooseDeepTauVSjet_2);
   input->SetBranchAddress("DeepTauJet_L_2", &tLooseDeepTauVSjet_2);
@@ -197,7 +197,9 @@ void ditau_factory::run_factory() {
   t1.setDecayMode(decayMode_1);
   t1.setDecayModeFinding(dmf_1);
   t1.setDecayModeFindingNew(dmf_new_1);
-  t1.setDeepIsoWPs(std::vector<Float_t>{
+  std::cout << "Setting up T1 DeepIsoWP vector" << std::endl;
+  t1.setDeepIsoWPs(std::vector<Float_t>{ 0, 0, 0, 0, 0, 0, 0, 0, 0});
+      /*
       tVVVLooseDeepTauVSjet_1,
         tVVLooseDeepTauVSjet_1,
         tVLooseDeepTauVSjet_1,
@@ -208,6 +210,8 @@ void ditau_factory::run_factory() {
         tVVTightDeepTauVSjet_1,
         0
 	});
+      */
+  std::cout << "Setting up T1 DeepAgainstEle vector" << std::endl;
   t1.setDeepAgainstElectron(std::vector<Float_t>{
       tVVVLooseDeepTauVSe_1,
         tVVLooseDeepTauVSe_1,
@@ -219,6 +223,7 @@ void ditau_factory::run_factory() {
         tVVTightDeepTauVSe_1,
         0
 	});
+  std::cout << "Setting up T1 DeepAgianstMu vector" << std::endl;
   t1.setDeepAgainstMuon(std::vector<Float_t>{
       tVVVLooseDeepTauVSmu_1,
         tVVLooseDeepTauVSmu_1,
