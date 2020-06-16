@@ -142,7 +142,6 @@ int main(int argc, char *argv[]) {
     // construct factories
     event_factory event(ntuple, isData, lepton::MUON, 2018, isMG, syst);
     ditau_factory taus(ntuple);
-    std::cout << "ditau factory successful" << std::endl;
     jet_factory jets(ntuple, 2018, syst);
     met_factory met(ntuple, 2018, syst);
 
@@ -153,8 +152,7 @@ int main(int argc, char *argv[]) {
     // begin the event loop
     Int_t nevts = ntuple->GetEntries();
     int progress(0), fraction((nevts - 1) / 10);
-    for (Int_t i = 0; i < 10; i++) {
-      std::cout << "Processing Event " << i << std::endl;
+    for (Int_t i = 0; i < nevts; i++) {
       ntuple->GetEntry(i);
       if (i == progress * fraction) {
 	running_log << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
@@ -190,25 +188,65 @@ int main(int argc, char *argv[]) {
 	  evtwt = 3.867;
 	}
       }
-      helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 1., 1.);
+      helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 1, 1.);
 
       // run factories
-      std::cout << "Running Ditau Factory" << std::endl;
       taus.run_factory();
-      std::cout << "Ditau Factory Successful" << std::endl;
       jets.run_factory();
       event.setNjets(jets.getNjets());
 
       auto ltau = taus.tau_at(0);
       auto stau = taus.tau_at(1);
 
+      // First tau ID selection                                                                                                 
+      if (ltau.getDecayModeFinding() > 0.5 && ltau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5 && 
+	  ltau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 2, 1.);
+      } else {
+	continue;
+      }
+
+      // Second tau ID selection
+      // Issue here
+      if (stau.getDecayModeFinding() > 0.5 && stau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5 && 
+	  stau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 3, 1.);
+      } else {
+	continue;
+      }
+
+      // create regions
+      bool signalRegion = (ltau.getDeepIsoWP(wps::deep_medium) && ltau.getDeepIsoWP(wps::deep_medium));
+      bool antiTauIsoRegion = (ltau.getDeepIsoWP(wps::deep_medium) == 0 && ltau.getDeepIsoWP(wps::deep_medium) && 
+			       ltau.getDeepIsoWP(wps::deep_vvvloose) > 0 && stau.getDeepIsoWP(wps::deep_vvvloose) > 0);
+      if (signal_type != "None") {
+	antiTauIsoRegion = false;  // don't need anti-tau iso region in signal
+      }
+      
+      // only keep the regions we need
+      if (signalRegion || antiTauIsoRegion) {
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
+      } else {
+	continue;
+      }
+      
       // build Higgs
       TLorentzVector Higgs = ltau.getP4() + stau.getP4() + met.getP4();
 
-      helper->create_and_fill("t1_pt", {40, 0, 500}, ltau.getPt(), 1.);
-      helper->create_and_fill("t2_pt", {40, 0, 500}, stau.getPt(), 1.);
-      helper->create_and_fill("vis_mass", {40, 0, 200}, (ltau.getP4() + stau.getP4()).M(), 1.);
-      helper->create_and_fill("higgs_mass", {40, 0, 200}, Higgs.M(), 1.);
+      // Normally, these aren't in here
+      // helper->create_and_fill("t1_pt", {40, 0, 500}, ltau.getPt(), 1.);
+      // helper->create_and_fill("t1_eta", {40, -2.4, 2.4}, ltau.getEta(), 1.);
+      // helper->create_and_fill("t2_pt", {40, 0, 500}, stau.getPt(), 1.);
+      // helper->create_and_fill("t2_eta", {40, -2.4, 2.4}, stau.getEta(), 1.);
+      // helper->create_and_fill("vis_mass", {40, 0, 200}, (ltau.getP4() + stau.getP4()).M(), 1.);
+      // helper->create_and_fill("higgs_mass", {40, 0, 200}, Higgs.M(), 1.);
+
+      // This is how things actually get done, but i need to fix these
+      /*
+      // fill the tree                                                                                                                            
+      st->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
+      st->fillTree(&muon, &tau, &event, name);
+      */
     }  // close event loop
 
     fin->Close();
