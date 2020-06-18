@@ -286,6 +286,16 @@ void ditau_factory::run_factory() {
         tVVTightDeepTauVSe_2,
         0
 	});
+  /*
+  std::cout << "Printing DeepAgainstMuon " << tVVVLooseDeepTauVSmu_2
+	    << ", "<< tVVLooseDeepTauVSmu_2
+	    << ", "<< tVLooseDeepTauVSmu_2
+	    << ", "<< tLooseDeepTauVSmu_2
+	    << ", "<< tMediumDeepTauVSmu_2
+	    << ", "<< tTightDeepTauVSmu_2
+	    << ", "<< tVTightDeepTauVSmu_2
+	    << ", "<< tVVTightDeepTauVSmu_2 << std::endl;
+  */
   t1.setDeepAgainstMuon(std::vector<Float_t>{
       tVVVLooseDeepTauVSmu_2,
         tVVLooseDeepTauVSmu_2,

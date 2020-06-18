@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
 	  evtwt = 3.867;
 	}
       }
-      helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 1, 1.);
+      helper->create_and_fill("cutflow", {10, 0.5, 10.5}, 1, 1.);
 
       // run factories
       taus.run_factory();
@@ -198,22 +198,57 @@ int main(int argc, char *argv[]) {
       auto ltau = taus.tau_at(0);
       auto stau = taus.tau_at(1);
 
-      // First tau ID selection                                                                                                 
-      if (ltau.getDecayModeFinding() > 0.5 && ltau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5 && 
-	  ltau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+      // First tau ID selection
+      // if (ltau.getDecayModeFinding() > 0.5 && ltau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5 && 
+      // 	  ltau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+      // 	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 2, 1.);
+      // } else {
+      // 	continue;
+      // }
+
+      // First tau ID vs Muon
+      if (ltau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5) {
 	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 2, 1.);
       } else {
 	continue;
       }
-
-      // Second tau ID selection
-      // Issue here
-      if (stau.getDecayModeFinding() > 0.5 && stau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5 && 
-	  stau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+      
+      // First tau ID vs Ele
+      if (ltau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
 	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 3, 1.);
       } else {
 	continue;
       }
+      
+      // First Tau DMF
+      if (ltau.getDecayModeFinding() > 0.5 ) {
+	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 4, 1.);
+      } else {
+	continue;
+      }
+      
+      // Second tau ID vs Muon
+      if (stau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5) {
+	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 5, 1.);
+      } else {
+	continue;
+      }
+      
+      // Second tau ID vs Ele
+      if (stau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 6, 1.);
+      } else {
+	continue;
+      }
+      
+      // Second Tau DMF
+      if (stau.getDecayModeFinding() > 0.5 ) {
+	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 7, 1.);
+      } else {
+	continue;
+      }
+
+      
 
       // create regions
       bool signalRegion = (ltau.getDeepIsoWP(wps::deep_medium) && ltau.getDeepIsoWP(wps::deep_medium));
@@ -225,7 +260,7 @@ int main(int argc, char *argv[]) {
       
       // only keep the regions we need
       if (signalRegion || antiTauIsoRegion) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 8, 1.);
       } else {
 	continue;
       }
