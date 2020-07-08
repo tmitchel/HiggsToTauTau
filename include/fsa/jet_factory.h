@@ -47,38 +47,50 @@ class jet_factory {
 
 // read data from tree into member variables
 jet_factory::jet_factory(TTree *input, int era, std::string syst)
-    : syst_name_map{
-          {"JetRelSam_Up", "JetRelativeSampleUp"},
-          {"JetRelSam_Down", "JetRelativeSampleDown"},
-          {"JetRelBal_Up", "JetRelativeBalUp"},
-          {"JetRelBal_Down", "JetRelativeBalDown"},
+: syst_name_map{
+  {"JetRelSam_Up", "JetRelativeSampleUp"},
+    {"JetRelSam_Down", "JetRelativeSampleDown"},
+      {"JetRelBal_Up", "JetRelativeBalUp"},
+	{"JetRelBal_Down", "JetRelativeBalDown"},
           {"JetJER_Up", "JERUp"},
-          {"JetJER_Down", "JERDown"},
-      } {
-    std::string mjj_name("vbfMass"), njets_name("jetVeto30");
-    if (era == 2017) {
-        mjj_name += "WoNoisyJets";
-        njets_name += "WoNoisyJets";
-    }
+	    {"JetJER_Down", "JERDown"},
+	      } {
 
-    auto end = std::string::npos;
-    if (syst.find("Jet") != end) {
-        auto syst_name = fix_syst_string(syst);
-        mjj_name += "_" + syst_name;
-        njets_name += "_" + syst_name;
-    }
+  
+  // Check name and change vars
+  std::string mjj_name, njets_name;
+  if (strcmp(input->GetName(), "tt_tree") == 0) {
+    // std::cout << "HERE" << std::endl;
+    mjj_name = "mjj";
+    njets_name = "njets";
+  } else {
+    mjj_name = "vbfMass";
+    njets_name = "jetVeto30";
+  }
+  
+  if (era == 2017) {
+    mjj_name += "WoNoisyJets";
+    njets_name += "WoNoisyJets";
+  }
+  
+  auto end = std::string::npos;
+  if (syst.find("Jet") != end) {
+    auto syst_name = fix_syst_string(syst);
+    mjj_name += "_" + syst_name;
+    njets_name += "_" + syst_name;
+  }
 
-    std::string btag_string("2016"), bweight_string("bweight_");
-    if (era == 2016) {
-        btag_string = "2016";
-        bweight_string += "2016";
-    } else if (era == 2017) {
-        btag_string = "2017";
-        bweight_string += "2017";
-    } else if (era == 2018) {
-        btag_string = "2018";
-        bweight_string += "2018";
-    }
+  std::string btag_string("2016"), bweight_string("bweight_");
+  if (era == 2016) {
+    btag_string = "2016";
+    bweight_string += "2016";
+  } else if (era == 2017) {
+    btag_string = "2017";
+    bweight_string += "2017";
+  } else if (era == 2018) {
+    btag_string = "2018";
+    bweight_string += "2018";
+  }
 
     input->SetBranchAddress(mjj_name.c_str(), &mjj);
     input->SetBranchAddress(njets_name.c_str(), &njets);

@@ -124,15 +124,17 @@ def fill_process_list(data, name, variable, bins, boilerplate, output_file, dire
         Process(target=fill_histograms, kwargs=proc_args, name=proc_name) for proc_name, proc_args in all_hists.iteritems()
     ], all_hists
 
-
+# I've added the tt part to make it compatible with ditau analysis
 def parse_tree_name(keys):
     """Take list of keys in the file and search for our TTree"""
     if 'et_tree;1' in keys:
         return 'et_tree'
     elif 'mt_tree;1' in keys:
         return 'mt_tree'
+    elif 'tt_tree;1' in keys:
+        return 'tt_tree'
     else:
-        raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
+        raise Exception('Can\t find et_tree, mt_tree, or tt_tree in keys: {}'.format(keys))
 
 
 def main(args):
@@ -155,7 +157,9 @@ def main(args):
 
     channel_prefix = tree_name.replace('mt_tree', 'mt')
     channel_prefix = channel_prefix.replace('et_tree', 'et')
-    assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
+    # Added for ditau compatibility
+    channel_prefix = channel_prefix.replace('tt_tree', 'tt')
+    assert channel_prefix == 'mt' or channel_prefix == 'et' or channel_prefix == 'tt', 'must provide a valid tree name'
 
     # get things for output file name
     ztt_name = 'emb' if args.embed else 'ztt'

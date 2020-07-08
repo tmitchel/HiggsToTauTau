@@ -50,8 +50,17 @@ int main(int argc, char *argv[]) {
     bool isEmbed = sample.find("embed") != std::string::npos || name.find("embed") != std::string::npos;
     bool isMG = sample.find("madgraph") != std::string::npos;
     bool doAC = signal_type != "None";
-
+    
+    // Added to make my life easier :)
+    bool skip = sample.find("_ac_") != std::string::npos || sample.find("JHU") != std::string::npos;
+    if (skip) {
+      std::cout << "Skipping" << std::endl;
+      return 0;
+    }
+      
     // get systematic shift name
+    // We change the tau energy (for example) and see how the analyis changes
+    // to get an estimate for errors
     std::string systname = "NOMINAL";
     if (!syst.empty()) {
         systname = "SYST_" + syst;
@@ -106,6 +115,7 @@ int main(int argc, char *argv[]) {
 
     // cd to root of output file and create tree
     fout->cd();
+    // this is important...
     slim_tree *st = new slim_tree("tt_tree", doAC);
 
     std::string original = sample;
@@ -124,10 +134,14 @@ int main(int argc, char *argv[]) {
     if (signal_type == "JHU" && (sample == "ggh125" || sample == "vbf125")) {
         gen_number = 1.;
     }
+    
 
     // reweighter for anomolous coupling samples
-    ACWeighter ac_weights = ACWeighter(original, sample, signal_type, "2018");
-    ac_weights.fillWeightMap();
+    // This causes issues with JHU
+    if (signal_type != "JHU") {
+      ACWeighter ac_weights = ACWeighter(original, sample, signal_type, "2018");
+      ac_weights.fillWeightMap();
+    }
 
     // get normalization (lumi & xs are in util.h)
     double norm(1.);
@@ -135,6 +149,37 @@ int main(int argc, char *argv[]) {
         norm = helper->getLuminosity2018() * helper->getCrossSection(sample) / gen_number;
     }
 
+    ///////////////////////////////////////////////
+    // Scale Factors:                            //
+    // Read weights, hists, graphs, etc. for SFs //
+    ///////////////////////////////////////////////
+    
+    /*
+    reweight::LumiReWeighting *lumi_weights;
+    // read inputs for lumi reweighting
+    if (!isData && !isEmbed && !doAC && !isMG) {
+      TNamed *dbsName = reinterpret_cast<TNamed *>(fin->Get("MiniAOD_name"));
+      std::string datasetName = dbsName->GetTitle();
+      if (datasetName.find("Not Found") != std::string::npos && !isEmbed && !isData) {
+	fin->Close();
+	fout->Close();
+	return 2;
+      }
+      std::cout << "here1" << std::endl;
+      std::replace(datasetName.begin(), datasetName.end(), '/', '#');
+      lumi_weights = new reweight::LumiReWeighting("root://cmsxrootd.fnal.gov//store/user/tmitchel/HTT_ScaleFactors/pu_distributions_mc_2017.root",
+						   "root://cmsxrootd.fnal.gov//store/user/tmitchel/HTT_ScaleFactors/pu_distributions_data_2017.root",
+						   ("pua/#" + datasetName).c_str(), "pileup");
+      running_log << "using PU dataset name: " << datasetName << std::endl;
+    }
+
+    
+    // legacy sf's
+    TFile htt_sf_file("root://cmsxrootd.fnal.gov//store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2017.root");
+    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
+    htt_sf_file.Close();
+    */
+    
     //////////////////////////////////////
     // Final setup:                     //
     // Declare histograms and factories //
@@ -158,6 +203,9 @@ int main(int argc, char *argv[]) {
 	running_log << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
 	progress++;
       }
+
+      if (i%1000 == 0)
+	std::cout << "Event Number " << i << std::endl;
 
       // find the event weight (not lumi*xs if looking at W or Drell-Yan)
       Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
@@ -188,7 +236,7 @@ int main(int argc, char *argv[]) {
 	  evtwt = 3.867;
 	}
       }
-      helper->create_and_fill("cutflow", {10, 0.5, 10.5}, 1, 1.);
+      helper->create_and_fill("cutflow", {7, 0.5, 7.5}, 1, 1.);
 
       // run factories
       taus.run_factory();
@@ -199,60 +247,50 @@ int main(int argc, char *argv[]) {
       auto stau = taus.tau_at(1);
 
       // First tau ID selection
-      // if (ltau.getDecayModeFinding() > 0.5 && ltau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5 && 
-      // 	  ltau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
-      // 	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 2, 1.);
-      // } else {
-      // 	continue;
-      // }
+      if (ltau.getDecayModeFinding() > 0.5 && ltau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5 && 
+       	  ltau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+       	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 3, 1.);
+      } else {
+       	continue;
+      }
 
-      // First tau ID vs Muon
-      if (ltau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5) {
-	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 2, 1.);
+      // Second tau ID selection
+      if (stau.getDecayModeFinding() > 0.5 && stau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5 && 
+       	  stau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+       	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 5, 1.);
       } else {
-	continue;
+       	continue;
       }
-      
-      // First tau ID vs Ele
-      if (ltau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
-	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 3, 1.);
-      } else {
-	continue;
-      }
-      
-      // First Tau DMF
-      if (ltau.getDecayModeFinding() > 0.5 ) {
-	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 4, 1.);
-      } else {
-	continue;
-      }
-      
-      // Second tau ID vs Muon
-      if (stau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5) {
-	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 5, 1.);
-      } else {
-	continue;
-      }
-      
-      // Second tau ID vs Ele
-      if (stau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
-	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 6, 1.);
-      } else {
-	continue;
-      }
-      
-      // Second Tau DMF
-      if (stau.getDecayModeFinding() > 0.5 ) {
-	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 7, 1.);
+
+      // only opposite-sign                                                                                                                          
+      int evt_charge = ltau.getCharge() + stau.getCharge();
+      if (evt_charge == 0) {
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
       } else {
 	continue;
       }
 
-      
+      // build Higgs
+      TLorentzVector Higgs = ltau.getP4() + stau.getP4() + met.getP4();
 
+      // calculate mt                                                                                                                                
+      // I don't know how to do this for ditau, need help, this was copied from mt
+      // double met_x = met.getMet() * cos(met.getMetPhi());
+      // double met_y = met.getMet() * sin(met.getMetPhi());
+      // double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
+      // double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getP4().Px() + met_x, 2) - pow(muon.getP4().Py() + met_y, 2));
+      double mt = 1;
+
+      // now do mt selection                                                                                                                         
+      if (mt < 50) {
+	// helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
+      } else {
+	continue;
+      }
+      
       // create regions
-      bool signalRegion = (ltau.getDeepIsoWP(wps::deep_medium) && ltau.getDeepIsoWP(wps::deep_medium));
-      bool antiTauIsoRegion = (ltau.getDeepIsoWP(wps::deep_medium) == 0 && ltau.getDeepIsoWP(wps::deep_medium) && 
+      bool signalRegion = (ltau.getDeepIsoWP(wps::deep_medium) && stau.getDeepIsoWP(wps::deep_medium));
+      bool antiTauIsoRegion = (ltau.getDeepIsoWP(wps::deep_medium) == 0 && stau.getDeepIsoWP(wps::deep_medium) && 
 			       ltau.getDeepIsoWP(wps::deep_vvvloose) > 0 && stau.getDeepIsoWP(wps::deep_vvvloose) > 0);
       if (signal_type != "None") {
 	antiTauIsoRegion = false;  // don't need anti-tau iso region in signal
@@ -260,28 +298,40 @@ int main(int argc, char *argv[]) {
       
       // only keep the regions we need
       if (signalRegion || antiTauIsoRegion) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 8, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7, 1.);
       } else {
 	continue;
       }
       
-      // build Higgs
-      TLorentzVector Higgs = ltau.getP4() + stau.getP4() + met.getP4();
+      std::vector<std::string> tree_cat;
+      // regions
+      if (signalRegion) {
+	tree_cat.push_back("signal");
+      } else if (antiTauIsoRegion) {
+	tree_cat.push_back("antiTauIso");
+      }
+      
+      // event charge
+      if (evt_charge == 0) {
+	tree_cat.push_back("OS");
+      }
 
-      // Normally, these aren't in here
-      // helper->create_and_fill("t1_pt", {40, 0, 500}, ltau.getPt(), 1.);
-      // helper->create_and_fill("t1_eta", {40, -2.4, 2.4}, ltau.getEta(), 1.);
-      // helper->create_and_fill("t2_pt", {40, 0, 500}, stau.getPt(), 1.);
-      // helper->create_and_fill("t2_eta", {40, -2.4, 2.4}, stau.getEta(), 1.);
-      // helper->create_and_fill("vis_mass", {40, 0, 200}, (ltau.getP4() + stau.getP4()).M(), 1.);
-      // helper->create_and_fill("higgs_mass", {40, 0, 200}, Higgs.M(), 1.);
-
-      // This is how things actually get done, but i need to fix these
+      // The slim_tree does a nullptr check on the weights, so I think I can skip all of this?
+      std::shared_ptr<std::vector<double>> weights(nullptr);
       /*
-      // fill the tree                                                                                                                            
-      st->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
-      st->fillTree(&muon, &tau, &event, name);
+      Long64_t currentEventID = event.getLumi();
+      currentEventID = currentEventID * 1000000 + event.getEvt();
+      if (doAC) {
+	// Problem here, because JHU skips the weights part :( so ac_weights will be NULL
+	weights = std::make_shared<std::vector<double>>(ac_weights.getWeights(currentEventID));
+      }
       */
+
+      // Fill Trees
+      // slim_tree class is used here (st is object)
+      // st->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
+      st->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
+      st->fillTree(&ltau, &stau, &event, name);
     }  // close event loop
 
     fin->Close();
