@@ -20,7 +20,7 @@ class jet_factory {
     Float_t mjj;
     std::vector<Bool_t> *loose_id;
     std::vector<Float_t> *pt, *eta, *phi, *energy, *csv_b, *csv_bb, *flavor, *id, *mva_csv;
-    std::vector<jet> plain_jets, btag_jets, all_jets;
+    std::vector<jet> plain_jets, btag_jets, all_jets, cleaned_jets;
 
    public:
     jet_factory(TTree *, Int_t, Bool_t, std::string);
@@ -38,7 +38,9 @@ class jet_factory {
     // Float_t getBWeight() { return bweight; }
     std::vector<jet> getJets() { return all_jets; }
     std::vector<jet> getBtagJets() { return btag_jets; }
+    std::vector<jet> getCleanedJets() { return cleaned_jets; }
     std::vector<jet> clean_jets(TLorentzVector, std::vector<jet>);
+    void set_cleaned_jets(std::vector<jet> cleaned) { cleaned_jets = cleaned; }
 };
 
 // read data from tree into member variables
@@ -96,6 +98,7 @@ void jet_factory::run_factory() {
     if (all_jets.size() > 1) {
         mjj = (all_jets.at(0).getP4() + all_jets.at(1).getP4()).M();
     }
+    cleaned_jets = all_jets;
 }
 
 Float_t jet_factory::getHT(Float_t pt, TLorentzVector lep, TLorentzVector tt) {

@@ -144,7 +144,7 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
 void slim_tree::generalFill(std::vector<std::string> cats, jet_factory *fjets, met_factory *fmet, event_factory *evt, Float_t weight,
                             TLorentzVector higgs, Float_t Mt, std::shared_ptr<std::vector<double>> ac_weights) {
     // create things needed for later
-    auto jets(fjets->getJets());
+    auto jets(fjets->getCleanedJets());
     auto btags(fjets->getBtagJets());
 
     // start filling branches
