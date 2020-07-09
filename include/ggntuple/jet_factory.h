@@ -38,7 +38,7 @@ class jet_factory {
     // Float_t getBWeight() { return bweight; }
     std::vector<jet> getJets() { return all_jets; }
     std::vector<jet> getBtagJets() { return btag_jets; }
-    std::vector<jet> clean_jets(TLorentzVector);
+    std::vector<jet> clean_jets(TLorentzVector, std::vector<jet>);
 };
 
 // read data from tree into member variables
@@ -125,9 +125,9 @@ Float_t jet_factory::getST(Float_t pt) {
     return st;
 }
 
-std::vector<jet> jet_factory::clean_jets(TLorentzVector lep) {
+std::vector<jet> jet_factory::clean_jets(TLorentzVector lep, std::vector<jet> collection) {
     std::vector<jet> cleaned;
-    for (auto &jet : all_jets) {
+    for (auto &jet : collection) {
         if (jet.getP4().DeltaR(lep) < 0.5) {  // possible other selection as well
             continue;
         }
