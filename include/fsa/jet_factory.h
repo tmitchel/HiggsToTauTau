@@ -47,65 +47,106 @@ class jet_factory {
 
 // read data from tree into member variables
 jet_factory::jet_factory(TTree *input, int era, std::string syst)
-    : syst_name_map{
-          {"JetRelSam_Up", "JetRelativeSampleUp"},
-          {"JetRelSam_Down", "JetRelativeSampleDown"},
-          {"JetRelBal_Up", "JetRelativeBalUp"},
-          {"JetRelBal_Down", "JetRelativeBalDown"},
+: syst_name_map{
+  {"JetRelSam_Up", "JetRelativeSampleUp"},
+    {"JetRelSam_Down", "JetRelativeSampleDown"},
+      {"JetRelBal_Up", "JetRelativeBalUp"},
+	{"JetRelBal_Down", "JetRelativeBalDown"},
           {"JetJER_Up", "JERUp"},
-          {"JetJER_Down", "JERDown"},
-      } {
-    std::string mjj_name("vbfMass"), njets_name("jetVeto30");
-    if (era == 2017) {
-        mjj_name += "WoNoisyJets";
-        njets_name += "WoNoisyJets";
-    }
+	    {"JetJER_Down", "JERDown"},
+	      } {
 
-    auto end = std::string::npos;
-    if (syst.find("Jet") != end) {
-        auto syst_name = fix_syst_string(syst);
-        mjj_name += "_" + syst_name;
-        njets_name += "_" + syst_name;
-    }
+  
+  // Check name and change vars
+  std::string mjj_name, njets_name;
+  if (strcmp(input->GetName(), "tt_tree") == 0) {
+    mjj_name = "mjj";
+    njets_name = "njets";
+  } else {
+    mjj_name = "vbfMass";
+    njets_name = "jetVeto30";
+  }
+  
+  if (era == 2017) {
+    mjj_name += "WoNoisyJets";
+    njets_name += "WoNoisyJets";
+  }
+  
+  auto end = std::string::npos;
+  if (syst.find("Jet") != end) {
+    auto syst_name = fix_syst_string(syst);
+    mjj_name += "_" + syst_name;
+    njets_name += "_" + syst_name;
+  }
 
-    std::string btag_string("2016"), bweight_string("bweight_");
-    if (era == 2016) {
-        btag_string = "2016";
-        bweight_string += "2016";
-    } else if (era == 2017) {
-        btag_string = "2017";
-        bweight_string += "2017";
-    } else if (era == 2018) {
-        btag_string = "2018";
-        bweight_string += "2018";
-    }
+  std::string btag_string("2016"), bweight_string("bweight_");
+  if (era == 2016) {
+    btag_string = "2016";
+    bweight_string += "2016";
+  } else if (era == 2017) {
+    btag_string = "2017";
+    bweight_string += "2017";
+  } else if (era == 2018) {
+    btag_string = "2018";
+    bweight_string += "2018";
+  }
 
     input->SetBranchAddress(mjj_name.c_str(), &mjj);
     input->SetBranchAddress(njets_name.c_str(), &njets);
-    input->SetBranchAddress("nbtag", &nbtag);
-    input->SetBranchAddress(("bjetDeepCSVVeto20Loose_" + btag_string + "_DR0p5").c_str(), &nbtag_loose);
-    input->SetBranchAddress(("bjetDeepCSVVeto20Medium_" + btag_string + "_DR0p5").c_str(), &nbtag_medium);
-    input->SetBranchAddress(bweight_string.c_str(), &bweight);
-    input->SetBranchAddress("j1pt", &jpt_1);
-    input->SetBranchAddress("j1eta", &jeta_1);
-    input->SetBranchAddress("j1phi", &jphi_1);
-    input->SetBranchAddress("j1csv", &jcsv_1);
-    input->SetBranchAddress("j2pt", &jpt_2);
-    input->SetBranchAddress("j2eta", &jeta_2);
-    input->SetBranchAddress("j2phi", &jphi_2);
-    input->SetBranchAddress("j2csv", &jcsv_2);
-    input->SetBranchAddress(("jb1pt_" + btag_string).c_str(), &bpt_1);
-    input->SetBranchAddress(("jb1eta_" + btag_string).c_str(), &beta_1);
-    input->SetBranchAddress(("jb1phi_" + btag_string).c_str(), &bphi_1);
-    // input->SetBranchAddress(("jb1csv_" + btag_string).c_str(), &bcsv_1);
-    input->SetBranchAddress(("jb1hadronflavor_" + btag_string).c_str(), &bflavor_1);
-    input->SetBranchAddress(("jb2pt_" + btag_string).c_str(), &bpt_2);
-    input->SetBranchAddress(("jb2eta_" + btag_string).c_str(), &beta_2);
-    input->SetBranchAddress(("jb2phi_" + btag_string).c_str(), &bphi_2);
-    // input->SetBranchAddress(("jb2csv_" + btag_string).c_str(), &bcsv_2);
-    input->SetBranchAddress(("jb2hadronflavor_" + btag_string).c_str(), &bflavor_2);
-    input->SetBranchAddress("topQuarkPt1", &topQuarkPt1);
-    input->SetBranchAddress("topQuarkPt2", &topQuarkPt2);
+    input->SetBranchAddress("nbtag", &Nbtag);
+
+    // Only do these for mt || et
+    if ((TString(input->GetName()) == "mt_tree") || (TString(input->GetName()) == "et_tree")) {
+      input->SetBranchAddress(("bjetDeepCSVVeto20Loose_" + btag_string + "_DR0p5").c_str(), &nbtag_loose); 
+      input->SetBranchAddress(("bjetDeepCSVVeto20Medium_" + btag_string + "_DR0p5").c_str(), &nbtag_medium); 
+      input->SetBranchAddress(bweight_string.c_str(), &bweight); 
+      
+      input->SetBranchAddress("j1pt", &jpt_1);
+      input->SetBranchAddress("j1eta", &jeta_1);
+      input->SetBranchAddress("j1phi", &jphi_1);
+      input->SetBranchAddress("j1csv", &jcsv_1);
+      input->SetBranchAddress("j2pt", &jpt_2);
+      input->SetBranchAddress("j2eta", &jeta_2);
+      input->SetBranchAddress("j2phi", &jphi_2);
+      input->SetBranchAddress("j2csv", &jcsv_2);
+      input->SetBranchAddress(("jb1pt_" + btag_string).c_str(), &bpt_1);
+      input->SetBranchAddress(("jb1eta_" + btag_string).c_str(), &beta_1);
+      input->SetBranchAddress(("jb1phi_" + btag_string).c_str(), &bphi_1);
+      // input->SetBranchAddress(("jb1csv_" + btag_string).c_str(), &bcsv_1);
+      input->SetBranchAddress(("jb1hadronflavor_" + btag_string).c_str(), &bflavor_1);
+      input->SetBranchAddress(("jb2pt_" + btag_string).c_str(), &bpt_2);
+      input->SetBranchAddress(("jb2eta_" + btag_string).c_str(), &beta_2);
+      input->SetBranchAddress(("jb2phi_" + btag_string).c_str(), &bphi_2);
+      // input->SetBranchAddress(("jb2csv_" + btag_string).c_str(), &bcsv_2);
+      input->SetBranchAddress(("jb2hadronflavor_" + btag_string).c_str(), &bflavor_2);
+      input->SetBranchAddress("topQuarkPt1", &topQuarkPt1);
+      input->SetBranchAddress("topQuarkPt2", &topQuarkPt2);
+    } else if (TString(input->GetName()) == "tt_tree") { 
+      input->SetBranchAddress("jetPt_1", &jpt_1);
+      input->SetBranchAddress("jeta_1", &jeta_1);
+      input->SetBranchAddress("jphi_1", &jphi_1);
+      input->SetBranchAddress("jcsv_1", &jcsv_1);
+      input->SetBranchAddress("jetPt_2", &jpt_2);
+      input->SetBranchAddress("jeta_2", &jeta_2);
+      input->SetBranchAddress("jphi_2", &jphi_2);
+      input->SetBranchAddress("jcsv_2", &jcsv_2);
+      input->SetBranchAddress("bpt_1", &bpt_1);
+      input->SetBranchAddress("beta_1", &beta_1);
+      input->SetBranchAddress("bphi_1", &bphi_1);
+      // input->SetBranchAddress("bcsv_1", &bcsv_1);
+      input->SetBranchAddress("bflavor_1", &bflavor_1);
+      input->SetBranchAddress("bpt_2", &bpt_2);
+      input->SetBranchAddress("beta_2", &beta_2);
+      input->SetBranchAddress("bphi_2", &bphi_2);
+      // input->SetBranchAddress("bcsv_2", &bcsv_2);
+      input->SetBranchAddress("bflavor_2", &bflavor_2);
+      input->SetBranchAddress("pt_top1", &topQuarkPt1);
+      input->SetBranchAddress("pt_top2", &topQuarkPt2);
+    } else {
+      std::cout << "NAME ERROR" << std::endl;
+    }
+    
+    
 }
 
 // initialize member data and set TLorentzVector
@@ -113,7 +154,7 @@ void jet_factory::run_factory() {
     plain_jets.clear();
     btag_jets.clear();
 
-    Nbtag = nbtag;
+    // Nbtag = nbtag;
 
     jet j1(jpt_1, jeta_1, jphi_1, jcsv_1);
     jet j2(jpt_2, jeta_2, jphi_2, jcsv_2);

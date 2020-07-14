@@ -28,6 +28,15 @@ ac-et-2017: plugins/AC/et_analyzer2016.cc
 ac-et-2018: plugins/AC/et_analyzer2016.cc
 	g++ $(OPT) plugins/AC/et_analyzer2018.cc $(ROOT) $(CFLAGS) -o $(OBIN)/analyze2018_et
 
+ac-tt-2016: plugins/AC/tt_analyzer2016.cc
+	g++ $(OPT) plugins/AC/tt_analyzer2016.cc $(ROOT) $(CFLAGS) -o $(OBIN)/analyze2016_tt
+
+ac-tt-2017: plugins/AC/tt_analyzer2017.cc
+	g++ $(OPT) plugins/AC/tt_analyzer2017.cc $(ROOT) $(CFLAGS) -o $(OBIN)/analyze2017_tt
+
+ac-tt-2018: plugins/AC/tt_analyzer2018.cc
+	g++ $(OPT) plugins/AC/tt_analyzer2018.cc $(ROOT) $(CFLAGS) -o $(OBIN)/analyze2018_tt
+
 # Boosted Tau Analyzers
 boost-mt-2017: plugins/Boosted/mt_analyzer2017.cc
 	g++ $(OPT) plugins/Boosted/mt_analyzer2017.cc $(ROOT) $(CFLAGS) -o $(OBIN)/boost_mt2017
@@ -50,6 +59,9 @@ test-ac-et-2017: plugins/AC/et_analyzer2016.cc
 
 test-ac-et-2018: plugins/AC/et_analyzer2016.cc
 	g++ plugins/AC/et_analyzer2018.cc $(ROOT) $(CFLAGS) -o test
+
+test-ac-tt-2018: plugins/AC/tt_analyzer2018.cc
+	g++ plugins/AC/tt_analyzer2018.cc $(ROOT) $(CFLAGS) -o test
 
 # Testing Boosted Tau Analyzers
 test-boost-mt-2017: plugins/Boosted/mt_analyzer2017.cc

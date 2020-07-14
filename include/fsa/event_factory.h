@@ -189,14 +189,21 @@ event_factory::event_factory(TTree* input, Bool_t _is_data, lepton _lep, int _er
     input->SetBranchAddress("evt", &evt);
     input->SetBranchAddress("run", &run);
     input->SetBranchAddress("lumi", &lumi);
-    input->SetBranchAddress("nTruePU", &npu);
     input->SetBranchAddress("genM", &genM);
     input->SetBranchAddress("genpT", &genpT);
     input->SetBranchAddress("numGenJets", &numGenJets);
-    input->SetBranchAddress("GenWeight", &genweight);
     input->SetBranchAddress("prefiring_weight", &prefiring_weight);
-    input->SetBranchAddress("prefiring_weight_up", &prefiring_weight_up);
-    input->SetBranchAddress("prefiring_weight_down", &prefiring_weight_down);
+    if ((TString(input->GetName()) == "mt_tree") || (TString(input->GetName()) == "et_tree")) {
+      input->SetBranchAddress("nTruePU", &npu);
+      input->SetBranchAddress("GenWeight", &genweight);
+      input->SetBranchAddress("prefiring_weight_up", &prefiring_weight_up);
+      input->SetBranchAddress("prefiring_weight_down", &prefiring_weight_down);
+    } else if ((TString(input->GetName()) == "mt_tree")) {
+      input->SetBranchAddress("npu", &npu);
+      input->SetBranchAddress("genweight", &genweight);
+      input->SetBranchAddress("prefiring_weight_Up", &prefiring_weight_up);
+      input->SetBranchAddress("prefiring_weight_Down", &prefiring_weight_down);
+    }
     input->SetBranchAddress("Flag_BadChargedCandidateFilter", &Flag_BadChargedCandidateFilter);
     input->SetBranchAddress("Flag_BadPFMuonFilter", &Flag_BadPFMuonFilter);
     input->SetBranchAddress("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter);

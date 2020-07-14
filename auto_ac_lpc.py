@@ -5,7 +5,7 @@
 
 from os import popen, makedirs, path
 from pprint import pprint
-from subprocess import call
+from subprocess import call, check_output
 import time
 import multiprocessing
 from glob import glob
@@ -136,6 +136,8 @@ def getSyst(name, signal_type, exe, doSyst):
                     'mfaket_es_DM0_Up', 'mfaket_es_DM0_Down',
                     'mfaket_es_DM1_Up', 'mfaket_es_DM1_Down',
                 ]
+        # elif '_tt' in exe:
+            # What to add here?
 
     if name != 'embed':
         # jet energy scale, unclustered MET, and JER
@@ -179,6 +181,8 @@ def getSyst(name, signal_type, exe, doSyst):
             'MES_1p2to2p1_Up', 'MES_1p2to2p1_Down',
             'MES_lt1p2_Up', 'MES_lt1p2_Down',
         ]
+    # elif '_tt' in exe:
+        # What to add here?
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
         systs += [
@@ -264,7 +268,8 @@ def run_parallel(output_dir, processes):
 
     # Use 10 cores if the machine has more than 20 total cores.
     # Otherwise, use half the available cores.
-    n_processes = min(10, multiprocessing.cpu_count() / 2)
+    # Can I make this use more or will I get in trouble?
+    n_processes = min(12, multiprocessing.cpu_count() / 2)
     print 'Process with {} cores'.format(n_processes)
     pool = multiprocessing.Pool(processes=n_processes)
     watcher = pool.apply_async(listener, (q, 'Output/trees/{}/logs/runninglog.txt'.format(output_dir)))
@@ -343,12 +348,15 @@ def main(args):
 
             names, signal_type = getNames(sample)
             # if signal_type != "None": continue
-            callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
+            callstring = '{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                      tosample, sample, args.output_dir, signal_type)
 
             doSyst = True if args.syst and not 'data' in sample.lower() else False
             processes = build_processes(processes, callstring, names, signal_type, args.exe, args.output_dir, doSyst)
         pprint(processes, width=150)
+
+        if args.dont_process:
+            return
 
         if args.parallel:
             run_parallel(args.output_dir, processes)
@@ -368,5 +376,6 @@ if __name__ == "__main__":
     parser.add_argument('--parallel', action='store_true', help='run in parallel')
     parser.add_argument('--output-dir', required=True, dest='output_dir',
                         help='name of output directory after Output/trees')
+    parser.add_argument('--dont-process', action='store_true', help='print commands without executing')
     parser.add_argument('--condor', action='store_true', help='submit jobs to condor')
     main(parser.parse_args())

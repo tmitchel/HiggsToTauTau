@@ -23,6 +23,7 @@ class slim_tree {
     // member functions
     void fillTree(electron *, tau *, event_factory *, std::string);
     void fillTree(muon *, tau *, event_factory *, std::string);
+    void fillTree(tau *, tau *, event_factory *, std::string);
     void generalFill(std::vector<std::string>, jet_factory *, met_factory *, event_factory *, Float_t, TLorentzVector, Float_t,
                      std::shared_ptr<std::vector<double>>);
     void initial_values();
@@ -36,8 +37,10 @@ class slim_tree {
     Float_t evtwt, el_pt, el_eta, el_phi, el_mass, el_charge, el_iso, el_genMatch, mu_pt, mu_eta, mu_phi, mu_mass, mu_charge, mu_iso, mu_genMatch,
         t1_pt, t1_eta, t1_phi, t1_mass, t1_charge, t1_iso, t1_iso_VL, t1_iso_L, t1_iso_M, t1_iso_T, t1_iso_VT, t1_iso_VVT, t1_decayMode,
         t1_genMatch,  // t1 is used for et and mt, as well
+        t2_pt, t2_eta, t2_phi, t2_mass, t2_charge, t2_iso, t2_iso_VL, t2_iso_L, t2_iso_M, t2_iso_T, t2_iso_VT, t2_iso_VVT, t2_decayMode,
+        t2_genMatch, dmf_1, dmf_new_1, dmf_2, dmf_new_2,
         njets, nbjets, j1_pt, j1_eta, j1_phi, j2_pt, j2_eta, j2_phi, b1_pt, b1_eta, b1_phi, b2_pt, b2_eta, b2_phi, met, metphi, mjj, numGenJets, mt,
-        dmf, dmf_new, pt_sv, m_sv, MELA_D2j, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2, ME_sm_ggH_qqInit, ME_ps_ggH_qqInit, ME_ps_ggH,
+        pt_sv, m_sv, MELA_D2j, Phi, Phi1, costheta1, costheta2, costhetastar, Q2V1, Q2V2, ME_sm_ggH_qqInit, ME_ps_ggH_qqInit, ME_ps_ggH,
         ME_ps_VBF, ME_sm_VBF, ME_sm_ggH, ME_sm_WH, ME_sm_ZH, ME_bkg, ME_bkg1, ME_bkg2, ME_a2_VBF, ME_L1_VBF, ME_L1Zg_VBF, D0_ggH, DCP_ggH, D0_VBF,
         D_a2_VBF, D_l1_VBF, D_l1zg_VBF, DCP_VBF, higgs_pT, higgs_m, hjj_pT, hjj_m, dEtajj, dPhijj, vis_mass, MT_lepMET, MT_t2MET, MT_HiggsMET,
         hj_dphi, hj_deta, jmet_dphi, hmet_dphi, hj_dr, lt_dphi;
@@ -78,9 +81,21 @@ slim_tree::slim_tree(std::string tree_name, bool isAC = false) : otree(new TTree
     // otree->Branch("t1_charge", &t1_charge, "t1_charge/F");
     otree->Branch("t1_iso", &t1_iso, "t1_iso/F");
     otree->Branch("t1_decayMode", &t1_decayMode, "t1_decayMode/F");
-    otree->Branch("t1_dmf", &dmf, "t1_dmf/F");
-    otree->Branch("t1_dmf_new", &dmf_new, "t1_dmf_new/F");
+    otree->Branch("t1_dmf", &dmf_1, "t1_dmf/F");
+    otree->Branch("t1_dmf_new", &dmf_new_1, "t1_dmf_new/F");
     otree->Branch("t1_genMatch", &t1_genMatch, "t1_genMatch/F");
+    
+    otree->Branch("t2_pt", &t2_pt, "t2_pt/F");
+    otree->Branch("t2_eta", &t2_eta, "t2_eta/F");
+    otree->Branch("t2_phi", &t2_phi, "t2_phi/F");
+    otree->Branch("t2_mass", &t2_mass, "t2_mass/F");
+    // otree->Branch("t2_charge", &t2_charge, "t2_charge/F");
+    otree->Branch("t2_iso", &t2_iso, "t2_iso/F");
+    otree->Branch("t2_decayMode", &t2_decayMode, "t2_decayMode/F");
+    otree->Branch("t2_dmf", &dmf_2, "t2_dmf/F");
+    otree->Branch("t2_dmf_new", &dmf_new_2, "t2_dmf_new/F");
+    otree->Branch("t2_genMatch", &t2_genMatch, "t2_genMatch/F");
+
     otree->Branch("lep_dr", &lep_dr, "lep_dr/F");
 
     otree->Branch("numGenJets", &numGenJets, "numGenJets/F");
@@ -345,8 +360,8 @@ void slim_tree::fillTree(electron *el, tau *t, event_factory *evt, std::string n
     t1_decayMode = t->getDecayMode();
     t1_iso = t->getIso();
     t1_genMatch = t->getGenMatch();
-    dmf = t->getDecayModeFinding();
-    dmf_new = t->getDecayModeFindingNew();
+    dmf_1 = t->getDecayModeFinding();
+    dmf_new_1 = t->getDecayModeFindingNew();
     vis_mass = (el->getP4() + t->getP4()).M();
     if ((name == "ZTT" || name == "ZL" || name == "TTT" || name == "TTL" || name == "STT" || name == "STL" || name == "VVT" || name == "VVL") &&
         (el->getGenMatch() > 2 && el->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
@@ -374,8 +389,8 @@ void slim_tree::fillTree(muon *mu, tau *t, event_factory *evt, std::string name)
     t1_decayMode = t->getDecayMode();
     t1_iso = t->getIso();
     t1_genMatch = t->getGenMatch();
-    dmf = t->getDecayModeFinding();
-    dmf_new = t->getDecayModeFindingNew();
+    dmf_1 = t->getDecayModeFinding();
+    dmf_new_1 = t->getDecayModeFindingNew();
     vis_mass = (mu->getP4() + t->getP4()).M();
     if ((name == "ZTT" || name == "ZL" || name == "TTT" || name == "TTL" || name == "STT" || name == "STL" || name == "VVT" || name == "VVL") &&
         (mu->getGenMatch() > 2 && mu->getGenMatch() < 6) && (t->getGenMatch() > 2 && t->getGenMatch() < 6)) {
@@ -384,6 +399,45 @@ void slim_tree::fillTree(muon *mu, tau *t, event_factory *evt, std::string name)
     cross_trigger = evt->getPassCrossTrigger(mu->getPt());
     lep_dr = mu->getP4().DeltaR(t->getP4());
 
+    otree->Fill();
+}
+
+// Added for ditau compatibility
+void slim_tree::fillTree(tau *t1, tau *t2, event_factory *evt, std::string name) {
+    // Tau 1 Cadidate
+    t1_pt = t1->getPt();
+    t1_eta = t1->getEta();
+    t1_phi = t1->getPhi();
+    t1_mass = t1->getMass();
+    t1_charge = t1->getCharge();
+    t1_decayMode = t1->getDecayMode();
+    t1_iso = t1->getIso();
+    t1_genMatch = t1->getGenMatch();
+    dmf_1 = t1->getDecayModeFinding();
+    dmf_new_1 = t1->getDecayModeFindingNew();
+    // Tau 2 Candidate
+    t2_pt = t2->getPt();
+    t2_eta = t2->getEta();
+    t2_phi = t2->getPhi();
+    t2_mass = t2->getMass();
+    t2_charge = t2->getCharge();
+    t2_decayMode = t2->getDecayMode();
+    t2_iso = t2->getIso();
+    t2_genMatch = t2->getGenMatch();
+    dmf_2 = t2->getDecayModeFinding();
+    dmf_new_2 = t2->getDecayModeFindingNew();
+
+    vis_mass = (t1->getP4() + t2->getP4()).M();
+
+    // Not sure if this is valid...
+    if ((name == "ZTT" || name == "ZL" || name == "TTT" || name == "TTL" || name == "STT" || name == "STL" || name == "VVT" || name == "VVL") &&
+        (t1->getGenMatch() > 2 && t1->getGenMatch() < 6) && (t2->getGenMatch() > 2 && t2->getGenMatch() < 6)) {
+      contamination = 1;  // mc contaminating embedded samples
+    }
+    // Only have taus, so I don't think I can use these
+    // cross_trigger = evt->getPassCrossTrigger(mu->getPt());
+    // lep_dr = mu->getP4().DeltaR(t->getP4());
+    
     otree->Fill();
 }
 
