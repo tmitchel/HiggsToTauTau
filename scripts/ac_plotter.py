@@ -10,7 +10,7 @@ def clean_samples(input_histos):
     merged = {
         'ZTT': input_histos['ZTT'].Clone(),
         'ZL': input_histos['ZL'].Clone(),
-        # 'jetFakes': input_histos['jetFakes'].Clone(),
+        'jetFakes': input_histos['jetFakes'].Clone(),
         'tt': input_histos['TTT'].Clone(),
         'Others': input_histos['STT'].Clone()
     }
@@ -40,14 +40,14 @@ def fillLegend(data, backgrounds, signals, stat):
 
     # leg.AddEntry(signals['reweighted_ggH_htt_0PM125'], 'ggH SM Higgs(125)x50', 'l')
     # leg.AddEntry(signals['reweighted_ggH_htt_0M125'], 'ggH PS Higgs(125)x50', 'l')
-    # 
+    #
     # leg.AddEntry(signals['reweighted_qqH_htt_0PM125'], 'VBF SM Higgs(125)x50', 'l')
     # leg.AddEntry(signals['reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
 
     # backgrounds
     leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
     leg.AddEntry(backgrounds['ZL'], 'ZL', 'f')
-    # leg.AddEntry(backgrounds['jetFakes'], 'Jet Mis-ID', 'f')
+    leg.AddEntry(backgrounds['jetFakes'], 'Jet Mis-ID', 'f')
     leg.AddEntry(backgrounds['tt'], 'tt', 'f')
     leg.AddEntry(backgrounds['Others'], 'Others', 'f')
 
@@ -55,7 +55,6 @@ def fillLegend(data, backgrounds, signals, stat):
     leg.AddEntry(stat, 'Uncertainty', 'f')
 
     return leg
-
 
 
 def BuildPlot(args):
@@ -99,11 +98,11 @@ def BuildPlot(args):
     stat.Reset()
     stack = ROOT.THStack()  # stack of all backgrounds
     for bkg in sorted(backgrounds.itervalues(), key=lambda hist: hist.Integral()):
-         stat.Add(bkg)
-         stack.Add(bkg)
+        stat.Add(bkg)
+        stack.Add(bkg)
 
     sig_yields = [ihist.GetMaximum() for ihist in [signals['ggh125_powheg'], signals['vbf125_powheg']]] + \
-       [data_hist.GetMaximum(), stat.GetMaximum()]
+        [data_hist.GetMaximum(), stat.GetMaximum()]
     stack.SetMaximum(max(sig_yields) * args.scale)
 
     # format the plots
@@ -113,7 +112,6 @@ def BuildPlot(args):
     stack.Draw('hist')
     plot_tools.formatStack(stack)
 
-    
     # combo_signal = signals['MG__GGH2Jets_pseudoscalar_M125'].Clone()
     combo_signal = signals['ggh125_powheg'].Clone()
     combo_signal.Reset()

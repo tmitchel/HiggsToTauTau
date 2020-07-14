@@ -193,12 +193,12 @@ event_factory::event_factory(TTree* input, Bool_t _is_data, lepton _lep, int _er
     input->SetBranchAddress("genpT", &genpT);
     input->SetBranchAddress("numGenJets", &numGenJets);
     input->SetBranchAddress("prefiring_weight", &prefiring_weight);
-    if ((TString(input->GetName()) == "mt_tree") || (TString(input->GetName()) == "et_tree")) {
+    if (lep == lepton::ELECTRON || lep == lepton::MUON || lep == lepton::EMU) {
       input->SetBranchAddress("nTruePU", &npu);
       input->SetBranchAddress("GenWeight", &genweight);
       input->SetBranchAddress("prefiring_weight_up", &prefiring_weight_up);
       input->SetBranchAddress("prefiring_weight_down", &prefiring_weight_down);
-    } else if ((TString(input->GetName()) == "mt_tree")) {
+    } else if (lep == lepton::DITAU) {
       input->SetBranchAddress("npu", &npu);
       input->SetBranchAddress("genweight", &genweight);
       input->SetBranchAddress("prefiring_weight_Up", &prefiring_weight_up);

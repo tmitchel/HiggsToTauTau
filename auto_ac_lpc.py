@@ -136,8 +136,6 @@ def getSyst(name, signal_type, exe, doSyst):
                     'mfaket_es_DM0_Up', 'mfaket_es_DM0_Down',
                     'mfaket_es_DM1_Up', 'mfaket_es_DM1_Down',
                 ]
-        # elif '_tt' in exe:
-            # What to add here?
 
     if name != 'embed':
         # jet energy scale, unclustered MET, and JER
@@ -181,8 +179,6 @@ def getSyst(name, signal_type, exe, doSyst):
             'MES_1p2to2p1_Up', 'MES_1p2to2p1_Down',
             'MES_lt1p2_Up', 'MES_lt1p2_Down',
         ]
-    # elif '_tt' in exe:
-        # What to add here?
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
         systs += [
@@ -266,9 +262,8 @@ def run_parallel(output_dir, processes):
     manager = multiprocessing.Manager()
     q = manager.Queue()
 
-    # Use 10 cores if the machine has more than 20 total cores.
+    # Use 12 cores if the machine has more than 24 total cores.
     # Otherwise, use half the available cores.
-    # Can I make this use more or will I get in trouble?
     n_processes = min(12, multiprocessing.cpu_count() / 2)
     print 'Process with {} cores'.format(n_processes)
     pool = multiprocessing.Pool(processes=n_processes)
