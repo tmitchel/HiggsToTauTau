@@ -131,7 +131,7 @@ Float_t jet_factory::getNbtag(wps wp = wps::btag_any) {
     } else if (wp == wps::btag_loose) {
         return nbtag_loose;
     } else if (wp == wps::btag_medium) {
-        return nbtag_loose;
+        return nbtag_medium;
     }
     return 0;
 }
