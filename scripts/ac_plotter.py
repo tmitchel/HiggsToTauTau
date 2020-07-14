@@ -10,7 +10,7 @@ def clean_samples(input_histos):
     merged = {
         'ZTT': input_histos['ZTT'].Clone(),
         'ZL': input_histos['ZL'].Clone(),
-        'jetFakes': input_histos['jetFakes'].Clone(),
+        # 'jetFakes': input_histos['jetFakes'].Clone(),
         'tt': input_histos['TTT'].Clone(),
         'Others': input_histos['STT'].Clone()
     }
@@ -35,6 +35,9 @@ def fillLegend(data, backgrounds, signals, stat):
     leg.AddEntry(data, 'Data', 'lep')
 
     # signals
+    leg.AddEntry(signals['ggh125_powheg'], 'ggh SM Higgs(125)x50', 'l')
+    leg.AddEntry(signals['vbf125_powheg'], 'VBF SM Higgs(125)x50', 'l')
+
     # leg.AddEntry(signals['reweighted_ggH_htt_0PM125'], 'ggH SM Higgs(125)x50', 'l')
     # leg.AddEntry(signals['reweighted_ggH_htt_0M125'], 'ggH PS Higgs(125)x50', 'l')
     # 
@@ -42,17 +45,11 @@ def fillLegend(data, backgrounds, signals, stat):
     # leg.AddEntry(signals['reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
 
     # backgrounds
-    leg.AddEntry(backgrounds['VVL'], 'VVL', 'f')
-    leg.AddEntry(backgrounds['VVT'], 'VVT', 'f')
-    leg.AddEntry(backgrounds['TTL'], 'TTL', 'f')
-    leg.AddEntry(backgrounds['TTT'], 'TTT', 'f')
-
-    # Original Backgrounds
-    # leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
-    # leg.AddEntry(backgrounds['ZL'], 'ZL', 'f')
+    leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
+    leg.AddEntry(backgrounds['ZL'], 'ZL', 'f')
     # leg.AddEntry(backgrounds['jetFakes'], 'Jet Mis-ID', 'f')
-    # leg.AddEntry(backgrounds['tt'], 'tt', 'f')
-    # leg.AddEntry(backgrounds['Others'], 'Others', 'f')
+    leg.AddEntry(backgrounds['tt'], 'tt', 'f')
+    leg.AddEntry(backgrounds['Others'], 'Others', 'f')
 
     # stat. uncertainty
     leg.AddEntry(stat, 'Uncertainty', 'f')
@@ -95,19 +92,19 @@ def BuildPlot(args):
             signals[hname] = ihist
 
     # merge backgrounds
-    # backgrounds = clean_samples(backgrounds)
+    backgrounds = clean_samples(backgrounds)
 
     # now get stat and stack filled
     stat = data_hist.Clone()  # sum of all backgrounds
     stat.Reset()
     stack = ROOT.THStack()  # stack of all backgrounds
     for bkg in sorted(backgrounds.itervalues(), key=lambda hist: hist.Integral()):
-        stat.Add(bkg)
-        stack.Add(bkg)
+         stat.Add(bkg)
+         stack.Add(bkg)
 
-    # sig_yields = [ihist.GetMaximum() for ihist in [signals['ggh125_powheg'], signals['vbf125_powheg']]] + \
-    #    [data_hist.GetMaximum(), stat.GetMaximum()]
-    # stack.SetMaximum(max(sig_yields) * args.scale)
+    sig_yields = [ihist.GetMaximum() for ihist in [signals['ggh125_powheg'], signals['vbf125_powheg']]] + \
+       [data_hist.GetMaximum(), stat.GetMaximum()]
+    stack.SetMaximum(max(sig_yields) * args.scale)
 
     # format the plots
     can = plot_tools.createCanvas()
@@ -116,22 +113,23 @@ def BuildPlot(args):
     stack.Draw('hist')
     plot_tools.formatStack(stack)
 
+    
     # combo_signal = signals['MG__GGH2Jets_pseudoscalar_M125'].Clone()
-    # combo_signal = signals['reweighted_ggH_htt_0PM125'].Clone()
-    # combo_signal.Reset()
-    # combo_signal.Add(signals['ggh125_powheg'])
-    # combo_signal.Add(signals['vbf125_powheg'])
-    # data_hist = plot_tools.blindData(data_hist, combo_signal, stat)
+    combo_signal = signals['ggh125_powheg'].Clone()
+    combo_signal.Reset()
+    combo_signal.Add(signals['ggh125_powheg'])
+    combo_signal.Add(signals['vbf125_powheg'])
+    data_hist = plot_tools.blindData(data_hist, combo_signal, stat)
 
     # draw the plots
     data_hist.Draw('same lep')
     stat.Draw('same e2')
-    # for sig_name, sig_hist in signals.iteritems():
-    #     if 'ggH' in sig_name:
-    #         sig_hist.Scale(50*signals['ggh125_powheg'].Integral()/sig_hist.Integral())
-    #     if 'qqH' in sig_name:
-    #         sig_hist.Scale(50*signals['vbf125_powheg'].Integral()/sig_hist.Integral())
-    #     sig_hist.Draw('same hist')
+    for sig_name, sig_hist in signals.iteritems():
+        if 'ggh' in sig_name:
+            sig_hist.Scale(50*signals['ggh125_powheg'].Integral()/sig_hist.Integral())
+        if 'vbf' in sig_name:
+            sig_hist.Scale(50*signals['vbf125_powheg'].Integral()/sig_hist.Integral())
+        sig_hist.Draw('same hist')
 
     legend = fillLegend(data_hist, backgrounds, signals, stat)
     legend.Draw('same')
@@ -168,13 +166,13 @@ def BuildPlot(args):
     prel.SetTextSize(0.06)
     prel.DrawLatex(0.16, 0.74, "Preliminary")
 
-    if args.category == 'et_inclusive' or args.category == 'mt_inclusive':
+    if args.category == 'et_inclusive' or args.category == 'mt_inclusive' or args.category == 'tt_inclusive':
         catName = 'Inclusive'
-    elif args.category == 'et_0jet' or args.category == 'mt_0jet':
+    elif args.category == 'et_0jet' or args.category == 'mt_0jet' or args.category == 'tt_0jet':
         catName = '0-Jet'
-    elif args.category == 'et_boosted' or args.category == 'mt_boosted':
+    elif args.category == 'et_boosted' or args.category == 'mt_boosted' or args.category == 'tt_boosted':
         catName = 'Boosted'
-    elif args.category == 'et_vbf' or args.category == 'mt_vbf':
+    elif args.category == 'et_vbf' or args.category == 'mt_vbf' or args.catagory == 'tt_vbf':
         catName = 'VBF Category'
     else:
         catName = ''

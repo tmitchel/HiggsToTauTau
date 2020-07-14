@@ -136,6 +136,8 @@ def getSyst(name, signal_type, exe, doSyst):
                     'mfaket_es_DM0_Up', 'mfaket_es_DM0_Down',
                     'mfaket_es_DM1_Up', 'mfaket_es_DM1_Down',
                 ]
+        # elif '_tt' in exe:
+            # What to add here?
 
     if name != 'embed':
         # jet energy scale, unclustered MET, and JER
@@ -179,6 +181,8 @@ def getSyst(name, signal_type, exe, doSyst):
             'MES_1p2to2p1_Up', 'MES_1p2to2p1_Down',
             'MES_lt1p2_Up', 'MES_lt1p2_Down',
         ]
+    # elif '_tt' in exe:
+        # What to add here?
 
     if name == 'ZJ' or name == 'ZL' or name == 'ZTT' or name == 'ggH125' or name == 'VBF125' or name == 'W':
         systs += [

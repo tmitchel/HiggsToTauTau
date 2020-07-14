@@ -139,14 +139,14 @@ int main(int argc, char *argv[]) {
     // reweighter for anomolous coupling samples
     // This causes issues with JHU
     if (signal_type != "JHU") {
-      ACWeighter ac_weights = ACWeighter(original, sample, signal_type, "2018");
+      ACWeighter ac_weights = ACWeighter(original, sample, signal_type, "2017");
       ac_weights.fillWeightMap();
     }
 
     // get normalization (lumi & xs are in util.h)
     double norm(1.);
     if (!isData && !isEmbed) {
-        norm = helper->getLuminosity2018() * helper->getCrossSection(sample) / gen_number;
+        norm = helper->getLuminosity2017() * helper->getCrossSection(sample) / gen_number;
     }
 
     ///////////////////////////////////////////////
@@ -185,10 +185,10 @@ int main(int argc, char *argv[]) {
     // Declare histograms and factories //
     //////////////////////////////////////
     // construct factories
-    event_factory event(ntuple, isData, lepton::MUON, 2018, isMG, syst);
+    event_factory event(ntuple, isData, lepton::MUON, 2017, isMG, syst);
     ditau_factory taus(ntuple);
-    jet_factory jets(ntuple, 2018, syst);
-    met_factory met(ntuple, 2018, syst);
+    jet_factory jets(ntuple, 2017, syst);
+    met_factory met(ntuple, 2017, syst);
 
     if (sample == "ggh125" && signal_type == "powheg") {
         event.setRivets(ntuple);
@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
 	  evtwt = 3.867;
 	}
       }
-      helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 1, 1.);
+      helper->create_and_fill("cutflow", {7, 0.5, 7.5}, 1, 1.);
 
       // run factories
       taus.run_factory();
@@ -247,32 +247,22 @@ int main(int argc, char *argv[]) {
       auto stau = taus.tau_at(1);
 
       // First tau ID selection
-      if (ltau.getAgainstMuonDeepWP(wps::deep_vvvloose) > 0.5 && 
-       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 2, 1.);
-      } else {
-       	continue;
-      }
-
-      if (ltau.getAgainstElectronDeepWP(wps::deep_vloose) > 0.5) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 3, 1.);
+      if (ltau.getDecayModeFinding() > 0.5 && ltau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5 && 
+       	  ltau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+       	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 3, 1.);
       } else {
        	continue;
       }
 
       // Second tau ID selection
-      if (stau.getAgainstMuonDeepWP(wps::deep_vvvloose) > 0.5 && 
-       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
+      if (stau.getDecayModeFinding() > 0.5 && stau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5 && 
+       	  stau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+       	helper->create_and_fill("cutflow", {15, 0.5, 15.5}, 5, 1.);
       } else {
        	continue;
       }
 
-      if (stau.getAgainstElectronDeepWP(wps::deep_vloose) > 0.5) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
-      } else {
-       	continue;
-      }
-
-      // only opposite-sign
+      // only opposite-sign                                                                                                                          
       int evt_charge = ltau.getCharge() + stau.getCharge();
       if (evt_charge == 0) {
 	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
@@ -283,15 +273,21 @@ int main(int argc, char *argv[]) {
       // build Higgs
       TLorentzVector Higgs = ltau.getP4() + stau.getP4() + met.getP4();
 
-      // calculate mt
+      // calculate mt                                                                                                                                
       // I don't know how to do this for ditau, need help, this was copied from mt
       // double met_x = met.getMet() * cos(met.getMetPhi());
       // double met_y = met.getMet() * sin(met.getMetPhi());
       // double met_pt = sqrt(pow(met_x, 2) + pow(met_y, 2));
       // double mt = sqrt(pow(muon.getPt() + met_pt, 2) - pow(muon.getP4().Px() + met_x, 2) - pow(muon.getP4().Py() + met_y, 2));
       double mt = 1;
-      // mt selection would go here
 
+      // now do mt selection                                                                                                                         
+      if (mt < 50) {
+	// helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
+      } else {
+	continue;
+      }
+      
       // create regions
       bool signalRegion = (ltau.getDeepIsoWP(wps::deep_medium) && stau.getDeepIsoWP(wps::deep_medium));
       bool antiTauIsoRegion = (ltau.getDeepIsoWP(wps::deep_medium) == 0 && stau.getDeepIsoWP(wps::deep_medium) && 
