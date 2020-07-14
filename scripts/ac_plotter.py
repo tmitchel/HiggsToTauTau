@@ -1,7 +1,7 @@
 import ROOT
 from pprint import pprint
 from collections import namedtuple
-import plot_tools
+import utils.plot_tools as plot_tools
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 ROOT.gStyle.SetOptStat(0)
 
@@ -35,11 +35,14 @@ def fillLegend(data, backgrounds, signals, stat):
     leg.AddEntry(data, 'Data', 'lep')
 
     # signals
-    leg.AddEntry(signals['reweighted_ggH_htt_0PM125'], 'ggH SM Higgs(125)x50', 'l')
-    leg.AddEntry(signals['reweighted_ggH_htt_0M125'], 'ggH PS Higgs(125)x50', 'l')
+    leg.AddEntry(signals['ggh125_powheg'], 'ggh SM Higgs(125)x50', 'l')
+    leg.AddEntry(signals['vbf125_powheg'], 'VBF SM Higgs(125)x50', 'l')
 
-    leg.AddEntry(signals['reweighted_qqH_htt_0PM125'], 'VBF SM Higgs(125)x50', 'l')
-    leg.AddEntry(signals['reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
+    # leg.AddEntry(signals['reweighted_ggH_htt_0PM125'], 'ggH SM Higgs(125)x50', 'l')
+    # leg.AddEntry(signals['reweighted_ggH_htt_0M125'], 'ggH PS Higgs(125)x50', 'l')
+    #
+    # leg.AddEntry(signals['reweighted_qqH_htt_0PM125'], 'VBF SM Higgs(125)x50', 'l')
+    # leg.AddEntry(signals['reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
 
     # backgrounds
     leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
@@ -52,7 +55,6 @@ def fillLegend(data, backgrounds, signals, stat):
     leg.AddEntry(stat, 'Uncertainty', 'f')
 
     return leg
-
 
 
 def BuildPlot(args):
@@ -81,15 +83,15 @@ def BuildPlot(args):
     for hkey in variable.GetListOfKeys():
         hname = hkey.GetName()
         ihist = variable.Get(hname).Clone()
-        if hname in plot_tools.style_map['backgrounds']:
-            ihist = ApplyStyle(ihist, plot_tools.style_map['backgrounds'][hname])
+        if hname in plot_tools.ac_style_map['backgrounds']:
+            ihist = plot_tools.ApplyStyle(ihist, plot_tools.ac_style_map['backgrounds'][hname])
             backgrounds[hname] = ihist
-        elif hname in plot_tools.style_map['signals']:
-            ihist = ApplyStyle(ihist, plot_tools.style_map['signals'][hname])
+        elif hname in plot_tools.ac_style_map['signals']:
+            ihist = plot_tools.ApplyStyle(ihist, plot_tools.ac_style_map['signals'][hname])
             signals[hname] = ihist
 
     # merge backgrounds
-    backgrounds = plot_tools.clean_samples(backgrounds)
+    backgrounds = clean_samples(backgrounds)
 
     # now get stat and stack filled
     stat = data_hist.Clone()  # sum of all backgrounds
@@ -105,13 +107,13 @@ def BuildPlot(args):
 
     # format the plots
     can = plot_tools.createCanvas()
-    data_hist = plot_tools.ApplyStyle(data_hist, style_map['data_obs'])
+    data_hist = plot_tools.ApplyStyle(data_hist, plot_tools.ac_style_map['data_obs'])
     stat = plot_tools.formatStat(stat)
     stack.Draw('hist')
     plot_tools.formatStack(stack)
 
     # combo_signal = signals['MG__GGH2Jets_pseudoscalar_M125'].Clone()
-    combo_signal = signals['reweighted_ggH_htt_0PM125'].Clone()
+    combo_signal = signals['ggh125_powheg'].Clone()
     combo_signal.Reset()
     combo_signal.Add(signals['ggh125_powheg'])
     combo_signal.Add(signals['vbf125_powheg'])
@@ -121,9 +123,9 @@ def BuildPlot(args):
     data_hist.Draw('same lep')
     stat.Draw('same e2')
     for sig_name, sig_hist in signals.iteritems():
-        if 'ggH' in sig_name:
+        if 'ggh' in sig_name:
             sig_hist.Scale(50*signals['ggh125_powheg'].Integral()/sig_hist.Integral())
-        if 'qqH' in sig_name:
+        if 'vbf' in sig_name:
             sig_hist.Scale(50*signals['vbf125_powheg'].Integral()/sig_hist.Integral())
         sig_hist.Draw('same hist')
 
@@ -139,6 +141,8 @@ def BuildPlot(args):
         lepLabel = "#tau_{e}#tau_{h}"
     elif 'mt_' in args.category:
         lepLabel = "#tau_{#mu}#tau_{h}"
+    elif 'tt_' in args.category:
+        lepLabel = "#tau_{h}#tau_{h}"
     if args.year == '2016':
         lumi = "35.9 fb^{-1}"
     elif args.year == '2017':
@@ -160,13 +164,13 @@ def BuildPlot(args):
     prel.SetTextSize(0.06)
     prel.DrawLatex(0.16, 0.74, "Preliminary")
 
-    if args.category == 'et_inclusive' or args.category == 'mt_inclusive':
+    if args.category == 'et_inclusive' or args.category == 'mt_inclusive' or args.category == 'tt_inclusive':
         catName = 'Inclusive'
-    elif args.category == 'et_0jet' or args.category == 'mt_0jet':
+    elif args.category == 'et_0jet' or args.category == 'mt_0jet' or args.category == 'tt_0jet':
         catName = '0-Jet'
-    elif args.category == 'et_boosted' or args.category == 'mt_boosted':
+    elif args.category == 'et_boosted' or args.category == 'mt_boosted' or args.category == 'tt_boosted':
         catName = 'Boosted'
-    elif args.category == 'et_vbf' or args.category == 'mt_vbf':
+    elif args.category == 'et_vbf' or args.category == 'mt_vbf' or args.catagory == 'tt_vbf':
         catName = 'VBF Category'
     else:
         catName = ''
@@ -181,12 +185,12 @@ def BuildPlot(args):
     can.cd(2)
     ratio = data_hist.Clone()
     ratio.Divide(stat)
-    ratio = formatPull(ratio, args.label)
+    ratio = plot_tools.formatPull(ratio, args.label)
     rat_unc = ratio.Clone()
     for ibin in range(1, rat_unc.GetNbinsX()+1):
         rat_unc.SetBinContent(ibin, 1)
         rat_unc.SetBinError(ibin, ratio.GetBinError(ibin))
-    rat_unc = formatStat(rat_unc)
+    rat_unc = plot_tools.formatStat(rat_unc)
     # rat_unc.SetMarkerSize(0)
     # rat_unc.SetMarkerStyle(8)
 

@@ -20,7 +20,7 @@ class jet_factory {
     Float_t mjj;
     std::vector<Bool_t> *loose_id;
     std::vector<Float_t> *pt, *eta, *phi, *energy, *csv_b, *csv_bb, *flavor, *id, *mva_csv;
-    std::vector<jet> plain_jets, btag_jets, all_jets;
+    std::vector<jet> plain_jets, btag_jets, all_jets, cleaned_jets;
 
    public:
     jet_factory(TTree *, Int_t, Bool_t, std::string);
@@ -29,15 +29,18 @@ class jet_factory {
 
     // getters
     Float_t getNbtag() { return btag_jets.size(); }
-    Float_t getNjets() { return plain_jets.size(); }
+    Float_t getNjets() { return all_jets.size(); }
     Float_t getDijetMass() { return mjj; }
     Float_t getHT(Float_t, TLorentzVector, TLorentzVector);
     Float_t getST(Float_t);
     // Float_t getTopPt1() { return topQuarkPt1; }
     // Float_t getTopPt2() { return topQuarkPt2; }
     // Float_t getBWeight() { return bweight; }
-    std::vector<jet> getJets() { return plain_jets; }
+    std::vector<jet> getJets() { return all_jets; }
     std::vector<jet> getBtagJets() { return btag_jets; }
+    std::vector<jet> getCleanedJets() { return cleaned_jets; }
+    std::vector<jet> clean_jets(TLorentzVector, std::vector<jet>);
+    void set_cleaned_jets(std::vector<jet> cleaned) { cleaned_jets = cleaned; }
 };
 
 // read data from tree into member variables
@@ -95,6 +98,7 @@ void jet_factory::run_factory() {
     if (all_jets.size() > 1) {
         mjj = (all_jets.at(0).getP4() + all_jets.at(1).getP4()).M();
     }
+    cleaned_jets = all_jets;
 }
 
 Float_t jet_factory::getHT(Float_t pt, TLorentzVector lep, TLorentzVector tt) {
@@ -122,6 +126,17 @@ Float_t jet_factory::getST(Float_t pt) {
         }
     }
     return st;
+}
+
+std::vector<jet> jet_factory::clean_jets(TLorentzVector lep, std::vector<jet> collection) {
+    std::vector<jet> cleaned;
+    for (auto &jet : collection) {
+        if (jet.getP4().DeltaR(lep) < 0.5) {  // possible other selection as well
+            continue;
+        }
+        cleaned.push_back(jet);
+    }
+    return cleaned;
 }
 
 #endif  // INCLUDE_GGNTUPLE_JET_FACTORY_H_

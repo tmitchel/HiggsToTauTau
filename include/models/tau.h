@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "TLorentzVector.h"
 #include "./defaults.h"
+#include "TLorentzVector.h"
 
 class tau {
    private:
@@ -84,7 +84,7 @@ void tau::setDeepIsoWPs(std::vector<Float_t> wps) {
     if (wps.size() < 9) {
         std::cerr << "Deep tau iso must be provided 9 working points" << std::endl;
     }
-    for (unsigned i = 0; i < 5; i++) {
+    for (unsigned i = 0; i < 9; i++) {
         deep_wps.at(i) = wps.at(i);
     }
 }
@@ -132,6 +132,9 @@ tau::tau(Float_t _pt, Float_t _eta, Float_t _phi, Float_t _mass, Float_t _charge
       phi(_phi),
       mass(_mass),
       charge(_charge),
+      deep_wps{0, 0, 0, 0, 0, 0, 0, 0, 0},
+      deep_againstel_wps{0, 0, 0, 0, 0, 0, 0, 0, 0},
+      deep_againstmu_wps{0, 0, 0, 0, 0, 0, 0, 0, 0},
       mva_wps{0, 0, 0, 0, 0},
       mva_againstel_wps{0, 0, 0, 0, 0},
       mva_againstmu_wps{0, 0, 0, 0, 0} {

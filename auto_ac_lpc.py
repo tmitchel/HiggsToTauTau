@@ -5,7 +5,7 @@
 
 from os import popen, makedirs, path
 from pprint import pprint
-from subprocess import call
+from subprocess import call, check_output
 import time
 import multiprocessing
 from glob import glob
@@ -262,9 +262,9 @@ def run_parallel(output_dir, processes):
     manager = multiprocessing.Manager()
     q = manager.Queue()
 
-    # Use 10 cores if the machine has more than 20 total cores.
+    # Use 12 cores if the machine has more than 24 total cores.
     # Otherwise, use half the available cores.
-    n_processes = min(10, multiprocessing.cpu_count() / 2)
+    n_processes = min(12, multiprocessing.cpu_count() / 2)
     print 'Process with {} cores'.format(n_processes)
     pool = multiprocessing.Pool(processes=n_processes)
     watcher = pool.apply_async(listener, (q, 'Output/trees/{}/logs/runninglog.txt'.format(output_dir)))
@@ -343,12 +343,15 @@ def main(args):
 
             names, signal_type = getNames(sample)
             # if signal_type != "None": continue
-            callstring = './{} -p {} -s {} -d {} --stype {} '.format(args.exe,
+            callstring = '{} -p {} -s {} -d {} --stype {} '.format(args.exe,
                                                                      tosample, sample, args.output_dir, signal_type)
 
             doSyst = True if args.syst and not 'data' in sample.lower() else False
             processes = build_processes(processes, callstring, names, signal_type, args.exe, args.output_dir, doSyst)
         pprint(processes, width=150)
+
+        if args.dont_process:
+            return
 
         if args.parallel:
             run_parallel(args.output_dir, processes)
@@ -368,5 +371,6 @@ if __name__ == "__main__":
     parser.add_argument('--parallel', action='store_true', help='run in parallel')
     parser.add_argument('--output-dir', required=True, dest='output_dir',
                         help='name of output directory after Output/trees')
+    parser.add_argument('--dont-process', action='store_true', help='print commands without executing')
     parser.add_argument('--condor', action='store_true', help='submit jobs to condor')
     main(parser.parse_args())
