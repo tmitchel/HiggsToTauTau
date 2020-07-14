@@ -94,11 +94,10 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst)
 
     input->SetBranchAddress(mjj_name.c_str(), &mjj);
     input->SetBranchAddress(njets_name.c_str(), &njets);
-    input->SetBranchAddress("nbtag", &nbtag);
-    input->SetBranchAddress("Nbtag", &Nbtag);
 
     // Only do these for mt || et || em
     if ((channel == "mt_tree") || (channel == "et_tree") || (channel == "em_tree")) {
+        input->SetBranchAddress("nbtag", &nbtag);
         input->SetBranchAddress(("bjetDeepCSVVeto20Loose_" + btag_string + "_DR0p5").c_str(), &nbtag_loose);
         input->SetBranchAddress(("bjetDeepCSVVeto20Medium_" + btag_string + "_DR0p5").c_str(), &nbtag_medium);
         input->SetBranchAddress(bweight_string.c_str(), &bweight);
@@ -124,6 +123,7 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst)
         input->SetBranchAddress("topQuarkPt1", &topQuarkPt1);
         input->SetBranchAddress("topQuarkPt2", &topQuarkPt2);
     } else if (TString(input->GetName()) == "tt_tree") {
+        input->SetBranchAddress("nbtag", &Nbtag);
         input->SetBranchAddress("jetPt_1", &jpt_1);
         input->SetBranchAddress("jeta_1", &jeta_1);
         input->SetBranchAddress("jphi_1", &jphi_1);
