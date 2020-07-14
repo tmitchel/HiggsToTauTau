@@ -61,11 +61,11 @@ jet_factory::jet_factory(TTree *input, int era, std::string syst)
     // Check name and change vars
     std::string mjj_name, njets_name;
     if (input->GetName() == "tt_tree") {
-        mjj_name = "mjj";
-        njets_name = "njets";
-    } else {
         mjj_name = "vbfMass";
         njets_name = "jetVeto30";
+    } else {
+        mjj_name = "mjj";
+        njets_name = "njets";
     }
 
     if (era == 2017) {
