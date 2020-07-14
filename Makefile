@@ -31,6 +31,8 @@ ac-et-2018: plugins/AC/et_analyzer2016.cc
 # Boosted Tau Analyzers
 boost-mt-2017: plugins/Boosted/mt_analyzer2017.cc
 	g++ $(OPT) plugins/Boosted/mt_analyzer2017.cc $(ROOT) $(CFLAGS) -o $(OBIN)/boost_mt2017
+boost-em-2017: plugins/Boosted/em_analyzer2017.cc
+	g++ $(OPT) plugins/Boosted/em_analyzer2017.cc $(ROOT) $(CFLAGS) -o $(OBIN)/boost_em2017
 
 # Testing Anomalous Coupling Analyzers
 test-ac-mt-2016: plugins/AC/mt_analyzer2016.cc
@@ -54,6 +56,8 @@ test-ac-et-2018: plugins/AC/et_analyzer2016.cc
 # Testing Boosted Tau Analyzers
 test-boost-mt-2017: plugins/Boosted/mt_analyzer2017.cc
 	g++ plugins/Boosted/mt_analyzer2017.cc $(ROOT) $(CFLAGS) -o test
+test-boost-em-2017: plugins/Boosted/em_analyzer2017.cc
+	g++ plugins/Boosted/em_analyzer2017.cc $(ROOT) $(CFLAGS) -o test
 
 # Clean binaries
 clean:

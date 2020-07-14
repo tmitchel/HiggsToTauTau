@@ -29,6 +29,7 @@ class gen_factory {
 
     Int_t num_gen_particles() { return gen_collection.size(); }
     DY DY_process(TLorentzVector);
+    DY DY_process(TLorentzVector, TLorentzVector);
     TLorentzVector getTop() { return top_idx > -1 ? gen_collection.at(top_idx).getP4() : TLorentzVector(); }
     TLorentzVector getAntiTop() { return topbar_idx > -1 ? gen_collection.at(topbar_idx).getP4() : TLorentzVector(); }
 };
@@ -90,7 +91,7 @@ void gen_factory::run_factory() {
         }
 
         // check if a lepton
-        if (pid->at(i) > 8 && pid->at(i) < 17) {
+        if (abs(pid->at(i)) > 8 && abs(pid->at(i)) < 17) {
             leptons.push_back(g);
         }
     }
@@ -127,6 +128,51 @@ DY gen_factory::DY_process(TLorentzVector reco_tau) {
     }
 
     // must be ZJ
+    return DY::ZJ;
+}
+
+DY gen_factory::DY_process(TLorentzVector reco_ele, TLorentzVector reco_mu) {
+    if (is_data) {
+        return DY::None;
+    }
+
+    int ele_gen_match = -1;
+    int mu_gen_match = -1;
+
+    //check if ZL event
+    for (auto g : leptons) {
+        if (fabs(g.getPID()) == 12 || fabs(g.getPID()) == 14 || fabs(g.getPID()) == 16) {
+            continue;
+        }
+        if (reco_ele.DeltaR(g.getP4()) < 0.2) {
+            if (abs(g.getPID()) == 11 && g.getStatus(9)) {
+	              return DY::ZL;
+            } else if (abs(g.getPID()) == 11) {
+	              ele_gen_match = 3;
+            } else if (abs(g.getPID()) == 15) {
+	              ele_gen_match = 5;
+            } else {
+                ele_gen_match = 6;
+            }
+        } else if (reco_mu.DeltaR(g.getP4()) < 0.2) {
+            if (abs(g.getPID()) == 13 && g.getStatus(9)) {
+          	    return DY::ZL;
+            } else if (abs(g.getPID()) == 13) {
+	              mu_gen_match = 4;
+            } else if (abs(g.getPID()) == 15) {
+	              mu_gen_match = 5;
+            } else {
+                mu_gen_match = 6;
+            }
+        }	
+    }
+
+    //check if ZTT event
+    if (ele_gen_match > 2 && ele_gen_match < 6 && mu_gen_match > 2 && mu_gen_match < 6) {
+        return DY::ZTT;
+    }
+
+    //must be ZJ event
     return DY::ZJ;
 }
 
