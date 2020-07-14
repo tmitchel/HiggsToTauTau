@@ -8,7 +8,7 @@ class FFApplicationTool():
         self.theFFDirectory = theFFDirectory
 
         # raw fake factors
-        self.raw_file = ROOT.TFile(theFFDirectory+"uncorrected_fakefactors_tt.root")
+        self.raw_file = ROOT.TFile.Open(theFFDirectory+"uncorrected_fakefactors_tt.root")
         if self.raw_file.IsZombie():
             raise RuntimeError("Problem loading the files!")
 
@@ -21,7 +21,7 @@ class FFApplicationTool():
         self.ff_raw_2jet_shape = self.raw_file.Get("rawFF_tt_qcd_2jet_linear")
 
         # visible mass corrections
-        self.vis_mass_closure_file = ROOT.TFile(theFFDirectory+"FF_corrections_1.root")
+        self.vis_mass_closure_file = ROOT.TFile.Open(theFFDirectory+"FF_corrections_1.root")
         if self.vis_mass_closure_file.IsZombie():
             raise RuntimeError("Problem loading the files!")
 
@@ -29,7 +29,7 @@ class FFApplicationTool():
         self.vis_mass_closure_shape = self.vis_mass_closure_file.Get("closure_OSSS_mvis_tt_qcd_linear")
 
         # closure correction
-        self.tau_pt_closure_file = ROOT.TFile(theFFDirectory+"FF_QCDcorrectionOSSS.root")
+        self.tau_pt_closure_file = ROOT.TFile.Open(theFFDirectory+"FF_QCDcorrectionOSSS.root")
         if self.tau_pt_closure_file.IsZombie():
             raise RuntimeError("Problem loading the files!")
 
@@ -101,11 +101,11 @@ class FFApplicationTool():
                 syst_factor = nominal / max(tau2_factor, 0.)  # don't apply tau2 correction for down
 
             # njets splitting
-            if unc == 'raw_0jet' and njets == 0:
+            if unc == 'tau2_0jet' and njets == 0:
                 return syst_factor
-            elif unc == 'raw_1jet' and njets == 1:
+            elif unc == 'tau2_1jet' and njets == 1:
                 return syst_factor
-            elif unc == 'raw_2jet' and njets > 1:
+            elif unc == 'tau2_2jet' and njets > 1:
                 return syst_factor
 
             # return nominal

@@ -5,7 +5,7 @@ import uproot
 from multiprocessing import Process, Queue
 from array import array
 from collections import defaultdict
-from ApplyFF import FFApplicationTool
+from utils.ApplyFF import FFApplicationTool
 from subprocess import call
 import multiprocessing
 
