@@ -7,7 +7,7 @@ OBIN=${CMSSW_BASE}/bin/${SCRAM_ARCH}
 
 all: ac-mt-2016 ac-mt-2017 ac-mt-2018 ac-et-2016 ac-et-2017 ac-et-2018 boost-mt-2017
 
-test: test-ac-mt-2016 test-ac-mt-2017 test-ac-mt-2018 test-ac-et-2016 test-ac-et-2017 test-ac-et-2018 test-boost-mt-2017
+test: test-ac-mt-2016 test-ac-mt-2017 test-ac-mt-2018 test-ac-et-2016 test-ac-et-2017 test-ac-et-2018 test-ac-tt-2016 test-ac-tt-2017 test-ac-tt-2018 test-boost-mt-2017
 
 # Anomalous Coupling Analyzers
 ac-mt-2016: plugins/AC/mt_analyzer2016.cc
