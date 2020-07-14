@@ -24,6 +24,7 @@ class slim_tree {
     // member functions
     void fillTree(electron *, tau *, event_factory *, std::string);
     void fillTree(muon *, tau *, event_factory *, std::string);
+    void fillTree(electron *, muon *, event_factory *, std::string);
     void generalFill(std::vector<std::string>, jet_factory *, met_factory *, event_factory *, Float_t, TLorentzVector, Float_t,
                      std::shared_ptr<std::vector<double>>);
     void initial_values();
@@ -322,6 +323,30 @@ void slim_tree::fillTree(muon *mu, tau *t, event_factory *evt, std::string name)
     lep_dr = mu->getP4().DeltaR(t->getP4());
 
     otree->Fill();
+}
+
+void slim_tree::fillTree(electron *el, muon *mu, event_factory *evt, std::string name) {
+  el_pt = el->getPt();
+  el_eta = el->getEta();
+  el_phi = el->getPhi();
+  el_mass = el->getMass();
+  el_charge = el->getCharge();
+  el_iso = el->getIso();
+  el_genMatch = el->getGenMatch();
+  mu_pt = mu->getPt();
+  mu_eta = mu->getEta();
+  mu_phi = mu->getPhi();
+  mu_mass = mu->getMass();
+  mu_charge = mu->getCharge();
+  mu_iso = mu->getIso();
+  mu_genMatch = mu->getGenMatch();
+  vis_mass = (el->getP4() + mu->getP4()).M();
+  if ((name == "ZTT" || name == "ZL" || name == "TTT" || name == "TTL" || name == "STT" || name == "STL" || name == "VVT" || name == "VVL") && (el->getGenMatch() > 2 && el-> getGenMatch() < 6) && (mu->getGenMatch() > 2 && mu->getGenMatch() < 6)) {
+    contamination = 1; //mc contaminating embedded samples
+  }
+  lep_dr = el->getP4().DeltaR(mu->getP4());
+
+  otree->Fill();
 }
 
 void slim_tree::initial_values() {

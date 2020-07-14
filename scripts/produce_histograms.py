@@ -131,6 +131,8 @@ def parse_tree_name(keys):
         return 'et_tree'
     elif 'mt_tree;1' in keys:
         return 'mt_tree'
+    elif 'em_tree;1' in keys:
+        return 'em_tree'
     else:
         raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
 
@@ -155,7 +157,9 @@ def main(args):
 
     channel_prefix = tree_name.replace('mt_tree', 'mt')
     channel_prefix = channel_prefix.replace('et_tree', 'et')
-    assert channel_prefix == 'mt' or channel_prefix == 'et', 'must provide a valid tree name'
+    channel_prefix = channel_prefix.replace('em_tree', 'em')
+
+    assert channel_prefix == 'mt' or channel_prefix == 'et' or channel_prefix == 'em', 'must provide a valid tree name'
 
     # get things for output file name
     ztt_name = 'emb' if args.embed else 'ztt'

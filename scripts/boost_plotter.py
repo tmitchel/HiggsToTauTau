@@ -136,6 +136,8 @@ def BuildPlot(args):
         lepLabel = "#tau_{e}#tau_{h}"
     elif 'mt_' in args.category:
         lepLabel = "#tau_{#mu}#tau_{h}"
+    elif 'em_' in args.category:
+        lepLabel = "#tau_{e}#tau_{#mu}"
     if args.year == '2016':
         lumi = "35.9 fb^{-1}"
     elif args.year == '2017':
@@ -157,7 +159,7 @@ def BuildPlot(args):
     prel.SetTextSize(0.06)
     prel.DrawLatex(0.16, 0.74, "Preliminary")
 
-    if args.category == 'et_inclusive' or args.category == 'mt_inclusive':
+    if args.category == 'et_inclusive' or args.category == 'mt_inclusive' or args.category == 'em_inclusive':
         catName = 'Inclusive'
     elif args.category == 'et_0jet' or args.category == 'mt_0jet':
         catName = '0-Jet'

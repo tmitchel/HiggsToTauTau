@@ -12,6 +12,8 @@ def parse_tree_name(keys):
         return 'et_tree'
     elif 'mt_tree;1' in keys:
         return 'mt_tree'
+    elif 'em_tree;1' in keys:
+        return 'em_tree'
     else:
         raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
 
