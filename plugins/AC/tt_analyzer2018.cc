@@ -173,12 +173,12 @@ int main(int argc, char *argv[]) {
       running_log << "using PU dataset name: " << datasetName << std::endl;
     }
 
+    */
     
     // legacy sf's
-    TFile htt_sf_file("root://cmsxrootd.fnal.gov//store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2017.root");
-    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file.Get("w"));
-    htt_sf_file.Close();
-    */
+    auto htt_sf_file = TFile::Open("root://cmsxrootd.fnal.gov//store/user/tmitchel/HTT_ScaleFactors/htt_scalefactors_legacy_2018.root");
+    RooWorkspace *htt_sf = reinterpret_cast<RooWorkspace *>(htt_sf_file->Get("w"));
+    htt_sf_file->Close();
     
     //////////////////////////////////////
     // Final setup:                     //
@@ -305,6 +305,89 @@ int main(int argc, char *argv[]) {
 	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7, 1.);
       } else {
 	continue;
+      }
+
+      if (!isData && !isEmbed) {
+            // lead tau id
+            htt_sf->var("t_dm")->setVal(ltau.getDecayMode());
+            if (ltau.getDecayMode() == 5) {
+                evtwt *= htt_sf->function("t_deeptauid_dm_medium")->getVal();
+            }
+
+            // sublead tau id
+            htt_sf->var("t_dm")->setVal(stau.getDecayMode());
+            if (stau.getDecayMode() == 5) {
+                evtwt *= htt_sf->function("t_deeptauid_dm_medium")->getVal();
+            }
+
+            // trigger scale factors
+            htt_sf->var("t_pt")->setVal(ltau.getPt());
+            htt_sf->var("t_eta")->setVal(ltau.getEta());
+            htt_sf->var("t_phi")->setVal(ltau.getPhi());
+            htt_sf->var("t_dm")->setVal(ltau.getDecayMode());
+            // trigger sf applied here ...
+
+            // top-pT Reweighting
+            if (name == "TTT" || name == "TTJ" || name == "TTL" || name == "STT" || name == "STJ" || name == "STL") {
+                float pt_top1 = std::min(static_cast<float>(400.), jets.getTopPt1());
+                float pt_top2 = std::min(static_cast<float>(400.), jets.getTopPt2());
+                if (syst == "ttbarShape_Up") {
+                    evtwt *= (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1);  // 2*√[e^(..)*e^(..)] - 1
+                } else if (syst == "ttbarShape_Up") {
+                    // no weight for shift down
+                } else {
+                    evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2));  // √[e^(..)*e^(..)]
+                }
+            }
+      } else if (!isData && isEmbed) {
+            // embedded generator weights
+            auto genweight(event.getGenWeight());
+            if (genweight > 1 || genweight < 0) {
+                genweight = 0;
+            }
+            evtwt *= genweight;
+
+            // embedded tracker correction
+            evtwt *= helper->embed_tracking(ltau.getDecayMode());
+            evtwt *= helper->embed_tracking(stau.getDecayMode());
+
+            // lead tau id
+            htt_sf->var("t_dm")->setVal(ltau.getDecayMode());
+            if (ltau.getDecayMode() == 5) {
+                evtwt *= htt_sf->function("t_deeptauid_dm_embed_medium")->getVal();
+            }
+
+            // sublead tau id
+            htt_sf->var("t_dm")->setVal(stau.getDecayMode());
+            if (stau.getDecayMode() == 5) {
+                evtwt *= htt_sf->function("t_deeptauid_dm_embed_medium")->getVal();
+            }
+
+            // trigger scale factors
+            htt_sf->var("t_pt")->setVal(ltau.getPt());
+            htt_sf->var("t_eta")->setVal(ltau.getEta());
+            htt_sf->var("t_phi")->setVal(ltau.getPhi());
+            htt_sf->var("t_dm")->setVal(ltau.getDecayMode());
+            // trigger sf applied here ...
+
+            // embedded scale factors
+            htt_sf->var("gt1_pt")->setVal(ltau.getGenPt());
+            htt_sf->var("gt1_eta")->setVal(ltau.getGenEta());
+            htt_sf->var("gt2_pt")->setVal(stau.getGenPt());
+            htt_sf->var("gt2_eta")->setVal(stau.getGenEta());
+
+            // double muon trigger eff in selection
+            evtwt *= htt_sf->function("m_sel_trg_ratio")->getVal();
+
+            // muon ID eff in selection (leg 1)
+            htt_sf->var("gt_pt")->setVal(ltau.getGenPt());
+            htt_sf->var("gt_eta")->setVal(ltau.getGenEta());
+            evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
+
+            // muon ID eff in selection (leg 2)
+            htt_sf->var("gt_pt")->setVal(stau.getGenPt());
+            htt_sf->var("gt_eta")->setVal(stau.getGenEta());
+            evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
       }
       
       std::vector<std::string> tree_cat;
