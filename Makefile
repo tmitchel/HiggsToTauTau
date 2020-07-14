@@ -60,6 +60,12 @@ test-ac-et-2017: plugins/AC/et_analyzer2016.cc
 test-ac-et-2018: plugins/AC/et_analyzer2016.cc
 	g++ plugins/AC/et_analyzer2018.cc $(ROOT) $(CFLAGS) -o test
 
+test-ac-tt-2016: plugins/AC/tt_analyzer2016.cc
+	g++ plugins/AC/tt_analyzer2016.cc $(ROOT) $(CFLAGS) -o test
+
+test-ac-tt-2017: plugins/AC/tt_analyzer2017.cc
+	g++ plugins/AC/tt_analyzer2017.cc $(ROOT) $(CFLAGS) -o test
+
 test-ac-tt-2018: plugins/AC/tt_analyzer2018.cc
 	g++ plugins/AC/tt_analyzer2018.cc $(ROOT) $(CFLAGS) -o test
 
