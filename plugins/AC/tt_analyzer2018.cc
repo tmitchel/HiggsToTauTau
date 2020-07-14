@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
       auto stau = taus.tau_at(1);
 
       // First tau ID selection
-      if (ltau.getAgainstMuonDeepWP(wps::deep_vvvloose) > 0.5 && 
+      if (ltau.getAgainstMuonDeepWP(wps::deep_vvvloose) > 0.5) { 
        	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 2, 1.);
       } else {
        	continue;
@@ -260,7 +260,7 @@ int main(int argc, char *argv[]) {
       }
 
       // Second tau ID selection
-      if (stau.getAgainstMuonDeepWP(wps::deep_vvvloose) > 0.5 && 
+      if (stau.getAgainstMuonDeepWP(wps::deep_vvvloose) > 0.5) { 
        	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
       } else {
        	continue;
