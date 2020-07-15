@@ -67,7 +67,7 @@ def main(args):
     open_file = uproot.open('{}/data_obs.root'.format(args.input))
     fake_file = '/hdfs/store/user/tmitchel/deep-tau-fake-factor/ff_files_tt_{}/'.format(args.year)
     if 'uscms' in os.getcwd():
-        fake_file = 'root://cmsxrootd.fnal.gov//store/user/tmitchel/HTT_ScaleFactors/weightROOTs/FF_v3/ff_files_tt_{}'.format(args.year)
+        fake_file = 'root://cmsxrootd.fnal.gov//store/user/tmitchel/HTT_ScaleFactors/weightROOTs/FF_v3/ff_files_tt_{}/'.format(args.year)
 
     oldtree = open_file['tt_tree'].arrays(['*'])
     treedict = {ikey: oldtree[ikey].dtype for ikey in oldtree.keys()}
@@ -88,7 +88,7 @@ def main(args):
     n_processes = min(9, multiprocessing.cpu_count() / 2)
     pool = multiprocessing.Pool(processes=n_processes)
 
-    jobs = [pool.apply_async(create_fakes, (args.input, tree_name, channel_prefix, treedict,
+    jobs = [pool.apply_async(create_fakes, (args.input, 'tt_tree', 'tt', treedict,
                                             output_dir, fake_file, sample, args.syst)) for sample in samples]
     a = [j.get() for j in jobs]
 
@@ -97,9 +97,7 @@ def main(args):
     fout.Close()
 
     call('ahadd.py {0}/jetFakes.root {0}/jetFakes_*.root'.format(output_dir), shell=True)
-
-    if '/hdfs' in args.input:
-        call('mv -v {}/jetFakes.root {}'.format(output_dir, args.input), shell=True)
+    call('mv -v {}/jetFakes.root {}'.format(output_dir, args.input), shell=True)
 
 
 if __name__ == "__main__":

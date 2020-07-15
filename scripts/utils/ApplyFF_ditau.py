@@ -21,7 +21,7 @@ class FFApplicationTool():
         self.ff_raw_2jet_shape = self.raw_file.Get("rawFF_tt_qcd_2jet_linear")
 
         # visible mass corrections
-        self.vis_mass_closure_file = ROOT.TFile.Open(theFFDirectory+"FF_corrections_1.root")
+        self.vis_mass_closure_file = ROOT.TFile.Open(theFFDirectory+"FF_QCDcorrectionOSSS.root")
         if self.vis_mass_closure_file.IsZombie():
             raise RuntimeError("Problem loading the files!")
 
@@ -29,7 +29,7 @@ class FFApplicationTool():
         self.vis_mass_closure_shape = self.vis_mass_closure_file.Get("closure_OSSS_mvis_tt_qcd_linear")
 
         # closure correction
-        self.tau_pt_closure_file = ROOT.TFile.Open(theFFDirectory+"FF_QCDcorrectionOSSS.root")
+        self.tau_pt_closure_file = ROOT.TFile.Open(theFFDirectory+"FF_corrections_1.root")
         if self.tau_pt_closure_file.IsZombie():
             raise RuntimeError("Problem loading the files!")
 
@@ -46,7 +46,7 @@ class FFApplicationTool():
     def get_mvis_closure(self, mvis, cutoff=False):
         """evaluate vis_mass closure correction. Cutoff used in nominal case."""
         if cutoff:
-            return self.vis_mass_closure.Eval(mvis) if mvsis < 90 else self.vis_mass_closure_shape.Eval(mvis)
+            return self.vis_mass_closure.Eval(mvis) if mvis < 90 else self.vis_mass_closure_shape.Eval(mvis)
         return self.vis_mass_closure_shape.Eval(mvis)
 
     def get_tau2_pt_closure(self, pt2, fct):
@@ -63,7 +63,7 @@ class FFApplicationTool():
             return self.ff_raw_2jet, self.ff_raw_2jet_shape, self.tau_pt_closure_2jet
 
     def get_ff(self, pt1, pt2, mvis, njets, unc='', upOrDown=''):
-        raw_func, raw_linear_func, tau2_func = get_functions(njets)
+        raw_func, raw_linear_func, tau2_func = self.get_functions(njets)
 
         raw_factor = self.get_raw_FF(pt1, raw_func, cutoff=False)
         tau2_factor = self.get_tau2_pt_closure(pt2, tau2_func)
