@@ -14,8 +14,6 @@
    -- This is the Stand-Alone version that doesn't use any CMS classes --
 
   https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc#How_to_use_script_estimatePileup
-
-  \authors Salvatore Rappoccio, Mike Hildreth
 */
 
 #include <algorithm>
@@ -23,6 +21,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH3.h"
@@ -38,7 +37,7 @@ namespace reweight {
 // Each PoissonMeanShifter does one shift, so defining multiples can give you an arbitrary collection
 
 class PoissonMeanShifter {
- public:
+   public:
     PoissonMeanShifter() {}
     explicit PoissonMeanShifter(float Shift) {
         // these are the polynomial or exponential coefficients for each bin of a 25-bin sequence that
@@ -107,17 +106,17 @@ class PoissonMeanShifter {
         }
     }
 
- private:
+   private:
     double Pweight_[25];
 };
 
 class LumiReWeighting {
- public:
+   public:
     LumiReWeighting() {}
 
     LumiReWeighting(std::string generatedFile, std::string dataFile, std::string GenHistName, std::string DataHistName)
         : generatedFileName_(generatedFile), dataFileName_(dataFile), GenHistName_(GenHistName), DataHistName_(DataHistName) {
-        generatedFile_ =  TFile::Open(generatedFileName_.c_str());  // MC distribution
+        generatedFile_ = TFile::Open(generatedFileName_.c_str());  // MC distribution
         dataFile_ = TFile::Open(dataFileName_.c_str());            // Data distribution
 
         Data_distr_ = new TH1F(*(static_cast<TH1F*>(dataFile_->Get(DataHistName_.c_str())->Clone())));
@@ -618,7 +617,7 @@ class LumiReWeighting {
         return TotalWeight;
     }
 
- protected:
+   protected:
     std::string generatedFileName_;
     std::string dataFileName_;
     std::string GenHistName_;
